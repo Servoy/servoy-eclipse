@@ -103,6 +103,7 @@ import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.DocumentationUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -782,7 +783,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 				if (model instanceof IBasicWebComponent && FormTemplateGenerator.isWebcomponentBean((IBasicWebComponent)model))
 				{
-					lm = getWebComponentMembers(prefix, (IBasicWebComponent)model);
+					lm = getWebComponentMembers(prefix, (IBasicWebComponent)model, un);
 					key = null; // for now don't cache this.
 				}
 				else if (specificClass == null)
@@ -925,10 +926,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return new Object[] { new SimpleUserNode("Loading...", UserNodeType.LOADING) };
 	}
 
-	/**
-	 * @param un
-	 * @return
-	 */
 	private SimpleUserNode[] createComponentFileList(SimpleUserNode un)
 	{
 		WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
@@ -1025,11 +1022,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return new SimpleUserNode[0];
 	}
 
-	/**
-	 * @param folder
-	 * @param resources
-	 * @return
-	 */
 	private List<SimpleUserNode> createComponentList(String path, IContainer folder)
 	{
 		List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
@@ -1919,16 +1911,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					Script script = JavaScriptParserUtil.parse(source, null);
 
-					// see if it starts with an overall description of the component/service
-					List<Comment> comments = script.getComments();
-					if (comments.size() > 0)
-					{
-						Comment firstComment = comments.get(0);
-						// it has to be a stand-alone comment, not a comment of some method / variable
-						// and it has to be the first comment in the file (should we limit it to be the first thing in the file?)
-						if (!firstComment.isDocumentation())
-							spec.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(firstComment.getText())));
-					}
+					DocumentationUtils.extractWebObjectLevelDoc(script,
+						webObjectDesc -> spec.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(TextUtils.newLinesToBackslashN(webObjectDesc))));
 
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
@@ -1946,20 +1930,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									Comment doc = node.getDocumentation();
 									if (api != null && doc != null && doc.isDocumentation())
 									{
-										api.setDocumentation(doc.getText());
+										api.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(doc.getText()));
 									}
 								}
 							}
 							return super.visitBinaryOperation(node);
 						}
 
-
-						/*
-						 * (non-Javadoc)
-						 *
-						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
-						 * ObjectInitializer)
-						 */
 						@Override
 						public ASTNode visitObjectInitializer(ObjectInitializer node)
 						{
@@ -1986,7 +1963,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 									Comment doc = initializer.getName().getDocumentation();
 									if (api != null && initializer.getValue() instanceof FunctionStatement && doc != null && doc.isDocumentation())
 									{
-										api.setDocumentation(doc.getText());
+										api.setDocumentation(TextUtils.stripCommentStartMiddleAndEndChars(doc.getText()));
 									}
 								}
 							}
@@ -2004,7 +1981,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								WebObjectApiFunctionDefinition api = apis.get(baseName);
 								if (api != null)
 								{
-									String doc = parseDoc(node.getDocumentation().getText());
+									String doc = parseDoc(TextUtils.stripCommentStartMiddleAndEndChars(node.getDocumentation().getText()));
 
 									if (nameParts.length > 1)
 									{
@@ -2044,7 +2021,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								if (parent instanceof BinaryOperation bo && bo.getLeftExpression() instanceof PropertyExpression pe &&
 									pe.getDocumentation() != null)
 								{
-									String doc = parseDoc(pe.getDocumentation().getText());
+									String doc = parseDoc(TextUtils.stripCommentStartMiddleAndEndChars(pe.getDocumentation().getText()));
 									String fullName = pe.getProperty().toString();
 									WebObjectApiFunctionDefinition apiFunction = customType.getApiFunction(fullName);
 									if (apiFunction != null)
@@ -2135,11 +2112,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							return super.visitLetStatement(node);
 						}
 
-						/*
-						 * (non-Javadoc)
-						 *
-						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitThisExpression(org.eclipse.dltk.javascript.ast.ThisExpression)
-						 */
 						@Override
 						public ASTNode visitThisExpression(ThisExpression node)
 						{
@@ -2160,10 +2132,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								PropertyDescription pd = properties.get(node.getVariables().get(0).getVariableName());
 								if (pd != null)
 								{
-									pd.setDescription(node.getDocumentation().getText());
+									pd.setDescription(TextUtils.stripCommentStartMiddleAndEndChars(node.getDocumentation().getText()));
 								}
 							}
 						}
+
 					});
 				}
 			}
@@ -2174,13 +2147,39 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	public static String getParsedComment(String comment, String elementName, boolean toHTML)
+	public static String getParsedComment(String comment, String elementName, boolean toHTML, boolean commentMayContainsStartMiddleAnDEndTags)
 	{
 		if (comment == null) return null;
-		String c = comment.replaceAll("/\\*\\*|\\*/", "");
-		c = c.replaceAll("\\n(\\s*)\\*", "\n").trim();
+		String c = (commentMayContainsStartMiddleAnDEndTags ? TextUtils.stripCommentStartMiddleAndEndChars(comment) : comment);
+
+		if (elementName != null) c = c.replaceAll("%%elementName%%", "elements." + elementName);
+
+		String[] splitExample = c.split("@example", 2);
+		if (splitExample.length > 1 && elementName != null)
+		{
+			String exampleBlock = splitExample[1].split("@")[0];
+			String[] exampleLines = exampleBlock.split("\\r?\\n");
+			StringBuilder cleanedExample = new StringBuilder();
+
+			for (String line : exampleLines)
+			{
+				String trimmed = line.trim();
+				if (!trimmed.isEmpty())
+				{
+					cleanedExample.append(trimmed).append("\n");
+				}
+			}
+
+			String finalExample = cleanedExample.toString().trim(); // remove leading/trailing newlines
+			if (!finalExample.isEmpty())
+			{
+				c = c.replace(exampleBlock, finalExample + "\n"); // \n is needed for formatting the tooltip correctly in script editor code completion
+			}
+		}
+
 		if (!toHTML)
 		{
+			c = c.replaceAll("@param\\s+(\\{[^}]+})\\s+(\\[?\\w+\\]?)", "@param $1 <b>$2</b>"); // bold param name
 			String separator = System.getProperty("line.separator");
 			String[] inputArray = c.split(separator);
 			StringBuilder stringBuilder = new StringBuilder();
@@ -2190,18 +2189,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				stringBuilder.append(separator);
 			}
 			c = stringBuilder.toString();
-			c = c.replaceAll(separator, "<br/>");
-		}
-		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
-
-		String[] splitExample = c.split("@example");
-		if (splitExample.length > 1)
-		{
-			String example = splitExample[1].split("@")[0];
-			if (!example.isBlank())
+			if (elementName == null) // if the element name is null it means we are parsing the documentation of a method from a form or scope
 			{
-				c = c.replace(example, "\n<pre>" + example + "</pre><br/>\n");
+				c = c.replaceAll("\n\n", "<br/>");
+				c = c.replaceAll("\n", "<br/>");
+				c = c.replaceFirst("@example", "<br/>@example");
+				c = c.replaceFirst("@param", "<br/>@param");
+				c = c.replaceFirst("@return", "<br/>@return");
+				c = c.replaceFirst("@properties", "<br/><b>@properties</b>");
 			}
+
+			c = c.replaceAll(separator, "<br/>");
 		}
 
 		if (!toHTML) return c;
@@ -2220,7 +2218,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		if (documentation != null && documentation.contains("@example"))
 		{
-			String description = getParsedComment(documentation, name, false);
+			String description = getParsedComment(documentation, name, false, false);
 			String example = description.split("@example")[1].split("@")[0];
 			example = example.replaceAll("<br>|<br/>", "\n");
 			example = example.replaceAll("\\<.*?\\>", "");
@@ -2296,7 +2294,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getToolTip(String methodName)
 							{
-								return getParsedComment(api.getDocumentation(), elementName, false);
+								return getParsedComment(api.getDocumentation(), elementName, false, false);
 							}
 
 							@Override
@@ -2613,7 +2611,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(nodes);
 	}
 
-	private SimpleUserNode[] getWebComponentMembers(String prefix, final IBasicWebComponent webcomponent)
+	private SimpleUserNode[] getWebComponentMembers(String prefix, final IBasicWebComponent webcomponent, SimpleUserNode un)
 	{
 		String prefixForWebComponentMembers = prefix + ".";
 		if (webcomponent == null)
@@ -2649,6 +2647,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				// and skip the dataprovider properties (those are not accesable through scripting)
 				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 				{
+					if (un.getForm().isResponsiveLayout() && name.equals("cssPosition")) continue;
+
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
 						new WebObjectFieldFeedback(pd, webcomponent.getName(), prefixForWebComponentMembers + name), webcomponent,
 						propertiesIcon));
@@ -2711,7 +2711,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			@Override
 			public String getToolTip(String methodName)
 			{
-				return getParsedComment(api.getDocumentation(), elementName, false);
+				return getParsedComment(api.getDocumentation(), elementName, false, false);
 			}
 
 			@Override
@@ -3212,7 +3212,26 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>");
 			if ("".equals(tooltip))
 			{
-				tooltip = tmp.toString();
+				String methodDocu = getTooltipIfMethodActuallyHasDocumentation();
+				if (methodDocu == null)
+				{
+					StringBuilder generatedJSDocCommentFromSpec = new StringBuilder();
+					if (paramNames != null)
+					{
+						for (int i = 0; i < paramNames.length; i++)
+						{
+							String paramName = paramNames[i];
+							generatedJSDocCommentFromSpec.append("\n @param {")
+								.append(parameterTypes != null && i < parameterTypes.length ? parameterTypes[i] : "Object").append("} ").append(paramName);
+						}
+					}
+					if (returnTypeString != null && !"void".equals(returnTypeString))
+					{
+						generatedJSDocCommentFromSpec.append("\n @return {").append(returnTypeString).append("}");
+					}
+					methodDocu = generatedJSDocCommentFromSpec.toString();
+				}
+				tooltip = tmp.toString() + "<br/><br/>" + methodDocu;
 			}
 			else
 			{
@@ -3221,7 +3240,146 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return tooltip;
 		}
 
-		private Class getMethodReturnType()
+		/**
+		 * Web components also have Legacy api methods found in interfaces like HasRuntimeStyleClass
+		 * HasRuntimeFormName, HasRuntimeName, HasRuntimeElementType, HasRuntimeDesignTimeProperty, HasRuntimeClientProperty
+		 *
+		 * TODO: investigate if we can add scriptObject for these methods so that we do not need to hardcode the documentation here.
+		 *
+		 * @param methodDocu
+		 * @return
+		 */
+		private String getTooltipIfMethodActuallyHasDocumentation()
+		{
+			Class< ? > clazz = getMethodClass();
+			String methodDocu = null;
+			if (clazz != null)
+			{
+				// check documentation for the legacy api methods
+				if (HasRuntimeStyleClass.class.isAssignableFrom(clazz))
+				{
+					if ("addStyleClass".equals(name))
+					{
+						methodDocu = "Adds a style to the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "addStyleClass();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>styleName</b> the name of the style class to add";
+					}
+					if ("removeStyleClass".equals(name))
+					{
+						methodDocu = "Removes a style from the styleClass property. This works only for NGClient where multiple styles are supported.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "removeStyleClass();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>styleName</b> the name of the style class to remove";
+					}
+					if ("hasStyleClass".equals(name))
+					{
+						methodDocu = "Check if an element already has a style from the styleClass property.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var name = elements." + prefix + "hasStyleClass();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>styleName</b> the name of the style class to be checked";
+					}
+					if ("getStyleClasses".equals(name))
+					{
+						methodDocu = "Return style classes of the element.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "getStyleClasses();<br/>" +
+							"<br/>" +
+							"<b>@return</b> an array of style class names";
+					}
+
+				}
+				else if (HasRuntimeFormName.class.isAssignableFrom(clazz))
+				{
+					methodDocu = "Returns the name of the form. (may be empty string as well)<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var name = elements." + prefix + "getFormName();<br/>" +
+						"<br/>" +
+						"<b>@return</b> The name of the form.";
+
+				}
+				else if (HasRuntimeName.class.isAssignableFrom(clazz))
+				{
+					methodDocu = "Returns the name of an element. (may be null as well)<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var name = elements." + prefix + "getName();<br/>" +
+						"<br/>" +
+						"<b>@return</b> The name of the element.";
+
+				}
+				else if (HasRuntimeElementType.class.isAssignableFrom(clazz))
+				{
+					methodDocu = "Returns the type of a specified element.<br/>" +
+						"<br/>" +
+						"<b>@sample</b><br/>" +
+						"var et = elements." + prefix + "getElementType();<br/>" +
+						"<br/>" +
+						"<b>@return</b> The display type of the element as String.";
+
+				}
+				else if (HasRuntimeDesignTimeProperty.class.isAssignableFrom(clazz))
+				{
+					if ("getDesignTimeProperty".equals(name))
+					{
+						methodDocu = "Get a design-time property of an element.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var prop = elements." + prefix + "getDesignTimeProperty();<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>key</b> the name of the property<br/>" +
+							"<br/>" +
+							"<b>@return</b> The value of the specified design-time property.";
+					}
+					if ("getDesignProperties".equals(name))
+					{
+						methodDocu = "Returns the type of a specified element.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var propMap = elements." + prefix + "getDesignProperties();<br/>" +
+							"<br/>" +
+							"<b>@return</b> A map of all design-time properties for the element.";
+					}
+				}
+				else if (HasRuntimeClientProperty.class.isAssignableFrom(clazz))
+				{
+					if ("putClientProperty".equals(name))
+					{
+						methodDocu = "Sets the value for the specified element client property key.<br/>" +
+							"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"elements." + prefix + "putClientProperty('ToolTipText','some text');<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system<br/>" +
+							"<b>@param</b> {String} <b>value</b> a predefined value for the key<br/>";
+					}
+					if ("getClientProperty".equals(name))
+					{
+						methodDocu = "Gets the specified client property for the element based on a key.<br/>" +
+							"NOTE: Depending on the operating system, a user interface property name may be available.<br/>" +
+							"<br/>" +
+							"<b>@sample</b><br/>" +
+							"var property = elements." + prefix + "getClientProperty('ToolTipText');<br/>" +
+							"<br/>" +
+							"<b>@param</b> {String} <b>key</b> user interface key (depends on operating system)<br/>" +
+							"<br/>" +
+							"<b>@return</b> The value of the property for specified key.";
+					}
+				}
+			}
+			return methodDocu;
+		}
+
+		private Class< ? > getMethodReturnType()
 		{
 			if (njm != null)
 			{
@@ -3236,6 +3394,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				return method.getReturnType();
 			}
 			return null;
+		}
+
+		private Class< ? > getMethodClass()
+		{
+			Class< ? > clazz = null;
+			if (njm != null)
+			{
+				for (MemberBox mthd : njm.getMethods())
+				{
+					if (Utils.equalObjects(mthd.getParameterTypes(), parameterTypes))
+					{
+						clazz = mthd.getDeclaringClass();
+						break;
+					}
+				}
+			}
+			return clazz;
 		}
 
 		private String getPrettyParameterTypesString(String[] names, boolean namesOnly)
@@ -3331,7 +3506,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				@Override
 				public String getSample(String methodName)
 				{
-					String comment = getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false);
+					String comment = getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false, true);
 					if (comment != null)
 					{
 						String[] commentSplitByExample = comment.split("@example");
@@ -3391,7 +3566,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							extendsForm = extendsForm.getExtendsForm();
 						}
 					}
-					return getParsedComment(comment, null, false);
+					return getParsedComment(comment, null, false, true);
 				}
 
 				@Override
@@ -3584,7 +3759,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getToolTipText()
 		{
-			return getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), elementName, false);
+			return getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic), elementName, false, false);
 		}
 	}
 

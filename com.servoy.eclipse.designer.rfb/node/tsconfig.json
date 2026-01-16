@@ -24,6 +24,9 @@
       "@servoy/public": [
         "../../com.servoy.eclipse.ngclient.ui/node/projects/servoy-public/src/public-api"
       ],
+	  "@servoy/designer": [
+	          "../../com.servoy.eclipse.ngclient.ui/node/src/designer/public-api"
+	  ],
       "@angular/*": [
         "./node_modules/@angular/*"
       ]

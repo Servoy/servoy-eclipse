@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy War Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.war;singleton:=true
-Bundle-Version: 2025.12.0.4120_rc
+Bundle-Version: 2026.3.0.4140_rc
 Export-Package: com.servoy.eclipse.warexporter.export
 Bundle-Activator: com.servoy.eclipse.warexporter.Activator
 Bundle-Vendor: Servoy
@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.core.resources,
  sablo,
  org.apache.commons.lang3,
  com.servoy.eclipse.ngclient,
- com.servoy.eclipse.notification
+ com.servoy.eclipse.notification,
+ org.eclipse.jgit;bundle-version="7.4.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

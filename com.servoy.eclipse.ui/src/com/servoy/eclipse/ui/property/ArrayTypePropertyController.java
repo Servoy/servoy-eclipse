@@ -46,6 +46,7 @@ import com.servoy.j2db.util.IDelegate;
 public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 	protected ILabelProvider labelProvider = null;
+	protected boolean canAddRemoveItems = true;
 
 	public ArrayTypePropertyController(Object id, String displayName)
 	{
@@ -152,7 +153,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
 				buttonWidget.setToolTipText("Prepends a new array item.\n" +
 					"To add a new item after another item,\nclick the '+' button on a specific item.");
-				buttonWidget.setEnabled(true);
+				buttonWidget.setEnabled(canAddRemoveItems);
 
 				updateButtonVisibility();
 			}

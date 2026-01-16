@@ -53,29 +53,42 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ISourceRange;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
+import org.eclipse.dltk.javascript.typeinference.ReferenceLocation;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
+import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
+import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
 import org.eclipse.dltk.javascript.typeinfo.JSDocTypeParser;
 import org.eclipse.dltk.javascript.typeinfo.MetaType;
+import org.eclipse.dltk.javascript.typeinfo.RTypes;
+import org.eclipse.dltk.javascript.typeinfo.ReferenceSource;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
 import org.eclipse.dltk.javascript.typeinfo.model.AnyType;
 import org.eclipse.dltk.javascript.typeinfo.model.ArrayType;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
+import org.eclipse.dltk.javascript.typeinfo.model.FunctionType;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.Method;
 import org.eclipse.dltk.javascript.typeinfo.model.Parameter;
 import org.eclipse.dltk.javascript.typeinfo.model.ParameterKind;
+import org.eclipse.dltk.javascript.typeinfo.model.ParameterizedType;
 import org.eclipse.dltk.javascript.typeinfo.model.Property;
 import org.eclipse.dltk.javascript.typeinfo.model.SimpleType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.TypeKind;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
+import org.eclipse.dltk.javascript.typeinfo.model.impl.TypeImpl;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.common.util.URI;
@@ -83,16 +96,19 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.mozilla.javascript.Function;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
+import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectApiFunctionDefinition;
+import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
@@ -122,6 +138,7 @@ import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.debug.script.ReturnTypeParser.ParsedReturnType;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
@@ -130,6 +147,7 @@ import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.MenuFoundsetServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -191,9 +209,11 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
@@ -223,6 +243,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
@@ -246,11 +267,13 @@ import com.servoy.j2db.querybuilder.impl.QBParameter;
 import com.servoy.j2db.querybuilder.impl.QBParameters;
 import com.servoy.j2db.querybuilder.impl.QBPart;
 import com.servoy.j2db.querybuilder.impl.QBResult;
+import com.servoy.j2db.querybuilder.impl.QBScoreColumn;
 import com.servoy.j2db.querybuilder.impl.QBSelect;
 import com.servoy.j2db.querybuilder.impl.QBSort;
 import com.servoy.j2db.querybuilder.impl.QBSorts;
 import com.servoy.j2db.querybuilder.impl.QBTableClause;
 import com.servoy.j2db.querybuilder.impl.QBTextColumn;
+import com.servoy.j2db.querybuilder.impl.QBVectorColumn;
 import com.servoy.j2db.querybuilder.impl.QBWhereCondition;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -277,11 +300,14 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
+import com.servoy.j2db.scripting.annotations.JSRealClass;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.scripting.info.JSPermission;
 import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.scripting.solutionmodel.JSValueList;
+import com.servoy.j2db.scripting.solutionmodel.JSWebComponent;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.Location;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -525,6 +551,8 @@ public class TypeCreator extends TypeCache
 		addQueryBuilderScopeType(QBMediaColumn.class);
 		addQueryBuilderScopeType(QBTextColumn.class);
 		addQueryBuilderScopeType(QBArrayColumn.class);
+		addQueryBuilderScopeType(QBVectorColumn.class);
+		addQueryBuilderScopeType(QBScoreColumn.class);
 		addQueryBuilderScopeType(QBCondition.class);
 		addQueryBuilderScopeType(QBFactory.class);
 		addQueryBuilderScopeType(QBGroupBy.class);
@@ -571,6 +599,9 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSMenuDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSMenuDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(EventType.class.getSimpleName(), new EventTypesCreator());
 		addScopeType(JSPermission.class.getSimpleName(), new JSPermissionCreator());
+		addScopeType(JSValueList.class.getSimpleName(), new JSValueListCreator());
+		addScopeType(com.servoy.j2db.scripting.solutionmodel.JSForm.class.getSimpleName(), new JSFormCreator()); //here we refer to the one from the solution model, even though it's the same class name
+		addScopeType(JSWebComponent.class.getSimpleName(), new JSComponentCreator());
 	}
 
 	private void addQueryBuilderScopeType(Class< ? > clazz)
@@ -803,9 +834,16 @@ public class TypeCreator extends TypeCache
 		return null;
 	}
 
+	private volatile Job clearJob = null;
+
 
 	private void clearCache()
 	{
+		if (clearJob != null)
+		{
+			return;
+		}
+
 		Job job = new Job("clearing cache")
 		{
 			@Override
@@ -820,9 +858,11 @@ public class TypeCreator extends TypeCache
 				clear(null);
 				flushCache();
 				docCache.clear();
+				clearJob = null;
 				return Status.OK_STATUS;
 			}
 		};
+		clearJob = job;
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 		job.schedule();
 	}
@@ -834,10 +874,7 @@ public class TypeCreator extends TypeCache
 		{
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSEventsManager.class), null);
-			// special case  EventType should be a scope creator
-			classTypes.remove(EventType.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
-			classTypes.remove(JSPermission.class.getSimpleName());
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSMenuItem.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
@@ -948,7 +985,7 @@ public class TypeCreator extends TypeCache
 								if (changed instanceof Solution)
 								{
 									fullChange = true;
-									runClearCacheJob();
+									clearCache();
 									break;
 								}
 							}
@@ -1001,10 +1038,36 @@ public class TypeCreator extends TypeCache
 					@Override
 					public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 
 				});
+
+				IItemChangeListener<IColumn> columnListener = new IItemChangeListener<IColumn>()
+				{
+					public void itemChanged(IColumn column)
+					{
+						clearCache();
+					}
+
+					@Override
+					public void itemChanged(Collection<IColumn> columns)
+					{
+						clearCache();
+					}
+
+					@Override
+					public void itemRemoved(IColumn column)
+					{
+						clearCache();
+					}
+
+					@Override
+					public void itemCreated(IColumn column)
+					{
+						clearCache();
+					}
+				};
 
 				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				ITableListener tableListener = new ITableListener.TableListener()
@@ -1012,26 +1075,68 @@ public class TypeCreator extends TypeCache
 					@Override
 					public void tablesAdded(IServerInternal server, String[] tableNames)
 					{
-						runClearCacheJob();
+						clearCache();
+						try
+						{
+							for (String tableName : tableNames)
+							{
+								if (server.isTableLoaded(tableName))
+								{
+									(server.getTable(tableName)).addIColumnListener(columnListener);
+								}
+							}
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
 
 					@Override
 					public void hiddenTableChanged(IServerInternal server, ITable table)
 					{
-						runClearCacheJob();
+						clearCache();
 					}
 
 					@Override
 					public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
 					{
-						runClearCacheJob();
+						clearCache();
+						for (ITable table : tables)
+						{
+							table.removeIColumnListener(columnListener);
+						}
+					}
+
+					@Override
+					public void tableInitialized(Table t)
+					{
+						t.addIColumnListener(columnListener);
 					}
 				};
 				// add listeners to initial server list
 				String[] array = serverManager.getServerNames(false, false, true, true);
 				for (String server_name : array)
 				{
-					((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
+					IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
+					server.addTableListener(tableListener);
+					if (server.getConfig().isEnabled() && server.isValid() && server.isTableListLoaded())
+					{
+						try
+						{
+							for (String tableName : server.getTableAndViewNames(false))
+							{
+								if (server.isTableLoaded(tableName))
+								{
+									(server.getTable(tableName)).addIColumnListener(columnListener);
+								}
+							}
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
 				}
 				serverManager.addServerListener(new IServerListener()
 				{
@@ -1058,19 +1163,21 @@ public class TypeCreator extends TypeCache
 						{
 							List<IResourceDelta> changedFiles = new ArrayList<IResourceDelta>();
 							ServoyModel.findChangedFiles(event.getDelta(), changedFiles);
-							boolean permissionsChanged = false;
+							boolean clearCache = false;
 							for (IResourceDelta changedDelta : changedFiles)
 							{
 								IResource res = changedDelta.getResource();
-								if (res instanceof IFile file && file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT))
+								if (res instanceof IFile file && (file.getName().endsWith(DataModelManager.SECURITY_FILE_EXTENSION_WITH_DOT) ||
+									file.getName().endsWith(SolutionSerializer.VALUELIST_FILE_EXTENSION) ||
+									file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION)))
 								{
-									permissionsChanged = true;
+									clearCache = true;
 									break;
 								}
 							}
-							if (permissionsChanged)
+							if (clearCache)
 							{
-								runClearCacheJob();
+								clearCache();
 							}
 						}
 					}
@@ -1082,6 +1189,10 @@ public class TypeCreator extends TypeCache
 
 	protected final Class< ? > getTypeClass(String name)
 	{
+		if (scopeTypes.containsKey(name))
+		{
+			return null;
+		}
 		Class< ? > clz = classTypes.get(name);
 		if (clz == null)
 		{
@@ -1340,9 +1451,16 @@ public class TypeCreator extends TypeCache
 				if (name.endsWith("ID")) name = name.substring(0, name.length() - 2);
 				Property property = createProperty(name, false, memberType,
 					SolutionExplorerListContentProvider.getParsedComment(pd.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic),
-						STANDARD_ELEMENT_NAME, true),
+						STANDARD_ELEMENT_NAME, true, false),
 					null);
 				property.setDeprecated(pd.isDeprecated());
+				if (!fullTypeName.startsWith(WEB_SERVICE) && StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(name) &&
+					!fullTypeName.contains(_ABS_POSTFIX))
+				{
+					property.setDeprecated(true);
+					property.setDescription(
+						"<b>Deprecated:</b> do not use cssPosition in responsive forms!<br/>" + property.getDescription());
+				}
 				members.add(property);
 			}
 		}
@@ -1360,23 +1478,22 @@ public class TypeCreator extends TypeCache
 			{
 				members.add(fillParameter(createMethod("addStyleClass",
 					"Add a style class to styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.addStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to add"),
+						"</br></br><b>@param</b> {String} <b>style</b> class to add"),
 					createParam("String", "styleclass")));
 
 				members.add(fillParameter(createMethod("removeStyleClass",
 					"Remove a style class (if already present) from styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.removeStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to remove"),
+						"</br></br><b>@param</b> {String} <b>style</b> class to remove"),
 					createParam("String", "styleclass")));
 
 				members.add(fillParameter(createMethod("hasStyleClass",
 					"Check if a style class is present on styleclass named property</br></br>elements.myelem.hasStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to search"),
+						"</br></br><b>@param</b> {String} <b>style</b> class to search"),
 					createParam("String", "styleclass")));
 				members.add(fillParameter(createMethod("getStyleClasses",
 					"Returns the style classes of the styleclass named property</br></br>elements.myelem.getStyleClasses();" +
-						"</br></br>@return {String[]} array of style classes")));
+						"</br></br><b>@return</b> {String[]} array of style classes")));
 			}
-
 			if (fullTypeName.endsWith(_ABS_POSTFIX))
 			{
 				members.add(fillParameter(createMethod("setLocation",
@@ -1426,11 +1543,6 @@ public class TypeCreator extends TypeCache
 		return Arrays.asList(method);
 	}
 
-	/**
-	 * @param context
-	 * @param api
-	 * @return
-	 */
 	private Method createMethod(String context, WebObjectApiFunctionDefinition api)
 	{
 		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
@@ -1440,12 +1552,32 @@ public class TypeCreator extends TypeCache
 			StringBuilder description = new StringBuilder(api.getDocumentation());
 			if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
 			method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
-				STANDARD_ELEMENT_NAME, true));
+				STANDARD_ELEMENT_NAME, true, false));
 			method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
 		}
 		else
 		{
 			if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
+			else
+			{
+				StringBuilder generatedJSDocCommentFromSpec = new StringBuilder();
+				if (api.getParameters() != null)
+				{
+					IFunctionParameters parameters = api.getParameters();
+					for (int i = 0; i < parameters.getDefinedArgsCount(); i++)
+					{
+						generatedJSDocCommentFromSpec.append("<br/>@param {")
+							.append(ElementUtil.getDecoratedCustomTypeName(parameters.getParameterDefinition(i).getType())).append("} <b>")
+							.append(parameters.getParameterDefinition(i).getName()).append("</b>");
+					}
+				}
+				if (api.getReturnType() != null)
+				{
+					generatedJSDocCommentFromSpec.append("<br/><br/> @return {").append(ElementUtil.getDecoratedCustomTypeName(api.getReturnType().getType()))
+						.append("}");
+				}
+				method.setDescription(generatedJSDocCommentFromSpec.toString());
+			}
 			method.setDeprecated(api.isDeprecated());
 		}
 
@@ -1836,10 +1968,36 @@ public class TypeCreator extends TypeCache
 							}
 
 							method.setDescription(getDoc(name, scriptObjectClass, parameterTypes)); // TODO name should be of parent.
-							if (returnTypeClz != null)
+
+							if (scriptObject instanceof ITypedScriptObject typed)
+							{
+								String returnDescription = typed.getReturnDescription(name, parameterTypes);
+
+								if (returnDescription != null && returnDescription.contains("{"))
+								{
+									ParsedReturnType parsed = ReturnTypeParser.parse(returnDescription);
+									if (parsed != null && !"void".equals(parsed.baseType()))
+									{
+										System.out.println("Parsed : " + parsed);
+
+										// Build the full type tree (handles nested generics & multi-arg generics)
+										JSType finalType = buildFromParsed(parsed);
+										System.out.println("FinalType : " + finalType.toString());
+										if (finalType != null)
+										{
+											method.setType(finalType);
+										}
+									}
+								}
+							}
+
+							// Fallback to reflection-provided / existing type if still unset
+							if (method.getType() == null && returnTypeClz != null)
 							{
 								method.setType(getMemberTypeName(context, name, returnTypeClz, typeName));
 							}
+
+
 							method.setAttribute(IMAGE_DESCRIPTOR, METHOD);
 							method.setStatic(type == STATIC_METHOD);
 
@@ -1869,6 +2027,42 @@ public class TypeCreator extends TypeCache
 											{
 												parameter.setType(TypeUtil.arrayOf(getMemberTypeName(context, name, componentType, typeName)));
 											}
+										}
+										else if (paramType != null && Function.class.isAssignableFrom(paramType))
+										{
+											FunctionTypeParser.ParsedFunctionDeclaration parsed = FunctionTypeParser.parseFunctionType(param.getDescription());
+
+											FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
+											EList<Parameter> functionTypeParameters = functionType.getParameters();
+											JSDocTypeParser parse = new JSDocTypeParser();
+
+											for (FunctionTypeParser.ParsedParameter p : parsed.parameters())
+											{
+												Parameter paramForFunctionType = TypeInfoModelFactory.eINSTANCE.createParameter();
+												paramForFunctionType.setName(p.name());
+												try
+												{
+													JSType jsType = parse.parse(p.type());
+													paramForFunctionType.setType(jsType);
+												}
+												catch (ParseException e)
+												{
+													ServoyLog.logInfo("Couldn't parse the type: " + p.type() + " form param: " + p + " of " +
+														param.getDescription() + " - " + e.getMessage());
+												}
+												if (p.optional())
+												{
+													paramForFunctionType.setKind(ParameterKind.OPTIONAL);
+												}
+												if (p.kind() == FunctionTypeParser.ParsedParameterKind.VARARGS)
+												{
+													paramForFunctionType.setKind(ParameterKind.VARARGS);
+												}
+												functionTypeParameters.add(paramForFunctionType);
+											}
+											functionType.getParameters().addAll(functionTypeParameters);
+											parameter.setType(functionType);
+
 										}
 										else if (paramType != null)
 										{
@@ -2015,7 +2209,129 @@ public class TypeCreator extends TypeCache
 
 			membersList.addAll(newMembers);
 		}
+
 	}
+
+	/** Ensure the given JSType is represented as a ParameterizedType. */
+	private ParameterizedType ensureParam(JSType t)
+	{
+		if (t instanceof ParameterizedType) return (ParameterizedType)t;
+
+		// If your model ever returns other JSType impls, convert them to a PT leaf
+		// by extracting the underlying Type name. If you don't have such cases, you
+		// can just throw. Here is a safe fallback:
+		ParameterizedType pt = TypeInfoModelFactory.eINSTANCE.createParameterizedType();
+		// Try to resolve the name from toString(); otherwise provide a meaningful hint
+		pt.setTarget(TypeUtil.type(String.valueOf(t)));
+		return pt;
+	}
+
+	/**
+	 * Convert a type string (possibly parameterized, possibly nested)
+	 * into a JSType by recursively using ReturnTypeParser for generics.
+	 * No aliasing, names are passed through as-is.
+	 */
+	private JSType toJSType(String typeStr)
+	{
+		if (typeStr == null || typeStr.isBlank())
+			return leaf("void"); // or "Object" if you prefer
+
+		String normalized = typeStr.trim();
+
+		// Your parser never returns null; it uses "void" as sentinel
+		ParsedReturnType parsed = ReturnTypeParser.parse(normalized);
+
+		if ("void".equals(parsed.baseType()))
+			return leaf("void");
+
+		return buildFromParsed(parsed);
+	}
+
+	/**
+	 * Build a JSType (ParameterizedType or leaf) from a ParsedReturnType.
+	 * Recurses for each generic argument.
+	 */
+	private JSType buildFromParsed(ParsedReturnType parsed)
+	{
+		String base = parsed.baseType();
+		java.util.List<String> args = parsed.genericArgs();
+
+
+		// ----- special-case: Map<K,V> -----
+		if ("Map".equals(base))
+		{
+			ParameterizedType mapPT = TypeInfoModelFactory.eINSTANCE.createParameterizedType();
+			mapPT.setTarget(TypeUtil.type("Map"));
+
+			if (args == null || args.size() != 2)
+			{
+				// be strict; you can relax this to log+best-effort if needed
+				throw new IllegalArgumentException("Map expects exactly 2 type arguments, got " +
+					(args == null ? 0 : args.size()) + " for: " + parsed.fullType());
+			}
+
+			// K
+			JSType k = toJSType(args.get(0)); // "String" (leaf) or nested generic
+			mapPT.getActualTypeArguments().add(ensureParam(k)); // add at same layer (slot 0)
+
+			// V
+			JSType v = toJSType(args.get(1)); // "Array<String>" or leaf
+			mapPT.getActualTypeArguments().add(ensureParam(v)); // add at same layer (slot 1)
+
+			return mapPT;
+		}
+
+
+		// Parameterized?
+		if (args != null && !args.isEmpty())
+		{
+			// Optional: validate arity for better diagnostics (Map=2, Promise=1, etc.)
+			// validateArity(base, args.size());
+
+			ParameterizedType pt = TypeInfoModelFactory.eINSTANCE.createParameterizedType();
+			pt.setTarget(TypeUtil.type(base)); // base used exactly as parsed
+
+			for (String argStr : args)
+			{
+				// Recurse; never returns null for good inputs
+				JSType argType = toJSType(argStr);
+				pt.getActualTypeArguments().add(argType);
+			}
+			return pt;
+		}
+
+		// Leaf (no generics) → wrap named Type as JSType
+		return leaf(base);
+	}
+
+	/**
+	 * Wrap a named Type into a JSType.
+	 * If your model has a TypeRef that implements JSType, use that instead of the ParameterizedType shim.
+	 */
+	private JSType leaf(String typeName)
+	{
+		Type named = TypeUtil.type(typeName);
+		// If you have a proper TypeRef, prefer:
+		// TypeRef ref = TypeInfoModelFactory.eINSTANCE.createTypeRef();
+		// ref.setTarget(named);
+		// return ref;
+
+		// Generic-safe wrapper: ParameterizedType with zero args is a valid JSType leaf.
+		ParameterizedType pt = TypeInfoModelFactory.eINSTANCE.createParameterizedType();
+		pt.setTarget(named);
+		return pt;
+	}
+
+	// (Optional) only if you want better error messages for malformed docs
+	@SuppressWarnings("unused")
+	private void validateArity(String base, int argCount)
+	{
+		if ("Map".equals(base) && argCount != 2)
+			ServoyLog.logInfo("Map expects 2 type arguments, got " + argCount);
+		else if ("Promise".equals(base) && argCount != 1)
+			ServoyLog.logInfo("Promise expects 1 type argument, got " + argCount);
+	}
+
 
 	protected final JSType getMemberTypeName(String context, String memberName, Class< ? > memberReturnType, String objectTypeName)
 	{
@@ -2511,7 +2827,13 @@ public class TypeCreator extends TypeCache
 					{
 						returnText = "<b>@return</b> ";
 						if (returnedType != null)
-							returnText += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType) + ' ';
+						{
+							String returnTypeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType);
+							if (returnDescription != null && !returnDescription.contains("{" + returnTypeName))
+							{
+								returnText += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType) + ' ';
+							}
+						}
 						if (returnDescription != null) returnText += HtmlUtils.applyDescriptionMagic(returnDescription);
 					}
 				}
@@ -2547,7 +2869,7 @@ public class TypeCreator extends TypeCache
 						{
 							sb.append("<b>@param</b> ");
 							String type = parameter.getType();
-							if (type != null)
+							if (type != null && !(("Function").equals(type) && parameter.getDescription() != null && parameter.getDescription().contains("{(")))
 							{
 								type = type.replace("<", "&lt;").replace(">", "&gt;");
 								type = parameter.isVarArgs() ? type.replace("[]", "...") : type;
@@ -2715,12 +3037,11 @@ public class TypeCreator extends TypeCache
 			return null;
 		}
 
-		ServoyDocumented sd = returnType.getAnnotation(ServoyDocumented.class);
-		if (sd != null && sd.realClass() != null && sd.realClass() != Object.class)
+		JSRealClass rc = returnType.getAnnotation(JSRealClass.class);
+		if (rc != null && rc.value() != null)
 		{
-			return sd.realClass();
+			return rc.value();
 		}
-
 
 		return returnType;
 	}
@@ -3068,6 +3389,30 @@ public class TypeCreator extends TypeCache
 						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
 					}
 				}
+				else if (member.getName().equals("forEach"))
+				{
+					Method clone = (Method)TypeCreator.clone(member, member.getType());
+					Parameter functionParam = clone.getParameterFor(0);
+					FunctionType functionType = TypeInfoModelFactory.eINSTANCE.createFunctionType();
+					EList<Parameter> parameters = functionType.getParameters();
+					Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("record");
+					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + config + '>'));
+					parameters.add(param);
+					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("recordIndex");
+					param.setType(getTypeRef(context, "Number"));
+					param.setKind(ParameterKind.OPTIONAL);
+					parameters.add(param);
+					param = TypeInfoModelFactory.eINSTANCE.createParameter();
+					param.setName("foundset");
+					param.setType(getTypeRef(context, fullTypeName));
+					param.setKind(ParameterKind.OPTIONAL);
+					parameters.add(param);
+					functionParam.setType(functionType);
+
+					overridden = clone;
+				}
 				else
 				{
 					String memberConfig = config;
@@ -3342,17 +3687,24 @@ public class TypeCreator extends TypeCache
 	{
 		public Type createType(String context, String fullTypeName)
 		{
-			Type type = getType(context, "JSDataSet");
-			int index = fullTypeName.indexOf('<');
-			if (index != -1 && fullTypeName.endsWith(">"))
+			if (fullTypeName.equals(JSDataSet.class.getSimpleName()))
 			{
-				String recordType = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
-				Type t = getRecordType(recordType);
-				t.setName(fullTypeName);
-				t.setSuperType(type);
-				type = t;
+				Type type = TypeCreator.this.createType(context, fullTypeName, JSDataSet.class);
+				return addType(null, type);
 			}
-			return type;
+			else
+			{
+				Type type = null;
+				int index = fullTypeName.indexOf('<');
+				if (index != -1 && fullTypeName.endsWith(">"))
+				{
+					String recordType = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
+					type = getRecordType(recordType);
+					type.setName(fullTypeName);
+					type.setSuperType(findType(null, JSDataSet.class.getSimpleName()));
+				}
+				return type;
+			}
 		}
 
 		public ClientSupport getClientSupport()
@@ -3855,6 +4207,10 @@ public class TypeCreator extends TypeCache
 
 		private static Class< ? > determineColumnClass(Column column)
 		{
+			if (column.hasFlag(IBaseColumn.VECTOR_COLUMN))
+			{
+				return QBVectorColumn.class;
+			}
 			switch (column.getDataProviderType())
 			{
 				case IColumnTypeConstants.DATETIME :
@@ -5071,7 +5427,13 @@ public class TypeCreator extends TypeCache
 		public Type createType(String context, String fullTypeName)
 		{
 			//Custom component type can be defined only in WebComponents objects. So get WebComponentSpec
-			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
+			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1)
+			{
+				Type type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName(ElementUtil.CUSTOM_TYPE);
+				type.setKind(TypeKind.JAVA);
+				return addType(null, type);
+			}
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			String[] typeNames = wcTypeName.split("\\.");
 			if (typeNames.length < 2) return null;
@@ -5155,7 +5517,11 @@ public class TypeCreator extends TypeCache
 		public Type createType(String context, String fullTypeName)
 		{
 			int smallerThenIndex = fullTypeName.indexOf('<');
-			if (smallerThenIndex == -1) return null;
+			if (smallerThenIndex == -1)
+			{
+				Class< ? > clz = classTypes.get(fullTypeName);
+				return TypeCreator.this.createType(context, fullTypeName, clz);
+			}
 			String wcTypeName = fullTypeName.substring(smallerThenIndex + 1, fullTypeName.length() - 1);
 			// test for form component
 			if ((smallerThenIndex = wcTypeName.indexOf('<')) != -1) wcTypeName = wcTypeName.substring(0, smallerThenIndex);
@@ -5229,6 +5595,96 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	private class JSValueListCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSValueListCreator()
+		{
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(java.lang.String, java.lang.String)
+		 */
+		@Override
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setVisible(true);
+
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSValueList", JSValueList.class);
+			}
+
+			type.setSuperType(superType);
+
+			EList<Member> members = type.getMembers();
+
+			Property NAMES = TypeInfoModelFactory.eINSTANCE.createProperty();
+			NAMES.setName("NAMES");
+			NAMES.setVisible(true);
+			NAMES.setStatic(true);
+			NAMES.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("valuelist.gif")); // is this image correct
+			NAMES.setDescription("List of value list names");
+
+			members.add(NAMES);
+
+			Type namesType = TypeInfoModelFactory.eINSTANCE.createType();
+			namesType.setName("JSValueListNames");
+			namesType.setKind(TypeKind.JAVA);
+
+			NAMES.setDirectType(namesType);
+
+
+			EList<Member> namesMembers = namesType.getMembers();
+
+			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+			if (flattenedSolution != null)
+			{
+				Iterator<ValueList> valuelistIterator = flattenedSolution.getValueLists(false);
+				while (valuelistIterator.hasNext())
+				{
+					final ValueList valuelist = valuelistIterator.next();
+
+					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName(valuelist.getName());
+					property.setVisible(true);
+					property.setStatic(false);
+					property.setType(getTypeRef(context, "String"));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("valuelist.gif")); // is this image correct
+					property.setDescription("Value list name");
+
+					namesMembers.add(property);
+				}
+			}
+
+			return addType(null, type);
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#getClientSupport()
+		 */
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+
+	}
+
 	private class JSPermissionCreator implements IScopeTypeCreator
 	{
 		Type superType;
@@ -5280,6 +5736,261 @@ public class TypeCreator extends TypeCache
 		@Override
 		public void flush()
 		{
+		}
+	}
+
+	private class JSFormCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSFormCreator()
+		{
+		}
+
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setVisible(true);
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSForm", com.servoy.j2db.scripting.solutionmodel.JSForm.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+
+			Property INSTANCES = TypeInfoModelFactory.eINSTANCE.createProperty();
+			INSTANCES.setName("INSTANCES");
+			INSTANCES.setVisible(true);
+			INSTANCES.setStatic(true);
+			INSTANCES.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("forms.png"));
+			INSTANCES.setDescription("The list of design time forms.");
+			members.add(INSTANCES);
+			Type instancesType = TypeInfoModelFactory.eINSTANCE.createType();
+			instancesType.setName("JSFormInstances");
+			instancesType.setKind(TypeKind.JAVA);
+			INSTANCES.setDirectType(instancesType);
+
+			EList<Member> instancesMembers = instancesType.getMembers();
+			Property NAMES = TypeInfoModelFactory.eINSTANCE.createProperty();
+			NAMES.setName("NAMES");
+			NAMES.setVisible(true);
+			NAMES.setStatic(true);
+			NAMES.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("forms.png"));
+			NAMES.setDescription("The list of form names as strings.");
+			members.add(NAMES);
+			Type namesType = TypeInfoModelFactory.eINSTANCE.createType();
+			namesType.setName("JSFormNames");
+			namesType.setKind(TypeKind.JAVA);
+			NAMES.setDirectType(namesType);
+			EList<Member> namesMembers = namesType.getMembers();
+
+			List<String> forms = new ArrayList<>();
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForms(true)
+				.forEachRemaining(form -> forms.add(form.getName()));
+			if (forms != null)
+			{
+				for (String form : forms)
+				{
+					// JSForm property (in INSTANCES)
+					Property formInstance = TypeInfoModelFactory.eINSTANCE.createProperty();
+					formInstance.setName(form);
+					formInstance.setVisible(true);
+					formInstance.setStatic(false);
+					formInstance.setType(TypeUtil.ref(type));
+					formInstance.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("form.png"));
+					formInstance.setDescription("JSForm to be used in scripting.");
+					instancesMembers.add(formInstance);
+
+					// String property (in NAMES)
+					Property formNameProp = TypeInfoModelFactory.eINSTANCE.createProperty();
+					formNameProp.setName(form);
+					formNameProp.setVisible(true);
+					formNameProp.setStatic(false);
+					formNameProp.setType(getTypeRef(context, "String"));
+					formNameProp.setDescription("Form name as string.");
+					namesMembers.add(formNameProp);
+				}
+			}
+			return addType(null, type);
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class JSComponentCreator implements IScopeTypeCreator
+	{
+		Type superType;
+
+		JSComponentCreator()
+		{
+		}
+
+		@Override
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setVisible(true);
+			if (superType == null)
+			{
+				superType = TypeCreator.this.createType(null, "JSWebComponent", JSWebComponent.class);
+			}
+			type.setSuperType(superType);
+			type.setKind(TypeKind.JAVA);
+			EList<Member> members = type.getMembers();
+
+
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			componentsSpecProviderState.getWebObjectSpecifications().values().forEach(componentsPackage -> {
+
+				Property pkg = TypeInfoModelFactory.eINSTANCE.createProperty();
+				pkg.setName(componentsPackage.getPackageName());
+				pkg.setVisible(true);
+				pkg.setStatic(true);
+				pkg.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("ng_component.png"));
+				pkg.setDescription("JSWebComponent constants for scripting.");
+				members.add(pkg);
+
+				Type pckType = new LazyJSPackageType(context, componentsPackage.getPackageName());
+				pkg.setDirectType(pckType);
+				addType(context, pckType);
+			});
+			return addType(null, type);
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class LazyJSPackageType extends TypeImpl
+	{
+		private final String context;
+		private final String packageName;
+		private boolean membersLoaded = false;
+
+		LazyJSPackageType(String context, String packageName)
+		{
+			this.context = context;
+			this.packageName = packageName;
+			setName("JSPackage<" + packageName + ">");
+			setKind(TypeKind.JAVASCRIPT);
+			setVisible(true);
+		}
+
+		@Override
+		public EList<Member> getMembers()
+		{
+			if (!membersLoaded)
+			{
+				loadMembers();
+				membersLoaded = true;
+			}
+			return super.getMembers();
+		}
+
+		private void loadMembers()
+		{
+
+			EList<Member> componentMembers = super.getMembers();
+			for (String compName : WebComponentSpecProvider.getSpecProviderState().getWebObjectsInPackage(packageName))
+			{
+				if (compName.contains("-"))
+				{
+					Property prop = TypeInfoModelFactory.eINSTANCE.createProperty();
+					prop.setName(compName.split("-")[1]);
+					prop.setVisible(true);
+					prop.setStatic(false);
+					prop.setAttribute(IMAGE_DESCRIPTOR,
+						com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("element.png"));
+					componentMembers.add(prop);
+
+					Type pckType = new LazyJSComponentType(context, compName);
+					prop.setDirectType(pckType);
+					addType(context, pckType);
+				}
+				else
+				{
+					Debug.log("Invalid component name in package: " + compName);
+				}
+			}
+		}
+	}
+
+	private class LazyJSComponentType extends TypeImpl
+	{
+		private final String context;
+		private final String componentName;
+		private boolean membersLoaded = false;
+
+		LazyJSComponentType(String context, String componentName)
+		{
+			this.context = context;
+			this.componentName = componentName;
+			setName("JSComponent<" + componentName + ">");
+			setKind(TypeKind.JAVASCRIPT);
+			setVisible(true);
+		}
+
+		@Override
+		public EList<Member> getMembers()
+		{
+			if (!membersLoaded)
+			{
+				loadMembers();
+				membersLoaded = true;
+			}
+			return super.getMembers();
+		}
+
+		@Override
+		public IRType toRType(ITypeSystem typeSystem)
+		{
+			return new SimpleTypeWithDefault(typeSystem, this, RTypes.STRING);
+		}
+
+		private void loadMembers()
+		{
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentName);
+			EList<Member> componentMembers = super.getMembers();
+			// properties
+			spec.getAllPropertiesNames().forEach(propertyName -> {
+				PropertyDescription pd = spec.getProperty(propertyName);
+				if (pd == null)
+				{
+					WebObjectHandlerFunctionDefinition handler = spec.getHandler(propertyName);
+					if (handler == null || handler.isDeprecated() || handler.isPrivate())
+					{
+						return;
+					}
+				}
+				else if (pd.isDeprecated() || "private".equals(pd.getTag(WebFormComponent.TAG_SCOPE))) return;
+				Property prop = TypeInfoModelFactory.eINSTANCE.createProperty();
+				prop.setName(propertyName);
+				prop.setVisible(true);
+				prop.setStatic(false);
+				prop.setType(getTypeRef(context, "String"));
+				prop.setAttribute(IMAGE_DESCRIPTOR,
+					com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("element.png"));
+				componentMembers.add(prop);
+			});
 		}
 	}
 
@@ -5605,10 +6316,32 @@ public class TypeCreator extends TypeCache
 						org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 						m.setName(method.getName());
 						m.setAttribute(RESOURCE, method);
+
+						try
+						{
+							IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
+								Path.fromPortableString(method.getSerializableRuntimeProperty(IScriptProvider.FILENAME).replace('\\', '/')));
+							if (file != null)
+							{
+								ISourceModule sm = DLTKCore.createSourceModuleFrom(file);
+								ReferenceSource rs = ReferenceSource.create(sm);
+								ISourceRange range = sm.getMethod(method.getName()).getSourceRange();
+								ISourceRange nameRange = sm.getMethod(method.getName()).getNameRange();
+								ReferenceLocation location = ReferenceLocation.create(rs, range.getOffset(), range.getOffset() + range.getLength(),
+									nameRange.getOffset(),
+									nameRange.getOffset() + nameRange.getLength());
+								m.setAttribute(IReferenceAttributes.LOCATION, location);
+							}
+						}
+						catch (ModelException e)
+						{
+							ServoyLog.logError("Could not set the location for fs method " + method.getName(), e);
+						}
+
 						String comment = method.getRuntimeProperty(IScriptProvider.COMMENT);
 						if (comment != null)
 						{
-							m.setDescription(SolutionExplorerListContentProvider.getParsedComment(comment, STANDARD_ELEMENT_NAME, false));
+							m.setDescription(SolutionExplorerListContentProvider.getParsedComment(comment, STANDARD_ELEMENT_NAME, false, true));
 						}
 						MethodArgument returnTypeArgument = method.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
 						if (returnTypeArgument != null)
@@ -5671,24 +6404,6 @@ public class TypeCreator extends TypeCache
 		superType.getMembers().add(arrayType);
 		return superType;
 	}
-
-
-	private void runClearCacheJob()
-	{
-		Job job = new Job("clearing cache")
-		{
-
-			@Override
-			public IStatus run(IProgressMonitor monitor)
-			{
-				clearCache();
-				return Status.OK_STATUS;
-			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.schedule();
-	}
-
 
 	public static class TypeConfig
 	{

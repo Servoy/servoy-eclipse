@@ -18,6 +18,7 @@ import { isEmpty } from 'lodash-es';
 import { ServoyApi } from '../../ngclient/servoy_api';
 import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { RowRenderer } from './row-renderer.component';
+import { SabloTabseq } from '@servoy/public';
 import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
@@ -35,7 +36,9 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
       @if (useScrolling) {
         <ag-grid-angular #aggrid
           [gridOptions]="agGridOptions"
-          [ngStyle]="getAGGridStyle()">
+          [ngStyle]="getAGGridStyle()"
+          [sabloTabseq]="tabSeq"
+          [sabloTabseqConfig]="{container: true, reservedGap: 1000}">
         </ag-grid-angular>
       }
     
@@ -113,6 +116,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     @Input() pageLayout: string;
     @Input() readOnly: boolean;
     @Input() editable: boolean;
+    @Input() tabSeq: number;
+
     @Input() onSelectionChanged: (event: any) => void;
     @Input() onListItemClick: (record: any, event: any) => void;
 
@@ -130,6 +135,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     // used for scrolling with AGGGrid
     @ViewChild('aggrid', { static: false }) agGrid: AgGridAngular;
+
+    // Reference to the sabloTabseq directive
+    @ViewChild('aggrid', { read: SabloTabseq, static: false }) sabloTabseqDirective: SabloTabseq;
 
     // TODO: remove this when switching completely to scrollable LFC
     useScrolling = false;
@@ -277,7 +285,20 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 },
                 headerHeight: 0,
                 defaultColDef: {
-                    flex: 1
+                    flex: 1,
+                    suppressKeyboardEvent: (params: any) => {
+                        if(params.event.keyCode === 9) {
+                            if(params.event.altKey) {
+                                const nextIndex = this.sabloTabseqDirective.runtimeIndex.nextAvailableIndex;
+                                const nextElement = this.doc.querySelector('[tabindex="' + nextIndex + '"]');
+                                if (nextElement) {
+                                    (nextElement as HTMLElement).focus();
+                                }
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
                 },
                 columnDefs: [
                     { cellRenderer: 'row-renderer', autoHeight: true }
@@ -632,21 +653,28 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         if (!cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate) { // declare it only once for all rows in ComponentValue - so it can be used by component_converter.ts
             cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[], relativeRowIndex: number) => {
-                const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({ [property: string]: ServoyBaseComponent<any> })) => {
+                const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({ [property: string]: ServoyBaseComponent<any> }), componentModel: any) => {
                     const ui = rowObject[cm.name];
                     if (ui) {
                         const changes = {};
                         propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
-                            changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
+                            const newValue = componentModel && (componentModel[propertyChangedButNotByRef.propertyName] !== undefined) ? componentModel[propertyChangedButNotByRef.propertyName] : propertyChangedButNotByRef.newPropertyValue;
+                            changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(newValue, newValue, false);
                         });
                         ui.ngOnChanges(changes);
                         // no use to call detect changes here because it will be called in root parent form - because this is a result of a incomming server change for a child 'component' property
                     }
                 };
 
-                if (relativeRowIndex === -1 /*this means all rows*/) this.componentCache.forEach((rowObject) => triggerNgOnChangeForThisComponentInGivenRow(rowObject));
-                else if (this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex] /* do we really need this check? we should not get a change event for a component at an inexistent position */) {
-                    triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeRowIndex]);
+                let relativeStartIndex = relativeRowIndex, relativeStopIndex = relativeRowIndex + 1;
+                if (relativeRowIndex === -1 /*this means all rows*/) {
+                    relativeStartIndex = this.foundset.viewPort.startIndex;
+                    relativeStopIndex = this.foundset.viewPort.startIndex + this.foundset.viewPort.rows.length;
+                }
+                for(let relativeIndex = relativeStartIndex; relativeIndex < relativeStopIndex; relativeIndex++) {
+                    if (this.componentCache[this.foundset.viewPort.startIndex + relativeIndex]) {
+                        triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this.foundset.viewPort.startIndex + relativeIndex], cm.modelViewport ? cm.modelViewport[relativeIndex] : cm.model);
+                    }
                 }
             };
         }

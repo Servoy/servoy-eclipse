@@ -906,7 +906,11 @@ public class SolutionSerializer
 			ServoyJSONObject obj;
 			try
 			{
-				obj = generateJSONObject(persist, forceRecursive, false, repository, true, null);
+				if (persist instanceof ScriptMethod)
+				{
+					obj = generateJSONObject(persist, forceRecursive, false, repository, false, null);
+				}
+				else obj = generateJSONObject(persist, forceRecursive, false, repository, true, null);
 			}
 			catch (RepositoryException e)
 			{
@@ -1171,14 +1175,17 @@ public class SolutionSerializer
 			Object propertyObjectValue = property_values.get(propertyName);
 			boolean isBoolean = (propertyObjectValue instanceof Boolean);
 			boolean isNumber = (propertyObjectValue instanceof Number && element.getTypeID() != IRepository.ELEMENTS);//element_id for elements type becomes uuid
-			boolean isJSON = propertyObjectValue instanceof JSONObject || element.getTypeID() == IRepository.JSON ||
-				StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName().equals(propertyName);
+			boolean isJSON = propertyObjectValue instanceof JSONObject || element.getTypeID() == IRepository.JSON;
 
 			String propertyValue = repository.convertObjectToArgumentString(element.getTypeID(), propertyObjectValue);//, persist.getID(), persist.getRevisionNumber(), element.contentID, resolver);
 
 			if (isJSON)
 			{
-				property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, false, true)); // always store as pure json
+				if (persist instanceof ScriptMethod)
+				{
+					property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, true, true)); // always store as pure json
+				}
+				else property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, false, true)); // always store as pure json
 			}
 
 			if (valueFilter != null)

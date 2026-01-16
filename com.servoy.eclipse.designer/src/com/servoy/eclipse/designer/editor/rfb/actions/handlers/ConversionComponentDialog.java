@@ -96,7 +96,10 @@ public class ConversionComponentDialog extends Dialog
 		for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
 		{
 			if (webComponentSpec.isDeprecated()) continue;
-			if (!webComponentSpec.getPackageName().equals("servoydefault") && !initialSpecName.equals(webComponentSpec.getName()))
+			if (webComponentSpec.getPackageName().equals("servoycore") && !webComponentSpec.getName().equals("servoycore-formcomponent") &&
+				!webComponentSpec.getName().equals("servoycore-formcontainer") && !webComponentSpec.getName().equals("servoycore-listformcomponent")) continue;
+			if (!webComponentSpec.getPackageName().equals("servoydefault") &&
+				!initialSpecName.equals(webComponentSpec.getName()))
 			{
 				specs.add(webComponentSpec.getName());
 			}

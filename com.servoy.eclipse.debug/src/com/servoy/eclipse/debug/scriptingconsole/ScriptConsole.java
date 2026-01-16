@@ -83,12 +83,6 @@ public class ScriptConsole extends TextConsole implements IEvaluateConsole
 	private ScriptConsolePage page;
 	private IMemento memento;
 
-	/**
-	 * @param name
-	 * @param consoleType
-	 * @param imageDescriptor
-	 * @param autoLifecycle
-	 */
 	public ScriptConsole()
 	{
 		super("Command Console", "CommandConsole", null, true);

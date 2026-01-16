@@ -96,7 +96,7 @@ public class DBIQuickFixChangeInfoPkIntoUserRowIdent extends TableDifferenceQuic
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent, false);
 
 						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
 						{

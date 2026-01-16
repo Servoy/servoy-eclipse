@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -534,7 +535,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		}
 		else if (name.endsWith("navigatorID") && form != null)
 		{
-			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
+			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(
+				new FormLabelProvider(flattenedEditingSolution, false, true, true),
 				persistContext.getContext());
 			PropertyDescriptor pd = new PropertyDescriptor(name, displayName)
 			{
@@ -554,7 +556,30 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true, false,
 							null),
 						SWT.NONE, null, "navigatorFormDialog",
-						"Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
+						"Only forms that have navigator set to -none- and showInMenu deselected appear in this list.")
+					{
+
+						@Override
+						protected StructuredSelection getSelection(Object value)
+						{
+							if (value == Form.NAVIGATOR_DEFAULT)
+							{
+								return new StructuredSelection(FormLabelProvider.FORM_DEFAULT_STRING);
+							}
+							return super.getSelection(value);
+						}
+
+						@Override
+						protected Object doGetValue()
+						{
+							Object value = super.doGetValue();
+							if (FormLabelProvider.FORM_DEFAULT_STRING.equals(value))
+							{
+								return Form.NAVIGATOR_DEFAULT;
+							}
+							return value;
+						}
+					};
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -960,7 +985,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 	 * Looks in case of IFormElement persists for legacy java interface javadoc or a .spec file with "doc" tag on that property or doc key on the handler.<br/>
 	 * What it finds it provides either to the propertyControllerThatMightNeedTooltip if given or it sets it as string into setTooltipOnTagsJSONObjectHack.
 	 */
-	private void applyTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
+	public static void applyTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
 		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip)
 	{
 		// it's not always a trivial thing to compute it for all properties so if possible give a tooltip provider - not a string
@@ -987,7 +1012,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 	}
 
 
-	private String getTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
+	private static String getTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
 		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip)
 	{
 		String toolTip = null;

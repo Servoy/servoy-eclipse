@@ -447,23 +447,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	private List<String> getImportantProperties()
+	protected List<String> getImportantProperties()
 	{
-		List<String> importantProps = new ArrayList<String>();
-		if (this instanceof WebComponentPropertySource wps)
-		{
-			PropertyDescription desc = wps.getPropertyDescription();
-			Map<String, PropertyDescription> props = desc.getProperties();
-			for (String name : props.keySet())
-			{
-				Object tagValue = props.get(name).getTag("basic");
-				if (tagValue != null)
-				{
-					importantProps.add(name);
-				}
-			}
-		}
-		return importantProps;
+		return Collections.emptyList();
 	}
 
 
@@ -2704,6 +2690,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				if (beanPropertyPersist instanceof IChildWebObject) specPD = ((IChildWebObject)beanPropertyPersist).getPropertyDescription();
 				if (beanPropertyPersist instanceof WebComponent && ((WebComponent)beanPropertyPersist).getImplementation() instanceof WebObjectImpl)
 					specPD = ((WebObjectImpl)(((WebComponent)beanPropertyPersist).getImplementation())).getPropertyDescription();
+				if (beanPropertyPersist instanceof WebFormComponentChildType wfcct) specPD = wfcct.getPropertyDescription();
+
 				if (specPD != null)
 				{
 					// find out if this property has a default value
@@ -3847,7 +3835,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		else if (persistContainingFoundsetProperty instanceof WebFormComponentChildType)
 		{
-			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(IRepository.WEBCOMPONENTS);
+			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(WebComponent.class);
 		}
 		if (forFoundsetName == null)
 		{
@@ -3944,7 +3932,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (persistContext.getPersist() instanceof WebFormComponentChildType)
 		{
-			WebComponent parentComponent = (WebComponent)persistContext.getPersist().getAncestor(IRepository.WEBCOMPONENTS);
+			WebComponent parentComponent = (WebComponent)persistContext.getPersist().getParent().getAncestor(IRepository.WEBCOMPONENTS);
 			if (parentComponent != null)
 			{
 				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentComponent.getTypeName());

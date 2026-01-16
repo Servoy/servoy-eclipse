@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.FlattenedSolution;
@@ -40,6 +41,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 
@@ -75,14 +77,15 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 						Iterator keys = jsonObj.keys();
 						while (keys.hasNext())
 						{
-							String uuid = (String)keys.next();
-							final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), uuid);
+							String persistIdentifierString = (String)keys.next();
+							PersistIdentifier persistIdentifier = PersistIdentifier.fromJSONString(persistIdentifierString);
+							final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), persistIdentifier);
 							if (persist instanceof AbstractBase)
 							{
-								JSONObject properties = jsonObj.optJSONObject(uuid);
+								JSONObject properties = jsonObj.optJSONObject(persistIdentifierString);
 
-								String dropTarget = properties.optString("dropTargetUUID", null);
-								String rightSibling = properties.optString("rightSibling", null);
+								PersistIdentifier dropTarget = PersistIdentifier.fromJSONString(properties.optString("dropTargetUUID", null));
+								PersistIdentifier rightSibling = PersistIdentifier.fromJSONString(properties.optString("rightSibling", null));
 
 								ISupportFormElements parent = editorPart.getForm();
 								IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), dropTarget);

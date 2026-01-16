@@ -79,6 +79,7 @@ import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
@@ -101,6 +102,13 @@ public class GhostHandler implements IServerService
 	public GhostHandler(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
+	}
+
+	public static PersistIdentifier getGhostPersistIdentifier(AbstractBase parent, IChildWebObject ghostWebObject)
+	{
+		PersistIdentifier parentID = FormElement.getDesignIdFromPersist(parent);
+		PersistIdentifier ghostID = new PersistIdentifier(parentID.persistUUIDAndFCPropAndComponentPath(), ghostWebObject.getUUID().toString());
+		return ghostID;
 	}
 
 	public Object executeMethod(String methodName, final JSONObject args) throws JSONException
@@ -188,8 +196,7 @@ public class GhostHandler implements IServerService
 				return location;
 			}
 
-			private void writeGhostsForWebcomponentBeans(IBasicWebComponent basicWebComponent, String parentID,
-				ArrayList<IBasicWebComponent> parentFormComponentPath)
+			private void writeGhostsForWebcomponentBeans(IBasicWebComponent basicWebComponent, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(basicWebComponent))
 				{
@@ -260,9 +267,9 @@ public class GhostHandler implements IServerService
 						}
 						endGhostContainer(writer);
 					}
-					else if (basicWebComponent instanceof WebComponent)
+					else if (basicWebComponent instanceof WebComponent webComponent)
 					{
-						SortedMap<String, Object> sortedDroppableProperties = filterAndSortDroppableProperties((WebComponent)basicWebComponent);
+						SortedMap<String, Object> sortedDroppableProperties = filterAndSortDroppableProperties(webComponent);
 
 						int droppablePropCount = sortedDroppableProperties.size(), i = 0;
 
@@ -270,7 +277,7 @@ public class GhostHandler implements IServerService
 						{
 							PropertyDescription propertyPD = spec.getProperty(dropPropEntry.getKey());
 
-							startNewGhostContainer(writer, basicWebComponent, i++, droppablePropCount, dropPropEntry.getKey(),
+							startNewGhostContainer(writer, webComponent, i++, droppablePropCount, dropPropEntry.getKey(),
 								PropertyUtils.isCustomJSONArrayPropertyType(propertyPD.getType()), parentFormComponentPath, inherited);
 
 							if (dropPropEntry.getValue() != null)
@@ -305,10 +312,11 @@ public class GhostHandler implements IServerService
 
 										try
 										{
-											String parentKey = parentID != null ? parentID + ghostWebObject.getJsonKey()
-												: basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
-											String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
-											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(),
+											String parentKey = webComponent.getUUID() + ghostWebObject.getJsonKey();
+
+											PersistIdentifier ghostID = getGhostPersistIdentifier(webComponent, ghostWebObject);
+
+											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID.toJSONString(), ghostWebObject.getIndex(),
 												ghostWebObject.getTypeName(),
 												inherited || ghostWebObject instanceof WebCustomType custom && custom.getExtendsID() != null);
 										}
@@ -443,7 +451,7 @@ public class GhostHandler implements IServerService
 
 			private void writeGhostForPersist(IPersist o)
 			{
-				writeGhostForPersist(o, null, null, new HashSet<String>());
+				writeGhostForPersist(o, null, new HashSet<String>());
 			}
 
 			private boolean isInShowedContainer(IPersist o)
@@ -465,7 +473,7 @@ public class GhostHandler implements IServerService
 				return parent != null;
 			}
 
-			private void writeGhostForPersist(IPersist o, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath,
+			private void writeGhostForPersist(IPersist o, ArrayList<IBasicWebComponent> parentFormComponentPath,
 				HashSet<String> recursiveCheck)
 			{
 				if (o instanceof TabPanel panel && isInShowedContainer(o))
@@ -614,7 +622,7 @@ public class GhostHandler implements IServerService
 				}
 				else if (o instanceof IBasicWebComponent && isInShowedContainer(o))
 				{
-					writeGhostsForWebcomponentBeans((IBasicWebComponent)o, parentID, parentFormComponentPath);
+					writeGhostsForWebcomponentBeans((IBasicWebComponent)o, parentFormComponentPath);
 
 					String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)o);
 					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentType);
@@ -652,7 +660,7 @@ public class GhostHandler implements IServerService
 									IPersist p = element.getPersistIfAvailable();
 									if (p instanceof IFormElement)
 									{
-										writeGhostForPersist(p, ((IFormElement)p).getName(), newParentFormComponentPath, recursiveCheck);
+										writeGhostForPersist(p, newParentFormComponentPath, recursiveCheck);
 									}
 								}
 								recursiveCheck.remove(frm.getName());

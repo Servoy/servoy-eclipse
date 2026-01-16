@@ -183,7 +183,8 @@ public class WarExporter
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
-		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar" };
+		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
+		"org.owasp.encoder_*.jar" };
 
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
 

@@ -56,7 +56,6 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
-import org.mozilla.javascript.Function;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -68,9 +67,9 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.DeveloperMenuCommand;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
@@ -103,10 +102,12 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MenuPropertyType;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
@@ -311,22 +312,22 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			{
 				public void gotoMarker(IMarker marker)
 				{
-					String elementUuid = marker.getAttribute("elementUuid", null);
+					PersistIdentifier persistIdentifier = null;
 					int start = marker.getAttribute(IMarker.CHAR_START, -1);
+
 					if (start != -1)
 					{
-						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), start);
+						String uuidAtStart = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(), start);
+						if (uuidAtStart != null) persistIdentifier = PersistIdentifier.fromSimpleUUID(UUID.fromString(uuidAtStart));
 					}
-					String name = marker.getAttribute("Name", null);
-					if (name != null && name.indexOf('$') >= 0)
-					{
-						elementUuid = name;
-					}
-					if (elementUuid != null)
+					if (persistIdentifier == null) persistIdentifier = PersistIdentifier.fromJSONString(marker.getAttribute("persistIdentifier", null));
+
+					if (persistIdentifier != null)
 					{
 						try
 						{
-							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(), elementUuid));
+							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this.getForm(),
+								persistIdentifier));
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -1157,7 +1158,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		super.setContentDescription(description);
 	}
 
-	public void executeDeveloperMenuCommand(Function callback, Form[] forms, BaseComponent[] components)
+	public void executeDeveloperMenuCommand(FunctionDefinition callback, Form[] forms, BaseComponent[] components)
 	{
 		getCommandStack().execute(new DeveloperMenuCommand(callback, forms, components));
 	}

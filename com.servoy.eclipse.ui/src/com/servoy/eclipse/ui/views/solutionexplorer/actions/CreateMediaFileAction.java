@@ -17,8 +17,10 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
@@ -133,7 +135,7 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 						IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 						if (file != null && !file.exists())
 						{
-							InputStream inputStream = getContentInputStream();
+							InputStream inputStream = getContentInputStream(file);
 							file.create(inputStream, false, null);
 							viewer.refreshTreeCompletely();
 							inputStream.close();
@@ -226,4 +228,14 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 	{
 		return new java.io.StringBufferInputStream("");
 	}
+
+	protected InputStream getContentInputStream(IFile file)
+	{
+		if ("json".equalsIgnoreCase(file.getFileExtension()))
+		{
+			return new ByteArrayInputStream("{}".getBytes(StandardCharsets.UTF_8));
+		}
+		return new java.io.StringBufferInputStream("");
+	}
+
 }

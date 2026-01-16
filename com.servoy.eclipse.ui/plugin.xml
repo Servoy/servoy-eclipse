@@ -369,6 +369,9 @@
          <contentTypeBinding
                contentTypeId="com.servoy.eclipse.core.resource.server">
          </contentTypeBinding>
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.dbsecurity">
+         </contentTypeBinding>
       </editor>
       <editor
             class="com.servoy.eclipse.ui.editors.SecurityEditor"

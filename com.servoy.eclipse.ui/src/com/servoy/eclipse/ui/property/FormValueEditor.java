@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.property;
 
 import com.servoy.eclipse.ui.editors.IValueEditor;
+import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -44,6 +45,7 @@ public class FormValueEditor implements IValueEditor<String>
 	public boolean canEdit(String value)
 	{
 		if (value == null) return false;
-		return !Form.NAVIGATOR_NONE.equals(value) && !Form.NAVIGATOR_IGNORE.equals(value) && flattenedSolution.getForm(value) != null;
+		return !Form.NAVIGATOR_NONE.equals(value) && !Form.NAVIGATOR_IGNORE.equals(value) && !FormLabelProvider.FORM_DEFAULT_STRING.equals(value) &&
+			flattenedSolution.getForm(value) != null;
 	}
 }

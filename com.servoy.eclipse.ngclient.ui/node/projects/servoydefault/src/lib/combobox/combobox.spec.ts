@@ -23,7 +23,6 @@ describe('ComboboxComponent', () => {
         startEdit(_p: string) {}
         apply(_propertyName: string, _value: any) {}
         callServerSideApi(_methodName: string, _args: Array<any>) {}
-        getFormComponentElements(_propertyName: string, _formComponentValue: any) {}
         isInDesigner(): boolean { return false; }
         trustAsHtml(): boolean { return false; }
         isInAbsoluteLayout(): boolean { return false; }
@@ -41,7 +40,6 @@ describe('ComboboxComponent', () => {
         'startEdit',
         'apply',
         'callServerSideApi',
-        'getFormComponentElements',
         'isInDesigner',
         'trustAsHtml',
         'isInAbsoluteLayout',

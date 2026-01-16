@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 
 import { AgRendererComponent } from 'ag-grid-angular';
 import { ICellRendererParams, IAfterGuiAttachedParams } from 'ag-grid-community';
@@ -14,6 +14,16 @@ export class RowRenderer implements AgRendererComponent {
     lfc: ListFormComponent;
     foundsetRows: any[];
     startIndex: number;
+
+    @HostListener('registerCSTS', ['$event'])
+    registerCSTS(event: CustomEvent) {
+        // Create a new event with the same detail
+        const newEvent = new CustomEvent('registerCSTS', {
+            bubbles: true,
+            detail: event.detail
+        });
+        this.lfc.elementRef.nativeElement.children[0].dispatchEvent(newEvent);
+    }
 
     refresh(params: ICellRendererParams): boolean {
         // nop

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { EditorContentService } from './editorcontent.service';
+import { EditorContentService} from './editorcontent.service';
 import { EditorSessionService, IShowDynamicGuidesChangedListener } from './editorsession.service';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-
+import { PersistIdentifier } from '@servoy/designer';
 
 @Injectable()
 export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
@@ -65,15 +65,18 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				this.element = this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]);
 				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
 			}
-			let parent = contentElements.find(e => e.classList.contains('svy-formcomponent'));
+			let parent = contentElements.find(e => this.isParentContainer(e));
             this.uuid = this.element?.getAttribute('svy-id');
-			if (this.uuid && parent && this.uuid.indexOf(parent.getAttribute('svy-id').replace(/-/g,'_')) >= 0 ){
+			const persistId = this.uuid ? PersistIdentifier.fromJSONString(this.uuid) : null;
+			const parentSvyName = parent?.getAttribute('svy-id');
+			const parentPersistId = parentSvyName ? PersistIdentifier.fromJSONString(parentSvyName) : null;
+			if (persistId && parentPersistId && persistId.isDirectlyNestedInside(parentPersistId)) {
 				this.parentContainer = parent;
 			}
 			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
             for (let comp of this.editorContentService.getAllContentElements()) {
 				const compParent = this.getParent(comp);
-				if (compParent?.classList.contains('svy-formcomponent')) {
+				if (this.isParentContainer(compParent)) {
 					//ignore components within FC
 					continue;
 				}
@@ -105,10 +108,17 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         }
     }
 
+	private isParentContainer(compParent: Element) {
+		if (!compParent) return false;
+		const parentClassList = compParent.classList;
+		return parentClassList.contains('svy-formcomponent') || parentClassList.contains('svy-listformcomponent')
+			|| parentClassList.contains('svy-container');
+	}
+
 	private getParent(element: HTMLElement) {
 		while (element.parentElement) {
 			element = element.parentElement;
-			if (element.classList.contains('svy-formcomponent') || element.classList.contains('svy-form')) {
+			if (element.classList.contains('svy-form') || this.isParentContainer(element)) {
 				return element;
 			}
 		}
@@ -284,8 +294,8 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 
 	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
-		if (this.parentContainer?.classList.contains('svy-formcomponent')) {
-			//disable for components within a form component
+		if (this.isParentContainer(this.parentContainer) ) {
+			//disable for components within a form component or container
 			this.snapDataListener.next(null);
 			return;
 		}
@@ -370,14 +380,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			this.initialPoint = point;
 			this.initialRectangle = rect;
 		}
-		if (this.parentContainer) this.adjustPropertiesToContainer(properties);
 		this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
-	}
-
-	private adjustPropertiesToContainer(properties: SnapData) {
-		const parentBounds = this.parentContainer.getBoundingClientRect();
-		properties.top -= parentBounds.top;
-		properties.left -= parentBounds.left;
 	}
 
 	private checkSnapToSize(properties: SnapData, rect: DOMRect, overlapsX: DOMRect[], overlapsY: DOMRect[]) {
@@ -501,9 +504,9 @@ this.snapToEndEnabled = !event.shiftKey;
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
 		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
-			let closerToTheLeft = this.pointCloserToTopOrLeftSide(point, rect, 'x');
 			let snapX, guideX;
-			if (!resizing || closerToTheLeft) {
+            // left edge
+			if (!resizing || resizing.indexOf('w') >= 0) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.leftPos);
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
@@ -526,12 +529,12 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (!properties.cssPosition['left']) properties.cssPosition['left'] = properties.left;
 					guideX = properties.left;
 					if (resizing) {
-						properties['width'] = rect.width + rect.left - properties.left;
+						properties['width'] = this.rightPos.get(snapX.uuid) - properties.left;
 					}
 				}
 			}
 			//if not found, check the right edge as well
-			if(!snapX && (!resizing || !closerToTheLeft)) {
+			if(!snapX && (!resizing || resizing.indexOf('e') >= 0)) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.rightPos);
 				guideX = this.rightPos.get(snapX?.uuid);
 				properties.left = snapX ? this.rightPos.get(snapX.uuid) : properties.left;
@@ -590,9 +593,9 @@ this.snapToEndEnabled = !event.shiftKey;
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
 		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
-			let closerToTheTop = this.pointCloserToTopOrLeftSide(point, rect, 'y');
 			let snapY, guideY;
-			if (!resizing || closerToTheTop) {
+            // top edge
+			if (!resizing || resizing.indexOf('n') >= 0) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.topPos);
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
@@ -614,11 +617,12 @@ this.snapToEndEnabled = !event.shiftKey;
 					properties.cssPosition['top'] = snapY;
 					guideY = properties.top;
 					if (resizing) {
-						properties['height'] = rect.height + rect.top - properties.top;
+						properties['height'] = this.bottomPos.get(snapY.uuid) - properties.top;
 					}
 				}
 			}
-			if (!snapY && (!resizing || !closerToTheTop)) {
+            //if not found, check the bottom edge as well
+			if (!snapY && (!resizing || resizing.indexOf('s') >= 0)) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.bottomPos);
 				if (snapY?.uuid) {
 					guideY = this.bottomPos.get(snapY.uuid);

@@ -36,6 +36,7 @@ import com.servoy.j2db.dataprocessing.IModificationSubject;
 import com.servoy.j2db.dataprocessing.ModificationEvent;
 import com.servoy.j2db.dataprocessing.ModificationSubject;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -72,7 +73,7 @@ public class EditorComponentActionHandlerImpl implements EditorComponentActionHa
 	{
 		return (uuid) -> {
 			CreateComponentOptions args = new CreateComponentOptions();
-			args.setDropTargetUUID(uuid.toString());
+			args.setDropTarget(PersistIdentifier.fromSimpleUUID(uuid));
 			args.setGhostPropertyName(propertyName);
 			args.setDropTargetIsSibling(dropTargetIsSibling);
 			args.setIndex(index);

@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
@@ -295,11 +296,11 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE))
 			{
-				String uuid = marker.getAttribute("elementUuid", null);
+				PersistIdentifier persistIdentifier = PersistIdentifier.fromJSONString(marker.getAttribute("persistIdentifier", null));
 				String solName = marker.getAttribute("SolutionName", null);
-				if (solName != null && uuid != null)
+				if (solName != null && persistIdentifier != null)
 				{
-					fixes = new IMarkerResolution[] { new ClearLabelForElementProperty(uuid, solName) };
+					fixes = new IMarkerResolution[] { new ClearLabelForElementProperty(persistIdentifier, solName) };
 				}
 			}
 			else if (type.equals(ServoyBuilder.MISPLACED_MODULES_MARKER_TYPE))

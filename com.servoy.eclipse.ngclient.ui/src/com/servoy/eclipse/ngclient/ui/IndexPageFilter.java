@@ -70,6 +70,12 @@ public class IndexPageFilter implements Filter
 		HttpServletResponse response = (HttpServletResponse)servletResponse;
 		request.getSession();
 		String requestURI = request.getRequestURI();
+
+		if (AngularIndexPageWriter.handleShortSolutionRequest(request, response))
+		{
+			return;
+		}
+
 		if (requestURI.toLowerCase().endsWith("/index.html") &&
 			(requestURI.toLowerCase().contains("rfb/angular2") || requestURI.toLowerCase().contains("/solution/")) && WebPackagesListener.isBuildRunning())
 		{
@@ -98,10 +104,17 @@ public class IndexPageFilter implements Filter
 				requestURI.contains("/svy_oauth/"))
 			{
 				Pair<Boolean, String> showLogin = null;
-				if (requestURI.contains("/svy_oauth/"))
+				if (OAuthHandler.isOAuthRequest(request))
 				{
 					showLogin = OAuthHandler.handleOauth(request, response);
-					if (Boolean.FALSE.equals(showLogin.getLeft()) && showLogin.getRight() == null) return;
+					if (Boolean.FALSE.equals(showLogin.getLeft()))
+					{
+						if (showLogin.getRight() == null) return; // oauth was successful but the cloud returned html
+						request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+						String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
+						response.sendRedirect(request.getRequestURI().replace("/svy_oauth", "") + (queryString != null ? "?" + queryString : ""));
+						return;
+					}
 				}
 				else
 				{
@@ -118,9 +131,6 @@ public class IndexPageFilter implements Filter
 				if (showLogin.getRight() != null)
 				{
 					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
-
-					//could be oauth + deeplink (need to wrap the request to add the parameters)
-					req = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
 				}
 
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
@@ -130,7 +140,7 @@ public class IndexPageFilter implements Filter
 					contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
 				return;
 			}
-			else if (solutionName != null && CloudStatelessAccessManager.handlePossibleCloudRequest(request, response, solutionName, indexFile))
+			else if (solutionName != null && CloudStatelessAccessManager.handlePossibleCloudRequest(request, response, solutionName))
 			{
 				return;
 			}

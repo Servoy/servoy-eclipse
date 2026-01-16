@@ -108,6 +108,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -146,6 +147,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -2651,6 +2653,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ITable table = server.getTable(tableName);
 							IResource res = project;
 							if (getServoyModel().getDataModelManager() != null &&
+								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName) != null &&
 								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
 							{
 								res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
@@ -3306,6 +3309,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		try
 		{
 			IMarker marker = null;
+			String[] fcComponentAndPropertyNamePath = null;
 			String elementName = null;
 			if (persist != null)
 			{
@@ -3315,23 +3319,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (persist instanceof ISupportFormElement)
 				{
 					Form parent = persist.getAncestor(Form.class);
-					if (parent != null && parent.isFormComponent())
+					if (parent != null && parent.isFormComponent().booleanValue())
 					{
-						String name = ((ISupportFormElement)persist).getName();
-						if (name != null)
+						fcComponentAndPropertyNamePath = ((AbstractBase)persist).getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
+						if (fcComponentAndPropertyNamePath != null)
 						{
-							String[] nameParts = name.split("\\$");
-							if (nameParts.length == 3)
+							// look for real form to add marker on it; as this is a component from a form component - so its inside one or more form component containers
+							IPersist formComponentContainer = ServoyModelFinder.getServoyModel().getFlattenedSolution()
+								.searchPersist(fcComponentAndPropertyNamePath[0]);
+							if (formComponentContainer != null)
 							{
-								// look for real form to add marker on it
-								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
-								if (form != null)
-								{
-									elementName = name;
-									pathPair = SolutionSerializer.getFilePath(form, true);
-									path = new Path(pathPair.getLeft() + pathPair.getRight());
-									file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-								}
+								elementName = ((IFormElement)persist).getName();
+								pathPair = SolutionSerializer.getFilePath(formComponentContainer, true);
+								path = new Path(pathPair.getLeft() + pathPair.getRight());
+								file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 							}
 						}
 					}

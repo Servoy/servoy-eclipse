@@ -19,12 +19,11 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.json.JSONObject;
-import org.mozilla.javascript.Function;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -34,6 +33,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.util.UUID;
 
@@ -92,7 +92,7 @@ public class ExecuteDeveloperMenu implements IServerService
 			}
 
 			String menuName = args.getString("name");
-			for (Map.Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+			for (Entry<JSDeveloperMenu, FunctionDefinition> entry : DeveloperBridge.menus.entrySet())
 			{
 				if (menuName.equals(entry.getKey().getText()))
 				{

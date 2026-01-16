@@ -88,6 +88,8 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -153,9 +155,29 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 		}
 		models = null;
 		alternativeParent = null;
+		List<IPersist> changes = new ArrayList<>();
 		try
 		{
-			parent = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(parent, context));
+			IPersist newParent = ElementUtil.getOverridePersist(PersistContext.create(parent, context));
+			if (newParent != parent)
+			{
+				parent = (ISupportChilds)newParent;
+				changes.add(parent);
+				if (context instanceof Form form && parent instanceof LayoutContainer)
+				{
+					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(parent);
+					Iterator<IPersist> it = PersistHelper.getFlattenedPersist(flattenedSolution, form, parent).getAllObjects();
+					while (it.hasNext())
+					{
+						IPersist child = it.next();
+						IPersist overridePersist = ElementUtil.getOverridePersist(PersistContext.create(child, form));
+						if (!overridePersist.getUUID().equals(child.getUUID()))
+						{
+							changes.add(overridePersist);
+						}
+					}
+				}
+			}
 			Point location = getNextLocation();
 			models = placeElements(location);
 			if (models == null && object instanceof Object[] && ((Object[])object).length > 0)
@@ -175,8 +197,16 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				setPropertiesOnModels();
 				for (Object model : models)
 				{
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, false);
+					if (model instanceof IPersist)
+					{
+						changes.add((IPersist)model);
+					}
+					else
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, model, false);
+					}
 				}
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 			}
 			else
 			{
@@ -414,6 +444,10 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			return null;
 		}
 		IPersist draggedPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), dragData.uuid);
+		if (draggedPersist == null)
+		{
+			draggedPersist = FormElementHelper.INSTANCE.findPersist(dragData.uuid);
+		}
 		if (draggedPersist == null)
 		{
 			// maybe it was deleted by a CutAction, possibly by another editor

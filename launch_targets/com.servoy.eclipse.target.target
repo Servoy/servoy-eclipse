@@ -7,50 +7,51 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.09/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202507231516"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202508121425"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/"/>
-            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.11.0.202508291001"/>
+            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.14.0.202512112209"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/eclipse/updates/4.37/"/>
-            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.3000.v20250801-0854"/>
-            <unit id="org.eclipse.sdk.ide" version="4.37.0.I20250905-0730"/>
-            <unit id="org.eclipse.terminal.feature.feature.group" version="1.0.0.v20250819-0800"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2025.12/"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202511191606"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202601021056"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/releases/2025-09"/>
-            <unit id="org.eclipse.egit.feature.group" version="7.4.0.202509020913-r"/>
-            <unit id="org.eclipse.emf.sdk.feature.group" version="2.43.0.v20250825-1255"/>
+            <repository location="https://download.eclipse.org/releases/2025-12"/>
+            <unit id="org.eclipse.egit.feature.group" version="7.5.0.202512021534-r"/>
+            <unit id="org.eclipse.emf.sdk.feature.group" version="2.44.0.v20251106-1447"/>
             <unit id="org.eclipse.epp.mpc.feature.group" version="1.13.0.v20250816-1241"/>
-            <unit id="org.eclipse.jgit.feature.group" version="7.4.0.202509020913-r"/>
-            <unit id="org.eclipse.jgit.http.apache.feature.group" version="7.4.0.202509020913-r"/>
-            <unit id="org.eclipse.jgit.lfs.feature.group" version="7.4.0.202509020913-r"/>
+            <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.3100.v20251111-0406"/>
+            <unit id="org.eclipse.jgit.feature.group" version="7.5.0.202512021534-r"/>
+            <unit id="org.eclipse.jgit.http.apache.feature.group" version="7.5.0.202512021534-r"/>
+            <unit id="org.eclipse.jgit.lfs.feature.group" version="7.5.0.202512021534-r"/>
             <unit id="org.eclipse.jst.web_ui.feature.feature.group" version="3.39.0.v202508180347"/>
+            <unit id="org.eclipse.terminal.feature.feature.group" version="1.0.100.v20251015-0620"/>
+            <unit id="org.eclipse.sdk.feature.group" version="4.38.0.v20251201-1407"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tm4e/releases/0.15.1/"/>
-            <unit id="org.eclipse.tm4e.feature.feature.group" version="0.15.1.202509041551"/>
-            <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.15.1.202506111607"/>
-        </location>
-         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="http://download.eclipse.org/nattable/releases/2.5.0/repository/"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.5.0.202411280718"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.source.feature.group" version="2.5.0.202411280718"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="2.5.0.202411280718"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.source.feature.group" version="2.5.0.202411280718"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="2.5.0.202411280718"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.5.0.202411280718"/>
+            <repository location="https://download.eclipse.org/tm4e/releases/0.17.1/"/>
+            <unit id="org.eclipse.tm4e.feature.feature.group" version="0.17.1.202511281119"/>
+            <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.17.1.202511281119"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.25.0"/>
-            <unit id="org.eclipse.draw2d.feature.group" version="3.25.0.202508011427"/>
-            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.25.0.202508011427"/>
-            <unit id="org.eclipse.gef.feature.group" version="3.25.0.202508011427"/>
-            <unit id="org.eclipse.gef.sdk.feature.group" version="3.25.0.202508011427"/>
+            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.26.0"/>
+            <unit id="org.eclipse.draw2d.feature.group" version="3.26.0.202512020742"/>
+            <unit id="org.eclipse.draw2d.sdk.feature.group" version="3.26.0.202512020742"/>
+            <unit id="org.eclipse.gef.feature.group" version="3.26.0.202512020742"/>
+            <unit id="org.eclipse.gef.sdk.feature.group" version="3.26.0.202512020742"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="http://download.eclipse.org/nattable/releases/2.6.0/repository/"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="2.6.0.202509190702"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.source.feature.group" version="2.6.0.202509190702"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="2.6.0.202509190702"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.source.feature.group" version="2.6.0.202509190702"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="2.6.0.202509190702"/>
+            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="2.6.0.202509190702"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="https://download.eclipse.org/nebula/updates/release/3.2.0"/>
+            <unit id="org.eclipse.nebula.widgets.richtext.feature.feature.group" version="1.6.0.202509131601"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
@@ -69,37 +70,37 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.aarch64</artifactId>
-                    <version>128.0.18</version>
+                    <version>128.0.28</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.x86_64</artifactId>
-                    <version>128.0.18</version>
+                    <version>128.0.28</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.aarch64</artifactId>
-                    <version>128.0.18</version>
+                    <version>128.0.28</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.x86_64</artifactId>
-                    <version>128.0.18</version>
+                    <version>128.0.28</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.aarch64</artifactId>
-                    <version>128.0.18</version>
+                    <version>128.0.28</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.x86_64</artifactId>
-                    <version>128.0.18</version>
+                    <version>128.0.28</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -117,7 +118,7 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium</artifactId>
-                    <version>128.0.18</version>
+                    <version>128.0.28</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -135,25 +136,25 @@
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.20.0</version>
+                    <version>2.20.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.20.0</version>
+                    <version>2.20.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.dataformat</groupId>
                     <artifactId>jackson-dataformat-yaml</artifactId>
-                    <version>2.20.0</version>
+                    <version>2.20.1</version>
                     <type>jar</type>
                 </dependency>
 		       <dependency>
                     <groupId>com.fasterxml</groupId>
                     <artifactId>classmate</artifactId>
-                    <version>1.7.0</version>
+                    <version>1.7.3</version>
                     <type>jar</type>
                 </dependency>
 				<dependency>
@@ -217,9 +218,45 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.linux.x86_64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.macosx.aarch64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.macosx.x86_64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.win32.aarch64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime-extensions.win32.x86_64</artifactId>
+                    <version>0.15.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime</artifactId>
+                    <version>1.23.2</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>com.networknt</groupId>
                     <artifactId>json-schema-validator</artifactId>
-                    <version>1.5.9</version>
+                    <version>2.0.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -232,6 +269,12 @@
                     <groupId>com.servoy</groupId>
                     <artifactId>javax.transaction</artifactId>
                     <version>1.1.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>com.servoy</groupId>
+                    <artifactId>onnx-models-bge-small-en</artifactId>
+                    <version>1.5.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -273,7 +316,7 @@
                 <dependency>
                     <groupId>commons-codec</groupId>
                     <artifactId>commons-codec</artifactId>
-                    <version>1.19.0</version>
+                    <version>1.20.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -283,33 +326,45 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-core</artifactId>
+                    <version>1.9.1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j</artifactId>
+                    <version>1.9.1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>io.modelcontextprotocol.sdk</groupId>
                     <artifactId>mcp-core</artifactId>
-                    <version>0.13.1</version>
+                    <version>0.17.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>io.modelcontextprotocol.sdk</groupId>
                     <artifactId>mcp-json-jackson2</artifactId>
-                    <version>0.13.1</version>
+                    <version>0.17.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>io.projectreactor</groupId>
                     <artifactId>reactor-core</artifactId>
-                    <version>3.7.11</version>
+                    <version>3.8.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.5.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>jakarta.activation</groupId>
                     <artifactId>jakarta.activation-api</artifactId>
-                    <version>2.1.3</version>
+                    <version>2.1.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -333,7 +388,7 @@
                 <dependency>
                     <groupId>jakarta.mail</groupId>
                     <artifactId>jakarta.mail-api</artifactId>
-                    <version>2.1.4</version>
+                    <version>2.1.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -369,7 +424,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.17.7</version>
+                    <version>1.18.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -405,19 +460,19 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-lang3</artifactId>
-                    <version>3.18.0</version>
+                    <version>3.20.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-pool2</artifactId>
-                    <version>2.12.1</version>
+                    <version>2.13.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-text</artifactId>
-                    <version>1.14.0</version>
+                    <version>1.15.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -429,49 +484,49 @@
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-api</artifactId>
-                    <version>2.25.1</version>
+                    <version>2.25.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-core</artifactId>
-                    <version>2.25.1</version>
+                    <version>2.25.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-jakarta-web</artifactId>
-                    <version>2.25.1</version>
+                    <version>2.25.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-slf4j2-impl</artifactId>
-                    <version>2.25.1</version>
+                    <version>2.25.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpg-jdk18on</artifactId>
-                    <version>1.81</version>
+                    <version>1.83</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpkix-jdk18on</artifactId>
-                    <version>1.81</version>
+                    <version>1.83</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk18on</artifactId>
-                    <version>1.81</version>
+                    <version>1.83</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcutil-jdk18on</artifactId>
-                    <version>1.81</version>
+                    <version>1.83</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -484,6 +539,18 @@
                     <groupId>org.eclipse.birt.runtime</groupId>
                     <artifactId>org.w3c.css.sac</artifactId>
                     <version>1.3.1.v200903091627</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.collections</groupId>
+                    <artifactId>eclipse-collections-api</artifactId>
+                    <version>13.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.collections</groupId>
+                    <artifactId>eclipse-collections</artifactId>
+                    <version>13.0.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -523,7 +590,19 @@
                 <dependency>
                     <groupId>org.jsoup</groupId>
                     <artifactId>jsoup</artifactId>
-                    <version>1.21.2</version>
+                    <version>1.22.1</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.jspecify</groupId>
+                    <artifactId>jspecify</artifactId>
+                    <version>1.0.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.owasp.encoder</groupId>
+                    <artifactId>encoder</artifactId>
+                    <version>1.4.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -541,7 +620,7 @@
                 <dependency>
                     <groupId>org.yaml</groupId>
                     <artifactId>snakeyaml</artifactId>
-                    <version>2.4</version>
+                    <version>2.5</version>
                     <type>jar</type>
                 </dependency>
             </dependencies>
@@ -551,12 +630,12 @@
                     <url>https://developer.servoy.com/mvn_repository/</url>
                 </repository>
                 <repository>
-                    <id>central</id>
-                    <url>https://repo.maven.apache.org/maven2</url>
-                </repository>
-                <repository>
                     <id>chromium</id>
                     <url>https://dl.equo.dev/chromium-swt-ee/servoy/mvn</url>
+                </repository>
+                <repository>
+                    <id>central</id>
+                    <url>https://repo.maven.apache.org/maven2</url>
                 </repository>
             </repositories>
         </location>

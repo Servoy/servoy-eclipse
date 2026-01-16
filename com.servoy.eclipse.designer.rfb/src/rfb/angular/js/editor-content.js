@@ -414,7 +414,10 @@ angular.module('editorContent',['servoyApp'])
     callServerSideApi: function(methodName, args) {
       return null;
     },
-    getFormComponentElements: function(propertyName, formComponentValue) {
+    /**
+     * @param _propertyName deprecated; not used
+     */
+    getFormComponentElements: function(_propertyName, formComponentValue) {
     	return $compile($templateCache.get(formComponentValue.uuid))($scope);
 	},
 	isInDesigner: function() {
@@ -661,6 +664,7 @@ angular.module('editorContent',['servoyApp'])
           if(data.updatedFormComponentsDesignId) {
         	  for (var index in data.updatedFormComponentsDesignId) {
                   for (var name in formData.components) {
+                      // doSomethingHere(); in titanium this check was replaced by something like if (PersistIdentifier.fromJSONString(child).isDirectlyNestedInside(formComponentComponentIdentifier)) {
                 	  if((name.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(name) == -1) ) {
                 		  toDeleteA.push(name);
                 	  }

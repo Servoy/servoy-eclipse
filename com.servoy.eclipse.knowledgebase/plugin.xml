@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <!-- Ensure plugin starts early to initialize ONNX models and load knowledge bases -->
+   <extension point="org.eclipse.ui.startup">
+      <startup class="com.servoy.eclipse.knowledgebase.KnowledgeBaseStartup"/>
+   </extension>
+
+   <!-- Extension point definition for knowledge base operations -->
+   <extension-point id="knowledgeBaseOperations" name="Knowledge Base Operations Provider" schema="schema/knowledgeBaseOperations.exsd"/>
+
+   <!-- Default implementation of knowledge base operations -->
+   <extension point="com.servoy.eclipse.knowledgebase.knowledgeBaseOperations">
+      <provider class="com.servoy.eclipse.knowledgebase.KnowledgeBaseOperationsProvider"/>
+   </extension>
+</plugin>

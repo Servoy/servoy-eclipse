@@ -77,7 +77,6 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.RepositorySettingsDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -173,7 +172,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
 //					}
 
-					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
+					String modulesTokenized = Utils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
 					solution.setVersion("1.0");
 
@@ -793,7 +792,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 								{
 									modulesList.add(name);
 								}
-								String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+								String modulesTokenized = Utils.getTokenValue(modulesList.toArray(new String[] { }), ",");
 								editingSolution.setModulesNames(modulesTokenized);
 
 								try

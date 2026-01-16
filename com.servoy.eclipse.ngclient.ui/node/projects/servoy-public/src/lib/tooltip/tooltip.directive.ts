@@ -1,49 +1,30 @@
 import { Directive, HostListener, Input, OnDestroy } from '@angular/core';
 import { TooltipService } from './tooltip.service';
+import { HTMLTooltipDirective } from './tooltip-html.directive';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
     selector: '[svyTooltip]',
     standalone: false
 })
-export class TooltipDirective implements OnDestroy {
+export class TooltipDirective extends HTMLTooltipDirective {
 
     @Input('svyTooltip') tooltipText: string;
-    isActive = false;
 
-    constructor(private tooltipService: TooltipService, private servoyService: ServoyPublicService) {
-        this.tooltipService.isTooltipActive.subscribe(a => {
-            this.isActive = a;
-        });
+        constructor(tooltipService: TooltipService, private servoyService: ServoyPublicService) {
+        super(tooltipService);
     }
 
-    @HostListener('pointerenter')
-    onMouseEnter(event): void {
-        if (this.tooltipText) {
-            let initialDelay = this.servoyService.getUIProperty("tooltipInitialDelay");
-            if (initialDelay === null || isNaN(initialDelay)) initialDelay = 750;
-            let dismissDelay = this.servoyService.getUIProperty("tooltipDismissDelay");
-            if (dismissDelay === null || isNaN(dismissDelay)) dismissDelay = 5000;
-            this.tooltipService.showTooltip(event, this.tooltipText, initialDelay, dismissDelay);
-        }
+    protected getInitialDelay(): number {
+        let initialDelay = super.getInitialDelay();
+        if (initialDelay === null || isNaN(initialDelay)) initialDelay = this.servoyService.getUIProperty("tooltipInitialDelay");
+        return initialDelay;
     }
 
-    @HostListener('pointerleave')
-    onMouseLeave(): void {
-        this.tooltipService.hideTooltip();
+    protected getDismissDelay(): number {
+        let dismissDelay = super.getDismissDelay();
+        if (dismissDelay === null || isNaN(dismissDelay)) dismissDelay = this.servoyService.getUIProperty("tooltipDismissDelay");
+        return dismissDelay;
     }
 
-    @HostListener('click')
-    onClick(): void {
-        this.tooltipService.hideTooltip();
-    }
-
-    @HostListener('contextmenu')
-    onContextMenu(): void {
-        this.tooltipService.hideTooltip();
-    }
-
-    ngOnDestroy(): void {
-        this.tooltipService.hideTooltip();
-    }
 }

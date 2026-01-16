@@ -45,3 +45,11 @@ html, body
 .accordion-button {
     opacity: 0.7;
 }
+
+.mktipmsg {
+    position: absolute;
+    background-color: black;
+    color: white;
+    text-align: left;
+    font-size: 12px;
+}

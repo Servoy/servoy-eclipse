@@ -168,7 +168,7 @@ public class TestTarget
 			}
 			case FORM_METHOD :
 			{
-				return type + DELIM + activeSolution.getName() + DELIM + testMethodsForm.getName() + DELIM + testMethodToTest.getUUID();
+				return type + DELIM + activeSolution.getName() + DELIM + testMethodsForm.getName() + DELIM + testMethodToTest.getName();
 			}
 			case GLOBAL_METHOD :
 			{
@@ -214,9 +214,9 @@ public class TestTarget
 			case FORM_METHOD :
 			{
 				String formName = st.nextToken();
-				String methodUUID = st.nextToken();
+				String methodName = st.nextToken();
 				Form form = fl.getForm(formName); //Assert not null
-				ScriptMethod method = form.getScriptMethod(methodUUID); //Assert not null
+				ScriptMethod method = form.getScriptMethod(methodName); //Assert not null
 				target.testMethodToTest = method;
 				break;
 			}

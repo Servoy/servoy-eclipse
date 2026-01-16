@@ -101,7 +101,7 @@ public class DBIQuickFixDeleteInfoForColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent, false);
 
 						// delete the column information
 						boolean removed = false;

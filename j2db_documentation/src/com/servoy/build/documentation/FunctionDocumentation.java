@@ -850,8 +850,6 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 	{
 		Element functionElement = DocumentHelper.createElement(typesToTags.get(type));
 
-//		if (!pretty)
-//		{
 		if (argumentsTypes != null)
 		{
 			Element argsTypes = DocumentHelper.createElement(TAG_ARGUMENTSTYPES);
@@ -863,7 +861,6 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 				argType.addAttribute(ATTR_TYPECODE, cc.getName());
 			}
 		}
-//		}
 
 		if (isDeprecated()) functionElement.addAttribute(ATTR_DEPRECATED, Boolean.TRUE.toString());
 		if (getClientSupport() != null) functionElement.addAttribute(ATTR_CLIENT_SUPPORT, getClientSupport().toAttribute());
@@ -1054,7 +1051,20 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 				}
 				catch (Throwable e)
 				{
-					System.out.println("Failed to decode class from '" + returnedTypeCode + "' at return type of function " + name + ".");
+					int indexOf = returnedTypeCode.indexOf('<');
+					if (indexOf > 0)
+					{
+						returnedTypeCode = returnedTypeCode.substring(0, indexOf);
+						try
+						{
+							returnedType = DocumentationUtil.loadClass(loader, returnedTypeCode);
+						}
+						catch (Throwable e1)
+						{
+						}
+					}
+					if (returnedType == null)
+						System.out.println("Failed to decode class from '" + returnedTypeCode + "' at return type of function " + name + ".");
 				}
 				if (returnedType != null)
 				{

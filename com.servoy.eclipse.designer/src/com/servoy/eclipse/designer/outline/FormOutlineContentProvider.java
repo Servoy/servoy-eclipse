@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.core.util.WrappingComparator;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -135,7 +136,16 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
 			List<IPersist> allObjectsAsList = new ArrayList<>(getPersistChildrenAsList(((AbstractBase)((PersistContext)parentElement).getPersist()), false));
-			Collections.sort(allObjectsAsList, PositionComparator.XY_PERSIST_COMPARATOR);
+			Collections.sort(allObjectsAsList, new WrappingComparator<IPersist, IPersist>(PositionComparator.XY_PERSIST_COMPARATOR)
+			{
+				@Override
+				protected IPersist convertToWrappedComparatorValue(IPersist value)
+				{
+					// see DevTabSeqProperty class comment for why this is needed (WebFormComponentChildType cannot be used for computing CSS location)
+					if (value instanceof WebFormComponentChildType wfcct) return wfcct.getElement();
+					else return value;
+				}
+			});
 			for (IPersist persist : allObjectsAsList)
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
@@ -402,48 +412,56 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		return getPersistChildrenAsList(persist, true).size() > 0;
 	}
 
-	private List<IPersist> getPersistChildrenAsList(AbstractBase persist, boolean stopOnFirstFound)
+	private List<IPersist> getPersistChildrenAsList(AbstractBase formComponentComponentPersistArg, boolean stopOnFirstFound)
 	{
-		List<IPersist> persistChildrenAsList = persist.getAllObjectsAsList();
-		IPersist formElement = persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getElement() : persist;
-		if (persistChildrenAsList.isEmpty() && formElement instanceof IFormElement)
+		List<IPersist> persistChildrenAsList = formComponentComponentPersistArg.getAllObjectsAsList();
+
+		// formComponentComponentPersistArg might be here a WebFormComponentChildType which is a designer only persist (used in Outline view) that represents a combination of child property of formComponent type inside some form-component-container + a child component of the form component that that property uses
+		IPersist formComponentComponentPersist = formComponentComponentPersistArg instanceof WebFormComponentChildType
+			? ((WebFormComponentChildType)formComponentComponentPersistArg).getElement() : formComponentComponentPersistArg;
+
+		if (persistChildrenAsList.isEmpty() && formComponentComponentPersist instanceof IFormElement)
 		{
 			persistChildrenAsList = new ArrayList<IPersist>();
-			FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((IFormElement)formElement, ModelUtils.getEditingFlattenedSolution(form),
+			FormElement formComponentComponentNGElement = FormElementHelper.INSTANCE.getFormElement((IFormElement)formComponentComponentPersist,
+				ModelUtils.getEditingFlattenedSolution(form),
 				null, true);
-			WebObjectSpecification spec = formComponentEl.getWebComponentSpec();
+			WebObjectSpecification spec = formComponentComponentNGElement.getWebComponentSpec();
 			if (spec != null)
 			{
-				Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
-				if (properties.size() > 0)
+				Collection<PropertyDescription> propertiesOfFormComponentType = spec.getProperties(FormComponentPropertyType.INSTANCE);
+				if (propertiesOfFormComponentType.size() > 0)
 				{
 					boolean firstFound = false;
-					for (PropertyDescription pd : properties)
+					for (PropertyDescription pd : propertiesOfFormComponentType)
 					{
-						Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
-						Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, ModelUtils.getEditingFlattenedSolution(form));
-						if (frm == null) continue;
-						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
+						Object fcPropertyValue = formComponentComponentNGElement.getPropertyValue(pd.getName());
+						Form formThatIsFormComponent = FormComponentPropertyType.INSTANCE.getForm(fcPropertyValue,
+							ModelUtils.getEditingFlattenedSolution(form));
+						if (formThatIsFormComponent == null) continue;
+						FormComponentCache fcCache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentComponentNGElement, pd,
+							(JSONObject)fcPropertyValue, formThatIsFormComponent,
 							ModelUtils.getEditingFlattenedSolution(form));
 						// responsive forms also just show the pure elements and not the structure.
-						for (FormElement element : cache.getFormComponentElements())
+						for (FormElement childNGFormElement : fcCache.getFormComponentElements())
 						{
-							IPersist p = element.getPersistIfAvailable();
-							if (p instanceof IFormElement)
+							IPersist childPersist = childNGFormElement.getPersistIfAvailable();
+							if (childPersist instanceof IFormElement)
 							{
-								String[] name = ((IFormElement)p).getName().split("\\$");
-								if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
+								// stuff like [7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8, containedForm, formComponent2, containedForm, n1]
+								String[] feComponentAndPropertyNamePath = ((AbstractBase)childPersist)
+									.getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
+
+								if (feComponentAndPropertyNamePath != null && feComponentAndPropertyNamePath.length > 2 &&
+									!feComponentAndPropertyNamePath[feComponentAndPropertyNamePath.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
 								{
-									StringBuilder keyBuilder = new StringBuilder();
-									for (int i = 1; i < name.length; i++)
-									{
-										if (i > 1) keyBuilder.append(".");
-										keyBuilder.append(name[i]);
-									}
+									// so the path also says it is a child component of a form component container + it has a name (set by the user, not the default generated svy_...)
+									// create the fake / design-time-only persist that represents this 1 (one) property of type form component from the form component component
 									persistChildrenAsList.add(new WebFormComponentChildType(
-										persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getParentComponent()
-											: (IBasicWebObject)formComponentEl.getPersistIfAvailable(),
-										keyBuilder.toString(), ModelUtils.getEditingFlattenedSolution(form)));
+										formComponentComponentPersistArg instanceof WebFormComponentChildType
+											? ((WebFormComponentChildType)formComponentComponentPersistArg).getParentComponent()
+											: (IBasicWebObject)formComponentComponentNGElement.getPersistIfAvailable(),
+										feComponentAndPropertyNamePath, ModelUtils.getEditingFlattenedSolution(form)));
 									if (stopOnFirstFound && !firstFound)
 									{
 										firstFound = true;
@@ -459,6 +477,11 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 					}
 				}
 			}
+		}
+
+		if (persistChildrenAsList.contains(null))
+		{
+			persistChildrenAsList = persistChildrenAsList.stream().filter((e) -> (e != null)).toList();
 		}
 
 		return persistChildrenAsList;

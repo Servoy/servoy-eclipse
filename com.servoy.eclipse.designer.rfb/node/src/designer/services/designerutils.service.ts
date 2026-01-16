@@ -92,9 +92,21 @@ export class DesignerUtilsService {
                             x: clientRec.right,
                             y: clientRec.bottom
                         };//);
+                        
+                        const eventPage = {
+                            x: event.pageX,
+                            y: event.pageY
+                        };
+                        if (this.editorContentService.getContentArea().scrollLeft > 0) {
+                            eventPage.x = eventPage.x + this.editorContentService.getContentArea().scrollLeft;
+                        }
+                        if (this.editorContentService.getContentArea().scrollTop > 0) {
+                            eventPage.y = eventPage.y + this.editorContentService.getContentArea().scrollTop;
+                        }
+                        
                         // if cursor is in rectangle between 0,0 and bottom right corner of component we consider it to be before that component
                         // can we enhance it ?
-                        if (event.pageY < absolutePoint.y && event.pageX < absolutePoint.x) {
+                        if (eventPage.y < absolutePoint.y && eventPage.x < absolutePoint.x) {
                             beforeNode = node;
                         }
                         else

@@ -403,7 +403,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 
 			for (int i = replacement.length(); i > 0; i--)
 			{
-				if (begin.endsWith(replacement.substring(0, i)))
+				if (endsWithIgnoreCase(begin, replacement.substring(0, i)))
 				{
 					begin = begin.substring(0, begin.length() - i);
 					break;
@@ -411,6 +411,13 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			}
 
 			return begin + replacement + remainder;
+		}
+
+		private boolean endsWithIgnoreCase(String str, String suffix)
+		{
+			if (str == null || suffix == null) return false;
+			if (suffix.length() > str.length()) return false;
+			return str.regionMatches(true, str.length() - suffix.length(), suffix, 0, suffix.length());
 		}
 	}
 

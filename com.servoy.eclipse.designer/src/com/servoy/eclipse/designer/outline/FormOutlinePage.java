@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.GraphicalViewer;
@@ -147,7 +145,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 		if (form != null)
 		{
-			final Map<String, Set<String>> allowedChildrenMap = DesignerUtil.getAllowedChildren();
 			getTreeViewer().addDragSupport(DND.DROP_MOVE, new Transfer[] { FormElementTransfer.getInstance() }, new DragSourceListener()
 			{
 				@Override
@@ -164,9 +161,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
-								if (CSSPositionUtils.isInAbsoluteLayoutMode(real))
+								if (CSSPositionUtils.isInAbsoluteLayoutMode(real) || real.getAncestor(WebFormComponentChildType.class) != null)
 								{
-									// do not allow d&d from absolute layout div
+									// do not allow d&d from absolute layout div or inside form component
 									event.doit = false;
 									return;
 								}
@@ -442,14 +439,13 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				WebFormComponentChildType webFormComponentChildType = persist instanceof WebFormComponentChildType ? (WebFormComponentChildType)persist : null;
 				if (webFormComponentChildType != null)
 				{
-					String wfcName = webFormComponentChildType.getElement().getName();
-					int first$ = wfcName.indexOf("$");
-					if (first$ > 0)
+					String[] fcPropAndCompPath = webFormComponentChildType.getFcPropAndCompPath();
+					if (fcPropAndCompPath != null && fcPropAndCompPath.length > 0) // should always be true because it is a WebFormComponentChildType
 					{
-						String uuid = wfcName.substring(0, first$);
-						if (uuid.startsWith("_")) uuid = uuid.substring(1);
-						uuid = uuid.replace('_', '-');
-						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(uuid);
+						String rootFormComponentContainerUuid = fcPropAndCompPath[0];
+						if (rootFormComponentContainerUuid.startsWith("_")) rootFormComponentContainerUuid = rootFormComponentContainerUuid.substring(1);
+						rootFormComponentContainerUuid = rootFormComponentContainerUuid.replace('_', '-');
+						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(rootFormComponentContainerUuid);
 					}
 				}
 				if (persist != null)

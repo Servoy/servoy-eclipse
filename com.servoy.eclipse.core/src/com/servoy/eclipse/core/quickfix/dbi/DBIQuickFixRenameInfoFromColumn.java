@@ -94,7 +94,7 @@ public class DBIQuickFixRenameInfoFromColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
+						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent, false);
 						for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
 						{
 							ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);

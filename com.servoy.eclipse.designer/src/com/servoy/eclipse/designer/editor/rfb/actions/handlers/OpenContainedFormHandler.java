@@ -28,6 +28,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -38,12 +39,12 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
  * @author gganea@servoy.com
- *
  */
 public class OpenContainedFormHandler implements IServerService
 {
@@ -55,10 +56,6 @@ public class OpenContainedFormHandler implements IServerService
 
 	private final BaseVisualFormEditor editorPart;
 
-	/**
-	 * @param methodName
-	 * @param args
-	 */
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
 		Display.getDefault().asyncExec(new Runnable()
@@ -71,7 +68,8 @@ public class OpenContainedFormHandler implements IServerService
 				{
 					try
 					{
-						IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(), args.getString("uuid"));
+						IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart.getForm(),
+							PersistIdentifier.fromJSONString(args.getString("uuid")));
 						Solution s = (Solution)editorPart.getForm().getParent();
 						boolean open = false;
 						if (persist != null)
@@ -135,11 +133,6 @@ public class OpenContainedFormHandler implements IServerService
 				}
 			}
 
-			/**
-			 * @param s
-			 * @param value
-			 * @return
-			 */
 			private boolean openFormDesignEditor(Solution s, Object value)
 			{
 				if (value != null)

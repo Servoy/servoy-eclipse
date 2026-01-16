@@ -26,6 +26,12 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     snapData: SnapData;
     subscription: Subscription;
 
+    searchHistory: string[] = [];
+    filteredSuggestions: string[] = [];
+    showSuggestions = false;
+    keepSuggestionsOpen = false;
+    showSearchDeleteBtn = false;
+
     constructor(protected readonly editorSession: EditorSessionService, private http: HttpClient, private urlParser: URLParserService,
         protected readonly renderer: Renderer2, protected designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService,
         private windowRef: WindowRefService, private guidesService: DynamicGuidesService) {
@@ -57,6 +63,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 this.editorSession.variantsTrigger.emit({ show: false });
             }
         });
+        
+        this.searchHistory = localStorage.getItem('searchHistory') ? JSON.parse(localStorage.getItem('searchHistory')) : [];
     }
 
     ngAfterViewInit(): void {
@@ -247,9 +255,16 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             else {
                 component.x = event.pageX;
                 component.y = event.pageY;
-                // do we also need to set size here ?
-                component.x = component.x - this.editorContentService.getLeftPositionIframe();
-                component.y = component.y - this.editorContentService.getTopPositionIframe();
+                if (!this.urlParser.isAbsoluteFormLayout() && this.editorContentService.getContentArea().scrollLeft > 0) {
+                    component.x = component.x + this.editorContentService.getContentArea().scrollLeft;
+                }
+                if (!this.urlParser.isAbsoluteFormLayout() && this.editorContentService.getContentArea().scrollTop > 0) {
+                    component.y = component.y + this.editorContentService.getContentArea().scrollTop;
+                }
+                if (this.urlParser.isAbsoluteFormLayout()) {
+                    component.x = component.x - this.editorContentService.getLeftPositionIframe();
+                    component.y = component.y - this.editorContentService.getTopPositionIframe();
+                }
             }
 
             if (this.isDraggedVariant) {
@@ -340,6 +355,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
 
                 this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType, this.dragItem.topContainer, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName, event, this.dragItem.elementName);
+
                 if (!this.canDrop.dropAllowed) {
                     this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
                 }
@@ -497,6 +513,77 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         else {
             this.snapData = null;
         }
+    }
+
+    clearSearch(): void {
+        this.addToHistory(this.searchText);
+        this.searchText = '';
+        this.showSearchDeleteBtn = false;
+    }
+
+    onSearchInput(value: string): void {
+        this.updateDeleteVisibility();
+        this.filteredSuggestions = this.filterSuggestions(this.searchText);
+    }
+
+    openSuggestions(): void {
+        this.searchHistory = localStorage.getItem('searchHistory') ? JSON.parse(localStorage.getItem('searchHistory')) : [];
+        this.keepSuggestionsOpen = false;
+        this.showSuggestions = true;
+        this.updateDeleteVisibility();
+        this.filteredSuggestions = this.filterSuggestions(this.searchText);
+    }
+
+    applySuggestion(suggestion: string): void {
+        this.searchText = suggestion;
+        this.showSuggestions = false;
+        this.updateDeleteVisibility();
+    }
+
+    removeSuggestion(event: MouseEvent, suggestion: string): void {
+        event.stopPropagation();
+        const index = this.searchHistory.indexOf(suggestion);
+        if (index !== -1) {
+            this.searchHistory.splice(index, 1);
+            localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory));
+        }
+        setTimeout(() => {
+            this.keepSuggestionsOpen = true;
+            (document.querySelector('#searchInput') as HTMLElement)?.focus();
+        });
+    }
+
+    closeSuggestions(): void {
+        if (!this.keepSuggestionsOpen) {
+            this.searchText && this.addToHistory(this.searchText);
+            this.showSuggestions = false;
+        }
+    }
+    
+    private addToHistory(value: string): void {
+        const trimmedText = value.trim();
+        if (trimmedText && this.filteredSuggestions.length === 0) {
+            const index = this.searchHistory.indexOf(trimmedText);
+            if (index === -1) {
+                this.searchHistory.push(trimmedText);
+                localStorage.setItem('searchHistory', JSON.stringify(this.searchHistory));
+            }
+        }
+    }
+
+    private updateDeleteVisibility(): void {
+        this.showSearchDeleteBtn = this.searchText?.trim().length > 0;
+    }
+
+    private filterSuggestions(value: string): string[] {
+        if (this.searchHistory.length === 0) return [];
+        const numberOfSuggestions = 5;
+        const reversedHistory = [...this.searchHistory].reverse();
+        if (value && value.trim().length > 0) {
+            const lowerValue = value.toLowerCase();
+            return reversedHistory.filter(suggestion => suggestion.toLowerCase().includes(lowerValue) && suggestion.toLowerCase() !== lowerValue).slice(0, numberOfSuggestions);
+        }
+        return reversedHistory.slice(0, numberOfSuggestions);
     }
 }
 

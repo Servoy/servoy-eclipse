@@ -715,10 +715,10 @@ public class MobileExporter
 		modelData.append("var _formdata_ = [");
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 
-		String prevValue = Settings.getInstance().getProperty("servoy.ngclient.testingMode", "false");
+		String prevValue = Settings.getInstance().getProperty(Settings.TESTING_MODE, "false");
 		try
 		{
-			Settings.getInstance().setProperty("servoy.ngclient.testingMode", "true");
+			Settings.getInstance().setProperty(Settings.TESTING_MODE, "true");
 			flattenedSolution.getForms(false).forEachRemaining(form -> {
 				AngularFormGenerator generator = new AngularFormGenerator(flattenedSolution, form, form.getName(), false, null);
 				try
@@ -736,7 +736,7 @@ public class MobileExporter
 		}
 		finally
 		{
-			Settings.getInstance().setProperty("servoy.ngclient.testingMode", prevValue);
+			Settings.getInstance().setProperty(Settings.TESTING_MODE, prevValue);
 		}
 		String modelDataString = modelData.toString();
 

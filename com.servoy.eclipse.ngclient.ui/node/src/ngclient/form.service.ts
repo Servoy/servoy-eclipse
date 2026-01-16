@@ -43,25 +43,25 @@ export class FormService {
 			}) => {
 				if (msg.forms) {
 					for (const formname in msg.forms) {
-						// if form is loaded
-						if (this.formsCache.has(formname)) {
-							this.clientFunctionService.waitForLoading().finally(() => {
+						this.clientFunctionService.waitForLoading().finally(() => {
+							// if form is loaded
+							if (this.formsCache.has(formname)) {
 								this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
-							});
-						} else {
-							this.log.warn('Updates to a form state/cache/model came before it was initialized; this is no longer expected; form: ' + formname);
-							// do treat this situation anyway, even if it's no loner expected
-							let pendingRunnablesForThisForm = this.formsCachePendingRunnables.get(formname);
-							if (!pendingRunnablesForThisForm) {
-								pendingRunnablesForThisForm = [];
-								this.formsCachePendingRunnables.set(formname, pendingRunnablesForThisForm);
-							}
+							} else {
+								this.log.warn('Updates to a form state/cache/model came before it was initialized; this is no longer expected; form: ' + formname);
+								// do treat this situation anyway, even if it's no loner expected
+								let pendingRunnablesForThisForm = this.formsCachePendingRunnables.get(formname);
+								if (!pendingRunnablesForThisForm) {
+									pendingRunnablesForThisForm = [];
+									this.formsCachePendingRunnables.set(formname, pendingRunnablesForThisForm);
+								}
 
-							pendingRunnablesForThisForm.push((formCache) => {
-								// it is not needed here to do this.clientFunctionService.waitForLoading().finally, as pendingRunnables will always run inside that anyway
-								this.formMessageHandler(formCache, formname, msg, servoyService);
-							});
-						}
+								pendingRunnablesForThisForm.push((formCache) => {
+									// it is not needed here to do this.clientFunctionService.waitForLoading().finally, as pendingRunnables will always run inside that anyway
+									this.formMessageHandler(formCache, formname, msg, servoyService);
+								});
+							}
+						});
 					}
 				}
 				if (msg.call) {
@@ -214,11 +214,11 @@ export class FormService {
 
 			// update legacy location and size property to layout
 			// hack for legacy absolute form runtime changes
-			if (propertyName === 'location' && newPropertyValue && comp.layout) {
+			if (propertyName === 'location' && newPropertyValue && comp.layout && !newComponentProperties.hasOwnProperty('cssPosition')) {
 				comp.layout = { left : newPropertyValue.x + 'px', top : newPropertyValue.y + 'px', width : comp.layout.width, height : comp.layout.height };
 			}
 
-			if (propertyName === 'size' && newPropertyValue && comp.layout) {
+			if (propertyName === 'size' && newPropertyValue && comp.layout && !newComponentProperties.hasOwnProperty('cssPosition')) {
 				comp.layout = { left : comp.layout.left, top : comp.layout.top, width : newPropertyValue.width + 'px', height : newPropertyValue.height + 'px'};
 			}
 

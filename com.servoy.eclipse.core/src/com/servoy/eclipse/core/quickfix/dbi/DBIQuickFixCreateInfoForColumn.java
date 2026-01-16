@@ -21,13 +21,14 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.preferences.DbiPreferences;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -104,41 +105,32 @@ public class DBIQuickFixCreateInfoForColumn extends TableDifferenceQuickFix
 					}
 					if (dbiFileContent != null)
 					{
-						TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
-
-						// add the column information
-						ArrayList<String> colNames = new ArrayList<String>();
-						Collection<Column> col = difference.getTable().getColumns();
-						for (Column column : col)
-						{
-							colNames.add(column.getName());
-						}
 						Column c = difference.getTable().getColumn(difference.getColumnName());
 						if (c != null)
 						{
+							TableDef tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent, false);
+							String dbiSortingKey = new DbiPreferences().getDbiSortingKey();
+							// add the column information
+							ArrayList<String> colNames = new ArrayList<String>();
+							difference.getTable().getColumns().forEach(col -> colNames.add(col.getName()));
 							dmm.createNewColumnInfo(c, false);
-							ColumnInfoDef cidToBeAdded = DataModelManager.getColumnInfoDef(c, colNames.indexOf(difference.getColumnName()));
-							int insertIndex = -1;
-							for (int i = tableInfo.columnInfoDefSet.size() - 1; i >= 0; i--)
+							ColumnInfoDef cidToBeAdded = DataModelManager.getColumnInfoDef(c,
+								(DbiPreferences.DBI_SORT_BY_INDEX.equals(dbiSortingKey) ? colNames.indexOf(difference.getColumnName()) : -1));
+							Iterator<Column> it = (DbiPreferences.DBI_SORT_BY_INDEX.equals(dbiSortingKey))
+								? difference.getTable().getColumnsSortedByIndex(colNames)
+								: difference.getTable().getColumnsSortedByName();
+							ArrayList<ColumnInfoDef> columnInfoDefSetCopy = new ArrayList<ColumnInfoDef>(tableInfo.columnInfoDefSet);
+							tableInfo.columnInfoDefSet.clear();
+							while (it.hasNext())
 							{
-								ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(i);
-								int creationOrderIndex = colNames.indexOf(cid.name);
-								if (creationOrderIndex >= 0)
-								{
-									cid.creationOrderIndex = creationOrderIndex;
-								}
-								if (insertIndex == -1 && cid.name.compareToIgnoreCase(cidToBeAdded.name) <= 0)
-								{
-									insertIndex = i + 1;
-								}
-							}
-							if (insertIndex == -1)
-							{
-								tableInfo.columnInfoDefSet.add(0, cidToBeAdded);
-							}
-							else
-							{
-								tableInfo.columnInfoDefSet.add(insertIndex, cidToBeAdded);
+								Column column = it.next();
+								columnInfoDefSetCopy.stream().filter(cid -> cid.name.equals(column.getName())).findFirst()
+									.ifPresentOrElse(cid -> tableInfo.columnInfoDefSet.add(cid), () -> {
+										if (column.getName().equals(cidToBeAdded.name))
+										{
+											tableInfo.columnInfoDefSet.add(cidToBeAdded);
+										}
+									});
 							}
 
 							// write back the contents and reload them to make sure markers are in sync

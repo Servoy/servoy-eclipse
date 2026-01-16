@@ -24,7 +24,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -75,7 +74,7 @@ public class AddAsModuleAction extends AddAsSolutionReference
 						modulesList.add(module);
 					}
 				}
-				String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+				String modulesTokenized = Utils.getTokenValue(modulesList.toArray(new String[] { }), ",");
 				editingSolution.setModulesNames(modulesTokenized);
 
 				try

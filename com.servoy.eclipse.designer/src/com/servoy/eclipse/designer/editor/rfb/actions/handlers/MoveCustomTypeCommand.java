@@ -21,6 +21,7 @@ import java.awt.Point;
 
 import org.eclipse.gef.commands.Command;
 
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.WebCustomType;
 
@@ -47,7 +48,8 @@ public class MoveCustomTypeCommand extends Command
 	@Override
 	public void execute()
 	{
-		LocationCache.getINSTANCE().putLocation(source.getParent().getUUID() + source.getJsonKey(), source.getUUID().toString(), (Point)value);
+		LocationCache.getINSTANCE().putLocation(source.getParent().getUUID() + source.getJsonKey(),
+			GhostHandler.getGhostPersistIdentifier((AbstractBase)source.getParent(), source).toJSONString(), (Point)value);
 	}
 
 	@Override

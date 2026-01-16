@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.repository;
 import static com.servoy.j2db.util.DatabaseUtils.deserializeServerInfo;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -62,6 +63,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.UpdateMarkersJob;
+import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
@@ -244,7 +246,7 @@ public class DataModelManager implements IServerInfoManager
 			}
 		}
 		IFile file = getDBIFile(serverName, t.getName());
-		if (file.exists())
+		if (file != null && file.exists())
 		{
 			InputStream is = null;
 			try
@@ -974,9 +976,27 @@ public class DataModelManager implements IServerInfoManager
 			obj.putOpt(ColumnInfoDef.DESCRIPTION, cid.description);
 			obj.putOpt(ColumnInfoDef.FOREIGN_TYPE, cid.foreignType);
 			obj.putOpt(ColumnInfoDef.CONVERTER_NAME, cid.converterName);
-			obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES, cid.converterProperties != null ? new ServoyJSONObject(cid.converterProperties, false) : null);
-			obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES, cid.validatorProperties != null ? new ServoyJSONObject(cid.validatorProperties, false) : null);
+			try
+			{
+				obj.putOpt(ColumnInfoDef.CONVERTER_PROPERTIES,
+					cid.converterProperties != null ? new ServoyJSONObject(ComponentFactory.parseJSonProperties(cid.converterProperties), false, true) : null);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+				throw new JSONException("Error calling ComponentFactory.parseJSonProperties with " + cid.converterProperties);
+			}
 			obj.putOpt(ColumnInfoDef.VALIDATOR_NAME, cid.validatorName);
+			try
+			{
+				obj.putOpt(ColumnInfoDef.VALIDATOR_PROPERTIES,
+					cid.validatorProperties != null ? new ServoyJSONObject(ComponentFactory.parseJSonProperties(cid.validatorProperties), false, true) : null);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+				throw new JSONException("Error calling ComponentFactory.parseJSonProperties with " + cid.validatorProperties);
+			}
 			obj.putOpt(ColumnInfoDef.DEFAULT_FORMAT, cid.defaultFormat);
 			obj.putOpt(ColumnInfoDef.ELEMENT_TEMPLATE_PROPERTIES, cid.elementTemplateProperties);
 			obj.putOpt(ColumnInfoDef.DATA_PROVIDER_ID, cid.dataProviderID);
@@ -1295,7 +1315,8 @@ public class DataModelManager implements IServerInfoManager
 			{
 				try
 				{
-					if (file.exists() && file.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_ZERO).length > 0)
+					if (file != null && file.exists() &&
+						file.findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, false, IResource.DEPTH_ZERO).length > 0)
 					{
 						// because this is executed async (problem markers cannot be added/removed when on resource change notification thread)
 						// the project might have disappeared before this job was started... (delete)
@@ -1953,5 +1974,4 @@ public class DataModelManager implements IServerInfoManager
 			else addDifferenceMarker(difference, true);
 		}
 	}
-
 }

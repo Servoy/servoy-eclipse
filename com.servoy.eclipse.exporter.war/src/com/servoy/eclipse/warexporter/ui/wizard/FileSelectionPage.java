@@ -85,6 +85,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	private Button addUsersToAdminGroupButton;
 	private Button createNoneExistingUsersButton;
 	private Button overwriteExistingUsersButton;
+	private boolean firstTimeVisible = true;
 
 	public FileSelectionPage(ExportWarModel exportModel)
 	{
@@ -678,9 +679,11 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	public void setVisible(boolean visible)
 	{
 		super.setVisible(visible);
-		if (visible)
+		if (firstTimeVisible && visible)
 		{
+			//call pack only once
 			this.getWizard().getContainer().getShell().pack();
+			firstTimeVisible = false;
 		}
 	}
 }

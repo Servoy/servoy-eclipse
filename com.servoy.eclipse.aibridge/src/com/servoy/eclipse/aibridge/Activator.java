@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 
 import com.microsoft.copilot.eclipse.ui.CopilotUi;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -12,10 +13,8 @@ import com.microsoft.copilot.eclipse.ui.CopilotUi;
 public class Activator extends AbstractUIPlugin
 {
 
-	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.aibridge"; //$NON-NLS-1$
 
-	// The shared instance
 	private static Activator plugin;
 
 	/**
@@ -32,39 +31,36 @@ public class Activator extends AbstractUIPlugin
 		super.start(context);
 		plugin = this;
 		String mcpServers = CopilotUi.getPlugin().getPreferenceStore().getString("mcp");
-		boolean addServoyServer = mcpServers == null || mcpServers.trim().length() == 0;
 		JSONObject json = null;
-		if (!addServoyServer)
+		if (mcpServers != null && mcpServers.isBlank())
 		{
 			try
 			{
 				json = new JSONObject(mcpServers);
-				if (json.has("servers") && json.getJSONObject("servers").has("servoy"))
-				{
-					addServoyServer = false;
-				}
 			}
-			catch (Exception ex)
+			catch (Exception e)
 			{
-				// ignore and add servoy server
-				addServoyServer = true;
+				// ignore invalid json
 			}
 		}
-		if (addServoyServer)
-		{
-			JSONObject servers = null;
-			if (json == null) json = new JSONObject();
-			if (!json.has("servers")) json.put("servers", servers = new JSONObject());
-			else servers = json.getJSONObject("servers");
+		JSONObject servers = null;
+		if (json == null) json = new JSONObject();
+		if (!json.has("servers")) json.put("servers", servers = new JSONObject());
+		else servers = json.getJSONObject("servers");
 
-			JSONObject servoy = new JSONObject();
-			servoy.put("url", "http://localhost:8183/mcp");
+		JSONObject servoy = new JSONObject();
+		servoy.put("url", "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/mcp");
 
-			servers.put("servoy", servoy);
+		servers.put("servoy", servoy);
 
-			CopilotUi.getPlugin().getPreferenceStore().putValue("mcp", json.toString());
-		}
+		CopilotUi.getPlugin().getPreferenceStore().putValue("mcp", json.toString(1));
 
+		// Knowledge base initialization is handled by com.servoy.eclipse.knowledgebase plugin
+		// The knowledgebase plugin manages:
+		// - Embedding service initialization
+		// - Loading knowledge bases from SPM packages
+		// - Solution activation triggers
+		// See: KnowledgeBaseManager in the knowledgebase plugin
 	}
 
 	@Override

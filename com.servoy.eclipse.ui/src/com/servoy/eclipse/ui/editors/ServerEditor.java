@@ -82,6 +82,7 @@ import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 
@@ -937,7 +938,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
 	{
 		setSite(site);
-		setInput(input);
+		setInput(convertInput(input));
 	}
 
 	/**
@@ -968,13 +969,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			String.class, String.class, String.class, int.class, int.class, //
 			int.class, int.class, String.class, String.class, boolean.class, //
 			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
-			String.class, List.class, boolean.class, String.class //
+			String.class, List.class, boolean.class, String.class, SortingNullprecedence.class //
 		}, new String[] { //
 			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
 			"driver", "catalog", "schema", "maxActive", "maxIdle", //
 			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
 			"skipSysTables", "prefixTables", "queryProceduresNOTUSED", "idleTimeout", "selectINValueCountLimit", //
-			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED", "initializationString" },
+			"dialectClass", "quoteList", "clientOnlyConnectionsNOTUSED", "initializationString", "sortingNullprecedence" },
 			new String[] { "queryProceduresNOTUSED", "clientOnlyConnectionsNOTUSED" });
 
 		serverSettingsObservable = new ImmutableObjectObservable<ServerSettings>(serverSettings,
@@ -987,6 +988,27 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		}
 
 		updateTitle();
+	}
+
+	private IEditorInput convertInput(IEditorInput input)
+	{
+		if (input instanceof FileEditorInput fileEditorInput)
+		{
+			int dbiExtensionIndex = fileEditorInput.getFile().getName().lastIndexOf(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
+			if (dbiExtensionIndex != -1)
+			{
+				// this is a column info file; get the server config for the server name part of the file name
+				String serverName = fileEditorInput.getFile().getName().substring(0, dbiExtensionIndex);
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+				ServerConfig serverConfig = serverManager.getServerConfig(serverName);
+				if (serverConfig == null)
+				{
+					return input; // cannot convert
+				}
+				return new ServerEditorInput(serverConfig, serverManager.getServerSettings(serverName));
+			}
+		}
+		return input;
 	}
 
 	protected void updateTitle()
@@ -1305,13 +1327,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			@Override
 			protected Object doGetValue()
 			{
-				return serverSettingsObservable.getObject().getSortingNullprecedence().display();
+				return serverSettingsObservable.getObject().getSortingNullprecedence() != null
+					? serverSettingsObservable.getObject().getSortingNullprecedence().display() : SortingNullprecedence.databaseDefault.display();
 			}
 
 			@Override
 			protected void doSetValue(Object value)
 			{
-				SortingNullprecedence.fromDisplay(value.toString()).ifPresent(snp -> serverSettingsObservable.setPropertyValue("sortingNullprecedence", snp));
+				SortingNullprecedence.fromDisplay(value.toString()).ifPresent(snp -> serverSettingsObservable.setPropertyValue("sortingNullprecedence",
+					snp != SortingNullprecedence.databaseDefault ? snp : null));
 			}
 		};
 

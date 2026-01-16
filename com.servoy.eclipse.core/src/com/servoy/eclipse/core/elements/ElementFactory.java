@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.border.Border;
@@ -115,6 +116,7 @@ import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.DefaultComponentPropertiesProvider;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -275,8 +277,6 @@ public class ElementFactory
 	public static IPersist copyComponent(ISupportChilds parent, AbstractBase component, int x, int y, int type, Map<String, String> groupMap)
 		throws RepositoryException
 	{
-		String name = (component instanceof ISupportUpdateableName)
-			? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR) : null;
 		// place copied group
 		String groupId = (component instanceof IFormElement) ? ((IFormElement)component).getGroupID() : null;
 		String newGroupId = null;
@@ -303,7 +303,21 @@ public class ElementFactory
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 		AbstractBase copy = (AbstractBase)component.cloneObj(parent, true, validator, true, true,
 			true /* when component is an override we want a flattened one */);
-		if (copy instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
+		boolean changeNames = component.getAncestor(Form.class) != parent.getAncestor(Form.class) &&
+			!(parent instanceof Form frm && frm.getExtendsForm() != null);
+		if (changeNames)
+		{
+			if (component instanceof LayoutContainer)
+			{
+				updateRecursively(parent, component, copy, validator, IRepository.LAYOUTCONTAINERS);
+			}
+			else
+			{
+				updateName(parent, component, copy, validator, IRepository.ELEMENTS);
+			}
+		}
+		if (copy instanceof BaseComponent && ((parent instanceof Form && ((Form)parent).getUseCssPosition()) ||
+			(parent instanceof LayoutContainer container && CSSPositionUtils.isCSSPositionContainer(container))))
 		{
 			CSSPosition cssPosition = ((BaseComponent)copy).getCssPosition();
 
@@ -320,20 +334,15 @@ public class ElementFactory
 					cssPosition.top = String.valueOf(y);
 				}
 			}
+			if (cssPosition == null)
+			{
+				cssPosition = new CSSPosition("10", "-1", "-1", "10", "" + ((BaseComponent)copy).getSize().width, "" + ((BaseComponent)copy).getSize().height);
+			}
 			((BaseComponent)copy).setCssPosition(cssPosition);
 		}
 		else if (copy instanceof ISupportBounds)
 		{
 			CSSPositionUtils.setLocation((ISupportBounds)copy, x, y);
-		}
-		if (name != null)
-		{
-			((ISupportUpdateableName)copy).updateName(validator, name);
-			copy.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
-		}
-		if (name == null && component instanceof LayoutContainer && copy instanceof LayoutContainer)
-		{
-			checkAllElements(component.getAllObjectsAsList(), copy.getAllObjectsAsList(), parent, validator);
 		}
 		if (copy instanceof IFormElement)
 		{
@@ -342,31 +351,41 @@ public class ElementFactory
 		return copy;
 	}
 
-	private static void checkAllElements(List<IPersist> originalItems, List<IPersist> copyItems, ISupportChilds parent, IValidateName validator)
+	private static void updateRecursively(ISupportChilds parent, IPersist original, IPersist copyObj, IValidateName validator, int type)
 		throws RepositoryException
 	{
-		for (int i = 0; i < originalItems.size(); i++)
+		updateName(parent, original, copyObj, validator, type);
+		if (original instanceof LayoutContainer origLc && copyObj instanceof LayoutContainer copyLc)
 		{
-			IPersist originalItem = originalItems.get(i);
-			IPersist copyItem = copyItems.get(i);
-			if (originalItem instanceof WebComponent oWC && copyItem instanceof WebComponent cWC)
+			Iterator<IPersist> origChildren = origLc.getAllObjects();
+			Iterator<IPersist> copyChildren = copyLc.getAllObjects();
+			while (origChildren.hasNext() && copyChildren.hasNext())
 			{
-				updateName(parent, oWC, cWC, validator);
-			}
-			else if (originalItem instanceof LayoutContainer oLC && copyItem instanceof LayoutContainer cLC)
-			{
-				checkAllElements(oLC.getAllObjectsAsList(), cLC.getAllObjectsAsList(), parent, validator);
+				IPersist childOrig = origChildren.next();
+				IPersist childCopy = copyChildren.next();
+				updateRecursively(parent, childOrig, childCopy, validator,
+					childOrig instanceof LayoutContainer ? IRepository.LAYOUTCONTAINERS : IRepository.ELEMENTS);
 			}
 		}
 	}
 
-	private static void updateName(ISupportChilds parent, WebComponent oWC, WebComponent cWC, IValidateName validator) throws RepositoryException
+	private static void updateName(ISupportChilds parent, IPersist original, IPersist copy, IValidateName validator, int type) throws RepositoryException
 	{
-		String name = createUniqueName(parent, IRepository.ELEMENTS, oWC.getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR);
-		if (name != null)
+		boolean componentFromFCC = false;
+		String originalName = ((ISupportUpdateableName)original).getName();
+		if (original instanceof WebComponent wc)
 		{
-			cWC.updateName(validator, name);
-			cWC.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
+			String childName = wc.getRuntimeProperty(FormElementHelper.FC_CHILD_ELEMENT_NAME_INSIDE_DIRECT_PARENT_FORM_COMPONENT);
+			if (childName != null)
+			{
+				originalName = childName;
+				componentFromFCC = true;
+			}
+		}
+		String name = createUniqueName(parent, type, originalName, INameGenerate.GENERATE_NAME_PREPEND_CHAR);
+		if (name != null && (name.equals(originalName) || componentFromFCC))
+		{
+			((ISupportUpdateableName)copy).updateName(validator, name);
 		}
 	}
 
@@ -2034,10 +2053,15 @@ public class ElementFactory
 		{
 			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 				((WebComponent)formElement).getTypeName());
-			Collection<PropertyDescription> labelForProperties = spec.getProperties(TagStringPropertyType.INSTANCE);
-			for (PropertyDescription pd : labelForProperties)
+			Collection<PropertyDescription> textProperties = spec.getProperties(TagStringPropertyType.INSTANCE);
+			if (textProperties.size() > 0)
 			{
-				String i18nPName = labelForProperties.size() > 1 ? name + "_" + pd.getName() : name;
+				textProperties = textProperties.stream().filter(pd -> pd.getTag("isText") != null)
+					.collect(Collectors.toList());
+			}
+			for (PropertyDescription pd : textProperties)
+			{
+				String i18nPName = textProperties.size() > 1 ? name + "_" + pd.getName() : name;
 				if (isLabelFor) i18nPName += "_label";
 				if (configuration.isAutomaticI18N())
 				{

@@ -764,6 +764,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	@Override
 	protected void fillContentProvider(AbstractContentProvider contentProvider, ItemsFilter itemsFilter, IProgressMonitor progressMonitor) throws CoreException
 	{
+		if (progressMonitor.isCanceled()) return;
 		progressMonitor.subTask("Loading Servoy content...");
 		FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
 
@@ -771,6 +772,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		List<IPersist> allObjectsAsList = flattenedSolution.getAllObjectsAsList();
 		for (IPersist persist : allObjectsAsList)
 		{
+			if (progressMonitor.isCanceled()) return;
 			if (persist instanceof ISupportName && ((ISupportName)persist).getName() != null)
 			{
 				contentProvider.add(persist, itemsFilter);
@@ -806,12 +808,14 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, false, false);
 		for (String serverName : serverNames)
 		{
+			if (progressMonitor.isCanceled()) return;
 			try
 			{
 				IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 				List<String> tableNames = server.getTableAndViewNames(true);
 				for (String tableName : tableNames)
 				{
+					if (progressMonitor.isCanceled()) return;
 					contentProvider.add(new Table(DataSourceUtils.createDBTableDataSource(serverName, tableName)), itemsFilter);
 					if (showTableColumnsAction.isChecked())
 					{
@@ -854,6 +858,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 		for (ServoyProject servoyProject : modulesOfActiveProject)
 		{
+			if (progressMonitor.isCanceled()) return;
 			try
 			{
 				List<String> tables = servoyProject.getMemServer().getTableNames(false);

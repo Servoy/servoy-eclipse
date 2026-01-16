@@ -92,25 +92,6 @@ public class ModelUtils
 
 	public static final String ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME = "whenUIDisabledStateIs";
 
-	public static String getTokenValue(Object[] value, String delim)
-	{
-		if (value == null || value.length == 0)
-		{
-			return null;
-		}
-
-		StringBuilder sb = new StringBuilder();
-		for (Object o : value)
-		{
-			if (sb.length() > 0)
-			{
-				sb.append(delim);
-			}
-			sb.append(o instanceof String ? (String)o : "");
-		}
-		return sb.toString();
-	}
-
 	public static String getStyleLookupname(IPersist persist)
 	{
 		if (persist instanceof BaseComponent)

@@ -51,8 +51,24 @@ export class DialogService {
     private async showDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<any> {
         let dialogButtonsText = buttonsText;
         if (!dialogButtonsText || dialogButtonsText.length === 0) {
-            dialogButtonsText = ['OK'];
+            dialogButtonsText = [this.i18nOK];
         }
-        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, dialogButtonsText, inputType);
+        let defaultButtonIndex = 0;
+        if (dialogButtonsText.length > 2) {
+            const lastItem = dialogButtonsText[dialogButtonsText.length - 1];
+            if (typeof lastItem === 'string') {
+                const trimmed = lastItem.trim();
+                const num = Number(trimmed);
+                // Check if it's a finite number and a whole integer
+                if (Number.isFinite(num) && Number.isInteger(num)) {
+                    defaultButtonIndex = num;
+                    dialogButtonsText = dialogButtonsText.slice(0, -1); // remove the last element
+                    if (defaultButtonIndex < 0 || defaultButtonIndex >= dialogButtonsText.length) {
+                        defaultButtonIndex = 0;
+                    }
+                }
+            }
+        }
+        return await this.servoyService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, dialogButtonsText, inputType, defaultButtonIndex, this.i18nOK);
     }
 }

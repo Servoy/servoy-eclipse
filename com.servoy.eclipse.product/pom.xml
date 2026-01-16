@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.12.0.4120_rc</version>
+		<version>2026.3.0.4140_rc</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.product</artifactId>
@@ -16,6 +16,24 @@
 
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-gpg-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>sign-p2-artifacts</goal>
+                        </goals>
+                        <configuration>
+                           <signer>bc</signer>
+                           <keyname>D9DE7716CDB8905A30C8CDEFE15A4758177D4570</keyname>
+                           <addPublicKeyToRepo>true</addPublicKeyToRepo>
+                           <addPublicKeyToArtifacts>true</addPublicKeyToArtifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-publisher-plugin</artifactId>

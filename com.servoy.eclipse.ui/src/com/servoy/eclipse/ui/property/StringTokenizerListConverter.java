@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -51,6 +50,6 @@ public class StringTokenizerListConverter implements IPropertyConverter<String, 
 
 	public String convertValue(Object id, List<String> value)
 	{
-		return ModelUtils.getTokenValue(value == null ? null : value.toArray(), delim);
+		return Utils.getTokenValue(value == null ? null : value.toArray(), delim);
 	}
 }

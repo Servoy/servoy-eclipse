@@ -16,8 +16,10 @@
  */
 package com.servoy.eclipse.core.resource;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.content.IContentDescriber;
@@ -25,15 +27,46 @@ import org.eclipse.core.runtime.content.IContentDescription;
 
 /**
  * A general always-valid IContentDescriber.
- * 
+ *
  * @author rgansevles
  */
-public class ValidDescriber implements IContentDescriber
+public class ServerDBIValidDescriber implements IContentDescriber
 {
 
 	public int describe(InputStream contents, IContentDescription description) throws IOException
 	{
-		return VALID;
+		BufferedReader reader = null;
+		try
+		{
+			reader = new BufferedReader(new InputStreamReader(contents, "UTF8"));
+			String line;
+			for (int count = 0; count < 1000 && (line = reader.readLine()) != null; count++)
+			{
+				if (line.contains("sortIgnorecase") || line.contains("sortingNullprecedence") || line.contains("queryProcedures") ||
+					line.contains("clientOnlyConnections"))
+				{
+					return VALID;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			return INDETERMINATE;
+		}
+		finally
+		{
+			if (reader != null)
+			{
+				try
+				{
+					reader.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
+		}
+		return INVALID;
 	}
 
 	public QualifiedName[] getSupportedOptions()

@@ -18,11 +18,11 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2025.12.0.4120_rc</version>
+		<version>2026.3.0.4140_rc</version>
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.38.0.v20250807-1828</version>
+  <version>3.38.100.v20251108-1551</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>

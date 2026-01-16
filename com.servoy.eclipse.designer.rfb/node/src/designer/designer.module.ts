@@ -19,7 +19,7 @@ import { EditorContentComponent } from './editorcontent/editorcontent.component'
 import {EditorSessionService} from './services/editorsession.service';
 import {EditorContentService} from './services/editorcontent.service';
 import {URLParserService} from './services/urlparser.service';
-import { WindowRefService } from '@servoy/public';
+import { WindowRefService, ServoyPublicModule } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -72,6 +72,7 @@ import { DynamicGuidesService } from './services/dynamicguides.service';
         DynamicGuidesComponent
     ],
     bootstrap: [DesignerComponent], imports: [BrowserModule,
+        ServoyPublicModule,
         FormsModule,
         CommonModule,
         NgbModule,

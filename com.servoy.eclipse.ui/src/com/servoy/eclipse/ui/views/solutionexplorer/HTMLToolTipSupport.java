@@ -49,11 +49,19 @@ import com.servoy.j2db.util.Utils;
 
 public class HTMLToolTipSupport extends ColumnViewerToolTipSupport
 {
+	private static final int DEFAULT_DELAY = 1500;
 
 	protected HTMLToolTipSupport(ColumnViewer viewer, int style, boolean manualActivation)
 	{
 		super(viewer, style, manualActivation);
 		setHideOnMouseDown(false);
+	}
+
+	@Override
+	public void setPopupDelay(int popupDelay)
+	{
+		int delay = popupDelay > 0 ? popupDelay : DEFAULT_DELAY;
+		super.setPopupDelay(delay);
 	}
 
 	@Override

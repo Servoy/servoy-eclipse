@@ -55,6 +55,9 @@ public class KeywordProvider implements IKeywordProvider
 			IExecutingEnviroment.TOPLEVEL_MENUS, //
 			IExecutingEnviroment.TOPLEVEL_EVENTTYPES, //
 			IExecutingEnviroment.TOPLEVEL_JSPERMISSION, //
+			IExecutingEnviroment.TOPLEVEL_JSVALUELIST, //
+			IExecutingEnviroment.TOPLEVEL_JSFORM, //
+			IExecutingEnviroment.TOPLEVEL_JSWEBCOMPONENT, //
 			IExecutingEnviroment.TOPLEVEL_PLUGINS, //
 			"_super", //
 

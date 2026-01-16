@@ -166,10 +166,10 @@ public class EditorContentFilter implements Filter
 						Utils.getAsUUID(containerUUID, false));
 					if (container instanceof LayoutContainer)
 					{
-						FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);
+						FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true, null);
 						FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w,
 							new DesignProperties(containerUUID),
-							FormElementHelper.INSTANCE);
+							FormElementHelper.INSTANCE, null);
 						FormLayoutGenerator.generateFormEndTag(w, true);
 					}
 				}
@@ -181,7 +181,7 @@ public class EditorContentFilter implements Filter
 			}
 			else if (flattenedForm.isResponsiveLayout())
 			{
-				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), fs, w, new DesignProperties());
+				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), fs, w, new DesignProperties(), null);
 			}
 			else
 			{

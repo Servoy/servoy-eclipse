@@ -17,7 +17,6 @@ export class FormcomponentType implements IType<FormComponentValue> {
                                             serverSentData.childElements,
                                             serverSentData.formHeight,
                                             serverSentData.formWidth,
-                                            serverSentData.startName,
                                             serverSentData.useCssPosition,
                                             serverSentData.uuid);
 
@@ -69,7 +68,6 @@ export class FormComponentValue extends ChangeAwareState implements IChangeAware
         public childElements: ChildComponentPropertyValue[],
         public formHeight: number,
         public formWidth: number,
-        public startName: string,
         public useCssPosition: boolean,
         public uuid: string) {
         super();

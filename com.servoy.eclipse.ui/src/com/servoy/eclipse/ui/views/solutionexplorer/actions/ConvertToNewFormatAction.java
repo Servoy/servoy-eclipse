@@ -16,19 +16,25 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -39,15 +45,17 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.ServerSettings;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.ServoyJSONObject;
-import com.servoy.j2db.util.Utils;
 
 /**
  * Action to convert solution to new format.
@@ -84,18 +92,18 @@ public class ConvertToNewFormatAction extends Action implements ISelectionChange
 				{
 					selectedSolutionProject = (ServoyProject)node.getRealObject();
 
-					// check if it is already converted
-					final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-					File frmd = new File(wfa.getProjectFile(selectedSolutionProject.getProject().getName()), SolutionSerializer.SOLUTION_SETTINGS);
-					String solutionmetadata = Utils.getTXTFileContent(frmd);
-					ServoyJSONObject solutionMetaDataJSONObject = new ServoyJSONObject(solutionmetadata, false);
-					String solutionmetadataConverter = solutionMetaDataJSONObject.toString();
-
-					if (solutionmetadataConverter.equals(solutionmetadata))
-					{
-						selectedSolutionProject = null;
-						enabled = false;
-					}
+//					// check if it is already converted
+//					final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+//					File frmd = new File(wfa.getProjectFile(selectedSolutionProject.getProject().getName()), SolutionSerializer.SOLUTION_SETTINGS);
+//					String solutionmetadata = Utils.getTXTFileContent(frmd);
+//					ServoyJSONObject solutionMetaDataJSONObject = new ServoyJSONObject(solutionmetadata, false);
+//					String solutionmetadataConverter = solutionMetaDataJSONObject.toString();
+//
+//					if (solutionmetadataConverter.equals(solutionmetadata))
+//					{
+//						selectedSolutionProject = null;
+//						enabled = false;
+//					}
 				}
 				else
 				{
@@ -124,16 +132,85 @@ public class ConvertToNewFormatAction extends Action implements ISelectionChange
 		try
 		{
 			dialog.run(true, false, monitor -> {
-				Solution[] modules = selectedSolutionProject.getModules();
-				monitor.beginTask("Converting " + selectedSolutionProject.getSolution().getName() + " and its modules...", modules.length);
-				for (Solution solution : modules)
+				try
 				{
-					monitor.subTask("Converting " + solution.getName());
-					convertSolutionToNewFormat(solution);
-					monitor.worked(1);
-					if (monitor.isCanceled()) break;
+					ResourcesPlugin.getWorkspace().run(workspaceMonitor -> {
+						Solution[] modules = selectedSolutionProject.getModules();
+						monitor.beginTask("Converting " + selectedSolutionProject.getSolution().getName() + " and its modules...", modules.length + 2);
+						for (Solution solution : modules)
+						{
+							monitor.subTask("Converting " + solution.getName());
+							convertSolutionToNewFormat(solution);
+							monitor.worked(1);
+							if (monitor.isCanceled()) break;
+						}
+
+						final boolean[] resourceProjectConvert = new boolean[] { true };
+						Display.getDefault().syncExec(() -> {
+							resourceProjectConvert[0] = MessageDialog.openQuestion(UIUtils.getActiveShell(),
+								Messages.ConvertSolutionToNewFormatAction_convertToNewFormat,
+								"Convert the database and security information files from the resource project?");
+						});
+
+						if (resourceProjectConvert[0])
+						{
+							monitor.subTask("Converting the resource project database information");
+							IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+							for (String serverName : serverManager.getServerNames(false, true, false, true))
+							{
+								ServerSettings serverSettings = serverManager.getServerSettings(serverName);
+								try
+								{
+									IFile serverDbiFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager()
+										.getServerDBIFile(serverName);
+									if (serverDbiFile != null && serverDbiFile.exists())
+									{
+										ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().updateServerSettings(serverName,
+											serverSettings);
+									}
+									IServer server = serverManager.getServer(serverName);
+									for (String tableName : server.getTableNames(true))
+									{
+										IFile tableDbiFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().getDBIFile(
+											serverName,
+											tableName);
+										if (tableDbiFile != null && tableDbiFile.exists())
+										{
+											ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager()
+												.updateAllColumnInfo(server.getTable(tableName));
+										}
+									}
+								}
+								catch (Exception e)
+								{
+									Debug.error(e);
+								}
+							}
+							monitor.worked(1);
+
+							monitor.subTask("Converting the resource project security information");
+							try
+							{
+								ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().writeAllSecurityInformation(true);
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
+							monitor.worked(1);
+						}
+						else
+						{
+							monitor.worked(2);
+						}
+
+						monitor.done();
+					}, null, IWorkspace.AVOID_UPDATE, monitor);
 				}
-				monitor.done();
+				catch (CoreException e)
+				{
+					Debug.error(e);
+				}
 			});
 		}
 		catch (Exception e)
@@ -158,7 +235,8 @@ public class ConvertToNewFormatAction extends Action implements ISelectionChange
 					(persist instanceof Media && !mediaAlreadyConverted) ||
 					persist instanceof Menu ||
 					persist instanceof Relation ||
-					persist instanceof ValueList)
+					persist instanceof ValueList ||
+					persist instanceof TableNode)
 				{
 					SolutionSerializer.writePersist(persist, wfa, eclipseRepository, true, false, false);
 					if (persist instanceof Media && !mediaAlreadyConverted)
@@ -174,5 +252,4 @@ public class ConvertToNewFormatAction extends Action implements ISelectionChange
 			Debug.error(e);
 		}
 	}
-
 }

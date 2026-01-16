@@ -52,7 +52,6 @@ import com.servoy.j2db.IEventsManager;
 import com.servoy.j2db.IMenuManager;
 import com.servoy.j2db.IMessagesCallback;
 import com.servoy.j2db.IModeManager;
-import com.servoy.j2db.IPermissionManager;
 import com.servoy.j2db.ISmartClientApplication;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.RuntimeWindowManager;
@@ -869,6 +868,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().invokeLater(r);
 	}
 
+	@Override
+	public void invokeLater(Runnable r, boolean immediate)
+	{
+		getClient().invokeLater(r, immediate);
+	}
+
 	public boolean isEventDispatchThread()
 	{
 		return getClient().isEventDispatchThread();
@@ -1218,10 +1223,5 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public IEventsManager getEventsManager()
 	{
 		return getClient().getEventsManager();
-	}
-
-	public IPermissionManager getPermissionManager()
-	{
-		return getClient().getPermissionManager();
 	}
 }

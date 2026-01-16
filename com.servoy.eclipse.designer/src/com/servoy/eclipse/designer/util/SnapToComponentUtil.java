@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.Assert;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPosition;
@@ -33,6 +33,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportCSSPosition;
 import com.servoy.j2db.persistence.ISupportSize;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 
 /**
  * Handlers used for setting the correct anchors for the snapped component.
@@ -73,8 +74,8 @@ public class SnapToComponentUtil
 		for (String property : obj.keySet())
 		{
 			JSONObject jsonObject = obj.getJSONObject(property);
-			ISupportCSSPosition target = getTarget(form, jsonObject.optString("uuid"));
-			ISupportCSSPosition targetContainer = getTarget(form, jsonObject.optString("container"));
+			ISupportCSSPosition target = getTarget(form, jsonObject.optString("uuid", null));
+			ISupportCSSPosition targetContainer = getTarget(form, jsonObject.optString("container", null));
 			CSSPosition targetContainerCssPos = targetContainer != null ? targetContainer.getCssPosition() : null;
 			AbstractContainer targetParent = target != null ? CSSPositionUtils.getParentContainer(target) : null;
 
@@ -807,9 +808,9 @@ public class SnapToComponentUtil
 		return CSSValue.NOT_SET;
 	}
 
-	private static ISupportCSSPosition getTarget(Form form, String uuid)
+	private static ISupportCSSPosition getTarget(Form form, String persistIdentifierAsString)
 	{
-		IPersist persist = PersistFinder.INSTANCE.searchForPersist(form, uuid);
+		IPersist persist = PersistFinder.INSTANCE.searchForPersist(form, PersistIdentifier.fromJSONString(persistIdentifierAsString));
 		if (persist instanceof ISupportCSSPosition)
 		{
 			return (ISupportCSSPosition)persist;

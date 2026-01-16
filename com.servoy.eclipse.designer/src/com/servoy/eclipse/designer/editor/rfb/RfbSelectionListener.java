@@ -36,6 +36,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -80,7 +81,7 @@ public class RfbSelectionListener implements ISelectionListener
 		{
 			public void run()
 			{
-				final List<String> uuids = getPersistUUIDS((IStructuredSelection)currentSelection);
+				final List<String> uuids = getPersistIdentifiersAsStrings((IStructuredSelection)currentSelection);
 				if (uuids != null && (force || (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection)))))
 				{
 					lastSelection = uuids;
@@ -94,7 +95,7 @@ public class RfbSelectionListener implements ISelectionListener
 						}
 					});
 				}
-				else if (uuids == null)
+				else if (currentSelection == null || currentSelection.isEmpty())
 				{ //the components were deleted so the current selection is null; we also need to update the selection to empty
 					editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
 					{
@@ -110,11 +111,7 @@ public class RfbSelectionListener implements ISelectionListener
 		});
 	}
 
-	/**
-	 * @param selection
-	 * @return
-	 */
-	private List<String> getPersistUUIDS(IStructuredSelection selection)
+	private List<String> getPersistIdentifiersAsStrings(IStructuredSelection selection)
 	{
 		if (selection == null) return null;
 		// ignore persist that are not from the current form.
@@ -140,21 +137,15 @@ public class RfbSelectionListener implements ISelectionListener
 			{
 				if (persist instanceof WebFormComponentChildType)
 				{
-					String uuid = ((WebFormComponentChildType)persist).getElement().getName();
-					if (Character.isDigit(uuid.charAt(0)))
-					{
-						uuid = "_" + uuid;
-					}
-					uuid = uuid.replace('-', '_');
 					// TODO check if this is really on the form
-					uuids.add(uuid);
+					uuids.add(new PersistIdentifier(((WebFormComponentChildType)persist).getFcPropAndCompPath(), null).toJSONString());
 					forCurrentForm = true;
 				}
 				else if (persist.getParent() instanceof WebFormComponentChildType)
 				{
-					String uuid = ((WebFormComponentChildType)persist.getParent()).getElement().getName();
-					uuid += "#" + persist.getUUID();
-					uuids.add(uuid);
+					// custom types (column ghosts etc.) inside a WebFormComponentChildType
+					uuids.add(new PersistIdentifier(((WebFormComponentChildType)persist.getParent()).getFcPropAndCompPath(), persist.getUUID().toString())
+						.toJSONString());
 					forCurrentForm = true;
 				}
 				else
@@ -167,7 +158,7 @@ public class RfbSelectionListener implements ISelectionListener
 						 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); }
 						 * else
 						 */
-						uuids.add(persist.getUUID().toString());
+						uuids.add(PersistIdentifier.fromSimpleUUID(persist.getUUID()).toJSONString());
 						forCurrentForm = true;
 					}
 					else
@@ -175,7 +166,7 @@ public class RfbSelectionListener implements ISelectionListener
 						List<Form> formHierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy(form);
 						if (formHierarchy.contains(ancestor))
 						{
-							uuids.add(persist.getUUID().toString());
+							uuids.add(PersistIdentifier.fromSimpleUUID(persist.getUUID()).toJSONString());
 							forCurrentForm = true;
 						}
 					}
@@ -202,7 +193,7 @@ public class RfbSelectionListener implements ISelectionListener
 	 */
 	public void setLastSelection(IStructuredSelection selection)
 	{
-		List<String> persistUUIDS = getPersistUUIDS(selection);
+		List<String> persistUUIDS = getPersistIdentifiersAsStrings(selection);
 		this.lastSelection = persistUUIDS != null ? persistUUIDS : lastSelection;
 	}
 

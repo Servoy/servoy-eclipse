@@ -26,8 +26,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     glasspane: HTMLElement;
     contentArea: HTMLElement;
 	
-	formComponentBoundary: HTMLElement;
-	listFormComponentBoundary: HTMLElement;
+	formComponentBoundary: Element;
+	listFormComponentBoundary: Element;
 
     scroll = { x: 0, y: 0 };
 
@@ -496,8 +496,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         return canMove;
     }
 
-    private findAncestor(el: HTMLElement, cls: string): HTMLElement {
-        while (el && (el = el.parentElement) && !el.classList.contains(cls));
-        return el !== undefined && el !== null && el.classList.contains(cls) ? el : null;
+    private findAncestor(el: HTMLElement, cls: string): Element {
+		if (!el) return null;
+        var ancestor = el.closest('.' + cls);
+        if (ancestor && ancestor.parentElement && ancestor.parentElement.classList.contains('svy-wrapper')) {
+            ancestor = ancestor.parentElement;
+        }
+        return ancestor;
     }
 }

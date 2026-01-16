@@ -52,6 +52,7 @@ import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
+import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
@@ -103,7 +104,7 @@ public class CreateComponentHandler implements IServerService
 
 		if (editorPart.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage &&
 			((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer() != null && options.getName() != null &&
-			options.getDropTargetUUID() == null)
+			options.getDropTarget() == null)
 		{
 			// if we drop directly on form while zoomed in , do nothing
 			return null;
@@ -222,6 +223,8 @@ public class CreateComponentHandler implements IServerService
 				webComponent.setProperty(propertyName, result.toString());
 			}
 		}
+
+		UIUtils.restoreFocusToChromium();
 	}
 
 	public static void autoshowWizard(ISupportFormElements parentSupportingElements, WebObjectSpecification spec,
@@ -274,6 +277,8 @@ public class CreateComponentHandler implements IServerService
 			ServoyLog.logWarning("wizard:autoshow enabled for property " + property + " of component " + spec +
 				" that is not an custom array type " + propType, null);
 		}
+
+		UIUtils.restoreFocusToChromium();
 	}
 
 }

@@ -36,6 +36,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.EditorActionsRegistry;
 import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActionHandler;
 import com.servoy.eclipse.ui.EditorActionsRegistry.EditorComponentActions;
@@ -79,6 +80,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		this.persistPropertySource = persistPropertySource;
 		this.webComponentPropertyDescription = webComponentPropertyDescription;
 		this.persistContext = persistContext;
+		this.canAddRemoveItems = !(persistContext.getPersist() instanceof WebFormComponentChildType);
 	}
 
 	public PropertyDescription getArrayElementPD()
@@ -183,7 +185,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					protected void updateButtonState(Button buttonWidget, Object value)
 					{
 						buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ELCL_REMOVE));
-						buttonWidget.setEnabled(true);
+						buttonWidget.setEnabled(canAddRemoveItems);
 						buttonWidget.setToolTipText("Remove this array item.");
 					}
 
@@ -237,7 +239,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					protected void updateButtonState(Button buttonWidget, Object value)
 					{
 						buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
-						buttonWidget.setEnabled(true);
+						buttonWidget.setEnabled(canAddRemoveItems);
 						buttonWidget.setToolTipText("Insert a new array item below.");
 					}
 

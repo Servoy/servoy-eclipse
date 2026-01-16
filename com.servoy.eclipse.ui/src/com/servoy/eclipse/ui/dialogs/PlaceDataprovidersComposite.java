@@ -632,6 +632,10 @@ public class PlaceDataprovidersComposite extends Composite
 			public void selectionChanged(SelectionChangedEvent event)
 			{
 				configurationSelection = (String)((StructuredSelection)event.getSelection()).getFirstElement();
+				if (configurationSelection == null)
+				{
+					configurationSelection = configurationViewer.getCCombo().getText();
+				}
 				currentSelection = preferences.optJSONObject(configurationSelection);
 				if (currentSelection == null)
 				{

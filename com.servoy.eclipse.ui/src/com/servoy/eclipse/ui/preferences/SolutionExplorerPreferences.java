@@ -52,6 +52,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	private Button rdAutomaticAlignement;
 	private Button navigationContextMenu;
 	private Button treeHandlingContextMenu;
+	private Button developerSolution;
 	private Button chOpenAsDefaultAction;
 	private Button chShowInheritedMethods;
 	private Button chIncludeModules;
@@ -188,8 +189,13 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		treeHandlingContextMenu = new Button(solexTreeViewGroup, SWT.CHECK);
 		treeHandlingContextMenu.setText("Show Tree Handling Group In Context Menu");
 
+		developerSolution = new Button(solexTreeViewGroup, SWT.CHECK);
+		developerSolution.setText("Show Developer Sotion node (experimental)");
+
+
 		navigationContextMenu.setSelection(solexDialogSettings.getBoolean(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_NAVIGATION));
 		treeHandlingContextMenu.setSelection(solexDialogSettings.getBoolean(SolutionExplorerView.DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING));
+		developerSolution.setSelection(solexDialogSettings.getBoolean(SolutionExplorerView.INCLUDE_DEVELOPER_SOLUTION));
 
 		Group solexListViewerGroup = new Group(cp, SWT.NONE);
 		solexListViewerGroup.setText("Solution Explorer List Viewer Options");
@@ -243,6 +249,8 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		{
 			store.put(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_EXPAND_FORM_TREE);
 		}
+
+		solexDialogSettings.put(SolutionExplorerView.INCLUDE_DEVELOPER_SOLUTION, developerSolution.getSelection());
 
 		if (rdOpenGlobalScriptEditor.getSelection())
 		{

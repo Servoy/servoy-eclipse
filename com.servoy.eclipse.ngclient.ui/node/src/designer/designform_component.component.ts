@@ -276,6 +276,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 } else {
                     //if it's not a layout it must be a component
                     this.insertedClone = this.formCache.getComponent(event.data.uuid);
+                    if (!this.insertedClone.layout) {
+                        const elWidth = this.insertedClone.model.size ? this.insertedClone.model.size.width : 200;
+                        const elHeight = this.insertedClone.model.size ? this.insertedClone.model.size.height : 100;
+                        this.insertedClone.layout = { width: elWidth + 'px', height: elHeight + 'px' };
+                    }
                     const oldModel = this.insertedClone.model;
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
@@ -620,6 +625,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 }
 
 class FormComponentDesignServoyApi extends ServoyApi {
+	private markupId: string;
     constructor(item: ComponentCache,
         formname: string,
         absolute: boolean,
@@ -627,6 +633,7 @@ class FormComponentDesignServoyApi extends ServoyApi {
         servoyService: ServoyService,
         private fc: DesignFormComponent) {
         super(item, formname, absolute, formservice, servoyService, true);
+		this.markupId = super.getMarkupId() + '_' + item.rId;
     }
 
     registerComponent(comp: ServoyBaseComponent<any>) {
@@ -636,6 +643,10 @@ class FormComponentDesignServoyApi extends ServoyApi {
     unRegisterComponent(comp: ServoyBaseComponent<any>) {
         this.fc.unRegisterComponent(comp);
     }
+
+	getMarkupId(): string {
+		return this.markupId;
+	}
 
     public formWillShow(_formname: string, _relationname?: string, _formIndex?: number): Promise<boolean> {
         return new Promise<any>(resolve => {

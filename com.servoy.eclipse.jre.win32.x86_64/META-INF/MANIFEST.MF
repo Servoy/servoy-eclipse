@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OpenJDK Hotspot Runtime Environment
 Bundle-SymbolicName: com.servoy.eclipse.jre.win32.x86_64;singleton:=true
-Bundle-Version: 21.0.8
+Bundle-Version: 25.0.1
 Bundle-Vendor: Servoy
 Automatic-Module-Name: com.servoy.eclipse.jre.win32.x86_64
 Bundle-RequiredExecutionEnvironment: JavaSE-21

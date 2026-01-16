@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -55,6 +56,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
@@ -210,11 +212,12 @@ public class MovePersistAction extends AbstractMovePersistAction
 				{
 					// delete duplicate Media
 					((EclipseRepository)rootObject.getRepository()).deleteObject(editingNode);
-					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+					servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
 				}
 				else
 				{
 					editingNode.getParent().removeChild(editingNode);
+					destination.getServoyProject().getEditingSolution().addChild(editingNode);
 				}
 			}
 			catch (final RepositoryException e)
@@ -264,6 +267,32 @@ public class MovePersistAction extends AbstractMovePersistAction
 									{
 										wc.setProperty(handler, newUUID);
 										changed[0] = true;
+									}
+								}
+							}
+						}
+
+						Iterator<IPersist> it = wc.getAllObjects();
+						while (it.hasNext())
+						{
+							IPersist child = it.next();
+							if (child instanceof WebCustomType childWC)
+							{
+								PropertyDescription childPD = childWC.getPropertyDescription();
+								if (childPD != null)
+								{
+									for (String property : childPD.getProperties().keySet())
+									{
+										UUID uuid = Utils.getAsUUID(childWC.getProperty(property), false);
+										if (uuid != null)
+										{
+											Object newUUID = uuidMap.get(uuid.toString());
+											if (newUUID != null)
+											{
+												childWC.setProperty(property, newUUID);
+												changed[0] = true;
+											}
+										}
 									}
 								}
 							}

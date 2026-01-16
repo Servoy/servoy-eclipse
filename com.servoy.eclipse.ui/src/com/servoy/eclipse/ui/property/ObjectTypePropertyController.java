@@ -40,6 +40,7 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 {
 
 	private static ILabelProvider labelProvider = null;
+	protected boolean canAddRemoveItems = true;
 
 	public ObjectTypePropertyController(Object id, String displayName)
 	{
@@ -108,7 +109,7 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 			{
 				buttonWidget.setImage(
 					PlatformUI.getWorkbench().getSharedImages().getImage(!isJSONNull(value) ? ISharedImages.IMG_ETOOL_CLEAR : ISharedImages.IMG_OBJ_ADD));
-				buttonWidget.setEnabled(true);
+				buttonWidget.setEnabled(canAddRemoveItems);
 				buttonWidget.setToolTipText(
 					!isJSONNull(value) ? "Clears the property value." : "Creates an empty property value '{}' to be able to expand node.");
 			}

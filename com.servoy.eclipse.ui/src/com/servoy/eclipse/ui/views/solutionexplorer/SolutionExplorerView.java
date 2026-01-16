@@ -170,7 +170,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
-import org.mozilla.javascript.Function;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
@@ -261,6 +260,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -312,6 +312,8 @@ public class SolutionExplorerView extends ViewPart
 	public static final String SHOW_INHERITED_METHODS = "SolutionExplorerView.showInheritedMethods";
 
 	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";
+
+	public static final String INCLUDE_DEVELOPER_SOLUTION = "SolutionExplorerView.includeDeveloperSolution";
 
 	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";
 
@@ -496,6 +498,9 @@ public class SolutionExplorerView extends ViewPart
 	private MenuItem includeModulesToggleButton;
 
 	private Action includeModulesAction;
+
+	private LoadKnowledgeBaseAction loadKnowledgeBaseAction;
+	private ReloadAllKnowledgeBasesAction reloadAllKnowledgeBasesAction;
 
 	private Menu listDropDownMenu;
 
@@ -770,6 +775,11 @@ public class SolutionExplorerView extends ViewPart
 						comment = "Comment: " + comment;
 						result = (result != null) ? result += ("\n" + comment) : comment;
 					}
+				}
+				if (result == "")
+				{
+					// avoid showing tooltips with no content
+					result = null;
 				}
 
 			}
@@ -2844,6 +2854,8 @@ public class SolutionExplorerView extends ViewPart
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (editWebPackageDetailsAction.isEnabled()) manager.add(editWebPackageDetailsAction);
 		if (upgradeComponentPackageAction.isEnabled()) manager.add(upgradeComponentPackageAction);
+		if (loadKnowledgeBaseAction.isEnabled()) manager.add(loadKnowledgeBaseAction);
+		if (reloadAllKnowledgeBasesAction.isEnabled()) manager.add(reloadAllKnowledgeBasesAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		if (moveActionInTree.isEnabled()) manager.add(moveActionInTree);
@@ -2933,7 +2945,7 @@ public class SolutionExplorerView extends ViewPart
 				if (selectedType > 0)
 				{
 					boolean seperatedAdded = false;
-					for (Entry<JSDeveloperMenu, Function> entry : DeveloperBridge.menus.entrySet())
+					for (Entry<JSDeveloperMenu, FunctionDefinition> entry : DeveloperBridge.menus.entrySet())
 					{
 						int location = entry.getKey().getLocation();
 						if ((location & selectedType) > 0)
@@ -3505,10 +3517,9 @@ public class SolutionExplorerView extends ViewPart
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 		upgradeComponentPackageAction = new WebPackageUpgradeAction(this, shell, "Upgrade to Titanum NGClient package", Package.IPackageReader.WEB_COMPONENT);
+		loadKnowledgeBaseAction = new LoadKnowledgeBaseAction(this, "Load plugin knowledge");
+		reloadAllKnowledgeBasesAction = new ReloadAllKnowledgeBasesAction(this, "Refresh knowledge db");
 
-//		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
-//		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
-//		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -3678,6 +3689,8 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(exportComponentPackage);
 		addTreeSelectionChangedListener(editWebPackageDetailsAction);
 		addTreeSelectionChangedListener(upgradeComponentPackageAction);
+		addTreeSelectionChangedListener(loadKnowledgeBaseAction);
+		addTreeSelectionChangedListener(reloadAllKnowledgeBasesAction);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
 		addTreeSelectionChangedListener(convertToNewFormatAction);

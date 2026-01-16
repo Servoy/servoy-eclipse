@@ -191,7 +191,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	@Override
 	public Iterator<Form> getForms(String datasource, boolean sort)
 	{
-		return ((DeveloperPersistIndex)getIndex()).getFormsByDatasource(datasource, true).iterator();
+		return ((DeveloperPersistIndex)getIndex()).getFormsByDatasource(datasource, sort).iterator();
 	}
 
 	@Override

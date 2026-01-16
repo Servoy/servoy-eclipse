@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2025.12.0.4120_rc
+Bundle-Version: 2026.3.0.4140_rc
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -90,7 +90,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tm4e.languageconfiguration;bundle-version="0.5.2",
  org.eclipse.ui.genericeditor;bundle-version="1.2.300",
  servoy_headless_client,
- org.apache.tomcat;bundle-version="11.0.8"
+ org.apache.tomcat;bundle-version="11.0.8",
+ com.servoy.eclipse.knowledgebase
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

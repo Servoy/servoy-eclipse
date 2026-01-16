@@ -28,6 +28,7 @@ import org.mozilla.javascript.Function;
 
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
 import com.servoy.j2db.scripting.solutionmodel.developer.JSDeveloperMenu;
 import com.servoy.j2db.scripting.solutionmodel.developer.Location;
@@ -42,7 +43,7 @@ import com.servoy.j2db.util.UUID;
  */
 public class DeveloperBridge implements IJSDeveloperBridge
 {
-	public static Map<JSDeveloperMenu, Function> menus = new LinkedHashMap<>();
+	public static Map<JSDeveloperMenu, FunctionDefinition> menus = new LinkedHashMap<>();
 
 
 	private final DeveloperNGClient client;
@@ -92,12 +93,7 @@ public class DeveloperBridge implements IJSDeveloperBridge
 	@Override
 	public void registerMenuItem(JSDeveloperMenu menu, Function callback)
 	{
-		menus.put(menu, callback);
-	}
-
-	@Override
-	public void registerMenuItem(JSDeveloperMenu menu, Function callback, Function enabler)
-	{
+		menus.put(menu, new FunctionDefinition(callback));
 	}
 
 	@Override

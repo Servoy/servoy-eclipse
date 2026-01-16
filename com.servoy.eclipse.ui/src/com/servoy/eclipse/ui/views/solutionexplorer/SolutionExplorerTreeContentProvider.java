@@ -91,6 +91,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.XMLDesignDocsLoader;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
@@ -128,10 +129,14 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
+import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
+import com.servoy.j2db.dataprocessing.datasource.MenuDataSource;
+import com.servoy.j2db.dataprocessing.datasource.ViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
+import com.servoy.j2db.documentation.persistence.docs.DocsForm;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
@@ -146,6 +151,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Menu;
 import com.servoy.j2db.persistence.MenuItem;
 import com.servoy.j2db.persistence.NameComparator;
@@ -156,6 +162,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IIconProvider;
@@ -298,6 +305,15 @@ public class SolutionExplorerTreeContentProvider
 		return node;
 	}
 
+	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent,
+		Object realObject, Image icon, boolean isJSLibNode)
+	{
+		PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, type, realObject, icon, realType,
+			isJSLibNode ? new JSLibScriptObjectFeedback(null, realType) : new ScriptObjectFeedback(null, realType));
+		node.parent = parent;
+		return node;
+	}
+
 	SolutionExplorerTreeContentProvider(SolutionExplorerView v)
 	{
 		view = v;
@@ -366,8 +382,11 @@ public class SolutionExplorerTreeContentProvider
 		servicesFromResourcesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		servicesFromResourcesNode.parent = resources;
 
-		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
-			uiActivator.loadImageFromBundle("userandgroupsecurity.png"));
+		final String userGroupSecurityTooltip = "This node refers to users and groups defined in the solution. " +
+			"Users and groups are stored in workspace file, under resources project. " +
+			"You can open <a href=\"https://docs.servoy.com/reference/servoy-developer/object-editors/security-editor\">Security Editor</a> to modify them.";
+		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY,
+			"", userGroupSecurityTooltip, null, uiActivator.loadImageFromBundle("userandgroupsecurity.png"));
 		userGroupSecurityNode.setClientSupport(ClientSupport.ng_wc_sc);
 		userGroupSecurityNode.parent = resources;
 
@@ -382,16 +401,32 @@ public class SolutionExplorerTreeContentProvider
 		activeSolutionNode = new PlatformSimpleUserNode(Messages.TreeStrings_NoActiveSolution, UserNodeType.SOLUTION, null,
 			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.png"));
 		activeSolutionNode.parent = invisibleRootNode;
-		modulesOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_Modules, UserNodeType.MODULES, null,
-			uiActivator.loadImageFromBundle("modules.png"));
+
+		final String modulesTooltip = "The modules node shows all modules of active solution. Any solution can also be a module to another solution or have its own sub-modules. " +
+			"The modules system is used in order to organize your code, at runtime, in client, all the code and object model is flattened (merged together).<br/>" +
+			"Defining a Servoy solution as a \"module\" enables you to:<br/>" +
+			"<ul>" +
+			"<li>" + "Add \"components\" to existing solutions." + "</li>" +
+			"<li>" + "Add modules to other modules." + "</li>" +
+			"<li>" + "Develop parts of a Servoy solution separately and then combine them later." + "</li>" +
+			"<li>" + "Reuse GUI (graphic user interface) objects and business logic in multiple solutions." + "</li>" +
+			"<li>" + "Expanding this node will show a list of all modules available for the active solution." + "</li></ul>";
+
+		modulesOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_Modules, UserNodeType.MODULES,
+			"", modulesTooltip, null, uiActivator.loadImageFromBundle("modules.png"));
 		modulesOfActiveSolution.parent = activeSolutionNode;
 
-		devSolutionOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_DeveloperSolutions, UserNodeType.DEVELOPER_SOLUTIONS, null,
-			uiActivator.loadImageFromBundle("modules.png"));
+		devSolutionOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_DeveloperSolutions, UserNodeType.DEVELOPER_SOLUTIONS,
+			null, uiActivator.loadImageFromBundle("modules.png"));
 		devSolutionOfActiveSolution.parent = activeSolutionNode;
 
-		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
-			uiActivator.loadImageFromBundle("solutions.png"));
+		final String allSolutionsTooltip = "The All Solutions node in the " +
+			"<a href=\"https://docs.servoy.com/reference/servoy-developer/solution-explorer\">Solution Explorer</a> " +
+			"can be expanded to show each of the existing " +
+			"<a href=\"https://docs.servoy.com/reference/servoy-developer/solution-explorer/all-solutions/solution\">solutions</a> in the workspace.";
+
+		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS,
+			"", allSolutionsTooltip, null, uiActivator.loadImageFromBundle("solutions.png"));
 		allSolutionsNode.parent = invisibleRootNode;
 
 		allWebPackagesNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllWebPackageProjects, UserNodeType.ALL_WEB_PACKAGE_PROJECTS, null,
@@ -949,14 +984,12 @@ public class SolutionExplorerTreeContentProvider
 							if (un.isEnabled()) addSolutionNodeChildren(un);
 							if (un.children != null)
 							{
-								PlatformSimpleUserNode activeSolutionChildren[] = new PlatformSimpleUserNode[un.children.length + 2];
-								for (int i = un.children.length - 1; i >= 0; i--)
-								{
-									activeSolutionChildren[i] = (PlatformSimpleUserNode)un.children[i];
-								}
-								activeSolutionChildren[activeSolutionChildren.length - 2] = modulesOfActiveSolution;
-								activeSolutionChildren[activeSolutionChildren.length - 1] = devSolutionOfActiveSolution;
-								un.children = activeSolutionChildren;
+								List<SimpleUserNode> activeSolutionChildren = new ArrayList<>(Arrays.asList(un.children));
+								activeSolutionChildren.add(modulesOfActiveSolution);
+								if (uiActivator.getDialogSettings().getBoolean(SolutionExplorerView.INCLUDE_DEVELOPER_SOLUTION))
+									activeSolutionChildren.add(devSolutionOfActiveSolution);
+
+								un.children = activeSolutionChildren.toArray(new PlatformSimpleUserNode[activeSolutionChildren.size()]);
 							}
 							else
 							{
@@ -1060,6 +1093,10 @@ public class SolutionExplorerTreeContentProvider
 								UserNodeType.LAYOUT_PROJECT_PACKAGE, IPackageReader.WEB_LAYOUT);
 							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "services_package.png",
 								UserNodeType.SERVICES_PROJECT_PACKAGE, IPackageReader.WEB_SERVICE);
+							// TODO SVY-20650 get here the package descriptions and show them as tooltips... but those are currently not inside the .zip file
+							// or the package project (usually) that we have available, but inside the webpackage.json file somewhere inside their git repo...
+							// Johan suggested that we may base this on the README.md file of those repos as well...
+
 							children.addAll(servicesProjects);
 							children.addAll(layoutProjects);
 							children.addAll(getBinaryPackages(un, componentSpecProvider, serviceSpecProvider));
@@ -1081,6 +1118,7 @@ public class SolutionExplorerTreeContentProvider
 								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
+								node.setDeveloperFeedback(new WebComponentFeedback(spec));
 								node.parent = un;
 								children.add(node);
 							}
@@ -1097,6 +1135,7 @@ public class SolutionExplorerTreeContentProvider
 								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
+								node.setDeveloperFeedback(new LayoutContainerFeedback(spec));
 								node.parent = un;
 								children.add(node);
 							}
@@ -1133,6 +1172,7 @@ public class SolutionExplorerTreeContentProvider
 										Image img = getIconFromSpec(spec, false);
 										PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 											img != null ? img : componentIcon);
+										node.setDeveloperFeedback(new LayoutContainerFeedback(spec));
 										node.parent = un;
 										children.add(node);
 										folderNames.add(folderName);
@@ -1190,6 +1230,7 @@ public class SolutionExplorerTreeContentProvider
 									Image img = getIconFromSpec(spec, true);
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
+									node.setDeveloperFeedback(new WebServiceFeedback(spec));
 									node.parent = un;
 									children.add(node);
 								}
@@ -1238,6 +1279,11 @@ public class SolutionExplorerTreeContentProvider
 									packageType = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
 								}
 								if (packageType == null) continue;
+
+								// TODO SVY-20650 get here the package descriptions and show them as tooltips... but those are currently not inside the .zip file
+								// or the package project (usually) that we have available, but inside the webpackage.json file somewhere inside their git repo...
+								// Johan suggested that we may base this on the README.md file of those repos as well...
+
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
 									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, packageType, packageIcon);
 
@@ -1289,6 +1335,7 @@ public class SolutionExplorerTreeContentProvider
 	private void createWebPackageProjectChildren(PlatformSimpleUserNode un, SpecProviderState provider, UserNodeType type, Set<String> folderNames,
 		List<PlatformSimpleUserNode> children, List<String> services, Image defaultIcon)
 	{
+		// for component packages and for service packages
 		for (String component : services)
 		{
 			WebObjectSpecification spec = provider.getWebObjectSpecification(component);
@@ -1302,6 +1349,8 @@ public class SolutionExplorerTreeContentProvider
 					{
 						Image img = getIconFromSpec(spec, false);
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), type, spec, img != null ? img : defaultIcon);
+						if (type == UserNodeType.SERVICE) node.setDeveloperFeedback(new WebServiceFeedback(spec));
+						else node.setDeveloperFeedback(new WebComponentFeedback(spec));
 						node.parent = un;
 						children.add(node);
 						folderNames.add(folderName);
@@ -1420,6 +1469,9 @@ public class SolutionExplorerTreeContentProvider
 	private Collection< ? extends PlatformSimpleUserNode> getBinaryPackages(PlatformSimpleUserNode un, SpecProviderState componentsProvider,
 		SpecProviderState servicesProvider)
 	{
+		// TODO SVY-20650 get here the package descriptions and show them as tooltips... but those are currently not inside the .zip file
+		// or the package project (usually) that we have available, but inside the webpackage.json file somewhere inside their git repo...
+		// Johan suggested that we may base this on the README.md file of those repos as well...
 		List<PlatformSimpleUserNode> result = new ArrayList<PlatformSimpleUserNode>();
 		Object realObject = un.getRealObject();
 		if (realObject instanceof Solution)
@@ -2283,9 +2335,7 @@ public class SolutionExplorerTreeContentProvider
 				Image icon = getIconFromSpec(spec, true);
 				if (icon == null) icon = uiActivator.loadImageFromBundle("plugin.png");
 				PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
-					icon, WebServiceScriptable.class, new SimpleDeveloperFeedback(
-						SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + spec.getScriptingName(), null,
-						spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic)));
+					icon, WebServiceScriptable.class, new WebServiceFeedback(spec));
 				allPluginNodes.add(node);
 				node.parent = pluginNode;
 				this.addCustomTypesNodes(node, spec, null);
@@ -2615,64 +2665,107 @@ public class SolutionExplorerTreeContentProvider
 		Solution solution = servoyProject.getSolution();
 		if (solution != null)
 		{
+			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+
+			final String toolTip = "Expanding the Scopes node will show a list of all existing solution scopes.<br/>" +
+				"Solution scopes are not tied to anything specific but the solution itself, with a default 'globals' scope available.";
+
 			PlatformSimpleUserNode scopesFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Scopes,
-				solutionOfCalculation == null ? UserNodeType.SCOPES_ITEM : UserNodeType.SCOPES_ITEM_CALCULATION_MODE, solution,
+				solutionOfCalculation == null ? UserNodeType.SCOPES_ITEM : UserNodeType.SCOPES_ITEM_CALCULATION_MODE, "", toolTip, solution,
 				uiActivator.loadImageFromBundle("scopes.png"));
 			scopesFolder.parent = projectNode;
 			addScopesNodeChildren(scopesFolder);
 
-			PlatformSimpleUserNode forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution,
+			String formToolTip = null;
+			IObjectDocumentation persistDocs = XMLDesignDocsLoader.getObjectDocumentation(DocsForm.class);
+			if (persistDocs != null)
+			{
+				formToolTip = persistDocs.getDescription(clientSupport);
+			}
+
+			PlatformSimpleUserNode forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, "", formToolTip, solution,
 				uiActivator.loadImageFromBundle("forms.png"));
 			forms.parent = projectNode;
 
 			if (!(servoyProject instanceof ServoyDeveloperProject))
 			{
-				PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
-					uiActivator.loadImageFromBundle("form_component.png"));
+				String formComponentToolTip = "This node contains all the form components created in the active solution, which appear as a list when expanding the Form Components node.";
+				PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, "",
+					formComponentToolTip, solution, uiActivator.loadImageFromBundle("form_component.png"));
 				formReferences.parent = projectNode;
+
 				PlatformSimpleUserNode allRelations = null;
 				if (solutionOfCalculation == null)
 				{
-					allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
-						uiActivator.loadImageFromBundle("relations.png"));
+					String relationToolTip = "The Relation class represents a connection between two data sources, typically involving a primary and a foreign table.";
+					persistDocs = XMLDesignDocsLoader.getObjectDocumentation(Relation.class);
+
+					if (persistDocs != null)
+					{
+						relationToolTip = persistDocs.getDescription(clientSupport);
+					}
+					allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, "relation", relationToolTip,
+						solution, uiActivator.loadImageFromBundle("relations.png"));
 					allRelations.parent = projectNode;
 				}
-				PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
-					uiActivator.loadImageFromBundle("valuelists.png"));
+
+				String valueListToolTip = null;
+				persistDocs = XMLDesignDocsLoader.getObjectDocumentation(ValueList.class);
+				if (persistDocs != null)
+				{
+					valueListToolTip = persistDocs.getDescription(clientSupport);
+				}
+				PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, "valueList",
+					valueListToolTip, solution, uiActivator.loadImageFromBundle("valuelists.png"));
 				valuelists.parent = projectNode;
 
-				PlatformSimpleUserNode menus = new PlatformSimpleUserNode(Messages.TreeStrings_Menus, UserNodeType.MENUS, solution,
-					uiActivator.loadImageFromBundle("column.png"));
+				String menuToolTip = null;
+				persistDocs = XMLDesignDocsLoader.getObjectDocumentation(Menu.class);
+				if (persistDocs != null)
+				{
+					menuToolTip = persistDocs.getDescription(clientSupport);
+				}
+				PlatformSimpleUserNode menus = new PlatformSimpleUserNode(Messages.TreeStrings_Menus, UserNodeType.MENUS, "menu",
+					menuToolTip, solution, uiActivator.loadImageFromBundle("column.png"));
 				menus.parent = projectNode;
 
-				PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
-					uiActivator.loadImageFromBundle("media.png"));
+				String mediaToolTip = null;
+				persistDocs = XMLDesignDocsLoader.getObjectDocumentation(Media.class);
+				if (persistDocs != null)
+				{
+					mediaToolTip = persistDocs.getDescription(clientSupport);
+				}
+				PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, "media",
+					mediaToolTip, solution, uiActivator.loadImageFromBundle("media.png"));
 				media.parent = projectNode;
 				addMediaFolderChildrenNodes(media, solution);
 
-				PlatformSimpleUserNode solutionDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionDataSources,
-					UserNodeType.SOLUTION_DATASOURCES,
-					solution, IconProvider.instance().image(JSDataSources.class));
+				PlatformSimpleUserNode solutionDataSources = createTypeNode(Messages.TreeStrings_SolutionDataSources,
+					UserNodeType.SOLUTION_DATASOURCES, JSDataSources.class, projectNode, false);
 				solutionDataSources.parent = projectNode;
 
-
-				PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
-					servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
+				PlatformSimpleUserNode solutionMemoryDataSources = createTypeNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
+					MemDataSource.class, solutionDataSources, servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class), false);
 				solutionMemoryDataSources.parent = solutionDataSources;
 
-				PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
-					servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
+				PlatformSimpleUserNode viewFoundsets = createTypeNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
+					ViewDataSource.class, solutionDataSources, servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class),
+					false);
 				viewFoundsets.parent = solutionDataSources;
 
-				PlatformSimpleUserNode menuFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_MenuFoundsets, UserNodeType.MENU_FOUNDSETS,
-					solution, IconProvider.instance().image(JSDataSources.class));
+				PlatformSimpleUserNode menuFoundsets = createTypeNode(Messages.TreeStrings_MenuFoundsets, UserNodeType.MENU_FOUNDSETS,
+					MenuDataSource.class, solutionDataSources, solution, IconProvider.instance().image(JSDataSources.class), false);
 				menuFoundsets.parent = solutionDataSources;
 
 				solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets, menuFoundsets };
 
+				final String servoyProjectsToolTip = "This node contains all packages referenced by the solution, " +
+					"they are displayed when expanding Servoy Packages. In order to avoid conflicts, only one solution should contain a specific package. " +
+					"So, a package should only be referenced by the main solution or one of its modules. There are two forms of Servoy Packages, as projects or zips.";
 
 				PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
-					UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, solution, uiActivator.loadImageFromBundle("all_packages.png"));
+					UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, "", servoyProjectsToolTip, solution,
+					uiActivator.loadImageFromBundle("all_packages.png"));
 				solutionWebPackages.parent = projectNode;
 
 				if (solutionOfCalculation != null)
@@ -3090,9 +3183,20 @@ public class SolutionExplorerTreeContentProvider
 							this.addCustomTypesNodes(node, spec, originalForm);
 						}
 					}
-					node.setDeveloperFeedback(
-						new SimpleDeveloperFeedback("elements." + element.getName() + ".", null,
-							spec != null ? spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null));
+					node.setDeveloperFeedback(new WebComponentFeedback(spec)
+					{
+						@Override
+						public String getSample()
+						{
+							return null;
+						}
+
+						@Override
+						public String getCode()
+						{
+							return "elements." + element.getName() + ".";
+						}
+					});
 				}
 				elements.add(node);
 				node.parent = parentNode;
@@ -4235,4 +4339,102 @@ public class SolutionExplorerTreeContentProvider
 	{
 		return allWebPackagesNode;
 	}
+
+
+	private static class LayoutContainerFeedback extends WebObjectFeedback
+	{
+
+		public LayoutContainerFeedback(WebObjectSpecification spec)
+		{
+			super(spec);
+		}
+
+		@Override
+		public String getSample()
+		{
+			return "let myLayoutContainer = jsLayoutContainerOrForm.newLayoutContainer(\"" + forSolutionModelUsageInScripting() +
+				"\");";
+		}
+
+		@Override
+		public String getCode()
+		{
+			return forSolutionModelUsageInScripting();
+		}
+
+		private String forSolutionModelUsageInScripting()
+		{
+			return spec.getPackageName() + "-" + spec.getName();
+		}
+
+	}
+
+	private static class WebServiceFeedback extends WebObjectFeedback
+	{
+
+		public WebServiceFeedback(WebObjectSpecification spec)
+		{
+			super(spec);
+		}
+
+		@Override
+		public String getSample()
+		{
+			return null;
+		}
+
+		@Override
+		public String getCode()
+		{
+			return SolutionExplorerListContentProvider.PLUGIN_PREFIX + "." + spec.getScriptingName();
+		}
+
+	}
+
+	private static class WebComponentFeedback extends WebObjectFeedback
+	{
+
+		public WebComponentFeedback(WebObjectSpecification spec)
+		{
+			super(spec);
+		}
+
+		@Override
+		public String getSample()
+		{
+			return "let myWebComponent = jsSolutionModelForm.newWebComponent(\"wc1\", \"" + spec.getName() + "\");";
+		}
+
+		@Override
+		public String getCode()
+		{
+			return spec.getName();
+		}
+
+	}
+
+	/**
+	 * Web object (component, service, layout) feedback for properties of NG web components and services.
+	 * The information is taken from their .spec & _doc.js files.
+	 *
+	 * @author acostescu
+	 */
+	private abstract static class WebObjectFeedback implements IDeveloperFeedback
+	{
+
+		protected WebObjectSpecification spec;
+
+		protected WebObjectFeedback(WebObjectSpecification spec)
+		{
+			this.spec = spec;
+		}
+
+		public String getToolTipText()
+		{
+			SolutionExplorerListContentProvider.extractApiDocs(spec);
+			String description = (spec != null ? spec.getDescriptionProcessed(true, HtmlUtils::applyDescriptionMagic) : null);
+			return description != null ? (getCode() != null ? getCode() + "<br/><br/>" : "") + description : null; // if the result is fully null then Solex/user node will use getCode() if available anyway
+		}
+	}
+
 }
