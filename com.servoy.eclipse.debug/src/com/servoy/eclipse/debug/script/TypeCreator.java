@@ -1978,11 +1978,8 @@ public class TypeCreator extends TypeCache
 									ParsedReturnType parsed = ReturnTypeParser.parse(returnDescription);
 									if (parsed != null && !"void".equals(parsed.baseType()))
 									{
-										System.out.println("Parsed : " + parsed);
-
 										// Build the full type tree (handles nested generics & multi-arg generics)
 										JSType finalType = buildFromParsed(parsed);
-										System.out.println("FinalType : " + finalType.toString());
 										if (finalType != null)
 										{
 											method.setType(finalType);
@@ -2227,99 +2224,29 @@ public class TypeCreator extends TypeCache
 	}
 
 	/**
-	 * Convert a type string (possibly parameterized, possibly nested)
-	 * into a JSType by recursively using ReturnTypeParser for generics.
-	 * No aliasing, names are passed through as-is.
-	 */
-	private JSType toJSType(String typeStr)
-	{
-		if (typeStr == null || typeStr.isBlank())
-			return leaf("void"); // or "Object" if you prefer
-
-		String normalized = typeStr.trim();
-
-		// Your parser never returns null; it uses "void" as sentinel
-		ParsedReturnType parsed = ReturnTypeParser.parse(normalized);
-
-		if ("void".equals(parsed.baseType()))
-			return leaf("void");
-
-		return buildFromParsed(parsed);
-	}
-
-	/**
 	 * Build a JSType (ParameterizedType or leaf) from a ParsedReturnType.
 	 * Recurses for each generic argument.
 	 */
 	private JSType buildFromParsed(ParsedReturnType parsed)
 	{
-		String base = parsed.baseType();
-		java.util.List<String> args = parsed.genericArgs();
-
-
-		// ----- special-case: Map<K,V> -----
-		if ("Map".equals(base))
+		JSDocTypeParser parse = new JSDocTypeParser();
+		try
 		{
-			ParameterizedType mapPT = TypeInfoModelFactory.eINSTANCE.createParameterizedType();
-			mapPT.setTarget(TypeUtil.type("Map"));
-
-			if (args == null || args.size() != 2)
-			{
-				// be strict; you can relax this to log+best-effort if needed
-				throw new IllegalArgumentException("Map expects exactly 2 type arguments, got " +
-					(args == null ? 0 : args.size()) + " for: " + parsed.fullType());
-			}
-
-			// K
-			JSType k = toJSType(args.get(0)); // "String" (leaf) or nested generic
-			mapPT.getActualTypeArguments().add(ensureParam(k)); // add at same layer (slot 0)
-
-			// V
-			JSType v = toJSType(args.get(1)); // "Array<String>" or leaf
-			mapPT.getActualTypeArguments().add(ensureParam(v)); // add at same layer (slot 1)
-
-			return mapPT;
+			return parse.parse(parsed.fullType());
 		}
-
-
-		// Parameterized?
-		if (args != null && !args.isEmpty())
+		catch (ParseException e)
 		{
-			// Optional: validate arity for better diagnostics (Map=2, Promise=1, etc.)
-			// validateArity(base, args.size());
-
-			ParameterizedType pt = TypeInfoModelFactory.eINSTANCE.createParameterizedType();
-			pt.setTarget(TypeUtil.type(base)); // base used exactly as parsed
-
-			for (String argStr : args)
-			{
-				// Recurse; never returns null for good inputs
-				JSType argType = toJSType(argStr);
-				pt.getActualTypeArguments().add(argType);
-			}
-			return pt;
+			// ignore
 		}
-
-		// Leaf (no generics) → wrap named Type as JSType
-		return leaf(base);
-	}
-
-	/**
-	 * Wrap a named Type into a JSType.
-	 * If your model has a TypeRef that implements JSType, use that instead of the ParameterizedType shim.
-	 */
-	private JSType leaf(String typeName)
-	{
-		Type named = TypeUtil.type(typeName);
-		// If you have a proper TypeRef, prefer:
-		// TypeRef ref = TypeInfoModelFactory.eINSTANCE.createTypeRef();
-		// ref.setTarget(named);
-		// return ref;
-
-		// Generic-safe wrapper: ParameterizedType with zero args is a valid JSType leaf.
-		ParameterizedType pt = TypeInfoModelFactory.eINSTANCE.createParameterizedType();
-		pt.setTarget(named);
-		return pt;
+		try
+		{
+			return parse.parse(parsed.baseType());
+		}
+		catch (ParseException e)
+		{
+			// ignore
+		}
+		return null;
 	}
 
 	// (Optional) only if you want better error messages for malformed docs
