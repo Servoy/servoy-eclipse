@@ -543,6 +543,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 					}
 				}
 			}
+			tmp.sort(String::compareTo);
 			nonActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the non-active solutions",
 				"Select the solutions that you want to include in this WAR. Be aware that these solutions are not checked for builder markers!", tmp,
 				exportModel.getNonActiveSolutions(), false, "export_war_none_active_solutions");
