@@ -233,11 +233,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			int statusCode = response.statusCode();
 
 			// Optional: handle response
-			if (statusCode == 201)
-			{
-				//Pipeline created successfully
-			}
-			else
+			if (statusCode >= 400)
 			{
 				switch (statusCode)
 				{
