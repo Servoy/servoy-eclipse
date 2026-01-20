@@ -50,18 +50,18 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.ngclient,
  org.apache.tomcat
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.core,
- com.servoy.eclipse.core.ai.shared,
- com.servoy.eclipse.core.builder,
- com.servoy.eclipse.core.doc,
- com.servoy.eclipse.core.elements,
- com.servoy.eclipse.core.ngpackages,
- com.servoy.eclipse.core.quickfix,
- com.servoy.eclipse.core.quickfix.dbi,
- com.servoy.eclipse.core.repository,
- com.servoy.eclipse.core.resource,
- com.servoy.eclipse.core.util,
- com.servoy.eclipse.dnd
+Export-Package: com.servoy.eclipse.core;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.ai.shared;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.builder;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.doc;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.elements;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.ngpackages;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.quickfix;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.quickfix.dbi;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.repository;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.resource;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.core.util;version="2024.3.9.3952_LTS",
+ com.servoy.eclipse.dnd;version="2024.3.9.3952_LTS"
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.core
