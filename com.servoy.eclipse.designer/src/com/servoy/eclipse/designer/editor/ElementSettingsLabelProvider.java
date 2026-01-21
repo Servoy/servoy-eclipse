@@ -16,77 +16,190 @@
  */
 package com.servoy.eclipse.designer.editor;
 
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 
 /**
  * Label provider for setting security checkboxes in form editor security page.
  *
  * @author lvostinar
  */
-
-public class ElementSettingsLabelProvider extends LabelProvider implements ITableLabelProvider
+public class ElementSettingsLabelProvider
 {
 	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("check_on.png");
 	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("check_off.png");
+	public static final Image DISABLED_IMAGE = Activator.getDefault().loadImageFromBundle("check_disabled_off.png");
 
 	private final ElementSettingsModel model;
 
 	public ElementSettingsLabelProvider(ElementSettingsModel model)
 	{
-		super();
 		this.model = model;
-
 	}
 
-	public Image getColumnImage(Object element, int columnIndex)
+
+	/**
+	 * @return one of {@link #TRUE_IMAGE}, {@link #FALSE_IMAGE} or {@link #DISABLED_IMAGE}
+	 */
+	public static Image getViewableCheckImg(Object element, ElementSettingsModel model)
 	{
-		if (columnIndex == VisualFormEditorSecurityPage.CI_VIEWABLE)
+		// check parent form component component security rights - if applicable / present
+		IPersist parentFCC = (IPersist)element;
+		while ((parentFCC = ((AbstractBase)parentFCC)
+			.getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER)) != null)
 		{
-			if (model.hasRight((IPersist)element, IRepository.VIEWABLE))
+			if (!model.hasRight(parentFCC, IRepository.VIEWABLE))
 			{
-				return TRUE_IMAGE;
-			}
-			else
-			{
-				return FALSE_IMAGE;
+				return DISABLED_IMAGE;
 			}
 		}
-		else if (columnIndex == VisualFormEditorSecurityPage.CI_ACCESSABLE)
+
+		if (model.hasRight((IPersist)element, IRepository.VIEWABLE))
 		{
-			if (model.hasRight((IPersist)element, IRepository.ACCESSIBLE))
-			{
-				return TRUE_IMAGE;
-			}
-			else
-			{
-				return FALSE_IMAGE;
-			}
+			return TRUE_IMAGE;
 		}
 		else
 		{
-			return null;
+			return FALSE_IMAGE;
 		}
 	}
 
-	public String getColumnText(Object element, int columnIndex)
+	/**
+	 * @return one of {@link #TRUE_IMAGE}, {@link #FALSE_IMAGE} or {@link #DISABLED_IMAGE}
+	 */
+	public static Image getAccessibleCheckImg(Object element, ElementSettingsModel model)
 	{
-		if (columnIndex == VisualFormEditorSecurityPage.CI_NAME)
+		IPersist parentFCC = (IPersist)element;
+		while ((parentFCC = ((AbstractBase)parentFCC)
+			.getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER)) != null)
 		{
-			String name = ((ISupportName)element).getName();
-			if (((IPersist)element).getAncestor(IRepository.FORMS) != model.getForm())
+			if (!model.hasRight(parentFCC, IRepository.ACCESSIBLE))
 			{
-				name += " [" + ((Form)((IPersist)element).getAncestor(IRepository.FORMS)).getName() + "]";
+				return DISABLED_IMAGE;
 			}
-			return name;
 		}
-		return null;
+
+		if (model.hasRight((IPersist)element, IRepository.ACCESSIBLE))
+		{
+			return TRUE_IMAGE;
+		}
+		else
+		{
+			if (!model.hasRight((IPersist)element, IRepository.VIEWABLE))
+			{
+				return DISABLED_IMAGE;
+			}
+			return FALSE_IMAGE;
+		}
+	}
+
+	public CellLabelProvider getCellLabelProvider(int columnIndex)
+	{
+		if (columnIndex == VisualFormEditorSecurityPage.CI_VIEWABLE)
+		{
+			return new ColumnLabelProvider()
+			{
+				@Override
+				public String getToolTipText(Object element)
+				{
+					Image img = getViewableCheckImg(element, model);
+					return (img == DISABLED_IMAGE)
+						? "a Form Component Component that contains this component is\nnot viewable, so this will not be viewable either" : null;
+				}
+
+				@Override
+				public String getText(Object element)
+				{
+					return null;
+				}
+
+				@Override
+				public Image getImage(Object element)
+				{
+					return getViewableCheckImg(element, model);
+				}
+			};
+		}
+		else if (columnIndex == VisualFormEditorSecurityPage.CI_ACCESSABLE)
+		{
+			return new ColumnLabelProvider()
+			{
+				@Override
+				public String getToolTipText(Object element)
+				{
+					Image img = getAccessibleCheckImg(element, model);
+					// @formatter:off
+					return (img == DISABLED_IMAGE) ?
+						(
+							!model.hasRight((IPersist)element, IRepository.VIEWABLE) ?
+								"this component is not 'viewable' so there\nis no use to configure 'accessible'" :
+								"a Form Component Component that contains this component is\nnot 'accessible', so this will not be 'accesible' either") :
+						null;
+					// @formatter:on
+				}
+
+				@Override
+				public String getText(Object element)
+				{
+					return null;
+				}
+
+				@Override
+				public Image getImage(Object element)
+				{
+					return getAccessibleCheckImg(element, model);
+				}
+			};
+		}
+		else if (columnIndex == VisualFormEditorSecurityPage.CI_NAME)
+		{
+			return new ColumnLabelProvider()
+			{
+
+				@Override
+				public String getText(Object element)
+				{
+					String name = ((ISupportName)element).getName();
+					IPersist directParentFormComponentComponentIfApplicable = ((AbstractBase)element)
+						.getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER);
+					if (directParentFormComponentComponentIfApplicable != null)
+					{
+						name = ((AbstractBase)element)
+							.getRuntimeProperty(FormElementHelper.FC_CHILD_ELEMENT_NAME_INSIDE_DIRECT_PARENT_FORM_COMPONENT);
+						StringBuilder sb = new StringBuilder(50);
+						sb.append("[] ");
+						boolean notLast = false;
+						while (directParentFormComponentComponentIfApplicable != null)
+						{
+							if (notLast) sb.insert(1, " -> ");
+							if (notLast == false) notLast = true;
+
+							String fccName = ((AbstractBase)directParentFormComponentComponentIfApplicable)
+								.getRuntimeProperty(FormElementHelper.FC_CHILD_ELEMENT_NAME_INSIDE_DIRECT_PARENT_FORM_COMPONENT);
+							if (fccName == null) fccName = ((ISupportName)directParentFormComponentComponentIfApplicable).getName();
+							sb.insert(1, fccName);
+							directParentFormComponentComponentIfApplicable = ((AbstractBase)directParentFormComponentComponentIfApplicable)
+								.getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER);
+						}
+						sb.append(name);
+						name = sb.toString();
+					}
+					else if (element == model.getForm()) name = "[this form] " + name;
+
+					return name;
+				}
+
+			};
+		}
+
+		else return null;
 	}
 }

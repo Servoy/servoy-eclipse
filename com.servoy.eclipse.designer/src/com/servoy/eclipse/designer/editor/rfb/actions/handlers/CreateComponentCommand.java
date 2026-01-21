@@ -50,7 +50,6 @@ import org.sablo.websocket.utils.PropertyUtils;
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -61,6 +60,7 @@ import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.designer.util.SnapToComponentUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -107,9 +107,9 @@ import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**

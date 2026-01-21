@@ -70,8 +70,8 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.UUID;
 
 /**

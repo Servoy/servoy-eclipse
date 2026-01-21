@@ -23,7 +23,6 @@ import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,13 +50,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -65,7 +61,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.BufferedDataSet;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -77,16 +72,15 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ngclient.FormElement;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
-import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.GroupSecurityInfo;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerInternal;
 import com.servoy.j2db.server.shared.PCloneable;
 import com.servoy.j2db.server.shared.SecurityInfo;
+import com.servoy.j2db.server.util.SecAccessGatherer;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -1261,40 +1255,19 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
-	protected boolean isElementChildOfForm(final String elementUUID, Form form)
+	protected boolean isElementChildOfForm(final String elementUIDToString, Form form)
 	{
+		// if the elementUID is nested inside a form component component, we need to check if the top-most form component component parent is
+		// part of this form; otherwise uidOfFormLevelElement will be the same as elementUID (an UUID string representation) - for a normal component of the form
+		String uidOfFormLevelElement = PersistIdentifier.fromJSONString(elementUIDToString).persistUUIDAndFCPropAndComponentPath()[0];
+
 		Object retVal = form.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist o)
 			{
-				if (elementUUID.equals(o.getUUID().toString()))
+				if (uidOfFormLevelElement.equals(o.getUUID().toString()))
 				{
 					return Boolean.TRUE;
-				}
-				if (o instanceof IFormElement)
-				{
-					FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((IFormElement)o, ModelUtils.getEditingFlattenedSolution(form),
-						null, true);
-					WebObjectSpecification spec = formComponentEl.getWebComponentSpec();
-					if (spec != null)
-					{
-						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
-						if (properties.size() > 0)
-						{
-							for (PropertyDescription pd : properties)
-							{
-								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
-								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, ModelUtils.getEditingFlattenedSolution(form));
-								if (frm != null)
-								{
-									if (isElementChildOfForm(elementUUID, frm))
-									{
-										return Boolean.TRUE;
-									}
-								}
-							}
-						}
-					}
 				}
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
@@ -1375,11 +1348,110 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return false;
 	}
 
+	@Override
+	public TableAndFormSecurityAccessInfo getSecurityAccessForTablesAndForms(String clientId, UUID[] solution_uuids, int[] releaseNumbers, String[] groups)
+	{
+		TableAndFormSecurityAccessInfo newWaySecAccess = new TableAndFormSecurityAccessInfo(new SecurityAccessInfo(new HashMap<>(), new HashSet<>()),
+			new SecurityAccessInfo(new HashMap<>(), new HashSet<>()));
+
+		gatherSecurityAccess(new SecAccessGatherer<String>()
+		{
+
+			@Override
+			public void explicitFormElementAccessFoundForMerge(String uid, int element_access)
+			{
+				newWaySecAccess.formSecurityAccessInfo().explicitIdentifierToAccessMap().put(uid, Integer
+					.valueOf(Utils.getAsInteger(newWaySecAccess.formSecurityAccessInfo().explicitIdentifierToAccessMap().get(uid)) | element_access));
+			}
+
+			@Override
+			public void implicitFormElementAccess(String uid)
+			{
+				newWaySecAccess.formSecurityAccessInfo().implicitAccessIdentifiers().add(uid);
+			}
+
+			@Override
+			public void explicitColumnAccessFoundForMerge(CharSequence qualifiedColumn, int columninfo_access)
+			{
+				newWaySecAccess.tableSecurityAccessInfo().explicitIdentifierToAccessMap().put(qualifiedColumn.toString(), Integer.valueOf(
+					Utils.getAsInteger(newWaySecAccess.tableSecurityAccessInfo().explicitIdentifierToAccessMap().get(qualifiedColumn.toString())) |
+						columninfo_access));
+			}
+
+			@Override
+			public void implicitColumnAccess(CharSequence lastQualifiedColumn)
+			{
+				newWaySecAccess.tableSecurityAccessInfo().implicitAccessIdentifiers().add(lastQualifiedColumn.toString());
+			}
+		}, clientId, solution_uuids, releaseNumbers, groups);
+
+		return newWaySecAccess;
+	}
+
+	@Override
+	@Deprecated
 	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, UUID[] solution_uuids, int[] releaseNumbers, String[] groups)
 	{
-		Map<Object, Integer> retval = new HashMap<Object, Integer>();
+		Map<Object, Integer> explicitRights = new HashMap<Object, Integer>();
 		Set<Object> implicitRights = new HashSet<>();
-		Map<Object, Integer> groupsWithNonDefaultAccess = new HashMap<>();
+
+		gatherSecurityAccess(new SecAccessGatherer<String>()
+		{
+
+			@Override
+			public void explicitFormElementAccessFoundForMerge(String uid, int element_access)
+			{
+				UUID elementUUID = null;
+				try
+				{
+					elementUUID = UUID.fromString(uid);
+				}
+				catch (IllegalArgumentException e)
+				{
+					// it's not an UUID, it's probably an FCC child that is a PersistIdentifier.toJSONString()
+					// and this deprecated getSecurityAccess(...) does not support that; skip
+				}
+				if (elementUUID != null) explicitRights.put(elementUUID, Integer.valueOf(Utils.getAsInteger(explicitRights.get(elementUUID)) | element_access));
+			}
+
+			@Override
+			public void implicitFormElementAccess(String uid)
+			{
+				UUID elementUUID = null;
+				try
+				{
+					elementUUID = UUID.fromString(uid);
+				}
+				catch (IllegalArgumentException e)
+				{
+					// it's not an UUID, it's probably an FCC child that is a PersistIdentifier.toJSONString()
+					// and this deprecated getSecurityAccess(...) does not support that; skip
+				}
+				if (elementUUID != null) implicitRights.add(elementUUID);
+			}
+
+			@Override
+			public void explicitColumnAccessFoundForMerge(CharSequence qualifiedColumn, int columninfo_access)
+			{
+				explicitRights.put(qualifiedColumn, Integer.valueOf(Utils.getAsInteger(explicitRights.get(qualifiedColumn)) | columninfo_access));
+			}
+
+			@Override
+			public void implicitColumnAccess(CharSequence lastQualifiedColumn)
+			{
+				implicitRights.add(lastQualifiedColumn);
+			}
+
+		}, clientId, solution_uuids, releaseNumbers, groups);
+
+		return new Pair<Map<Object, Integer>, Set<Object>>(explicitRights, implicitRights);
+	}
+
+	protected void gatherSecurityAccess(SecAccessGatherer<String> gatherer, String clientId, UUID[] solution_uuids, int[] releaseNumbers,
+		String[] groups)
+	{
+		Map<String, Integer> groupCountWithNonDefaultAccessForFormsAndComponents = new HashMap<>();
+		Map<String, Integer> groupCountWithNonDefaultAccessForTableColumns = new HashMap<>();
 		for (int i = 0; i < solution_uuids.length; i++)
 		{
 			UUID solution_uuid = solution_uuids[i];
@@ -1395,13 +1467,13 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_uuid + ", " + releaseNumber, e);
-					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
+					return;
 				}
 				if (solution == null)
 				{
 					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_uuid + ", " + releaseNumber,
 						null);
-					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
+					return;
 				}
 			}
 
@@ -1420,26 +1492,17 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 								List<SecurityInfo> lsi = formSecurityEntry.getValue();
 								for (SecurityInfo si : lsi)
 								{
-									UUID uuid = UUID.fromString(si.element_uid);
-									Object value = retval.get(uuid);
-									if (value instanceof Integer)
-									{
-										value = new Integer(((Integer)value).intValue() | si.access);
-									}
-									else
-									{
-										value = new Integer(si.access);
-									}
-									Integer old = groupsWithNonDefaultAccess.get(uuid);
+									String uid = si.element_uid;
+									Integer old = groupCountWithNonDefaultAccessForFormsAndComponents.get(uid);
 									if (old == null)
 									{
-										groupsWithNonDefaultAccess.put(uuid, Integer.valueOf(1));
+										groupCountWithNonDefaultAccessForFormsAndComponents.put(uid, Integer.valueOf(1));
 									}
 									else
 									{
-										groupsWithNonDefaultAccess.put(uuid, Integer.valueOf(old.intValue() + 1));
+										groupCountWithNonDefaultAccessForFormsAndComponents.put(uid, Integer.valueOf(old.intValue() + 1));
 									}
-									retval.put(uuid, (Integer)value);
+									gatherer.explicitFormElementAccessFoundForMerge(uid, si.access);
 								}
 							}
 						}
@@ -1459,42 +1522,40 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					for (SecurityInfo si : lsi)
 					{
 						String cid = Utils.getDotQualitfied(s_t, si.element_uid);
-						Object value = retval.get(cid);
-						if (value instanceof Integer)
-						{
-							value = new Integer(((Integer)value).intValue() | si.access);
-						}
-						else
-						{
-							value = new Integer(si.access);
-						}
-						Integer old = groupsWithNonDefaultAccess.get(cid);
+
+						Integer old = groupCountWithNonDefaultAccessForTableColumns.get(cid);
 						if (old == null)
 						{
-							groupsWithNonDefaultAccess.put(cid, Integer.valueOf(1));
+							groupCountWithNonDefaultAccessForTableColumns.put(cid, Integer.valueOf(1));
 						}
 						else
 						{
-							groupsWithNonDefaultAccess.put(cid, Integer.valueOf(old.intValue() + 1));
+							groupCountWithNonDefaultAccessForTableColumns.put(cid, Integer.valueOf(old.intValue() + 1));
 						}
-						retval.put(cid, (Integer)value); //server.table.column -> int
+						gatherer.explicitColumnAccessFoundForMerge(cid, si.access); // server.table.column -> int
 					}
 				}
 			}
 		}
+
 		if (groups.length > 1)
 		{
 			// implicit values for all values that are in the map that are not already VIEWABLE|ACCESSIBLE must be looked at if they would have that implicit value
-			for (Entry<Object, Integer> entry : retval.entrySet())
+			for (Entry<String, Integer> entry : groupCountWithNonDefaultAccessForTableColumns.entrySet())
 			{
-				Integer gwnda = groupsWithNonDefaultAccess.get(entry.getKey());
-				if (gwnda.intValue() < groups.length)
+				if (entry.getValue().intValue() < groups.length)
 				{
-					implicitRights.add(entry.getKey());
+					gatherer.implicitColumnAccess(entry.getKey());
+				}
+			}
+			for (Entry<String, Integer> entry : groupCountWithNonDefaultAccessForFormsAndComponents.entrySet())
+			{
+				if (entry.getValue().intValue() < groups.length)
+				{
+					gatherer.implicitFormElementAccess(entry.getKey());
 				}
 			}
 		}
-		return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 	}
 
 	private boolean formIsChildOfPersist(IPersist persist, final UUID formUUID)
@@ -1785,11 +1846,33 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return getId(uuid);
 	}
 
-	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID elementUUID, String solutionName) throws ServoyException
+	@Override
+	@Deprecated
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID elementUUID, String solutionName)
+		throws ServoyException, RemoteException
 	{
-		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
+		setFormSecurityAccess(clientId, groupName, accessMask, elementUUID.toString(), solutionName);
+	}
+
+	@Override
+	@Deprecated
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, UUID elementUUID, String solutionName)
+		throws ServoyException, RemoteException
+	{
+		setFormSecurityAccess(clientId, groupName, accessMask, formUUID, elementUUID.toString(), solutionName);
+	}
+
+	/**
+	 * @param elementUID it is normally a PersistIdentifier.toJSONString() of an element; it can be a simple UUID as well,
+	 * just like it was used before SVY-20327, but as a String. By coincidence for most elements (so for the ones that are not nested inside form components)
+	 * the JSON representation of their PersistIdentifier is equal to their UUID.toString().
+	 */
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, String elementUID, String solutionName)
+		throws ServoyException
+	{
+		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUID == null || (!isOperational()))
 		{
-			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUUID +
+			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUID +
 				" received, or manager is not operational: " + isOperational() + " - setFormSecurityAccess(...)", null);
 			return;
 		}
@@ -1814,7 +1897,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				while (it.hasNext())
 				{
 					Form f = it.next();
-					if (isElementChildOfForm(elementUUID.toString(), f))
+					if (isElementChildOfForm(elementUID, f))
 					{
 						form = f;
 					}
@@ -1823,7 +1906,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 			if (form != null)
 			{
-				addFormSecurityAccess(groupName, accessMask, elementUUID, form.getUUID());
+				addFormSecurityAccess(groupName, accessMask, elementUID, form.getUUID());
 				if (writeMode == WRITE_MODE_AUTOMATIC)
 				{
 					writeSecurityInfo(form, false);
@@ -1840,14 +1923,19 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
+	/**
+	 * @param elementUID it is normally a PersistIdentifier.toJSONString() of an element; it can be a simple UUID as well,
+	 * just like it was used before SVY-20327, but as a String. By coincidence for most elements (so for the ones that are not nested inside form components)
+	 * the JSON representation of their PersistIdentifier is equal to their UUID.toString().
+	 */
 	@Override
-	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, UUID elementUUID, String solutionName)
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, String elementUID, String solutionName)
 		throws ServoyException, RemoteException
 	{
 
-		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUUID == null || (!isOperational()))
+		if (groupName == null || groupName.length() == 0 || accessMask == null || elementUID == null || (!isOperational()))
 		{
-			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUUID +
+			ServoyLog.logError("Invalid parameters: permision: " + groupName + ", accessMask: " + accessMask + ", element: " + elementUID +
 				" received, or manager is not operational: " + isOperational() + " - setFormSecurityAccess(...)", null);
 			return;
 		}
@@ -1863,7 +1951,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 			if (form != null)
 			{
-				addFormSecurityAccess(groupName, accessMask, elementUUID, form.getUUID());
+				addFormSecurityAccess(groupName, accessMask, elementUID, form.getUUID());
 				if (writeMode == WRITE_MODE_AUTOMATIC)
 				{
 					writeSecurityInfo(form, false);
@@ -1880,7 +1968,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
-	public void addFormSecurityAccess(String groupName, Integer accessMask, UUID elementUUID, UUID formUuid)
+	public void addFormSecurityAccess(String groupName, Integer accessMask, String elementUIDToString, UUID formUuid)
 	{
 		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
 
@@ -1892,7 +1980,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				securityInfo = new SortedList<SecurityInfo>();
 				gsi.formSecurity.put(formUuid, securityInfo);
 			}
-			setSecurityInfo(securityInfo, elementUUID.toString(), accessMask.intValue());
+			setSecurityInfo(securityInfo, elementUIDToString, accessMask.intValue());
 		}
 		else
 		{

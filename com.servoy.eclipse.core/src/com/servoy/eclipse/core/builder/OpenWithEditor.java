@@ -25,9 +25,9 @@ import org.eclipse.ui.ide.IDE;
 
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;

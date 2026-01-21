@@ -1602,7 +1602,7 @@ public class DataModelManager implements IServerInfoManager
 		{
 			int severity = -1;
 			String customSeverity = ServoyBuilder.getSeverity(problem.getLeft(), problem.getRight().name(),
-				ServoyModelFinder.getServoyModel().getActiveProject().getProject());
+				ServoyModelFinder.getServoyModel().getActiveProject() != null ? ServoyModelFinder.getServoyModel().getActiveProject().getProject() : null);
 			if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 			{
 				severity = ServoyBuilder.getTranslatedSeverity(customSeverity, problem.getRight());

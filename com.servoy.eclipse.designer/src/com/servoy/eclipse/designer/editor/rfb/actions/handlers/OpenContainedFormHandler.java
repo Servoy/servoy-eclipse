@@ -28,8 +28,8 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
@@ -39,8 +39,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.Utils;
 
 /**

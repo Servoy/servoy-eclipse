@@ -29,15 +29,15 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.UIUtils.CheckGroupDialog;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetCssAnchoringCommand;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
+import com.servoy.j2db.util.PersistIdentifier;
 
 /**
  * @author emera

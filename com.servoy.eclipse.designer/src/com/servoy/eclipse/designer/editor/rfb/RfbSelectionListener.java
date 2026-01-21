@@ -36,7 +36,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.Utils;
 
 /**

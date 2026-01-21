@@ -79,9 +79,9 @@ import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -106,7 +106,7 @@ public class GhostHandler implements IServerService
 
 	public static PersistIdentifier getGhostPersistIdentifier(AbstractBase parent, IChildWebObject ghostWebObject)
 	{
-		PersistIdentifier parentID = FormElement.getDesignIdFromPersist(parent);
+		PersistIdentifier parentID = PersistIdentifier.fromPersist(parent);
 		PersistIdentifier ghostID = new PersistIdentifier(parentID.persistUUIDAndFCPropAndComponentPath(), ghostWebObject.getUUID().toString());
 		return ghostID;
 	}

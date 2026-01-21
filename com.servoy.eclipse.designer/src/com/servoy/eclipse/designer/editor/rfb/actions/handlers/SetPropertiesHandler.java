@@ -27,9 +27,9 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.SnapToComponentUtil;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -43,7 +43,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
+import com.servoy.j2db.util.PersistIdentifier;
 
 /**
  * @author user

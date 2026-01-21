@@ -34,7 +34,6 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -70,6 +69,7 @@ import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.rfb.palette.PaletteFavoritesHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -81,8 +81,8 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.Utils;
 
 /**

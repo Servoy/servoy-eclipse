@@ -86,6 +86,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -779,15 +780,24 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					else
 					{
-						UUID uuid = UUID.fromString(elementInfo.elementUuid);
-						if (uuid != null)
-						{//at this point, on cleanImport, imported elements still contains the old uuid's - the new uuid's are generated but not yet replaced the old ones
-							UUID formUUID = getFormUUID(importInfo, rootObjectImportInfo, uuid);
+						String elementUid = elementInfo.elementUuid; // in new code this is a PersistIdentifier.toJSONString (which can be an UUID); in old code it would be an UUID, which is handled fine by PersistIdentiier.fromJSONString anyway
+						if (elementUid != null)
+						{
+							// at this point, on cleanImport, imported elements still contains the old uuid's - the new uuid's are generated but not yet replaced the old ones
+							PersistIdentifier elementIdentifier = PersistIdentifier.fromJSONString(elementUid);
+
+							UUID formUUID = getFormUUID(importInfo, rootObjectImportInfo, elementIdentifier);
 							if (importInfo.cleanImport)
-							{//on cleanImport we need to add security data to new uuid
-								uuid = importInfo.cleanImportUUIDMap.get(elementInfo.elementUuid);
+							{
+								// on cleanImport we need to add security data to new uuid
+
+								// in case of elements nested inside form component, the elementIdentifier contains the UUID of the top-most form component component and a path of names;
+								// update the UUID if needed by clean import (which is either the component's UUID directly or the top most form component component's UUID in case of FC usage)
+								elementIdentifier.persistUUIDAndFCPropAndComponentPath()[0] = importInfo.cleanImportUUIDMap
+									.get(elementIdentifier.persistUUIDAndFCPropAndComponentPath()[0]).toString();
+								elementUid = elementIdentifier.toJSONString();
 							}
-							userManager.addFormSecurityAccess(groupInfo.name, elementInfo.elementAccess, uuid, formUUID);
+							userManager.addFormSecurityAccess(groupInfo.name, Integer.valueOf(elementInfo.elementAccess), elementUid, formUUID);
 						}
 					}
 				}
@@ -797,13 +807,14 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		}
 	}
 
-	private UUID getFormUUID(ImportInfo importInfo, RootObjectImportInfo rootObjectImportInfo, UUID childUUID)
+	private UUID getFormUUID(ImportInfo importInfo, RootObjectImportInfo rootObjectImportInfo, PersistIdentifier childIdentifier)
 	{
+		UUID uuidOfChildComponentOrTopFCOfChildInForm = UUID.fromString(childIdentifier.persistUUIDAndFCPropAndComponentPath()[0]); // usually the identifer is just an UUID of the element; but in case of form component usage - we look up the form below using the top most form component's UUID in the identifier
 		for (RootElementInfo info : rootObjectImportInfo.info.elementInfo.children)
 		{
 			if (info.typeId == IRepository.FORMS)
 			{
-				if (hasChildUUID(importInfo, info, childUUID))
+				if (hasChildUUID(importInfo, info, uuidOfChildComponentOrTopFCOfChildInForm))
 				{
 					if (importInfo.cleanImport) return importInfo.cleanImportUUIDMap.get(info.uuid);
 					return UUID.fromString(info.uuid);

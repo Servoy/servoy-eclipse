@@ -21,6 +21,7 @@ import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -249,25 +250,32 @@ public class VisualFormEditorSecurityPage extends Composite
 		});
 		treeContainer = new Composite(sashForm, SWT.NONE);
 		elementsViewer = new TableViewer(treeContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		ElementSettingsLabelProvider tableLabelProvider = new ElementSettingsLabelProvider(model);
 		elementsViewer.getTable().setHeaderVisible(true);
 		elementsViewer.getTable().setLinesVisible(true);
 
 		TableColumn elementColumn = new TableColumn(elementsViewer.getTable(), SWT.LEFT, CI_NAME);
 		elementslayout.setColumnData(elementColumn, new ColumnWeightData(20, 50, true));
+		TableViewerColumn nameViewerColumn = new TableViewerColumn(elementsViewer, elementColumn);
+		nameViewerColumn.setLabelProvider(tableLabelProvider.getCellLabelProvider(CI_NAME));
 
 		final TableColumn viewableColumn = new TableColumn(elementsViewer.getTable(), SWT.CENTER, CI_VIEWABLE);
 		elementslayout.setColumnData(viewableColumn, new ColumnPixelData(70, true));
 		TableViewerColumn viewableViewerColumn = new TableViewerColumn(elementsViewer, viewableColumn);
 		final ElementSettingsEditingSupport viewableEditingSupport = new ElementSettingsEditingSupport(IRepository.VIEWABLE, elementsViewer, model);
+		viewableViewerColumn.setLabelProvider(tableLabelProvider.getCellLabelProvider(CI_VIEWABLE));
+
 
 		final TableColumn accessibleColumn = new TableColumn(elementsViewer.getTable(), SWT.CENTER, CI_ACCESSABLE);
 		elementslayout.setColumnData(accessibleColumn, new ColumnPixelData(70, true));
 		TableViewerColumn accessableViewerColumn = new TableViewerColumn(elementsViewer, accessibleColumn);
 		final ElementSettingsEditingSupport accessableEditingSupport = new ElementSettingsEditingSupport(IRepository.ACCESSIBLE, elementsViewer, model);
+		accessableViewerColumn.setLabelProvider(tableLabelProvider.getCellLabelProvider(CI_ACCESSABLE));
+
+		ColumnViewerToolTipSupport.enableFor(elementsViewer);
 
 		treeContainer.setLayout(elementslayout);
 
-		elementsViewer.setLabelProvider(new ElementSettingsLabelProvider(model));
 		elementsViewer.setContentProvider(new ArrayContentProvider());
 		sashForm.setWeights(new int[] { 1, 1 });
 		elementColumn.setText("Elements");
@@ -358,7 +366,7 @@ public class VisualFormEditorSecurityPage extends Composite
 
 	private void toggleValues(int mask)
 	{
-		model.getFormElements().forEach(elem -> model.setRight(!model.hasRight(elem, mask), elem, mask));
+		model.getFormElements().forEach(elem -> model.setAccessRight(!model.hasRight(elem, mask), elem, mask));
 	}
 
 }

@@ -30,14 +30,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.RfbSelectionListener;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
+import com.servoy.j2db.util.PersistIdentifier;
 
 public class SetSelectionHandler implements IServerService
 {
