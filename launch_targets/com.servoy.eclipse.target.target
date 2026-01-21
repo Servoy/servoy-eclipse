@@ -188,42 +188,6 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.linux.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.macosx.aarch64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.macosx.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.win32.aarch64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.win32.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime</artifactId>
-                    <version>1.23.2</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
                     <groupId>com.networknt</groupId>
                     <artifactId>json-schema-validator</artifactId>
                     <version>2.0.0</version>
@@ -239,12 +203,6 @@
                     <groupId>com.servoy</groupId>
                     <artifactId>javax.transaction</artifactId>
                     <version>1.1.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.servoy</groupId>
-                    <artifactId>onnx-models-bge-small-en</artifactId>
-                    <version>1.5.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>

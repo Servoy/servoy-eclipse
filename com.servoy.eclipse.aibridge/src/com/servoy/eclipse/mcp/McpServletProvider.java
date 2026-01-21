@@ -6,8 +6,8 @@ import org.apache.tomcat.starter.IServicesProvider;
 import org.apache.tomcat.starter.ServletInstance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
-import com.servoy.eclipse.knowledgebase.mcp.ToolManager;
+//import com.servoy.eclipse.knowledgebase.mcp.IToolHandler;
+//import com.servoy.eclipse.knowledgebase.mcp.ToolManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
@@ -46,20 +46,20 @@ public class McpServletProvider implements IServicesProvider
 	 */
 	private void registerHandlers(McpSyncServer server)
 	{
-		IToolHandler[] handlers = ToolManager.getHandlers();
-
-		for (IToolHandler handler : handlers)
-		{
-			try
-			{
-				handler.registerTools(server);
-				ServoyLog.logInfo("[MCP] Registered handler: " + handler.getHandlerName());
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("[MCP] Failed to register handler: " + handler.getHandlerName(), e);
-			}
-		}
+//		IToolHandler[] handlers = ToolManager.getHandlers();
+//
+//		for (IToolHandler handler : handlers)
+//		{
+//			try
+//			{
+//				handler.registerTools(server);
+//				ServoyLog.logInfo("[MCP] Registered handler: " + handler.getHandlerName());
+//			}
+//			catch (Exception e)
+//			{
+//				ServoyLog.logError("[MCP] Failed to register handler: " + handler.getHandlerName(), e);
+//			}
+//		}
 	}
 
 }
