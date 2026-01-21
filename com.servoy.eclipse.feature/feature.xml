@@ -431,38 +431,4 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.equo.chromium.eclipse.hook"
          version="1.0.11"/>
 
-   <plugin
-         id="onnx-models-bge-small-en"
-         version="1.5.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.linux.x86_64"
-         os="linux"
-         arch="x86_64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.macosx.aarch64"
-         os="macosx"
-         arch="aarch64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.macosx.x86_64"
-         os="macosx"
-         arch="x86_64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.win32.aarch64"
-         os="win32"
-         arch="aarch64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.win32.x86_64"
-         os="win32"
-         arch="x86_64"
-         version="0.15.0"/>
-
 </feature>
