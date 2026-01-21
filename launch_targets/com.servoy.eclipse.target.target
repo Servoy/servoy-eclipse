@@ -254,6 +254,12 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>jandex</artifactId>
+                    <version>3.5.3</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>jakarta.activation</groupId>
                     <artifactId>jakarta.activation-api</artifactId>
                     <version>2.1.4</version>
