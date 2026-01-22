@@ -170,9 +170,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				{
 					Display.getDefault().asyncExec(new Runnable()
 					{
-						LayoutContainer container = CSSPositionUtils
-							.isCSSPositionContainer((LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS))
-								? (LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS) : null;
+						LayoutContainer container = (LayoutContainer)newPersist[newPersist.length - 1].getAncestor(IRepository.LAYOUTCONTAINERS);
 
 						@Override
 						public void run()
@@ -924,7 +922,14 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() != null)
 						{
 							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
-							doFullFormRefresh(null);
+							if (persist instanceof LayoutContainer container)
+							{
+								doFullFormRefresh(container);
+							}
+							else
+							{
+								doFullFormRefresh(null);
+							}
 							break;
 						}
 					}
@@ -945,10 +950,25 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
 			if (activePage instanceof RfbVisualFormEditorDesignPage)
 			{
+				AbstractContainer zoomedContainer = ((RfbVisualFormEditorDesignPage)activePage).getZoomedContainer();
 				if (container != null)
 				{
-					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
-					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+					if (zoomedContainer == null)
+					{
+						((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+						((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+					}
+					else
+					{
+						boolean paramIsGood = true;
+						String extendsId = container.getExtendsID();
+						if (extendsId != null && !extendsId.equals(zoomedContainer.getUUID().toString()) && !extendsId.equals(zoomedContainer.getExtendsID()))
+						{
+							paramIsGood = false;
+						}
+						((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+						((RfbVisualFormEditorDesignPage)activePage).zoomIn(paramIsGood ? container : (LayoutContainer)zoomedContainer);
+					}
 				}
 				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
 			}
