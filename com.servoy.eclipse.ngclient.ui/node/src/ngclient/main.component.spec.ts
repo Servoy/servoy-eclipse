@@ -9,9 +9,14 @@ import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading
 import { ServerDataService } from './services/serverdata.service';
 import { I18NProvider } from './services/i18n_provider.service';
 import { I18NListener } from '../../projects/servoy-public/src/lib/services/servoy_public.service';
+import { ServoyTestingModule } from '../testing/servoytesting.module';
+import { ServoyPublicModule } from '@servoy/public';
 
 describe('MainComponent', () => {
-  const servicesService = jasmine.createSpyObj('ServoyService', ['connect']);
+  const servicesService = jasmine.createSpyObj('ServoyService', ['connect','getSolutionSettings']);
+  servicesService.getSolutionSettings.and.returnValue({ 
+    sessionProblem: null
+});
   const i18n: I18NListener = {
       messages: () =>i18n,
       destroy: () =>{}
@@ -20,6 +25,9 @@ describe('MainComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         MainComponent,MockFormComponent,MockDefaultNavigator,MockSessionView
+      ],
+      imports: [
+        ServoyTestingModule, ServoyPublicModule
       ],
       providers:    [ {provide: ServoyService, useValue: servicesService },
         { provide:AllServiceService, useValue: {init: ()=>{}} },
