@@ -51,12 +51,13 @@
     "eslint": "^9.39.2",
     "eslint-plugin-only-warn": "1.1.0",
     "eslint-plugin-prefer-arrow": "1.2.3",
-    "jasmine-core": "6.0.1",
+    "jasmine-core": "5.12.1",
     "jasmine-spec-reporter": "7.0.0",
     "karma": "6.4.4",
     "karma-chrome-launcher": "3.2.0",
     "karma-coverage-istanbul-reporter": "3.0.3",
     "karma-jasmine": "5.1.0",
+    "karma-jasmine-html-reporter": "2.1.0",
     "typescript": "5.9.3"
   }
 }
