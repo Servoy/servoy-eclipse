@@ -15,12 +15,6 @@
       "node_modules/@types",
       "typings"
     ],
-    "lib": [
-      "es2021",
-      "es2022.Error",
-      "dom",
-      "dom.Iterable"
-    ],
     "paths": {},
     "outDir": "./out-tsc/app",
     "useDefineForClassFields": false

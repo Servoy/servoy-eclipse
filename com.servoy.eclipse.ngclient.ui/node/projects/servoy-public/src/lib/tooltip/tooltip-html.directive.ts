@@ -23,8 +23,8 @@ export class HTMLTooltipDirective implements OnDestroy {
         });
     }
 
-    @HostListener('pointerenter')
-    onMouseEnter(event): void {
+    @HostListener('pointerenter',['$event'])
+    onMouseEnter(event:PointerEvent ): void {
         if (this.tooltipText) {
             let initialDelay = this.getInitialDelay();
             if (initialDelay === null || isNaN(initialDelay)) initialDelay = 750;

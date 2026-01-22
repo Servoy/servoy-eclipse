@@ -10,7 +10,7 @@
     "rxjs": "^7"
   },
   "dependencies": {
-    "@angular/cdk": "^20",
+    "@angular/cdk": "^21",
     "tslib": "*"
   },
   "license": "MIT",

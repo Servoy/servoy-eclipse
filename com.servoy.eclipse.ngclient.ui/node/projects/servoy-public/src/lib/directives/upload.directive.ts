@@ -15,7 +15,7 @@ export class UploadDirective implements OnInit {
     constructor(private servoyService: ServoyPublicService) {
     }
 
-    @HostListener('click') click(e: Event) {
+    @HostListener('click',['$event']) click(e: Event) {
         this.servoyService.showFileOpenDialog('Please select a file', false, null, this.url);
     }
 

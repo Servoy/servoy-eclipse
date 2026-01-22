@@ -7,9 +7,9 @@
     "@servoy/public": "*"
   },
   "dependencies": {
-    "@angular/cdk": "^20",
+    "@angular/cdk": "^21",
     "@eonasdan/tempus-dominus": "<6.11",
-    "@ng-bootstrap/ng-bootstrap": "^19",
+    "@ng-bootstrap/ng-bootstrap": "^20",
     "@popperjs/core": "<3",
     "@tinymce/tinymce-angular": "<8",
     "bootstrap": "<6",

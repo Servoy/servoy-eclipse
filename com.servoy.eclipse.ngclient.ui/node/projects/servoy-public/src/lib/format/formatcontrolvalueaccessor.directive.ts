@@ -71,16 +71,18 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         this.log = logFactory.getLogger('formatdirective');
     }
 
-    @HostListener('blur', ['$event.target.value']) touched(value: any) {
-        this.onTouchedCallback();
-        this.hasFocus = false;
-        this.dateInputChange(value);
-        const inputType = this.getType();
-        if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
-            this.writeValue(this.realValue);
-        }
-        if (!this.format.isMask && (this.format.uppercase || this.format.lowercase) && this.focusText != this._elementRef.nativeElement.value && inputType === 'text') {
-            this._elementRef.nativeElement.dispatchEvent(new CustomEvent('change', { bubbles: true }));
+    @HostListener('blur', ['$event.target']) touched(target: EventTarget) {
+        if ("value" in target) {
+            this.onTouchedCallback();
+            this.hasFocus = false;
+            this.dateInputChange(target.value);
+            const inputType = this.getType();
+            if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
+                this.writeValue(this.realValue);
+            }
+            if (!this.format.isMask && (this.format.uppercase || this.format.lowercase) && this.focusText != this._elementRef.nativeElement.value && inputType === 'text') {
+                this._elementRef.nativeElement.dispatchEvent(new CustomEvent('change', { bubbles: true }));
+            }
         }
     }
 
@@ -101,50 +103,52 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         }
     }
 
-    @HostListener('change', ['$event.target.value']) input(value: any) {
-        let data = value;
-        const inputType = this.getType();
-        if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
-            return;
-        }
-        else if (inputType === 'number') {
-            data = FormatDirective.BROWSERNUMBERFORMAT.parse(value);
-        } else if (inputType === 'email') {
-            data = value;
-        } else if (!this.findmode && this.format) {
-            const type = this.format.type;
-            let format = this.format.display ? this.format.display : this.format.edit;
-            if (this.hasFocus && this.format.edit && !this.format.isMask) format = this.format.edit;
-            try {
-                data = this.formatService.unformat(data, format, type, this.realValue, true);
-            } catch (e) {
-                this.log.error(e);
-                //TODO set error state
+    @HostListener('change', ['$event.target']) input(target: EventTarget) {
+        if ("value" in target) {
+            let data = target.value;
+            const inputType = this.getType();
+            if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
+                return;
             }
-            if (this.format.type === 'TEXT' && this.format.isRaw && this.format.isMask) {
-                if (data && format && data.length === format.length) {
-                    let ret = '';
-                    for (let i = 0; i < format.length; i++) {
-                        switch (format[i]) {
-                            case 'U':
-                            case 'L':
-                            case 'A':
-                            case '?':
-                            case '*':
-                            case 'H':
-                            case '#':
-                                ret += data[i];
-                                break;
-                            default:
-                                // ignore literal characters
-                                break;
+            else if (inputType === 'number') {
+                data = FormatDirective.BROWSERNUMBERFORMAT.parse(data as string);
+            } else if (inputType === 'email') {
+                data = target.value;
+            } else if (!this.findmode && this.format) {
+                const type = this.format.type;
+                let format = this.format.display ? this.format.display : this.format.edit;
+                if (this.hasFocus && this.format.edit && !this.format.isMask) format = this.format.edit;
+                try {
+                    data = this.formatService.unformat(data, format, type, this.realValue, true);
+                } catch (e) {
+                    this.log.error(e);
+                    //TODO set error state
+                }
+                if (this.format.type === 'TEXT' && this.format.isRaw && this.format.isMask && data instanceof String) {
+                    if (data && format && data.length === format.length) {
+                        let ret = '';
+                        for (let i = 0; i < format.length; i++) {
+                            switch (format[i]) {
+                                case 'U':
+                                case 'L':
+                                case 'A':
+                                case '?':
+                                case '*':
+                                case 'H':
+                                case '#':
+                                    ret += data[i];
+                                    break;
+                                default:
+                                    // ignore literal characters
+                                    break;
+                            }
                         }
+                        data = ret;
                     }
-                    data = ret;
                 }
             }
+            this.setRealValue(data);
         }
-        this.setRealValue(data);
     }
 
     dateInputChange(value: any) {
