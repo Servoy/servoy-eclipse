@@ -233,14 +233,23 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 			int statusCode = response.statusCode();
 
 			// Optional: handle response
-			if (statusCode == 200)
+			if (statusCode >= 400)
 			{
-				System.out.println("post response: " + response.body());
-			}
-			else
-			{
-				org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Pipeline Error",
-					"Failed to set up pipeline: Status code" + response.statusCode());
+				switch (statusCode)
+				{
+					case 401 :
+						org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Pipeline Error",
+							"Failed to set up pipeline: Unauthorized (401). Please check your login token.");
+						break;
+					case 409 :
+						org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Pipeline Error",
+							"Failed to set up pipeline: Conflict (409). A pipeline with the same name may already exist.");
+						break;
+					default :
+						org.eclipse.jface.dialogs.MessageDialog.openError(getShell(), "Pipeline Error",
+							"Failed to set up pipeline. Please check your details and try again. If this problem persists, please create a support ticket.");
+						break;
+				}
 				return false;
 			}
 

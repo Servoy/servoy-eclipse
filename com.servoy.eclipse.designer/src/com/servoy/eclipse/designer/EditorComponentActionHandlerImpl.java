@@ -36,7 +36,7 @@ import com.servoy.j2db.dataprocessing.IModificationSubject;
 import com.servoy.j2db.dataprocessing.ModificationEvent;
 import com.servoy.j2db.dataprocessing.ModificationSubject;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.UUID;
 
 /**

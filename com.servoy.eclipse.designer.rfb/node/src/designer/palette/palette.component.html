@@ -1,21 +1,29 @@
 <div id="palette" class="palette" (scroll)="onPaletteScroll()">
   <input type="text" id="searchInput" class="form-control input-xs" placeholder="Search" [(ngModel)]="searchText" (input)="onSearchInput(searchText)" (focus)="openSuggestions()" (blur)="closeSuggestions()"/>
-  <span class="delete-search" *ngIf="showSearchDeleteBtn">
+  @if (showSearchDeleteBtn) {
+    <span class="delete-search">
       <button class="btn btn-default btn-xs" (click)="clearSearch()">
-          <i class="fa fa-times"></i>
+        <i class="fa fa-times"></i>
       </button>
-  </span>
-  <h6 class="title" *ngIf="showSuggestions && filteredSuggestions.length">Recent Searches</h6>
-  <ul class="suggestions" *ngIf="showSuggestions && filteredSuggestions.length">
-      <li *ngFor="let suggestion of filteredSuggestions" (mousedown)="applySuggestion(suggestion)">
+    </span>
+  }
+  @if (showSuggestions && filteredSuggestions.length) {
+    <h6 class="title">Recent Searches</h6>
+  }
+  @if (showSuggestions && filteredSuggestions.length) {
+    <ul class="suggestions">
+      @for (suggestion of filteredSuggestions; track suggestion) {
+        <li (mousedown)="applySuggestion(suggestion)">
           <span class="text-suggestion">{{ suggestion }}</span>
           <span class="delete-suggestion">
-              <button class="btn" style="z-index: 5;" (mousedown)="removeSuggestion($event, suggestion)">
-                  <i class="fa fa-times"></i>
-              </button>
+            <button class="btn" style="z-index: 5;" (mousedown)="removeSuggestion($event, suggestion)">
+              <i class="fa fa-times"></i>
+            </button>
           </span>
-      </li>
-  </ul>
+        </li>
+      }
+    </ul>
+  }
   <button type="button" class="btn btn-default btn-link" (click)="openPackageManager()"><img draggable="false" src='/rfb/angular/templates/images/add_components.png'/>Get more components</button>
   <div ngbAccordion>
     @for (package of getPackages()| searchTextFilterDeep : searchText; track package; let i = $index) {

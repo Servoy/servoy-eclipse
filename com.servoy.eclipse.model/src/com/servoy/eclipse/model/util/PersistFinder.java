@@ -15,25 +15,21 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.util;
+package com.servoy.eclipse.model.util;
 
 import java.util.Iterator;
 import java.util.Map;
 
 import org.sablo.specification.PropertyDescription;
 
-import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebObjectImpl;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -132,6 +128,8 @@ public class PersistFinder
 	/**
 	 * This is kind of the reverse of {@link PersistFinder#searchForPersist(FlattenedSolution, PersistIdentifier)}.<br/><br/>
 	 *
+	 * Use this method instead of {@link PersistIdentifier#fromPersist(IPersist)} if the persist you give is from the development environment, so it can be a WebFormComponentChildType.<br/><br/>
+	 *
 	 * If the persist is not inside a form component and it's not a custom type, it will just use the UUID.<br/>
 	 * If it is inside a form component then it will use the correct identification path.<br/>
 	 * If it is a custom type (like a column of a table) then it will also give the correct PersistIdemtifier for it (UUID or path + UUID of custom type)...
@@ -139,24 +137,7 @@ public class PersistFinder
 	public PersistIdentifier fromPersist(IPersist persist)
 	{
 		if (persist instanceof WebFormComponentChildType wfcct) return new PersistIdentifier(wfcct.getFcPropAndCompPath(), null);
-
-		IPersist persistToGetThePathFrom = persist;
-		String customTypeOrComponentTypePropertyUUIDInsidePersist = null;
-		if (persist instanceof IChildWebObject persistBasedJSONProp)
-		{
-			// so either a custom type (like columns of a datagrid) or a child web component (property of type 'component' like list form component uses)
-			// so we need to get as PersistIdentifier the path array (simple UUID if not in FC) + the UUID of the IChildWebObject
-			persistToGetThePathFrom = persistBasedJSONProp.getParent();
-			customTypeOrComponentTypePropertyUUIDInsidePersist = persistBasedJSONProp.getUUID().toString();
-		}
-
-		String[] fcUUIDAndNamePath = ((AbstractBase)persistToGetThePathFrom).getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
-		if (fcUUIDAndNamePath == null)
-		{
-			fcUUIDAndNamePath = new String[] { persistToGetThePathFrom.getUUID().toString() };
-		}
-
-		return new PersistIdentifier(fcUUIDAndNamePath, customTypeOrComponentTypePropertyUUIDInsidePersist);
+		else return PersistIdentifier.fromPersist(persist);
 	}
 
 	public boolean checkName(Form form, String compName)

@@ -6,10 +6,6 @@
     "types": [
       "jasmine"
     ],
-    "lib": [
-      "dom",
-      "es2020"
-    ],
     "paths": {
         "@servoy/public": [
             "../servoy-public/src/public-api"

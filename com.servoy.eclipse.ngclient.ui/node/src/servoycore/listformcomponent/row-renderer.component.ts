@@ -16,11 +16,12 @@ export class RowRenderer implements AgRendererComponent {
     startIndex: number;
 
     @HostListener('registerCSTS', ['$event'])
-    registerCSTS(event: CustomEvent) {
-        // Create a new event with the same detail
+    registerCSTS(event: Event) {
+        // Cast the event to CustomEvent to access the detail property
+        const customEvent = event as CustomEvent;
         const newEvent = new CustomEvent('registerCSTS', {
             bubbles: true,
-            detail: event.detail
+            detail: customEvent.detail
         });
         this.lfc.elementRef.nativeElement.children[0].dispatchEvent(newEvent);
     }

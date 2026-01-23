@@ -31,9 +31,10 @@ import com.servoy.j2db.util.UUID;
 /**
  * Because unit tests isolate the workspace users from the tests, but depend on the app. server
  * user manager for many operations (which would normally reflect workspace users and not the possibly
- * altered test run users), we need to be able to temporarily switch the app. server user manager behaviour to that of the test client user manager.
+ * altered test run users), we need to be able to temporarily switch the app. server user manager behavior to that of the test client user manager.
  *
  * This class can be used as a user manager that is able to switch between a "main" EclipseUserManager and some other (IUserManagerInternal && IUserManager).
+ *
  * @author acostescu
  */
 public class SwitchableEclipseUserManager implements IUserManagerInternal, IUserManager
@@ -97,11 +98,20 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 		return switchedTo == null ? eclipseUserManger.getUserGroups(clientId, userUID) : switchedTo.getUserGroups(clientId, userUID);
 	}
 
+	@Deprecated
 	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, UUID[] solution_uuids, int[] releaseNumber, String[] groups)
 		throws RemoteException, ServoyException
 	{
 		return switchedTo == null ? eclipseUserManger.getSecurityAccess(clientId, solution_uuids, releaseNumber, groups)
 			: switchedTo.getSecurityAccess(clientId, solution_uuids, releaseNumber, groups);
+	}
+
+	@Override
+	public TableAndFormSecurityAccessInfo getSecurityAccessForTablesAndForms(String clientId, UUID[] solution_uuids, int[] releaseNumbers, String[] groups)
+		throws RemoteException, ServoyException
+	{
+		return switchedTo == null ? eclipseUserManger.getSecurityAccessForTablesAndForms(clientId, solution_uuids, releaseNumbers, groups)
+			: switchedTo.getSecurityAccessForTablesAndForms(clientId, solution_uuids, releaseNumbers, groups);
 	}
 
 	public String getUserUID(String clientId, String username) throws ServoyException, RemoteException
@@ -228,6 +238,23 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 			: switchedTo.changeUserName(clientId, userUID, newUserName);
 	}
 
+	@Override
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, String elementUID, String solutionName)
+		throws ServoyException, RemoteException
+	{
+		if (switchedTo == null) eclipseUserManger.setFormSecurityAccess(clientId, groupName, accessMask, elementUID, solutionName);
+		else switchedTo.setFormSecurityAccess(clientId, groupName, accessMask, elementUID, solutionName);
+	}
+
+	@Override
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, String elementUID, String solutionName)
+		throws ServoyException, RemoteException
+	{
+		if (switchedTo == null) eclipseUserManger.setFormSecurityAccess(clientId, groupName, accessMask, formUUID, elementUID, solutionName);
+		else switchedTo.setFormSecurityAccess(clientId, groupName, accessMask, formUUID, elementUID, solutionName);
+	}
+
+	@Deprecated
 	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID elementUUID, String solutionName)
 		throws ServoyException, RemoteException
 	{
@@ -235,6 +262,7 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 		else switchedTo.setFormSecurityAccess(clientId, groupName, accessMask, elementUUID, solutionName);
 	}
 
+	@Deprecated
 	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID formUUID, UUID elementUUID, String solutionName)
 		throws ServoyException, RemoteException
 	{
@@ -260,4 +288,5 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 	{
 		return switchedTo == null ? eclipseUserManger.getPasswordLastSet(clientId, userUID) : switchedTo.getPasswordLastSet(clientId, userUID);
 	}
+
 }

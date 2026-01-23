@@ -182,42 +182,6 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.linux.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.macosx.aarch64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.macosx.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.win32.aarch64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime-extensions.win32.x86_64</artifactId>
-                    <version>0.15.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.onnxruntime</groupId>
-                    <artifactId>onnxruntime</artifactId>
-                    <version>1.23.2</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
                     <groupId>com.networknt</groupId>
                     <artifactId>json-schema-validator</artifactId>
                     <version>2.0.0</version>
@@ -233,12 +197,6 @@
                     <groupId>com.servoy</groupId>
                     <artifactId>javax.transaction</artifactId>
                     <version>1.1.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.servoy</groupId>
-                    <artifactId>onnx-models-bge-small-en</artifactId>
-                    <version>1.5.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -287,36 +245,6 @@
                     <groupId>de.inetsoftware</groupId>
                     <artifactId>jlessc</artifactId>
                     <version>1.14.0.s2</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j-core</artifactId>
-                    <version>1.9.1</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j</artifactId>
-                    <version>1.9.1</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>io.modelcontextprotocol.sdk</groupId>
-                    <artifactId>mcp-core</artifactId>
-                    <version>0.17.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>io.modelcontextprotocol.sdk</groupId>
-                    <artifactId>mcp-json-jackson2</artifactId>
-                    <version>0.17.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>io.projectreactor</groupId>
-                    <artifactId>reactor-core</artifactId>
-                    <version>3.8.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -564,21 +492,9 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>org.jspecify</groupId>
-                    <artifactId>jspecify</artifactId>
-                    <version>1.0.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
                     <groupId>org.owasp.encoder</groupId>
                     <artifactId>encoder</artifactId>
                     <version>1.4.0</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.reactivestreams</groupId>
-                    <artifactId>reactive-streams</artifactId>
-                    <version>1.0.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>

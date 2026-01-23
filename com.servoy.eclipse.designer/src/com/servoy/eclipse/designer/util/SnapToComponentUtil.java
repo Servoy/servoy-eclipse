@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.Assert;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.util.PersistFinder;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPosition;
@@ -33,7 +33,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportCSSPosition;
 import com.servoy.j2db.persistence.ISupportSize;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
+import com.servoy.j2db.util.PersistIdentifier;
 
 /**
  * Handlers used for setting the correct anchors for the snapped component.

@@ -50,7 +50,6 @@ import org.sablo.websocket.utils.PropertyUtils;
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
-import com.servoy.eclipse.core.util.PersistFinder;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -61,6 +60,7 @@ import com.servoy.eclipse.designer.rfb.palette.PaletteCommonsHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.designer.util.SnapToComponentUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -107,9 +107,9 @@ import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
-import com.servoy.j2db.server.ngclient.template.PersistIdentifier;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -922,7 +922,14 @@ public class CreateComponentCommand extends BaseRestorableCommand
 						if (persist instanceof ISupportExtendsID && ((ISupportExtendsID)persist).getExtendsID() != null)
 						{
 							// very likely a complex inheritance situation that won't refresh correctly, just reinitialize form designer
-							doFullFormRefresh(null);
+							if (persist instanceof LayoutContainer container)
+							{
+								doFullFormRefresh(container);
+							}
+							else
+							{
+								doFullFormRefresh(null);
+							}
 							break;
 						}
 					}
@@ -943,10 +950,25 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
 			if (activePage instanceof RfbVisualFormEditorDesignPage)
 			{
-				if (container != null && ((RfbVisualFormEditorDesignPage)activePage).getShowedContainer() != null)
+				AbstractContainer zoomedContainer = ((RfbVisualFormEditorDesignPage)activePage).getZoomedContainer();
+				if (container != null)
 				{
-					((RfbVisualFormEditorDesignPage)activePage).zoomOut();
-					((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+					if (zoomedContainer == null)
+					{
+						((RfbVisualFormEditorDesignPage)activePage).zoomIn(container);
+						((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+					}
+					else
+					{
+						boolean paramIsGood = true;
+						String extendsId = container.getExtendsID();
+						if (extendsId != null && !extendsId.equals(zoomedContainer.getUUID().toString()) && !extendsId.equals(zoomedContainer.getExtendsID()))
+						{
+							paramIsGood = false;
+						}
+						((RfbVisualFormEditorDesignPage)activePage).zoomOut();
+						((RfbVisualFormEditorDesignPage)activePage).zoomIn(paramIsGood ? container : (LayoutContainer)zoomedContainer);
+					}
 				}
 				((RfbVisualFormEditorDesignPage)activePage).refreshContent();
 			}

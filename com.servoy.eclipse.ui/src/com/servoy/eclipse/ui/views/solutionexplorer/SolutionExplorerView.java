@@ -953,7 +953,7 @@ public class SolutionExplorerView extends ViewPart
 		addResizeListener(parent);
 
 		IWorkbenchSiteProgressService siteService = this.getSite().getAdapter(IWorkbenchSiteProgressService.class);
-		Job job = new WorkbenchJob("Setting up solution explorer tree")
+		Job job = new WorkbenchJob("Setting up Solution Explorer view")
 		{
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor)

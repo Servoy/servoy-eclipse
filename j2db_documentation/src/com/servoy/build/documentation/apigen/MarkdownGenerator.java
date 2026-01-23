@@ -201,7 +201,7 @@ public class MarkdownGenerator
 	private static final Set<String> storeAsReadMe = new HashSet<>();
 	private static final Set<String> doNotStoreAsReadMe = new HashSet<>();
 
-	private static final Set<String> excludedPluginJarNames = Set.of("aibridge.jar");
+	private static final Set<String> excludedPluginJarNames = Set.of();
 	private static final List<String> nonDefaultPluginJarNamesThatWeDoGenerateDocsFor = Arrays.asList("servoy_jasperreports.jar");
 	private static String gitLocation;
 

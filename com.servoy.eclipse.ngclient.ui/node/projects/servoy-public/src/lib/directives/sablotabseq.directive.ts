@@ -26,59 +26,61 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     // handle event: Child Servoy Tab Sequence registered
     @HostListener('registerCSTS', ['$event'])
-    registerChildHandler(event: CustomEvent<{ designChildIndex: number, runtimeChildIndex: RuntimeIndex}>): boolean {
-        if (this.designTabSeq === -2 || event.detail.designChildIndex === -2) {
-            this.recalculateIndexesHandler(event.detail.designChildIndex ? event.detail.designChildIndex : 0, false);
+    registerChildHandler(event: Event): boolean {
+        const customEvent = event as CustomEvent<{ designChildIndex: number, runtimeChildIndex: RuntimeIndex }>;
+        if (this.designTabSeq === -2 || customEvent.detail.designChildIndex === -2) {
+            this.recalculateIndexes(customEvent.detail.designChildIndex ? customEvent.detail.designChildIndex : 0, false);
             event.stopPropagation();
             return false;
         }
 
         // insert it sorted
         let posInDesignArray = 0;
-        for (let tz = 0; tz < this.designChildTabSeq.length && this.designChildTabSeq[tz] < event.detail.designChildIndex; tz++) {
+        for (let tz = 0; tz < this.designChildTabSeq.length && this.designChildTabSeq[tz] < customEvent.detail.designChildIndex; tz++) {
             posInDesignArray = tz + 1;
         }
-        if (posInDesignArray === this.designChildTabSeq.length || this.designChildTabSeq[posInDesignArray] > event.detail.designChildIndex) {
-            this.designChildTabSeq.splice(posInDesignArray, 0, event.detail.designChildIndex);
+        if (posInDesignArray === this.designChildTabSeq.length || this.designChildTabSeq[posInDesignArray] > customEvent.detail.designChildIndex) {
+            this.designChildTabSeq.splice(posInDesignArray, 0, customEvent.detail.designChildIndex);
 
             // always keep in designChildIndexToArrayPosition[i] the first occurrance of design index i in the sorted designChildTabSeq array
             for (let tz = posInDesignArray; tz < this.designChildTabSeq.length; tz++) {
                 this.designChildIndexToArrayPosition[this.designChildTabSeq[tz]] = tz;
             }
-            this.runtimeChildIndexes[event.detail.designChildIndex] = event.detail.runtimeChildIndex;
+            this.runtimeChildIndexes[customEvent.detail.designChildIndex] = customEvent.detail.runtimeChildIndex;
         } else {
             // its == that means that we have dupliate design indexes; we treat this special - all same design index children as a list in one runtime index array cell
-            if (!isRuntimeIndexArray(this.runtimeChildIndexes[event.detail.designChildIndex])) {
-                this.runtimeChildIndexes[event.detail.designChildIndex] = [this.runtimeChildIndexes[event.detail.designChildIndex] as RuntimeIndex];
+            if (!isRuntimeIndexArray(this.runtimeChildIndexes[customEvent.detail.designChildIndex])) {
+                this.runtimeChildIndexes[customEvent.detail.designChildIndex] = [this.runtimeChildIndexes[customEvent.detail.designChildIndex] as RuntimeIndex];
             }
-            (this.runtimeChildIndexes[event.detail.designChildIndex] as Array<RuntimeIndex>).push(event.detail.runtimeChildIndex);
+            (this.runtimeChildIndexes[customEvent.detail.designChildIndex] as Array<RuntimeIndex>).push(customEvent.detail.runtimeChildIndex);
         }
 
-        this.recalculateIndexesHandler(event.detail.designChildIndex ? event.detail.designChildIndex : 0, false);
+        this.recalculateIndexes(customEvent.detail.designChildIndex ? customEvent.detail.designChildIndex : 0, false);
         event.stopPropagation();
         return false;
     }
 
     @HostListener('unregisterCSTS', ['$event'])
-    unregisterChildHandler(event: CustomEvent<{ designChildIndex: number, runtimeChildIndex: RuntimeIndex}>): boolean {
-        if (this.designTabSeq === -2 || event.detail.designChildIndex === -2) {
+    unregisterChildHandler(event: Event): boolean {
+        const customEvent = event as CustomEvent<{ designChildIndex: number, runtimeChildIndex: RuntimeIndex }>;
+        if (this.designTabSeq === -2 || customEvent.detail.designChildIndex === -2) {
             event.stopPropagation();
             return false;
         }
 
-        const posInDesignArray = this.designChildIndexToArrayPosition[event.detail.designChildIndex];
+        const posInDesignArray = this.designChildIndexToArrayPosition[customEvent.detail.designChildIndex];
         if (posInDesignArray !== undefined) {
             const keyInRuntimeArray = this.designChildTabSeq[posInDesignArray];
             const runtimeChildIndexForKey = this.runtimeChildIndexes[keyInRuntimeArray];
             if (!isRuntimeIndexArray(runtimeChildIndexForKey)) {
-                delete this.designChildIndexToArrayPosition[event.detail.designChildIndex];
+                delete this.designChildIndexToArrayPosition[customEvent.detail.designChildIndex];
                 for (const tmp in this.designChildIndexToArrayPosition) {
                     if (this.designChildIndexToArrayPosition[tmp] > posInDesignArray) this.designChildIndexToArrayPosition[tmp]--;
                 }
                 this.designChildTabSeq.splice(posInDesignArray, 1);
                 delete this.runtimeChildIndexes[keyInRuntimeArray];
             } else { // multiple equal design values
-                runtimeChildIndexForKey.splice(runtimeChildIndexForKey.indexOf(event.detail.runtimeChildIndex), 1);
+                runtimeChildIndexForKey.splice(runtimeChildIndexForKey.indexOf(customEvent.detail.runtimeChildIndex), 1);
                 if (runtimeChildIndexForKey.length === 1) this.runtimeChildIndexes[keyInRuntimeArray] = runtimeChildIndexForKey[0];
             }
         }
@@ -88,8 +90,14 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     // handle event: child tree was now linked or some child needs extra indexes; runtime indexes can be computed starting at the given child;
     // recalculate Parent Servoy Tab Sequence
-    @HostListener('recalculatePSTS', ['$event.detail.designChildIndex', '$event.detail.initialRootRecalculate', '$event'])
-    recalculateIndexesHandler(designChildIndex: number, initialRootRecalculate: boolean, event?: Event): boolean {
+    @HostListener('recalculatePSTS', ['$event'])
+    recalculateIndexesHandler(event: Event): boolean {
+        const customEvent = event as CustomEvent<{ designChildIndex: number, initialRootRecalculate: boolean }>;
+        const designChildIndex = customEvent.detail.designChildIndex;
+        const initialRootRecalculate = customEvent.detail.initialRootRecalculate;
+        return this.recalculateIndexes(designChildIndex, initialRootRecalculate, event);
+      }
+    recalculateIndexes(designChildIndex: number, initialRootRecalculate: boolean, event?: Event): boolean {
         if (this.designTabSeq === -2 || designChildIndex === -2) {
             if (event) event.stopPropagation();
             return false;
@@ -112,18 +120,20 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     }
 
     @HostListener('disableTabseq', ['$event'])
-    disableTabseq(event: CustomEvent<boolean>): boolean {
+    disableTabseq(event: Event): boolean {
+        const customEvent = event as CustomEvent<boolean>;
         this.isEnabled = false;
         this.recalculateChildRuntimeIndexesStartingAt(0, true);
-        event.stopPropagation();
+        customEvent.stopPropagation();
         return false;
     }
 
     @HostListener('enableTabseq', ['$event'])
-    enableTabseq(event: CustomEvent<boolean>): boolean {
+    enableTabseq(event: Event): boolean {
+        const customEvent = event as CustomEvent<boolean>;
         this.isEnabled = true;
         this.triggerRecalculatePSTSInParent(0);
-        event.stopPropagation();
+        customEvent.stopPropagation();
         return false;
     }
 
@@ -144,7 +154,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
         // check to see if this is the top-most tabSeq container
         if (this.config && this.config.root) {
             // it's root tab seq container (so no parent); just do initial tree calculation
-            this.recalculateIndexesHandler(0, true);
+            this.recalculateIndexes(0, true);
         } else {
             if (this.designTabSeq !== -2) {
                 this.triggerRegisterCSTSInParent(this.designTabSeq, this.runtimeIndex);

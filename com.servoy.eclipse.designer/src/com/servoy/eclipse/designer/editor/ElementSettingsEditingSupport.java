@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.util.List;
+
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -29,8 +31,10 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 
 import com.servoy.eclipse.ui.editors.table.SimpleChangeSupport;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 
 /**
  * Editing support for setting security checkboxes in form editor security page.
@@ -69,8 +73,9 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 	@Override
 	protected boolean canEdit(Object element)
 	{
-		if (mask == IRepository.ACCESSIBLE && !model.hasRight((IPersist)element, IRepository.VIEWABLE)) return false;
-		return true;
+		return (mask == IRepository.ACCESSIBLE)
+			? ElementSettingsLabelProvider.getAccessibleCheckImg(element, model) != ElementSettingsLabelProvider.DISABLED_IMAGE
+			: ElementSettingsLabelProvider.getViewableCheckImg(element, model) != ElementSettingsLabelProvider.DISABLED_IMAGE;
 	}
 
 	@Override
@@ -95,12 +100,55 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 		if (element instanceof IPersist && value != null)
 		{
 			IPersist persist = (IPersist)element;
-			boolean right = Boolean.parseBoolean(value.toString());
-			model.setRight(right, persist, mask);
-			if (mask == IRepository.VIEWABLE && !right)
+			boolean valueToSetForThisMask = Boolean.parseBoolean(value.toString());
+			model.setAccessRight(valueToSetForThisMask, persist, mask);
+			if (valueToSetForThisMask == false)
 			{
-				// also uncheck accesible
-				model.setRight(right, persist, IRepository.ACCESSIBLE);
+				if (mask == IRepository.VIEWABLE)
+				{
+					// also un-check accessible for this persist - as if it is not viewable, accessible has no meaning
+					model.setAccessRight(false, persist, IRepository.ACCESSIBLE);
+					// un-check both 'viewable' and 'accessible' for all child components, if
+					// applicable (if this is a form component component - because then it
+					// restricts stuff for all children)
+					List<IPersist> allElements = model.getFormElements();
+					for (IPersist el : allElements)
+					{
+						IPersist parentFCC = el;
+						while ((parentFCC = ((AbstractBase)parentFCC)
+							.getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER)) != null)
+						{
+							if (parentFCC == persist)
+							{
+								model.setAccessRight(false, el, IRepository.VIEWABLE);
+								model.setAccessRight(false, el, IRepository.ACCESSIBLE);
+								break;
+							}
+						}
+					}
+				}
+				else
+				{
+					// mask == IRepository.ACCESSIBLE
+
+					// un-check 'accessible' for all child components, if
+					// applicable (if this is a form component component - because then it
+					// restricts stuff for all children)
+					List<IPersist> allElements = model.getFormElements();
+					for (IPersist el : allElements)
+					{
+						IPersist parentFCC = el;
+						while ((parentFCC = ((AbstractBase)parentFCC)
+							.getRuntimeProperty(FormElementHelper.FC_DIRECT_PARENT_FORM_COMPONENT_CONTAINER)) != null)
+						{
+							if (parentFCC == persist)
+							{
+								model.setAccessRight(false, el, IRepository.ACCESSIBLE);
+								break;
+							}
+						}
+					}
+				}
 			}
 			changeSupport.fireEvent(new ChangeEvent(ElementSettingsEditingSupport.this));
 		}

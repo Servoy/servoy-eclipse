@@ -790,4 +790,9 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		showContainer(zoomed.isEmpty() ? null : zoomed.pop());
 	}
 
+	public AbstractContainer getZoomedContainer()
+	{
+		return showedContainer;
+	}
+
 }

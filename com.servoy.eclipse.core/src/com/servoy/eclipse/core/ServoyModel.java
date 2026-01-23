@@ -1554,12 +1554,15 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							for (String server_name : array)
 							{
 								IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
-								if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
+
+								// auto create in mem server's tables if dbis are available (very useful for working with test in mem DBs)
+								try
 								{
-									IFolder serverInformationFolder = dataModelManager.getServerInformationFolder(server.getName());
-									if (serverInformationFolder.exists())
+									if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()) &&
+										server.getTableNames(true).size() == 0)
 									{
-										try
+										IFolder serverInformationFolder = dataModelManager.getServerInformationFolder(server.getName());
+										if (serverInformationFolder.exists())
 										{
 											serverInformationFolder.accept((IResource resource) -> {
 												String extension = resource.getFileExtension();
@@ -1587,11 +1590,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 												return true;
 											});
 										}
-										catch (Exception e)
-										{
-											ServoyLog.logError(e);
-										}
 									}
+								}
+								catch (Exception e)
+								{
+									ServoyLog.logError(e);
 								}
 							}
 

@@ -17,9 +17,11 @@ export class LogConfiguration {
     }
 }
 
-declare global {
-    // extend the existing window interface with the new log provider property
-    interface Window { svyLogConfiguration: LogConfiguration; logFactory: LoggerFactory; logLevels: {[property: string]: LogLevel}; console: Console }
+export interface ServoyWindow extends Window {
+    svyLogConfiguration: LogConfiguration;
+    logFactory: LoggerFactory;
+    logLevels: {[property: string]: LogLevel};
+    console: Console;
 }
 
 const noop = (): unknown => undefined;
@@ -29,7 +31,8 @@ export class LoggerService {
     private enabled = false;
 
     constructor(windowRefService: WindowRefService, private svyLogConfiguration: LogConfiguration, private className: string ) {
-        this.console = windowRefService.nativeWindow.console;
+        const win = windowRefService.nativeWindow as unknown as ServoyWindow;
+        this.console = win.console;
     }
 
     public buildMessage(message: string | ( () => string )) {
@@ -110,12 +113,13 @@ export class LoggerFactory {
     private defaultLogConfiguration: LogConfiguration;
 
     constructor(private windowRefService: WindowRefService ) {
-        windowRefService.nativeWindow.logFactory = this;
-        this.defaultLogConfiguration = windowRefService.nativeWindow.svyLogConfiguration;
+        const win = windowRefService.nativeWindow as unknown as ServoyWindow;
+        win.logFactory = this;
+        this.defaultLogConfiguration = win.svyLogConfiguration;
         if ( this.defaultLogConfiguration == null ) {
             this.defaultLogConfiguration = new LogConfiguration();
-            windowRefService.nativeWindow.svyLogConfiguration = this.defaultLogConfiguration;
-            windowRefService.nativeWindow.logLevels = {error: LogLevel.ERROR, debug: LogLevel.DEBUG, info: LogLevel.INFO, warn: LogLevel.WARN, spam: LogLevel.SPAM};
+            win.svyLogConfiguration = this.defaultLogConfiguration;
+            win.logLevels = {error: LogLevel.ERROR, debug: LogLevel.DEBUG, info: LogLevel.INFO, warn: LogLevel.WARN, spam: LogLevel.SPAM};
         }
     }
 

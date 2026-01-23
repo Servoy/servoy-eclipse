@@ -63,7 +63,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -81,7 +80,6 @@ import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.CSSPositionUtils;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
@@ -92,11 +90,12 @@ import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
-import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.FormElementHelper.TabSeqProperty;
-import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.ngclient.utils.FormComponentUtils;
+import com.servoy.j2db.server.ngclient.utils.FormComponentUtils.FCCCHandlerArgs;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
@@ -433,10 +432,10 @@ public class VisualFormEditorTabSequencePage extends Composite
 					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentType);
 					if (specification != null)
 					{
-						Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
-						if (properties != null && properties.size() > 0)
+						Collection<PropertyDescription> tabSeqProperties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
+						if (tabSeqProperties != null && tabSeqProperties.size() > 0)
 						{
-							for (PropertyDescription pd : properties)
+							for (PropertyDescription pd : tabSeqProperties)
 							{
 								int tabseq = Utils.getAsInteger(webComponent.getProperty(pd.getName()));
 								if (tabseq >= 0)
@@ -449,8 +448,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 								}
 							}
 						}
-						properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
-						addFormComponentProperties(persist, properties, available, selected, (IBasicWebComponent)persist, new Point());
+						addFormComponentProperties(persist, available, selected, new Point());
 					}
 				}
 				else if (persist instanceof ISupportTabSeq)
@@ -480,97 +478,78 @@ public class VisualFormEditorTabSequencePage extends Composite
 	}
 
 	/**
+	 * Currently for list form components we give the parent form component component's tabseq to all it's
+	 * children (their tabseq is not configurable in form editor; TODO why?)
+	 *
 	 * @param parentFCComputedLocation we care about the location of components nested in FC's relative to the form when comparing
 	 * positions in css positioned forms; this param says the starting position of the parent FC (or main form 0,0) of
 	 * formComponentFormElement (Note: FCs can be nested multiple times - that is why we need this as a param here)
 	 */
-	private void addFormComponentProperties(IFormElement componentThatUsesAFormComponentInIt, Collection<PropertyDescription> propertiesOfFormComponentType,
+	private void addFormComponentProperties(final IPersist rootComponentThatUsesAFormComponentInIt,
 		List<DevTabSeqProperty> availableToUseButNotSetInFormTabSeq,
-		List<DevTabSeqProperty> setInFormTabSequence, IBasicWebObject rootComponentThatUsedAFormComponentInIt, Point parentFCComputedLocation)
+		List<DevTabSeqProperty> setInFormTabSequence, Point initialParentFCComputedLocation)
 	{
-		if (propertiesOfFormComponentType.size() > 0 && !FormElementHelper.isListFormComponent(propertiesOfFormComponentType)) // currently for list form components we give the parent form component component's tabseq to all it's children (their tabseq is not configurable in form editor; TODO why?)
-		{
-			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editor.getForm());
-			FormElement elementThatUsesAFormComponentInIt = FormElementHelper.INSTANCE.getFormElement(componentThatUsesAFormComponentInIt, fs, null, true);
-			for (PropertyDescription pd : propertiesOfFormComponentType)
-			{
-				Object rawPropertyValueOfFEsFCProperty = elementThatUsesAFormComponentInIt.getPropertyValue(pd.getName());
-				Form formComponent = FormComponentPropertyType.INSTANCE.getForm(rawPropertyValueOfFEsFCProperty, fs);
-				if (formComponent == null) continue;
+		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editor.getForm());
 
-				FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(elementThatUsesAFormComponentInIt, pd,
-					(JSONObject)rawPropertyValueOfFEsFCProperty, formComponent, fs);
-				for (FormElement element : cache.getFormComponentElements())
+		FormComponentUtils.addFormComponentComponentChildren((IFormElement)rootComponentThatUsesAFormComponentInIt,
+			fs, false, (FCCCHandlerArgs<Point> args) -> {
+
+				// a child form element was identified; details in the given "args"
+				Point fCComputedLocation = null; // return value / future handler state for this function (what we return here will be given in args.handlerCallState() in a future call for nested children of this args.childFe() - if any)
+
+				// stuff like [7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8, containedForm, formComponent2, containedForm, n1]
+				String[] feComponentAndPropertyNamePath = ((AbstractBase)args.childFe())
+					.getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
+
+				if (feComponentAndPropertyNamePath != null && feComponentAndPropertyNamePath.length > 2 &&
+					!feComponentAndPropertyNamePath[feComponentAndPropertyNamePath.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
 				{
-					IPersist p = element.getPersistIfAvailable();
-					if (p instanceof IFormElement)
+					// it should always go into this if here as the args.childFe() is a child of a FormComponentComponent
+					WebFormComponentChildType formComponentChild = new WebFormComponentChildType((IBasicWebObject)rootComponentThatUsesAFormComponentInIt,
+						feComponentAndPropertyNamePath, fs);
+
+					if (args.childFe() instanceof ISupportTabSeq iSTSP)
 					{
-						// stuff like [7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8, containedForm, formComponent2, containedForm, n1]
-						String[] feComponentAndPropertyNamePath = ((AbstractBase)p)
-							.getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
+						Point locationOfFCInParent = CSSPositionUtils.getLocation(args.parentComponentThatUsesAFormComponentInIt());
+						fCComputedLocation = new Point(locationOfFCInParent.x + args.handlerCallState().x /* this is the parentFCComputedLocation */,
+							locationOfFCInParent.y + args.handlerCallState().y /* this is the parentFCComputedLocation */);
 
-						if (feComponentAndPropertyNamePath != null && feComponentAndPropertyNamePath.length > 2 &&
-							!feComponentAndPropertyNamePath[feComponentAndPropertyNamePath.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
+						if (iSTSP.getTabSeq() >= 0)
 						{
-							WebFormComponentChildType formComponentChild = new WebFormComponentChildType(rootComponentThatUsedAFormComponentInIt,
-								feComponentAndPropertyNamePath, fs);
+							setInFormTabSequence.add(new DevTabSeqProperty(formComponentChild, "tabSeq", fCComputedLocation));
+						}
+						else
+						{
+							availableToUseButNotSetInFormTabSeq.add(new DevTabSeqProperty(formComponentChild, "tabSeq", fCComputedLocation));
+						}
+					}
+					else if (args.childSpecIfAvailable() != null)
+				{ // a bug in Eclipse indents this incorrectly! it should be +1 indent level; reported as https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2643
+					Point locationOfFCInParent = CSSPositionUtils.getLocation(args.parentComponentThatUsesAFormComponentInIt());
+					fCComputedLocation = new Point(locationOfFCInParent.x + args.handlerCallState().x /* this is the parentFCComputedLocation */,
+						locationOfFCInParent.y + args.handlerCallState().y /* this is the parentFCComputedLocation */);
 
-							if (p instanceof ISupportTabSeq)
+					Collection<PropertyDescription> innerTabSeqproperties = args.childSpecIfAvailable().getProperties(NGTabSeqPropertyType.NG_INSTANCE);
+					if (innerTabSeqproperties != null && innerTabSeqproperties.size() > 0)
+					{
+						for (PropertyDescription tabSeqPD : innerTabSeqproperties)
+						{
+							int tabseq = Utils.getAsInteger(formComponentChild.getProperty(tabSeqPD.getName()));
+							if (tabseq >= 0)
 							{
-								Point locationOfFCInParent = CSSPositionUtils.getLocation(componentThatUsesAFormComponentInIt);
-								Point fCComputedLocation = new Point(locationOfFCInParent.x + parentFCComputedLocation.x,
-									locationOfFCInParent.y + parentFCComputedLocation.y);
-
-								if (((ISupportTabSeq)p).getTabSeq() >= 0)
-								{
-									setInFormTabSequence.add(new DevTabSeqProperty(formComponentChild, "tabSeq", fCComputedLocation));
-								}
-								else
-								{
-									availableToUseButNotSetInFormTabSeq.add(new DevTabSeqProperty(formComponentChild, "tabSeq", fCComputedLocation));
-								}
+								setInFormTabSequence.add(new DevTabSeqProperty(formComponentChild, tabSeqPD.getName(), fCComputedLocation));
 							}
-							else if (FormTemplateGenerator.isWebcomponentBean(p))
+							else
 							{
-								IBasicWebComponent innerWebComponent = (IBasicWebComponent)p;
-								String innerComponentType = FormTemplateGenerator.getComponentTypeName(innerWebComponent);
-								WebObjectSpecification innerSpecification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
-									innerComponentType);
-
-								Point locationOfFCInParent = CSSPositionUtils.getLocation(componentThatUsesAFormComponentInIt);
-								Point fCComputedLocation = new Point(locationOfFCInParent.x + parentFCComputedLocation.x,
-									locationOfFCInParent.y + parentFCComputedLocation.y);
-
-								if (innerSpecification != null)
-								{
-									Collection<PropertyDescription> innerTabSeqproperties = innerSpecification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
-									if (innerTabSeqproperties != null && innerTabSeqproperties.size() > 0)
-									{
-										for (PropertyDescription tabSeqPD : innerTabSeqproperties)
-										{
-											int tabseq = Utils.getAsInteger(formComponentChild.getProperty(tabSeqPD.getName()));
-											if (tabseq >= 0)
-											{
-												setInFormTabSequence.add(new DevTabSeqProperty(formComponentChild, tabSeqPD.getName(), fCComputedLocation));
-											}
-											else
-											{
-												availableToUseButNotSetInFormTabSeq
-													.add(new DevTabSeqProperty(formComponentChild, tabSeqPD.getName(), fCComputedLocation));
-											}
-										}
-									}
-								}
-								Collection<PropertyDescription> nestedProperties = innerSpecification.getProperties(FormComponentPropertyType.INSTANCE);
-
-								addFormComponentProperties(innerWebComponent, nestedProperties, availableToUseButNotSetInFormTabSeq, setInFormTabSequence,
-									rootComponentThatUsedAFormComponentInIt, fCComputedLocation);
+								availableToUseButNotSetInFormTabSeq
+									.add(new DevTabSeqProperty(formComponentChild, tabSeqPD.getName(), fCComputedLocation));
 							}
 						}
 					}
 				}
-			}
-		}
+				}
+				return new Pair<>(fCComputedLocation, Boolean.TRUE);
+			}, initialParentFCComputedLocation, true);
 	}
 
 	@Override

@@ -11,7 +11,7 @@
    </description>
 
    <copyright url="http://download.servoy.com/developer/copyright.html">
-      Copyright © 1997-2025 Servoy BV. All rights reserved.
+      Copyright © 1997-2026 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 This computer program is protected by copyright law and international
 treaties.
@@ -363,10 +363,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="5.1.2.Final"/>
 
    <plugin
-         id="com.servoy.eclipse.aibridge"
-         version="2026.3.0.4140_rc"/>
-
-   <plugin
          id="org.apache.commons.commons-codec"
          version="1.20.0"/>
 
@@ -434,39 +430,5 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <plugin
          id="com.equo.chromium.eclipse.hook"
          version="1.0.11"/>
-
-   <plugin
-         id="onnx-models-bge-small-en"
-         version="1.5.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.linux.x86_64"
-         os="linux"
-         arch="x86_64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.macosx.aarch64"
-         os="macosx"
-         arch="aarch64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.macosx.x86_64"
-         os="macosx"
-         arch="x86_64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.win32.aarch64"
-         os="win32"
-         arch="aarch64"
-         version="0.15.0"/>
-
-   <plugin
-         id="onnxruntime-extensions.win32.x86_64"
-         os="win32"
-         arch="x86_64"
-         version="0.15.0"/>
 
 </feature>
