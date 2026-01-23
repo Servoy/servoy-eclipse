@@ -313,6 +313,32 @@
                     <version>3.2.0</version>
                     <type>jar</type>
                 </dependency>
+                
+                <dependency>
+				  <groupId>org.checkerframework</groupId>
+				  <artifactId>checker-qual</artifactId>
+				  <version>3.49.4</version>
+				</dependency>
+				<dependency>
+				    <groupId>jakarta.enterprise</groupId>
+				    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+				    <version>4.1.0</version>
+				</dependency>
+				<dependency>
+				    <groupId>jakarta.enterprise</groupId>
+				    <artifactId>jakarta.enterprise.lang-model</artifactId>
+				    <version>4.1.0</version>
+				</dependency>
+				<dependency>
+				    <groupId>jakarta.validation</groupId>
+				    <artifactId>jakarta.validation-api</artifactId>
+				    <version>3.1.0</version>
+				</dependency>
+				<dependency>
+				    <groupId>jakarta.interceptor</groupId>
+				    <artifactId>jakarta.interceptor-api</artifactId>
+				    <version>2.2.0</version>
+				</dependency>
                 <dependency>
                     <groupId>jakarta.transaction</groupId>
                     <artifactId>jakarta.transaction-api</artifactId>
