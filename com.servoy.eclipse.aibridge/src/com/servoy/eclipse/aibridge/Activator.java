@@ -83,12 +83,12 @@ public class Activator extends AbstractUIPlugin
 					// This will trigger singleton initialization and load the knowledge base
 					ServoyEmbeddingService.getInstance();
 
+					ServoyLog.logInfo("[Activator] Servoy AI knowledge base loaded successfully");
 					return Status.OK_STATUS;
 				}
-				catch (Exception e)
+				catch (Throwable e)
 				{
-					ServoyLog.logError("[Activator] Failed to pre-load knowledge base: " + e.getMessage());
-					e.printStackTrace();
+					ServoyLog.logError("[Activator] Failed to pre-load knowledge base: " + e.getMessage(), e);
 					// Don't fail plugin startup if embedding service fails
 					return Status.OK_STATUS;
 				}
@@ -101,6 +101,7 @@ public class Activator extends AbstractUIPlugin
 
 		// Run as system job (won't show in progress view unless it takes long)
 		job.setSystem(true);
+		job.setUser(false);
 		job.schedule();
 	}
 

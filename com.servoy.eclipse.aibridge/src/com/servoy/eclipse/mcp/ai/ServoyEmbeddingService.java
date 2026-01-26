@@ -94,7 +94,7 @@ public class ServoyEmbeddingService
 			initializeKnowledgeBase();
 			ServoyLog.logInfo("[ServoyEmbeddings] Embedding service ready!");
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			ServoyLog.logError("[ServoyEmbeddings] Failed to initialize: " + e.getMessage());
 			throw new RuntimeException("Failed to initialize embedding service", e);
