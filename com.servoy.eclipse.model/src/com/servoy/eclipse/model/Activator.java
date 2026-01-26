@@ -67,16 +67,23 @@ public class Activator extends Plugin
 
 	public void setUseES6()
 	{
-		String value = System.getProperty("servoy.useES6");
-		if (value == null)
+		if (System.getProperty("servoy.useES6") != null || System.getenv("servoy.useES6") != null)
 		{
-			value = System.getenv("servoy.useES6");
+			ServoyLog.logWarning("Using the servoy.useES6 property/environment variable is ignored as ECMA is the default parser now.", null);
 		}
-		if (value != null)
+
+		//the legacy parser should be used for testing only
+		String forceLegacy = System.getProperty("servoy.forceLegacyJSParser");
+		if (forceLegacy == null) forceLegacy = System.getenv("servoy.forceLegacyJSParser");
+		boolean forceLegacyJSParser = Boolean.parseBoolean(forceLegacy);
+
+		JavascriptParserPreferences preferences = new JavascriptParserPreferences();
+		if (forceLegacyJSParser || !preferences.useES6Parser())
 		{
-			Boolean useEs6 = "".equals(value) ? Boolean.TRUE : Boolean.valueOf(value);
-			JavascriptParserPreferences preferences = new JavascriptParserPreferences();
-			preferences.useES6Parser(useEs6.booleanValue());
+			// ES6 is the default now; only set to false if forced to legacy
+			// for existing workspaces which didn't use ES6, sets it to true if not forced to legacy
+			ServoyLog.logInfo("Setting JavaScript parser to " + (forceLegacyJSParser ? "legacy" : "ES6") + " mode.");
+			preferences.useES6Parser(!forceLegacyJSParser);
 			preferences.save();
 		}
 	}
