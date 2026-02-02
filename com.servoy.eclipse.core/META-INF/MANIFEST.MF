@@ -51,6 +51,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.apache.tomcat;bundle-version="11.0.8"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.core;version="2026.3.0.4140_rc",
+ com.servoy.eclipse.core.ai;version="2026.3.0.4140_rc",
  com.servoy.eclipse.core.ai.shared;version="2026.3.0.4140_rc",
  com.servoy.eclipse.core.builder;version="2026.3.0.4140_rc",
  com.servoy.eclipse.core.doc;version="2026.3.0.4140_rc",
