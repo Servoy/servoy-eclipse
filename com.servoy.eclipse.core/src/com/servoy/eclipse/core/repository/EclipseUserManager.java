@@ -81,7 +81,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 	 * @throws RepositoryException
 	 */
 	@Override
-	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
+	public void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
 	{
 		if (ApplicationServerRegistry.get().getClientId().equals(clientId))
 		{
