@@ -98,6 +98,7 @@ import org.osgi.service.url.URLStreamHandlerService;
 import org.sablo.websocket.GetHttpSessionConfigurator;
 
 import com.servoy.base.persistence.constants.IFormConstants;
+import com.servoy.eclipse.core.ai.AIModelProvider;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -190,6 +191,8 @@ public class Activator extends Plugin
 	private final List<Runnable> postgressCheckedNotify = new ArrayList<Runnable>(3);
 
 	private boolean designerCallbackNotSetTodch = true;
+
+	private AIModelProvider aiModelProvider;
 
 	@Override
 	public void start(BundleContext context) throws Exception
@@ -1074,6 +1077,15 @@ public class Activator extends Plugin
 			debuggerStarter = (IDebuggerStarter)createExtensionPoint(IDebuggerStarter.EXTENSION_ID);
 		}
 		return debuggerStarter;
+	}
+
+	public synchronized AIModelProvider getAIModelProvider()
+	{
+		if (aiModelProvider == null)
+		{
+			aiModelProvider = (AIModelProvider)createExtensionPoint(AIModelProvider.EXTENSION_ID);
+		}
+		return aiModelProvider;
 	}
 
 	/**
