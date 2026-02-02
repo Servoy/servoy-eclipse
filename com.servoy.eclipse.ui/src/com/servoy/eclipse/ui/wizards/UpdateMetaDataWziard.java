@@ -72,7 +72,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard.SplitInThreeWizardPage;
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard.SplitInThreeWizardPage.PairTreeContentProvider;
 import com.servoy.eclipse.ui.wizards.SynchronizeDBIWithDBWizard.SplitInThreeWizardPage.RadioEditingSupport;
-import com.servoy.j2db.IDebugJ2DBClient;
+import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
@@ -266,10 +266,10 @@ public class UpdateMetaDataWziard extends Wizard
 							int ninserted = MetaDataUtils.loadMetadataInTable(table, contents);
 
 							// flush developer clients
-							IDebugJ2DBClient debugJ2DBClient = com.servoy.eclipse.core.Activator.getDefault().getDebugJ2DBClient();
-							if (debugJ2DBClient != null)
+							IDebugClient debugClient = com.servoy.eclipse.core.Activator.getDefault().getDebugNGClient();
+							if (debugClient != null && debugClient.isSolutionLoaded())
 							{
-								((FoundSetManager)debugJ2DBClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
+								((FoundSetManager)debugClient.getFoundSetManager()).flushCachedDatabaseData(table.getDataSource());
 							}
 							sb.append("Successfully saved " + ninserted + " records from workspace in table " + table.getName() + " in server " +
 								table.getServerName());
