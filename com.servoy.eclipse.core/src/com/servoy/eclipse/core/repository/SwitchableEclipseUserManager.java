@@ -108,7 +108,7 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 
 	@Override
 	public TableAndFormSecurityAccessInfo getSecurityAccessForTablesAndForms(String clientId, UUID[] solution_uuids, int[] releaseNumbers, String[] groups)
-		throws RemoteException, ServoyException
+		throws ServoyException
 	{
 		return switchedTo == null ? eclipseUserManger.getSecurityAccessForTablesAndForms(clientId, solution_uuids, releaseNumbers, groups)
 			: switchedTo.getSecurityAccessForTablesAndForms(clientId, solution_uuids, releaseNumbers, groups);
