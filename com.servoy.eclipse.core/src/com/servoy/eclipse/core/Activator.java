@@ -99,6 +99,7 @@ import org.sablo.websocket.GetHttpSessionConfigurator;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.ai.AIModelProvider;
+import com.servoy.eclipse.core.ai.ChatModel;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -1079,13 +1080,13 @@ public class Activator extends Plugin
 		return debuggerStarter;
 	}
 
-	public synchronized AIModelProvider getAIModelProvider()
+	public synchronized ChatModel getChatModel(String systemPrompt)
 	{
 		if (aiModelProvider == null)
 		{
 			aiModelProvider = (AIModelProvider)createExtensionPoint(AIModelProvider.EXTENSION_ID);
 		}
-		return aiModelProvider;
+		return aiModelProvider != null ? aiModelProvider.createChatModel(systemPrompt) : null;
 	}
 
 	/**
