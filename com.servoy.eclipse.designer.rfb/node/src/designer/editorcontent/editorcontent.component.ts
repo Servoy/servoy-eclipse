@@ -123,13 +123,17 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             this.renderer.setStyle(palette, 'height', paletteHeight);
             this.renderer.setStyle(palette, 'max-height', paletteHeight);
 
-            // make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
-            const contentArea = this.editorContentService.getContentArea();
-            //add a small scroll space in order to make margins visible
-            this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 20 + 'px');
-            this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 20 + 'px');
-        });
-    }
+			// make the overlay the same size as content area to cover it; unfortunately didn't find a way to do this through css'
+			const contentArea = this.editorContentService.getContentArea();
+			//add a small scroll space in order to make margins visible
+			
+			// a timeout is needed to render the correct scrollHeight/Width
+			setTimeout(() => {
+				this.renderer.setStyle(overlay, 'height', contentArea.scrollHeight + 20 + 'px');
+				this.renderer.setStyle(overlay, 'width', contentArea.scrollWidth + 20 + 'px');
+			}, 200);
+		});
+	}
 
     setContentSizeFull() {
         this.contentStyle = {
