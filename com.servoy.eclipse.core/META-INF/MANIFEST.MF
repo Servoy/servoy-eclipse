@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Core Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.core;singleton:=true
-Bundle-Version: 2024.3.9.3952_LTS
+Bundle-Version: 2024.3.9.qualifier
 Bundle-Activator: com.servoy.eclipse.core.Activator
 Bundle-Vendor: Servoy
 Bundle-Localization: plugin
@@ -50,18 +50,18 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.ngclient,
  org.apache.tomcat
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.core;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.ai.shared;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.builder;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.doc;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.elements;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.ngpackages;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.quickfix;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.quickfix.dbi;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.repository;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.resource;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.core.util;version="2024.3.9.3952_LTS",
- com.servoy.eclipse.dnd;version="2024.3.9.3952_LTS"
+Export-Package: com.servoy.eclipse.core;version="2024.3.9",
+ com.servoy.eclipse.core.ai.shared;version="2024.3.9",
+ com.servoy.eclipse.core.builder;version="2024.3.9",
+ com.servoy.eclipse.core.doc;version="2024.3.9",
+ com.servoy.eclipse.core.elements;version="2024.3.9",
+ com.servoy.eclipse.core.ngpackages;version="2024.3.9",
+ com.servoy.eclipse.core.quickfix;version="2024.3.9",
+ com.servoy.eclipse.core.quickfix.dbi;version="2024.3.9",
+ com.servoy.eclipse.core.repository;version="2024.3.9",
+ com.servoy.eclipse.core.resource;version="2024.3.9",
+ com.servoy.eclipse.core.util;version="2024.3.9",
+ com.servoy.eclipse.dnd;version="2024.3.9"
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.servoy.eclipse.core

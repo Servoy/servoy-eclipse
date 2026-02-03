@@ -8,7 +8,7 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2024.3.9.3952_LTS</version>
+	<version>2024.3.9-SNAPSHOT</version>
 	<properties>
 		<tycho.version>4.0.5</tycho.version>
 		<rhino.version>1.7.14.s7</rhino.version>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy AI Bridge
 Bundle-SymbolicName: com.servoy.eclipse.aibridge;singleton:=true
-Bundle-Version: 2024.3.9.3952_LTS
+Bundle-Version: 2024.3.9.qualifier
 Export-Package: com.servoy.eclipse.aibridge
 Import-Package: com.fasterxml.jackson.annotation;version="2.15.3",
  com.fasterxml.jackson.core.type;version="2.15.3",
