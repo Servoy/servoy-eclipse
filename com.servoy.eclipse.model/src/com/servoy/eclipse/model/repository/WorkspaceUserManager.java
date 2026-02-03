@@ -693,8 +693,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal,
 		try
 		{
 			final String out = serializeSecurityInfo(f);
-			if (out == null) return;
-			if (out.trim().length() == 0)
+			if (out == null || out.trim().length() == 0)
 			{
 				// no content to write
 				if (later)
@@ -2574,6 +2573,26 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal,
 		String[] groups) throws ServoyException
 	{
 
+	}
+
+	public void resetFormSecurityAccess(String clientId, String groupName, UUID formUUID) throws ServoyException
+	{
+		checkForAdminUser(clientId, null);
+
+		GroupSecurityInfo gsi = getGroupSecurityInfo(groupName);
+
+		if (gsi != null)
+		{
+			gsi.formSecurity.remove(formUUID);
+			if (writeMode == WRITE_MODE_AUTOMATIC)
+			{
+				writeSecurityInfo(getForm(formUUID), false);
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("resetFormSecurityAccess(...) cannot find the group with the given name!", null);
+		}
 	}
 
 	/**
