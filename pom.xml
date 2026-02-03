@@ -69,7 +69,7 @@
 						<artifact>
 							<groupId>com.servoy</groupId>
 							<artifactId>com.servoy.eclipse.target</artifactId>
-							<version>${osgi.version}</version>
+							<version>${project.parent.version}</version>
 						</artifact>
 					</target>
 					<pomDependencies>consider</pomDependencies>
