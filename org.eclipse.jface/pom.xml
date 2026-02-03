@@ -22,14 +22,13 @@
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.32.0.qualifier</version>
+  <version>3.32.0.v20231107-0834</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
     <code.ignoredWarnings>-warn:-deprecation,raw,unchecked</code.ignoredWarnings>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <forceContextQualifier>v20231107-0834</forceContextQualifier>
   </properties>
 	<build>
 		<plugins>
