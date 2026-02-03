@@ -316,7 +316,7 @@ public class ElementFactory
 				updateName(parent, component, copy, validator, IRepository.ELEMENTS);
 			}
 		}
-		if (copy instanceof BaseComponent && ((parent instanceof Form && ((Form)parent).getUseCssPosition()) ||
+		if (copy instanceof BaseComponent && ((parent instanceof Form frm && frm.getUseCssPosition().booleanValue()) ||
 			(parent instanceof LayoutContainer container && CSSPositionUtils.isCSSPositionContainer(container))))
 		{
 			CSSPosition cssPosition = ((BaseComponent)copy).getCssPosition();
