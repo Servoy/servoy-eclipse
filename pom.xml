@@ -435,34 +435,27 @@
 								</goals>
 								<configuration>
 									<target>
-                                        <replaceregexp
+                                          <replace
                                             file="${basedir}/pom.xml"
-                                            match="${osgi.version}" replace="${newOSGIVersion}"
-                                            byline="true" />
-										<replaceregexp
+                                            token="${osgi.version}" value="${newOSGIVersion}"/>
+										<replace
 											file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-										<replaceregexp
+											token="${project.version}" value="${newVersion}"/>
+										<replace
 											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-										<replaceregexp
+											token="${project.version}" value="${newVersion}"/>
+										<replace
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-										<replaceregexp
+											token="${project.version}" value="${newVersion}"/>
+										<replace
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-                                        <replaceregexp
+											token="${project.version}" value="${newVersion}"/>
+                                        <replace
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package.json"
-                                            match="${project.version}" replace="${newVersion}"
-                                            byline="true" />
-                                        <replaceregexp
+                                            token="${project.version}" value="${newVersion}"/>
+                                        <replace
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package_solution.json"
-                                            match="${project.version}" replace="${newVersion}"
-                                            byline="true" />
+                                            token="${project.version}" value="${newVersion}"/>
                                     </target>
 								</configuration>
 							</execution>
