@@ -10,7 +10,7 @@
 	<packaging>pom</packaging>
 	<version>2024.3.10-SNAPSHOT</version>
 	<properties>
-		<tycho.version>4.0.5</tycho.version>
+		<tycho.version>4.0.13</tycho.version>
 		<osgi.version>[2024.3.10,2024.3.11)</osgi.version>
 		<rhino.version>1.7.14.s7</rhino.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
