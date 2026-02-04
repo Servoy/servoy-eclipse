@@ -115,7 +115,8 @@ public class ScriptQuickFix implements IScriptCorrectionProcessor, IMarkerResolu
 			if (scriptFile instanceof IFile)
 			{
 				int problemStartIdx = context.getInvocationContext().getOffset();
-				context.addResolution(new ScriptFixResolution(scriptFile.getProject(), (IFile)scriptFile, problemStartIdx, problemId), annotation);
+				ScriptFixResolution scriptFixResolution = new ScriptFixResolution(scriptFile.getProject(), (IFile)scriptFile, problemStartIdx, problemId);
+				if (scriptFixResolution.canFix()) context.addResolution(scriptFixResolution, annotation);
 			}
 		}
 	}
@@ -135,7 +136,8 @@ public class ScriptQuickFix implements IScriptCorrectionProcessor, IMarkerResolu
 			if (scriptFile instanceof IFile)
 			{
 				int problemStartIdx = context.getInvocationContext().getOffset();
-				context.addResolution(new ScriptFixResolution(scriptFile.getProject(), (IFile)scriptFile, problemStartIdx, problemId), marker);
+				ScriptFixResolution scriptFixResolution = new ScriptFixResolution(scriptFile.getProject(), (IFile)scriptFile, problemStartIdx, problemId);
+				if (scriptFixResolution.canFix()) context.addResolution(scriptFixResolution, marker);
 			}
 		}
 	}
@@ -144,7 +146,7 @@ public class ScriptQuickFix implements IScriptCorrectionProcessor, IMarkerResolu
 	{
 		private String scope;
 		private String scriptItem;
-		private final IProblemIdentifier problemId;
+		private IProblemIdentifier problemId;
 		private final IProject project;
 
 		/**
@@ -161,25 +163,28 @@ public class ScriptQuickFix implements IScriptCorrectionProcessor, IMarkerResolu
 			try
 			{
 				String contents = scriptFileSourceModule.getBuffer().getContents();
-				String scriptProperty = ScriptQuickFix.getTokenAt(contents, problemStartIdx);
-				// Parse scriptProperty according to rules
-				this.scope = null;
-				this.scriptItem = null;
-				if (scriptProperty != null && scriptProperty.startsWith("scopes."))
+				TokenAndProblemId scriptProperty = ScriptQuickFix.getTokenAt(contents, problemStartIdx);
+				if (scriptProperty != null)
 				{
-					String[] parts = scriptProperty.split("\\.");
-					this.scope = parts.length > 1 ? parts[1] : null;
-					if (parts.length >= 3)
+					if (scriptProperty.problemid != problemId)
 					{
-						this.scriptItem = parts[2];
+						this.problemId = scriptProperty.problemid;
 					}
-				}
-				else if (scriptProperty != null)
-				{
-					String[] parts = scriptProperty.split("\\.");
-					if (parts.length >= 1)
+					// Parse scriptProperty according to rules
+					this.scope = null;
+					this.scriptItem = null;
+					if (scriptProperty.token.startsWith("scopes."))
 					{
-						this.scriptItem = parts[0];
+						String[] parts = scriptProperty.token.split("\\.");
+						this.scope = parts.length > 1 ? parts[1] : null;
+						if (parts.length >= 3)
+						{
+							this.scriptItem = parts[2];
+						}
+					}
+					else if (scriptProperty.token.indexOf(".") == -1)
+					{
+						this.scriptItem = scriptProperty.token;
 					}
 				}
 			}
@@ -187,6 +192,11 @@ public class ScriptQuickFix implements IScriptCorrectionProcessor, IMarkerResolu
 			{
 				ServoyLog.logError(ex);
 			}
+		}
+
+		public boolean canFix()
+		{
+			return this.scope != null || this.scriptItem != null;
 		}
 
 		/*
@@ -314,22 +324,7 @@ public class ScriptQuickFix implements IScriptCorrectionProcessor, IMarkerResolu
 		return new ScriptFileTypeAndName("scope", name);
 	}
 
-	/**
-	 * Simple holder for script file type and name.
-	 */
-	private static class ScriptFileTypeAndName
-	{
-		public final String type; // "form" or "scope"
-		public final String name; // form name or scope name
-
-		public ScriptFileTypeAndName(String type, String name)
-		{
-			this.type = type;
-			this.name = name;
-		}
-	}
-
-	private static String getTokenAt(String contents, int idx)
+	private static TokenAndProblemId getTokenAt(String contents, int idx)
 	{
 		if (contents == null || idx < 0 || idx >= contents.length()) return null;
 		int start = idx;
@@ -360,6 +355,38 @@ public class ScriptQuickFix implements IScriptCorrectionProcessor, IMarkerResolu
 				break;
 			}
 		}
-		return contents.substring(start, end);
+
+		return new TokenAndProblemId(contents.substring(start, end), (end < contents.length() - 2 && "()".equals(contents.substring(end, end + 2)))
+			? JavaScriptProblems.UNDEFINED_JAVA_METHOD : JavaScriptProblems.UNDEFINED_JAVA_PROPERTY);
+	}
+
+	/**
+	 * Simple holder for script file type and name.
+	 */
+	private static class ScriptFileTypeAndName
+	{
+		public final String type; // "form" or "scope"
+		public final String name; // form name or scope name
+
+		public ScriptFileTypeAndName(String type, String name)
+		{
+			this.type = type;
+			this.name = name;
+		}
+	}
+
+	/**
+	 * Simple holder for token and problemid.
+	 */
+	private static class TokenAndProblemId
+	{
+		public final String token;
+		public final IProblemIdentifier problemid;
+
+		public TokenAndProblemId(String token, IProblemIdentifier problemid)
+		{
+			this.token = token;
+			this.problemid = problemid;
+		}
 	}
 }
