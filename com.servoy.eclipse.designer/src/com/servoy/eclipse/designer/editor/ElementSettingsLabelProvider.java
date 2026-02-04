@@ -62,6 +62,10 @@ public class ElementSettingsLabelProvider
 			}
 		}
 
+		if (element != model.getForm() && !model.hasRight(model.getForm(), IRepository.VIEWABLE)) // if form is not viewable, all elements are not visible
+		{
+			return DISABLED_IMAGE;
+		}
 		if (model.hasRight((IPersist)element, IRepository.VIEWABLE))
 		{
 			return TRUE_IMAGE;
@@ -87,6 +91,14 @@ public class ElementSettingsLabelProvider
 			}
 		}
 
+		if (element != model.getForm() && !model.hasRight(model.getForm(), IRepository.VIEWABLE)) // if form is not viewable, all elements are not visible
+		{
+			return DISABLED_IMAGE;
+		}
+		if (element != model.getForm() && !model.hasRight(model.getForm(), IRepository.ACCESSIBLE)) // if form is not accessible, all elements are not accessible
+		{
+			return DISABLED_IMAGE;
+		}
 		if (model.hasRight((IPersist)element, IRepository.ACCESSIBLE))
 		{
 			return TRUE_IMAGE;
