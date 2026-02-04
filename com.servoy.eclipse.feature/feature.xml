@@ -179,35 +179,35 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="j2db_tunnel"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="j2db_runtime"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="j2db_log4j"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="j2db_server"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="servoy_debug"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="servoy_headless_client"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="servoy_shared"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="servoy_smart_client"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.model"
@@ -227,7 +227,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="servoy_base"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
@@ -251,11 +251,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="sablo"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="servoy_ngclient"
-         version="2024.3.9.qualifier"/>
+         version="2024.3.10.qualifier"/>
 
    <plugin
          id="javax.websocket"
