@@ -3,10 +3,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.3.9-SNAPSHOT</version>
+		<version>2024.3.10-SNAPSHOT</version>
 	</parent>
 	<artifactId>com.servoy.css.core</artifactId>
-	<version>2024.3.9-SNAPSHOT</version>
+	<version>2024.3.10-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 
 </project>
