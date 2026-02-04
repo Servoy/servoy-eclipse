@@ -419,50 +419,69 @@
 				<module>com.servoy.eclipse.ngclient.ui</module>
 			</modules>
 		</profile>
-		<profile>
-			<id>version_push</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.8</version>
-						<executions>
-							<execution>
-								<id>replace_version_in_property_files</id>
-								<phase>process-resources</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-                                          <replace
+        <profile>
+            <id>version_push</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>parse-version</id>
+                                <goals>
+                                    <goal>parse-version</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>replace_version_in_property_files</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="plainVersion" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}"/>
+                                        
+                                        <echo message="Parsed OSGi version: ${parsedVersion.osgiVersion}"/>
+                                        <echo message="Plain version for replacement: ${plainVersion}"/>
+        
+                                        <replace
                                             file="${basedir}/pom.xml"
-                                            token="${osgi.version}" value="${newOSGIVersion}"/>
-										<replace
-											file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											token="${project.version}" value="${newVersion}"/>
-										<replace
-											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											token="${project.version}" value="${newVersion}"/>
-										<replace
-											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											token="${project.version}" value="${newVersion}"/>
-										<replace
-											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											token="${project.version}" value="${newVersion}"/>
+                                            token="${osgi.version}" value="${newOSGIVersion}"
+                                            summary="true"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.product/p2.inf"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.core/about.properties"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.core/plugin.properties"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.feature/feature.xml"
+                                            token="${plainVersion}" value="${newVersion}"/>
                                         <replace
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package.json"
-                                            token="${project.version}" value="${newVersion}"/>
+                                            token="${plainVersion}" value="${newVersion}"/>
                                         <replace
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package_solution.json"
-                                            token="${project.version}" value="${newVersion}"/>
+                                            token="${plainVersion}" value="${newVersion}"/>
                                     </target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+		</profile>		
 	</profiles>
 </project>
