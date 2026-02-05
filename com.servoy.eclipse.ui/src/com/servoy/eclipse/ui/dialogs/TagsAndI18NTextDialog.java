@@ -131,6 +131,9 @@ public class TagsAndI18NTextDialog extends Dialog
 
 	private Browser browser;
 	private TabItem htmlPreviewTabItem;
+	private TabFolder tabFolder;
+	private TabItem i18nTabItem;
+	private boolean openI18nTab = false;
 
 	@Override
 	protected Control createDialogArea(Composite parent)
@@ -194,14 +197,12 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		final Composite composite_2 = new Composite(sashForm, SWT.NONE);
 
-		TabFolder tabFolder;
 		tabFolder = new TabFolder(composite_2, SWT.NONE);
 
 
 		final TabItem textTabItem = new TabItem(tabFolder, SWT.NONE);
 		textTabItem.setText("Text");
 
-		TabItem i18nTabItem = null;
 		if (!hideTags)
 		{
 			i18nTabItem = new TabItem(tabFolder, SWT.NONE);
@@ -227,7 +228,7 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		if (!hideTags)
 		{
-			i18nComposite = new I18nComposite(tabFolder, SWT.NONE, application, false);
+			i18nComposite = new I18nComposite(tabFolder, SWT.NONE, application, false, null, true);
 			i18nTabItem.setControl(i18nComposite);
 
 			i18nComposite.getTableViewer().addSelectionChangedListener(new ISelectionChangedListener()
@@ -257,7 +258,10 @@ public class TagsAndI18NTextDialog extends Dialog
 			{
 				if (tabFolder.getSelection()[0] == i18n)
 				{
-					if (!hideTags) i18nComposite.selectKey(value);
+					if (!hideTags)
+					{
+						i18nComposite.setFilterText(value);
+					}
 				}
 				else if (tabFolder.getSelection()[0] == htmlPreviewTabItem)
 				{
@@ -306,6 +310,13 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		if (!hideTags)
 		{
+			// Set the I18n tab as active if requested
+			if (openI18nTab && i18nTabItem != null && tabFolder != null)
+			{
+				tabFolder.setSelection(i18nTabItem);
+				i18nComposite.setFilterText(value);
+			}
+
 			dpTree.addOpenListener(new IOpenListener()
 			{
 				public void open(OpenEvent event)
@@ -333,6 +344,16 @@ public class TagsAndI18NTextDialog extends Dialog
 	protected void textModified()
 	{
 		value = text.getText();
+		
+		// If the i18n tab is visible and exists, set the filter text in the i18nComposite
+		if (!hideTags && i18nTabItem != null && tabFolder != null && 
+			tabFolder.getSelection().length > 0 && tabFolder.getSelection()[0] == i18nTabItem)
+		{
+			if (i18nComposite != null)
+			{
+				i18nComposite.setFilterText(value);
+			}
+		}
 	}
 
 	protected void handleAdd()
@@ -383,6 +404,17 @@ public class TagsAndI18NTextDialog extends Dialog
 	public Object getValue()
 	{
 		return "".equals(value) ? null : value;
+	}
+
+	/**
+	 * Set whether to open the I18n tab by default when the dialog is displayed.
+	 * Must be called before the dialog is opened.
+	 * 
+	 * @param openI18nTab true to open the I18n tab, false to open the text tab (default)
+	 */
+	public void setOpenI18nTab(boolean openI18nTab)
+	{
+		this.openI18nTab = openI18nTab;
 	}
 
 	@Override

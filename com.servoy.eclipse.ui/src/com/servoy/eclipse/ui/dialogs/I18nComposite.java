@@ -16,10 +16,13 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,10 +46,12 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -56,8 +61,11 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.ai.ChatModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.table.ColumnsSorter;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
@@ -65,6 +73,7 @@ import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.i18n.I18NMessagesModel;
 import com.servoy.j2db.i18n.I18NMessagesModel.I18NMessagesModelEntry;
+import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -74,6 +83,9 @@ import com.servoy.j2db.util.Utils;
 
 public class I18nComposite extends Composite
 {
+
+	private static final String DEFAULT_MESSAGES_TABLE = "defaultMessagesTable";
+	private static final String DEFAULT_MESSAGES_SERVER = "defaultMessagesServer";
 	private static final int LANG_COMBO_WIDTH = 128;
 	private static final String DIALOGSTORE_FILTER = "I18NComposite.filter";
 	private static final String DIALOGSTORE_LANG_COUNTRY = "I18NComposite.lang_country";
@@ -91,7 +103,7 @@ public class I18nComposite extends Composite
 	public static final int CI_COPY = 3;
 	public static final int CI_DELETE = 4;
 
-	private static final long FILTER_TYPE_DELAY = 300;
+	private static final long FILTER_TYPE_DELAY = 500;
 
 	public class I18nTableLabelProvider extends LabelProvider implements ITableLabelProvider
 	{
@@ -145,8 +157,36 @@ public class I18nComposite extends Composite
 	private String lastAutoSelectedKey;
 	private FilterDelayJob delayedFilterJob;
 	private Composite tableContainer;
+	private Composite centerPanel;
 	private final String i18nDatasource;
 	private ISelectionChangedListener selectionChangedListener;
+
+	private final boolean showAISuggestion;
+
+	private Label newAIKeyLabel;
+	private Label newKeyLabel;
+	private Label newDefaultLabel;
+	private Composite newTextFieldsComposite;
+	private Text newKeyTextField;
+	private Text newDefaultTextField;
+	private Button newKeyButton;
+
+	// Cached chat model for AI suggestions (both key generation and translation)
+	private ChatModel aiSuggestionModel;
+
+	// Dynamic locale fields
+	private org.eclipse.swt.custom.ScrolledComposite localeScrolledComposite;
+	private Composite localeFieldsComposite;
+	private Map<String, Label> localeLabels;
+	private Map<String, Text> localeTextFields;
+
+	// New locale controls
+	private Button addLocaleButton;
+	private List<Locale> currentLocalesList;
+
+	// Font for italic styling when isNew is true
+	private Font italicFont;
+
 
 	public I18nComposite(Composite parent, int style, IApplication application, boolean addActionColumns)
 	{
@@ -156,9 +196,37 @@ public class I18nComposite extends Composite
 
 	public I18nComposite(Composite parent, int style, IApplication application, boolean addActionColumns, String i18nDatasource)
 	{
+		this(parent, style, application, addActionColumns, i18nDatasource, false);
+	}
+
+	public I18nComposite(Composite parent, int style, IApplication application, boolean addActionColumns, String i18nDatasource, boolean showAISuggestion)
+	{
 		super(parent, style);
 		this.application = application;
-		this.i18nDatasource = i18nDatasource;
+		String vI18NDatasource = i18nDatasource;
+		if (vI18NDatasource == null)
+		{
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			ServoyProject activeProject = servoyModel.getActiveProject();
+			if (activeProject != null)
+			{
+				Solution activeSolution = activeProject.getEditingSolution();
+				String serverName = activeSolution.getI18nServerName();
+				String tableName = activeSolution.getI18nTableName();
+				if (serverName == null || serverName.trim().length() == 0 || tableName == null || tableName.trim().length() == 0)
+				{
+					Settings settings = Settings.getInstance();
+					serverName = settings.getProperty(DEFAULT_MESSAGES_SERVER);
+					tableName = settings.getProperty(DEFAULT_MESSAGES_TABLE);
+				}
+				if (serverName != null && serverName.trim().length() != 0 && tableName != null && tableName.trim().length() != 0)
+				{
+					vI18NDatasource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
+				}
+			}
+		}
+		this.i18nDatasource = vI18NDatasource;
+		this.showAISuggestion = showAISuggestion;
 		initialise(addActionColumns);
 	}
 
@@ -176,7 +244,7 @@ public class I18nComposite extends Composite
 				if (Display.getCurrent() != null)
 				{
 					fill("".equals(filterValue) ? null : filterValue);
-					selectKey(lastAutoSelectedKey);
+					selectKey("i18n:" + filterValue);
 				}
 				else
 				{
@@ -185,7 +253,7 @@ public class I18nComposite extends Composite
 						public void run()
 						{
 							fill("".equals(filterValue) ? null : filterValue);
-							selectKey(lastAutoSelectedKey);
+							selectKey("i18n:" + filterValue);
 						}
 					});
 				}
@@ -193,7 +261,8 @@ public class I18nComposite extends Composite
 
 		}, FILTER_TYPE_DELAY, "Filtering");
 
-		tableContainer = new Composite(this, SWT.NONE);
+		centerPanel = new Composite(this, SWT.NONE);
+		tableContainer = new Composite(centerPanel, SWT.NONE);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLinesVisible(true);
 		tableViewer.getTable().setHeaderVisible(true);
@@ -284,7 +353,105 @@ public class I18nComposite extends Composite
 			defaultColumn.setWidth(defaultWidth);
 			tableContainer.setLayout(new FillLayout());
 		}
-		setLayout(getLayout(tableContainer, languageComboViewer.getCombo(), countryComboViewer.getCombo()));
+
+		if (showAISuggestion)
+		{
+			// Initialize dynamic field maps
+			localeLabels = new HashMap<>();
+			localeTextFields = new HashMap<>();
+
+			// Ensure all controls are created with 'this' as parent
+			newAIKeyLabel = new Label(this, SWT.NONE);
+			newAIKeyLabel.setText("Edit or create new key. Words in italic are AI generated.");
+
+			// Create a single composite for all AI input controls with proper alignment
+			newTextFieldsComposite = new Composite(this, SWT.NONE);
+			GroupLayout aiLayout = new GroupLayout(newTextFieldsComposite);
+			newTextFieldsComposite.setLayout(aiLayout);
+
+			// Create labels
+			newKeyLabel = new Label(newTextFieldsComposite, SWT.NONE);
+			newKeyLabel.setText("key");
+			newDefaultLabel = new Label(newTextFieldsComposite, SWT.NONE);
+			newDefaultLabel.setText("default");
+
+			// Create text fields and button
+			newKeyTextField = new Text(newTextFieldsComposite, SWT.BORDER);
+			newDefaultTextField = new Text(newTextFieldsComposite, SWT.BORDER);
+			newKeyButton = new Button(newTextFieldsComposite, SWT.PUSH | SWT.CENTER);
+			newKeyButton.setText("Save");
+			newKeyButton.setAlignment(SWT.CENTER);
+			newKeyButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(org.eclipse.swt.events.SelectionEvent e)
+				{
+					handleNewKeyButtonClick();
+				}
+			});
+
+			// Horizontal layout: 2 columns (key, default) with equal width, plus button
+			aiLayout.setHorizontalGroup(
+				aiLayout.createSequentialGroup()
+					.addContainerGap()
+					.add(aiLayout.createParallelGroup(GroupLayout.LEADING)
+						.add(newKeyLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.add(newKeyTextField, GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(aiLayout.createParallelGroup(GroupLayout.LEADING)
+						.add(newDefaultLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.add(newDefaultTextField, GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(newKeyButton, 80, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap());
+
+			// Vertical layout: labels on top, text fields below (aligned)
+			aiLayout.setVerticalGroup(
+				aiLayout.createSequentialGroup()
+					.addContainerGap()
+					.add(aiLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(newKeyLabel)
+						.add(newDefaultLabel))
+					.addPreferredGap(LayoutStyle.RELATED)
+					.add(aiLayout.createParallelGroup(GroupLayout.BASELINE)
+						.add(newKeyTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.add(newDefaultTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.add(newKeyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap());
+
+			// Create scrollable composite for dynamic locale fields
+			localeScrolledComposite = new org.eclipse.swt.custom.ScrolledComposite(this, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+			localeScrolledComposite.setExpandHorizontal(true);
+			localeScrolledComposite.setExpandVertical(true);
+
+			// Create container for dynamic locale fields
+			localeFieldsComposite = new Composite(localeScrolledComposite, SWT.NONE);
+			localeScrolledComposite.setContent(localeFieldsComposite);
+
+			// Create dynamic fields for each locale
+			createDynamicLocaleFields();
+
+			addLocaleButton = new Button(this, SWT.PUSH);
+			addLocaleButton.setText("Add Locale");
+			addLocaleButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(org.eclipse.swt.events.SelectionEvent e)
+				{
+					addNewLocale();
+				}
+			});
+		}
+
+		GroupLayout centerPanelLayout = new GroupLayout(centerPanel);
+		centerPanel.setLayout(centerPanelLayout);
+		centerPanelLayout.setHorizontalGroup(centerPanelLayout.createSequentialGroup().add(tableContainer, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+		centerPanelLayout.setVerticalGroup(centerPanelLayout.createSequentialGroup().add(tableContainer, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+
+		setLayout(getLayout(centerPanel, languageComboViewer.getCombo(), countryComboViewer.getCombo(), showAISuggestion ? newAIKeyLabel : null,
+			showAISuggestion ? newTextFieldsComposite : null,
+			showAISuggestion ? localeScrolledComposite : null,
+			showAISuggestion ? addLocaleButton : null));
 
 		String lang_country = dialogSettings.get(DIALOGSTORE_LANG_COUNTRY);
 		if (lang_country != null)
@@ -326,8 +493,167 @@ public class I18nComposite extends Composite
 					delayedFilterJob = null;
 				}
 				dialogSettings.put(DIALOGSTORE_LANG_COUNTRY, selectedLanguage.toString());
+
+				// Dispose the italic font if it was created
+				if (italicFont != null && !italicFont.isDisposed())
+				{
+					italicFont.dispose();
+					italicFont = null;
+				}
+
+				// Clear cached chat model
+				aiSuggestionModel = null;
 			}
 		});
+	}
+
+	private Font getItalicFont()
+	{
+		if (italicFont == null)
+		{
+			// Get the default font from one of the text fields (or from Display)
+			Font defaultFont = newKeyTextField != null && !newKeyTextField.isDisposed() ? newKeyTextField.getFont() : Display.getCurrent().getSystemFont();
+
+			// Create italic font based on the default font
+			italicFont = new Font(Display.getCurrent(), defaultFont.getFontData()[0].getName(),
+				defaultFont.getFontData()[0].getHeight(), SWT.ITALIC);
+		}
+		return italicFont;
+	}
+
+	private void updateLocaleValues(String key, boolean isNewKey)
+	{
+		boolean isNew = isNewKey;
+
+		// Update the newKeyButton text based on whether this is a new or existing key
+		if (newKeyButton != null && !newKeyButton.isDisposed())
+		{
+			newKeyButton.setText(isNew ? "Create" : "Save");
+		}
+
+		// Set the key value in newKeyTextField if it exists
+		if (newKeyTextField != null && !newKeyTextField.isDisposed())
+		{
+			if (key != null && !key.trim().isEmpty())
+			{
+				newKeyTextField.setText(key);
+			}
+			else
+			{
+				newKeyTextField.setText("");
+			}
+
+			// Apply italic font when isNew is true
+			if (isNew)
+			{
+				newKeyTextField.setFont(getItalicFont());
+			}
+			else
+			{
+				newKeyTextField.setFont(null); // Reset to default font
+			}
+		}
+
+		// Set the default value in newDefaultTextField if it exists
+		if (newDefaultTextField != null && !newDefaultTextField.isDisposed())
+		{
+			if (key != null && !key.trim().isEmpty())
+			{
+				if (isNew)
+				{
+					newDefaultTextField.setText(generateAITranslateSuggestion(key, new Locale("en")));
+				}
+				else
+				{
+					EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+					Locale emptyLocale = new Locale("");
+					String defaultValue = messagesManager.getI18nMessage(i18nDatasource, "i18n:" + key, emptyLocale);
+					newDefaultTextField.setText(defaultValue != null ? defaultValue : "");
+				}
+			}
+			else
+			{
+				newDefaultTextField.setText("");
+			}
+
+			// Apply italic font when isNew is true
+			if (isNew)
+			{
+				newDefaultTextField.setFont(getItalicFont());
+			}
+			else
+			{
+				newDefaultTextField.setFont(null); // Reset to default font
+			}
+		}
+
+		// Populate locale text fields based on whether this is a new or existing entry
+		if (key != null && !key.trim().isEmpty() && localeTextFields != null)
+		{
+			EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+
+			for (Map.Entry<String, Text> entry : localeTextFields.entrySet())
+			{
+				String localeString = entry.getKey();
+				Text textField = entry.getValue();
+
+				if (textField != null && !textField.isDisposed())
+				{
+					try
+					{
+						// Convert the locale string back to a Locale object
+						Locale locale;
+						if (localeString.contains("_"))
+						{
+							String[] parts = localeString.split("_", 2);
+							locale = new Locale(parts[0], parts[1]);
+						}
+						else
+						{
+							locale = new Locale(localeString);
+						}
+
+						if (isNew)
+						{
+							// Generate AI translation suggestion for new entries
+							String translation = generateAITranslateSuggestion(key, locale);
+							textField.setText(translation != null ? translation : "");
+						}
+						else
+						{
+							// Get existing i18n message for this locale
+							String existingMessage = messagesManager.getI18nMessage(i18nDatasource, "i18n:" + key, locale, true);
+							if (existingMessage == null)
+							{
+								isNew = true;
+								String translation = generateAITranslateSuggestion(key, locale);
+								textField.setText(translation != null ? translation : "");
+							}
+							else
+							{
+								textField.setText(existingMessage);
+							}
+						}
+
+						// Apply italic font when isNew is true
+						if (isNew)
+						{
+							textField.setFont(getItalicFont());
+						}
+						else
+						{
+							textField.setFont(null); // Reset to default font
+						}
+					}
+					catch (Exception e)
+					{
+						// If locale parsing fails, leave the field empty
+						textField.setText("");
+						System.err.println("Failed to parse locale string or retrieve message: " + localeString);
+					}
+				}
+			}
+		}
 	}
 
 	private ISelectionChangedListener getLanguageSelectionHandler()
@@ -360,32 +686,83 @@ public class I18nComposite extends Composite
 		return countrySelectionHandler;
 	}
 
-	private GroupLayout getLayout(Composite container, Combo languageCombo, Combo countryCombo)
+	// Update getLayout to accept new controls
+	private GroupLayout getLayout(Composite centerPanel, Combo languageCombo, Combo countryCombo, Label infoLabel,
+		Composite textFieldsComposite, org.eclipse.swt.custom.ScrolledComposite scrollableComposite, Button newLocaleBtn)
 	{
 		GroupLayout i18NLayout = new GroupLayout(this);
-		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
-			i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, container, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).add(
-				i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(filterText, GroupLayout.PREFERRED_SIZE, 0,
-						Short.MAX_VALUE)
-					.addPreferredGap(LayoutStyle.RELATED).add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(LayoutStyle.RELATED).add(languageCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH,
-						GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(LayoutStyle.RELATED).add(countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH,
-						GroupLayout.PREFERRED_SIZE)))
-			.addContainerGap()));
-		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
-			i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-				GroupLayout.PREFERRED_SIZE).add(filterText, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(languageCombo, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-				.add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE)
-				.add(countryCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE))
-			.addPreferredGap(LayoutStyle.RELATED).add(container, GroupLayout.PREFERRED_SIZE, 100,
-				Short.MAX_VALUE)
-			.addContainerGap()));
+
+		// Build lists of controls for vertical and horizontal groups
+		List<org.eclipse.swt.widgets.Control> extraControls = new ArrayList<>();
+		if (infoLabel != null && !infoLabel.isDisposed() && infoLabel.getParent() == this)
+		{
+			extraControls.add(infoLabel);
+		}
+		if (textFieldsComposite != null && !textFieldsComposite.isDisposed() && textFieldsComposite.getParent() == this)
+		{
+			extraControls.add(textFieldsComposite);
+		}
+		if (scrollableComposite != null && !scrollableComposite.isDisposed() && scrollableComposite.getParent() == this)
+		{
+			extraControls.add(scrollableComposite);
+		}
+
+		// Add new locale button if it exists and has this composite as parent
+		if (newLocaleBtn != null && !newLocaleBtn.isDisposed() && newLocaleBtn.getParent() == this)
+		{
+			extraControls.add(newLocaleBtn);
+		}
+
+		// Vertical group
+		GroupLayout.SequentialGroup vGroup = i18NLayout.createSequentialGroup().addContainerGap();
+		GroupLayout.ParallelGroup topGroup = i18NLayout.createParallelGroup(GroupLayout.CENTER, false)
+			.add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+			.add(filterText, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+			.add(languageCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+			.add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+			.add(countryCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);
+		vGroup.add(topGroup)
+			.addPreferredGap(LayoutStyle.RELATED);
+
+		// If there are extra controls, centerPanel should share space, otherwise take all
+		if (extraControls.isEmpty())
+		{
+			vGroup.add(centerPanel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
+		}
+		else
+		{
+			vGroup.add(centerPanel, 200, 300, Short.MAX_VALUE);
+		}
+
+		for (org.eclipse.swt.widgets.Control c : extraControls)
+		{
+			vGroup.addPreferredGap(LayoutStyle.RELATED).add(c, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE);
+		}
+		vGroup.addContainerGap();
+
+		// Horizontal group
+		GroupLayout.ParallelGroup hGroup = i18NLayout.createParallelGroup(GroupLayout.LEADING);
+		GroupLayout.SequentialGroup hSeq = i18NLayout.createSequentialGroup().addContainerGap();
+		GroupLayout.ParallelGroup hInner = i18NLayout.createParallelGroup(GroupLayout.LEADING);
+		hInner.add(GroupLayout.TRAILING, centerPanel, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+			.add(i18NLayout.createSequentialGroup()
+				.add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(LayoutStyle.RELATED)
+				.add(filterText, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+				.addPreferredGap(LayoutStyle.RELATED)
+				.add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(LayoutStyle.RELATED)
+				.add(languageCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(LayoutStyle.RELATED)
+				.add(countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE));
+		for (org.eclipse.swt.widgets.Control c : extraControls)
+		{
+			hInner.add(c, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
+		}
+		hSeq.add(hInner).addContainerGap();
+		hGroup.add(hSeq);
+		i18NLayout.setHorizontalGroup(hGroup);
+		i18NLayout.setVerticalGroup(vGroup);
 		return i18NLayout;
 	}
 
@@ -468,6 +845,139 @@ public class I18nComposite extends Composite
 		return tableViewer;
 	}
 
+	/**
+	 * Sets the filter text programmatically and triggers filtering
+	 * @param filterValue the text to filter by
+	 */
+	public void setFilterText(String filterValue)
+	{
+		if (filterText != null && !filterText.isDisposed())
+		{
+			String processedFilterValue = filterValue;
+
+			// Remove "i18n:" prefix if it exists at the start
+			if (processedFilterValue != null && processedFilterValue.startsWith("i18n:"))
+			{
+				processedFilterValue = processedFilterValue.substring(5); // Remove "i18n:" (5 characters)
+			}
+
+			// Clear the tableViewer immediately to avoid showing old data while the delayed filter job runs
+			if (tableViewer != null && !tableViewer.getControl().isDisposed())
+			{
+				tableViewer.setInput(new ArrayList<>());
+			}
+
+			filterText.setText(processedFilterValue != null ? processedFilterValue : "");
+			// Trigger the delayed filter job
+			delayedFilterJob.setFilterText(filterText.getText());
+		}
+	}
+
+	/**
+	 * Gets or creates the unified AI suggestion model for both key generation and translation
+	 * @return the chat model, or null if unavailable
+	 */
+	private ChatModel getAISuggestionModel()
+	{
+		if (aiSuggestionModel == null)
+		{
+			EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+			TreeMap<String, MessageEntry> translations = messagesManager.getDatasourceMessages(i18nDatasource);
+
+			aiSuggestionModel = com.servoy.eclipse.core.Activator.getDefault().getChatModel(
+				"You are an expert in internationalization (i18n) and translation. " +
+					"You help with two types of tasks:\n\n" +
+					"1. I18N KEY GENERATION: Generate short, descriptive i18n key names based on provided text. " +
+					"Keys should follow these conventions:\n" +
+					"   - Use lowercase letters and dots for hierarchy\n" +
+					"   - Be concise but descriptive\n" +
+					"   - Use common prefixes like 'button.', 'label.', 'message.', 'error.', 'title.' etc.\n" +
+					"   - Maximum 50 characters\n\n" +
+					"2. TRANSLATION: Generate appropriate translations for i18n keys based on the key name and target language. " +
+					"Translations should:\n" +
+					"   - Be contextually appropriate for the key name\n" +
+					"   - Follow natural language conventions for the target locale\n" +
+					"   - Be concise but clear\n" +
+					"   - Consider common UI/UX terminology\n\n" +
+					"Here you have a list of keys and translations that can help in generating new keys and translations. " +
+					"They are between curly brackets, comma separated and of the following pattern: languageCode_countryCode.key=translation, " +
+					"where languageCode_countryCode can be missing: " + translations.toString() + "\n\n" +
+					"IMPORTANT: Always return ONLY the key name or translated text, no explanations or quotes.");
+		}
+		return aiSuggestionModel;
+	}
+
+	/**
+	 * Generates AI suggestions for the key field based on the provided text
+	 * @param text the text to base suggestions on
+	 * @return the suggested key string, or null if suggestion fails
+	 */
+	private String generateAIKeySuggestion(String text)
+	{
+		try
+		{
+			ChatModel chatModel = getAISuggestionModel();
+
+			if (chatModel != null)
+			{
+				String prompt = "Generate an i18n key for this text: \"" + text + "\"";
+				String suggestion = chatModel.chat(prompt);
+
+				// Clean up the suggestion (remove quotes, trim whitespace)
+				if (suggestion != null)
+				{
+					suggestion = suggestion.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
+					return suggestion;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			// Silently handle errors - AI suggestions are optional
+			System.err.println("AI suggestion failed: " + e.getMessage());
+		}
+
+		return null;
+	}
+
+	/**
+	 * Generates AI translation suggestions for a given key in the specified locale
+	 * @param key the i18n key to translate
+	 * @param locale the target locale for translation
+	 * @return the suggested translation string, or null if suggestion fails
+	 */
+	private String generateAITranslateSuggestion(String key, Locale locale)
+	{
+		try
+		{
+			ChatModel chatModel = getAISuggestionModel();
+
+			if (chatModel != null)
+			{
+				String languageName = locale.getDisplayLanguage();
+				String countryName = locale.getDisplayCountry();
+				String localeInfo = !countryName.isEmpty() ? languageName + " (" + countryName + ")" : languageName;
+
+				String prompt = "Translate this i18n key to " + localeInfo + ": \"" + key + "\"";
+				String suggestion = chatModel.chat(prompt);
+
+				// Clean up the suggestion (remove quotes, trim whitespace)
+				if (suggestion != null)
+				{
+					suggestion = suggestion.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "");
+					return suggestion;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			// Silently handle errors - AI suggestions are optional
+			System.err.println("AI translation suggestion failed: " + e.getMessage());
+		}
+
+		return null;
+	}
+
 	public String getSelectedKey()
 	{
 		I18NMessagesModelEntry row = (I18NMessagesModelEntry)((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
@@ -514,40 +1024,68 @@ public class I18nComposite extends Composite
 		if (selection != null) selectKey(selection);
 	}
 
+	/**
+	 * Searches for an entry with the given key in the table viewer and selects it if found.
+	 * @param key the key to search for (without "i18n:" prefix)
+	 * @return true if the entry was found and selected, false otherwise
+	 */
+	private boolean findEntryInTableViewer(String key)
+	{
+		if (key == null)
+		{
+			return false;
+		}
+
+		StructuredSelection currentSelection = (StructuredSelection)tableViewer.getSelection();
+		if (currentSelection.size() == 1 && ((I18NMessagesModelEntry)currentSelection.getFirstElement()).key.equals(key))
+		{
+			return true;
+		}
+
+		Collection<I18NMessagesModelEntry> contents = (Collection<I18NMessagesModelEntry>)tableViewer.getInput();
+		for (I18NMessagesModelEntry entry : contents)
+		{
+			if (entry.key.equals(key))
+			{
+				tableViewer.setSelection(new StructuredSelection(entry));
+				tableViewer.reveal(entry);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public void selectKey(String value)
 	{
 		lastAutoSelectedKey = value;
+		String key = value;
 		boolean found = false;
 		if (value != null && value.startsWith("i18n:"))
 		{
-			String key = value.substring(5);
-
-			StructuredSelection currentSelection = (StructuredSelection)tableViewer.getSelection();
-			if (currentSelection.size() != 1 || !((I18NMessagesModelEntry)currentSelection.getFirstElement()).key.equals(key))
-			{
-				Collection<I18NMessagesModelEntry> contents = (Collection<I18NMessagesModelEntry>)tableViewer.getInput();
-				Iterator<I18NMessagesModelEntry> it = contents.iterator();
-				while (it.hasNext() && !found)
-				{
-					I18NMessagesModelEntry entry = it.next();
-					if (entry.key.equals(key))
-					{
-						found = true;
-						tableViewer.setSelection(new StructuredSelection(entry));
-						tableViewer.reveal(entry);
-					}
-				}
-			}
-			else
-			{
-				found = true;
-			}
+			key = value.substring(5);
+			found = findEntryInTableViewer(key);
 		}
 
 		if (!found)
 		{
 			tableViewer.setSelection(new StructuredSelection());
+			if (showAISuggestion)
+			{
+				key = generateAIKeySuggestion(key);
+				// Search again for the AI-generated key
+				if (key != null)
+				{
+					found = findEntryInTableViewer(key);
+				}
+			}
 		}
+
+		if (showAISuggestion && key != null)
+		{
+			updateLocaleValues(key, !found);
+		}
+
 	}
 
 	public void saveTableColumnWidths()
@@ -659,6 +1197,291 @@ public class I18nComposite extends Composite
 		else
 		{
 			return 1;
+		}
+	}
+
+	/**
+	 * Creates dynamic locale fields based on getCurrentLocales() method
+	 */
+	private void createDynamicLocaleFields()
+	{
+		Locale[] locales = getCurrentLocales();
+		if (locales == null || locales.length == 0) return;
+
+		// Clear existing fields
+		localeLabels.clear();
+		localeTextFields.clear();
+
+		// Create a GridLayout for the locale fields composite - 2 columns (label, text field)
+		org.eclipse.swt.layout.GridLayout gridLayout = new org.eclipse.swt.layout.GridLayout();
+		gridLayout.numColumns = 2; // Two columns: label and text field
+		gridLayout.makeColumnsEqualWidth = false; // Label can be smaller than text field
+		gridLayout.marginWidth = 5;
+		gridLayout.marginHeight = 5;
+		gridLayout.horizontalSpacing = 5;
+		gridLayout.verticalSpacing = 5;
+		localeFieldsComposite.setLayout(gridLayout);
+
+		// Create each locale as a row with label and text field
+		for (Locale locale : locales)
+		{
+			String localeString = locale.toString();
+
+			// Create label for this locale
+			Label label = new Label(localeFieldsComposite, SWT.NONE);
+			label.setText(locale.getDisplayLanguage());
+			org.eclipse.swt.layout.GridData labelData = new org.eclipse.swt.layout.GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+			labelData.widthHint = 80; // Fixed width for labels
+			label.setLayoutData(labelData);
+			localeLabels.put(localeString, label);
+
+			// Create text field for this locale (same row)
+			Text textField = new Text(localeFieldsComposite, SWT.BORDER);
+			textField.setData("fieldName", "fld_" + localeString);
+			org.eclipse.swt.layout.GridData textData = new org.eclipse.swt.layout.GridData(SWT.FILL, SWT.CENTER, true, false);
+			textData.widthHint = 200; // Minimum width for text fields
+			textField.setLayoutData(textData);
+			localeTextFields.put(localeString, textField);
+		}
+
+		// Set the minimum size for the scrolled composite - crucial for scrolling to work
+		org.eclipse.swt.graphics.Point size = localeFieldsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		localeFieldsComposite.setSize(size);
+		localeScrolledComposite.setMinSize(size);
+
+		// For many locales, the scrolled composite will automatically show scrollbars when needed
+		if (locales.length > 8) // If more than 8 rows, add some padding for better visibility
+		{
+			localeScrolledComposite.setMinSize(size.x, Math.min(size.y, 200)); // Limit height to 200 pixels to force scrolling
+		}
+	}
+
+	/**
+	 * Returns the current locales to create fields for.
+	 * @return array of Locale objects
+	 */
+	private Locale[] getCurrentLocales()
+	{
+		if (currentLocalesList == null)
+		{
+			// Initialize with default locales
+			currentLocalesList = new ArrayList<>();
+			if (i18nDatasource != null)
+			{
+				String serverName = DataSourceUtils.getDataSourceServerName(i18nDatasource);
+				String tableName = DataSourceUtils.getDataSourceTableName(i18nDatasource);
+
+				String[] messagesFileNames = EclipseMessages.getMessageFileNames(serverName, tableName);
+				if (messagesFileNames != null && messagesFileNames.length > 0)
+				{
+					// Extract language from each filename and create Locale objects directly
+					// Format: serverName.tableName.language.properties
+					String prefix = serverName + "." + tableName + ".";
+					String suffix = ".properties";
+					for (String fileName : messagesFileNames)
+					{
+						if (fileName.startsWith(prefix) && fileName.endsWith(suffix))
+						{
+							// Extract the language part between prefix and suffix
+							int startIndex = prefix.length();
+							int endIndex = fileName.length() - suffix.length();
+
+							// Check bounds to avoid StringIndexOutOfBoundsException
+							if (startIndex <= endIndex && endIndex <= fileName.length())
+							{
+								String language = fileName.substring(startIndex, endIndex);
+								if (!language.isEmpty())
+								{
+									try
+									{
+										Locale locale;
+										// Handle locale strings that may contain language_country format
+										if (language.contains("_"))
+										{
+											String[] parts = language.split("_", 2);
+											locale = new Locale(parts[0], parts[1]);
+										}
+										else
+										{
+											locale = new Locale(language);
+										}
+
+										// Check if locale already exists
+										boolean exists = false;
+										for (Locale existingLocale : currentLocalesList)
+										{
+											if (existingLocale.equals(locale))
+											{
+												exists = true;
+												break;
+											}
+										}
+
+										if (!exists)
+										{
+											currentLocalesList.add(locale);
+										}
+									}
+									catch (Exception e)
+									{
+										// If locale creation fails, skip this locale
+										System.err.println("Failed to create locale from string: " + language);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return currentLocalesList.toArray(new Locale[0]);
+	}
+
+	/**
+	 * Adds a new locale to the current list and refreshes the dynamic locale fields
+	 */
+	private void addNewLocale()
+	{
+		// Open the LocaleSelectionDialog
+		LocaleSelectionDialog dialog = new LocaleSelectionDialog(this.getShell());
+		if (dialog.open() == org.eclipse.jface.window.Window.OK)
+		{
+			Locale selectedLocale = dialog.getSelectedLocale();
+			if (selectedLocale == null)
+			{
+				return;
+			}
+
+			// Initialize the list if needed
+			if (currentLocalesList == null)
+			{
+				currentLocalesList = new ArrayList<>();
+				currentLocalesList.add(new Locale("english"));
+				currentLocalesList.add(new Locale("french"));
+			}
+
+			// Check if locale already exists
+			boolean exists = false;
+			for (Locale existingLocale : currentLocalesList)
+			{
+				if (existingLocale.equals(selectedLocale))
+				{
+					exists = true;
+					break;
+				}
+			}
+
+			if (exists)
+			{
+				// Optionally show a message that locale already exists
+				return;
+			}
+
+			// Add the new locale
+			currentLocalesList.add(selectedLocale);
+
+			// Dispose existing locale fields
+			if (localeFieldsComposite != null && !localeFieldsComposite.isDisposed())
+			{
+				// Dispose all children first
+				org.eclipse.swt.widgets.Control[] children = localeFieldsComposite.getChildren();
+				for (org.eclipse.swt.widgets.Control child : children)
+				{
+					child.dispose();
+				}
+			}
+
+			// Recreate the dynamic fields
+			createDynamicLocaleFields();
+
+			// Update the layout
+			if (localeScrolledComposite != null && !localeScrolledComposite.isDisposed())
+			{
+				localeScrolledComposite.layout(true, true);
+			}
+
+			// Update the parent layout
+			this.layout(true, true);
+
+			this.selectKey("i18n:" + this.filterText.getText());
+		}
+	}
+
+	/**
+	 * Handles the click event for the new key button to create or update i18n keys
+	 */
+	private void handleNewKeyButtonClick()
+	{
+		if (newKeyTextField == null || newKeyTextField.isDisposed() ||
+			newDefaultTextField == null || newDefaultTextField.isDisposed())
+		{
+			return;
+		}
+
+		String key = newKeyTextField.getText().trim();
+		String defaultValue = newDefaultTextField.getText().trim();
+
+		if (key.isEmpty())
+		{
+			return; // Key is required
+		}
+
+		EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+
+		try
+		{
+			// Create or update the default value (empty locale)
+			if (!defaultValue.isEmpty())
+			{
+				messagesManager.addMessage(i18nDatasource, new MessageEntry(null, key, defaultValue));
+			}
+
+			// Create or update values for all locale text fields
+			if (localeTextFields != null)
+			{
+				for (Map.Entry<String, Text> entry : localeTextFields.entrySet())
+				{
+					String localeString = entry.getKey();
+					Text textField = entry.getValue();
+
+					if (textField != null && !textField.isDisposed())
+					{
+						String localeValue = textField.getText().trim();
+						if (!localeValue.isEmpty())
+						{
+							// Set the message for this locale
+							messagesManager.addMessage(i18nDatasource, new MessageEntry(localeString, key, localeValue));
+						}
+					}
+				}
+			}
+
+			messagesManager.save(this.i18nDatasource);
+
+			// Refresh the table to show the new/updated entry
+			refresh(null);
+
+			// Clear the text fields after successful creation/update
+			newKeyTextField.setText("");
+			newDefaultTextField.setText("");
+			if (localeTextFields != null)
+			{
+				for (Text textField : localeTextFields.values())
+				{
+					if (textField != null && !textField.isDisposed())
+					{
+						textField.setText("");
+					}
+				}
+			}
+
+			// Select the newly created/updated key in the table
+			fill(key);
+			selectKey("i18n:" + key);
+		}
+		catch (Exception e)
+		{
+			System.err.println("Failed to create/update i18n key: " + key + " - " + e.getMessage());
 		}
 	}
 }
