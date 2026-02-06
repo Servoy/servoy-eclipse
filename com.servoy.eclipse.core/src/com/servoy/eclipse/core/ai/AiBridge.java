@@ -101,7 +101,6 @@ public class AiBridge
 	public static void setFormExtendsID(Form form, Form parentForm)
 	{
 		form.setExtendsForm(parentForm);
-		form.setExtendsID(parentForm.getUUID().toString());
-
+		form.setExtendsID(parentForm.getID());
 	}
 }
