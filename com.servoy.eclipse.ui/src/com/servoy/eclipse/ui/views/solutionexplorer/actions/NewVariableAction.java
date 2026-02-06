@@ -185,6 +185,11 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 	public static VariableEditDialog showVariableEditDialog(Shell shell, final Object validationContext, String variableScopeType)
 	{
+		return showVariableEditDialog(shell, validationContext, variableScopeType, null);
+	}
+
+	public static VariableEditDialog showVariableEditDialog(Shell shell, final Object validationContext, String variableScopeType, String initialVariableName)
+	{
 		context = validationContext;
 		VariableEditDialog askUserDialog = new VariableEditDialog(shell, "Create a new " + variableScopeType + " variable", new IInputValidator()
 		{
@@ -213,7 +218,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 				}
 				return message;
 			}
-		});
+		}, initialVariableName, -1, null);
 		askUserDialog.open();
 		return askUserDialog;
 	}

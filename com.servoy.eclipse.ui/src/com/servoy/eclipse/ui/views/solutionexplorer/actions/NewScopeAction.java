@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -98,27 +97,32 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 				return;
 			}
 
-			String scopeName = askScopeName(viewer.getViewSite().getShell(), "", (ServoyProject)project.getRealObject());
-			if (scopeName == null)
-			{
-				return;
-			}
+			createScope("", viewer.getViewSite().getShell(), (ServoyProject)project.getRealObject(), true);
+		}
+	}
 
-			WorkspaceFileAccess wsfa = new WorkspaceFileAccess(((IProjectNature)project.getRealObject()).getProject().getWorkspace());
-			String scriptPath = SolutionSerializer.getRelativePath(((((ServoyProject)project.getRealObject()).getSolution())), false) + scopeName +
-				SolutionSerializer.JS_FILE_EXTENSION;
-			if (!wsfa.exists(scriptPath))
+	public static void createScope(String initialValue, Shell shell, ServoyProject servoyProject, boolean openEditor)
+	{
+		String scopeName = askScopeName(shell, initialValue, servoyProject);
+		if (scopeName == null)
+		{
+			return;
+		}
+
+		WorkspaceFileAccess wsfa = new WorkspaceFileAccess(servoyProject.getProject().getWorkspace());
+		String scriptPath = SolutionSerializer.getRelativePath(servoyProject.getSolution(), false) + scopeName +
+			SolutionSerializer.JS_FILE_EXTENSION;
+		if (!wsfa.exists(scriptPath))
+		{
+			// file doesn't exist, create the file and its parent directories
+			try
 			{
-				// file doesn't exist, create the file and its parent directories
-				try
-				{
-					wsfa.setContents(scriptPath, new byte[0]);
-					EditorUtil.openScriptEditor(((ServoyProject)project.getRealObject()).getSolution(), scopeName, true);
-				}
-				catch (IOException e)
-				{
-					ServoyLog.logError("Could not create global scope " + scopeName + " in project  " + project, e);
-				}
+				wsfa.setContents(scriptPath, new byte[0]);
+				if (openEditor) EditorUtil.openScriptEditor(servoyProject.getSolution(), scopeName, true);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError("Could not create global scope " + scopeName + " in project  " + servoyProject, e);
 			}
 		}
 	}

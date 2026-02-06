@@ -162,6 +162,58 @@ public class VisualFormEditorSecurityPage extends Composite
 		btnToggleViewable.setLayoutData(formData);
 
 
+		Button btnClearCurrentPermissions = new Button(this, SWT.NONE);
+		btnClearCurrentPermissions.setText("Clear Selected Permission");
+		btnClearCurrentPermissions
+			.setToolTipText("Clear all viewable and accessible settings for all elements in the form of selected permission (a reset to default) .");
+		btnClearCurrentPermissions.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				model.clearPermissionsForCurrentGroup();
+				editor.flagModified();
+				doRefresh();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
+		formData = new FormData();
+		formData.top = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(btnToggleViewable, -5);
+		btnClearCurrentPermissions.setLayoutData(formData);
+
+		Button btnClearAllPermissions = new Button(this, SWT.NONE);
+		btnClearAllPermissions.setText("Clear All Permissions");
+		btnClearAllPermissions
+			.setToolTipText("Clear all viewable and accessible settings for all elements in the form of all permissions (a reset to default) .");
+		btnClearAllPermissions.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				model.clearAllPermissions();
+				editor.flagModified();
+				doRefresh();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
+		formData = new FormData();
+		formData.top = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(btnClearCurrentPermissions, -5);
+		btnClearAllPermissions.setLayoutData(formData);
+
 		final SashForm sashForm = new SashForm(this, SWT.NONE);
 		formData = new FormData();
 		formData.top = new FormAttachment(btnToggleViewable, 6);

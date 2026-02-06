@@ -100,6 +100,27 @@ public class FormatDialog extends Dialog
 	{
 		Control content = super.createContents(parent);
 		getShell().pack();
+
+		// macOS layout is wrong on very first rendering
+		// simulate a click on the checkbox to force layout update
+		if (SWT.getPlatform().equals("cocoa"))
+		{
+			parent.getDisplay().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					if (useConvertersCheckbutton != null && !useConvertersCheckbutton.isDisposed())
+					{
+						boolean originalSelection = useConvertersCheckbutton.getSelection();
+						useConvertersCheckbutton.setSelection(!originalSelection);
+						useConvertersCheckbutton.notifyListeners(SWT.Selection, null);
+						useConvertersCheckbutton.setSelection(originalSelection);
+						useConvertersCheckbutton.notifyListeners(SWT.Selection, null);
+					}
+				}
+			});
+		}
+
 		return content;
 	}
 
@@ -141,10 +162,14 @@ public class FormatDialog extends Dialog
 			gl_uiConverterContainer.createSequentialGroup().add(
 				gl_uiConverterContainer.createParallelGroup(GroupLayout.LEADING).add(
 					gl_uiConverterContainer.createSequentialGroup().addContainerGap().add(useConvertersCheckbutton, GroupLayout.PREFERRED_SIZE, 169,
-						GroupLayout.PREFERRED_SIZE)).add(uiConvertersComposite)).addContainerGap()));
+						GroupLayout.PREFERRED_SIZE))
+					.add(uiConvertersComposite))
+				.addContainerGap()));
 		gl_uiConverterContainer.setVerticalGroup(gl_uiConverterContainer.createParallelGroup(GroupLayout.LEADING).add(
-			gl_uiConverterContainer.createSequentialGroup().add(useConvertersCheckbutton, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-				LayoutStyle.RELATED).add(uiConvertersComposite, GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)));
+			gl_uiConverterContainer.createSequentialGroup().add(useConvertersCheckbutton, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(
+					LayoutStyle.RELATED)
+				.add(uiConvertersComposite, GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)));
 
 		uiConverterContainer.setLayout(gl_uiConverterContainer);
 

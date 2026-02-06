@@ -198,6 +198,13 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
 		String forcedScopeName, Map<String, String> substitutions, IPersist persist, MethodArgument forcedReturnType)
 	{
+		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName,
+			forcedScopeName, substitutions, persist, forcedReturnType, true);
+	}
+
+	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
+		String forcedScopeName, Map<String, String> substitutions, IPersist persist, MethodArgument forcedReturnType, boolean askDirtyEditorForSave)
+	{
 		String methodType;
 		int tagFilter;
 		String[] listOptions = null;
@@ -483,7 +490,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 							// file (he will not see it in the solution explorer)
 							openEditor.getSite().getPage().activate(openEditor);
 
-							if (wasDirty)
+							if (askDirtyEditorForSave && wasDirty)
 							{
 								// let user now that he will not see the new method or be able to select it until editor is saved
 								Runnable r = new Runnable()

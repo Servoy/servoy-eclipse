@@ -754,6 +754,10 @@
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.deprecatedSpec">
       	</markerResolutionGenerator>
+        <markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ScriptQuickFix"
+            markerType="org.eclipse.dltk.javascript.core.jsproblem">
+        </markerResolutionGenerator>
      </extension>
      <extension
            point="org.eclipse.ui.commands">
@@ -1257,7 +1261,10 @@
             class="com.servoy.eclipse.ui.quickfix.jsexternalize.ExternalizeScriptCorrectionProcessor"
             nature="org.eclipse.dltk.javascript.core.nature">
       </correctionProcessor>
-      
+      <correctionProcessor
+            class="com.servoy.eclipse.ui.quickfix.ScriptQuickFix"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </correctionProcessor>      
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">

@@ -28,6 +28,7 @@ import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
@@ -53,6 +54,7 @@ public class ElementSettingsModel
 {
 	private String currentGroup;
 	private final Map<String, Map<String, Integer>> securityInfo;
+	private final List<String> permissionsToReset = new ArrayList<String>();
 	private final Form form;
 
 	public ElementSettingsModel(Form form)
@@ -93,7 +95,7 @@ public class ElementSettingsModel
 			// we already had it read/used in this editor's map
 			access = explicitAccessForThisElement.intValue();
 		}
-		else
+		else if (!permissionsToReset.contains(currentGroup))
 		{
 			// read it from the user manager
 			List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(currentGroup, form);
@@ -164,6 +166,11 @@ public class ElementSettingsModel
 		{
 			List<IPersist> formElements = getFormElements();
 			String solutionName = form.getSolution().getName();
+			for (String group : permissionsToReset)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().resetFormSecurityAccess(
+					ApplicationServerRegistry.get().getClientId(), group, form.getUUID());
+			}
 			for (String group : securityInfo.keySet())
 			{
 				Map<String, Integer> currentGroupSecurityInfo = securityInfo.get(group);
@@ -182,6 +189,7 @@ public class ElementSettingsModel
 				}
 			}
 			securityInfo.clear();
+			permissionsToReset.clear();
 		}
 		catch (Exception ex)
 		{
@@ -241,5 +249,21 @@ public class ElementSettingsModel
 	public Form getForm()
 	{
 		return form;
+	}
+
+	public void clearAllPermissions()
+	{
+		securityInfo.clear();
+		IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerRegistry.get().getClientId());
+		groups.getRows().forEach(row -> permissionsToReset.add(row[1].toString()));
+	}
+
+	public void clearPermissionsForCurrentGroup()
+	{
+		if (currentGroup != null)
+		{
+			securityInfo.remove(currentGroup);
+			permissionsToReset.add(currentGroup);
+		}
 	}
 }
