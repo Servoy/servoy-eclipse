@@ -21,6 +21,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 
 /**
+ * This is a helper clas that is implemented in the various releases to set stuff that are different between the releases, like the event method ids on the form.
+ *
  * @author jcompagner
  *
  * @since 2024.03.10 2026.03
@@ -85,5 +87,16 @@ public class AiBridge
 				ServoyLog.logInfo("[FormService] Unknown event: " + eventName);
 				break;
 		}
+	}
+
+	/**
+	 * @param form
+	 * @param parentForm
+	 */
+	public static void setFormExtendsID(Form form, Form parentForm)
+	{
+		form.setExtendsForm(parentForm);
+		form.setExtendsID(parentForm.getUUID().toString());
+
 	}
 }
