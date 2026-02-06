@@ -17,8 +17,10 @@
 
 package com.servoy.eclipse.core.ai;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
  * @author jcompagner
@@ -37,49 +39,52 @@ public class AiBridge
 	 */
 	public static void applyEventMethod(Form form, String eventName, String methodUUID)
 	{
+		ScriptMethod scriptMethod = ServoyModelFinder.getServoyModel().getFlattenedSolution().getScriptMethod(methodUUID);
+		if (scriptMethod == null)
+		{
+			ServoyLog.logInfo("[FormService] Could not find method with UUID: " + methodUUID);
+			return;
+		}
 		switch (eventName)
 		{
 			case "onLoad" :
-				form.setOnLoadMethodID(methodUUID);
+				form.setOnLoadMethodID(scriptMethod.getID());
 				break;
 			case "onUnLoad" :
-				form.setOnUnLoadMethodID(methodUUID);
+				form.setOnUnLoadMethodID(scriptMethod.getID());
 				break;
 			case "onShow" :
-				form.setOnShowMethodID(methodUUID);
+				form.setOnShowMethodID(scriptMethod.getID());
 				break;
 			case "onHide" :
-				form.setOnHideMethodID(methodUUID);
+				form.setOnHideMethodID(scriptMethod.getID());
 				break;
 			case "onBeforeHide" :
-				form.setOnBeforeHideMethodID(methodUUID);
+				form.setOnBeforeHideMethodID(scriptMethod.getID());
 				break;
 			case "onRecordSelection" :
-				form.setOnRecordSelectionMethodID(methodUUID);
-				break;
-			case "onBeforeRecordSelection" :
-				form.setOnBeforeRecordSelectionMethodID(methodUUID);
+				form.setOnRecordSelectionMethodID(scriptMethod.getID());
 				break;
 			case "onRecordEditStart" :
-				form.setOnRecordEditStartMethodID(methodUUID);
+				form.setOnRecordEditStartMethodID(scriptMethod.getID());
 				break;
 			case "onRecordEditStop" :
-				form.setOnRecordEditStopMethodID(methodUUID);
+				form.setOnRecordEditStopMethodID(scriptMethod.getID());
 				break;
 			case "onElementDataChange" :
-				form.setOnElementDataChangeMethodID(methodUUID);
+				form.setOnElementDataChangeMethodID(scriptMethod.getID());
 				break;
 			case "onElementFocusGained" :
-				form.setOnElementFocusGainedMethodID(methodUUID);
+				form.setOnElementFocusGainedMethodID(scriptMethod.getID());
 				break;
 			case "onElementFocusLost" :
-				form.setOnElementFocusLostMethodID(methodUUID);
+				form.setOnElementFocusLostMethodID(scriptMethod.getID());
 				break;
 			case "onResize" :
-				form.setOnResizeMethodID(methodUUID);
+				form.setOnResizeMethodID(scriptMethod.getID());
 				break;
 			case "onSort" :
-				form.setOnSortCmdMethodID(methodUUID);
+				form.setOnSortCmdMethodID(scriptMethod.getID());
 				break;
 			default :
 				ServoyLog.logInfo("[FormService] Unknown event: " + eventName);
