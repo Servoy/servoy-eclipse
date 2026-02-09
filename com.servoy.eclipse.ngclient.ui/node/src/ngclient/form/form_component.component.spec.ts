@@ -5,7 +5,8 @@ import {
   Renderer2, ChangeDetectorRef, DebugElement,
   input,
   output,
-  viewChild
+  viewChild,
+  signal
 } from '@angular/core';
 
 import { FormattingService, TooltipService, LoggerFactory, ServoyBaseComponent,
@@ -90,7 +91,9 @@ export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButto
     readonly arrayOfCustomObjects = input<Array<SomeCustomObject>>(undefined);
 
     readonly divLocation = input<number>(undefined);
-    readonly divLocationChange = output();
+    readonly divLocationChange = output<number>();
+    
+    _divLocation = signal<number>(undefined);
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -106,8 +109,12 @@ export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButto
 //        super.svyOnChanges(changes);
 //    }
 
+    ngOnInit() {
+        this._divLocation.set(this.divLocation());
+    }
     click1() {
-        divLocation++;
+        let divLocation = this._divLocation();
+        this._divLocation.set(divLocation++);
         this.divLocationChange.emit(divLocation);
     }
 
