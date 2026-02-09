@@ -358,7 +358,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
+            return item.tagname ? this[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
         } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent();
             return item.responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
@@ -372,7 +372,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             if (componentRef === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
-            return componentRef;
+            return typeof componentRef === 'function' ? componentRef() : componentRef;
         }
     }
 
