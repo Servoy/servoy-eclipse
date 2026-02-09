@@ -23,7 +23,7 @@ export class RowRenderer implements AgRendererComponent {
             bubbles: true,
             detail: customEvent.detail
         });
-        this.lfc.elementRef.nativeElement.children[0].dispatchEvent(newEvent);
+        this.lfc.element().nativeElement.children[0].dispatchEvent(newEvent);
     }
 
     refresh(params: ICellRendererParams): boolean {
@@ -34,7 +34,7 @@ export class RowRenderer implements AgRendererComponent {
     agInit(params: ICellRendererParams): void {
         this.lfc = params.context['componentParent'];
         this.foundsetRows = params.data;
-        this.startIndex =(params.node.rowIndex - this.lfc.foundset.viewPort.startIndex) * this.lfc.numberOfColumns;
+        this.startIndex =(params.node.rowIndex - this.lfc._foundset().viewPort.startIndex) * this.lfc.numberOfColumns;
 
     }
 

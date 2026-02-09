@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, EventEmitter, Output, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 
 
@@ -9,19 +9,21 @@ import { ServoyBaseComponent } from '@servoy/public';
     standalone: false
 } )
 export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
-    @Input() onChangeMethodID;
-    @Input() onCreateMethodID;
-    @Input() onSlideMethodID;
-    @Input() onStartMethodID;
-    @Input() onStopMethodID;
+    readonly onChangeMethodID = input(undefined);
+    readonly onCreateMethodID = input(undefined);
+    readonly onSlideMethodID = input(undefined);
+    readonly onStartMethodID = input(undefined);
+    readonly onStopMethodID = input(undefined);
 
-    @Input() min;
-    @Input() max;
-    @Input() orientation;
-    @Input() step;
+    readonly min = input(undefined);
+    readonly max = input(undefined);
+    readonly orientation = input(undefined);
+    readonly step = input(undefined);
 
-    @Input() dataProviderID: any;
-    @Output() dataProviderIDChange = new EventEmitter();
+    readonly dataProviderID = input<any>(undefined);
+    readonly dataProviderIDChange = output();
+    
+    _dataProviderID = signal<any>(undefined);
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -29,20 +31,20 @@ export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
 
     svyOnInit() {
         super.svyOnInit();
-        if (this.orientation === 'vertical') {
+        if (this.orientation() === 'vertical') {
             this.renderer.setStyle(this.getNativeElement(), '-webkit-appearance', 'slider-vertical' );
             this.renderer.setAttribute(this.getNativeElement(), 'orient', 'vertical');
         }
      }
 
     update( event: Event) {
-        this.dataProviderID = (event.target as HTMLInputElement).value;
-        this.dataProviderIDChange.emit( this.dataProviderID );
+        this._dataProviderID.set((event.target as HTMLInputElement).value);
+        this.dataProviderIDChange.emit( this._dataProviderID() );
     }
 
     protected attachHandlers(){
-        if ( this.onChangeMethodID ) {
-            this.renderer.listen( this.getNativeElement(), 'change', e => this.onChangeMethodID( e ));
+        if ( this.onChangeMethodID() ) {
+            this.renderer.listen( this.getNativeElement(), 'change', e => this.onChangeMethodID()( e ));
         }
     }
 }

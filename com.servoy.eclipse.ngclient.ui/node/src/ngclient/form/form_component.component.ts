@@ -1,7 +1,9 @@
 import {
-  Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+  Component, Input, OnDestroy, OnChanges, SimpleChanges,
   TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit, AfterViewChecked,
-  DOCUMENT
+  DOCUMENT,
+  input,
+  viewChild
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
@@ -217,25 +219,25 @@ export abstract class AbstractFormComponent {
  * This is the definition of a angular component that represents servoy forms.
  */
 export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, IFormComponent {
-    @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
-    @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
+    readonly svyResponsiveDiv = viewChild<TemplateRef<any>>('svyResponsiveDiv');
+    readonly cssPositionContainer = viewChild<TemplateRef<any>>('cssPositionContainer');
     // structure viewchild template generate start
     // structure viewchild template generate end
-    @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
-    @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
+    readonly formComponentAbsoluteDiv = viewChild<TemplateRef<any>>('formComponentAbsoluteDiv');
+    readonly formComponentResponsiveDiv = viewChild<TemplateRef<any>>('formComponentResponsiveDiv');
 
     // component viewchild template generate start
-    @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
-    @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
-    @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
-    @ViewChild('servoycoreFormcontainer', { static: true }) readonly servoycoreFormcontainer: TemplateRef<any>;
+    readonly servoycoreSlider = viewChild<TemplateRef<any>>('servoycoreSlider');
+    readonly servoycoreErrorbean = viewChild<TemplateRef<any>>('servoycoreErrorbean');
+    readonly servoycoreListformcomponent = viewChild<TemplateRef<any>>('servoycoreListformcomponent');
+    readonly servoycoreFormcontainer = viewChild<TemplateRef<any>>('servoycoreFormcontainer');
 
     // component viewchild template generate end
 
     @Input() name: string;
 
     //** "injectedComponentRefs" is used for being able to inject some test component templates inside Karma/Jasmine unit tests */
-    @Input() injectedComponentRefs: Record<string, TemplateRef<any>>;
+    readonly injectedComponentRefs = input<Record<string, TemplateRef<any>>>(undefined);
 
     formClasses: string[];
 
@@ -317,6 +319,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     ngOnChanges(changes: SimpleChanges) {
+        const name = this.name;
         if (changes.name) {
             //
             // Form Instances are reused for tabpanels that have a template reference to this make sure to clean up the old reference/name to this instance
@@ -334,9 +337,9 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.servoyApiCache = {};
             this.componentCache = {};
 
-            this.renderer.setAttribute(this.el.nativeElement, 'name', this.name);
+            this.renderer.setAttribute(this.el.nativeElement, 'name', name);
         }
-        this.updateFormStyleClasses(this.formservice.getFormStyleClasses(this.name));
+        this.updateFormStyleClasses(this.formservice.getFormStyleClasses(name));
     }
 
     ngAfterViewInit() {
@@ -355,15 +358,16 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : (item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
+            return item.tagname ? this[item.tagname] : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
         } else if (item instanceof FormComponentCache) {
-            if (item.hasFoundset) return this.servoycoreListformcomponent;
-            return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
+            if (item.hasFoundset) return this.servoycoreListformcomponent();
+            return item.responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
         } else {
             let componentRef = this[item.type];
 
             // "injectedComponentRefs" is used only for being able to inject some TEST component templates inside Karma/Jasmine unit tests
-            if (!componentRef && this.injectedComponentRefs) componentRef = this.injectedComponentRefs[item.type];
+            const injectedComponentRefs = this.injectedComponentRefs();
+            if (!componentRef && injectedComponentRefs) componentRef = injectedComponentRefs[item.type];
 
             if (componentRef === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
@@ -374,7 +378,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
-            return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
+            return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv() : this.formComponentResponsiveDiv();
         } else {
             // TODO: this has to be replaced with a type property on the state object
             // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { I18NProvider } from '../i18n_provider.service';
 
@@ -10,11 +10,15 @@ import { I18NProvider } from '../i18n_provider.service';
 })
 export class FileUploadWindowComponent {
 
-    @Input() url: string;
-    @Input() title: string;
-    @Input() multiselect: boolean;
-    @Input() filter: string;
+    readonly url = input<string>(undefined);
+    readonly title = input<string>(undefined);
+    readonly multiselect = input<boolean>(undefined);
+    readonly filter = input<string>(undefined);
 
+    _url = signal<string>(undefined);
+    _title = signal<string>(undefined);
+    _multiselect = signal<boolean>(undefined);
+    _filter = signal<string>(undefined);
 
     i18n_upload = 'Upload';
     i18n_chooseFiles = 'Select a file';
@@ -53,12 +57,19 @@ export class FileUploadWindowComponent {
                 this.i18n_remove = val.get('servoy.filechooser.button.remove');
                 this.i18n_name = val.get('servoy.filechooser.label.name');
                 this.genericError = val.get('servoy.filechooser.error');
-                if (!this.title) this.title = this.i18n_chooseFiles;
+                if (!this.title()) this._title.set(this.i18n_chooseFiles);
             });
+    }
+    
+    ngOnInit(): void {
+        this._url.set(this.url());
+        this._title.set(this.title());
+        this._multiselect.set(this.multiselect());
+        this._filter.set(this.filter());
     }
 
     isMultiselect(): boolean {
-        return this.multiselect === true;
+        return this._multiselect() === true;
     }
 
     isFileSelected(): boolean {
@@ -118,8 +129,9 @@ export class FileUploadWindowComponent {
     
     getAcceptFilter(): string {
         // If filter contains maxUploadFileSize information, extract it
-        if (this.filter && this.filter.includes('maxUploadFileSize=')) {
-            const filters = this.filter.split(',');
+        const filterValue = this._filter();
+        if (filterValue && filterValue.includes('maxUploadFileSize=')) {
+            const filters = filterValue.split(',');
             let cleanedFilter: string[] = [];
             
             for (const filter of filters) {
@@ -135,10 +147,10 @@ export class FileUploadWindowComponent {
             }
             
             // Update filter without the maxUploadFileSize entry
-            this.filter = cleanedFilter.join(',');
+            this._filter.set(cleanedFilter.join(','));
         }
 		
-        return this.filter;
+        return filterValue;
     }
 
     // Helper method to get display name (with asterisk for oversized files)
@@ -171,7 +183,7 @@ export class FileUploadWindowComponent {
             formData.append('uploads[]', file, file.name);
         }
 
-        this.http.post(this.url, formData, { reportProgress: true, observe: 'events' })
+        this.http.post(this._url(), formData, { reportProgress: true, observe: 'events' })
             .subscribe(
                 data => {
                     const r: any = data as any;

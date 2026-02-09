@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { AbstractFormComponent } from '../../ngclient/form/form_component.component';
 
 @Component({
@@ -7,6 +7,6 @@ import { AbstractFormComponent } from '../../ngclient/form/form_component.compon
     standalone: false
 })
 export class ServoyCoreFormcomponentResponsiveCotainer {
-    @Input() items: any[];
-    @Input() formComponent: AbstractFormComponent;
+    readonly items = input<any[]>(undefined);
+    readonly formComponent = input<AbstractFormComponent>(undefined);
 }

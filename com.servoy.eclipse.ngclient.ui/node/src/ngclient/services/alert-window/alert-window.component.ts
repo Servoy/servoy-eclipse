@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { I18NProvider } from '../i18n_provider.service';
 
 @Component({
@@ -8,12 +8,18 @@ import { I18NProvider } from '../i18n_provider.service';
     standalone: false
 })
 export class AlertWindowComponent {
-    @Input() title: string;
-    @Input() message: string;
+    readonly title = input<string>(undefined);
+    readonly message = input<string>(undefined);
+    _title = signal<string>(undefined);
+    _message = signal<string>(undefined);
     onCloseCallback: () => void;
     constructor() {
     }
 
+    ngOnInit(): void {
+        this._title.set(this.title());
+        this._message.set(this.message());
+    }
 
     dismiss(): void {
       this.onCloseCallback();
