@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Cloud
 Bundle-SymbolicName: com.servoy.eclipse.cloud;singleton:=true
-Bundle-Version: 2025.12.1.4123
+Bundle-Version: 2025.12.2.qualifier
 Export-Package: com.servoy.eclipse.cloud
 Import-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.util,

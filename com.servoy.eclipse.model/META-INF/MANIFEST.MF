@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Workspace based Repository
 Bundle-SymbolicName: com.servoy.eclipse.model;singleton:=true
-Bundle-Version: 2025.12.1.4123
+Bundle-Version: 2025.12.2.qualifier
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: servoy_shared,
@@ -23,19 +23,19 @@ Require-Bundle: servoy_shared,
  com.servoy.eclipse.ngclient,
  j2db_server,
  org.apache.commons.lang3
-Export-Package: com.servoy.eclipse.model;version="2025.12.1.4123",
- com.servoy.eclipse.model.builder;version="2025.12.1.4123",
- com.servoy.eclipse.model.export;version="2025.12.1.4123",
- com.servoy.eclipse.model.extensions;version="2025.12.1.4123",
- com.servoy.eclipse.model.inmemory;version="2025.12.1.4123",
- com.servoy.eclipse.model.nature;version="2025.12.1.4123",
- com.servoy.eclipse.model.ngpackages;version="2025.12.1.4123",
- com.servoy.eclipse.model.preferences;version="2025.12.1.4123",
- com.servoy.eclipse.model.repository;version="2025.12.1.4123",
- com.servoy.eclipse.model.test;version="2025.12.1.4123",
- com.servoy.eclipse.model.util;version="2025.12.1.4123",
- com.servoy.eclipse.model.view;version="2025.12.1.4123",
- com.servoy.eclipse.model.war.exporter;version="2025.12.1.4123"
+Export-Package: com.servoy.eclipse.model;version="2025.12.2",
+ com.servoy.eclipse.model.builder;version="2025.12.2",
+ com.servoy.eclipse.model.export;version="2025.12.2",
+ com.servoy.eclipse.model.extensions;version="2025.12.2",
+ com.servoy.eclipse.model.inmemory;version="2025.12.2",
+ com.servoy.eclipse.model.nature;version="2025.12.2",
+ com.servoy.eclipse.model.ngpackages;version="2025.12.2",
+ com.servoy.eclipse.model.preferences;version="2025.12.2",
+ com.servoy.eclipse.model.repository;version="2025.12.2",
+ com.servoy.eclipse.model.test;version="2025.12.2",
+ com.servoy.eclipse.model.util;version="2025.12.2",
+ com.servoy.eclipse.model.view;version="2025.12.2",
+ com.servoy.eclipse.model.war.exporter;version="2025.12.2"
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.common.cache;version="[33.0.0,34.0.0)",

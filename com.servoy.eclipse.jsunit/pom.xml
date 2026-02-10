@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>2025.12.1.4123</version>
+    <version>2025.12.2-SNAPSHOT</version>
   </parent>
   <artifactId>com.servoy.eclipse.jsunit</artifactId>
   <packaging>eclipse-plugin</packaging>
