@@ -6,6 +6,7 @@
 	<extension-point id="preInitializeJob" name="Provides an opportunity to execute code before initializing ServoyModel." schema="schema/preInitializeJob.exsd"/>
     <extension-point id="debugstarter" name="Debug Starter" schema="schema/debugstarter.exsd"/>
     <extension-point id="activesolutionlistener" name="Active Solution Listener" schema="schema/activesolutionlistener.exsd"/>
+    <extension-point id="aiprovider" name="aiprovider" schema="schema/aiprovider.exsd"/>
   	
    <extension
          id="ide"

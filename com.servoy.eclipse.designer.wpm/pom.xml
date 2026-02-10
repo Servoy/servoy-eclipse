@@ -12,7 +12,6 @@
 		<version>2025.3.4.4046_LTS</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.wpm</artifactId>
-	<version>2025.3.4.4046_LTS</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
