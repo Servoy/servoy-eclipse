@@ -385,7 +385,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
             compDirectiveName = compDirectiveName.replace('-', '');
-            return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)];
+            return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)]();
         }
     }
 

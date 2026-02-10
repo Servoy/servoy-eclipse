@@ -112,9 +112,9 @@ export class ApplicationService {
 
     public showMessage(message: string) {
         const alertWindowComponent = this.mainViewRefService.mainContainer.createComponent(AlertWindowComponent);
-        alertWindowComponent.instance._message.set(message);
+        alertWindowComponent.instance.message.set(message);
         const origin: string = this.windowRefService.nativeWindow.location.origin;
-        alertWindowComponent.instance._title.set(origin.substring(origin.indexOf('://') + 3));
+        alertWindowComponent.instance.title.set(origin.substring(origin.indexOf('://') + 3));
 
         const opt: BSWindowOptions = {
             id: 'svyalert',
@@ -323,10 +323,10 @@ export class ApplicationService {
         }
         const fileUploadWindowComponent = this.mainViewRefService.mainContainer.createComponent(FileUploadWindowComponent);
 
-        fileUploadWindowComponent.instance._url.set(url);
-        fileUploadWindowComponent.instance._title.set(title);
-        fileUploadWindowComponent.instance._multiselect.set(multiselect);
-        fileUploadWindowComponent.instance._filter.set(acceptFilter);
+        fileUploadWindowComponent.instance.url.set(url);
+        fileUploadWindowComponent.instance.title.set(title);
+        fileUploadWindowComponent.instance.multiselect.set(multiselect);
+        fileUploadWindowComponent.instance.filter.set(acceptFilter);
 
         const opt: BSWindowOptions = {
             id: 'svyfileupload',
@@ -348,13 +348,13 @@ export class ApplicationService {
         return new Promise((resolve, reject) => {
             const messageDialogWindowComponent = this.mainViewRefService.mainContainer.createComponent(MessageDialogWindowComponent);
 
-            messageDialogWindowComponent.instance._message.set(dialogMessage);
-            messageDialogWindowComponent.instance._styleClass.set(styleClass);
-            messageDialogWindowComponent.instance._values.set(values);
-            messageDialogWindowComponent.instance._buttonsText.set(buttonsText);
-            messageDialogWindowComponent.instance._inputType.set(inputType);
-            messageDialogWindowComponent.instance._defaultButtonIndex.set(defaultButtonIndex);
-            messageDialogWindowComponent.instance._okButtonText.set(okButtonText);
+            messageDialogWindowComponent.instance.message.set(dialogMessage);
+            messageDialogWindowComponent.instance.styleClass.set(styleClass);
+            messageDialogWindowComponent.instance.values.set(values);
+            messageDialogWindowComponent.instance.buttonsText.set(buttonsText);
+            messageDialogWindowComponent.instance.inputType.set(inputType);
+            messageDialogWindowComponent.instance.defaultButtonIndex.set(defaultButtonIndex);
+            messageDialogWindowComponent.instance.okButtonText.set(okButtonText);
 
             const dialogWindowComponentEl = messageDialogWindowComponent.location.nativeElement.childNodes[0];
             const windowWidth = this.doc.documentElement.clientWidth;

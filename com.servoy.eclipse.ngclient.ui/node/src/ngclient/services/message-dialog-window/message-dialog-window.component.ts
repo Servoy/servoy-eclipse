@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, input, viewChild, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, viewChild, signal } from '@angular/core';
 
 @Component({
     selector: 'servoycore-message-dialog-window',
@@ -8,21 +8,13 @@ import { Component, ElementRef, HostListener, input, viewChild, signal } from '@
 })
 export class MessageDialogWindowComponent {
 
-  readonly message = input<string>(undefined);
-  readonly styleClass = input<string>(undefined);
-  readonly values = input<string[]>(undefined);
-  readonly buttonsText = input<string[]>(undefined);
-  readonly inputType = input<string>(undefined);
-  readonly defaultButtonIndex = input<number>(undefined);
-  readonly okButtonText = input<string>('OK');
-  
-  _message = signal<string>(undefined);
-  _styleClass = signal<string>(undefined);
-  _values = signal<string[]>(undefined);
-  _buttonsText = signal<string[]>(undefined);
-  _inputType = signal<string>(undefined);
-  _defaultButtonIndex = signal<number>(undefined);
-  _okButtonText = signal<string>('OK');
+  readonly message = signal<string>(undefined);
+  readonly styleClass = signal<string>(undefined);
+  readonly values = signal<string[]>(undefined);
+  readonly buttonsText = signal<string[]>(undefined);
+  readonly inputType = signal<string>(undefined);
+  readonly defaultButtonIndex = signal<number>(undefined);
+  readonly okButtonText = signal<string>('OK');
 
   readonly inputfield = viewChild<ElementRef>("inputfield");
   readonly buttons = viewChild<ElementRef>("buttons");
@@ -43,18 +35,11 @@ export class MessageDialogWindowComponent {
   }
 
   ngOnInit(): void {
-    this._message.set(this.message());
-    this._styleClass.set(this.styleClass());
-    this._values.set(this.values());
-    this._buttonsText.set(this.buttonsText());
-    this._inputType.set(this.inputType());
-    this._defaultButtonIndex.set(this.defaultButtonIndex());
-    this._okButtonText.set(this.okButtonText());
-    const okButtonText = this._okButtonText();
-    if (!okButtonText) this._okButtonText.set('OK');
-    const buttonsText = this._buttonsText();
+    const okButtonText = this.okButtonText();
+    if (!okButtonText) this.okButtonText.set('OK');
+    const buttonsText = this.buttonsText();
     if(!buttonsText || !buttonsText.length) {
-      this._buttonsText.set([okButtonText]);
+      this.buttonsText.set([okButtonText]);
     }
     const styleClass = this.styleClass();
     const values = this.values();

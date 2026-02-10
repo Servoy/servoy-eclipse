@@ -518,6 +518,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     ngAfterViewInit() {
         this.elementRef = this.element();
+        super.ngAfterViewInit();
         this.calculateCells();
         if (this.useScrolling) {
             this.agGrid().api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
@@ -631,7 +632,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : this.svyResponsiveDiv();
+            return item.tagname ? this[item.tagname]() : this.svyResponsiveDiv();
         }
         if (item instanceof FormComponentCache) {
             return (item as FormComponentCache).responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
