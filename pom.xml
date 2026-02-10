@@ -12,6 +12,7 @@
 	<properties>
 		<tycho.version>4.0.12</tycho.version>
 		<rhino.version>1.8.0.s12</rhino.version>
+        <osgi.version>[2025.3.5,2025.3.6)</osgi.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
@@ -105,7 +106,7 @@
 							<type>eclipse-plugin</type>
 							<id>sablo</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
@@ -119,84 +120,84 @@
 							<type>eclipse-plugin</type>
 							<id>servoy_base</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_shared</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_smart_client</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_headless_client</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_ngclient</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>servoy_debug</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>j2db_server</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>j2db_log4j</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.eclipse.ui.tweaks</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
                         <filter>
                             <type>eclipse-plugin</type>
                             <id>com.servoy.eclipse.ngclient.ui</id>
                             <restrictTo>
-                                <version>${project.parent.version}</version>
+                                <versionRange>${osgi.version}</versionRange>
                             </restrictTo>
                         </filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.css.core</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.eclipse.model</id>
 							<restrictTo>
-								<version>${project.parent.version}</version>
+								<versionRange>${osgi.version}</versionRange>
 							</restrictTo>
 						</filter>
 					</filters>
@@ -426,53 +427,69 @@
 				<module>com.servoy.eclipse.ngclient.ui</module>
 			</modules>
 		</profile>
-		<profile>
-			<id>version_push</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.8</version>
-						<executions>
-							<execution>
-								<id>replace_version_in_property_files</id>
-								<phase>process-resources</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<replaceregexp
-											file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-										<replaceregexp
-											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-										<replaceregexp
-											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-										<replaceregexp
-											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											match="${project.version}" replace="${newVersion}"
-											byline="true" />
-                                        <replaceregexp
+        <profile>
+            <id>version_push</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>parse-version</id>
+                                <goals>
+                                    <goal>parse-version</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <id>replace_version_in_property_files</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="plainVersion" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}"/>
+                                        
+                                        <echo message="Parsed OSGi version: ${parsedVersion.osgiVersion}"/>
+                                        <echo message="Plain version for replacement: ${plainVersion}"/>
+        
+                                        <replace
+                                            file="${basedir}/pom.xml"
+                                            token="${osgi.version}" value="${newOSGIVersion}"
+                                            summary="true"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.product/p2.inf"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.core/about.properties"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.core/plugin.properties"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.feature/feature.xml"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package.json"
-                                            match="${project.version}" replace="${newVersion}"
-                                            byline="true" />
-                                        <replaceregexp
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package_solution.json"
-                                            match="${project.version}" replace="${newVersion}"
-                                            byline="true" />
+                                            token="${plainVersion}" value="${newVersion}"/>
                                     </target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+		</profile>		
 	</profiles>
 </project>

@@ -27,6 +27,7 @@
                         </goals>
                         <configuration>
                            <signer>bc</signer>
+                           <skipIfJarsigned>false</skipIfJarsigned>
                            <keyname>D9DE7716CDB8905A30C8CDEFE15A4758177D4570</keyname>
                            <addPublicKeyToRepo>true</addPublicKeyToRepo>
                            <addPublicKeyToArtifacts>true</addPublicKeyToArtifacts>
