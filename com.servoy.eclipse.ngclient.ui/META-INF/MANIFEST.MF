@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Titanium NGClient plugin
 Bundle-SymbolicName: com.servoy.eclipse.ngclient.ui;singleton:=true
-Bundle-Version: 2025.3.4.4046_LTS
+Bundle-Version: 2025.3.5.qualifier
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy

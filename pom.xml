@@ -8,10 +8,10 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2025.3.4.4046_LTS</version>
+	<version>2025.3.5-SNAPSHOT</version>
 	<properties>
         <tycho.version>4.0.13</tycho.version>
-        <osgi.version>[2025.3.4,2025.3.5)</osgi.version>
+        <osgi.version>[2025.3.5,2025.3.6)</osgi.version>
 		<rhino.version>1.7.15.s4</rhino.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>

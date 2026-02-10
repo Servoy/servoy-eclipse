@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ngclient Developer Package
 Bundle-SymbolicName: com.servoy.eclipse.ngclient;singleton:=true
-Bundle-Version: 2025.3.4.4046_LTS
+Bundle-Version: 2025.3.5.qualifier
 Export-Package:  com.servoy.eclipse.ngclient.startup,
  com.servoy.eclipse.ngclient.startup.resourceprovider
 Require-Bundle: sablo,
