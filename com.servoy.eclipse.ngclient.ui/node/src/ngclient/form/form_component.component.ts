@@ -3,7 +3,8 @@ import {
   TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit, AfterViewChecked,
   DOCUMENT,
   input,
-  viewChild
+  viewChild,
+  signal
 } from '@angular/core';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
@@ -134,7 +135,7 @@ export abstract class AbstractFormComponent {
     /* eslint-disable max-len */
     template: `
       @if (formCache.absolute) {
-        <div [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses" svyAutosave> <!-- main div -->
+        <div [ngStyle]="getAbsoluteFormStyle()" class="svy-form" [ngClass]="formClasses()" svyAutosave> <!-- main div -->
           @for (part of formCache.parts; track part.rId) {
             <div [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
               @for (item of part.items; track item.rId) {
@@ -147,7 +148,7 @@ export abstract class AbstractFormComponent {
         </div>
       }
       @if (!formCache.absolute&&formCache.mainStructure) {
-        <div class="svy-form svy-respform" [ngClass]="formClasses"> <!-- main container div -->
+        <div class="svy-form svy-respform" [ngClass]="formClasses()"> <!-- main container div -->
           @for (item of formCache.mainStructure.items; track item.rId) {
             <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
             }  <!-- component or responsive div  -->
@@ -239,7 +240,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     //** "injectedComponentRefs" is used for being able to inject some test component templates inside Karma/Jasmine unit tests */
     readonly injectedComponentRefs = input<Record<string, TemplateRef<any>>>(undefined);
 
-    formClasses: string[];
+    formClasses = signal<string[]>(undefined);
 
     formCache: FormCache;
 
@@ -328,9 +329,9 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass as string;
             if (styleClasses)
-                this.formClasses = styleClasses.split(' ');
+                this.formClasses.set(styleClasses.split(' '));
             else
-                this.formClasses = null;
+                this.formClasses.set(null);
             this._containers = this.formCache.getComponent('').model.containers;
             this._cssstyles = this.formCache.getComponent('').model.cssstyles;
             this.handlerCache = {};
@@ -494,13 +495,12 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     public updateFormStyleClasses(ngutilsstyleclasses: string): void {
         const styleClasses: string = this.formCache.getComponent('').model.styleClass;
         if (styleClasses)
-            this.formClasses = styleClasses.split(' ');
+            this.formClasses.set(styleClasses.split(' '));
         else
-            this.formClasses = [];
+            this.formClasses.set([]);
         if (ngutilsstyleclasses) {
-            this.formClasses = this.formClasses.concat(ngutilsstyleclasses.split(' '));
+            this.formClasses.set(this.formClasses().concat(ngutilsstyleclasses.split(' ')));
         }
-        this.detectChanges();
     }
 
     private onResize(): void {
