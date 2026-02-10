@@ -17,10 +17,8 @@
 
 package com.servoy.eclipse.core.ai;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
  * This is a helper clas that is implemented in the various releases to set stuff that are different between the releases, like the event method ids on the form.
@@ -41,52 +39,49 @@ public class AiBridge
 	 */
 	public static void applyEventMethod(Form form, String eventName, String methodUUID)
 	{
-		ScriptMethod scriptMethod = ServoyModelFinder.getServoyModel().getFlattenedSolution().getScriptMethod(methodUUID);
-		if (scriptMethod == null)
-		{
-			ServoyLog.logInfo("[FormService] Could not find method with UUID: " + methodUUID);
-			return;
-		}
 		switch (eventName)
 		{
 			case "onLoad" :
-				form.setOnLoadMethodID(scriptMethod.getID());
+				form.setOnLoadMethodID(methodUUID);
 				break;
 			case "onUnLoad" :
-				form.setOnUnLoadMethodID(scriptMethod.getID());
+				form.setOnUnLoadMethodID(methodUUID);
 				break;
 			case "onShow" :
-				form.setOnShowMethodID(scriptMethod.getID());
+				form.setOnShowMethodID(methodUUID);
 				break;
 			case "onHide" :
-				form.setOnHideMethodID(scriptMethod.getID());
+				form.setOnHideMethodID(methodUUID);
 				break;
 			case "onBeforeHide" :
-				form.setOnBeforeHideMethodID(scriptMethod.getID());
+				form.setOnBeforeHideMethodID(methodUUID);
 				break;
 			case "onRecordSelection" :
-				form.setOnRecordSelectionMethodID(scriptMethod.getID());
+				form.setOnRecordSelectionMethodID(methodUUID);
+				break;
+			case "onBeforeRecordSelection" :
+				form.setOnBeforeRecordSelectionMethodID(methodUUID);
 				break;
 			case "onRecordEditStart" :
-				form.setOnRecordEditStartMethodID(scriptMethod.getID());
+				form.setOnRecordEditStartMethodID(methodUUID);
 				break;
 			case "onRecordEditStop" :
-				form.setOnRecordEditStopMethodID(scriptMethod.getID());
+				form.setOnRecordEditStopMethodID(methodUUID);
 				break;
 			case "onElementDataChange" :
-				form.setOnElementDataChangeMethodID(scriptMethod.getID());
+				form.setOnElementDataChangeMethodID(methodUUID);
 				break;
 			case "onElementFocusGained" :
-				form.setOnElementFocusGainedMethodID(scriptMethod.getID());
+				form.setOnElementFocusGainedMethodID(methodUUID);
 				break;
 			case "onElementFocusLost" :
-				form.setOnElementFocusLostMethodID(scriptMethod.getID());
+				form.setOnElementFocusLostMethodID(methodUUID);
 				break;
 			case "onResize" :
-				form.setOnResizeMethodID(scriptMethod.getID());
+				form.setOnResizeMethodID(methodUUID);
 				break;
 			case "onSort" :
-				form.setOnSortCmdMethodID(scriptMethod.getID());
+				form.setOnSortCmdMethodID(methodUUID);
 				break;
 			default :
 				ServoyLog.logInfo("[FormService] Unknown event: " + eventName);
@@ -101,6 +96,7 @@ public class AiBridge
 	public static void setFormExtendsID(Form form, Form parentForm)
 	{
 		form.setExtendsForm(parentForm);
-		form.setExtendsID(parentForm.getID());
+		form.setExtendsID(parentForm.getUUID().toString());
+
 	}
 }
