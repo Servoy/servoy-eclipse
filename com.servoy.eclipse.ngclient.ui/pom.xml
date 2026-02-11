@@ -13,7 +13,6 @@
 		<version>2026.3.0.4140_rc</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
-	<version>2026.3.0.4140_rc</version>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<test.script>test_headless</test.script>
