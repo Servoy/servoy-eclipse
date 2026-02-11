@@ -2018,7 +2018,9 @@ public class TypeCreator extends TypeCache
 											}
 											else if (componentType == Object.class)
 											{
-												parameter.setType(getTypeRef(context, ITypeNames.ARRAY));
+
+												parameter.setType(TypeUtil.arrayOf(getTypeRef(context, ITypeNames.OBJECT)));
+												//parameter.setType(getTypeRef(context, ITypeNames.ARRAY));
 											}
 											else
 											{
