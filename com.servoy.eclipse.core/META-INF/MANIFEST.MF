@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Core Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.core;singleton:=true
-Bundle-Version: 2026.3.0.4140_rc
+Bundle-Version: 2026.3.0.qualifier
 Bundle-Activator: com.servoy.eclipse.core.Activator
 Bundle-Vendor: Servoy
 Bundle-Localization: plugin
@@ -50,19 +50,19 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.ngclient,
  org.apache.tomcat;bundle-version="11.0.8"
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.core;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.ai;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.ai.shared;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.builder;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.doc;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.elements;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.ngpackages;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.quickfix;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.quickfix.dbi;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.repository;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.resource;version="2026.3.0.4140_rc",
- com.servoy.eclipse.core.util;version="2026.3.0.4140_rc",
- com.servoy.eclipse.dnd;version="2026.3.0.4140_rc"
+Export-Package: com.servoy.eclipse.core;version="2026.3.0",
+ com.servoy.eclipse.core.ai;version="2026.3.0",
+ com.servoy.eclipse.core.ai.shared;version="2026.3.0",
+ com.servoy.eclipse.core.builder;version="2026.3.0",
+ com.servoy.eclipse.core.doc;version="2026.3.0",
+ com.servoy.eclipse.core.elements;version="2026.3.0",
+ com.servoy.eclipse.core.ngpackages;version="2026.3.0",
+ com.servoy.eclipse.core.quickfix;version="2026.3.0",
+ com.servoy.eclipse.core.quickfix.dbi;version="2026.3.0",
+ com.servoy.eclipse.core.repository;version="2026.3.0",
+ com.servoy.eclipse.core.resource;version="2026.3.0",
+ com.servoy.eclipse.core.util;version="2026.3.0",
+ com.servoy.eclipse.dnd;version="2026.3.0"
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.core
