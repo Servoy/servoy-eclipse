@@ -186,7 +186,7 @@
                             </restrictTo>
                         </filter>
 						<filter>
-							<type>eclipse-plugin</type>
+							<type>eclipse-feature</type>
 							<id>com.servoy.css.core</id>
 							<restrictTo>
 								<versionRange>${osgi.version}</versionRange>
