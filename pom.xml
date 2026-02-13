@@ -185,13 +185,13 @@
                                 <versionRange>${osgi.version}</versionRange>
                             </restrictTo>
                         </filter>
-						<filter>
-							<type>eclipse-feature</type>
-							<id>com.servoy.css.core</id>
-							<restrictTo>
-								<versionRange>${osgi.version}</versionRange>
-							</restrictTo>
-						</filter>
+                        <filter>
+                            <type>p2</type>
+                            <id>com.servoy.css.core.feature.group</id>
+                            <restrictTo>
+                                <versionRange>${osgi.version}</versionRange>
+                            </restrictTo>
+                        </filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.eclipse.model</id>
