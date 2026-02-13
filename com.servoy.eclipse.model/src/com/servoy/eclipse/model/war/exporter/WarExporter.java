@@ -162,9 +162,9 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 public class WarExporter
 {
 	private static final String[] WAR_LIBS = new String[] { "org.freemarker*.jar", //
-		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"servoy_ngclient_" + ClientVersion.getPureVersion() + "*.jar", //
+		"sablo_" + ClientVersion.getPureVersion() + "*.jar", //
+		"j2db_log4j_" + ClientVersion.getPureVersion() + "*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
 		"de.inetsoftware.jlessc_*.jar", "org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
