@@ -186,7 +186,7 @@
                             </restrictTo>
                         </filter>
                         <filter>
-                            <type>p2</type>
+                            <type>p2-installable-unit</type>
                             <id>com.servoy.css.core.feature.group</id>
                             <restrictTo>
                                 <versionRange>${osgi.version}</versionRange>
