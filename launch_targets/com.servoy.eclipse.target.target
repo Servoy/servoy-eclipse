@@ -385,6 +385,12 @@
                 	<version>1.4.0</version>
                 	<type>jar</type>
                 </dependency>
+                <dependency>
+                    <groupId>de.rtner</groupId>
+                    <artifactId>PBKDF2</artifactId>
+                    <version>1.1.4</version>
+                    <type>jar</type>
+                </dependency>
             </dependencies>
             <repositories>
                 <repository>
