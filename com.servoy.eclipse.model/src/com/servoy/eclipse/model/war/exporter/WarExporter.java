@@ -1404,6 +1404,7 @@ public class WarExporter
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
+		Set<String> dependencies = new HashSet<String>();
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
 			Set<File> writtenFiles = new HashSet<File>();
@@ -1439,9 +1440,11 @@ public class WarExporter
 								copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, classPath);
 							}
 						}
+						dependencies.addAll(JarManager.getRequiredBundles(pluginFile.toURI().toURL()));
 					}
 				}
 			}
+			copyRequiredBundles(tmpWarDir, appServerDir, fw, writtenFiles, dependencies);
 		}
 		catch (IOException e1)
 		{
@@ -1693,6 +1696,36 @@ public class WarExporter
 				jarName = jarName.substring(index + "plugins/".length());
 			}
 			writeFileEntry(fw, jarFile, jarName, writtenFiles);
+		}
+	}
+
+	private void copyRequiredBundles(File tmpWarDir, String appServerDir, Writer fw, Set<File> writtenFiles, Set<String> requiredBundleNames)
+		throws ExportException, IOException
+	{
+		File pluginsDir = new File(appServerDir, "plugins");
+
+		if (!pluginsDir.exists() || !pluginsDir.isDirectory())
+		{
+			return;
+		}
+
+		File[] jars = pluginsDir.listFiles((dir, name) -> name.endsWith(".jar"));
+		if (jars == null) return;
+
+		for (File jarFile : jars)
+		{
+			String bundleSymbolicName = JarManager.getNameAndVersion(jarFile.toURI().toURL()).getLeft();
+			if (bundleSymbolicName == null) continue;
+
+			bundleSymbolicName = bundleSymbolicName.split(";")[0].trim();
+			if (requiredBundleNames.contains(bundleSymbolicName))
+			{
+				File jarTargetFile = new File(tmpWarDir, "plugins/" + jarFile.getName());
+				jarTargetFile.getParentFile().mkdirs();
+
+				copyFile(jarFile, jarTargetFile);
+				writeFileEntry(fw, jarFile, "plugins/" + jarFile.getName(), writtenFiles);
+			}
 		}
 	}
 
