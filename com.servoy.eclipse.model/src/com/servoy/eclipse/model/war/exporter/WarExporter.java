@@ -178,6 +178,7 @@ public class WarExporter
 		"org.yaml.snakeyaml_*.jar", //
 		"org.jboss.logging.jboss-logging_*.jar", //
 		"net.bytebuddy.byte-buddy_*.jar", //
+		"wrapped.de.rtner.PBKDF2_*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
 		"de.inetsoftware.jlessc_*.jar", "wrapped.com.servoy.tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
