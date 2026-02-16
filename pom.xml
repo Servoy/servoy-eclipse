@@ -186,13 +186,13 @@
                                 <versionRange>${osgi.version}</versionRange>
                             </restrictTo>
                         </filter>
-						<filter>
-							<type>eclipse-plugin</type>
-							<id>com.servoy.css.core</id>
-							<restrictTo>
-								<versionRange>${osgi.version}</versionRange>
-							</restrictTo>
-						</filter>
+                        <filter>
+                            <type>p2-installable-unit</type>
+                            <id>com.servoy.css.core.feature.group</id>
+                            <restrictTo>
+                                <versionRange>${osgi.version}</versionRange>
+                            </restrictTo>
+                        </filter>
 						<filter>
 							<type>eclipse-plugin</type>
 							<id>com.servoy.eclipse.model</id>
@@ -393,6 +393,41 @@
 				</plugins>
 			</build>
 		</profile>
+        <profile>
+            <id>only_product</id>
+            <modules>
+                <module>org.eclipse.jface</module>
+                <module>com.servoy.eclipse.feature</module>
+                <module>com.servoy.eclipse.product</module>
+            </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <delete>
+                                            <fileset
+                                                dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
+                                                includes="TEST*.xml" />
+                                        </delete>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>		
 		<profile>
 			<id>plugins</id>
 			<activation>

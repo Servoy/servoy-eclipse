@@ -140,14 +140,14 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 public class WarExporter
 {
 	private static final String[] WAR_LIBS = new String[] { "org.freemarker*.jar", //
-		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_base_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_shared_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_smart_client_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_headless_client_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_server_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"servoy_ngclient_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_base_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_shared_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_smart_client_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_headless_client_" + ClientVersion.getPureVersion() + "*.jar", //
+		"j2db_log4j_" + ClientVersion.getPureVersion() + "*.jar", //
+		"j2db_server_" + ClientVersion.getPureVersion() + "*.jar", //
+		"sablo_" + ClientVersion.getPureVersion() + "*.jar", //
 		"org.eclipse.dltk.javascript.rhino_*.jar", //
 		"slf4j.api_*.jar", //
 		"jabsorb_*.jar", //
