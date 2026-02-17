@@ -951,7 +951,31 @@ public class MenuEditor extends PersistEditor
 					{
 						value = isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName);
 					}
-					propertyCheckbox.setSelection(menuItem != null ? Utils.getAsBoolean(value) : false);
+					boolean selectedValue = false;
+					if (value != null)
+					{
+						selectedValue = Utils.getAsBoolean(value);
+					}
+					else
+					{
+						Object defaultValue = getPropertyDefaultValue(propertyDescription);
+						if (defaultValue != null)
+						{
+							selectedValue = Utils.getAsBoolean(defaultValue);
+							if (menuItem != null)
+							{
+								if (isExtraProperties)
+								{
+									menuItem.putExtraProperty(categoryName, propertyName, defaultValue);
+								}
+								else
+								{
+									menuItem.putCustomPropertyValue(propertyName, defaultValue);
+								}
+							}
+						}
+					}
+					propertyCheckbox.setSelection(selectedValue);
 				});
 				propertyCheckbox.addSelectionListener(new SelectionAdapter()
 				{
@@ -1007,10 +1031,22 @@ public class MenuEditor extends PersistEditor
 					}
 				});
 				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-					Object value = "";
-					if (menuItem != null)
+					Object value = menuItem != null
+						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					if (value == null)
 					{
-						value = isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName);
+						value = getPropertyDefaultValue(propertyDescription);
+						if (value != null && menuItem != null)
+						{
+							if (isExtraProperties)
+							{
+								menuItem.putExtraProperty(categoryName, propertyName, value);
+							}
+							else
+							{
+								menuItem.putCustomPropertyValue(propertyName, value);
+							}
+						}
 					}
 					ValueList valuelist = null;
 					if (value != null)
@@ -1060,10 +1096,22 @@ public class MenuEditor extends PersistEditor
 				});
 				relationSelect.setInput(new RelationContentProvider.RelationListOptions(null, null, true, true));
 				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
-					Object value = null;
-					if (menuItem != null)
+					Object value = menuItem != null
+						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					if (value == null)
 					{
-						value = isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName);
+						value = getPropertyDefaultValue(propertyDescription);
+						if (value != null && menuItem != null)
+						{
+							if (isExtraProperties)
+							{
+								menuItem.putExtraProperty(categoryName, propertyName, value);
+							}
+							else
+							{
+								menuItem.putCustomPropertyValue(propertyName, value);
+							}
+						}
 					}
 					Relation[] relations = null;
 					if (value != null)
@@ -1118,6 +1166,21 @@ public class MenuEditor extends PersistEditor
 				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
 					Object value = menuItem != null
 						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					if (value == null)
+					{
+						value = getPropertyDefaultValue(propertyDescription);
+						if (value != null && menuItem != null)
+						{
+							if (isExtraProperties)
+							{
+								menuItem.putExtraProperty(categoryName, propertyName, value);
+							}
+							else
+							{
+								menuItem.putCustomPropertyValue(propertyName, value);
+							}
+						}
+					}
 					Form form = null;
 					if (value != null)
 					{
@@ -1205,6 +1268,21 @@ public class MenuEditor extends PersistEditor
 				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
 					Object value = menuItem != null
 						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					if (value == null)
+					{
+						value = getPropertyDefaultValue(propertyDescription);
+						if (value != null && menuItem != null)
+						{
+							if (isExtraProperties)
+							{
+								menuItem.putExtraProperty(categoryName, propertyName, value);
+							}
+							else
+							{
+								menuItem.putCustomPropertyValue(propertyName, value);
+							}
+						}
+					}
 					FormAndTableDataProviderLookup dpLookup = new FormAndTableDataProviderLookup(editingFlattenedSolution, null, null);
 					IDataProvider dp = null;
 					if (value != null)
@@ -1242,6 +1320,18 @@ public class MenuEditor extends PersistEditor
 					else if (valuesConfig.hasDefault())
 					{
 						propertyCombobox.setText(valuesConfig.getDisplayDefault());
+						if (menuItem != null)
+						{
+							Object defaultValue = valuesConfig.getRealDefault();
+							if (isExtraProperties)
+							{
+								menuItem.putExtraProperty(categoryName, propertyName, defaultValue);
+							}
+							else
+							{
+								menuItem.putCustomPropertyValue(propertyName, defaultValue);
+							}
+						}
 					}
 				});
 				propertyCombobox.addModifyListener(new ModifyListener()
@@ -1270,8 +1360,32 @@ public class MenuEditor extends PersistEditor
 				propertyTextbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				selectedMenuItemCallbacks.add((MenuItem menuItem) -> {
 					Object value = menuItem != null
-						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : "";
-					propertyTextbox.setText(value != null ? value.toString() : "");
+						? (isExtraProperties ? menuItem.getExtraProperty(categoryName, propertyName) : menuItem.getCustomPropertyValue(propertyName)) : null;
+					String textValue = "";
+					if (value != null && !value.toString().isEmpty())
+					{
+						textValue = value.toString();
+					}
+					else
+					{
+						Object defaultValue = getPropertyDefaultValue(propertyDescription);
+						if (defaultValue != null)
+						{
+							textValue = defaultValue.toString();
+							if (menuItem != null)
+							{
+								if (isExtraProperties)
+								{
+									menuItem.putExtraProperty(categoryName, propertyName, defaultValue);
+								}
+								else
+								{
+									menuItem.putCustomPropertyValue(propertyName, defaultValue);
+								}
+							}
+						}
+					}
+					propertyTextbox.setText(textValue);
 				});
 				propertyTextbox.addModifyListener(new ModifyListener()
 				{
@@ -1294,6 +1408,21 @@ public class MenuEditor extends PersistEditor
 				});
 			}
 		}
+	}
+
+	/**
+	 * Helper method to extract the default value from a PropertyDescription if available
+	 *
+	 * @param propertyDescription the property description to check
+	 * @return the default value if it exists, null otherwise
+	 */
+	private Object getPropertyDefaultValue(PropertyDescription propertyDescription)
+	{
+		if (propertyDescription != null && propertyDescription.hasDefault())
+		{
+			return propertyDescription.getDefaultValue();
+		}
+		return null;
 	}
 
 	@Override

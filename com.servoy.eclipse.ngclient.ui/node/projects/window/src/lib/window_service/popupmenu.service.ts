@@ -152,11 +152,31 @@ export class PopupMenuService {
 			this.visibleSubMenuPath.splice(idx + 1);
 		}
 	}
+    
+    private keepMenuOpen(event: MouseEvent): boolean {
+        const checkClasses = ['.dropdown-divider', '.disabled', '.dropdown-submenu', '.keep-open'];
+        const target = event.target as HTMLElement | null;
+        if (!target) {
+            return false;
+        }
+        const up = target.closest(checkClasses.join(', ')) ?? null;
+        if (up) {
+            return true;
+        }
+        const down = target.querySelector?.(checkClasses.join(', ')) ?? null;
+        if (down) {
+            return true;
+        }
+        return false;
+    }
+
 
 	public initClosePopupHandler(handler: () => void) {
 		const listener = (event: MouseEvent) => {
 			// don't dispose if target is the dropdown menu, as we need to keep it open for scrolling
 			if (event.target instanceof HTMLDivElement && event.target.classList.contains('dropdown-menu')) return;
+            // don't dispose if element is a divider, disabled, submenu or autoClose is disabled, as we need to keep it open when clicking on those elements
+            if (this.keepMenuOpen(event)) return;
 			this.hideSubMenusOf(this.menu);
 			this.visibleSubMenuPath.splice(0, this.visibleSubMenuPath.length);
 			this.parentNode.splice(0, this.parentNode.length);
@@ -289,7 +309,8 @@ export class PopupMenuService {
 			menuItem.appendChild(link);
 			if (item) {
 				if (item.enabled === false) link.classList.add('disabled');
-				if (item.callback && item.enabled !== false) {
+                if (item.autoClose === false) link.classList.add('keep-open');
+				if (item.callback && (item.enabled !== false && item.autoClose !== false)) {
 					menuItem.addEventListener('mousedown', (event) => {
 						if (event.button == 0) this.servoyService.callServiceServerSideApi("window", "executeMenuItem", [item.id, index, -1, item.selected, null, item.text]);
 					});
@@ -400,4 +421,5 @@ export class MenuItem extends BaseCustomObject {
 	public cssClass: string;
 	public items: MenuItem[];
 	public tooltipText: string;
+    public autoClose: boolean;
 }
