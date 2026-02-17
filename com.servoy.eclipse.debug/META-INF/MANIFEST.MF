@@ -39,10 +39,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.expressions
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Export-Package: com.servoy.eclipse.debug;version="2024.3.10",
- com.servoy.eclipse.debug.actions;version="2024.3.10",
- com.servoy.eclipse.debug.handlers;version="2024.3.10",
- com.servoy.eclipse.debug.script;version="2024.3.10"
+Export-Package: com.servoy.eclipse.debug;version="2025.3.5",
+ com.servoy.eclipse.debug.actions;version="2025.3.5",
+ com.servoy.eclipse.debug.handlers;version="2025.3.5",
+ com.servoy.eclipse.debug.script;version="2025.3.5"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.ngclient.ui.utils,
