@@ -28,6 +28,7 @@ import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -200,7 +201,10 @@ public class ElementSettingsModel
 	public List<IPersist> getFormElements()
 	{
 		ArrayList<IPersist> formElements = new ArrayList<IPersist>();
-		List<IFormElement> elements = form.getFlattenedObjects(NameComparator.INSTANCE);
+
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
+		Form flattenedForm = flattenedSolution.getFlattenedForm(form);
+		List<IFormElement> elements = flattenedForm.getFlattenedObjects(NameComparator.INSTANCE);
 
 		// track names that are already in formElements
 		HashSet<String> formElementNames = new java.util.HashSet<String>();
