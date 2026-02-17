@@ -293,4 +293,14 @@ public class TypeProvider implements ITypeProvider
 		}
 		return names;
 	}
+
+	/**
+	 * Gets the TypeCreator instance for accessing type information with merged documentation.
+	 * 
+	 * @return the TypeCreator instance
+	 */
+	public TypeCreator getTypeCreator()
+	{
+		return TYPES;
+	}
 }
