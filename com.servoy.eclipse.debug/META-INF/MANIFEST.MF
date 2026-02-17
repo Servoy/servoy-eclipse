@@ -40,9 +40,10 @@ Require-Bundle: org.eclipse.core.runtime,
  com.google.guava
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Export-Package: com.servoy.eclipse.debug,
- com.servoy.eclipse.debug.actions,
- com.servoy.eclipse.debug.handlers
+Export-Package: com.servoy.eclipse.debug;version="2025.12.2",
+ com.servoy.eclipse.debug.actions;version="2025.12.2",
+ com.servoy.eclipse.debug.handlers;version="2025.12.2",
+ com.servoy.eclipse.debug.script;version="2025.12.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.ngclient.ui.utils,
