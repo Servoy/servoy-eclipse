@@ -39,4 +39,14 @@ public class TypeProviderFactory implements IExecutableExtensionFactory
 	{
 		return provider;
 	}
+
+	/**
+	 * Gets the singleton TypeProvider instance.
+	 * 
+	 * @return the TypeProvider singleton
+	 */
+	public static TypeProvider getTypeProvider()
+	{
+		return provider;
+	}
 }
