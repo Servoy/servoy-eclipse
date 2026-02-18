@@ -14,6 +14,7 @@ import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { FormSettings } from '../types';
 import { environment as env} from '../../environments/environment';
+import { isEqual } from 'lodash-es';
 
 @Injectable()
 export class WindowService {
@@ -119,6 +120,7 @@ export class WindowService {
 
             // resolve initial bounds
             let location = null;
+            let centerLocation = false;
             let size = instance.form.size;
             if (instance.initialBounds) {
                 const bounds = instance.initialBounds;
@@ -151,7 +153,10 @@ export class WindowService {
             if (formSize.height === 0) formSize.height = windowHeight / 2;
 
 
-            if (!location || (location.x < 0 && location.y < 0)) location = this.centerWindow(formSize);
+            if (!location || (location.x < 0 && location.y < 0)) {
+                location = this.centerWindow(formSize);
+                centerLocation = true;
+            }
             if (!size || size.width < 0 || size.height < 0) size = null;
 
             if (size) {
@@ -233,6 +238,17 @@ export class WindowService {
             const height = instance.bsWindowInstance.element.getBoundingClientRect().height;
             if (width > 0 && height > 0) {
                 const dialogSize = { width, height };
+                const headerHeight = instance.bsWindowInstance.options.elements.handle.getBoundingClientRect().height;
+                const footerHeight = instance.bsWindowInstance.options.elements.footer.getBoundingClientRect().height;
+                if (centerLocation) {
+                    const newLocation = this.centerWindow(dialogSize);
+                    if (!isEqual(location, newLocation)) {
+                        this.setLocation(instance.bsWindowInstance.id, newLocation);
+                    }
+                } else if (windowHeight - loc.top < dialogSize.height) {
+                    dialogSize.height = windowHeight - headerHeight - footerHeight - loc.top;
+                    this.setSize(instance.bsWindowInstance.id, dialogSize);
+                }  
                 this.sabloService.callService('$windowService', 'resize', { name: instance.name, size: dialogSize }, true);
             }
         }
@@ -586,6 +602,7 @@ export class SvyWindow {
         if (this.bsWindowInstance && this.location) {
             this.renderer2.setStyle(this.bsWindowInstance.element, 'left', this.location.x + 'px');
             this.renderer2.setStyle(this.bsWindowInstance.element, 'top', this.location.y + 'px');
+            this.bsWindowInstance.options.location = { left: this.location.x, top: this.location.y };
         }
         if (this.storeBounds) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.location', this.location);
