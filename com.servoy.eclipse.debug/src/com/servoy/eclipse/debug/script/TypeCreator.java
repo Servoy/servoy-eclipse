@@ -4087,6 +4087,9 @@ public class TypeCreator extends TypeCache
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 
+			ParameterizedType parameterizedType = TypeUtil.parameterizedType(TypeUtil.type("Object"), TypeUtil.ref("QBColumn"));
+			type.setSuperTypeExpr(parameterizedType);
+
 			TypeConfig fsAndTable = getFlattenedSolutonAndTable(typeName);
 			ITable table = null;
 			if (fsAndTable != null && (fsAndTable.table != null || typeName.indexOf('<') <= 0))
