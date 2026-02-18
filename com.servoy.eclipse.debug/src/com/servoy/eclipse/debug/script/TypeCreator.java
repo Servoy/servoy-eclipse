@@ -362,6 +362,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -1758,7 +1759,7 @@ public class TypeCreator extends TypeCache
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
-		type.setKind(TypeKind.JAVA);
+		type.setKind(UUID.class.equals(cls) ? TypeKind.JAVASCRIPT : TypeKind.JAVA);
 		EList<Member> members = type.getMembers();
 		fill(context, members, cls, typeName);
 
