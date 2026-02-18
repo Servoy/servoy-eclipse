@@ -101,13 +101,13 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 		{
 			IPersist persist = (IPersist)element;
 			boolean valueToSetForThisMask = Boolean.parseBoolean(value.toString());
-			model.setAccessRight(valueToSetForThisMask, persist, mask);
+			persist = model.setAccessRight(valueToSetForThisMask, persist, mask);
 			if (valueToSetForThisMask == false)
 			{
 				if (mask == IRepository.VIEWABLE)
 				{
 					// also un-check accessible for this persist - as if it is not viewable, accessible has no meaning
-					model.setAccessRight(false, persist, IRepository.ACCESSIBLE);
+					persist = model.setAccessRight(false, persist, IRepository.ACCESSIBLE);
 					// un-check both 'viewable' and 'accessible' for all child components, if
 					// applicable (if this is a form component component - because then it
 					// restricts stuff for all children)
@@ -120,8 +120,8 @@ public class ElementSettingsEditingSupport extends EditingSupport implements IOb
 						{
 							if (parentFCC == persist)
 							{
-								model.setAccessRight(false, el, IRepository.VIEWABLE);
-								model.setAccessRight(false, el, IRepository.ACCESSIBLE);
+								el = model.setAccessRight(false, el, IRepository.VIEWABLE);
+								el = model.setAccessRight(false, el, IRepository.ACCESSIBLE);
 								break;
 							}
 						}

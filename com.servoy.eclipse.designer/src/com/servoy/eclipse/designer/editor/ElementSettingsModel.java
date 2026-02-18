@@ -18,7 +18,6 @@ package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -129,7 +128,7 @@ public class ElementSettingsModel
 		return access;
 	}
 
-	public void setAccessRight(boolean hasRight, IPersist element, int mask)
+	public IPersist setAccessRight(boolean hasRight, IPersist element, int mask)
 	{
 		int access = getAccess(element);
 		if (hasRight) access = access | mask;
@@ -159,6 +158,8 @@ public class ElementSettingsModel
 		currentGroupSecurityInfo.remove(persistIdentifierToString);
 
 		currentGroupSecurityInfo.put(persistIdentifierToString, Integer.valueOf(access));
+
+		return element;
 	}
 
 	public void saveSecurityElements()
@@ -206,16 +207,12 @@ public class ElementSettingsModel
 		Form flattenedForm = flattenedSolution.getFlattenedForm(form);
 		List<IFormElement> elements = flattenedForm.getFlattenedObjects(NameComparator.INSTANCE);
 
-		// track names that are already in formElements
-		HashSet<String> formElementNames = new java.util.HashSet<String>();
-
 		for (IFormElement elem : elements)
 		{
 			String name = elem.getName();
 			if (name != null && name.length() != 0)
 			{
 				formElements.add(elem);
-				formElementNames.add(name);
 				if (FormTemplateGenerator.isWebcomponentBean(elem))
 				{
 					FormComponentUtils.addFormComponentComponentChildren(elem,
@@ -224,24 +221,10 @@ public class ElementSettingsModel
 								.getRuntimeProperty(FormElementHelper.FC_CHILD_ELEMENT_NAME_INSIDE_DIRECT_PARENT_FORM_COMPONENT);
 							if (ownName != null && ownName.length() != 0)
 							{
-								if (formElementNames.add(ownName)) formElements.add(args.childFe());
+								formElements.add(args.childFe());
 							}
 							return null;
 						}, null, true);
-				}
-			}
-		}
-		// try to find if the form has a parent form and if the parent form has components
-		if (form.extendsForm != null)
-		{
-			elements = form.extendsForm.getFlattenedObjects(NameComparator.INSTANCE);
-			for (IFormElement elem : elements)
-			{
-				String name = elem.getName();
-				if (name != null && name.length() != 0)
-				{
-					// check by name instead of contains(elem)
-					if (formElementNames.add(name)) formElements.add(elem);
 				}
 			}
 		}
