@@ -35,6 +35,7 @@ import com.servoy.eclipse.core.quickfix.security.RemoveAccessMaskForMissingEleme
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.PersistFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.Form;
@@ -108,6 +109,24 @@ public class EclipseUserManager extends WorkspaceUserManager
 		}
 
 		// ok
+	}
+
+	public boolean hasSecurityInfo(IPersist persist)
+	{
+		Form form = (Form)persist.getAncestor(IRepository.FORMS);
+		for (GroupSecurityInfo groupSecurityInfo : groupInfos)
+		{
+			List<SecurityInfo> elementAccess = groupSecurityInfo.formSecurity.get(form.getUUID());
+			for (SecurityInfo element : elementAccess)
+			{
+				if (PersistFinder.INSTANCE.fromPersist(persist).toJSONString().equals(element.element_uid) ||
+					persist.getUUID().toString().equals(element.element_uid))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

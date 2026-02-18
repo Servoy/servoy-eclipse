@@ -266,6 +266,20 @@ public class FormElementDeleteCommand extends Command
 					continue;
 				}
 			}
+			boolean hasSecurityInfo = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().hasSecurityInfo(child);
+			if (hasSecurityInfo)
+			{
+				String name = child instanceof ISupportName ? ((ISupportName)child).getName() : "";
+				if (name == null) name = child.toString();
+
+				MessageDialog dialog = new MessageDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+					"Element has security info", null, "The element '" + name + "' has security info defined. Do you want to proceed with the deletion (security info will be lost)?",
+					MessageDialog.QUESTION, new String[] { "Yes", "No" }, 1);
+				if (dialog.open() != Window.OK)
+				{
+					continue;
+				}
+			}
 			confirmedChildren.add(child);
 		}
 		children = confirmedChildren.toArray(new IPersist[confirmedChildren.size()]);

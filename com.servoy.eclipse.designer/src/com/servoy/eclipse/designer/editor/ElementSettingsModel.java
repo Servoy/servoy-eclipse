@@ -18,6 +18,7 @@ package com.servoy.eclipse.designer.editor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -192,6 +193,35 @@ public class ElementSettingsModel
 			}
 			securityInfo.clear();
 			permissionsToReset.clear();
+			boolean modified = false;
+			IDataSet groups = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager()
+				.getGroups(ApplicationServerRegistry.get().getClientId());
+			for (int i = 0; i < groups.getRowCount(); i++)
+			{
+				String groupName = groups.getRow(i)[1].toString();
+				List<SecurityInfo> infos = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getSecurityInfos(groupName, form);
+				if (infos != null)
+				{
+					Iterator<SecurityInfo> it = infos.iterator();
+					while (it.hasNext())
+					{
+						SecurityInfo info = it.next();
+						String uid = info.element_uid;
+						if (formElements.stream().noneMatch(formElement -> (PersistFinder.INSTANCE.fromPersist(formElement).toJSONString().equals(uid) ||
+							formElement.getUUID().toString().equals(uid))))
+						{
+							// clean up access rights for elements that do not exist anymore
+							it.remove();
+							modified = true;
+						}
+					}
+				}
+
+			}
+			if (modified)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().writeSecurityInfoIfNeeded(form, false);
+			}
 		}
 		catch (Exception ex)
 		{
