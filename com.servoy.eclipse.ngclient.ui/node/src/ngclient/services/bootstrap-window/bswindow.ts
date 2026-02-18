@@ -146,7 +146,13 @@ export class BSWindow {
     }
 
     setSize(size: { width: number; height: number }) {
+        const handleHeight = this.options.elements.handle ? this.options.elements.handle.getBoundingClientRect().height : 0;
+        const footerHeight = this.options.elements.footer ? this.options.elements.footer.getBoundingClientRect().height : 0;
+        const docHeight = this.doc.documentElement.clientHeight;
         const winBody = this.element.querySelector(this.options.selectors.body);
+        if (docHeight <= (size.height + handleHeight + footerHeight)) {
+            size.height = docHeight - handleHeight - footerHeight;
+        }
         this.renderer.setStyle(winBody, 'min-width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + 'px');
         this.renderer.setStyle(winBody, 'min-height', size.height + 'px');
         this.renderer.setStyle(winBody, 'height', '1px');
