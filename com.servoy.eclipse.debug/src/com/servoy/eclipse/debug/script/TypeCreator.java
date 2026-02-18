@@ -4004,7 +4004,7 @@ public class TypeCreator extends TypeCache
 			type.setDescription(cstt.getDescription());
 //			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 			type.setSuperType(getType(context, superTypeName));
-			return type;
+			return addType(context, type);
 		}
 
 		protected Member createMember(Member member, String context, String config)
@@ -4111,7 +4111,7 @@ public class TypeCreator extends TypeCache
 				addColumns(context, table.getColumns(), type.getMembers(), table.getDataSource());
 			}
 
-			return type;
+			return addType(context, type);
 		}
 
 		private void addColumns(String context, Collection< ? extends Column> columns, EList<Member> members, String dataSource)
