@@ -51,7 +51,7 @@
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.03/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202602110948"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202602110955"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202602191225"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
@@ -251,6 +251,12 @@
                     <groupId>de.inetsoftware</groupId>
                     <artifactId>jlessc</artifactId>
                     <version>1.14.0.s2</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>de.rtner</groupId>
+                    <artifactId>PBKDF2</artifactId>
+                    <version>1.1.4</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -497,12 +503,6 @@
                     <groupId>org.yaml</groupId>
                     <artifactId>snakeyaml</artifactId>
                     <version>2.5</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>de.rtner</groupId>
-                    <artifactId>PBKDF2</artifactId>
-                    <version>1.1.4</version>
                     <type>jar</type>
                 </dependency>
             </dependencies>
