@@ -962,17 +962,6 @@ public class MenuEditor extends PersistEditor
 						if (defaultValue != null)
 						{
 							selectedValue = Utils.getAsBoolean(defaultValue);
-							if (menuItem != null)
-							{
-								if (isExtraProperties)
-								{
-									menuItem.putExtraProperty(categoryName, propertyName, defaultValue);
-								}
-								else
-								{
-									menuItem.putCustomPropertyValue(propertyName, defaultValue);
-								}
-							}
 						}
 					}
 					propertyCheckbox.setSelection(selectedValue);
@@ -1036,17 +1025,6 @@ public class MenuEditor extends PersistEditor
 					if (value == null)
 					{
 						value = getPropertyDefaultValue(propertyDescription);
-						if (value != null && menuItem != null)
-						{
-							if (isExtraProperties)
-							{
-								menuItem.putExtraProperty(categoryName, propertyName, value);
-							}
-							else
-							{
-								menuItem.putCustomPropertyValue(propertyName, value);
-							}
-						}
 					}
 					ValueList valuelist = null;
 					if (value != null)
@@ -1101,17 +1079,6 @@ public class MenuEditor extends PersistEditor
 					if (value == null)
 					{
 						value = getPropertyDefaultValue(propertyDescription);
-						if (value != null && menuItem != null)
-						{
-							if (isExtraProperties)
-							{
-								menuItem.putExtraProperty(categoryName, propertyName, value);
-							}
-							else
-							{
-								menuItem.putCustomPropertyValue(propertyName, value);
-							}
-						}
 					}
 					Relation[] relations = null;
 					if (value != null)
@@ -1169,17 +1136,6 @@ public class MenuEditor extends PersistEditor
 					if (value == null)
 					{
 						value = getPropertyDefaultValue(propertyDescription);
-						if (value != null && menuItem != null)
-						{
-							if (isExtraProperties)
-							{
-								menuItem.putExtraProperty(categoryName, propertyName, value);
-							}
-							else
-							{
-								menuItem.putCustomPropertyValue(propertyName, value);
-							}
-						}
 					}
 					Form form = null;
 					if (value != null)
@@ -1271,17 +1227,6 @@ public class MenuEditor extends PersistEditor
 					if (value == null)
 					{
 						value = getPropertyDefaultValue(propertyDescription);
-						if (value != null && menuItem != null)
-						{
-							if (isExtraProperties)
-							{
-								menuItem.putExtraProperty(categoryName, propertyName, value);
-							}
-							else
-							{
-								menuItem.putCustomPropertyValue(propertyName, value);
-							}
-						}
 					}
 					FormAndTableDataProviderLookup dpLookup = new FormAndTableDataProviderLookup(editingFlattenedSolution, null, null);
 					IDataProvider dp = null;
@@ -1320,18 +1265,6 @@ public class MenuEditor extends PersistEditor
 					else if (valuesConfig.hasDefault())
 					{
 						propertyCombobox.setText(valuesConfig.getDisplayDefault());
-						if (menuItem != null)
-						{
-							Object defaultValue = valuesConfig.getRealDefault();
-							if (isExtraProperties)
-							{
-								menuItem.putExtraProperty(categoryName, propertyName, defaultValue);
-							}
-							else
-							{
-								menuItem.putCustomPropertyValue(propertyName, defaultValue);
-							}
-						}
 					}
 				});
 				propertyCombobox.addModifyListener(new ModifyListener()
@@ -1372,17 +1305,6 @@ public class MenuEditor extends PersistEditor
 						if (defaultValue != null)
 						{
 							textValue = defaultValue.toString();
-							if (menuItem != null)
-							{
-								if (isExtraProperties)
-								{
-									menuItem.putExtraProperty(categoryName, propertyName, defaultValue);
-								}
-								else
-								{
-									menuItem.putCustomPropertyValue(propertyName, defaultValue);
-								}
-							}
 						}
 					}
 					propertyTextbox.setText(textValue);
