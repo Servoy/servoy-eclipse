@@ -19,7 +19,7 @@
 -Xmx2G
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
--Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org
+-Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org,https://build.servoy.com/
 -Dchromium.integration.eclipse.disable=true
       </vmArgs>
       <vmArgsLin>-Dchromium.suspend_threads=false
