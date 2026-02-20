@@ -525,135 +525,184 @@ public class I18nComposite extends Composite
 	{
 		boolean isNew = isNewKey;
 
-		// Update the newKeyButton text based on whether this is a new or existing key
-		if (newKeyButton != null && !newKeyButton.isDisposed())
-		{
-			newKeyButton.setText(isNew ? "Create" : "Save");
-		}
-
-		// Set the key value in newKeyTextField if it exists
+		// Clear all text fields and set placeholder text "Loading..." at the beginning
 		if (newKeyTextField != null && !newKeyTextField.isDisposed())
 		{
-			if (key != null && !key.trim().isEmpty())
-			{
-				newKeyTextField.setText(key);
-			}
-			else
-			{
-				newKeyTextField.setText("");
-			}
+			newKeyTextField.setText("");
+			newKeyTextField.setMessage("Loading...");
+		}
 
-			// Apply italic font when isNew is true
-			if (isNew)
+		if (newDefaultTextField != null && !newDefaultTextField.isDisposed())
+		{
+			newDefaultTextField.setText("");
+			newDefaultTextField.setMessage("Loading...");
+		}
+
+		if (localeTextFields != null)
+		{
+			for (Text textField : localeTextFields.values())
 			{
-				newKeyTextField.setFont(getItalicFont());
-			}
-			else
-			{
-				newKeyTextField.setFont(null); // Reset to default font
+				if (textField != null && !textField.isDisposed())
+				{
+					textField.setText("");
+					textField.setMessage("Loading...");
+				}
 			}
 		}
 
-		// Set the default value in newDefaultTextField if it exists
-		if (newDefaultTextField != null && !newDefaultTextField.isDisposed())
+	// Update the newKeyButton text based on whether this is a new or existing key
+	if (newKeyButton != null && !newKeyButton.isDisposed())
+	{
+		newKeyButton.setText(isNew ? "Create" : "Save");
+		newKeyButton.setEnabled(false); // Disable while loading
+	}
+
+	// Disable addLocaleButton while loading
+	if (addLocaleButton != null && !addLocaleButton.isDisposed())
+	{
+		addLocaleButton.setEnabled(false);
+	}
+
+	// Use asyncExec to allow UI to update and show "Loading..." before populating fields
+	Display.getDefault().asyncExec(new Runnable()
+	{
+		@Override
+		public void run()
 		{
-			if (key != null && !key.trim().isEmpty())
+			// Set the key value in newKeyTextField if it exists
+			if (newKeyTextField != null && !newKeyTextField.isDisposed())
 			{
-				if (isNew)
+				if (key != null && !key.trim().isEmpty())
 				{
-					newDefaultTextField.setText(generateAITranslateSuggestion(key, new Locale("en")));
+					newKeyTextField.setText(key);
 				}
 				else
 				{
-					EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
-					Locale emptyLocale = new Locale("");
-					String defaultValue = messagesManager.getI18nMessage(i18nDatasource, "i18n:" + key, emptyLocale);
-					newDefaultTextField.setText(defaultValue != null ? defaultValue : "");
+					newKeyTextField.setText("");
+				}
+
+				// Apply italic font when isNew is true
+				if (isNew)
+				{
+					newKeyTextField.setFont(getItalicFont());
+				}
+				else
+				{
+					newKeyTextField.setFont(null); // Reset to default font
 				}
 			}
-			else
-			{
-				newDefaultTextField.setText("");
-			}
 
-			// Apply italic font when isNew is true
-			if (isNew)
+			// Set the default value in newDefaultTextField if it exists
+			if (newDefaultTextField != null && !newDefaultTextField.isDisposed())
 			{
-				newDefaultTextField.setFont(getItalicFont());
-			}
-			else
-			{
-				newDefaultTextField.setFont(null); // Reset to default font
-			}
-		}
-
-		// Populate locale text fields based on whether this is a new or existing entry
-		if (key != null && !key.trim().isEmpty() && localeTextFields != null)
-		{
-			EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
-
-			for (Map.Entry<String, Text> entry : localeTextFields.entrySet())
-			{
-				String localeString = entry.getKey();
-				Text textField = entry.getValue();
-
-				if (textField != null && !textField.isDisposed())
+				if (key != null && !key.trim().isEmpty())
 				{
-					try
+					if (isNew)
 					{
-						// Convert the locale string back to a Locale object
-						Locale locale;
-						if (localeString.contains("_"))
-						{
-							String[] parts = localeString.split("_", 2);
-							locale = new Locale(parts[0], parts[1]);
-						}
-						else
-						{
-							locale = new Locale(localeString);
-						}
+						newDefaultTextField.setText(generateAITranslateSuggestion(key, new Locale("en")));
+					}
+					else
+					{
+						EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+						Locale emptyLocale = new Locale("");
+						String defaultValue = messagesManager.getI18nMessage(i18nDatasource, "i18n:" + key, emptyLocale);
+						newDefaultTextField.setText(defaultValue != null ? defaultValue : "");
+					}
+				}
+				else
+				{
+					newDefaultTextField.setText("");
+				}
 
-						if (isNew)
+				// Apply italic font when isNew is true
+				if (isNew)
+				{
+					newDefaultTextField.setFont(getItalicFont());
+				}
+				else
+				{
+					newDefaultTextField.setFont(null); // Reset to default font
+				}
+			}
+
+			// Populate locale text fields based on whether this is a new or existing entry
+			if (key != null && !key.trim().isEmpty() && localeTextFields != null)
+			{
+				EclipseMessages messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+
+				for (Map.Entry<String, Text> entry : localeTextFields.entrySet())
+				{
+					String localeString = entry.getKey();
+					Text textField = entry.getValue();
+
+					if (textField != null && !textField.isDisposed())
+					{
+						try
 						{
-							// Generate AI translation suggestion for new entries
-							String translation = generateAITranslateSuggestion(key, locale);
-							textField.setText(translation != null ? translation : "");
-						}
-						else
-						{
-							// Get existing i18n message for this locale
-							String existingMessage = messagesManager.getI18nMessage(i18nDatasource, "i18n:" + key, locale, true);
-							if (existingMessage == null)
+							// Convert the locale string back to a Locale object
+							Locale locale;
+							if (localeString.contains("_"))
 							{
-								isNew = true;
+								String[] parts = localeString.split("_", 2);
+								locale = new Locale(parts[0], parts[1]);
+							}
+							else
+							{
+								locale = new Locale(localeString);
+							}
+
+							if (isNew)
+							{
+								// Generate AI translation suggestion for new entries
 								String translation = generateAITranslateSuggestion(key, locale);
 								textField.setText(translation != null ? translation : "");
 							}
 							else
 							{
-								textField.setText(existingMessage);
+								// Get existing i18n message for this locale
+								String existingMessage = messagesManager.getI18nMessage(i18nDatasource, "i18n:" + key, locale, true);
+								if (existingMessage == null)
+								{
+									String translation = generateAITranslateSuggestion(key, locale);
+									textField.setText(translation != null ? translation : "");
+									// Apply italic font for missing translations
+									textField.setFont(getItalicFont());
+								}
+								else
+								{
+									textField.setText(existingMessage);
+									textField.setFont(null); // Reset to default font
+								}
+							}
+
+							// Apply italic font when isNew is true
+							if (isNew)
+							{
+								textField.setFont(getItalicFont());
 							}
 						}
-
-						// Apply italic font when isNew is true
-						if (isNew)
+						catch (Exception e)
 						{
-							textField.setFont(getItalicFont());
+							// If locale parsing fails, leave the field empty
+							textField.setText("");
+							System.err.println("Failed to parse locale string or retrieve message: " + localeString);
 						}
-						else
-						{
-							textField.setFont(null); // Reset to default font
-						}
-					}
-					catch (Exception e)
-					{
-						// If locale parsing fails, leave the field empty
-						textField.setText("");
-						System.err.println("Failed to parse locale string or retrieve message: " + localeString);
 					}
 				}
 			}
+
+			// Re-enable buttons after content is loaded
+			if (newKeyButton != null && !newKeyButton.isDisposed())
+			{
+				newKeyButton.setEnabled(true);
+			}
+
+			if (addLocaleButton != null && !addLocaleButton.isDisposed())
+			{
+				addLocaleButton.setEnabled(true);
+			}
 		}
+	});
 	}
 
 	private ISelectionChangedListener getLanguageSelectionHandler()
@@ -954,12 +1003,13 @@ public class I18nComposite extends Composite
 
 			if (chatModel != null)
 			{
-				String languageName = locale.getDisplayLanguage();
-				String countryName = locale.getDisplayCountry();
-				String localeInfo = !countryName.isEmpty() ? languageName + " (" + countryName + ")" : languageName;
+			String languageName = locale.getDisplayLanguage();
+			String countryName = locale.getDisplayCountry();
+			String localeInfo = !countryName.isEmpty() ? languageName + " (" + countryName + ")" : languageName;
 
-				String prompt = "Translate this i18n key to " + localeInfo + ": \"" + key + "\"";
-				String suggestion = chatModel.chat(prompt);
+			String prompt = "Translate this i18n key to " + localeInfo + ": \"" + key + "\". " +
+				"If you cannot suggest a meaningful translation, just return the key as-is: \"" + key + "\"";
+			String suggestion = chatModel.chat(prompt);
 
 				// Clean up the suggestion (remove quotes, trim whitespace)
 				if (suggestion != null)
