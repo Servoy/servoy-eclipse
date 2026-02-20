@@ -521,7 +521,7 @@ public class I18nComposite extends Composite
 		return italicFont;
 	}
 
-	private void updateLocaleValues(String key, boolean isNewKey)
+	private void updateLocaleValues(String key, String newValue, boolean isNewKey)
 	{
 		boolean isNew = isNewKey;
 
@@ -599,7 +599,7 @@ public class I18nComposite extends Composite
 					{
 						if (isNew)
 						{
-							newDefaultTextField.setText(generateAITranslateSuggestion(key, new Locale("en")));
+							newDefaultTextField.setText(generateAITranslateSuggestion(newValue, new Locale("en")));
 						}
 						else
 						{
@@ -654,7 +654,7 @@ public class I18nComposite extends Composite
 								if (isNew)
 								{
 									// Generate AI translation suggestion for new entries
-									String translation = generateAITranslateSuggestion(key, locale);
+									String translation = generateAITranslateSuggestion(newValue, locale);
 									textField.setText(translation != null ? translation : "");
 								}
 								else
@@ -663,7 +663,7 @@ public class I18nComposite extends Composite
 									String existingMessage = messagesManager.getI18nMessage(i18nDatasource, "i18n:" + key, locale, true);
 									if (existingMessage == null)
 									{
-										String translation = generateAITranslateSuggestion(key, locale);
+										String translation = generateAITranslateSuggestion(newDefaultTextField.getText(), locale);
 										textField.setText(translation != null ? translation : "");
 										// Apply italic font for missing translations
 										textField.setFont(getItalicFont());
@@ -1143,7 +1143,7 @@ public class I18nComposite extends Composite
 
 		if (showAISuggestion && key != null)
 		{
-			updateLocaleValues(key, !found);
+			updateLocaleValues(key, value, !found);
 		}
 
 	}
