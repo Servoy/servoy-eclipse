@@ -381,7 +381,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							return null;
 						}
 						// superform
-						return getSuperFormContext(context, form, null);
+						if (form.getExtendsForm() != null)
+						{
+							return getSuperFormContext(context, form, null);
+						}
+
+						//IRType instanceType = new AnyType();
+						Type type = context.getType("RuntimeForm<" + formName + ">");
+						IValueCollection collection = ValueCollectionFactory.createValueCollection(type.toRType(context));
+
+						return collection;
 					}
 
 					String[] serverTablename = SolutionSerializer.getDataSourceForCalculationJSFile(resource);

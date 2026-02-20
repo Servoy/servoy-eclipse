@@ -1,4 +1,4 @@
-import { Directive, Input, ElementRef, OnChanges, SimpleChanges, Renderer2, Injector } from '@angular/core';
+import { Directive, ElementRef, OnChanges, SimpleChanges, Renderer2, Injector, input } from '@angular/core';
 import { DesignFormComponent } from '../designer/designform_component.component';
 import { AbstractFormComponent, FormComponent } from '../ngclient/form/form_component.component';
 import { StructureCache } from '../ngclient/types';
@@ -8,10 +8,10 @@ import { StructureCache } from '../ngclient/types';
     standalone: false
 })
 export class AddAttributeDirective implements OnChanges {
-    @Input() svyContainerStyle: any;
-    @Input() svyContainerLayout;
-    @Input() svyContainerClasses: Array<string>;
-    @Input() svyContainerAttributes;
+    readonly svyContainerStyle = input<any>(undefined);
+    readonly svyContainerLayout = input(undefined);
+    readonly svyContainerClasses = input<Array<string>>(undefined);
+    readonly svyContainerAttributes = input(undefined);
 
     parent: AbstractFormComponent;
 
@@ -33,8 +33,9 @@ export class AddAttributeDirective implements OnChanges {
             if (changes.svyContainerClasses.previousValue) {
                 changes.svyContainerClasses.previousValue.forEach(cls => this.renderer.removeClass(this.el.nativeElement, cls));
             }
-            if (this.svyContainerClasses) {
-                this.svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
+            const svyContainerClasses = this.svyContainerClasses();
+            if (svyContainerClasses) {
+                svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
             }
         }
 
@@ -50,21 +51,24 @@ export class AddAttributeDirective implements OnChanges {
                 }
             }
         }
-        if (changes.svyContainerAttributes && this.svyContainerAttributes) {
-            for (const key of Object.keys(this.svyContainerAttributes)) {
-                this.renderer.setAttribute(this.el.nativeElement, key, this.svyContainerAttributes[key]);
-                if (key === 'name' && this.svyContainerStyle instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
+        const svyContainerAttributes = this.svyContainerAttributes();
+        if (changes.svyContainerAttributes && svyContainerAttributes) {
+            for (const key of Object.keys(svyContainerAttributes)) {
+                this.renderer.setAttribute(this.el.nativeElement, key, svyContainerAttributes[key]);
+                if (key === 'name' && this.svyContainerStyle() instanceof StructureCache) this.restoreCss(); //set the containers css and classes after a refresh if it's the case
             }
         }
-        if (changes.svyContainerStyle && this.svyContainerStyle && this.svyContainerStyle.cssPositionContainer) {
+        const svyContainerStyle = this.svyContainerStyle();
+        if (changes.svyContainerStyle && svyContainerStyle && svyContainerStyle.cssPositionContainer) {
             this.renderer.setStyle(this.el.nativeElement, 'position', 'relative');
-            this.renderer.setStyle(this.el.nativeElement, 'height', this.svyContainerAttributes.size.height + 'px');
+            this.renderer.setStyle(this.el.nativeElement, 'height', svyContainerAttributes.size.height + 'px');
         }
     }
 
     private restoreCss() {
-        if ('attributes' in this.svyContainerStyle && this.svyContainerStyle.attributes.name.indexOf('.') > 0) {
-            const name = this.svyContainerStyle.attributes.name.split('.')[1];
+        const svyContainerStyle = this.svyContainerStyle();
+        if ('attributes' in svyContainerStyle && svyContainerStyle.attributes.name.indexOf('.') > 0) {
+            const name = svyContainerStyle.attributes.name.split('.')[1];
             if (this.parent.cssstyles && this.parent.cssstyles[name]) {
                 const stylesMap = this.parent.cssstyles[name];
                 for (let k in stylesMap) {

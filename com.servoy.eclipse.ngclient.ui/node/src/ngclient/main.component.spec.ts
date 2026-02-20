@@ -1,4 +1,4 @@
-import { Directive, Input} from '@angular/core';
+import { Directive, input } from '@angular/core';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { MainComponent } from './main.component';
 import {ServoyService} from './servoy.service';
@@ -54,8 +54,7 @@ describe('MainComponent', () => {
     standalone: false
 })
   class MockFormComponent{
-    @Input('name')
-    public name: string;
+    public readonly name = input<string>(undefined);
   }
 
 @Directive({
@@ -63,8 +62,7 @@ describe('MainComponent', () => {
     standalone: false
 })
   class MockDefaultNavigator{
-    @Input('name')
-    public name: string;
+    public readonly name = input<string>(undefined);
   }
 @Directive({
     selector: 'session-view',

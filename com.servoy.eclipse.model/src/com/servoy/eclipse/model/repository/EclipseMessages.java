@@ -298,6 +298,11 @@ public class EclipseMessages implements ICustomMessageLoader
 	@Override
 	public String getI18nMessage(String i18nDatasource, String key, Locale language)
 	{
+		return getI18nMessage(i18nDatasource, key, language, false);
+	}
+
+	public String getI18nMessage(String i18nDatasource, String key, Locale language, boolean nullIfNotExist)
+	{
 		if (i18nDatasource != null && key != null && key.startsWith("i18n:")) //$NON-NLS-1$
 		{
 			key = key.substring(5);
@@ -306,6 +311,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			{
 				String languageKey = Messages.localeToString(language) + "." + key;
 				if (messages.containsKey(languageKey)) return messages.get(languageKey).getValue();
+				if (nullIfNotExist) return null;
 				languageKey = "." + key;
 				if (messages.containsKey(languageKey)) return messages.get(languageKey).getValue();
 				String message = AbstractApplication.getDefaultMessage(key, language);
@@ -754,7 +760,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			ArrayList<IFormElement> remainedI18NComponents = new ArrayList<IFormElement>();
 			for (IFormElement textComponent : componentsI18NKeys.keySet())
 			{
-				Form f = (Form)((IPersist)textComponent).getAncestor(IRepository.FORMS);
+				Form f = (Form)textComponent.getAncestor(IRepository.FORMS);
 				if (form.equals(f)) remainedI18NComponents.add(textComponent);
 			}
 			for (IFormElement textComponent : remainedI18NComponents)

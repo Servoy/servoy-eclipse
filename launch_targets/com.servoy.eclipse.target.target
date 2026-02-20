@@ -8,7 +8,7 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://azuredownloads-g3ahgwb5b8bkbxhd.b01.azurefd.net/github-copilot/"/>
-            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.15.0.202601270459"/>
+            <unit id="com.microsoft.copilot.eclipse.feature.feature.group" version="0.0.0"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/releases/2025-12"/>
@@ -50,8 +50,8 @@
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.03/"/>
-            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202601231531"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202601231644"/>
+            <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202602110948"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202602191225"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
@@ -70,37 +70,31 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.aarch64</artifactId>
-                    <version>128.0.28</version>
+                    <version>138.0.6</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.x86_64</artifactId>
-                    <version>128.0.28</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.equo</groupId>
-                    <artifactId>com.equo.chromium.cef.gtk.linux.aarch64</artifactId>
-                    <version>128.0.28</version>
+                    <version>138.0.6</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.x86_64</artifactId>
-                    <version>128.0.28</version>
+                    <version>138.0.6</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.aarch64</artifactId>
-                    <version>128.0.28</version>
+                    <version>138.0.6</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.x86_64</artifactId>
-                    <version>128.0.28</version>
+                    <version>138.0.6</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -118,7 +112,7 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium</artifactId>
-                    <version>128.0.28</version>
+                    <version>138.0.6</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -254,6 +248,12 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
+                    <groupId>de.rtner</groupId>
+                    <artifactId>PBKDF2</artifactId>
+                    <version>1.1.4</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
                     <version>3.5.3</version>
@@ -319,31 +319,31 @@
                     <version>3.2.0</version>
                     <type>jar</type>
                 </dependency>
-                <dependency>
-				  <groupId>org.checkerframework</groupId>
-				  <artifactId>checker-qual</artifactId>
-				  <version>3.49.4</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.enterprise</groupId>
-				    <artifactId>jakarta.enterprise.cdi-api</artifactId>
-				    <version>4.1.0</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.enterprise</groupId>
-				    <artifactId>jakarta.enterprise.lang-model</artifactId>
-				    <version>4.1.0</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.validation</groupId>
-				    <artifactId>jakarta.validation-api</artifactId>
-				    <version>3.1.0</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.interceptor</groupId>
-				    <artifactId>jakarta.interceptor-api</artifactId>
-				    <version>2.2.0</version>
-				</dependency>
+                 <dependency>
+		  <groupId>org.checkerframework</groupId>
+		  <artifactId>checker-qual</artifactId>
+		  <version>3.49.4</version>
+		</dependency>
+		<dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+		    <version>4.1.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.lang-model</artifactId>
+		    <version>4.1.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>jakarta.validation</groupId>
+		    <artifactId>jakarta.validation-api</artifactId>
+		    <version>3.1.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>jakarta.interceptor</groupId>
+		    <artifactId>jakarta.interceptor-api</artifactId>
+		    <version>2.2.0</version>
+		</dependency>
                 <dependency>
                     <groupId>jakarta.transaction</groupId>
                     <artifactId>jakarta.transaction-api</artifactId>

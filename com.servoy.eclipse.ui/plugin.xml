@@ -1002,6 +1002,17 @@
                tooltip="Open form hierarchy">
          </action>
       </viewerContribution>
+      <viewerContribution
+            id="com.servoy.eclipse.ui.viewer.JavascriptEditor"
+            targetID="#JavascriptEditorContext">
+        <action
+            class="com.servoy.eclipse.ui.actions.ReplaceWithI18NTag"
+            id="com.servoy.eclipse.ui.actions.ReplaceWithI18NText"
+            label="Replace with I18N tag"
+            menubarPath="additions"
+            tooltip="Replace selected text with an I18N tag">
+        </action>
+      </viewerContribution>
    </extension>
    <extension
          point="org.eclipse.ui.importWizards">

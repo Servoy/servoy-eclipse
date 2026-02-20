@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.sablo.eventthread.Event;
 import org.sablo.eventthread.IEventDispatcher;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IWebsocketSession;
@@ -137,6 +138,13 @@ public class Activator implements BundleActivator
 								public boolean isEventDispatchThread()
 								{
 									return super.isEventDispatchThread() || Thread.currentThread().getName().equals("Debug command reader"); //$NON-NLS-1$
+								}
+
+								@Override
+								protected Event getCurrentEventIfOnEventThread()
+								{
+									if (Thread.currentThread().getName().equals("Debug command reader")) return null;
+									return super.getCurrentEventIfOnEventThread();
 								}
 							};
 						}

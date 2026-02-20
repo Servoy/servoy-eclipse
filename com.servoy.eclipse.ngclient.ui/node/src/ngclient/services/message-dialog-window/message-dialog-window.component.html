@@ -1,16 +1,16 @@
 <div class="svy-message-dialog" #svyMessageDialog>
-  <h4 class="window-title window-header" [ngClass]="styleClass"></h4>
+  <h4 class="window-title window-header" [ngClass]="styleClass()"></h4>
   <div class="window-body">
     <div class="inner-content">
-      <span [innerHTML]='message'></span>
-      @if (styleClass==='type-input' || styleClass === 'type-select') {
+      <span [innerHTML]='message()'></span>
+      @if (styleClass()==='type-input' || styleClass() === 'type-select') {
         <form>
-          @if (styleClass==='type-input') {
+          @if (styleClass()==='type-input') {
             <input [type]="getType()" #inputfield class="input-width form-control" [(ngModel)]="retValue" [ngModelOptions]="{standalone: true}">
           }
-          @if (styleClass==='type-select') {
+          @if (styleClass()==='type-select') {
             <select #inputfield class="input-width form-select" [(ngModel)]="retValue" [ngModelOptions]="{standalone: true}">
-              @for (myValue of values; track myValue) {
+              @for (myValue of values(); track myValue) {
                 <option [value]="myValue">{{ myValue }}</option>
               }
             </select>
@@ -20,7 +20,7 @@
     </div>
   </div>
   <div #buttons class="window-footer">
-    @for (text of buttonsText; track text; let idx = $index) {
+    @for (text of buttonsText(); track text; let idx = $index) {
       <button class="svy-btn" [ngClass]="getButtonClass(idx)" (click)="dismiss(text)">{{ text }}</button>
     }
   </div>

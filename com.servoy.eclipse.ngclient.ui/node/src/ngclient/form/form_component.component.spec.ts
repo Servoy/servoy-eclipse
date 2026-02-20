@@ -1,7 +1,13 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { CUSTOM_ELEMENTS_SCHEMA, Component, ViewChild, TemplateRef,
-            Input, Output, ChangeDetectionStrategy, EventEmitter,
-            Renderer2, ChangeDetectorRef, DebugElement } from '@angular/core';
+import {
+  CUSTOM_ELEMENTS_SCHEMA, Component, TemplateRef,
+  ChangeDetectionStrategy,
+  Renderer2, ChangeDetectorRef, DebugElement,
+  input,
+  output,
+  viewChild,
+  signal
+} from '@angular/core';
 
 import { FormattingService, TooltipService, LoggerFactory, ServoyBaseComponent,
             ICustomObjectValue, ICustomArrayValue, ServoyPublicModule, WindowRefService, SpecTypesService } from '@servoy/public';
@@ -56,10 +62,10 @@ import { By } from '@angular/platform-browser';
     standalone: false
 })
 class TestHostComponent {
-    @ViewChild('customTestComponent', { static: true }) readonly customTestComponentTemplate: TemplateRef<any>;
+    readonly customTestComponentTemplate = viewChild<TemplateRef<any>>('customTestComponent');
 
     getCustomTestComponentTemplates() {
-        return { customTestComponent: this.customTestComponentTemplate };
+        return { customTestComponent: this.customTestComponentTemplate() };
     }
 }
 
@@ -68,13 +74,13 @@ class TestHostComponent {
     template: `
         <div  [id]="servoyApi.getMarkupId()" #element>
             <button type="button" (click)="click1()" class="button1">
-                {{divLocation}}
+                {{divLocation()}}
             </button>
             <button type="button" (click)="click2()" class="button2">
-                {{divLocation}}
+                {{divLocation()}}
             </button>
             <button type="button" (click)="click3()" class="button3">
-                {{divLocation}}
+                {{divLocation()}}
             </button>
         </div>`,
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -82,10 +88,12 @@ class TestHostComponent {
 })
 export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButtonElement> {
 
-    @Input() arrayOfCustomObjects: Array<SomeCustomObject>;
+    readonly arrayOfCustomObjects = input<Array<SomeCustomObject>>(undefined);
 
-    @Input() divLocation: number;
-    @Output() divLocationChange = new EventEmitter();
+    readonly divLocation = input<number>(undefined);
+    readonly divLocationChange = output<number>();
+    
+    _divLocation = signal<number>(undefined);
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -101,17 +109,21 @@ export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButto
 //        super.svyOnChanges(changes);
 //    }
 
+    ngOnInit() {
+        this._divLocation.set(this.divLocation());
+    }
     click1() {
-        this.divLocation++;
-        this.divLocationChange.emit(this.divLocation);
+        let divLocation = this._divLocation();
+        this._divLocation.set(divLocation++);
+        this.divLocationChange.emit(divLocation);
     }
 
     click2() {
-        this.arrayOfCustomObjects.push({ active: true });
+        this.arrayOfCustomObjects().push({ active: true });
     }
 
     click3() {
-        this.arrayOfCustomObjects[0].active = false;
+        this.arrayOfCustomObjects()[0].active = false;
     }
 
 }

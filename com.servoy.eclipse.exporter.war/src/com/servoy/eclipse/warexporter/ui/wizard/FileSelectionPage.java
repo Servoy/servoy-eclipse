@@ -121,7 +121,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		browseButton.addListener(SWT.Selection, this);
 
 		exportActiveSolution = new Button(composite, SWT.CHECK);
-		exportActiveSolution.setText("Include active solution and modules (a war export without solution does not support newest features)");
+		exportActiveSolution.setText("Include active solution and modules (a war export without a solution does not support the newest features)");
 		exportActiveSolution.setSelection(exportModel.isExportActiveSolution());
 		exportActiveSolution.addSelectionListener(new SelectionAdapter()
 		{
@@ -147,7 +147,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 				exportModel.setExportNonActiveSolutions(exportSomeNonActiveSolutions.getSelection());
 			}
 		});
-
 
 		exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
 		exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only");
@@ -474,9 +473,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	}
 
 
-	/**
-	 *
-	 */
 	private void enableSolutionExportData()
 	{
 		exportSomeNonActiveSolutions.setEnabled(exportActiveSolution.getSelection());

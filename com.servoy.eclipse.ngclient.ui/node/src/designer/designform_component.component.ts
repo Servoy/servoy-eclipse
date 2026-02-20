@@ -1,5 +1,5 @@
 import {
-  Component, Input, OnDestroy, OnChanges, SimpleChanges, ViewChild,
+  Component, Input, OnDestroy, OnChanges, SimpleChanges, viewChild,
   TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, ViewEncapsulation,
   HostListener,
   DOCUMENT
@@ -118,19 +118,19 @@ import { TypesRegistry} from '../sablo/types_registry';
 })
 
 export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, IFormComponent {
-
-    @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
-    @ViewChild('cssPositionContainer', { static: true }) readonly cssPositionContainer: TemplateRef<any>;
+    
+    readonly svyResponsiveDiv = viewChild<TemplateRef<any>>('svyResponsiveDiv');
+    readonly cssPositionContainer = viewChild<TemplateRef<any>>('cssPositionContainer');
     // structure viewchild template generate start
     // structure viewchild template generate end
-    @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
-    @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
+    readonly formComponentAbsoluteDiv = viewChild<TemplateRef<any>>('formComponentAbsoluteDiv');
+    readonly formComponentResponsiveDiv = viewChild<TemplateRef<any>>('formComponentResponsiveDiv');
 
     // component viewchild template generate start
-    @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
-    @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
-    @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
-    @ViewChild('servoycoreFormcontainer', { static: true }) readonly servoycoreFormcontainer: TemplateRef<any>;
+    readonly servoycoreSlider = viewChild<TemplateRef<any>>('servoycoreSlider');
+    readonly servoycoreErrorbean = viewChild<TemplateRef<any>>('servoycoreErrorbean');
+    readonly servoycoreListformcomponent = viewChild<TemplateRef<any>>('servoycoreListformcomponent');
+    readonly servoycoreFormcontainer = viewChild<TemplateRef<any>>('servoycoreFormcontainer');
     // component viewchild template generate end
 
     @Input() name: string;
@@ -473,29 +473,29 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname] : (item.cssPositionContainer ? this.cssPositionContainer : this.svyResponsiveDiv);
+            return item.tagname ? this[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
         } else if (item instanceof FormComponentCache) {
-            if (item.hasFoundset) return this.servoycoreListformcomponent;
-            return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
+            if (item.hasFoundset) return this.servoycoreListformcomponent();
+            return item.responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
         } else {
             if (item.type === 'menu') return;
             if (this[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
-            return this[item.type];
+            return this[item.type]();
         }
     }
 
     getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
-            return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv : this.formComponentResponsiveDiv;
+            return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv() : this.formComponentResponsiveDiv();
         } else {
             // TODO: this has to be replaced with a type property on the state object
             // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
             compDirectiveName = compDirectiveName.replace('-', '');
-            return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)];
+            return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)]();
         }
     }
 

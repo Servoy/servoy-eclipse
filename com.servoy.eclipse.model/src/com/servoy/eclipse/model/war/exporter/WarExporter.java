@@ -140,14 +140,14 @@ import com.servoy.j2db.util.xmlxport.TableDef;
 public class WarExporter
 {
 	private static final String[] WAR_LIBS = new String[] { "org.freemarker*.jar", //
-		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_base_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_shared_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_smart_client_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"servoy_headless_client_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_server_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"servoy_ngclient_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_base_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_shared_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_smart_client_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_headless_client_" + ClientVersion.getPureVersion() + "*.jar", //
+		"j2db_log4j_" + ClientVersion.getPureVersion() + "*.jar", //
+		"j2db_server_" + ClientVersion.getPureVersion() + "*.jar", //
+		"sablo_" + ClientVersion.getPureVersion() + "*.jar", //
 		"org.eclipse.dltk.javascript.rhino_*.jar", //
 		"slf4j.api_*.jar", //
 		"jabsorb_*.jar", //
@@ -178,6 +178,7 @@ public class WarExporter
 		"org.yaml.snakeyaml_*.jar", //
 		"org.jboss.logging.jboss-logging_*.jar", //
 		"net.bytebuddy.byte-buddy_*.jar", //
+		"wrapped.de.rtner.PBKDF2_*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
 		"de.inetsoftware.jlessc_*.jar", "wrapped.com.servoy.tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
@@ -1403,6 +1404,7 @@ public class WarExporter
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
+		Set<String> dependencies = new HashSet<String>();
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
 			Set<File> writtenFiles = new HashSet<File>();
@@ -1438,9 +1440,11 @@ public class WarExporter
 								copyPluginJars(tmpWarDir, appServerDir, fw, writtenFiles, classPath);
 							}
 						}
+						dependencies.addAll(JarManager.getRequiredBundles(pluginFile.toURI().toURL()));
 					}
 				}
 			}
+			copyRequiredBundles(tmpWarDir, appServerDir, fw, writtenFiles, dependencies);
 		}
 		catch (IOException e1)
 		{
@@ -1692,6 +1696,36 @@ public class WarExporter
 				jarName = jarName.substring(index + "plugins/".length());
 			}
 			writeFileEntry(fw, jarFile, jarName, writtenFiles);
+		}
+	}
+
+	private void copyRequiredBundles(File tmpWarDir, String appServerDir, Writer fw, Set<File> writtenFiles, Set<String> requiredBundleNames)
+		throws ExportException, IOException
+	{
+		File pluginsDir = new File(appServerDir, "plugins");
+
+		if (!pluginsDir.exists() || !pluginsDir.isDirectory())
+		{
+			return;
+		}
+
+		File[] jars = pluginsDir.listFiles((dir, name) -> name.endsWith(".jar"));
+		if (jars == null) return;
+
+		for (File jarFile : jars)
+		{
+			String bundleSymbolicName = JarManager.getNameAndVersion(jarFile.toURI().toURL()).getLeft();
+			if (bundleSymbolicName == null) continue;
+
+			bundleSymbolicName = bundleSymbolicName.split(";")[0].trim();
+			if (requiredBundleNames.contains(bundleSymbolicName))
+			{
+				File jarTargetFile = new File(tmpWarDir, "plugins/" + jarFile.getName());
+				jarTargetFile.getParentFile().mkdirs();
+
+				copyFile(jarFile, jarTargetFile);
+				writeFileEntry(fw, jarFile, "plugins/" + jarFile.getName(), writtenFiles);
+			}
 		}
 	}
 

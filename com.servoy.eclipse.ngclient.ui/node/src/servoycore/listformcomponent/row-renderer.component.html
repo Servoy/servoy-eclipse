@@ -1,5 +1,5 @@
 <div>
-  @if (lfc.containedForm.absoluteLayout) {
+  @if (lfc.containedForm().absoluteLayout) {
     @for (row of foundsetRows; track row; let i = $index) {
       <div [sabloTabseq]="getFoundsetRowIndex(i) + 1" [sabloTabseqConfig]="{container: true, reservedGap: 100}" (click)="lfc.onRowClick(row, $event)" [class]="lfc.getRowClasses(getFoundsetRowIndex(i))" [ngStyle]="lfc.getRowStyle(true)" style="display:block; position: relative; float: left; white-space: normal;">
         @for (item of lfc.cache.items; track item) {
@@ -10,7 +10,7 @@
       </div>
     }
   }
-  @if (!lfc.containedForm.absoluteLayout) {
+  @if (!lfc.containedForm().absoluteLayout) {
     @for (row of foundsetRows; track row; let i = $index) {
       <div [sabloTabseq]="getFoundsetRowIndex(i) + 1" [sabloTabseqConfig]="{container: true, reservedGap: 100}" (click)="lfc.onRowClick(row, $event)" [class]="lfc.getRowClasses(getFoundsetRowIndex(i))" [ngStyle]="lfc.getRowStyle(false)" style="float: left; white-space: normal;">
         @for (item of lfc.cache.items; track item) {

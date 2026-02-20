@@ -910,11 +910,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				templateLFC.append(pair.getRight());
 				templateLFC.append(">\n</ng-template>\n");
 
-				viewChild.append("@ViewChild('svyResponsive");
+				viewChild.append("readonly svyResponsive");
 				viewChild.append(templateName);
-				viewChild.append("', { static: true }) readonly svyResponsive");
+				viewChild.append(" = viewChild<TemplateRef<any>>('svyResponsive");
 				viewChild.append(templateName);
-				viewChild.append(": TemplateRef<any>;\n");
+				viewChild.append("');\n");
 			});
 			template.append("<!-- structure template generate end -->");
 			templateLFC.append("<!-- structure template generate end -->");

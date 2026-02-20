@@ -1,25 +1,25 @@
 <div
   class='svy-container'
   [id]="servoyApi.getMarkupId()"
-  [svyTooltip]="toolTipText"
-  [sabloTabseq]="tabSeq"
+  [svyTooltip]="toolTipText()"
+  [sabloTabseq]="tabSeq()"
   [sabloTabseqConfig]="{container: true, reservedGap: 50}"
   #element>
   @if (form1_visible) {
     <div class='svy-tabcontainer' [@slideAnimation]="form1_state"  (@slideAnimation.done)="animationDone($event, 'form1')" [ngStyle]="getContainerStyle(getForm1())">
       @if (!servoyApi.isInDesigner()) {
-        <ng-template  [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
+        <ng-template  [ngTemplateOutlet]="templateRef()" [ngTemplateOutletContext]="{name:getForm1()}"></ng-template>
       } @else {
-        <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm }}</div>
+        <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm() }}</div>
       }
     </div>
   }
   @if (form2_visible) {
     <div class='svy-tabcontainer' [@slideAnimation]="form2_state" (@slideAnimation.done)="animationDone($event, 'form2')"  [ngStyle]="getContainerStyle(getForm2())">
       @if (!servoyApi.isInDesigner()) {
-        <ng-template  [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm2()}" ></ng-template>
+        <ng-template  [ngTemplateOutlet]="templateRef()" [ngTemplateOutletContext]="{name:getForm2()}" ></ng-template>
       } @else {
-        <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm }}</div>
+        <div style="height: 100%; background-color:#e6e6e6;">{{ containedForm() }}</div>
       }
     </div>
   }

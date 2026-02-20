@@ -120,11 +120,11 @@ public class ComponentTemplateGenerator
 		template.append(specName);
 		template.append(' ');
 
-		viewChild.append("@ViewChild('");
+		viewChild.append("readonly ");
 		viewChild.append(templateName);
-		viewChild.append("', { static: true }) readonly ");
+		viewChild.append(" = viewChild<TemplateRef<any>>('");
 		viewChild.append(templateName);
-		viewChild.append(": TemplateRef<any>;\n");
+		viewChild.append("');\n");
 
 		ArrayList<PropertyDescription> specProperties = new ArrayList<>(spec.getProperties().values());
 		Collections.sort(specProperties, new Comparator<PropertyDescription>()

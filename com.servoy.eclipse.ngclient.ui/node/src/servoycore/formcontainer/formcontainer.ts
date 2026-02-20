@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Renderer2, ContentChild, TemplateRef, Input, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, TemplateRef, SimpleChanges, ChangeDetectionStrategy, input, contentChild } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 import { FormService } from '../../ngclient/form.service';
 import {
@@ -75,18 +75,17 @@ import {
 })
 export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement> {
 
-	@Input() containedForm: any;
-	@Input() relationName: any;
+	readonly containedForm = input<any>(undefined);
+	readonly relationName = input<any>(undefined);
 	// deprecated, not used anymore
-	@Input() waitForData: any;
-	@Input() height: string;
-	@Input() tabSeq: number;
-	@Input() toolTipText: string;
-	@Input() animation: string;
-	@Input() styleClass: string;
+	readonly waitForData = input<any>(undefined);
+	readonly height = input<string>(undefined);
+	readonly tabSeq = input<number>(undefined);
+	readonly toolTipText = input<string>(undefined);
+	readonly animation = input<string>(undefined);
+	readonly styleClass = input<string>(undefined);
 
-	@ContentChild(TemplateRef, { static: true })
-	templateRef: TemplateRef<any>;
+	readonly templateRef = contentChild(TemplateRef);
 
 	form1_state: string;
 	form2_state: string;
@@ -111,8 +110,8 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 					case 'containedForm': {
 						if (change.currentValue !== change.previousValue) {
 							if (change.previousValue && this.realContainedForm) {
-								this.form1_state = this.animation;
-								this.form2_state = this.animation;
+								this.form1_state = this.animation();
+								this.form2_state = this.animation();
 							}
 							this.switchForm(change.currentValue);
 						}
@@ -126,8 +125,8 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 					}
 					case 'animation': {
 						if (this.realContainedForm) {
-							this.form1_state = this.animation;
-							this.form2_state = this.animation;
+							this.form1_state = this.animation();
+							this.form2_state = this.animation();
 						}
 						break;
 					}
@@ -148,16 +147,17 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 	}
 
 	switchForm(name: string) {
-		if (this.animation && this.animation !== 'none' && this.realContainedForm) {
+		const animation = this.animation();
+  if (animation && animation !== 'none' && this.realContainedForm) {
 			if (this.form1 === this.realContainedForm) {
 				this.form2 = name;
 				this.form1_state = 'hide';
-				this.form2_state = this.animation;
+				this.form2_state = animation;
 				this.form2_visible = true;
 			} else {
 				this.form1 = name;
 				this.form2_state = 'hide';
-				this.form1_state = this.animation;
+				this.form1_state = animation;
 				this.form1_visible = true;
 			}
 		} else {
@@ -185,9 +185,10 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 	getContainerStyle(name: string) {
 		const styl = {};
 		let minHeight: string | number;
-		if (this.height && this.height !== '0') {
-			minHeight = this.height;
-		} else if (this.containedForm || name) {
+		const height = this.height();
+  if (height && height !== '0') {
+			minHeight = height;
+		} else if (this.containedForm() || name) {
 			// for absolute form default height is design height, for responsive form default height is 0
 			const formCache = this.formService.getFormCacheByName(name);
 			if (formCache && formCache.absolute) {
@@ -203,9 +204,9 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 				}
 			}
 		}
-		if (this.height && this.height.indexOf('%') >= 0) {
-			styl['height'] = this.height;
-			if (this.getNativeElement()) this.renderer.setStyle(this.getNativeElement(), 'height', this.height);
+		if (height && height.indexOf('%') >= 0) {
+			styl['height'] = height;
+			if (this.getNativeElement()) this.renderer.setStyle(this.getNativeElement(), 'height', height);
 		} else if (minHeight) {
 			styl['minHeight'] = minHeight + 'px';
 		}
