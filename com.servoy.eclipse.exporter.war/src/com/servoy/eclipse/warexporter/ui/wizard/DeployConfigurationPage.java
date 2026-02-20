@@ -62,6 +62,8 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 	private Button clearReferencesStopTimerThreads;
 	private Text fileContextNameText;
 	private Button browseContextButton;
+	private Button exportTitaniumSourceMaps;
+
 
 	public DeployConfigurationPage(String title, ExportWarModel exportModel)
 	{
@@ -73,7 +75,7 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 
 	public void createControl(Composite parent)
 	{
-		GridLayout gridLayout = new GridLayout(4, false);
+		GridLayout gridLayout = new GridLayout(3, false);
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 
@@ -84,7 +86,7 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		contextText
 			.setToolTipText("This context.file can be used to configure this war for tomcat (resource locking, cookie setings), see tomcat documentation");
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 4;
+		gd.horizontalSpan = 3;
 		contextText.setLayoutData(gd);
 
 
@@ -92,17 +94,18 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		fileContextNameText.addListener(SWT.KeyUp, this);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
+		gd.grabExcessHorizontalSpace = true;
+		gd.minimumWidth = 100;
 		fileContextNameText.setLayoutData(gd);
 		if (exportModel.getTomcatContextXMLFileName() != null) fileContextNameText.setText(exportModel.getTomcatContextXMLFileName());
 
 		browseContextButton = new Button(composite, SWT.PUSH);
 		browseContextButton.setText("Browse...");
 		browseContextButton.addListener(SWT.Selection, this);
+
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 4;
-
-		new Label(composite, SWT.NONE).setLayoutData(gd);
-
+		new Label(composite, SWT.NONE).setLayoutData(gd); // just an empty vertical space
 
 //		createTomcatContextXML = new Button(composite, SWT.CHECK);
 //		createTomcatContextXML.setText("Create Tomcat META-INF/context.xml");
@@ -213,12 +216,12 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 			}
 		});
 		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
-		automaticallyUpgradeRepository.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+		automaticallyUpgradeRepository.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
 
 		overwriteDBServerPropertiesBtn = new Button(composite, SWT.CHECK);
 		overwriteDBServerPropertiesBtn.setSelection(exportModel.isOverwriteDeployedDBServerProperties());
 		overwriteDBServerPropertiesBtn.addSelectionListener(this);
-		overwriteDBServerPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+		overwriteDBServerPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
 		overwriteDBServerPropertiesBtn.setText("Overwrite changed DB servers properties from previous deployment");
 		overwriteDBServerPropertiesBtn.setToolTipText(
 			"Overwrite all DB-server-configuration-related changes that were made after previous deployment of the war via admin page with the ones from war export.");
@@ -226,25 +229,51 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		overwriteAllPropertiesBtn = new Button(composite, SWT.CHECK);
 		overwriteAllPropertiesBtn.setSelection(exportModel.isOverwriteDeployedServoyProperties());
 		overwriteAllPropertiesBtn.addSelectionListener(this);
-		overwriteAllPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+		overwriteAllPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
 		overwriteAllPropertiesBtn.setText("Overwrite all Servoy properties");
 		overwriteAllPropertiesBtn.setToolTipText("Overwrite all servoy.properties changes that were made on the previous deploy of the war");
 
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 3;
+		new Label(composite, SWT.NONE).setLayoutData(gd); // just an empty vertical space
+
 		Label label = new Label(composite, SWT.NONE);
-		label.setText("User home directory ");
+		label.setText("User home directory: ");
 		userHomeText = new Text(composite, SWT.BORDER);
 		userHomeText.setText(exportModel.getUserHome() != null ? exportModel.getUserHome() : "");
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = 2;
+		gd.grabExcessHorizontalSpace = true;
+		gd.minimumWidth = 100;
 		userHomeText.setLayoutData(gd);
 		userHomeText.addListener(SWT.KeyUp, this);
 
 		label = new Label(composite, SWT.NONE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 4;
+		gd.horizontalSpan = 3;
 		label.setLayoutData(gd);
 		label.setText(
-			"\nNOTE: This must be a writable directory where Servoy application related files will be stored.\nIf you leave it empty, the system user home directory will be used.");
+			"NOTE: This must be a writable directory where Servoy application related files will be stored.\nIf you leave it empty, the system user home directory will be used.");
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 3;
+		new Label(composite, SWT.NONE).setLayoutData(gd); // just an empty vertical space
+
+		exportTitaniumSourceMaps = new Button(composite, SWT.CHECK);
+		exportTitaniumSourceMaps.setText("Include Titanium client source-maps - for debugging");
+		exportTitaniumSourceMaps.setToolTipText(
+			"It can be useful if you want the titanium client side (browser) code to be debugged easier (see the original sources when debugging).");
+		exportTitaniumSourceMaps.setSelection(exportModel.exportNG2Mode() == "sourcemaps");
+		exportTitaniumSourceMaps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
+		exportTitaniumSourceMaps.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setExportNG2Mode(exportTitaniumSourceMaps.getSelection() ? "sourcemaps" : "true"); // as Titanium is the only client to use currently, we never give "false" from the UI exporter
+			}
+		});
 
 		setControl(composite);
 	}
@@ -364,6 +393,8 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		clearReferencesStopTimerThreads.setSelection(false);
 		clearReferencesStopTimerThreads.setEnabled(false);
 		exportModel.setClearReferencesStopTimerThreads(false);
+
+		exportTitaniumSourceMaps.setSelection(false);
 	}
 
 	@Override
