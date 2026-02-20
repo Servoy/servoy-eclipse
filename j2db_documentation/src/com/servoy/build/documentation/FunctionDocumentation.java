@@ -193,13 +193,24 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 
 	public String getFullJSTranslatedSignature(boolean withNames, boolean withTypes)
 	{
+		return getFullJSTranslatedSignature(withNames, withTypes, null);
+	}
+
+	@Override
+	public String getFullJSTranslatedSignature(boolean withNames, boolean withTypes, Class returnType)
+	{
 		String signature = getJSTranslatedSignature(null, withNames, withTypes);
 		if (signature == null) return null;
 
 		StringBuilder sb = new StringBuilder();
 
 		String returnTypeString = null;
-		if (!simplifiedSignature && returnedType != null) returnTypeString = getClassStringType(returnedType);
+		if (!simplifiedSignature && returnType != null)
+		{
+			returnTypeString = getClassStringType(returnType);
+			setReturnedType(returnType);
+		}
+		else if (!simplifiedSignature && returnedType != null) returnTypeString = getClassStringType(returnedType);
 		if (withNames && returnTypeString != null) sb.append(returnTypeString).append(" ");
 		sb.append(signature);
 		if (!withNames && returnTypeString != null) sb.append(" - ").append(returnTypeString);

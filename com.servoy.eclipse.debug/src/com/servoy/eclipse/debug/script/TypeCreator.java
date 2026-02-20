@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -127,7 +126,6 @@ import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
-import com.google.common.reflect.TypeToken;
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.constants.IColumnTypeConstants;
 import com.servoy.base.persistence.constants.IFormConstants;
@@ -300,7 +298,6 @@ import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
-import com.servoy.j2db.scripting.annotations.JSRealClass;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.info.EventType;
 import com.servoy.j2db.scripting.info.JSPermission;
@@ -1935,7 +1932,7 @@ public class TypeCreator extends TypeCache
 						int membersSize = memberbox == null ? 0 : memberbox.length;
 						for (int i = 0; i < membersSize; i++)
 						{
-							Class< ? > returnTypeClz = getReturnType(scriptObjectClass, memberbox[i]);
+							Class< ? > returnTypeClz = SolutionExplorerListContentProvider.getReturnType(scriptObjectClass, memberbox[i]);
 							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 							method.setName(name);
 							Class< ? >[] parameterTypes = memberbox[i].getParameterTypes();
@@ -2117,7 +2114,7 @@ public class TypeCreator extends TypeCache
 					}
 					else
 					{
-						Class< ? > returnTypeClz = getReturnType(scriptObjectClass, object);
+						Class< ? > returnTypeClz = SolutionExplorerListContentProvider.getReturnType(scriptObjectClass, object);
 						JSType returnType = null;
 						if (returnTypeClz != null)
 						{
@@ -2300,7 +2297,7 @@ public class TypeCreator extends TypeCache
 		}
 		if (memberReturnType.isArray())
 		{
-			Class< ? > returnType = getReturnType(memberReturnType.getComponentType());
+			Class< ? > returnType = SolutionExplorerListContentProvider.getReturnType(memberReturnType.getComponentType());
 			if (returnType != null && returnType != Object.class)
 			{
 				JSType componentJSType = getMemberTypeName(context, memberName, returnType, objectTypeName);
@@ -2880,100 +2877,6 @@ public class TypeCreator extends TypeCache
 		else if (doc.length() == 0) doc = null;
 
 		return doc;
-	}
-
-	public static Class< ? > getReturnType(Class< ? > cls, Object object)
-	{
-		Class< ? > returnType = null;
-		if (object instanceof NativeJavaMethod method)
-		{
-			MemberBox[] methods = method.getMethods();
-			if (methods != null && methods.length > 0)
-			{
-				returnType = getGenericReturnType(cls, methods[0].method());
-			}
-		}
-		else if (object instanceof MemberBox memberBox)
-		{
-			returnType = getGenericReturnType(cls, memberBox.method());
-
-		}
-		else if (object instanceof BeanProperty beanProperty)
-		{
-			returnType = getGenericReturnType(cls, beanProperty.getGetter());
-		}
-		else if (object instanceof Field field)
-		{
-			returnType = field.getType();
-		}
-		return getReturnType(returnType);
-	}
-
-	/**
-	 * Get the return type for the method using generics.
-	 */
-	private static Class< ? > getGenericReturnType(Class< ? > cls, java.lang.reflect.Method method)
-	{
-		var typeToken = TypeToken.of(cls);
-		var returnType = typeToken.method(method).getReturnType();
-		return returnType.getRawType();
-	}
-
-	/**
-	 * @param returnType
-	 */
-	private static Class< ? > getReturnType(Class< ? > returnType)
-	{
-		if (returnType == null) return null;
-		if (returnType == Object.class || returnType.isArray()) return returnType;
-		if (returnType.isAssignableFrom(Void.class) || returnType.isAssignableFrom(void.class))
-		{
-			return null;
-		}
-
-		if (returnType.isAssignableFrom(Record.class))
-		{
-			return Record.class;
-		}
-
-		if (returnType.isAssignableFrom(JSDataSet.class))
-		{
-			return JSDataSet.class;
-		}
-
-		if (returnType.isAssignableFrom(FoundSet.class))
-		{
-			return FoundSet.class;
-		}
-
-		if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
-		{
-			if (returnType.isAssignableFrom(boolean.class)) return Boolean.class;
-			if (returnType.isAssignableFrom(byte.class) || returnType == Byte.class)
-			{
-				return byte.class;
-			}
-			return Number.class;
-		}
-
-		if (returnType == Object.class || returnType == String.class || Date.class.isAssignableFrom(returnType))
-		{
-			return returnType;
-		}
-
-		JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(returnType, null);
-		if (javaMembers == null)
-		{
-			return null;
-		}
-
-		JSRealClass rc = returnType.getAnnotation(JSRealClass.class);
-		if (rc != null && rc.value() != null)
-		{
-			return rc.value();
-		}
-
-		return returnType;
 	}
 
 	private final static class MethodSignature

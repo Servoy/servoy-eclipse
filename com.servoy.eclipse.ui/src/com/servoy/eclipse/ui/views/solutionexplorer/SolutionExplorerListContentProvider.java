@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -81,6 +82,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaMembers;
+import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
@@ -97,6 +99,7 @@ import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 
+import com.google.common.reflect.TypeToken;
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -132,7 +135,10 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.MenuManager;
+import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
+import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
@@ -203,6 +209,7 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.RuntimeGroup;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
+import com.servoy.j2db.scripting.annotations.JSRealClass;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -2559,7 +2566,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					String displayName = null;
 
 					Class[] parameterTypes = method.getParameterTypes();
-					Class returnType = method.getReturnType();
+					Class returnType = getReturnType(originalClass, method);
 					JSSignature annotation = method.method().getAnnotation(JSSignature.class);
 					if (annotation != null)
 					{
@@ -2572,7 +2579,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (adapter instanceof ITypedScriptObject)
 						{
 							if (((ITypedScriptObject)adapter).isDeprecated(id, parameterTypes)) continue;
-							displayName = ((ITypedScriptObject)adapter).getJSTranslatedSignature(id, parameterTypes);
+							displayName = ((ITypedScriptObject)adapter).getJSTranslatedSignature(id, parameterTypes, returnType);
 						}
 						else
 						{
@@ -2610,6 +2617,102 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		SimpleUserNode[] nodes = new SimpleUserNode[dlm.size()];
 		return dlm.toArray(nodes);
 	}
+
+	public static Class< ? > getReturnType(Class< ? > cls, Object object)
+	{
+		Class< ? > returnType = null;
+		if (object instanceof NativeJavaMethod method)
+		{
+			MemberBox[] methods = method.getMethods();
+			if (methods != null && methods.length > 0)
+			{
+				returnType = getGenericReturnType(cls, methods[0].method());
+			}
+		}
+		else if (object instanceof MemberBox memberBox)
+		{
+			returnType = getGenericReturnType(cls, memberBox.method());
+
+		}
+		else if (object instanceof BeanProperty beanProperty)
+		{
+			returnType = getGenericReturnType(cls, beanProperty.getGetter());
+		}
+		else if (object instanceof Field field)
+		{
+			returnType = field.getType();
+		}
+		return getReturnType(returnType);
+	}
+
+	/**
+	 * Get the return type for the method using generics.
+	 */
+	public static Class< ? > getGenericReturnType(Class< ? > cls, java.lang.reflect.Method method)
+	{
+		var typeToken = TypeToken.of(cls);
+		var returnType = typeToken.method(method).getReturnType();
+		return returnType.getRawType();
+	}
+
+
+	/**
+	 * @param returnType
+	 */
+	public static Class< ? > getReturnType(Class< ? > returnType)
+	{
+		if (returnType == null) return null;
+		if (returnType == Object.class || returnType.isArray()) return returnType;
+		if (returnType.isAssignableFrom(Void.class) || returnType.isAssignableFrom(void.class))
+		{
+			return null;
+		}
+
+		if (returnType.isAssignableFrom(Record.class))
+		{
+			return Record.class;
+		}
+
+		if (returnType.isAssignableFrom(JSDataSet.class))
+		{
+			return JSDataSet.class;
+		}
+
+		if (returnType.isAssignableFrom(FoundSet.class))
+		{
+			return FoundSet.class;
+		}
+
+		if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType))
+		{
+			if (returnType.isAssignableFrom(boolean.class)) return Boolean.class;
+			if (returnType.isAssignableFrom(byte.class) || returnType == Byte.class)
+			{
+				return byte.class;
+			}
+			return Number.class;
+		}
+
+		if (returnType == Object.class || returnType == String.class || Date.class.isAssignableFrom(returnType))
+		{
+			return returnType;
+		}
+
+		JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(returnType, null);
+		if (javaMembers == null)
+		{
+			return null;
+		}
+
+		JSRealClass rc = returnType.getAnnotation(JSRealClass.class);
+		if (rc != null && rc.value() != null)
+		{
+			return rc.value();
+		}
+
+		return returnType;
+	}
+
 
 	private SimpleUserNode[] getWebComponentMembers(String prefix, final IBasicWebComponent webcomponent, SimpleUserNode un)
 	{
