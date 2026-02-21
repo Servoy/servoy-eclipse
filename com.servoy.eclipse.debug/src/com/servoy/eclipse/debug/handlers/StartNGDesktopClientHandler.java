@@ -318,72 +318,37 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			JSONObject options = configObject.getJSONObject("options");
 			options.put("url", url);
 			options.put("showMenu", true);
+			options.put("useDefaultConfig", true);
 			configObject.put("options", options);
 		}
 		catch (JSONException e)
 		{//options not found
 			configObject.put("url", url);
 			configObject.put("showMenu", true);
+			configObject.put("useDefaultConfig", true);
 		}
 
 		return configObject;
 	}
 
-	/**
-	 * Method for writing into servoy.json details about NgDesktop app.
-	 * Here can be also changed icon, url, or used modules.
-	 */
-
-	private void updateJsonFile(Solution solution) throws IOException
+	private void updateJsonFile(Solution solution)
 	{
 		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solution/" + solution.getName() + "/index.html";
+		String resourceStr = Utils.isAppleMacOS() ? "/" + NGDESKTOP_APP_NAME + ".app/Contents/Resources" : File.separator + "resources";
+		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
+			File.separator + "servoy.json";
 
-		String userDataPath = getUserDataPath();
-		File userConfigDir = Paths.get(userDataPath, "config").normalize().toFile();
-		File userConfigFile = Paths.get(userDataPath, "config", "servoy.json").normalize().toFile();
+		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + configLocation).normalize().toFile();// + fileUrl);
+		JSONObject configObject = getJsonObj(configFile, solutionUrl);
 
-		if (!userConfigFile.exists())
-		{
-			if (!userConfigDir.exists())
-			{
-				userConfigDir.mkdirs();
-			}
-
-			String resourceStr = Utils.isAppleMacOS() ? "/" + NGDESKTOP_APP_NAME + ".app/Contents/Resources" : File.separator + "resources";
-			String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
-				File.separator + "servoy.json";
-			File templateConfigFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + configLocation).normalize().toFile();
-			Files.copy(templateConfigFile.toPath(), userConfigFile.toPath());
-		}
-
-		JSONObject configObject = getJsonObj(userConfigFile, solutionUrl);
-
-		try (FileWriter file = new FileWriter(userConfigFile);
+		try (FileWriter file = new FileWriter(configFile);
 			BufferedWriter out = new BufferedWriter(file);)
 		{
 			out.write(configObject.toString());
 		}
-	}
-
-	/**
-	 * Get the userData path based on the platform (matching Electron's app.getPath('userData'))
-	 * @return the userData path
-	 */
-	private String getUserDataPath()
-	{
-		String userHome = System.getProperty("user.home");
-		if (Utils.isAppleMacOS())
+		catch (IOException e1)
 		{
-			return userHome + "/Library/Application Support/NgDesktop";
-		}
-		else if (Utils.isWindowsOS())
-		{
-			String localAppData = userHome + "/AppData/Local";
-			return localAppData + "/NgDesktop";
-		}
-		else // Linux
-		{
-			return userHome + "/.config/NgDesktop";
+			ServoyLog.logError("Error writing  in servoy.json file " + configFile.getAbsolutePath(), e1);
 		}
 	}
 
