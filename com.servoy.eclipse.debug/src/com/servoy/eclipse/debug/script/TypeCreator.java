@@ -5493,6 +5493,7 @@ public class TypeCreator extends TypeCache
 					property.setStatic(false);
 					property.setType(getTypeRef(context, "String"));
 					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("valuelist.gif")); // is this image correct
+					property.setAttribute(RESOURCE, valuelist);
 					property.setDescription("Value list name");
 
 					namesMembers.add(property);
@@ -5622,32 +5623,30 @@ public class TypeCreator extends TypeCache
 			NAMES.setDirectType(namesType);
 			EList<Member> namesMembers = namesType.getMembers();
 
-			List<String> forms = new ArrayList<>();
-			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForms(true)
-				.forEachRemaining(form -> forms.add(form.getName()));
-			if (forms != null)
+			Iterator<Form> forms = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForms(true);
+			while (forms.hasNext())
 			{
-				for (String form : forms)
-				{
-					// JSForm property (in INSTANCES)
-					Property formInstance = TypeInfoModelFactory.eINSTANCE.createProperty();
-					formInstance.setName(form);
-					formInstance.setVisible(true);
-					formInstance.setStatic(false);
-					formInstance.setType(TypeUtil.ref(type));
-					formInstance.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("form.png"));
-					formInstance.setDescription("JSForm to be used in scripting.");
-					instancesMembers.add(formInstance);
+				Form form = forms.next();
+				// JSForm property (in INSTANCES)
+				Property formInstance = TypeInfoModelFactory.eINSTANCE.createProperty();
+				formInstance.setName(form.getName());
+				formInstance.setVisible(true);
+				formInstance.setStatic(false);
+				formInstance.setType(TypeUtil.ref(type));
+				formInstance.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("form.png"));
+				formInstance.setAttribute(RESOURCE, form);
+				formInstance.setDescription("JSForm to be used in scripting.");
+				instancesMembers.add(formInstance);
 
-					// String property (in NAMES)
-					Property formNameProp = TypeInfoModelFactory.eINSTANCE.createProperty();
-					formNameProp.setName(form);
-					formNameProp.setVisible(true);
-					formNameProp.setStatic(false);
-					formNameProp.setType(getTypeRef(context, "String"));
-					formNameProp.setDescription("Form name as string.");
-					namesMembers.add(formNameProp);
-				}
+				// String property (in NAMES)
+				Property formNameProp = TypeInfoModelFactory.eINSTANCE.createProperty();
+				formNameProp.setName(form.getName());
+				formNameProp.setVisible(true);
+				formNameProp.setStatic(false);
+				formNameProp.setAttribute(RESOURCE, form);
+				formNameProp.setType(getTypeRef(context, "String"));
+				formNameProp.setDescription("Form name as string.");
+				namesMembers.add(formNameProp);
 			}
 			return addType(null, type);
 		}
