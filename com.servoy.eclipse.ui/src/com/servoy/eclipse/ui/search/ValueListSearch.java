@@ -38,7 +38,7 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * An {@link ISearchQuery} implementation for finding valuelists in frm and js files.
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -53,7 +53,7 @@ public class ValueListSearch extends AbstractPersistSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
@@ -67,7 +67,7 @@ public class ValueListSearch extends AbstractPersistSearch
 		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile("etValueList.*\"" + valueList.getName() + "\""), monitor);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile("etValueList.*'" + valueList.getName() + "'"), monitor);
-
+		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\bJSValueList\\.NAMES\\." + valueList.getName() + "\\b"), monitor);
 
 		return Status.OK_STATUS;
 	}
@@ -96,7 +96,7 @@ public class ValueListSearch extends AbstractPersistSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */
 	public String getLabel()

@@ -39,7 +39,7 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * An {@link ISearchQuery} implementation for finding relations in frm and js files.
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -55,7 +55,7 @@ public class FormSearch extends AbstractPersistSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
@@ -67,14 +67,15 @@ public class FormSearch extends AbstractPersistSearch
 		TextSearchEngine.create().search(scope, collector, Pattern.compile(form.getUUID().toString()), monitor);
 
 		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js" }, true);
-		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\bforms." + form.getName() + "\\b"), monitor);
+		TextSearchEngine.create().search(scope, collector, Pattern.compile(
+			"\\b(?:forms\\.|JSForm\\.NAMES\\.|JSForm\\.INSTANCES\\.)" + form.getName() + "\\b"), monitor);
 
 		return Status.OK_STATUS;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.search.AbstractPersistSearch#createTextSearchCollector(org.eclipse.search.ui.text.AbstractTextSearchResult)
 	 */
 	@Override
@@ -87,7 +88,7 @@ public class FormSearch extends AbstractPersistSearch
 		{
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see com.servoy.eclipse.ui.search.TextSearchResultCollector#acceptFile(org.eclipse.core.resources.IFile)
 			 */
 			@Override
@@ -106,7 +107,7 @@ public class FormSearch extends AbstractPersistSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */
 	public String getLabel()
