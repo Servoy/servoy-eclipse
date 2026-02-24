@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -120,6 +121,10 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		{
 			query = new MediaSearch((Media)selectedObject);
 		}
+		else if (selectedObject instanceof WebObjectSpecification spec)
+		{
+			query = new JSWebComponentSearch(spec);
+		}
 		if (query != null) NewSearchUI.runQueryInBackground(query);
 	}
 
@@ -149,7 +154,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 					node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
 					node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW || node.getType() == UserNodeType.TABLE_COLUMNS_ITEM ||
 					node.getType() == UserNodeType.RELATION_COLUMN || node.getType() == UserNodeType.CALCULATIONS_ITEM ||
-					node.getType() == UserNodeType.MEDIA_IMAGE)
+					node.getType() == UserNodeType.MEDIA_IMAGE || node.getType() == UserNodeType.COMPONENT)
 				{
 					selectedObject = node.getRealObject();
 					if (selectedObject instanceof Object[])
