@@ -36,14 +36,14 @@ public interface IBrowser
 	/**
 	 * @param url
 	 */
-	void setUrl(String url);
+	boolean setUrl(String url);
 
 	/**
 	 * @param url
 	 * @param object
 	 * @param strings
 	 */
-	void setUrl(String url, String postData, String[] headers);
+	boolean setUrl(String url, String postData, String[] headers);
 
 	/**
 	 * @param locationListener
@@ -66,4 +66,37 @@ public interface IBrowser
 	void setFocus();
 
 	boolean isChromium();
+
+	/**
+	 * Gets the underlying browser instance.
+	 * This is needed for creating BrowserFunction instances.
+	 *
+	 * @return the underlying browser object
+	 */
+	public Object getBrowserInstance();
+
+	/**
+	 * Sets the HTML content of the browser.
+	 * For Chromium on Linux, if the content is large, it uses a temporary file approach
+	 * instead of setText to avoid size limitations.
+	 *
+	 * @param html the HTML content to display
+	 * @return true if the operation was successful, false otherwise
+	 */
+	public boolean setText(String html);
+
+	/**
+	 * @return true if the browser is disposed, false otherwise
+	 */
+	boolean isDisposed();
+
+	/**
+	 * @param string
+	 */
+	void execute(String string);
+
+	/**
+	 *
+	 */
+	void dispose();
 }
