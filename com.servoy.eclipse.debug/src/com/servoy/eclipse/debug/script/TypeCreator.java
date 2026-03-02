@@ -4781,10 +4781,14 @@ public class TypeCreator extends TypeCache
 		@Override
 		public Type createType(String context, String fullTypeName)
 		{
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			if (fs == null)
+			{
+				return null;
+			}
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(fullTypeName);
 			type.setKind(TypeKind.JAVA);
-			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			String formName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			Form form = fs.getForm(formName);
 			if (form != null)
