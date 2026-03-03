@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.querybuilder.impl.QBSelect;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -94,6 +95,19 @@ public class TypeProvider implements ITypeProvider
 									}
 								}
 							}
+							Iterator<ScriptVariable> scriptVariables = flattenedSolution.getScriptVariables(scopes[1], false);
+							for (ScriptVariable variable : Utils.iterate(scriptVariables))
+							{
+								if (variable.isEnum())
+								{
+									String name = "scopes." + scopes[1] + '.' + variable.getName();
+									if (name.toLowerCase().startsWith(prefixLower))
+									{
+										names.add(name);
+									}
+								}
+							}
+
 						}
 						else
 						{
@@ -297,7 +311,7 @@ public class TypeProvider implements ITypeProvider
 
 	/**
 	 * Gets the TypeCreator instance for accessing type information with merged documentation.
-	 * 
+	 *
 	 * @return the TypeCreator instance
 	 */
 	public TypeCreator getTypeCreator()
