@@ -95,7 +95,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2026.3.0.qualifier"/>
+      <feature id="com.servoy.eclipse.feature" version="2026.3.0.qualifier" installMode="root"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -106,6 +106,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <feature id="org.eclipse.jdt"/>
       <feature id="org.eclipse.help"/>
       <feature id="org.eclipse.rcp"/>
+      <feature id="com.servoy.eclipse.servoypilot.feature"/>
    </features>
 
    <configurations>
