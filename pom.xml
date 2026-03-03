@@ -35,6 +35,14 @@
         </repository>        
     </repositories>
 -->
+    <repositories>
+       <repository>
+          <id>servoy-ai-repo</id>
+          <url>https://build.servoy.com/latest/servoy_ai/</url>
+          <layout>p2</layout>
+       </repository>
+    </repositories>
+    
     <pluginRepositories>
         <pluginRepository>
             <id>tycho-snapshots </id>
