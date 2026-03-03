@@ -14,14 +14,6 @@
 	<artifactId>com.servoy.eclipse.product</artifactId>
 	<packaging>eclipse-repository</packaging>
 
-    <repositories>
-       <repository>
-          <id>servoy-ai-repo</id>
-          <url>https://build.servoy.com/latest/servoy_ai/</url>
-          <layout>p2</layout>
-       </repository>
-    </repositories>
-
 	<build>
 		<plugins>
             <plugin>
