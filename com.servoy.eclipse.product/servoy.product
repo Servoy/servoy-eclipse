@@ -134,6 +134,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <repository location="https://developer.servoy.com/sqlexplorer/" name="SQLExplorer" enabled="true" />
       <repository location="https://download.eclipse.org/eclipse/updates/4.38" name="Eclipse Release" enabled="true" />
       <repository location="https://download.eclipse.org/releases/2025-12" name="Eclipse Updates" enabled="true" />
+      <repository location="https://build.servoy.com/latest/servoy_master/update_site/" name="Nightly Build" enabled="false" />
+      <repository location="https://build.servoy.com/latest/servoy_ai/" name="Servoy AI feature" enabled="true" />
    </repositories>
 
    <preferencesInfo>
