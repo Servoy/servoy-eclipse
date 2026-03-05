@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChanges, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, SimpleChanges, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
@@ -9,7 +9,7 @@ import { ServoyBaseComponent } from '@servoy/public';
 })
 export class ##componentclassname## extends ServoyBaseComponent<HTMLDivElement>{
 
-    @Input() yourName: string;
+    yourName = input<string>(undefined);
 
     constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
          super(renderer, cdRef);
