@@ -3842,6 +3842,9 @@ public class TypeCreator extends TypeCache
 			type.setKind(TypeKind.JAVA);
 			type.setAttribute(IMAGE_DESCRIPTOR, CONTAINERS);
 
+			ParameterizedType parameterizedType = TypeUtil.parameterizedType(TypeUtil.type("Object"), TypeUtil.ref("RuntimeContainer"));
+			type.setSuperTypeExpr(parameterizedType);
+
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs == null) return type;
 			String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
