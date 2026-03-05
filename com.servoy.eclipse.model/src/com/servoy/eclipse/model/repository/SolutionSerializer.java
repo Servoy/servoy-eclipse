@@ -1095,30 +1095,60 @@ public class SolutionSerializer
 	 */
 	private static boolean generateParams(StringBuilder sb, AbstractScriptProvider abstractScriptProvider)
 	{
-		if (abstractScriptProvider == null) return false;
-		MethodArgument[] arguments = abstractScriptProvider.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-		if (arguments != null && arguments.length > 0)
-		{
-			sb.append(" * TODO generated, please specify type and doc for the params\n");
-			for (MethodArgument methodArgument : arguments)
-			{
-				sb.append(" * @param ");
-				if (methodArgument.getType() != null && !methodArgument.getType().toString().endsWith("Any"))
-				{
-					sb.append("{");
-					sb.append(methodArgument.getType().toString());
-					sb.append("} ");
-				}
-				sb.append(methodArgument.getName());
-				if (methodArgument.getDescription() != null)
-				{
-					sb.append(methodArgument.getDescription());
-				}
-				sb.append("\n");
-			}
-			return true;
-		}
-		return false;
+	    if (abstractScriptProvider == null) return false;
+
+	    ScriptMethod parentMethod = PersistHelper.getOverridenMethod((ScriptMethod)abstractScriptProvider);
+	    MethodArgument[] parentMethodArguments = null;
+
+	    if (parentMethod != null)
+	    {
+	        parentMethodArguments = parentMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+	    }
+
+	    MethodArgument[] arguments = abstractScriptProvider.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+	    if (arguments != null && arguments.length > 0)
+	    {
+	        sb.append(" * TODO generated, please specify type and doc for the params\n");
+
+	        for (int i = 0; i < arguments.length; i++)
+	        {
+	            MethodArgument methodArgument = arguments[i];
+	            sb.append(" * @param ");
+
+	            String typeToUse = null;
+
+	            // Use child's type if valid
+	            if (methodArgument.getType() != null && !methodArgument.getType().toString().endsWith("Any"))
+	            {
+	                typeToUse = methodArgument.getType().toString();
+	            }
+	            // Otherwise inherit from parent (position-based)
+	            else if (parentMethodArguments != null &&
+	                     parentMethodArguments.length == arguments.length &&
+	                     parentMethodArguments[i].getType() != null &&
+	                     !parentMethodArguments[i].getType().toString().endsWith("Any"))
+	            {
+	                typeToUse = parentMethodArguments[i].getType().toString();
+	            }
+
+	            // Write type if available
+	            if (typeToUse != null)
+	            {
+	                sb.append("{").append(typeToUse).append("} ");
+	            }
+
+	            sb.append(methodArgument.getName());
+
+	            if (methodArgument.getDescription() != null)
+	            {
+	                sb.append(methodArgument.getDescription());
+	            }
+
+	            sb.append("\n");
+	        }
+	        return true;
+	    }
+	    return false;
 	}
 
 	/**
