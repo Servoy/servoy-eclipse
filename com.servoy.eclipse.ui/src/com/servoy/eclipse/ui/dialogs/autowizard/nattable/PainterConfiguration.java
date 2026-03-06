@@ -28,6 +28,7 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.ListDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.convert.DefaultDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
@@ -229,10 +230,6 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 	private void registerI18nColumn(IConfigRegistry configRegistry, PropertyDescription dp)
 	{
-		NatTextDialogCellEditor dialogCellEditor = new I18NTextDialogCellEditor(false, context, Activator.getDefault().getDesignClient(),
-			propertiesConfig.getTable(), flattenedSolution,
-			"Edit title/text property", com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("i18n.png"));
-
 		Style style = new Style();
 		style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
 		configRegistry.registerConfigAttribute(
@@ -243,12 +240,22 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			dialogCellEditor, DisplayMode.EDIT,
+			new I18NTextDialogCellEditor(false, context, Activator.getDefault().getDesignClient(),
+				propertiesConfig.getTable(), flattenedSolution,
+				"Edit title/text property", com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("i18n.png")),
+			DisplayMode.EDIT,
+			dp.getName());
+
+		configRegistry.registerConfigAttribute(
+			CellConfigAttributes.DISPLAY_CONVERTER,
+			new DefaultDisplayConverter(),
+			DisplayMode.NORMAL,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITABLE_RULE,
-			IEditableRule.ALWAYS_EDITABLE, DisplayMode.EDIT,
+			IEditableRule.ALWAYS_EDITABLE,
+			DisplayMode.EDIT,
 			dp.getName());
 	}
 
