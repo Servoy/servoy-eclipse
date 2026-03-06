@@ -2752,7 +2752,7 @@ public class TypeCreator extends TypeCache
 					String returnDescription = ((ITypedScriptObject)scriptObject).getReturnDescription(name, parameterTypes);
 					if ((returnedType != Void.class && returnedType != void.class && returnedType != null) || returnDescription != null)
 					{
-						returnText = "<b>@return</b> ";
+						if (returnDescription != null) returnText = "<b>@return</b> ";
 						if (returnedType != null)
 						{
 							String returnTypeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType);
