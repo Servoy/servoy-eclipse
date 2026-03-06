@@ -117,12 +117,15 @@ public class EclipseUserManager extends WorkspaceUserManager
 		for (GroupSecurityInfo groupSecurityInfo : groupInfos)
 		{
 			List<SecurityInfo> elementAccess = groupSecurityInfo.formSecurity.get(form.getUUID());
-			for (SecurityInfo element : elementAccess)
+			if (elementAccess != null)
 			{
-				if (PersistFinder.INSTANCE.fromPersist(persist).toJSONString().equals(element.element_uid) ||
-					persist.getUUID().toString().equals(element.element_uid))
+				for (SecurityInfo element : elementAccess)
 				{
-					return true;
+					if (PersistFinder.INSTANCE.fromPersist(persist).toJSONString().equals(element.element_uid) ||
+						persist.getUUID().toString().equals(element.element_uid))
+					{
+						return true;
+					}
 				}
 			}
 		}

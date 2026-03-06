@@ -1119,11 +1119,13 @@ public class I18nComposite extends Composite
 	public void selectKey(String value)
 	{
 		lastAutoSelectedKey = value;
+		String plainValue = value;
 		String key = value;
 		boolean found = false;
 		if (value != null && value.startsWith("i18n:"))
 		{
 			key = value.substring(5);
+			plainValue = key;
 			found = findEntryInTableViewer(key);
 		}
 
@@ -1143,7 +1145,7 @@ public class I18nComposite extends Composite
 
 		if (showAISuggestion && key != null)
 		{
-			updateLocaleValues(key, value, !found);
+			updateLocaleValues(key, plainValue, !found);
 		}
 
 	}

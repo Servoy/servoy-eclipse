@@ -2463,7 +2463,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter.isDeprecated((String)element)) continue;
 					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
-					node = new UserNode((String)element, actionType, new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm),
+					node = new UserNode((String)element, actionType,
+						new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm, originalClass),
 						real, uiActivator.loadImageFromBundle("constant.png"));
 
 					// this field is a constant
@@ -2519,7 +2520,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					codePrefix = elementName;
 				}
 
-				UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm), real, pIcon);
+				UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm, originalClass), real, pIcon);
 				if (bp instanceof JavaMembers.BeanProperty)
 				{
 					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(((JavaMembers.BeanProperty)bp).getGetter(), originalClass,
@@ -3732,15 +3733,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		private final String name;
 		private final JavaMembers ijm;
 		private final String prefix;
+		private final Class< ? > originalClass;
 
-		FieldFeedback(String name, String prefix, ITagResolver resolver, IScriptObject scriptObject, JavaMembers ijm)
+		FieldFeedback(String name, String prefix, ITagResolver resolver, IScriptObject scriptObject, JavaMembers ijm, Class< ? > originalClass)
 		{
 			this.name = name;
 			this.prefix = prefix;
 			this.resolver = resolver;
 			this.scriptObject = scriptObject;
 			this.ijm = ijm;
-
+			this.originalClass = originalClass;
 		}
 
 		/**
@@ -3799,9 +3801,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			if (ijm != null)
 			{
 				Object bp = ijm.getField(name, false);
-				if (bp instanceof JavaMembers.BeanProperty)
+				if (bp instanceof JavaMembers.BeanProperty bpo)
 				{
-					tmp = "<b>" + XMLScriptObjectAdapter.getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
+					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(getReturnType(originalClass, bpo)) + " " + name +
+						"</b>";
 				}
 				else if (bp instanceof Field)
 				{

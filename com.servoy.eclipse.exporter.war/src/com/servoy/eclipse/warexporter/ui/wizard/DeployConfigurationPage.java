@@ -30,6 +30,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
@@ -55,14 +56,14 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 	private Button overwriteAllPropertiesBtn;
 	private Text userHomeText;
 	private Button automaticallyUpgradeRepository;
-	private Button createTomcatContextXML;
-	private Button antiResourceLocking;
-	private Button clearReferencesStatic;
-	private Button clearReferencesStopThreads;
-	private Button clearReferencesStopTimerThreads;
+//	private Button createTomcatContextXML;
+//	private Button antiResourceLocking;
+//	private Button clearReferencesStatic;
+//	private Button clearReferencesStopThreads;
+//	private Button clearReferencesStopTimerThreads;
 	private Text fileContextNameText;
 	private Button browseContextButton;
-	private Button exportTitaniumSourceMaps;
+	private Combo exportTitaniumSourceMaps;
 
 
 	public DeployConfigurationPage(String title, ExportWarModel exportModel)
@@ -260,20 +261,45 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		gd.horizontalSpan = 3;
 		new Label(composite, SWT.NONE).setLayoutData(gd); // just an empty vertical space
 
-		exportTitaniumSourceMaps = new Button(composite, SWT.CHECK);
-		exportTitaniumSourceMaps.setText("Include Titanium client source-maps - for debugging");
+		Label compilationModeLabel = new Label(composite, SWT.NONE);
+		compilationModeLabel.setText("Titanium client compilation mode: ");
+
+		exportTitaniumSourceMaps = new Combo(composite, SWT.READ_ONLY | SWT.BORDER);
+		exportTitaniumSourceMaps.setItems(new String[] { "production", "production with source-maps (for debugging)", "development (for debugging)" });
+
 		exportTitaniumSourceMaps.setToolTipText(
-			"It can be useful if you want the titanium client side (browser) code to be debugged easier (see the original sources when debugging).");
-		exportTitaniumSourceMaps.setSelection(exportModel.exportNG2Mode() == "sourcemaps");
-		exportTitaniumSourceMaps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 1));
+			"It can be useful if you want the titanium client side (browser) code to be debugged easier.\nSorce maps are useful to see the original sources when debugging.\nDevelopment is useful for debugging heap snapshots/memory.");
+
+		if ("sourcemaps".equals(exportModel.exportNG2Mode())) exportTitaniumSourceMaps.select(1);
+		else if ("dev".equals(exportModel.exportNG2Mode())) exportTitaniumSourceMaps.select(2);
+		else exportTitaniumSourceMaps.select(0);
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		gd.grabExcessHorizontalSpace = true;
+		gd.minimumWidth = 100;
+		exportTitaniumSourceMaps.setLayoutData(gd);
 		exportTitaniumSourceMaps.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				exportModel.setExportNG2Mode(exportTitaniumSourceMaps.getSelection() ? "sourcemaps" : "true"); // as Titanium is the only client to use currently, we never give "false" from the UI exporter
+				String compilationArg;
+				switch (exportTitaniumSourceMaps.getSelectionIndex())
+				{
+					case 1 :
+						compilationArg = "sourcemaps";
+						break;
+					case 2 :
+						compilationArg = "dev";
+						break;
+					default :
+						compilationArg = "true";
+				}
+				exportModel.setExportNG2Mode(compilationArg); // as Titanium is the only main client to use currently, we never give "false" here
 			}
 		});
+		exportTitaniumSourceMaps.setLayoutData(gd);
 
 		setControl(composite);
 	}
@@ -379,22 +405,23 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 
 		fileContextNameText.setText("");
 		exportModel.setTomcatContextXMLFileName("");
-		createTomcatContextXML.setSelection(false);
+//		createTomcatContextXML.setSelection(false);
 		exportModel.setCreateTomcatContextXML(false);
-		antiResourceLocking.setSelection(false);
-		antiResourceLocking.setEnabled(false);
+//		antiResourceLocking.setSelection(false);
+//		antiResourceLocking.setEnabled(false);
 		exportModel.setAntiResourceLocking(false);
-		clearReferencesStatic.setSelection(false);
-		clearReferencesStatic.setEnabled(false);
+//		clearReferencesStatic.setSelection(false);
+//		clearReferencesStatic.setEnabled(false);
 		exportModel.setClearReferencesStatic(false);
-		clearReferencesStopThreads.setEnabled(false);
-		clearReferencesStopThreads.setSelection(false);
+//		clearReferencesStopThreads.setEnabled(false);
+//		clearReferencesStopThreads.setSelection(false);
 		exportModel.setClearReferencesStopThreads(false);
-		clearReferencesStopTimerThreads.setSelection(false);
-		clearReferencesStopTimerThreads.setEnabled(false);
+//		clearReferencesStopTimerThreads.setSelection(false);
+//		clearReferencesStopTimerThreads.setEnabled(false);
 		exportModel.setClearReferencesStopTimerThreads(false);
 
-		exportTitaniumSourceMaps.setSelection(false);
+		exportTitaniumSourceMaps.select(0);
+		exportModel.setExportNG2Mode("true");
 	}
 
 	@Override

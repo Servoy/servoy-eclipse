@@ -285,7 +285,14 @@ export class FormattingService {
         // and test if this number can be represented as a javascript number without loosing precision
         // if not, return the string representation of the number
         const stripped = data.replaceAll(numbro.languageData().delimiters.thousands, '').replace(numbro.languageData().delimiters.decimal, '.');
-        const bigNumber = new BigNumber(stripped);
+        let bigNumber: BigNumber;
+        try {
+            bigNumber = new BigNumber(stripped);
+        } catch (e) {
+            // If v10 throws because of symbols like '+' or '%', 
+            // we fall back to a NaN BigNumber to let your existing logic take over.
+            bigNumber = new BigNumber(NaN);
+        }
         if (!bigNumber.isNaN() && !bigNumber.isEqualTo(bigNumber.toNumber())) {
             return bigNumber.toString();
         }
@@ -385,8 +392,12 @@ export class FormattingService {
         let nmbr = Number(data);
         if (typeof data === 'string' && nmbr.toString() != data) {
            // this is very likely a bignumber.
-           data = new BigNumber(data);
-           if (data.isNaN()) return '';
+           try {
+               data = new BigNumber(data);
+               if (data.isNaN()) return '';
+           } catch (e) {
+               return '';
+           }
         }
         else {
             data = Number(data); // just to make sure that if it was a string representing a number we turn it into a number

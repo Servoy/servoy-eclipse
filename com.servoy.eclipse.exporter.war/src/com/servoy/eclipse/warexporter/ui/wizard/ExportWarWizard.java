@@ -853,7 +853,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -overwriteAllProperties", exportModel.isOverwriteDeployedServoyProperties());
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
-		if ("sourcemaps".equals(exportModel.exportNG2Mode())) appendToBuilder(sb, " -ng2 ", exportModel.exportNG2Mode());
+
+		if (!Arrays.asList(null, "", "true").contains(exportModel.exportNG2Mode())) appendToBuilder(sb, " -ng2 ", exportModel.exportNG2Mode());
 		sb.append("\"");
 
 		StringSelection selection = new StringSelection(sb.toString());

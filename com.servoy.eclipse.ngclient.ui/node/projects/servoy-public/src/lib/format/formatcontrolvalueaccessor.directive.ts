@@ -343,8 +343,10 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             return currentValue;
         }
         let stripped = '';
+		const editFormat = this.format.edit ? this.format.edit : this.format.display;
         for (let i = 0; i < currentValue.length; i++) {
-            if (this.formatService.testForNumbersOnly(e, currentValue.charAt(i), this._elementRef.nativeElement, this.findmode, true, this.format, true)) {
+            if (this.formatService.testForNumbersOnly(e, currentValue.charAt(i), this._elementRef.nativeElement, this.findmode, true, this.format, true)
+				|| (editFormat && i < editFormat.length && editFormat.charAt(i) === currentValue.charAt(i))) {
                 stripped = stripped + currentValue.charAt(i);
                 if (stripped.length === this.format.maxLength) break;
             }

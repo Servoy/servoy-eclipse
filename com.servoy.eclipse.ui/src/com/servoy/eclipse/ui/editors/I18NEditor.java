@@ -26,7 +26,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -103,14 +102,9 @@ public class I18NEditor extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		myScrolledComposite.setExpandHorizontal(true);
-		myScrolledComposite.setExpandVertical(true);
-		myScrolledComposite.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
+		parent.setData(CSSSWTConstants.CSS_ID_KEY, "svyeditor");
 
-		Composite container = new Composite(myScrolledComposite, SWT.NONE);
-
-		myScrolledComposite.setContent(container);
+		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new FillLayout());
 
 		SashForm sash = new SashForm(container, SWT.VERTICAL);
@@ -179,8 +173,8 @@ public class I18NEditor extends EditorPart
 		});
 
 		SashForm textComposite = new SashForm(upperComposite, SWT.HORIZONTAL);
-		GridData textCompositeGridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		textCompositeGridData.widthHint = 500;
+		GridData textCompositeGridData = new GridData(SWT.FILL, SWT.TOP, true, false);
+		textCompositeGridData.heightHint = 100;
 		textComposite.setLayoutData(textCompositeGridData);
 
 		Group refTextGroup = new Group(textComposite, SWT.SHADOW_ETCHED_IN);
@@ -254,7 +248,6 @@ public class I18NEditor extends EditorPart
 			}
 		});
 		sash.setWeights(new int[] { 2, 1 });
-		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	private void onAdd()

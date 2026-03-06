@@ -132,7 +132,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				// skip the null values and the true value then it should just be "build"
 				if (!Arrays.asList(null, "", "true").contains(warExportModel.exportNG2Mode()))
 				{
-					toRun = "sourcemaps".equals(warExportModel.exportNG2Mode()) ? "build_sourcemap" : warExportModel.exportNG2Mode();
+					if ("sourcemaps".equals(warExportModel.exportNG2Mode()))
+						toRun = "build_sourcemap";
+					else if ("dev".equals(warExportModel.exportNG2Mode()))
+						toRun = "build_debug_nowatch";
+					else toRun = warExportModel.exportNG2Mode();
 				}
 				else
 				{
@@ -1030,7 +1034,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									File packagesFolder = new File(projectFolder, "packages");
 									File packageFolder = new File(packagesFolder, packageName);
 
-									// quicly check tsconfig.json to get rid of warnings
+									// quickly check tsconfig.json to get rid of warnings
 									File tsconfig = new File(packagesFolder, "tsconfig.json");
 									if (!tsconfig.exists())
 									{
@@ -1096,7 +1100,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 										}
 
 										File srcDir = file.getLocation().toFile();
-										FileUtils.copyDirectory(srcDir, packageFolder);
+										FileUtils.copyDirectory(srcDir, packageFolder, (File f) -> {
+											// copy all except node_modules (in case an npm install was run in that package), we don't want to waste lots of space and time by copying it over at each developer restart or when this code hits...
+											return !("node_modules".equals(f.getName()) && f.getParentFile() != null &&
+												new File(f.getParentFile(), "package.json").exists());
+										});
 										writeConsole(console, "- updated target folder " + packageFolder + " from source package dir " + srcDir);
 										WebPackagesListener.watchCreated.put(packageFolder, new DirectorySync(srcDir, packageFolder, null));
 
