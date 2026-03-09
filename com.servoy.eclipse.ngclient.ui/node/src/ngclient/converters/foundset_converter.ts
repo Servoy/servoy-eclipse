@@ -461,10 +461,41 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         return this.__internalState;
     }
 
-    uiDestroyed(): void{
-        this.__internalState.sabloDeferHelper.cancelAll(this.getInternalState());
-        delete this.__internalState.selectionUpdateDefer;
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        this.__internalState.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
+
+        if (debugLocator) {
+            // we are in development, not production mode, as 'debugLocator' is defined; and after a form ui has been destroyed,
+            // check to see if listeners (or other possible UI related references that are stored in the model of a form) attached
+            // to the properties are still present (that means that references to UI might still
+            // be present in the model; the model of the component stays on client even though the UI has been destroyed until
+            // the server-side form is destroyed; so the form was now probably hidden... it can be reused later; however, the listeners
+            // to destroyed UI/components are probably a memory leak that will accumulate over time; components should clear those when
+            // their UI is destroyed...
+
+            // in the future we could also clear these automatically - in case only the UI of forms adds such listeners/caches to the model
+            afterNgOnDestroyOfChildrenPotentialRunner(() => {
+                let possibleWarnMessage: string;
+                this.viewPort.rows.forEach(row => {
+                    if (row._cache) {
+                        if (!possibleWarnMessage) possibleWarnMessage =  'svy FoundsetValue: foundset.viewport.rows[?]._cache'
+                            + ' still present after the form UI was destroyed. Check for a possible temporary memory leak in browser-side-component-code: '
+                            + debugLocator + '\n[\n';
+                        possibleWarnMessage += '  {';
+                        let sep = '';
+                        row._cache.forEach((v, k) => {
+                            possibleWarnMessage += sep + k + ": " + ((typeof(v == 'object') ? v.constructor?.name : v))
+                            sep = ', ';
+                        });
+                        possibleWarnMessage += '}\n';
+                    }
+                });
+                if (possibleWarnMessage) this.log.warn(possibleWarnMessage + ']');
+            });
+        }
     }
+
 }
 
 class FoundsetTypeInternalState extends FoundsetViewportState implements IDeferedState {
@@ -478,6 +509,7 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
 
     constructor(propertyContext: IPropertyContext, log: LoggerService, public readonly sabloDeferHelper: SabloDeferHelper, public readonly viewportService: ViewportService,
         protected sabloService: SabloService) {
+            
         super(undefined, log, sabloService);
 
         this.propertyContextCreator = {
@@ -503,6 +535,13 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
 
     fireChanges(changes: FoundsetChangeEvent): void {
         super.fireChanges(changes);
+    }
+    
+    public override uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        this.sabloDeferHelper.cancelAll(this);
+        delete this.selectionUpdateDefer;
+        
+        super.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
     }
 
 }

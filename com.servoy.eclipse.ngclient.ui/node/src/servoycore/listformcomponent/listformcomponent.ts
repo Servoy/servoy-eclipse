@@ -560,10 +560,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (containedForm && containedForm.childElements) {
             containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
         }
-        this.getViewportRows().forEach(elem => elem._cache = null);
+        this._foundset()?.viewPort.rows.forEach(elem => elem._cache = null);
     }
 
     getViewportRows(): ViewPortRow[] {
+        // this method is only used in the old - non-scrolling version
         if (this.servoyApi.isInDesigner()) {
             return this.designerViewportRows;
         }

@@ -468,7 +468,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     ngOnDestroy() {
-        this.formservice.destroy(this.name);
+        this.formservice.destroy(this.name, true);
     }
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {

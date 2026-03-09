@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, afterNextRender, inject, Injector } from '@angular/core';
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { LoggerService, LogLevel, LoggerFactory, Deferred, RequestInfoPromise, WindowRefService } from '@servoy/public';
@@ -11,6 +11,7 @@ import { PushToServerEnum, IType, IWebObjectSpecification, TypesRegistry, RootPr
 import { FoundsetLinkedValue } from './converters/foundsetLinked_converter';
 import { DateType } from '../sablo/converters/date_converter';
 import { SvyUtilsService } from './utils.service';
+import { environment } from '../environments/environment';
 
 @Injectable({
 	providedIn: 'root'
@@ -18,15 +19,17 @@ import { SvyUtilsService } from './utils.service';
 export class FormService {
 
 	private formsCache: Map<string, FormCache>; // keeps form state (not actual angular components that are forms)
-	private formsCachePendingRunnables: Map<string, ((FormCache) => void)[]>; // in case code wants to execute to update formCache content before form cache is sent from server;;
+	private formsCachePendingRunnables: Map<string, ((FormCache) => void)[]>; // in case code wants to execute to update formCache content before form cache is sent from server;
 	// this should normally not happen (use of 'formCachePendingRunnables') since SVY-19635 and we do print a warning message when it does...
 
 	private log: LoggerService;
-	private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy form components
+	private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy "form components"
 	private ngUtilsFormStyleclasses: { property: string };
 
 	private isInDesigner = false;
-
+    
+    private injector = inject(Injector);
+    
 	constructor(private sabloService: SabloService, private converterService: ConverterService<unknown>, websocketService: WebsocketService, logFactory: LoggerFactory,
 		private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry, private utils: SvyUtilsService,
 		private windowRefService: WindowRefService) {
@@ -350,6 +353,10 @@ export class FormService {
 	public getFormCache(form: IFormComponent): FormCache {
 		return this.formsCache.get(form.name);
 	}
+    
+    public isFormAngularComponentPresent(formName: string) {
+        return this.formComponentCache.has(formName);
+    }
 
 	public resolveComponentCache(form: IFormComponent): void {
 		const previousValue = this.formComponentCache.get(form.name);
@@ -389,7 +396,7 @@ export class FormService {
 		this.ngUtilsFormStyleclasses = styleclasses;
 	}
 
-	public destroy(formName: string) {
+	public destroy(formName: string, triggeredByFormNGOnDestroy: boolean) {
 		const previousFormUI = this.formComponentCache.get(formName);
 		this.formComponentCache.delete(formName);
 
@@ -398,25 +405,73 @@ export class FormService {
 
 		const form = this.formsCache.get(formName);
 		if (form) {
+
+            let afterNgOnDestroyOfChildrenPotentialRunner = undefined;
+            let debugLocatorStart = undefined;
+            if (!environment.production) {
+                // some memory leak detection helpers
+                afterNgOnDestroyOfChildrenPotentialRunner = triggeredByFormNGOnDestroy ? this.rightAwayRunner : this.afterNextRenderIfFormUIIsStillPresentForFormRunner(formName);
+                debugLocatorStart = formName + ".";
+            }
+
 			form.componentCache.forEach((comp) => {
-				Object.values(comp.model).forEach((elem) => {
-					this.callOnDestroy(elem);
+				Object.keys(comp.model).forEach((propertyName) => {
+					this.callOnDestroy(comp.model[propertyName],
+                         afterNgOnDestroyOfChildrenPotentialRunner,
+                         debugLocatorStart ? debugLocatorStart + (comp.name ? comp.name : "-form_prop-") + "." + propertyName : undefined);
 				});
 			});
+            form.formComponents.forEach((fcc) => {
+                Object.keys(fcc.model).forEach((propertyName) => {
+                    this.callOnDestroy(fcc.model[propertyName],
+                        afterNgOnDestroyOfChildrenPotentialRunner,
+                        debugLocatorStart ? debugLocatorStart + fcc.name + "." + propertyName : undefined);
+                });
+            });
 		}
 	}
+    
+    /**
+     * Used in uiDestroy() calls in case child components of the form already had a chance to do cleanup in their ngOnDestroy. So triggeredByFormNGOnDestroy == true.
+     */
+    private rightAwayRunner(fToRun: () => void) {
+        fToRun();
+    }
 
-	callOnDestroy(value: any) {
+    private afterNextRenderIfFormUIIsStillPresentForFormRunner(formName: string) {
+        return this.afterNextRenderIfFormUIIsStillPresentRunner.bind(this, formName);
+    }
+
+    /**
+     * Used in uiDestroy() calls in case child components of the form did not have a chance to do cleanup in their ngOnDestroy yet. So triggeredByFormNGOnDestroy == false.
+     */
+    private afterNextRenderIfFormUIIsStillPresentRunner(formName: string, fToRun: () => void): void {
+        // ngOnChanges of a form_component_component can trigger for UI destroy() as well - in which case
+        // the child components did not execute their ngOnDestroy yet... give them that chance using afterNextRender
+        afterNextRender({ read: () => {            
+            if (!this.isFormAngularComponentPresent(formName))
+                fToRun();
+            // else, in case the same form was already reshown there or elsewhere, so it's UI is no longer destroyed, do nothing (it's unlikely though)
+            // so for example do not check for leaks anymoreif that is what you were doing in uiDestroyed(...)
+        }}, { injector: this.injector });
+    }
+    
+    // see jsDocs of IUIDestroyAware.uiDestroyed(...) for info about args
+	private callOnDestroy(value: any, afterNgOnDestroyOfChildrenPotentialRunner: (f: () => void) => void, debugLocator?: string) {
 		if (!value) return;
 		if (instanceOfUIDestroyAwareValue(value)) {
-			value.uiDestroyed();
-		} else if (Array.isArray(value)) {
-			value.forEach((elem) => {
-				this.callOnDestroy(elem);
+			value.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator); 
+		}
+        // I think these 2 else ifs might not be needed anymore - maybe just for object type / default conversions (object_converter.ts)
+        // or some other types that have nested properties but forget to forward the uiDestroy to those that implement the interface... but they should;
+        // so maybe they should be moved to object_converter.ts somehow
+        else if (Array.isArray(value)) {
+			value.forEach((elem, idx) => {
+				this.callOnDestroy(elem, afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + "[" + idx + "]" : undefined);
 			});
 		} else if (typeof value === 'object') {
-			Object.values(value).forEach((elem) => {
-				this.callOnDestroy(elem);
+			Object.keys(value).forEach((subKey) => {
+				this.callOnDestroy(value[subKey], afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + "." + subKey : undefined);
 			});
 		}
 	}
