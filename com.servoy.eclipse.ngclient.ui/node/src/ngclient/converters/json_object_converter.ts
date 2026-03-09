@@ -1,9 +1,10 @@
 import { ConverterService, ChangeAwareState, instanceOfChangeAwareValue,
-            SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction, SoftProxyRevoker, CASBackup } from '../../sablo/converter.service';
+            SubpropertyChangeByReferenceHandler, IParentAccessForSubpropertyChanges, IChangeAwareValue, ChangeListenerFunction, SoftProxyRevoker, CASBackup, 
+            IUIDestroyAwareValue, instanceOfUIDestroyAwareValue } from '../../sablo/converter.service';
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum, IPropertyDescription,
             ICustomTypesFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext, ChildPropertyContextCreator, IPropertyContextGetterMethod } from '../../sablo/types_registry';
-import { BaseCustomObject, LoggerFactory, LoggerService, SpecTypesService  } from '@servoy/public';
+import { BaseCustomObject, LoggerFactory, LoggerService, SpecTypesService } from '@servoy/public';
 import { ICustomObjectValue } from '@servoy/public';
 
 export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> {
@@ -67,7 +68,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
 }
 
 /** implementers of this interface are generated via initCustomObjectValue */
-class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue {
+class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDestroyAwareValue {
 
     // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
     // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)
@@ -105,6 +106,16 @@ class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue {
             // notify parent that changes are present, but trigger an actual push-to-server oonly if pushToServer is DEEP
             // SHALLOW will work/trigger push-to-server automatically through proxy obj. impl., and ALLOW doesn't need to trigger push right away
             this.__internalState.notifyChangeListener(pushToServerOnSubProp <= PushToServerEnum.SHALLOW);
+        }
+    }
+
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        // uiDestroy - call it on all nested properties that implement this interface
+        for (const c of Object.keys(this)) {
+            let subPropValue = this[c];
+            if (instanceOfUIDestroyAwareValue(subPropValue))
+                subPropValue.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.' + c : undefined);
         }
     }
 
@@ -565,7 +576,8 @@ export interface BCOSBackup extends CASBackup {
     dynamicPropertyTypesHolder: Record<string, any>;
 }
 
-export class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState implements IParentAccessForSubpropertyChanges<KeyT> {
+export abstract class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState
+    implements IParentAccessForSubpropertyChanges<KeyT> {
 
     public contentVersion: number;
 

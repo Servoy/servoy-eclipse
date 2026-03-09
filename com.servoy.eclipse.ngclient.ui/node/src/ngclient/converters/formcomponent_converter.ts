@@ -1,4 +1,5 @@
-import { ChangeAwareState, ConverterService, IChangeAwareValue, instanceOfChangeAwareValue } from '../../sablo/converter.service';
+import { ChangeAwareState, ConverterService, IChangeAwareValue, instanceOfChangeAwareValue,
+    IUIDestroyAwareValue } from '../../sablo/converter.service';
 import { ChildComponentPropertyValue, ComponentType } from './component_converter';
 import { IType, IPropertyContext, TypesRegistry,  } from '../../sablo/types_registry';
 
@@ -34,7 +35,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
 
                 if (instanceOfChangeAwareValue(childCompElem)) {
                     childCompElem.getInternalState().setChangeListener((doNotPush?: boolean) => {
-                        formComponentPropertyValue.markAllChanged(true);
+                        formComponentPropertyValue.markAllChanged(true, doNotPush);
                     });
                 }
             }
@@ -61,7 +62,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
 
 }
 
-export class FormComponentValue extends ChangeAwareState implements IChangeAwareValue {
+export class FormComponentValue extends ChangeAwareState implements IChangeAwareValue, IUIDestroyAwareValue {
 
     constructor(
         public absoluteLayout: boolean,
@@ -77,5 +78,11 @@ export class FormComponentValue extends ChangeAwareState implements IChangeAware
         return this;
     }
 
-}
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        // uiDestroy - call it on all nested child component properties
+        this.childElements?.forEach((child, idx) =>
+            child?.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.childElements[' + idx + ']' : undefined));
+    }
 
+}

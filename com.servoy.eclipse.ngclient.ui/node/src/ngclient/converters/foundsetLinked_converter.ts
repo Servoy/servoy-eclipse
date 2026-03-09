@@ -1,8 +1,8 @@
-import { FoundsetChangeEvent, LoggerService, LoggerFactory, IFoundset, ViewportChangeListener } from '@servoy/public';
+import { FoundsetChangeEvent, LoggerService, LoggerFactory, IFoundset, ViewportChangeListener, FoundsetChangeListener } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { ViewportService, FoundsetViewportState, ConversionInfoFromServerForViewport, IPropertyContextCreatorForRow, RowUpdate } from '../services/viewport.service';
 import { IType, IPropertyContext, PushToServerEnum } from '../../sablo/types_registry';
-import { IChangeAwareValue } from '../../sablo/converter.service';
+import { IChangeAwareValue, instanceOfUIDestroyAwareValue, IUIDestroyAwareValue, IInternalReferenceBetweenPropertyImpls } from '../../sablo/converter.service';
 
 export class FoundsetLinkedType implements IType<FoundsetLinkedValue> {
 
@@ -60,7 +60,7 @@ export class FoundsetLinkedType implements IType<FoundsetLinkedValue> {
 
 }
 
-export class FoundsetLinkedValue extends Array<any> implements IChangeAwareValue {
+export class FoundsetLinkedValue extends Array<any> implements IChangeAwareValue, IUIDestroyAwareValue {
 
     idForFoundset?: string;
     private __internalState: FSLinkedInternalState;
@@ -87,17 +87,13 @@ export class FoundsetLinkedValue extends Array<any> implements IChangeAwareValue
      * @param listener the listener to register.
      */
     public addChangeListener(listener: ViewportChangeListener) {
-        this.__internalState.changeListeners.push(listener);
-        return () => this.removeChangeListener(listener);
+        return this.__internalState.addChangeListener(listener);
     }
 
     public removeChangeListener(listener: ViewportChangeListener) {
-        const index = this.__internalState.changeListeners.indexOf(listener);
-        if (index > -1) {
-            this.__internalState.changeListeners.splice(index, 1);
-        }
+        this.__internalState.removeChangeListener(listener);
     }
-
+    
     public dataChanged(index: number, newValue: any, oldValue?: any) {
         const propertyContext = this.__internalState.getPropertyContextCreatorForRow().withRowValueAndPushToServerFor(undefined, undefined);
         if (!propertyContext || propertyContext.getPushToServerCalculatedValue() < PushToServerEnum.ALLOW) return; // we ignore all changes if server will block them anyway
@@ -109,6 +105,11 @@ export class FoundsetLinkedValue extends Array<any> implements IChangeAwareValue
         this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this, this.__internalState, undefined,
                 this.__internalState.forFoundset().viewPort.rows[index]._svyRowId, undefined,
                 this.__internalState.getPropertyContextCreatorForRow(), newValue, oldValue);
+    }
+    
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        this.__internalState.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
     }
 
 }
@@ -230,9 +231,24 @@ class FSLinkedInternalState extends FoundsetViewportState {
         if (this.singleValueState) this.singleValueState.dispose();
     }
 
+    public override uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        // see if nested singleValue or viewport values need to be destroyed as well
+        if (this.singleValueState) this.singleValueState.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.singleValueState' : undefined);
+        
+        if (this.foundsetLinkedValue) {
+            this.foundsetLinkedValue.forEach((row, rowIdx) => {
+                if (instanceOfUIDestroyAwareValue(row))
+                    row.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '[' + rowIdx + ']' : undefined);
+                }
+            );
+        }
+
+        super.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
+    }
+
 }
 
-class SingleValueState {
+class SingleValueState implements IUIDestroyAwareValue {
 
     private viewPortSize: number;
     private singleValue: any;
@@ -244,11 +260,14 @@ class SingleValueState {
         sabloService.addIncomingMessageHandlingDoneTask(() => { // do it after all incomming properties have been converted so we are sure to have the forFoundset prop. ready
             const fs: IFoundset = iS.forFoundset();
             if (fs) {
-                this.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
+                let cl = ((event: FoundsetChangeEvent) => {
                     if (event.viewPortSizeChanged || event.fullValueChanged) {
                         this.checkFoundsetSizeAndRegenerateIfNeeded();
                     }
-                });
+                }) as unknown as IInternalReferenceBetweenPropertyImpls & FoundsetChangeListener;
+                cl.internalReferenceBetweenPropertyImpls = true; // this is only a marker for debugging-in-developer purposes - finding memory leaks
+
+                this.viewportSizeChangedListener = fs.addChangeListener(cl);
             }
 
             // if both foundset and foundset linked come in the same json from server, it might
@@ -274,6 +293,13 @@ class SingleValueState {
             this.viewportSizeChangedListener();
             this.viewportSizeChangedListener = undefined;
         }
+    }
+    
+    public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        this.dispose();
+        
+        if (instanceOfUIDestroyAwareValue(this.singleValue))
+            this.singleValue.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
     }
 
     getConversionInfo() {

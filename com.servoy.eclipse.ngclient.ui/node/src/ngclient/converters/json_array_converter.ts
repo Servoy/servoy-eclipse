@@ -1,5 +1,6 @@
 import { ConverterService, IChangeAwareValue, instanceOfChangeAwareValue,
-            ChangeListenerFunction, ChangeAwareState, SoftProxyRevoker } from '../../sablo/converter.service';
+            ChangeListenerFunction, ChangeAwareState, SoftProxyRevoker, 
+            IUIDestroyAwareValue, instanceOfUIDestroyAwareValue } from '../../sablo/converter.service';
 import { IType, IPropertyContext, ITypeFactory, PushToServerEnum,
             PushToServerEnumServerValue, ICustomTypesFromServer, ITypeFromServer, ITypesRegistryForTypeFactories,
             PushToServerUtils, PropertyContext } from '../../sablo/types_registry';
@@ -476,14 +477,14 @@ export class ArrayState extends BaseCustomObjectState<number, Array<any>> {
     constructor(originalNonProxiedInstanceOfCustomObject: Array<any>, public readonly pushToServerForElements: PushToServerEnum) {
         super(originalNonProxiedInstanceOfCustomObject);
     }
-
+    
 }
 
 const instanceOfCustomArray = <T>(obj: any): obj is CustomArrayValue<T> =>
     instanceOfChangeAwareValue(obj) && obj.getInternalState() instanceof ArrayState;
 
 
-class CustomArrayValue<T> extends Array<T> implements ICustomArrayValue<T>, IChangeAwareValue, ICustomArray<T> {
+class CustomArrayValue<T> extends Array<T> implements ICustomArrayValue<T>, IChangeAwareValue, IUIDestroyAwareValue, ICustomArray<T> {
 
     // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
     // instead, it is set on exiting arrays as a prototype (to avoid server JSON creating an array and then creating another new instance and copying over the elements...)
@@ -534,6 +535,18 @@ class CustomArrayValue<T> extends Array<T> implements ICustomArrayValue<T>, ICha
     /** @deprecated see ICustomArray jsdoc */
     getStateHolder(): DeprecatedArrayState {
         return getDeprecatedCustomArrayState();
+    }
+
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        // uiDestroy - call it on all nested properties that implement this interface
+        if (this.length) {
+            for (let c = 0; c < this.length; c++) {
+                let elem = this[c];
+                if (instanceOfUIDestroyAwareValue(elem))
+                    elem.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '[' + c + ']' : undefined);
+            }
+        }
     }
 
 }
