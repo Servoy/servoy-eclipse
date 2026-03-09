@@ -32,7 +32,6 @@ import org.eclipse.nebula.widgets.nattable.data.convert.DefaultDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
-import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
@@ -43,15 +42,12 @@ import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
-import org.eclipse.nebula.widgets.nattable.widget.EditModeEnum;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.core.Activator;
@@ -200,25 +196,12 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			new TextCellEditor(true, true, true), DisplayMode.NORMAL,
+			new VerticallyCenteredTextCellEditor(), DisplayMode.NORMAL,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			new TextCellEditor(true, true, true)
-			{
-				@Override
-				public Text createEditorControl(Composite parent_)
-				{
-					int style_ = SWT.LEFT;
-					if (this.editMode == EditModeEnum.DIALOG)
-					{
-						style_ = style_ | SWT.BORDER;
-					}
-
-					return super.createEditorControl(parent_, style_);
-				}
-			}, //
+			new VerticallyCenteredTextCellEditor(),
 			DisplayMode.EDIT,
 			dp.getName());
 
