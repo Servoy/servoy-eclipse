@@ -45,7 +45,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
       }
     
       @if (!useScrolling) {
-        @if (containedForm()&&containedForm().absoluteLayout) {
+        @if (cache&&containedForm()&&containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track row; let i = $index) {
               <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
@@ -58,7 +58,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
             }
           </div>
         }
-        @if (containedForm()&&!containedForm().absoluteLayout) {
+        @if (cache&&containedForm()&&!containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track trackByFn(i, row); let i = $index) {
               <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
