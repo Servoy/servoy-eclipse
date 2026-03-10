@@ -694,9 +694,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (npmCommand.getExitCode() != 0)
 						{
 							writeConsole(console,
-								"\r\n" + "Unexpected EXIT_CODE calling npm install many, packages, that, are, needed: " + npmCommand.getExitCode() + "\r\n");
+								"\r\n" + "Unexpected EXIT_CODE calling npm install [many packages that are needed]: " + npmCommand.getExitCode() + "\r\n");
 							return new Status(IStatus.WARNING, getClass(),
-								"npm install many, packages, that, are, needed EXIT_CODE was: " + npmCommand.getExitCode());
+								"npm install [many packages that are needed] EXIT_CODE was: " + npmCommand.getExitCode());
 						}
 					}
 					catch (Exception e)
