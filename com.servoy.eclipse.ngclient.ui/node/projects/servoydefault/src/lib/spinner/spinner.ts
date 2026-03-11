@@ -44,6 +44,10 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
             }
         }
         super.svyOnChanges(changes);
+		if (changes.editable || changes.readOnly || changes.findmode) {
+			//always readonly, undo super changes
+			this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
+		}
     }
 
     addHandlersToInputAndSpinnerButtons() {
