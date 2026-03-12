@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinfo.IElementResolver;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
@@ -58,11 +59,14 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.solutionmodel.developer.IJSDeveloperBridge;
@@ -145,13 +149,13 @@ public class ElementResolver implements IElementResolver
 		constantTypeNames.put("JSWebComponent", "JSWebComponent");
 	}
 
-
-	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
+	public Set<String> listGlobals(ITypeInfoContext context, String prefix, IValueCollection valueCollection)
 	{
 		Set<String> typeNames = Collections.emptySet();
 		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 		IResource resource = context.getModelElement().getResource();
 		String projectName = getProjectName(context);
+
 		if (projectName != null &&
 			ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName) instanceof ServoyDeveloperProject)
 		{
@@ -204,9 +208,34 @@ public class ElementResolver implements IElementResolver
 					}
 					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
 
-					if (form.getExtendsID() != null)
+					if (formToUse.getExtendsID() != null)
 					{
-						typeNames.add("_super");
+						if (valueCollection == null)
+						{
+							Iterator<ScriptMethod> scriptMethods = formToUse.getScriptMethods(false);
+
+							while (scriptMethods.hasNext())
+							{
+								ScriptMethod scriptMethod = scriptMethods.next();
+								if (scriptMethod.getName().startsWith(prefix) && !scriptMethod.getParent().equals(form))
+								{
+									MethodArgument[] arguments = scriptMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+									StringBuilder methodSignature = new StringBuilder("function " + scriptMethod.getName() + "(");
+									if (arguments != null)
+									{
+										for (int i = 0; i < arguments.length; i++)
+										{
+											methodSignature.append(arguments[i].getName());
+											if (i < arguments.length - 1) methodSignature.append(", ");
+										}
+									}
+									methodSignature.append(") { }");
+									typeNames.add(methodSignature.toString());
+								}
+							}
+						}
+						else
+							typeNames.add("_super");
 					}
 					try
 					{
@@ -391,6 +420,25 @@ public class ElementResolver implements IElementResolver
 			String desc = TypeCreator.getTopLevelDoc(Globals.class);
 			if (desc != null) property.setDescription(desc);
 			members.add(property);
+		}
+
+		if (name.contains("function "))
+		{
+			Form form = getForm(context);
+			if (form != null && form.getExtendsID() != null && fs != null)
+			{
+				Form superForm = fs.getForm(form.getExtendsID());
+				if (superForm != null)
+				{
+					Property property = TypeCreator.createProperty(name, true, (JSType)null, null,
+						TypeCreator.getImageDescriptorForFormEncapsulation(superForm.getEncapsulation()));
+					property.setDescription("Would you like to override this method in the current form?");
+					property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
+					property.setAttribute(ValueCollectionProvider.SUPER_SCOPE, Boolean.TRUE);
+					members.add(property);
+				}
+			}
+			return members;
 		}
 
 		if ("_super".equals(name))
