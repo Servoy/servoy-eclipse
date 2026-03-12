@@ -37,6 +37,9 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -571,6 +574,29 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			else
 			{
+				if (parent instanceof Form form && form.isResponsiveLayout())
+				{
+					if (draggedPersist instanceof LayoutContainer layoutContainer)
+					{
+						WebLayoutSpecification spec = null;
+						PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications()
+							.get(layoutContainer.getPackageName());
+						if (pkg != null)
+						{
+							spec = pkg.getSpecification(layoutContainer.getSpecName());
+						}
+						if (spec != null && !spec.isTopContainer())
+						{
+							ServoyLog.logWarning("paste object: cannot paste layout container that is not a top container into responsive form", null);
+							return null;
+						}
+					}
+					else
+					{
+						ServoyLog.logWarning("paste object: cannot paste component into responsive form", null);
+						return null;
+					}
+				}
 				persist = ElementFactory.copyComponent(parent, (AbstractBase)draggedPersist, x, y, IRepository.ELEMENTS, groupMap);
 			}
 			if (persist instanceof ISupportTabSeq)
