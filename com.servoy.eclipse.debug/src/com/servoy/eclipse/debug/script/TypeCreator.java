@@ -335,7 +335,7 @@ import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
 import com.servoy.j2db.ui.IScriptTabPanelMethods;
-import com.servoy.j2db.ui.runtime.IBaseRuntimeComponent;
+import com.servoy.j2db.ui.runtime.IBaseForInterfaceRuntimeComponent;
 import com.servoy.j2db.ui.runtime.IRuntimeButton;
 import com.servoy.j2db.ui.runtime.IRuntimeCalendar;
 import com.servoy.j2db.ui.runtime.IRuntimeCheck;
@@ -1756,7 +1756,15 @@ public class TypeCreator extends TypeCache
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
-		type.setKind(UUID.class.equals(cls) ? TypeKind.JAVASCRIPT : TypeKind.JAVA);
+		if (UUID.class.equals(cls))
+		{
+			type.setKind(TypeKind.JAVASCRIPT);
+			type.setSuperType(getType(context, ITypeNames.STRING));
+		}
+		else
+		{
+			type.setKind(TypeKind.JAVA);
+		}
 		EList<Member> members = type.getMembers();
 		fill(context, members, cls, typeName);
 
@@ -1801,7 +1809,7 @@ public class TypeCreator extends TypeCache
 			}
 		}
 
-		type.setSuperType(superT);
+		if (superT != null) type.setSuperType(superT);
 
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
 		if (returnTypes != null)
