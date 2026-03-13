@@ -33,6 +33,7 @@ import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
+import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ImagePainter;
@@ -47,6 +48,8 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.sablo.specification.PropertyDescription;
 
@@ -150,32 +153,62 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 	{
 		Style style = new Style();
 		style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, "delete");
+
+		ImagePainter normalPainter = new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("delete.png"))
+		{
+			@Override
+			public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry)
+			{
+				if (!cell.getConfigLabels().hasLabel("NO_DELETE"))
+				{
+					super.paintCell(cell, gc, bounds, configRegistry);
+				}
+			}
+		};
 		configRegistry.registerConfigAttribute(
-			CellConfigAttributes.CELL_STYLE,
-			style,
+			CellConfigAttributes.CELL_PAINTER,
+			normalPainter,
 			DisplayMode.NORMAL,
 			"delete");
+
+		ImagePainter selectPainter = new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("trash.png"))
+		{
+			@Override
+			public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry)
+			{
+				if (!cell.getConfigLabels().hasLabel("NO_DELETE"))
+				{
+					super.paintCell(cell, gc, bounds, configRegistry);
+				}
+			}
+		};
 		configRegistry.registerConfigAttribute(
-			CellConfigAttributes.CELL_STYLE,
-			style,
+			CellConfigAttributes.CELL_PAINTER,
+			selectPainter,
 			DisplayMode.SELECT,
-			LinkClickConfiguration.LINK_CELL_LABEL);
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER,
-			new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("delete.png")), DisplayMode.NORMAL, "delete");
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER,
-			new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("trash.png")), DisplayMode.SELECT, "delete");
+			"delete");
+
 		linkClickConfig.addClickListener(new IMouseAction()
 		{
 			@Override
 			public void run(NatTable natTable, MouseEvent event)
 			{
 				NatEventData eventData = NatEventData.createInstanceFromEvent(event);
-				deleteRow(natTable, eventData.getRowPosition(), eventData.getColumnPosition());
+				LabelStack labels = natTable.getConfigLabelsByPosition(eventData.getColumnPosition(), eventData.getRowPosition());
+				if (!labels.hasLabel("NO_DELETE"))
+				{
+					deleteRow(natTable, eventData.getRowPosition(), eventData.getColumnPosition());
+				}
 			}
 		});
 		linkClickConfig.addKeyListener((NatTable natTable, KeyEvent event) -> {
 			ILayerCell selectedCell = linkClickConfig.getSelectionLayer().getSelectedCells().iterator().next();
-			deleteRow(natTable, selectedCell.getRowPosition(), selectedCell.getColumnPosition());
+			LabelStack labels = natTable.getConfigLabelsByPosition(selectedCell.getColumnPosition(), selectedCell.getRowPosition());
+			if (!labels.hasLabel("NO_DELETE"))
+			{
+				deleteRow(natTable, selectedCell.getRowPosition(), selectedCell.getColumnPosition());
+			}
 		});
 	}
 
