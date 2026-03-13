@@ -219,17 +219,23 @@ public class ElementResolver implements IElementResolver
 								ScriptMethod scriptMethod = scriptMethods.next();
 								if (scriptMethod.getName().startsWith(prefix) && !scriptMethod.getParent().equals(form))
 								{
-									MethodArgument[] arguments = scriptMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-									StringBuilder methodSignature = new StringBuilder("function " + scriptMethod.getName() + "(");
+									final MethodArgument[] arguments = scriptMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+									final StringBuilder methodSignature = new StringBuilder("function " + scriptMethod.getName() + "(");
+									final StringBuilder parametersForSuperCall = new StringBuilder();
 									if (arguments != null)
 									{
 										for (int i = 0; i < arguments.length; i++)
 										{
 											methodSignature.append(arguments[i].getName());
-											if (i < arguments.length - 1) methodSignature.append(", ");
+											parametersForSuperCall.append(arguments[i].getName());
+											if (i < arguments.length - 1)
+											{
+												methodSignature.append(", ");
+												parametersForSuperCall.append(", ");
+											}
 										}
 									}
-									methodSignature.append(") { }");
+									methodSignature.append(") { _super." + scriptMethod.getName() + "(" + parametersForSuperCall.toString() + "); }");
 									typeNames.add(methodSignature.toString());
 								}
 							}
