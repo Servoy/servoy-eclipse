@@ -5073,7 +5073,7 @@ public class TypeCreator extends TypeCache
 			addType("RuntimeBean", IScriptMobileBean.class);
 			addType("RuntimeComponent", IRuntimeComponent.class);
 			addType(RUNTIME_WEB_COMPONENT, IRuntimeWebComponent.class);
-			addType("Component", IBaseRuntimeComponent.class);
+			addType("Component", IBaseForInterfaceRuntimeComponent.class);
 		}
 
 		public Type createType(String context, String typeName)
