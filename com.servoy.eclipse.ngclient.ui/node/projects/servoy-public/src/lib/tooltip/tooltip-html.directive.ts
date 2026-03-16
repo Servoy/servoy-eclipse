@@ -1,5 +1,6 @@
 import { Directive, HostListener, Input, OnDestroy } from '@angular/core';
 import { TooltipService } from './tooltip.service';
+import { Subscription } from 'rxjs';
 
 
 /**
@@ -16,9 +17,11 @@ export class HTMLTooltipDirective implements OnDestroy {
     @Input('tooltipInitialDelay') tooltipInitialDelay?: number;
     @Input('tooltipDismissDelay') tooltipDismissDelay?: number;
     isActive = false;
+    
+    private unsubscribeIsTooltipActive: Subscription;
 
     constructor(private tooltipService: TooltipService) {
-        this.tooltipService.isTooltipActive.subscribe(a => {
+        this.unsubscribeIsTooltipActive = this.tooltipService.isTooltipActive.subscribe(a => {
             this.isActive = a;
         });
     }
@@ -59,5 +62,6 @@ export class HTMLTooltipDirective implements OnDestroy {
 
     ngOnDestroy(): void {
         this.tooltipService.hideTooltip();
+        this.unsubscribeIsTooltipActive.unsubscribe();
     }
 }

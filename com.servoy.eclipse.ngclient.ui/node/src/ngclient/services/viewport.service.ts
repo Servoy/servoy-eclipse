@@ -775,6 +775,9 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
                     }
                      
                     if (possibleLeaksFound)
+                        // IMPORTANT: if you change the text below and remove ' memory leak ' from it = you have to adjust
+                        // the e2e.js from servoy_test repo/cypress/cypress/support
+                        // as that one searches for this text to force-fail the e2e tests
                         this.log.warn('svy FoundsetViewportState(' + this.constructor.name + '): listeners still present after the form UI was destroyed.'
                             + ' Check for a possible cumulative memory leak in browser-side-component-code: ' + debugLocator);
                 }
