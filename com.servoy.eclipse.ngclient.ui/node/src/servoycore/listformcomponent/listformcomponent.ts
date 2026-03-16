@@ -560,7 +560,18 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (containedForm && containedForm.childElements) {
             containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
         }
-        this._foundset()?.viewPort.rows.forEach(elem => elem._cache = null);
+        this._foundset()?.viewPort.rows.forEach(elem => {
+            if (elem._cache) {
+                elem._cache.forEach((cell, _compName) => {
+                    // clear the defineProperty hadlers from the comp model (that is kept even if form is hidden)
+                    // because those handlers keep references back to "this", so the list form component UI which is wrong
+                    delete (cell as Cell).model.visible;
+                    delete (cell as Cell).model.enabled;
+                    delete (cell as Cell).model.readOnly;
+                });
+                elem._cache = null;
+            }
+        });
     }
 
     getViewportRows(): ViewPortRow[] {

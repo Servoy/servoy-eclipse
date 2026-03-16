@@ -479,6 +479,10 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
                 let possibleWarnMessage: string;
                 this.viewPort.rows.forEach(row => {
                     if (row._cache) {
+
+                        // IMPORTANT: if you change the text below and remove ' memory leak ' from it = you have to adjust
+                        // the e2e.js from servoy_test repo/cypress/cypress/support
+                        // as that one searches for this text to force-fail the e2e tests
                         if (!possibleWarnMessage) possibleWarnMessage =  'svy FoundsetValue: foundset.viewport.rows[?]._cache'
                             + ' still present after the form UI was destroyed. Check for a possible temporary memory leak in browser-side-component-code: '
                             + debugLocator + '\n[\n';
