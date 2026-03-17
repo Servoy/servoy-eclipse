@@ -45,6 +45,7 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.cell.AggregateConfigLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
+import org.eclipse.nebula.widgets.nattable.layer.cell.IConfigLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.selection.config.DefaultSelectionLayerConfiguration;
 import org.eclipse.swt.SWT;
@@ -289,6 +290,21 @@ public class AutoWizardPropertiesComposite
 			registerColumnLabels(columnLabelAccumulator);
 
 			accumulator.add(columnLabelAccumulator);
+			IConfigLabelAccumulator compositeAccumulator = (labelStack, columnPosition, rowPosition) -> {
+				if (columnPosition == propertyNames.size())
+				{
+					Map<String, Object> rowValue = ((ListDataProvider<Map<String, Object>>)dataProvider).getRowObject(rowPosition);
+					if (Boolean.TRUE.equals(rowValue.get("inherited")))
+					{
+						labelStack.addLabel("NO_DELETE");
+					}
+					else
+					{
+						columnLabelAccumulator.accumulateConfigLabels(labelStack, columnPosition, rowPosition);
+					}
+				}
+			};
+			accumulator.add(compositeAccumulator);
 			bodyDataLayer.setConfigLabelAccumulator(accumulator);
 
 			this.selectionLayer = new SelectionLayer(bodyDataLayer);

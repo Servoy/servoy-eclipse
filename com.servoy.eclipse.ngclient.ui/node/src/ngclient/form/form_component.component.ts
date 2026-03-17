@@ -322,9 +322,10 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     ngOnChanges(changes: SimpleChanges) {
         const name = this.name;
         if (changes.name) {
-            //
-            // Form Instances are reused for tabpanels that have a template reference to this make sure to clean up the old reference/name to this instance
-            if (changes.name.previousValue) this.formservice.destroy(changes.name.previousValue);
+            // Form Instances can be reused for tabpanels that have a template reference to this (depending on what the component does)
+            // they are reused in main form switches
+            // make sure to clean up the old reference/name to this instance and mark the previous form as destroyed
+            if (changes.name.previousValue) this.formservice.destroy(changes.name.previousValue, false); // TODO should we do something so that ngOnDestroy of child components still gets called before the uiDestroyed() or model properties? see what formservice.destroy does
             // really make sure all form state is reverted to default for this new name
             this.formCache = this.formservice.getFormCache(this);
             const styleClasses: string = this.formCache.getComponent('').model.styleClass as string;
@@ -353,7 +354,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     ngOnDestroy() {
-        this.formservice.destroy(this.name);
+        this.formservice.destroy(this.name, true);
         this.resizeSubscription$.unsubscribe();
     }
 

@@ -147,7 +147,8 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
         return this.internalState;
     }
 
-    uiDestroyed(): void{
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    uiDestroyed(_afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, _debugLocator?: string): void{
         this.sabloDeferHelper.cancelAll(this.getInternalState());
         this.internalState.realToDisplayCache.clear();
     }

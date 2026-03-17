@@ -45,7 +45,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
       }
     
       @if (!useScrolling) {
-        @if (containedForm()&&containedForm().absoluteLayout) {
+        @if (cache&&containedForm()&&containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track row; let i = $index) {
               <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
@@ -58,7 +58,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
             }
           </div>
         }
-        @if (containedForm()&&!containedForm().absoluteLayout) {
+        @if (cache&&containedForm()&&!containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track trackByFn(i, row); let i = $index) {
               <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
@@ -560,10 +560,22 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (containedForm && containedForm.childElements) {
             containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
         }
-        this.getViewportRows().forEach(elem => elem._cache = null);
+        this._foundset()?.viewPort.rows.forEach(elem => {
+            if (elem._cache) {
+                elem._cache.forEach((cell, _compName) => {
+                    // clear the defineProperty hadlers from the comp model (that is kept even if form is hidden)
+                    // because those handlers keep references back to "this", so the list form component UI which is wrong
+                    delete (cell as Cell).model.visible;
+                    delete (cell as Cell).model.enabled;
+                    delete (cell as Cell).model.readOnly;
+                });
+                elem._cache = null;
+            }
+        });
     }
 
     getViewportRows(): ViewPortRow[] {
+        // this method is only used in the old - non-scrolling version
         if (this.servoyApi.isInDesigner()) {
             return this.designerViewportRows;
         }

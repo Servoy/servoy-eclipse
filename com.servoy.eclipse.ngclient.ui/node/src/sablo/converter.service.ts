@@ -294,9 +294,34 @@ export const instanceOfUIDestroyAwareValue = (obj: any): obj is IUIDestroyAwareV
     obj != null && obj.uiDestroyed instanceof Function;
 
 export interface IUIDestroyAwareValue {
-
-    uiDestroyed(): void;
+    /**
+     * Do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl.
+     *
+     * Do any needed cleanup on this property value when the form's UI is destroyed (the form gets hidden and the angular/DOM should
+     * be garbage collectable, even though the form model (properties, component properties etc.) can still be kept - until
+     * the server side form gets destroyed as well, if that happens).
+     * 
+     * @param afterNgOnDestroyOfChildrenPotentialRunner optional - Helper method to execute a function either right away or later,
+     * in an Angular "afterNextRender", with an extra-form-check depending on this uiDestroyed(...) being initiated
+     * as a result of the form's ngOnDestroy (so the form UI is being destroyed),- in which case the child component ngOnDestroy have
+     * already executed - or being triggered by the form template getting reused to show another form (then one cannot rely on
+     * the fact that all the components in the form have had their ngOnDestroy called already); it is useful if your code depends on
+     * the components of the form being already destroyed. But there is a catch: if afterNextRender is used (so it executes the given
+     * function later), it will only execute the function if the form UI is still destroyed/not recreated already at that moment.
+     * Currently this is only given when running in development mode, not in production mode
+     * 
+     * @param debugLocator optional - only given when running in development mode, not in production mode; it identifies
+     * in which form/component/prop etc. this property value was located - in case a warning message needs to be printed
+     * out - because for example the component did not unregister listeners to this prop etc. and might contain memory leaks  
+     */
+    uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void;
 }
+
+export interface IInternalReferenceBetweenPropertyImpls {
+    internalReferenceBetweenPropertyImpls: true;
+}
+export const instanceOfIInternalReferenceBetweenPropertyImpls = (obj: any): obj is IInternalReferenceBetweenPropertyImpls =>
+    obj != null && obj.internalReferenceBetweenPropertyImpls;
 
 export interface CASBackup {
 }

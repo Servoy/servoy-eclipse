@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { ChangeType, IFoundset, LoggerService, ViewportChangeEvent, ViewportChangeListener } from '@servoy/public';
 import {
     ConverterService, ChangeAwareState, isChanged, instanceOfChangeAwareValue,
-    SubpropertyChangeByReferenceHandler, SoftProxyRevoker
+    SubpropertyChangeByReferenceHandler, SoftProxyRevoker, IUIDestroyAwareValue,
+    instanceOfIInternalReferenceBetweenPropertyImpls
 } from '../../sablo/converter.service';
 import {
     IType, ITypeFromServer, IPropertyContext, PushToServerEnum,
     IWebObjectSpecification, TypesRegistry
 } from '../../sablo/types_registry';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
-import { SabloService } from '../../sablo/sablo.service'
+import { SabloService } from '../../sablo/sablo.service';
 
 /** this is what the server sends for type info (a compressed way of sending types for all cells) */
 export interface ConversionInfoFromServerForViewport {
@@ -703,7 +704,7 @@ export class ViewportService {
 
 }
 
-export abstract class FoundsetViewportState extends ChangeAwareState {
+export abstract class FoundsetViewportState extends ChangeAwareState implements IUIDestroyAwareValue {
 
     changeListeners: ViewportChangeListener[] = [];
 
@@ -750,6 +751,38 @@ export abstract class FoundsetViewportState extends ChangeAwareState {
                 cl(changes);
             }
         });
+    }
+    
+    public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        if (debugLocator) {
+            // we are in development, not production mode, as 'debugLocator' is defined; and after a form ui has been destroyed,
+            // check to see if listeners (or other possible UI related references that are stored in the model of a form) attached
+            // to the properties are still present (that means that references to UI might still
+            // be present in the model; the model of the component stays on client even though the UI has been destroyed until
+            // the server-side form is destroyed; so the form was now probably hidden... it can be reused later; however, the listeners
+            // to destroyed UI/components are probably a memory leak that will accumulate over time; components should clear those when
+            // their UI is destroyed...
+
+            // in the future we could also clear these automatically - in case only the UI of forms adds such listeners/caches to the model
+            afterNgOnDestroyOfChildrenPotentialRunner(() => {
+                if (this.changeListeners?.length) {
+                    let possibleLeaksFound = false;
+                    for (let chL of this.changeListeners) {
+                        if (!instanceOfIInternalReferenceBetweenPropertyImpls(chL)) {
+                            possibleLeaksFound = true;
+                            break;
+                        }
+                    }
+                     
+                    if (possibleLeaksFound)
+                        // IMPORTANT: if you change the text below and remove ' memory leak ' from it = you have to adjust
+                        // the e2e.js from servoy_test repo/cypress/cypress/support
+                        // as that one searches for this text to force-fail the e2e tests
+                        this.log.warn('svy FoundsetViewportState(' + this.constructor.name + '): listeners still present after the form UI was destroyed.'
+                            + ' Check for a possible cumulative memory leak in browser-side-component-code: ' + debugLocator);
+                }
+            });
+        }
     }
 
 }

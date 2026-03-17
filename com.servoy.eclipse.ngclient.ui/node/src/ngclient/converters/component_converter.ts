@@ -1,6 +1,7 @@
 import {
-    IParentAccessForSubpropertyChanges, ConverterService, isChanged, IChangeAwareValue,
-    instanceOfChangeAwareValue, ChangeListenerFunction
+    ConverterService, isChanged, IChangeAwareValue,
+    instanceOfChangeAwareValue, ChangeListenerFunction, IUIDestroyAwareValue,
+        instanceOfUIDestroyAwareValue
 } from '../../sablo/converter.service';
 import { LoggerService, LoggerFactory, IFoundset, ViewportChangeEvent, ViewportChangeListener, IChildComponentPropertyValue } from '@servoy/public';
 import {
@@ -20,7 +21,7 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
     private log: LoggerService;
 
     constructor(private converterService: ConverterService<unknown>, private readonly typesRegistry: TypesRegistry, logFactory: LoggerFactory,
-        private viewportService: ViewportService, private readonly sabloService: SabloService, private uiBlockerService: UIBlockerService) {
+            private viewportService: ViewportService, private readonly sabloService: SabloService, private uiBlockerService: UIBlockerService) {
         this.log = logFactory.getLogger('ComponentConverter');
     }
 
@@ -55,7 +56,7 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
 
 }
 
-export class ChildComponentPropertyValue extends ComponentCache implements IChangeAwareValue, IChildComponentPropertyValue {
+export class ChildComponentPropertyValue extends ComponentCache implements IChangeAwareValue, IChildComponentPropertyValue, IUIDestroyAwareValue {
 
     name: string;
 
@@ -117,7 +118,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     // if you are wondering why there a two kinds of rowIds used below: we need to work with both component rowId and property inside component rowId if we have this scenario
     // listFormComponent
     //   - foundset property
-    //   - childCompProperty of 'component' type (to which someTableCompThatCanEditCells is assigned) - that is foundset linked
+    //   - childCompProperty of 'component' type (to which someTableCompThatCanEditCells is assigned) - that is using foundset linked properties
     //       - foundsetProp - a prop that is linked to parent foundset of list form component (a related foundset)
     //       - columns[1].dp - that would be a dataprovider property that if foundset linked to the foundsetProp - so to the related foundset
     //
@@ -170,6 +171,12 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
         if (index > -1) {
             this.__internalState.changeListeners.splice(index, 1);
         }
+    }
+    
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        // uiDestroy - call it on all properties from the viewport that implement this interface
+        this.__internalState.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
     }
 
 }
@@ -278,7 +285,6 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         let done = false;
 
         if (nonFSLinkedModelUpdates) {
-            // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
             FormService.updateComponentModelPropertiesFromServer(nonFSLinkedModelUpdates, this.componentValue,
                 this.componentSpecification, this.converterService,
                 this.getChangeListenerGeneratorForSmartNonFSLinkedProps(),
@@ -500,6 +506,31 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                 if (this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate)
                     this.componentValue.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate(rowEntriesChangedButNotByRef.propertiesChangedButNotByRef, rowEntriesChangedButNotByRef.relativeRowIndex)
             }) : undefined));
+    }
+    
+    public override uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
+        // uiDestroy - call it on all properties from the viewport that implement this interface
+        // both model and modelViewport (that has model in it - as a prototype) properties need to be checked
+        
+        let modelKeys = Object.keys(this.componentValue.model);
+        modelKeys.forEach((key) => {
+            let v = this.componentValue.model[key];
+            if (instanceOfUIDestroyAwareValue(v))
+                v.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.model.' + key : undefined);
+        });
+        let modelKeySet = new Set(modelKeys);
+        
+        this.componentValue.modelViewport.forEach((row, rowIdx) => {
+            for (let key of Object.keys(row)) {
+                if (!modelKeySet.has(key)) { // only check properties that are not in model as those are shared and already checked above
+                    let v = row[key];
+                    if (instanceOfUIDestroyAwareValue(v))
+                        v.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.modelViewport.rows[' + rowIdx + '].' + key : undefined);
+                }
+            }
+        });
+        
+        super.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
     }
 
 }

@@ -28,11 +28,12 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.ListDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.convert.DefaultDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.data.convert.DisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
-import org.eclipse.nebula.widgets.nattable.edit.editor.TextCellEditor;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
+import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ImagePainter;
@@ -42,15 +43,14 @@ import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
-import org.eclipse.nebula.widgets.nattable.widget.EditModeEnum;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.core.Activator;
@@ -153,32 +153,62 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 	{
 		Style style = new Style();
 		style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, "delete");
+
+		ImagePainter normalPainter = new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("delete.png"))
+		{
+			@Override
+			public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry)
+			{
+				if (!cell.getConfigLabels().hasLabel("NO_DELETE"))
+				{
+					super.paintCell(cell, gc, bounds, configRegistry);
+				}
+			}
+		};
 		configRegistry.registerConfigAttribute(
-			CellConfigAttributes.CELL_STYLE,
-			style,
+			CellConfigAttributes.CELL_PAINTER,
+			normalPainter,
 			DisplayMode.NORMAL,
 			"delete");
+
+		ImagePainter selectPainter = new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("trash.png"))
+		{
+			@Override
+			public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry)
+			{
+				if (!cell.getConfigLabels().hasLabel("NO_DELETE"))
+				{
+					super.paintCell(cell, gc, bounds, configRegistry);
+				}
+			}
+		};
 		configRegistry.registerConfigAttribute(
-			CellConfigAttributes.CELL_STYLE,
-			style,
+			CellConfigAttributes.CELL_PAINTER,
+			selectPainter,
 			DisplayMode.SELECT,
-			LinkClickConfiguration.LINK_CELL_LABEL);
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER,
-			new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("delete.png")), DisplayMode.NORMAL, "delete");
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER,
-			new ImagePainter(com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("trash.png")), DisplayMode.SELECT, "delete");
+			"delete");
+
 		linkClickConfig.addClickListener(new IMouseAction()
 		{
 			@Override
 			public void run(NatTable natTable, MouseEvent event)
 			{
 				NatEventData eventData = NatEventData.createInstanceFromEvent(event);
-				deleteRow(natTable, eventData.getRowPosition(), eventData.getColumnPosition());
+				LabelStack labels = natTable.getConfigLabelsByPosition(eventData.getColumnPosition(), eventData.getRowPosition());
+				if (!labels.hasLabel("NO_DELETE"))
+				{
+					deleteRow(natTable, eventData.getRowPosition(), eventData.getColumnPosition());
+				}
 			}
 		});
 		linkClickConfig.addKeyListener((NatTable natTable, KeyEvent event) -> {
 			ILayerCell selectedCell = linkClickConfig.getSelectionLayer().getSelectedCells().iterator().next();
-			deleteRow(natTable, selectedCell.getRowPosition(), selectedCell.getColumnPosition());
+			LabelStack labels = natTable.getConfigLabelsByPosition(selectedCell.getColumnPosition(), selectedCell.getRowPosition());
+			if (!labels.hasLabel("NO_DELETE"))
+			{
+				deleteRow(natTable, selectedCell.getRowPosition(), selectedCell.getColumnPosition());
+			}
 		});
 	}
 
@@ -199,25 +229,12 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			new TextCellEditor(true, true, true), DisplayMode.NORMAL,
+			new VerticallyCenteredTextCellEditor(), DisplayMode.NORMAL,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			new TextCellEditor(true, true, true)
-			{
-				@Override
-				public Text createEditorControl(Composite parent_)
-				{
-					int style_ = SWT.LEFT;
-					if (this.editMode == EditModeEnum.DIALOG)
-					{
-						style_ = style_ | SWT.BORDER;
-					}
-
-					return super.createEditorControl(parent_, style_);
-				}
-			}, //
+			new VerticallyCenteredTextCellEditor(),
 			DisplayMode.EDIT,
 			dp.getName());
 
@@ -229,10 +246,6 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 	private void registerI18nColumn(IConfigRegistry configRegistry, PropertyDescription dp)
 	{
-		NatTextDialogCellEditor dialogCellEditor = new I18NTextDialogCellEditor(false, context, Activator.getDefault().getDesignClient(),
-			propertiesConfig.getTable(), flattenedSolution,
-			"Edit title/text property", com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("i18n.png"));
-
 		Style style = new Style();
 		style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
 		configRegistry.registerConfigAttribute(
@@ -243,12 +256,22 @@ public class PainterConfiguration extends AbstractRegistryConfiguration
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITOR,
-			dialogCellEditor, DisplayMode.EDIT,
+			new I18NTextDialogCellEditor(false, context, Activator.getDefault().getDesignClient(),
+				propertiesConfig.getTable(), flattenedSolution,
+				"Edit title/text property", com.servoy.eclipse.ui.Activator.getDefault().loadImageFromBundle("i18n.png")),
+			DisplayMode.EDIT,
+			dp.getName());
+
+		configRegistry.registerConfigAttribute(
+			CellConfigAttributes.DISPLAY_CONVERTER,
+			new DefaultDisplayConverter(),
+			DisplayMode.NORMAL,
 			dp.getName());
 
 		configRegistry.registerConfigAttribute(
 			EditConfigAttributes.CELL_EDITABLE_RULE,
-			IEditableRule.ALWAYS_EDITABLE, DisplayMode.EDIT,
+			IEditableRule.ALWAYS_EDITABLE,
+			DisplayMode.EDIT,
 			dp.getName());
 	}
 

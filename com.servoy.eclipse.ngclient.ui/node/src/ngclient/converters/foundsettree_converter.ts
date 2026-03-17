@@ -34,7 +34,7 @@ export class FoundsetTreeType implements IType<FoundsetTree> {
                 if (currentClientValue && currentClientValue.getInternalState()) {
                     this.sabloDeferHelper.initInternalStateForDeferringFromOldInternalState(internalState, currentClientValue.getInternalState());
                 } else {
-                    this.sabloDeferHelper.initInternalStateForDeferring(internalState, 'svy valuelist * ');
+                    this.sabloDeferHelper.initInternalStateForDeferring(internalState, 'svy foundset-tree * ');
                 }
                 newValue = new FoundsetTree(this.sabloDeferHelper, internalState, serverJSONValue);
                 deferredValue = newValue;
@@ -125,7 +125,8 @@ export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAw
         return this.internalState;
     }
 
-    uiDestroyed(): void{
+    /** do not call this method from component/service impls.; this is meant to be used only by Servoy internal impl. */
+    uiDestroyed(_afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, _debugLocator?: string): void{
         this.sabloDeferHelper.cancelAll(this.getInternalState());
     }
 
@@ -148,7 +149,7 @@ export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAw
         this.internalState.notifyChangeListener();
     }
 
-     updateCheckboxValue(id: string, value: boolean): void{
+    updateCheckboxValue(id: string, value: boolean): void{
         this.internalState.updateCheckboxValueReq = {
             updateCheckboxValue: id,
             value

@@ -23,7 +23,7 @@
               "tsConfig": "project/tsconfig.lib.prod.json"
             }
           }
-        },
+        }
       }
     }
   },

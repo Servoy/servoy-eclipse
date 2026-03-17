@@ -335,7 +335,7 @@ import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
 import com.servoy.j2db.ui.IScriptTabPanelMethods;
-import com.servoy.j2db.ui.runtime.IBaseRuntimeComponent;
+import com.servoy.j2db.ui.runtime.IBaseForInterfaceRuntimeComponent;
 import com.servoy.j2db.ui.runtime.IRuntimeButton;
 import com.servoy.j2db.ui.runtime.IRuntimeCalendar;
 import com.servoy.j2db.ui.runtime.IRuntimeCheck;
@@ -1756,7 +1756,15 @@ public class TypeCreator extends TypeCache
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
-		type.setKind(UUID.class.equals(cls) ? TypeKind.JAVASCRIPT : TypeKind.JAVA);
+		if (UUID.class.equals(cls))
+		{
+			type.setKind(TypeKind.JAVASCRIPT);
+			type.setSuperType(getType(context, ITypeNames.STRING));
+		}
+		else
+		{
+			type.setKind(TypeKind.JAVA);
+		}
 		EList<Member> members = type.getMembers();
 		fill(context, members, cls, typeName);
 
@@ -1801,7 +1809,7 @@ public class TypeCreator extends TypeCache
 			}
 		}
 
-		type.setSuperType(superT);
+		if (superT != null) type.setSuperType(superT);
 
 		Class< ? >[] returnTypes = linkedTypes.get(cls);
 		if (returnTypes != null)
@@ -2752,7 +2760,7 @@ public class TypeCreator extends TypeCache
 					String returnDescription = ((ITypedScriptObject)scriptObject).getReturnDescription(name, parameterTypes);
 					if ((returnedType != Void.class && returnedType != void.class && returnedType != null) || returnDescription != null)
 					{
-						returnText = "<b>@return</b> ";
+						if (returnDescription != null) returnText = "<b>@return</b> ";
 						if (returnedType != null)
 						{
 							String returnTypeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType);
@@ -3841,6 +3849,9 @@ public class TypeCreator extends TypeCache
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 			type.setAttribute(IMAGE_DESCRIPTOR, CONTAINERS);
+
+			ParameterizedType parameterizedType = TypeUtil.parameterizedType(TypeUtil.type("Object"), TypeUtil.ref("RuntimeContainer"));
+			type.setSuperTypeExpr(parameterizedType);
 
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs == null) return type;
@@ -5070,7 +5081,7 @@ public class TypeCreator extends TypeCache
 			addType("RuntimeBean", IScriptMobileBean.class);
 			addType("RuntimeComponent", IRuntimeComponent.class);
 			addType(RUNTIME_WEB_COMPONENT, IRuntimeWebComponent.class);
-			addType("Component", IBaseRuntimeComponent.class);
+			addType("Component", IBaseForInterfaceRuntimeComponent.class);
 		}
 
 		public Type createType(String context, String typeName)
