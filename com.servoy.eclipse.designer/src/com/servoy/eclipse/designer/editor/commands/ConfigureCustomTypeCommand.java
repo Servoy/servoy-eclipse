@@ -55,6 +55,7 @@ import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -212,6 +213,12 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 			{
 				return true;
 			}
+		}
+		PersistContext context = getPersistContext();
+		if (context != null && context.getContext() instanceof Form frm && !frm.getName().equals(((Form)component.getParent()).getName()))
+		{
+			//component without modifications on the child form, should not allow delete for columns
+			return true;
 		}
 		return false;
 	}
