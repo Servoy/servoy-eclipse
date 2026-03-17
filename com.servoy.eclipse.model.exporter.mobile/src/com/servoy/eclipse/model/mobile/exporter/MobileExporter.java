@@ -31,6 +31,7 @@ import java.sql.Types;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,6 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
@@ -105,6 +107,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
+import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.Debug;
@@ -370,6 +373,20 @@ public class MobileExporter
 													{
 														String call = generateMethodCall(form, persist, name, handlerValue);
 														json.put(name, call);
+													}
+												}
+												Collection<PropertyDescription> properties = spec.getProperties(MediaPropertyType.INSTANCE);
+												for (PropertyDescription property : properties)
+												{
+													String name = property.getName();
+													String propertyValue = json.optString(name, null);
+													if (propertyValue != null)
+													{
+														Media media = getFlattenedSolution().getMedia(propertyValue);
+														if (media != null)
+														{
+															json.put(name, "media/" + media.getName());
+														}
 													}
 												}
 											}
