@@ -563,15 +563,21 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         this._foundset()?.viewPort.rows.forEach(elem => {
             if (elem._cache) {
                 elem._cache.forEach((cell, _compName) => {
-                    // clear the defineProperty hadlers from the comp model (that is kept even if form is hidden)
+                    // clear the defineProperty getters/setters from the comp model (that is kept even if form is hidden)
                     // because those handlers keep references back to "this", so the list form component UI which is wrong
-                    delete (cell as Cell).model.visible;
-                    delete (cell as Cell).model.enabled;
-                    delete (cell as Cell).model.readOnly;
+                    this.deleteDescriptorAndKeepSimpleValue((cell as Cell).model, 'visible');
+                    this.deleteDescriptorAndKeepSimpleValue((cell as Cell).model, 'enabled');
+                    this.deleteDescriptorAndKeepSimpleValue((cell as Cell).model, 'readOnly');
                 });
-                elem._cache = null;
+                delete elem._cache;
             }
         });
+    }
+    
+    private deleteDescriptorAndKeepSimpleValue(obj: any, propName: string) {
+        let oldVal = (Object.getOwnPropertyDescriptor(obj, propName).get as any as ICellValuePropGetter).getStoredBasePropValue();
+        delete obj[propName]; // delete the descriptor with getter/setter for this prop
+        obj[propName] = oldVal; // keep the value, but as a simple value, not as property descriptor with getter/setter - to be used if the form is made visible again
     }
 
     getViewportRows(): ViewPortRow[] {
@@ -731,49 +737,58 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         const thisLFC = this;
         const idx = rowIndex;
+        
 		let elementReadOnly = rowItem.model.readOnly;
+        let getterForReadOnly = function get() {
+            let rowReadOnly = false;
+            const rowEditableDataprovider = thisLFC.rowEditableDataprovider();
+            if (rowEditableDataprovider && rowEditableDataprovider.length > idx) {
+                rowReadOnly = !rowEditableDataprovider[idx];
+            }
+            return elementReadOnly || rowReadOnly || thisLFC.readOnly() || !thisLFC.editable();
+        };
+        (getterForReadOnly as any as ICellValuePropGetter).getStoredBasePropValue = (() => elementReadOnly); // this is used when UI is destroyed to be able to keep the cell/model value without keeping the getters/setters that keep a reference to "this" (so the UI)
         Object.defineProperty(rowItem.model, 'readOnly', {
             configurable: true,
-            get() {
-                let rowReadOnly = false;
-                const rowEditableDataprovider = thisLFC.rowEditableDataprovider();
-                if (rowEditableDataprovider && rowEditableDataprovider.length > idx) {
-                    rowReadOnly = !rowEditableDataprovider[idx];
-                }
-                return elementReadOnly || rowReadOnly || thisLFC.readOnly() || !thisLFC.editable();
-            },
+            get: getterForReadOnly,
 			set(value: boolean) {
 				elementReadOnly = value;
 			}
         });
+        
         // TODO: 'enabledDataProvider' and 'visibleDataProvider' should not be in the model - on the server side
         // they should be evaluated for each row and added to the model as regular 'enabled' and 'visible' properties
         let elementEnabled = rowItem.model.enabled;
+        let getterForEnabled = function get() {
+            const rowEnableDataprovider = thisLFC.rowEnableDataprovider();
+            if (rowEnableDataprovider && rowEnableDataprovider.length > idx) {
+                return thisLFC.rowEditableDataprovider()[idx]
+            }
+            if(this.enabledDataProvider !== undefined) {
+                return this.enabledDataProvider;
+            }
+            return elementEnabled;
+        };
+        (getterForEnabled as any as ICellValuePropGetter).getStoredBasePropValue = (() => elementEnabled); // this is used when UI is destroyed to be able to keep the cell/model value without keeping the getters/setters that keep a reference to "this" (so the UI)
         Object.defineProperty(rowItem.model, 'enabled', {
             configurable: true,
-            get() {
-                const rowEnableDataprovider = thisLFC.rowEnableDataprovider();
-                if (rowEnableDataprovider && rowEnableDataprovider.length > idx) {
-                    return thisLFC.rowEditableDataprovider()[idx]
-                }
-                if(this.enabledDataProvider !== undefined) {
-                    return this.enabledDataProvider;
-                }
-                return elementEnabled;
-            },
+            get: getterForEnabled,
             set(value: boolean) {
 				elementEnabled = value;
 			}
         });
+        
         let elementVisible = rowItem.model.visible;
+        let getterForVisible = function get() {
+            if(this.visibleDataProvider !== undefined) {
+                return this.visibleDataProvider;
+            }
+            return elementVisible;
+        };
+        (getterForVisible as any as ICellValuePropGetter).getStoredBasePropValue = (() => elementVisible); // this is used when UI is destroyed to be able to keep the cell/model value without keeping the getters/setters that keep a reference to "this" (so the UI)
         Object.defineProperty(rowItem.model, 'visible', {
             configurable: true,
-            get() {
-                if(this.visibleDataProvider !== undefined) {
-                    return this.visibleDataProvider;
-                }
-                return elementVisible;
-            },
+            get: getterForVisible,
             set(value: boolean) {
 				elementVisible = value;
 			}
@@ -1148,4 +1163,9 @@ class AGGridDatasource implements IServerSideDatasource {
 
         return result;
     }
+    
+}
+
+type ICellValuePropGetter = Function & {
+    getStoredBasePropValue(): any;
 }
