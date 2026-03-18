@@ -146,8 +146,9 @@ export class BSWindow {
     }
 
     setSize(size: { width: number; height: number }) {
-        const handleHeight = this.options.elements.handle ? this.options.elements.handle.getBoundingClientRect().height : 0;
-        const footerHeight = this.options.elements.footer ? this.options.elements.footer.getBoundingClientRect().height : 0;
+        const isUndecorated = this.options.undecorated;
+        const handleHeight = isUndecorated ? 0 : this.options.elements.handle ? this.options.elements.handle.getBoundingClientRect().height : 0;
+        const footerHeight = isUndecorated ? 0 : this.options.elements.footer ? this.options.elements.footer.getBoundingClientRect().height : 0;
         const docHeight = this.doc.documentElement.clientHeight;
         const winBody = this.element.querySelector(this.options.selectors.body);
         if (docHeight <= (size.height + handleHeight + footerHeight)) {
@@ -566,4 +567,5 @@ export interface BSWindowOptions {
     isModal?: boolean;
     window_manager?: BSWindowManager;
     modalBackdrop?: HTMLElement;
+    undecorated?: boolean;
 }
