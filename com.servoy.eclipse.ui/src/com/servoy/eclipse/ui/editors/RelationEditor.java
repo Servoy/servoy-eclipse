@@ -659,14 +659,14 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 	{
 		final List<Object> retval = new ArrayList<Object>();
 		retval.add(EMPTY);
-		ITable t = null;
+		ITable table = null;
 		Map<String, ScriptCalculation> calcs = null;
 		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
 		if (index == CI_FROM)
 		{
-			t = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getPrimaryDataSource());
+			table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getPrimaryDataSource());
 			calcs = new LinkedHashMap<String, ScriptCalculation>();
-			Iterator<ScriptCalculation> calcsIt = fs.getScriptCalculations(t, true);
+			Iterator<ScriptCalculation> calcsIt = fs.getScriptCalculations(table, true);
 			while (calcsIt.hasNext())
 			{
 				ScriptCalculation calc = calcsIt.next();
@@ -675,11 +675,11 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		}
 		else if (index == CI_TO)
 		{
-			t = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
+			table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
 		}
-		if (t != null)
+		if (table != null)
 		{
-			Iterator<Column> cols = EditorUtil.getTableColumns(t, false);
+			Iterator<Column> cols = EditorUtil.getTableColumns(table, false);
 			while (cols.hasNext())
 			{
 				// stored calcs are shown in calculations section
@@ -709,6 +709,10 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 				if (global.isEnum())
 				{
 					retval.addAll(ScriptingUtils.getEnumDataProviders(global));
+				}
+				else if (global.isConstant())
+				{
+					retval.addAll(ScriptingUtils.getConstantDataProviders(global));
 				}
 				else
 				{

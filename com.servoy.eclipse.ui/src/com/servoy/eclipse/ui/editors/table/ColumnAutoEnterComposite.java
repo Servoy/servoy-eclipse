@@ -84,6 +84,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.ConstantDataProvider;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -250,6 +251,10 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 									{
 										children.addAll(ScriptingUtils.getEnumDataProviders(sv));
 									}
+									else if (sv.isConstant())
+									{
+										children.addAll(ScriptingUtils.getConstantDataProviders(sv));
+									}
 									else
 									{
 										children.add(sv);
@@ -278,6 +283,21 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						if (value instanceof EnumDataProvider)
 						{
 							Pair<String, String> scopePair = ScopesUtils.getVariableScope(((EnumDataProvider)value).getDataProviderID());
+							Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
+							ScopeWithContext scope = null;
+							for (Pair<String, IRootObject> sc : scopes)
+							{
+								if (sc.getLeft().equals(scopePair.getLeft()))
+								{
+									scope = new ScopeWithContext(sc.getLeft(), sc.getRight());
+									break;
+								}
+							}
+							return new DataProviderNodeWrapper(scopePair.getLeft(), scope, DataProviderTreeViewer.VARIABLES);
+						}
+						if (value instanceof ConstantDataProvider)
+						{
+							Pair<String, String> scopePair = ScopesUtils.getVariableScope(((ConstantDataProvider)value).getDataProviderID());
 							Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
 							ScopeWithContext scope = null;
 							for (Pair<String, IRootObject> sc : scopes)

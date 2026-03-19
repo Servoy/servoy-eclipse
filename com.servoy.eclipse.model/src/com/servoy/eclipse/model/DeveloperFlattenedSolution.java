@@ -27,6 +27,7 @@ import java.util.Map;
 import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.ISolutionModelPersistIndex;
+import com.servoy.j2db.persistence.ConstantDataProvider;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -167,6 +168,29 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 					if (enumProvider.getDataProviderID().equals(id))
 					{
 						return enumProvider;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	protected IDataProvider getConstantDataProvider(String id) throws RepositoryException
+	{
+		String[] constantParts = id.split("\\.");
+		if (constantParts.length > 3)
+		{
+			IDataProvider globalDataProvider = getGlobalDataProvider(constantParts[0] + '.' + constantParts[1] + '.' + constantParts[2]);
+			if (globalDataProvider instanceof ScriptVariable && ((ScriptVariable)globalDataProvider).isEnum())
+			{
+				List<ConstantDataProvider> constantDataProviders = ScriptingUtils.getConstantDataProviders((ScriptVariable)globalDataProvider);
+				for (ConstantDataProvider constantProvider : constantDataProviders)
+				{
+					if (constantProvider.getDataProviderID().equals(id))
+					{
+						return constantProvider;
 					}
 				}
 			}
