@@ -154,48 +154,38 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	}
 
 	@Override
-	protected IDataProvider getEnumDataProvider(String id) throws RepositoryException
+	protected IDataProvider getEnumOrConstantDataProvider(String id) throws RepositoryException
 	{
 		String[] enumParts = id.split("\\.");
 		if (enumParts.length > 3)
 		{
 			IDataProvider globalDataProvider = getGlobalDataProvider(enumParts[0] + '.' + enumParts[1] + '.' + enumParts[2]);
-			if (globalDataProvider instanceof ScriptVariable && ((ScriptVariable)globalDataProvider).isEnum())
+			if (globalDataProvider instanceof ScriptVariable)
 			{
-				List<EnumDataProvider> enumDataProviders = ScriptingUtils.getEnumDataProviders((ScriptVariable)globalDataProvider);
-				for (EnumDataProvider enumProvider : enumDataProviders)
+				if (((ScriptVariable)globalDataProvider).isEnum())
 				{
-					if (enumProvider.getDataProviderID().equals(id))
+					List<EnumDataProvider> enumDataProviders = ScriptingUtils.getEnumDataProviders((ScriptVariable)globalDataProvider);
+					for (EnumDataProvider enumProvider : enumDataProviders)
 					{
-						return enumProvider;
+						if (enumProvider.getDataProviderID().equals(id))
+						{
+							return enumProvider;
+						}
+					}
+				}
+				else if (((ScriptVariable)globalDataProvider).isConstant())
+				{
+					List<ConstantDataProvider> constantDataProviders = ScriptingUtils.getConstantDataProviders((ScriptVariable)globalDataProvider);
+					for (ConstantDataProvider constantProvider : constantDataProviders)
+					{
+						if (constantProvider.getDataProviderID().equals(id))
+						{
+							return constantProvider;
+						}
 					}
 				}
 			}
 		}
-
-		return null;
-	}
-
-	@Override
-	protected IDataProvider getConstantDataProvider(String id) throws RepositoryException
-	{
-		String[] constantParts = id.split("\\.");
-		if (constantParts.length > 3)
-		{
-			IDataProvider globalDataProvider = getGlobalDataProvider(constantParts[0] + '.' + constantParts[1] + '.' + constantParts[2]);
-			if (globalDataProvider instanceof ScriptVariable && ((ScriptVariable)globalDataProvider).isEnum())
-			{
-				List<ConstantDataProvider> constantDataProviders = ScriptingUtils.getConstantDataProviders((ScriptVariable)globalDataProvider);
-				for (ConstantDataProvider constantProvider : constantDataProviders)
-				{
-					if (constantProvider.getDataProviderID().equals(id))
-					{
-						return constantProvider;
-					}
-				}
-			}
-		}
-
 		return null;
 	}
 
