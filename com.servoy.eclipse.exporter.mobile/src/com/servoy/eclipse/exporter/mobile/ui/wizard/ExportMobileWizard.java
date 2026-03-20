@@ -19,6 +19,7 @@ package com.servoy.eclipse.exporter.mobile.ui.wizard;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -85,6 +86,28 @@ public class ExportMobileWizard extends DirtySaveExportWizard implements IExport
 			public String exportNG2Mode()
 			{
 				return "build_mobile";
+			}
+
+			/**
+			 * The 2 methods below are overriding to include also the explicit once
+			 * Because the Mobile Export wizard doesn't show those 2 tabs (like the normal export does)
+			 * And the normal exported then already copies those components to the ui and then the ui selection will be use
+			 * but for a mobile exporter w
+			 */
+			@Override
+			public Set<String> getAllExportedComponents()
+			{
+				Set<String> allExportedComponents = super.getAllExportedComponents();
+				allExportedComponents.addAll(getComponentsUsedExplicitlyBySolution());
+				return allExportedComponents;
+			}
+
+			@Override
+			public Set<String> getAllExportedServicesWithoutSabloServices()
+			{
+				Set<String> allExportedServices = super.getAllExportedServicesWithoutSabloServices();
+				allExportedServices.addAll(getServicesUsedExplicitlyBySolution());
+				return allExportedServices;
 			}
 		});
 		pgAppPage = new PhoneGapApplicationPage("PhoneGap Application", mobileExporter);
