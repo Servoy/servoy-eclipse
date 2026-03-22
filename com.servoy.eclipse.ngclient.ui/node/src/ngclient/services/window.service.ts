@@ -597,7 +597,10 @@ export class SvyWindow {
 
     hide() {
         if (this.bsWindowInstance) this.bsWindowInstance.close();
-        if (this.componentRef) this.componentRef.destroy();
+        if (this.componentRef) {
+            this.componentRef.destroy();
+            delete this.componentRef;
+        }
         if (!this.storeBounds) {
             delete this.location;
             delete this.size;
