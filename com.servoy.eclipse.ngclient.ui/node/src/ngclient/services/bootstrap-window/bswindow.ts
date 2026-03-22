@@ -36,10 +36,18 @@ export class BSWindow {
     window_info: any;
 
     onClose: () => void;
-    mouseDownListenerElement: any;
-    mouseDownListenerHandle: any;
+    
+    private mouseDownListenerElement: () => void;
+    private mouseDownListenerHandle: () => void;
+    private mouseUpBody: () => void;
+    private mouseUpListenerHandle: () => void;
+    private mouseMoveBody: () => void;
+    private mouseLeaveBody: () => void;
+    private mouseMoveElement: () => void;
 
     private renderer: Renderer2;
+    private listenersToBeUnregisteredOnClose: (() => void)[] = [];
+    
     constructor(private windowRefService: WindowRefService,
         rendererFactory: RendererFactory2,
         private utilsService: SvyUtilsService,
@@ -120,14 +128,15 @@ export class BSWindow {
         if (this.options.size) {
             this.setSize(this.options.size);
         }
+        
+        // TODO why are these 3 listeners not added in this.initHandlers call below? I don't see initHandlers() getting called from anywhere else...
+        
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            this.renderer.listen(this.options.references.window, 'orientationchange', () => _this.centerWindow());
-            this.renderer.listen(this.options.references.window, 'resize', () => _this.centerWindow());
+            this.listenersToBeUnregisteredOnClose.push(this.renderer.listen(this.options.references.window, 'orientationchange', () => _this.centerWindow()));
+            this.listenersToBeUnregisteredOnClose.push(this.renderer.listen(this.options.references.window, 'resize', () => _this.centerWindow()));
         }
 
-        this.renderer.listen(this.element, 'touchmove', (e) => {
-            e.stopPropagation();
-        });
+        this.listenersToBeUnregisteredOnClose.push(this.renderer.listen(this.element, 'touchmove', (e) => e.stopPropagation()));
 
         this.initHandlers();
         this.renderer.setStyle(this.element, 'display', 'none');
@@ -199,6 +208,8 @@ export class BSWindow {
         if (this.windowTab) {
             _this.windowTab.remove();
         }
+        
+        this.listenersToBeUnregisteredOnClose.forEach((listenerUnregisterFn) => listenerUnregisterFn());
     }
 
     setActive(active: boolean) {
@@ -264,16 +275,18 @@ export class BSWindow {
     }
 
     initHandlers() {
-//        this.renderer.listen(this.element.querySelector('[data-dismiss=window]'), 'click', (e) => {
+//        this.listenersToBeUnregisteredOnClose.push(this.renderer.listen(this.element.querySelector('[data-dismiss=window]'), 'click', (e) => {
 //            if (this.options.blocker) {
 //                return;
 //            }
 //            this.close();
-//        });
+//        }));
 //
 
         if (this.mouseDownListenerElement) {
+            // TODO why do we do this? initHandlers is only called once, right? with setOptions -> initialize -> undock -> initHandlers; and setOptions is called only once in bswindow_manager_service.ts after creating the obj.
             this.mouseDownListenerElement();
+            this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseDownListenerElement), 1);
         }
         this.mouseDownListenerElement = this.renderer.listen(this.element, 'mousedown', (event) => {
             const focusedEvent = new Event('focused');
@@ -325,8 +338,14 @@ export class BSWindow {
                 }
             }
         });
+        this.listenersToBeUnregisteredOnClose.push(this.mouseDownListenerElement);
 
-        this.renderer.listen(this.options.references.body, 'mouseup', () => {
+        if (this.mouseUpBody) {
+            // TODO why do we do this? initHandlers is only called once, right? with setOptions -> initialize -> undock -> initHandlers; and setOptions is called only once in bswindow_manager_service.ts after creating the obj.
+            this.mouseUpBody();
+            this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseUpBody), 1)
+        }
+        this.mouseUpBody = this.renderer.listen(this.options.references.body, 'mouseup', () => {
             this.resizing = false;
             this.moving = false;
             this.removeClassToBodyChildren('disable-select');
@@ -342,8 +361,12 @@ export class BSWindow {
             // not sure if it's okay, is there a better way to trigger events manually in Angular?
             this.element.dispatchEvent(new CustomEvent('bswin.resize', { detail: size  }));
         });
+        this.listenersToBeUnregisteredOnClose.push(this.mouseUpBody);
+
         if (this.mouseDownListenerHandle) {
+            // TODO why do we do this? initHandlers is only called once, right? with setOptions -> initialize -> undock -> initHandlers; and setOptions is called only once in bswindow_manager_service.ts after creating the obj.
             this.mouseDownListenerHandle();
+            this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseDownListenerHandle), 1)
         }
         this.mouseDownListenerHandle = this.renderer.listen(this.options.elements.handle, 'mousedown', (event) => {
             const handleHeight = this.options.elements.handle.offsetHeight;
@@ -368,15 +391,27 @@ export class BSWindow {
             this.offset.y = event.pageY - this.element.offsetTop;
             this.addClassToBodyChildren('disable-select');
         });
+        this.listenersToBeUnregisteredOnClose.push(this.mouseDownListenerHandle);
 
-        this.renderer.listen(this.options.elements.handle, 'mouseup', () => {
+        if (this.mouseUpListenerHandle) {
+            // TODO why do we do this? initHandlers is only called once, right? with setOptions -> initialize -> undock -> initHandlers; and setOptions is called only once in bswindow_manager_service.ts after creating the obj.
+            this.mouseUpListenerHandle();
+            this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseUpListenerHandle), 1)
+        }
+        this.mouseUpListenerHandle = this.renderer.listen(this.options.elements.handle, 'mouseup', () => {
             this.moving = false;
             this.removeClassToBodyChildren('disable-select');
             const pos = { y: this.element.offsetTop, x: this.element.offsetLeft };
             this.element.dispatchEvent(new CustomEvent<{x: number; y: number}>('bswin.move', { detail: pos }));
         });
+        this.listenersToBeUnregisteredOnClose.push(this.mouseUpListenerHandle);
 
-        this.renderer.listen(this.options.references.body, 'mousemove', (event: MouseEvent) => {
+        if (this.mouseMoveBody) {
+            // TODO why do we do this? initHandlers is only called once, right? with setOptions -> initialize -> undock -> initHandlers; and setOptions is called only once in bswindow_manager_service.ts after creating the obj.
+            this.mouseMoveBody();
+            this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseMoveBody), 1)
+        }
+        this.mouseMoveBody = this.renderer.listen(this.options.references.body, 'mousemove', (event: MouseEvent) => {
             if (this.moving) {
                 this.renderer.setStyle(this.element, 'top', (event.pageY - this.offset.y) + 'px');
                 this.renderer.setStyle(this.element, 'left', (event.pageX - this.offset.x) + 'px');
@@ -408,14 +443,26 @@ export class BSWindow {
                 }
             }
         });
+        this.listenersToBeUnregisteredOnClose.push(this.mouseMoveBody);
 
-        this.renderer.listen(this.options.references.body, 'mouseleave', () => {
+        if (this.mouseLeaveBody) {
+            // TODO why do we do this? initHandlers is only called once, right? with setOptions -> initialize -> undock -> initHandlers; and setOptions is called only once in bswindow_manager_service.ts after creating the obj.
+            this.mouseLeaveBody();
+            this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseLeaveBody), 1)
+        }
+        this.mouseLeaveBody = this.renderer.listen(this.options.references.body, 'mouseleave', () => {
             this.moving = false;
             this.removeClassToBodyChildren('disable-select');
         });
+        this.listenersToBeUnregisteredOnClose.push(this.mouseLeaveBody);
 
         let lastResizeClass = '';
-        this.renderer.listen(this.element, 'mousemove', (event) => {
+        if (this.mouseMoveElement) {
+            // TODO why do we do this? initHandlers is only called once, right? with setOptions -> initialize -> undock -> initHandlers; and setOptions is called only once in bswindow_manager_service.ts after creating the obj.
+            this.mouseMoveElement();
+            this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseMoveElement), 1)
+        }
+        this.mouseMoveElement = this.renderer.listen(this.element, 'mousemove', (event) => {
             if (this.options.blocker) {
                 return;
             }
@@ -455,6 +502,7 @@ export class BSWindow {
                 }
             }
         });
+        this.listenersToBeUnregisteredOnClose.push(this.mouseMoveElement);
     }
 
     resize(options) {
