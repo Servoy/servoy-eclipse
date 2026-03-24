@@ -238,13 +238,17 @@ export class WindowService {
             const width = instance.bsWindowInstance.element.getBoundingClientRect().width;
             const height = instance.bsWindowInstance.element.getBoundingClientRect().height;
             if (width > 0 && height > 0) {
-                const dialogSize = { width, height };
+                const dialogSize = size || { width, height };
                 const isUndecorated = instance.undecorated;
                 const headerHeight = instance.bsWindowInstance.options.elements.handle.getBoundingClientRect().height;
                 const footerHeight = instance.bsWindowInstance.options.elements.footer.getBoundingClientRect().height;
                 if (centerLocation) {
                     if (isUndecorated) {
-                        dialogSize.height = dialogSize.height - headerHeight - footerHeight;
+                        if (size) {
+                            dialogSize.height = dialogSize.height + headerHeight + footerHeight;
+                        } else {
+                            dialogSize.height = dialogSize.height - headerHeight - footerHeight;
+                        }
                     }
                     const newLocation = this.centerWindow(dialogSize);
                     if (!isEqual(location, newLocation)) {
