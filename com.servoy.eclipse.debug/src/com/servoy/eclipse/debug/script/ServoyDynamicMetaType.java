@@ -50,7 +50,7 @@ public class ServoyDynamicMetaType extends DefaultMetaType
 			Type recordType = type.findDirectMember("getSelectedRecord").getDirectType();
 			if (recordType != null)
 			{
-				return new ServoyDynamicArrayRuntimeType(typeSystem, type, recordType.toRType(typeSystem));
+				return new ServoyDynamicIterableRuntimeType(typeSystem, type, recordType.toRType(typeSystem));
 			}
 		}
 		// for a dataset we need to look at the record type that a dataset can have and use that one.
@@ -60,7 +60,7 @@ public class ServoyDynamicMetaType extends DefaultMetaType
 			String recordType = fullTypeName.substring("JSDataSet<".length(), fullTypeName.length() - 1);
 			Type t = TypeCreator.getRecordType(recordType);
 			t.setName(recordType);
-			return new ServoyDynamicArrayRuntimeType(typeSystem, type, t.toRType(typeSystem));
+			return new ServoyDynamicIterableRuntimeType(typeSystem, type, t.toRType(typeSystem));
 		}
 		return new ServoyDynamicRuntimeType(typeSystem, type);
 	}
