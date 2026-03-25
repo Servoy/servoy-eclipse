@@ -124,7 +124,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                     this.log.error(e);
                     //TODO set error state
                 }
-                if (this.format.type === 'TEXT' && this.format.isRaw && this.format.isMask && data instanceof String) {
+                if (this.format.type === 'TEXT' && this.format.isRaw && this.format.isMask && typeof data === 'string') {
                     if (data && format && data.length === format.length) {
                         let ret = '';
                         for (let i = 0; i < format.length; i++) {
