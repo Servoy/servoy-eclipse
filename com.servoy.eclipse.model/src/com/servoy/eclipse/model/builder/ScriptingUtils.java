@@ -46,6 +46,7 @@ import org.eclipse.dltk.javascript.ast.v4.PropertyShorthand;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.ConstantDataProvider;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -147,6 +148,114 @@ public class ScriptingUtils
 						else
 						{
 							Debug.error("unsuported enum constant: " + part);
+						}
+					}
+					return null;
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitDecimalLiteral(org.eclipse.dltk.javascript.ast.DecimalLiteral)
+				 */
+				@Override
+				public Object visitDecimalLiteral(DecimalLiteral node)
+				{
+					return Integer.valueOf(IColumnTypes.NUMBER);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitBigIntLiteral(org.eclipse.dltk.javascript.ast.BigIntLiteral)
+				 */
+				@Override
+				public Object visitBigIntLiteral(BigIntLiteral node)
+				{
+					return Integer.valueOf(IColumnTypes.NUMBER);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitStringLiteral(org.eclipse.dltk.javascript.ast.StringLiteral)
+				 */
+				@Override
+				public Object visitStringLiteral(StringLiteral node)
+				{
+					return Integer.valueOf(IColumnTypes.TEXT);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitNullExpression(org.eclipse.dltk.javascript.ast.NullExpression)
+				 */
+				@Override
+				public Object visitNullExpression(NullExpression node)
+				{
+					return Integer.valueOf(Types.NULL);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 *
+				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitUnaryOperation(org.eclipse.dltk.javascript.ast.UnaryOperation)
+				 */
+				@Override
+				public Object visitUnaryOperation(UnaryOperation node)
+				{
+					if (node.getExpression() instanceof DecimalLiteral)
+					{
+						return Integer.valueOf(IColumnTypes.NUMBER);
+					}
+					return super.visitUnaryOperation(node);
+				}
+			});
+		}
+		catch (Throwable throwable)
+		{
+			Debug.error(throwable);
+		}
+		return retval;
+	}
+
+
+	/**
+	 * @param global
+	 * @param retval
+	 */
+	public static List<ConstantDataProvider> getConstantDataProviders(final ScriptVariable global)
+	{
+		final List<ConstantDataProvider> retval = new ArrayList<ConstantDataProvider>();
+		String defaultValue = global.getDefaultValue();
+		try
+		{
+			Script script = JavaScriptParserUtil.parse(global.getName() + '=' + defaultValue, dummyReporter);
+			script.visitAll(new AbstractNavigationVisitor<Object>()
+			{
+				@Override
+				public Object visitObjectInitializer(ObjectInitializer node)
+				{
+					for (ObjectInitializerPart part : node.getInitializers())
+					{
+						if (part instanceof PropertyInitializer)
+						{
+							Object type = visit(((PropertyInitializer)part).getValue());
+							int typeid = IColumnTypes.MEDIA;
+							if (type instanceof Integer) typeid = ((Integer)type).intValue();
+							retval.add(new ConstantDataProvider(global.getDataProviderID() + '.' + ((PropertyInitializer)part).getNameAsString(), typeid));
+						}
+						else if (part instanceof PropertyShorthand)
+						{
+							Object type = visit(((PropertyShorthand)part).getExpression());
+							int typeid = IColumnTypes.MEDIA;
+							if (type instanceof Integer) typeid = ((Integer)type).intValue();
+							retval.add(new ConstantDataProvider(global.getDataProviderID() + '.' + ((PropertyShorthand)part).getNameAsString(), typeid));
+						}
+						else
+						{
+							Debug.error("unsuported constant variable: " + part);
 						}
 					}
 					return null;

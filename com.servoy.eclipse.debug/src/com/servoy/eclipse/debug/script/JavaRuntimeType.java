@@ -76,8 +76,10 @@ class JavaRuntimeType extends RSimpleType
 		}
 		if (runtimeType instanceof IRSimpleType)
 		{
+			String localName = TypeUtil.getName(getTarget());
+			// let all simple types like Array be assignable to Object (of java)
+			if ("java.lang.Object".equals(localName)) return TypeCompatibility.TRUE;
 			Type src = ((IRSimpleType)runtimeType).getTarget();
-			final String localName = TypeUtil.getName(getTarget());
 			for (Type t : new TypeQuery(src).getHierarchy())
 			{
 				if (localName.equals(TypeUtil.getName(t))) return TypeCompatibility.TRUE;

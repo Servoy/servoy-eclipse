@@ -20,14 +20,26 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     runtimeIndex: RuntimeIndex;
     initializing: boolean;
     isEnabled: boolean;
+    
+    private parentSTS: SabloTabseq; // we keep a hard ref. to parent tab seq. container now for unregistering child from parent
+    // because at the moment a child SabloTabseq directive receives ngOnDestroy it is possible that the chain of DOM parents was already
+    // broken; for example when a dialog that contains a form gets closed, it's UI is hidden via DOM operations, then ngOnDestroy
+    // happens in child (we used to make child trigger a CustomEvent for a parent's @HostListener to tell the parent, but in the case
+    // described above, the event would not reach the parent as parent DOM chain was already broken; that means parent would forever keep
+    // references to detached UI via SabloTabseq child; so now we keep a direct ref.)
 
     constructor(private _elemRef: ElementRef<Element>/*, private _cdRef: ChangeDetectorRef*/) {
+    }
+    
+    private setParentSTS(parentSTS: SabloTabseq) {
+        this.parentSTS = parentSTS;
     }
 
     // handle event: Child Servoy Tab Sequence registered
     @HostListener('registerCSTS', ['$event'])
     registerChildHandler(event: Event): boolean {
-        const customEvent = event as CustomEvent<{ designChildIndex: number, runtimeChildIndex: RuntimeIndex }>;
+        const customEvent = event as CustomEvent<{ designChildIndex: number, runtimeChildIndex: RuntimeIndex, childSTS: SabloTabseq }>;
+        customEvent.detail.childSTS.setParentSTS(this);
         if (this.designTabSeq === -2 || customEvent.detail.designChildIndex === -2) {
             this.recalculateIndexes(customEvent.detail.designChildIndex ? customEvent.detail.designChildIndex : 0, false);
             event.stopPropagation();
@@ -60,32 +72,27 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
         return false;
     }
 
-    @HostListener('unregisterCSTS', ['$event'])
-    unregisterChildHandler(event: Event): boolean {
-        const customEvent = event as CustomEvent<{ designChildIndex: number, runtimeChildIndex: RuntimeIndex }>;
-        if (this.designTabSeq === -2 || customEvent.detail.designChildIndex === -2) {
-            event.stopPropagation();
-            return false;
+    private unregisterChildSTS(designChildIndex: number, runtimeChildIndex: RuntimeIndex) {
+        if (this.designTabSeq === -2 || designChildIndex === -2) {
+            return; // nothing to do; either this parent or the child was/were already excluded from the tabSeq
         }
 
-        const posInDesignArray = this.designChildIndexToArrayPosition[customEvent.detail.designChildIndex];
+        const posInDesignArray = this.designChildIndexToArrayPosition[designChildIndex];
         if (posInDesignArray !== undefined) {
             const keyInRuntimeArray = this.designChildTabSeq[posInDesignArray];
             const runtimeChildIndexForKey = this.runtimeChildIndexes[keyInRuntimeArray];
             if (!isRuntimeIndexArray(runtimeChildIndexForKey)) {
-                delete this.designChildIndexToArrayPosition[customEvent.detail.designChildIndex];
+                delete this.designChildIndexToArrayPosition[designChildIndex];
                 for (const tmp in this.designChildIndexToArrayPosition) {
                     if (this.designChildIndexToArrayPosition[tmp] > posInDesignArray) this.designChildIndexToArrayPosition[tmp]--;
                 }
                 this.designChildTabSeq.splice(posInDesignArray, 1);
                 delete this.runtimeChildIndexes[keyInRuntimeArray];
             } else { // multiple equal design values
-                runtimeChildIndexForKey.splice(runtimeChildIndexForKey.indexOf(customEvent.detail.runtimeChildIndex), 1);
+                runtimeChildIndexForKey.splice(runtimeChildIndexForKey.indexOf(runtimeChildIndex), 1);
                 if (runtimeChildIndexForKey.length === 1) this.runtimeChildIndexes[keyInRuntimeArray] = runtimeChildIndexForKey[0];
             }
         }
-        event.stopPropagation();
-        return false;
     }
 
     // handle event: child tree was now linked or some child needs extra indexes; runtime indexes can be computed starting at the given child;
@@ -145,10 +152,10 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
         this.isEnabled = true;
 
         // runtime index -1 == SKIP focus traversal in browser
-        // runtime index  0 == DEFAULT == design tab seq 0 (not tabIndex attr set to element or it's children)
+        // runtime index  0 == DEFAULT == design tab seq 0 (no tabIndex attr set to element or it's children)
         this.runtimeIndex = { startIndex: -1, nextAvailableIndex: -1, sablotabseq: this };
         // -1 runtime initially for all (in case some node in the tree has -2 design (skip) and children have >= 0,
-        // at runtime all children should be excluded as wel)
+        // at runtime all children should be excluded as well)
         this.updateCurrentDomElTabIndex();
 
         // check to see if this is the top-most tabSeq container
@@ -272,11 +279,14 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     }
     
     triggerRegisterCSTSInParent(designChildIndex: number, runtimeChildIndex: RuntimeIndex) {
-        this.triggerInParent('registerCSTS', { designChildIndex, runtimeChildIndex });
+        this.triggerInParent('registerCSTS', { designChildIndex, runtimeChildIndex, childSTS: this });
     }
     
     triggerUnregisterCSTSInParent(designChildIndex: number, runtimeChildIndex: RuntimeIndex) {
-        this.triggerInParent('unregisterCSTS', { designChildIndex, runtimeChildIndex });
+        if (this.parentSTS) {
+            this.parentSTS.unregisterChildSTS(designChildIndex, runtimeChildIndex);
+            delete this.parentSTS;
+        }
     }
 
     triggerInParent(eventName: string, arg: unknown): void {
@@ -288,9 +298,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     ngOnDestroy(): void {
         // unregister current tabSeq from parent tabSeq container
-        if(this._elemRef.nativeElement.parentNode) {
-            this.triggerUnregisterCSTSInParent(this.designTabSeq, this.runtimeIndex);
-        }
+        this.triggerUnregisterCSTSInParent(this.designTabSeq, this.runtimeIndex);
     }
 }
 

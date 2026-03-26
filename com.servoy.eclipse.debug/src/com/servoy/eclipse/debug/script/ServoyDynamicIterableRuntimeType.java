@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.eclipse.dltk.javascript.typeinfo.IJavaScriptLikeObject;
-import org.eclipse.dltk.javascript.typeinfo.IRArrayType;
+import org.eclipse.dltk.javascript.typeinfo.IRIterableType;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
@@ -35,27 +35,27 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  * @since 2024.06
  *
  */
-public class ServoyDynamicArrayRuntimeType extends RSimpleType implements IJavaScriptLikeObject, IRArrayType
+public class ServoyDynamicIterableRuntimeType extends RSimpleType implements IJavaScriptLikeObject, IRIterableType
 {
 	private final IRType itemType;
 
 	/**
 	 * @param declaration
 	 */
-	public ServoyDynamicArrayRuntimeType(IRTypeDeclaration declaration, IRType itemType)
+	public ServoyDynamicIterableRuntimeType(IRTypeDeclaration declaration, IRType itemType)
 	{
 		super(declaration);
 		this.itemType = itemType;
 	}
 
-	public ServoyDynamicArrayRuntimeType(ITypeSystem typeSystem, Type type, IRType itemType)
+	public ServoyDynamicIterableRuntimeType(ITypeSystem typeSystem, Type type, IRType itemType)
 	{
 		super(typeSystem, type);
 		this.itemType = itemType;
 	}
 
 	@Override
-	public IRType getItemType()
+	public IRType getIterableType()
 	{
 		return itemType;
 	}
@@ -64,7 +64,7 @@ public class ServoyDynamicArrayRuntimeType extends RSimpleType implements IJavaS
 	public TypeCompatibility isAssignableFrom(IRType type)
 	{
 		TypeCompatibility compatible = super.isAssignableFrom(type);
-		if (!compatible.ok() && type instanceof ServoyDynamicArrayRuntimeType)
+		if (!compatible.ok() && type instanceof ServoyDynamicIterableRuntimeType)
 		{
 			IRTypeDeclaration other = ((RSimpleType)type).getDeclaration();
 			return ServoyDynamicRuntimeType.isAssignableFrom(getDeclaration(), other, new HashSet<IRTypeDeclaration>());
@@ -73,7 +73,7 @@ public class ServoyDynamicArrayRuntimeType extends RSimpleType implements IJavaS
 	}
 
 	@Override
-	public IRArrayType makeImmutable(Map<Object, Object> visited)
+	public ServoyDynamicIterableRuntimeType makeImmutable(Map<Object, Object> visited)
 	{
 		IRTypeDeclaration declaration = getDeclaration();
 		if (declaration instanceof ImmutableType< ? > || itemType instanceof ImmutableType< ? >)
@@ -87,7 +87,7 @@ public class ServoyDynamicArrayRuntimeType extends RSimpleType implements IJavaS
 			{
 				declaration = (IRTypeDeclaration)t.makeImmutable(visited);
 			}
-			return new ServoyDynamicArrayRuntimeType(declaration, type);
+			return new ServoyDynamicIterableRuntimeType(declaration, type);
 		}
 		return this;
 	}

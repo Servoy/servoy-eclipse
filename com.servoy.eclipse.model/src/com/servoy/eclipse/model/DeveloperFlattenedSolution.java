@@ -27,6 +27,7 @@ import java.util.Map;
 import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.ISolutionModelPersistIndex;
+import com.servoy.j2db.persistence.ConstantDataProvider;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -153,25 +154,38 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	}
 
 	@Override
-	protected IDataProvider getEnumDataProvider(String id) throws RepositoryException
+	protected IDataProvider getEnumOrConstantDataProvider(String id) throws RepositoryException
 	{
 		String[] enumParts = id.split("\\.");
 		if (enumParts.length > 3)
 		{
 			IDataProvider globalDataProvider = getGlobalDataProvider(enumParts[0] + '.' + enumParts[1] + '.' + enumParts[2]);
-			if (globalDataProvider instanceof ScriptVariable && ((ScriptVariable)globalDataProvider).isEnum())
+			if (globalDataProvider instanceof ScriptVariable)
 			{
-				List<EnumDataProvider> enumDataProviders = ScriptingUtils.getEnumDataProviders((ScriptVariable)globalDataProvider);
-				for (EnumDataProvider enumProvider : enumDataProviders)
+				if (((ScriptVariable)globalDataProvider).isEnum())
 				{
-					if (enumProvider.getDataProviderID().equals(id))
+					List<EnumDataProvider> enumDataProviders = ScriptingUtils.getEnumDataProviders((ScriptVariable)globalDataProvider);
+					for (EnumDataProvider enumProvider : enumDataProviders)
 					{
-						return enumProvider;
+						if (enumProvider.getDataProviderID().equals(id))
+						{
+							return enumProvider;
+						}
+					}
+				}
+				else if (((ScriptVariable)globalDataProvider).isConstant())
+				{
+					List<ConstantDataProvider> constantDataProviders = ScriptingUtils.getConstantDataProviders((ScriptVariable)globalDataProvider);
+					for (ConstantDataProvider constantProvider : constantDataProviders)
+					{
+						if (constantProvider.getDataProviderID().equals(id))
+						{
+							return constantProvider;
+						}
 					}
 				}
 			}
 		}
-
 		return null;
 	}
 

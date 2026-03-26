@@ -98,7 +98,7 @@ public class TypeProvider implements ITypeProvider
 							Iterator<ScriptVariable> scriptVariables = flattenedSolution.getScriptVariables(scopes[1], false);
 							for (ScriptVariable variable : Utils.iterate(scriptVariables))
 							{
-								if (variable.isEnum())
+								if (variable.isEnum() || variable.isConstant())
 								{
 									String name = "scopes." + scopes[1] + '.' + variable.getName();
 									if (name.toLowerCase().startsWith(prefixLower))

@@ -27,6 +27,7 @@ import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.ColumnWrapper;
+import com.servoy.j2db.persistence.ConstantDataProvider;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
@@ -79,6 +80,11 @@ public class DataProviderLabelProvider extends LabelProvider implements IFontPro
 		if (hidePrefix && dataProvider instanceof EnumDataProvider)
 		{
 			return ScopesUtils.getVariableScope(((EnumDataProvider)dataProvider).getDataProviderID()).getRight();
+		}
+
+		if (hidePrefix && dataProvider instanceof ConstantDataProvider)
+		{
+			return ScopesUtils.getVariableScope(((ConstantDataProvider)dataProvider).getDataProviderID()).getRight();
 		}
 
 		if (dataProvider instanceof IDataProvider)

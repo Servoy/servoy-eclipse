@@ -184,7 +184,8 @@ export class WindowService {
                 resizable: !!instance.resizable,
                 location: loc,
                 size,
-                isModal: instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG
+                isModal: instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG,
+                undecorated: instance.undecorated
             };
 
             // test if it is modal dialog, then the request blocks on the server and we should hide the loading.
@@ -237,16 +238,27 @@ export class WindowService {
             const width = instance.bsWindowInstance.element.getBoundingClientRect().width;
             const height = instance.bsWindowInstance.element.getBoundingClientRect().height;
             if (width > 0 && height > 0) {
-                const dialogSize = { width, height };
+                const dialogSize = size || { width, height };
+                const isUndecorated = instance.undecorated;
                 const headerHeight = instance.bsWindowInstance.options.elements.handle.getBoundingClientRect().height;
                 const footerHeight = instance.bsWindowInstance.options.elements.footer.getBoundingClientRect().height;
                 if (centerLocation) {
+                    if (isUndecorated) {
+                        if (size) {
+                            dialogSize.height = dialogSize.height + headerHeight + footerHeight;
+                        } else {
+                            dialogSize.height = dialogSize.height - headerHeight - footerHeight;
+                        }
+                    }
                     const newLocation = this.centerWindow(dialogSize);
                     if (!isEqual(location, newLocation)) {
+                        if (isUndecorated && newLocation.y > 0) {
+                            newLocation.y += (headerHeight / 2);
+                        }
                         this.setLocation(instance.bsWindowInstance.id, newLocation);
                     }
                 } else if (windowHeight - loc.top < dialogSize.height) {
-                    dialogSize.height = windowHeight - headerHeight - footerHeight - loc.top;
+                    dialogSize.height = windowHeight - (isUndecorated ? 0 : headerHeight) - (isUndecorated ? 0 : footerHeight) - loc.top;
                     this.setSize(instance.bsWindowInstance.id, dialogSize);
                 }  
                 this.sabloService.callService('$windowService', 'resize', { name: instance.name, size: dialogSize }, true);
@@ -589,7 +601,10 @@ export class SvyWindow {
 
     hide() {
         if (this.bsWindowInstance) this.bsWindowInstance.close();
-        if (this.componentRef) this.componentRef.destroy();
+        if (this.componentRef) {
+            this.componentRef.destroy();
+            delete this.componentRef;
+        }
         if (!this.storeBounds) {
             delete this.location;
             delete this.size;
@@ -602,7 +617,6 @@ export class SvyWindow {
         if (this.bsWindowInstance && this.location) {
             this.renderer2.setStyle(this.bsWindowInstance.element, 'left', this.location.x + 'px');
             this.renderer2.setStyle(this.bsWindowInstance.element, 'top', this.location.y + 'px');
-            this.bsWindowInstance.options.location = { left: this.location.x, top: this.location.y };
         }
         if (this.storeBounds) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.location', this.location);
