@@ -40,6 +40,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
@@ -298,6 +299,8 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		container.setLayout(groupLayout);
 
 		initDataBindings();
+
+		setupCustomSelectionColors();
 
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
@@ -624,6 +627,72 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			}
 		}
 		return groups;
+	}
+
+	private void setupCustomSelectionColors()
+	{
+		if (UIUtils.isDarkThemeSelected(false))
+		{
+			Display display = Display.getCurrent();
+
+			final Color selectionColor = new Color(display, 51, 51, 51); // #333333
+			final Color foregroundColor = new Color(display, 204, 204, 204); // #cccccc
+			final Color backgroundColor = new Color(display, 21, 21, 21); // #151515
+
+			// Custom paint for Table selection
+			groupTable.addListener(SWT.EraseItem, event -> {
+				boolean isSelected = (event.detail & SWT.SELECTED) != 0;
+				if (isSelected)
+				{
+					event.gc.setBackground(selectionColor);
+					event.gc.setForeground(foregroundColor);
+					event.gc.fillRectangle(0, event.y, groupTable.getClientArea().width, event.height);
+					// Suppress native selection but keep text/checkbox/icons
+					event.detail &= ~SWT.SELECTED;
+					event.detail |= SWT.BACKGROUND | SWT.FOREGROUND;
+				}
+				else
+				{
+					event.gc.setBackground(backgroundColor);
+					event.gc.setForeground(foregroundColor);
+				}
+			});
+
+			// Custom paint for Tree selection
+			usersTree.addListener(SWT.EraseItem, event -> {
+				boolean isSelected = (event.detail & SWT.SELECTED) != 0;
+				if (isSelected)
+				{
+					event.gc.setBackground(selectionColor);
+					event.gc.setForeground(foregroundColor);
+					event.gc.fillRectangle(0, event.y, usersTree.getClientArea().width, event.height);
+					// Suppress native selection but keep text/checkbox/icons
+					event.detail &= ~SWT.SELECTED;
+					event.detail |= SWT.BACKGROUND | SWT.FOREGROUND;
+				}
+				else
+				{
+					event.gc.setBackground(backgroundColor);
+					event.gc.setForeground(foregroundColor);
+				}
+			});
+
+			// Dispose color when widgets are disposed
+			groupTable.addListener(SWT.Dispose, event -> {
+				if (selectionColor != null && !selectionColor.isDisposed())
+				{
+					selectionColor.dispose();
+				}
+				if (foregroundColor != null && !foregroundColor.isDisposed())
+				{
+					foregroundColor.dispose();
+				}
+				if (backgroundColor != null && !backgroundColor.isDisposed())
+				{
+					backgroundColor.dispose();
+				}
+			});
+		}
 	}
 
 	@Override
