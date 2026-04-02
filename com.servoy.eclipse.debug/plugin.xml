@@ -248,12 +248,20 @@
               org.eclipse.dltk.javascript.core.JavaScriptProblems#WRONG_JAVA_PARAMETERS
            </problem>
         </problemCategory>
-         <problemCategory
+        <problemCategory
               id="any"
               nature="org.eclipse.dltk.javascript.core.nature"
               scope="@SuppressWarnings">
            <problem>
               org.eclipse.dltk.javascript.core.JavaScriptProblems#ANY_TYPE
+           </problem>
+        </problemCategory>
+        <problemCategory
+              id="assignedtype"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#INVALID_ASSIGN_LEFT
            </problem>
         </problemCategory>
      </extension>
