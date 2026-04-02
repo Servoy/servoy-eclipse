@@ -3159,18 +3159,22 @@ public class TypeCreator extends TypeCache
 
 	}
 
-	private Member createOverrideMember(Member member, String context, String config)
+	private Member createOverrideMember(Member member, String context, String config, String recordConfig)
 	{
 		JSType memberType = member.getType();
 		if (memberType != null)
 		{
 			if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
 			{
-				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>'));
+				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + recordConfig + '>'));
 			}
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
-				memberType.getName().equals(QBJoin.class.getSimpleName()) ||
-				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
+				memberType.getName().equals(QBJoin.class.getSimpleName()))
+			{
+				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + recordConfig + '>'));
+			}
+
+			if (memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
 				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()) ||
 				memberType.getName().equals(MenuFoundSet.class.getSimpleName()) || memberType.getName().equals(MenuItemRecord.class.getSimpleName()))
 			{
@@ -3196,6 +3200,7 @@ public class TypeCreator extends TypeCache
 
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			String recordConfig = config;
 			EList<Member> members;
 			if (fs != null && fs.getRelation(config) != null)
 			{
@@ -3205,6 +3210,8 @@ public class TypeCreator extends TypeCache
 					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, FoundSet.JS_FOUNDSET, RelatedFoundSet.class);
 				}
 				members = cachedSuperTypeTemplateTypeForRelatedFoundSet.getMembers();
+				Relation relation = fs.getRelation(config);
+				recordConfig = relation.getForeignDataSource();
 			}
 			else
 			{
@@ -3238,7 +3245,7 @@ public class TypeCreator extends TypeCache
 					EList<Parameter> parameters = functionType.getParameters();
 					Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
 					param.setName("record");
-					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + config + '>'));
+					param.setType(getTypeRef(context, Record.JS_RECORD + '<' + recordConfig + '>'));
 					parameters.add(param);
 					param = TypeInfoModelFactory.eINSTANCE.createParameter();
 					param.setName("recordIndex");
@@ -3257,18 +3264,31 @@ public class TypeCreator extends TypeCache
 				else
 				{
 					String memberConfig = config;
-					if (fs != null && member.getType() != null && member.getType().getName().equals(FoundSet.JS_FOUNDSET) &&
-						member.getName().equals("unrelate"))
+					String overrideRecordConfig = recordConfig;
+					if (fs != null && member.getType() != null)
 					{
-						// its really a relation, unrelate it.
-						Relation relation = fs.getRelation(config);
-						if (relation != null)
+						if (member.getType().getName().equals(FoundSet.JS_FOUNDSET) &&
+							member.getName().equals("unrelate"))
 						{
-							memberConfig = relation.getForeignDataSource();
+							// its really a relation, unrelate it.
+							Relation relation = fs.getRelation(config);
+							if (relation != null)
+							{
+								memberConfig = relation.getForeignDataSource();
+							}
+						}
+						else if (member.getName().equals("getParentRecords"))
+						{
+							// its really a relation, unrelate it.
+							Relation relation = fs.getRelation(config);
+							if (relation != null)
+							{
+								overrideRecordConfig = relation.getPrimaryDataSource();
+							}
 						}
 					}
 
-					overridden = createOverrideMember(member, context, memberConfig);
+					overridden = createOverrideMember(member, context, memberConfig, overrideRecordConfig);
 				}
 
 				if (overridden != null)
@@ -3329,6 +3349,7 @@ public class TypeCreator extends TypeCache
 
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			String recordConfig = config;
 			EList<Member> members;
 			if (fs != null && fs.getRelation(config) != null)
 			{
@@ -3338,6 +3359,8 @@ public class TypeCreator extends TypeCache
 					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, ViewFoundSet.VIEW_FOUNDSET, RelatedFoundSet.class);
 				}
 				members = cachedSuperTypeTemplateTypeForRelatedFoundSet.getMembers();
+				Relation relation = fs.getRelation(config);
+				recordConfig = relation.getForeignDataSource();
 			}
 			else
 			{
@@ -3377,7 +3400,7 @@ public class TypeCreator extends TypeCache
 						}
 					}
 
-					overridden = createOverrideMember(member, context, memberConfig);
+					overridden = createOverrideMember(member, context, memberConfig, recordConfig);
 				}
 
 				if (overridden != null)
@@ -3455,7 +3478,7 @@ public class TypeCreator extends TypeCache
 				}
 				else
 				{
-					overridden = createOverrideMember(member, context, config);
+					overridden = createOverrideMember(member, context, config, config);
 				}
 				if (overridden != null)
 				{
@@ -3579,7 +3602,7 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				Member overridden = createOverrideMember(member, context, config);
+				Member overridden = createOverrideMember(member, context, config, config);
 				if (overridden != null)
 				{
 					overwrittenMembers.add(overridden);
@@ -3928,7 +3951,7 @@ public class TypeCreator extends TypeCache
 			{
 				return TypeCreator.clone(member, getTypeRef(context, QBSelect.class.getSimpleName()));
 			}
-			return createOverrideMember(member, context, config);
+			return createOverrideMember(member, context, config, config);
 		}
 
 		protected Type createBaseType(String context, String fullTypeName)
@@ -4419,7 +4442,7 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				Member overridden = createOverrideMember(member, context, config);
+				Member overridden = createOverrideMember(member, context, config, config);
 				if (overridden != null)
 				{
 					overwrittenMembers.add(overridden);
@@ -4521,7 +4544,7 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				Member overridden = createOverrideMember(member, context, config);
+				Member overridden = createOverrideMember(member, context, config, config);
 				if (overridden != null)
 				{
 					overwrittenMembers.add(overridden);

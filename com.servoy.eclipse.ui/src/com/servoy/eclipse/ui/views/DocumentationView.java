@@ -248,6 +248,7 @@ public class DocumentationView extends ViewPart implements ISelectionListener, I
 	 */
 	private String getNodeUrl(SimpleUserNode node)
 	{
+		if (node == null) return null;
 		switch (node.getType())
 		{
 			case ALL_RELATIONS :
