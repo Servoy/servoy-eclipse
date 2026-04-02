@@ -50,7 +50,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 	public String getLabel()
 	{
 		FunctionStatement f = getFunction();
-		return "Add SuppressWarnings(" + type + ") to '" + (f != null ? f.getFunctionName() : "") + "'";
+		return "Add SuppressWarnings(" + type + ") to the function '" + (f != null ? f.getFunctionName() : "") + "'";
 	}
 
 	private String getAnnotation()
@@ -60,7 +60,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IMarkerResolution2#getImage()
 	 */
 	public Image getImage()
@@ -70,7 +70,7 @@ class GenerateSuppressWarningsResolution extends TextFileEditResolution
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.ui.text.IAnnotationResolution2#getDescription()
 	 */
 	public String getDescription()
