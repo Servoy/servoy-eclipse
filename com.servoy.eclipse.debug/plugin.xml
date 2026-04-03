@@ -245,6 +245,9 @@
               org.eclipse.dltk.javascript.core.JavaScriptProblems#WRONG_PARAMETERS
            </problem>
            <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#WRONG_PARAMETERS_PARAMETERIZATION
+           </problem>
+           <problem>
               org.eclipse.dltk.javascript.core.JavaScriptProblems#WRONG_JAVA_PARAMETERS
            </problem>
         </problemCategory>
@@ -257,11 +260,41 @@
            </problem>
         </problemCategory>
         <problemCategory
+              id="returntype"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#DECLARATION_MISMATCH_ACTUAL_RETURN_TYPE
+           </problem>
+        </problemCategory>
+        <problemCategory
               id="assignedtype"
               nature="org.eclipse.dltk.javascript.core.nature"
               scope="@SuppressWarnings">
            <problem>
               org.eclipse.dltk.javascript.core.JavaScriptProblems#INVALID_ASSIGN_LEFT
+           </problem>
+        </problemCategory>
+        <problemCategory
+              id="undefinedmethod"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#UNDEFINED_METHOD
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#UNDEFINED_JAVA_METHOD
+           </problem>
+        </problemCategory>
+        <problemCategory
+              id="undefinedproperty"
+              nature="org.eclipse.dltk.javascript.core.nature"
+              scope="@SuppressWarnings">
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#UNDEFINED_JAVA_PROPERTY
+           </problem>
+           <problem>
+              org.eclipse.dltk.javascript.core.JavaScriptProblems#UNDEFINED_PROPERTY
            </problem>
         </problemCategory>
      </extension>
