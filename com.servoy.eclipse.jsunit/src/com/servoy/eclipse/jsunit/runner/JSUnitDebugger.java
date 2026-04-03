@@ -33,6 +33,8 @@ public class JSUnitDebugger implements Debugger
 {
 	private final Debugger wrapper;
 	private final Map<String, Throwable> exceptions = new HashMap<String, Throwable>();
+	// type -> scopeName -> functionName -> lineNumber -> hits
+	private final Map<String, Map<String, Map<String, Map<Integer, Integer>>>> lineNumbers = new HashMap<String, Map<String, Map<String, Map<Integer, Integer>>>>();
 
 	public JSUnitDebugger(Debugger wrapper)
 	{
@@ -41,7 +43,7 @@ public class JSUnitDebugger implements Debugger
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.mozilla.javascript.debug.Debugger#handleCompilationDone(org.mozilla.javascript.Context, org.mozilla.javascript.debug.DebuggableScript,
 	 * java.lang.String)
 	 */
@@ -52,7 +54,7 @@ public class JSUnitDebugger implements Debugger
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.mozilla.javascript.debug.Debugger#getFrame(org.mozilla.javascript.Context, org.mozilla.javascript.debug.DebuggableScript)
 	 */
 	public DebugFrame getFrame(Context cx, DebuggableScript fnOrScript)
@@ -79,4 +81,16 @@ public class JSUnitDebugger implements Debugger
 		return exceptions.get(testName);
 	}
 
+	public void addLineNumberHit(String type, String scopeName, String functionName, int lineNumber)
+	{
+		lineNumbers.computeIfAbsent(type, k -> new HashMap<String, Map<String, Map<Integer, Integer>>>())
+			.computeIfAbsent(scopeName, k -> new HashMap<String, Map<Integer, Integer>>())
+			.computeIfAbsent(functionName, k -> new HashMap<Integer, Integer>())
+			.merge(lineNumber, 1, Integer::sum);
+	}
+
+	public Map<String, Map<String, Map<String, Map<Integer, Integer>>>> getLineNumbers()
+	{
+		return lineNumbers;
+	}
 }

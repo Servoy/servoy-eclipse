@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.mozilla.javascript.Scriptable;
 
@@ -49,6 +50,7 @@ public class JSUnitSuite extends TestSuite
 	private boolean useFileInStackQualifiedName = false;
 	private String[] stackElementFilters;
 	private boolean useDebugger;
+	private Map<String, Map<String, Map<String, Map<Integer, Integer>>>> lineNumbers;
 
 	public static Test suite()
 	{
@@ -194,6 +196,7 @@ public class JSUnitSuite extends TestSuite
 	 */
 	protected void releaseScopes()
 	{
+		this.lineNumbers = runner.getLineNumbers();
 		runner = null;
 	}
 
@@ -273,4 +276,12 @@ public class JSUnitSuite extends TestSuite
 		}
 	}
 
+	public Map<String, Map<String, Map<String, Map<Integer, Integer>>>> getLineNumbers()
+	{
+		if (runner != null)
+		{
+			return runner.getLineNumbers();
+		}
+		return lineNumbers;
+	}
 }
