@@ -830,6 +830,12 @@
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package.json"
                                             token="${plainVersion}" value="${newVersion}"/>
                                         <replace
+                                            file="${basedir}/com.servoy.eclipse.designer.rfb/node/package.json"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
+                                            file="${basedir}/com.servoy.eclipse.designer.wpm/node/package.json"
+                                            token="${plainVersion}" value="${newVersion}"/>
+                                        <replace
                                             file="${basedir}/com.servoy.eclipse.ngclient.ui/node/package_solution.json"
                                             token="${plainVersion}" value="${newVersion}"/>
                                     </target>
