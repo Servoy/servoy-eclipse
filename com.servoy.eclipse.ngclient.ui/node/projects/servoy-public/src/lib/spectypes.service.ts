@@ -356,6 +356,7 @@ export interface IFoundsetTree extends Array<any> {
     getChildren(parentID: string, level: number): Promise<any>;
     updateSelection(idarray: Array<string>): void;
     updateCheckboxValue(id: string, value: boolean): void;
+    updateExpandedNodes(paths: Array<string>): void;
     getAndResetNewChildren(): {key: any};
     getAndResetUpdatedCheckboxValues(): {key: boolean};
 }
