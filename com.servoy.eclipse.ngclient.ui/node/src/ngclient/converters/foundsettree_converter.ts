@@ -73,6 +73,11 @@ export class FoundsetTreeType implements IType<FoundsetTree> {
                 delete newDataInternalState.updateCheckboxValueReq;
                 return [tmp, newClientData];
             }
+            if (newDataInternalState.updateExpandedNodesReq) {
+                const tmp = newDataInternalState.updateExpandedNodesReq;
+                delete newDataInternalState.updateExpandedNodesReq;
+                return [tmp, newClientData];
+            }
         }
         return null; // should never happen
     }
@@ -83,6 +88,7 @@ class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
     public getChildrenReq: { getChildren: string; id: number; level: number };
     public updateSelectionReq: {updateSelection: Array<string>};
     public updateCheckboxValueReq: {updateCheckboxValue: string; value: boolean};
+    public updateExpandedNodesReq: { updateExpandedNodes: Array<string> };
     public newChildren: {key: any};
     public newCheckedValues: {key: boolean};
 
@@ -95,7 +101,7 @@ class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
     }
 
     hasChanges(): boolean {
-        return super.hasChanges() || this.getChildrenReq !== undefined || this.updateSelectionReq !== undefined || this.updateCheckboxValueReq !== undefined;
+        return super.hasChanges() || this.getChildrenReq !== undefined || this.updateSelectionReq !== undefined || this.updateCheckboxValueReq !== undefined || this.updateExpandedNodesReq !== undefined;
     }
 
     clearChanges(): void {
@@ -103,6 +109,7 @@ class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
         this.getChildrenReq = undefined;
         this.updateSelectionReq = undefined;
         this.updateCheckboxValueReq = undefined;
+        this.updateExpandedNodesReq = undefined;
     }
 
 }
@@ -153,6 +160,13 @@ export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAw
         this.internalState.updateCheckboxValueReq = {
             updateCheckboxValue: id,
             value
+        };
+        this.internalState.notifyChangeListener();
+    }
+
+    updateExpandedNodes(paths: Array<string>): void {
+        this.internalState.updateExpandedNodesReq = {
+            updateExpandedNodes: paths,
         };
         this.internalState.notifyChangeListener();
     }
