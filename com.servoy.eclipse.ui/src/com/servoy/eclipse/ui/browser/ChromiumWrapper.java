@@ -17,6 +17,11 @@
 
 package com.servoy.eclipse.ui.browser;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.layout.GridData;
@@ -31,6 +36,7 @@ import com.equo.chromium.swt.Browser;
 public class ChromiumWrapper implements IBrowser
 {
 	private final Browser browser;
+	private Path tempHtmlFile;
 
 	/**
 	 * @param parent
@@ -46,6 +52,65 @@ public class ChromiumWrapper implements IBrowser
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.browser.IBrowser#setText(java.lang.String)
+	 */
+	@Override
+	public boolean setText(String html)
+	{
+		// Chromium has size limitations with setText for large content
+		// If content is larger than 500KB, use a file-based approach
+		if (html.length() > 500_000)
+		{
+			return setTextViaFile(html);
+		}
+		else
+		{
+			return browser.setText(html);
+		}
+	}
+
+	/**
+	 * Sets HTML content via a temporary file for large content on Chromium.
+	 * This avoids the size limitations of setText().
+	 *
+	 * @param html the HTML content to display
+	 * @return true if successful, false otherwise
+	 */
+	private boolean setTextViaFile(String html)
+	{
+		try
+		{
+			// Clean up previous temp file if it exists
+			if (tempHtmlFile != null && Files.exists(tempHtmlFile))
+			{
+				try
+				{
+					Files.delete(tempHtmlFile);
+				}
+				catch (IOException e)
+				{
+					// Ignore cleanup errors
+				}
+			}
+
+			// Create a new temporary file
+			tempHtmlFile = Files.createTempFile("servoy-ai-chat-", ".html");
+			Files.write(tempHtmlFile, html.getBytes(StandardCharsets.UTF_8));
+
+			// Load the file via URL
+			String fileUrl = tempHtmlFile.toUri().toString();
+			return setUrl(fileUrl);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	@Override
 	public void setSize(int width, int height)
 	{
@@ -53,15 +118,15 @@ public class ChromiumWrapper implements IBrowser
 	}
 
 	@Override
-	public void setUrl(String url)
+	public boolean setUrl(String url)
 	{
-		this.browser.setUrl(url);
+		return this.browser.setUrl(url);
 	}
 
 	@Override
-	public void setUrl(String url, String postData, String[] headers)
+	public boolean setUrl(String url, String postData, String[] headers)
 	{
-		this.browser.setUrl(url, postData, headers);
+		return this.browser.setUrl(url, postData, headers);
 	}
 
 	@Override
@@ -86,5 +151,29 @@ public class ChromiumWrapper implements IBrowser
 	public int getStyle()
 	{
 		return this.browser.getStyle();
+	}
+
+	@Override
+	public Object getBrowserInstance()
+	{
+		return this.browser;
+	}
+
+	@Override
+	public boolean isDisposed()
+	{
+		return this.browser.isDisposed();
+	}
+
+	@Override
+	public void dispose()
+	{
+		this.browser.dispose();
+	}
+
+	@Override
+	public void execute(String string)
+	{
+		this.browser.execute(string);
 	}
 }

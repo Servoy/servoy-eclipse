@@ -53,15 +53,21 @@ public class SwtBrowserWrapper implements IBrowser
 	}
 
 	@Override
-	public void setUrl(String url)
+	public boolean setUrl(String url)
 	{
-		this.browser.setUrl(url);
+		return this.browser.setUrl(url);
 	}
 
 	@Override
-	public void setUrl(String url, String postData, String[] headers)
+	public boolean setUrl(String url, String postData, String[] headers)
 	{
-		this.browser.setUrl(url, postData, headers);
+		return this.browser.setUrl(url, postData, headers);
+	}
+
+	@Override
+	public boolean setText(String html)
+	{
+		return browser.setText(html);
 	}
 
 	@Override
@@ -86,5 +92,30 @@ public class SwtBrowserWrapper implements IBrowser
 	public int getStyle()
 	{
 		return this.browser.getStyle();
+	}
+
+	@Override
+	public Object getBrowserInstance()
+	{
+		return this.browser;
+	}
+
+
+	@Override
+	public boolean isDisposed()
+	{
+		return this.browser.isDisposed();
+	}
+
+	@Override
+	public void dispose()
+	{
+		this.browser.dispose();
+	}
+
+	@Override
+	public void execute(String string)
+	{
+		this.browser.execute(string);
 	}
 }
