@@ -288,11 +288,12 @@ public class ResourceProvider implements Filter
 		String pathInfo = ((HttpServletRequest)request).getRequestURI();
 		if (pathInfo != null && !pathInfo.equals("/"))
 		{
+			Path base = Paths.get("/templates/");
 			URL url = null;
 			Path normalizedPath = Paths.get(pathInfo.replace(':', '_')).normalize();
-			if (normalizedPath.startsWith("/templates/"))
+			if (normalizedPath.startsWith(base))
 			{
-				File templateFile = new File(templatesDir, normalizedPath.toString().substring("/templates/".length()));
+				File templateFile = new File(templatesDir, base.relativize(normalizedPath).toString());
 				if (templateFile.exists())
 				{
 					url = templateFile.toURI().toURL();
