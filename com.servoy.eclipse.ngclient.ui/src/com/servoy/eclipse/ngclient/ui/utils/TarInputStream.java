@@ -29,7 +29,7 @@ public class TarInputStream extends FilterInputStream
 	private int nextEntry = 0;
 	private int nextEOF = 0;
 	private int filepos = 0;
-	private int bytesread = 0;
+	private long bytesread = 0;
 	private TarEntry firstEntry = null;
 	private String longLinkName = null;
 
@@ -91,7 +91,7 @@ public class TarInputStream extends FilterInputStream
 	 */
 	boolean skipToEntry(TarEntry entry) throws TarException, IOException
 	{
-		int bytestoskip = entry.filepos - bytesread;
+		long bytestoskip = entry.filepos - bytesread;
 		if (bytestoskip < 0)
 		{
 			return false;
@@ -403,11 +403,7 @@ public class TarInputStream extends FilterInputStream
 		{
 			return -1;
 		}
-		if (len > nextEOF)
-		{
-			len = nextEOF;
-		}
-		int size = super.read(b, off, len);
+		int size = super.read(b, off, len > nextEOF ? nextEOF : len);
 		nextEntry -= size;
 		nextEOF -= size;
 		bytesread += size;
