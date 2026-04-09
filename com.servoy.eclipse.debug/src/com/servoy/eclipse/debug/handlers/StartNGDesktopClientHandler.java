@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.regex.Pattern;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -90,6 +91,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	protected static String ARCHITECTURE = Utils.isArmArchitecture() ? "-arm64" : "";
 	protected static String LOCAL_PATH = Activator.getDefault().getStateLocation().toOSString() + File.separator;
 	protected static String NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
+	private static final Pattern SAFE_VERSION_PATTERN = Pattern.compile("^\\d+\\.\\d+(?:\\.\\d+)?$");
 
 	protected static final int BUFFER_SIZE = 16 * 1024;
 
@@ -137,6 +139,13 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		{
 			result = requestedVersion;
 		}
+
+		if (result == null || !SAFE_VERSION_PATTERN.matcher(result).matches())
+		{
+			ServoyLog.logInfo("Invalid NGDesktop version value '" + result + "'. Falling back to default version.");
+			result = NGDESKTOP_VERSION;
+		}
+
 		final String srcNumbers[] = result.split("\\.");
 		if (srcNumbers.length < 3)
 		{
