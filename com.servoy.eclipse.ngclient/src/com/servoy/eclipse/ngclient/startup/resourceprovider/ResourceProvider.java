@@ -292,7 +292,7 @@ public class ResourceProvider implements Filter
 			Path normalizedPath = Paths.get(pathInfo.replace(':', '_')).normalize();
 			if (normalizedPath.startsWith("/templates/"))
 			{
-				File templateFile = new File(templatesDir, pathInfo.substring("/templates/".length()));
+				File templateFile = new File(templatesDir, normalizedPath.toString().substring("/templates/".length()));
 				if (templateFile.exists())
 				{
 					url = templateFile.toURI().toURL();
