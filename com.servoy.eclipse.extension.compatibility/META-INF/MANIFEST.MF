@@ -23,7 +23,6 @@ Require-Bundle: servoy_shared,
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.14.2",
  wrapped.com.auth0.java-jwt;bundle-version="4.2.2",
  org.apache.commons.commons-compress;bundle-version="1.25.0",
- org.apache.commons.logging;bundle-version="1.2.0",
  org.apache.commons.commons-codec;bundle-version="1.16.0",
  com.github.scribejava.apis;bundle-version="8.3.3",
  com.github.scribejava.core;bundle-version="8.3.3",
@@ -31,7 +30,8 @@ Require-Bundle: servoy_shared,
  wrapped.com.auth0.jwks-rsa;bundle-version="0.22.1",
  org.apache.commons.text;bundle-version="1.12.0",
  org.apache.commons.commons-fileupload2-core;bundle-version="2.0.0",
- org.apache.commons.commons-fileupload2-jakarta-servlet6;bundle-version="2.0.0"
+ org.apache.commons.commons-fileupload2-jakarta-servlet6;bundle-version="2.0.0",
+ org.apache.commons.commons-logging;bundle-version="1.3.5"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
