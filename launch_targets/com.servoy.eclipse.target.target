@@ -45,9 +45,9 @@
             <unit id="org.eclipse.nebula.widgets.richtext.feature.feature.group" version="1.6.0.202509131601"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.03/"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.06/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="0.0.0"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="0.0.0"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202604160945"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>

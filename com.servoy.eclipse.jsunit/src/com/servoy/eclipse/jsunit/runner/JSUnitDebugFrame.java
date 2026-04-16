@@ -19,7 +19,6 @@ package com.servoy.eclipse.jsunit.runner;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
-import org.mozilla.javascript.NativeWith;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.debug.DebugFrame;
 
@@ -119,20 +118,6 @@ public class JSUnitDebugFrame implements DebugFrame
 	public void onDebuggerStatement(Context cx)
 	{
 		if (wrapper != null) wrapper.onDebuggerStatement(cx);
-
-	}
-
-	@Override
-	public void onNativeWithEnter(Context cx, NativeWith withScope)
-	{
-		if (wrapper != null) wrapper.onNativeWithEnter(cx, withScope);
-
-	}
-
-	@Override
-	public void onNativeWithExit(Context cx, NativeWith withScope)
-	{
-		if (wrapper != null) wrapper.onNativeWithExit(cx, withScope);
 
 	}
 

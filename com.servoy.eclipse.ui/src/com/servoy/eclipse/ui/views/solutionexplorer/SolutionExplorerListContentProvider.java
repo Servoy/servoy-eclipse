@@ -80,13 +80,13 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.mozilla.javascript.BeanProperty;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaMembers;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.lc.member.NativeJavaField;
 import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
@@ -189,6 +189,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
+import com.servoy.j2db.scripting.DummyScope;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.IPrefixedConstantsObject;
@@ -1807,15 +1808,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray();
 	}
 
-	private static class DummyScope extends ScriptableObject
-	{
-		@Override
-		public String getClassName()
-		{
-			return "DummyScope";
-		}
-	}
-
 	private final class TagResolver implements ITagResolver
 	{
 		private final String elementName;
@@ -2521,9 +2513,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 
 				UserNode node = new UserNode(name, actionType, new FieldFeedback(name, codePrefix, resolver, scriptObject, ijm, originalClass), real, pIcon);
-				if (bp instanceof JavaMembers.BeanProperty)
+				if (bp instanceof BeanProperty prop)
 				{
-					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(((JavaMembers.BeanProperty)bp).getGetter(), originalClass,
+					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(prop.getGetter(), originalClass,
 						ClientSupport.Default));
 				}
 				dlm.add(node);
@@ -2642,6 +2634,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		else if (object instanceof Field field)
 		{
 			returnType = field.getType();
+		}
+		else if (object instanceof NativeJavaField field)
+		{
+			returnType = field.type().asClass();
 		}
 		return getReturnType(returnType);
 	}
@@ -3495,7 +3491,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						method = mthd;
 					}
 				}
-				return method.getReturnType();
+				return method.method().getReturnType();
 			}
 			return null;
 		}
@@ -3801,7 +3797,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			if (ijm != null)
 			{
 				Object bp = ijm.getField(name, false);
-				if (bp instanceof JavaMembers.BeanProperty bpo)
+				if (bp instanceof BeanProperty bpo)
 				{
 					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(getReturnType(originalClass, bpo)) + " " + name +
 						"</b>";
