@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
@@ -110,6 +109,7 @@ import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.Debug;
@@ -759,8 +759,9 @@ public class MobileExporter
 		}
 		String modelDataString = modelData.toString();
 
-		JSONObject componentsSpec = getSpecAsJSON(WebComponentSpecProvider.getSpecProviderState());
-		JSONObject servicesSpec = getSpecAsJSON(WebServiceSpecProvider.getSpecProviderState());
+		JSONObject componentsSpec = getSpecAsJSON(WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications());
+		JSONObject servicesSpec = getSpecAsJSON(NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
+			WebServiceSpecProvider.getSpecProviderState()));
 
 		String specDataString = "var _specdata_ = " + componentsSpec.toString();
 		String serviceSpecDataString = "var _servicespecdata_ = " + servicesSpec.toString();
@@ -1429,36 +1430,38 @@ public class MobileExporter
 		return mediaOrder;
 	}
 
-	public JSONObject getSpecAsJSON(SpecProviderState specProviderState) throws IOException
+	public JSONObject getSpecAsJSON(WebObjectSpecification[] allWebObjectSpecifications) throws IOException
 	{
 		JSONObject spec = new JSONObject();
 
-		WebObjectSpecification[] allWebObjectSpecifications = specProviderState.getAllWebObjectSpecifications();
+		if (allWebObjectSpecifications == null) return spec;
+
 		for (WebObjectSpecification webObjectSpecification : allWebObjectSpecifications)
 		{
 			try (InputStream stream = webObjectSpecification.getSpecURL().openStream())
 			{
 				String content = IOUtils.toString(stream, Charset.forName("UTF8"));
 				JSONObject json = new JSONObject(content);
-				JSONObject properties = json.getJSONObject("model");
-				// strip it a bit
-				properties.keys().forEachRemaining(key -> {
-					if (properties.get(key) instanceof JSONObject property)
-					{
-						property.remove("default");
-						property.remove("tags");
-						property.remove("values");
-					}
-					else
-					{
-						// replace the type string with a json object for easer use in the client
-						JSONObject property = new JSONObject();
-						property.put("type", properties.get(key));
-						properties.put(key, property);
-					}
-				});
-
-
+				JSONObject properties = json.optJSONObject("model");
+				if (properties != null)
+				{
+					// strip it a bit
+					properties.keys().forEachRemaining(key -> {
+						if (properties.get(key) instanceof JSONObject property)
+						{
+							property.remove("default");
+							property.remove("tags");
+							property.remove("values");
+						}
+						else
+						{
+							// replace the type string with a json object for easer use in the client
+							JSONObject property = new JSONObject();
+							property.put("type", properties.get(key));
+							properties.put(key, property);
+						}
+					});
+				}
 				JSONObject api = json.optJSONObject("api");
 				JSONObject component = new JSONObject();
 				component.put("model", properties);
