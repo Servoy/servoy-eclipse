@@ -3725,7 +3725,7 @@ public class TypeCreator extends TypeCache
 				}
 			}
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
-			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
+			if (clientSupport != null && (clientSupport.supports(ClientSupport.ng) || clientSupport == ClientSupport.mc))
 			{
 				WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
 					WebServiceSpecProvider.getSpecProviderState());
