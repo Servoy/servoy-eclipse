@@ -166,7 +166,7 @@ public class WarExporter
 		"sablo_" + ClientVersion.getPureVersion() + "*.jar", //
 		"j2db_log4j_" + ClientVersion.getPureVersion() + "*.jar", //
 		"org.apache.commons.lang3_*.jar", "org.apache.commons.text_*.jar", "org.apache.commons.commons-compress_*.jar", //
-		"de.inetsoftware.jlessc_*.jar", "org.apache.logging.log4j.jcl_*.jar", "tus-java-server_*.jar", //
+		"de.inetsoftware.jlessc_*.jar", /* "org.apache.logging.log4j.jcl_*.jar", */ "tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"wrapped.org.apache.httpcomponents.core5.httpcore5_*.jar", "wrapped.org.apache.httpcomponents.core5.httpcore5-h2_*.jar", //
