@@ -95,9 +95,9 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.mozilla.javascript.BeanProperty;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.JavaMembers;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.NativePromise;
@@ -2151,9 +2151,9 @@ public class TypeCreator extends TypeCache
 						}
 
 						boolean readOnly = false;
-						if (object instanceof BeanProperty)
+						if (object instanceof BeanProperty bp)
 						{
-							readOnly = AnnotationManagerReflection.getInstance().isAnnotationPresent(((BeanProperty)object).getGetter(), scriptObjectClass,
+							readOnly = AnnotationManagerReflection.getInstance().isAnnotationPresent(bp.getGetter(), scriptObjectClass,
 								JSReadonlyProperty.class);
 						}
 
@@ -3725,7 +3725,7 @@ public class TypeCreator extends TypeCache
 				}
 			}
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
-			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
+			if (clientSupport != null && (clientSupport.supports(ClientSupport.ng) || clientSupport == ClientSupport.mc))
 			{
 				WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
 					WebServiceSpecProvider.getSpecProviderState());

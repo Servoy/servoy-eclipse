@@ -19,9 +19,11 @@ package com.servoy.eclipse.jsunit.runner;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
-import org.mozilla.javascript.NativeWith;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.debug.DebugFrame;
+
+import com.servoy.j2db.scripting.FormScope;
+import com.servoy.j2db.scripting.GlobalScope;
 
 /**
  * @author jcompagner
@@ -32,6 +34,7 @@ public class JSUnitDebugFrame implements DebugFrame
 	private final DebugFrame wrapper;
 	private final JSUnitDebugger debugger;
 	private final String name;
+	private Scriptable currentScope;
 
 	public JSUnitDebugFrame(JSUnitDebugger debugger, String name, DebugFrame frame)
 	{
@@ -49,6 +52,7 @@ public class JSUnitDebugFrame implements DebugFrame
 	public void onEnter(Context cx, Scriptable activation, Scriptable thisObj, Object[] args)
 	{
 		if (wrapper != null) wrapper.onEnter(cx, activation, thisObj, args);
+		this.currentScope = thisObj;
 
 	}
 
@@ -60,7 +64,14 @@ public class JSUnitDebugFrame implements DebugFrame
 	public void onLineChange(Context cx, int lineNumber)
 	{
 		if (wrapper != null) wrapper.onLineChange(cx, lineNumber);
-
+		if (currentScope instanceof GlobalScope globalScope)
+		{
+			debugger.addLineNumberHit("scopes", globalScope.getScopeName(), name, lineNumber);
+		}
+		if (currentScope instanceof FormScope formScope)
+		{
+			debugger.addLineNumberHit("forms", formScope.getScopeName(), name, lineNumber);
+		}
 	}
 
 	/*
@@ -100,26 +111,13 @@ public class JSUnitDebugFrame implements DebugFrame
 	public void onExit(Context cx, boolean byThrow, Object resultOrException)
 	{
 		if (wrapper != null) wrapper.onExit(cx, byThrow, resultOrException);
+		this.currentScope = null;
 
 	}
 
 	public void onDebuggerStatement(Context cx)
 	{
 		if (wrapper != null) wrapper.onDebuggerStatement(cx);
-
-	}
-
-	@Override
-	public void onNativeWithEnter(Context cx, NativeWith withScope)
-	{
-		if (wrapper != null) wrapper.onNativeWithEnter(cx, withScope);
-
-	}
-
-	@Override
-	public void onNativeWithExit(Context cx, NativeWith withScope)
-	{
-		if (wrapper != null) wrapper.onNativeWithExit(cx, withScope);
 
 	}
 

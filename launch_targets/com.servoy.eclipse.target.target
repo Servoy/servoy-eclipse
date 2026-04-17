@@ -45,9 +45,9 @@
             <unit id="org.eclipse.nebula.widgets.richtext.feature.feature.group" version="1.6.0.202509131601"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.03/"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.06/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="0.0.0"/>
-            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="0.0.0"/>
+            <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202604160945"/>
         </location>
         <location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
             <dependencies>
@@ -316,30 +316,30 @@
                     <type>jar</type>
                 </dependency>
                  <dependency>
-					  <groupId>org.checkerframework</groupId>
-					  <artifactId>checker-qual</artifactId>
-					  <version>3.49.4</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.enterprise</groupId>
-				    <artifactId>jakarta.enterprise.cdi-api</artifactId>
-				    <version>4.1.0</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.enterprise</groupId>
-				    <artifactId>jakarta.enterprise.lang-model</artifactId>
-				    <version>4.1.0</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.validation</groupId>
-				    <artifactId>jakarta.validation-api</artifactId>
-				    <version>3.1.0</version>
-				</dependency>
-				<dependency>
-				    <groupId>jakarta.interceptor</groupId>
-				    <artifactId>jakarta.interceptor-api</artifactId>
-				    <version>2.2.0</version>
-				</dependency>
+                      <groupId>org.checkerframework</groupId>
+                      <artifactId>checker-qual</artifactId>
+                      <version>3.49.4</version>
+                </dependency>
+                <dependency>
+                    <groupId>jakarta.enterprise</groupId>
+                    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+                    <version>4.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>jakarta.enterprise</groupId>
+                    <artifactId>jakarta.enterprise.lang-model</artifactId>
+                    <version>4.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>jakarta.validation</groupId>
+                    <artifactId>jakarta.validation-api</artifactId>
+                    <version>3.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>jakarta.interceptor</groupId>
+                    <artifactId>jakarta.interceptor-api</artifactId>
+                    <version>2.2.0</version>
+                </dependency>
                 <dependency>
                     <groupId>jakarta.transaction</groupId>
                     <artifactId>jakarta.transaction-api</artifactId>
@@ -349,7 +349,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.18.7</version>
+                    <version>1.18.8</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -496,16 +496,16 @@
                     <version>7.0.2-Servoy1</version>
                     <type>jar</type>
                 </dependency>
-				<dependency>
-				  <groupId>org.hibernate.orm</groupId>
-				  <artifactId>hibernate-community-dialects</artifactId>
-				  <version>7.0.2.Final</version>
-				</dependency>
-				<dependency>
-				    <groupId>org.hibernate.models</groupId>
-				    <artifactId>hibernate-models</artifactId>
-				    <version>1.0.0</version>
-				</dependency>
+                <dependency>
+                  <groupId>org.hibernate.orm</groupId>
+                  <artifactId>hibernate-community-dialects</artifactId>
+                  <version>7.0.2.Final</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.hibernate.models</groupId>
+                    <artifactId>hibernate-models</artifactId>
+                    <version>1.0.0</version>
+                </dependency>
                 <dependency>
                     <groupId>org.jboss.logging</groupId>
                     <artifactId>jboss-logging</artifactId>

@@ -34,6 +34,7 @@ import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
@@ -835,13 +836,20 @@ public class WarExporter
 		try (JarFile jarfile = new JarFile(file))
 		{
 			Enumeration<JarEntry> enu = jarfile.entries();
+			String destdir = tmpWarDir + "/" + dirName;
+			Path extractionBasePath = Paths.get(destdir).normalize();
 			while (enu.hasMoreElements())
 			{
-				String destdir = tmpWarDir + "/" + dirName;
 				JarEntry je = enu.nextElement();
 				if (excludedResourcesByName != null && excludedResourcesByName.stream().anyMatch(item -> je.getName().startsWith(item))) continue;
 				if (!je.getName().endsWith(".spec") && !je.getName().endsWith("MANIFEST.MF") && !je.getName().endsWith(".json")) continue;
-				File fl = Paths.get(destdir, je.getName()).normalize().toFile();
+				Path targetPath = extractionBasePath.resolve(je.getName()).normalize();
+				if (!targetPath.startsWith(extractionBasePath))
+				{
+					ServoyLog.logError("Skipping unsafe archive entry outside target dir: " + je.getName() + " from " + file, null);
+					continue;
+				}
+				File fl = targetPath.toFile();
 				if (!fl.exists())
 				{
 					fl.getParentFile().mkdirs();
@@ -884,7 +892,14 @@ public class WarExporter
 					scripts.forEach((String path) -> {
 						String serverScriptPath = path.substring(path.indexOf("/") + 1);
 						ZipEntry serverScriptEntry = jarfile.getEntry(serverScriptPath);
-						File destScriptFile = new File(destdir, serverScriptPath);
+						Path scriptTargetPath = extractionBasePath.resolve(serverScriptPath).normalize();
+						if (!scriptTargetPath.startsWith(extractionBasePath))
+						{
+							ServoyLog.logError("Skipping unsafe serverscript entry outside target dir: " + serverScriptPath + " from " + file, null);
+							return;
+						}
+						File destScriptFile = scriptTargetPath.toFile();
+						if (!destScriptFile.getParentFile().exists()) destScriptFile.getParentFile().mkdirs();
 						try (InputStream is = jarfile.getInputStream(serverScriptEntry); FileOutputStream fo = new FileOutputStream(destScriptFile))
 						{
 							while (is.available() > 0)

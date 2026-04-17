@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
@@ -52,6 +53,7 @@ public class JSUnitToJavaRunner
 	private static final String jsUtil;
 	private static final String jsUnitToJava;
 	private static String curentlyExecutingTest = null;
+	private Map<String, Map<String, Map<String, Map<Integer, Integer>>>> lineNumbers;
 
 	protected static interface RhinoContextRunnable<T, X extends Exception>
 	{
@@ -288,11 +290,12 @@ public class JSUnitToJavaRunner
 		try
 		{
 			Debugger oldDebugger = context.getDebugger();
+			JSUnitDebugger jsUnitDebugger = new JSUnitDebugger(oldDebugger);
 			if (useDebugMode && !(oldDebugger instanceof JSUnitDebugger))
 			{
 				context.setGeneratingDebug(true);
 				context.setOptimizationLevel(-1);
-				context.setDebugger(new JSUnitDebugger(oldDebugger), null);
+				context.setDebugger(jsUnitDebugger, null);
 			}
 			try
 			{
@@ -312,12 +315,22 @@ public class JSUnitToJavaRunner
 			finally
 			{
 				if (useDebugMode) context.setDebugger(oldDebugger, null);
+				if (jsUnitDebugger != null && jsUnitDebugger.getLineNumbers() != null && jsUnitDebugger.getLineNumbers().size() > 0)
+				{
+					// just one call will actually get the line numbers, the rest should be empty
+					lineNumbers = jsUnitDebugger.getLineNumbers();
+				}
 			}
 		}
 		finally
 		{
 			Context.exit();
 		}
+	}
+
+	public Map<String, Map<String, Map<String, Map<Integer, Integer>>>> getLineNumbers()
+	{
+		return lineNumbers;
 	}
 
 //	private static void close(final Writer writer)

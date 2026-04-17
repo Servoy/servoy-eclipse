@@ -58,6 +58,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.base.nongwt.test.LineMapper;
 import com.servoy.base.persistence.constants.IComponentConstants;
@@ -108,6 +109,7 @@ import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.Debug;
@@ -757,45 +759,12 @@ public class MobileExporter
 		}
 		String modelDataString = modelData.toString();
 
-		JSONObject spec = new JSONObject();
+		JSONObject componentsSpec = getSpecAsJSON(WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications());
+		JSONObject servicesSpec = getSpecAsJSON(NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
+			WebServiceSpecProvider.getSpecProviderState()));
 
-		WebObjectSpecification[] allWebObjectSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
-		for (WebObjectSpecification webObjectSpecification : allWebObjectSpecifications)
-		{
-			try (InputStream stream = webObjectSpecification.getSpecURL().openStream())
-			{
-				String content = IOUtils.toString(stream, Charset.forName("UTF8"));
-				JSONObject json = new JSONObject(content);
-				JSONObject properties = json.getJSONObject("model");
-				// strip it a bit
-				properties.keys().forEachRemaining(key -> {
-					if (properties.get(key) instanceof JSONObject property)
-					{
-						property.remove("default");
-						property.remove("tags");
-						property.remove("values");
-					}
-					else
-					{
-						// replace the type string with a json object for easer use in the client
-						JSONObject property = new JSONObject();
-						property.put("type", properties.get(key));
-						properties.put(key, property);
-					}
-				});
-
-
-				JSONObject api = json.optJSONObject("api");
-				JSONObject component = new JSONObject();
-				component.put("model", properties);
-				component.put("api", api);
-
-				spec.put(webObjectSpecification.getName(), component);
-			}
-		}
-
-		String specDataString = "var _specdata_ = " + spec.toString();
-
+		String specDataString = "var _specdata_ = " + componentsSpec.toString();
+		String serviceSpecDataString = "var _servicespecdata_ = " + servicesSpec.toString();
 
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
@@ -818,6 +787,10 @@ public class MobileExporter
 			outputFile = new File(tmpP, "spec_json.js");
 			Utils.writeTXTFile(outputFile, modelDataString);
 			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/spec_json.js"), specDataString);
+
+			outputFile = new File(tmpP, "plugins_spec_json.js");
+			Utils.writeTXTFile(outputFile, serviceSpecDataString);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/plugins_spec_json.js"), serviceSpecDataString);
 		}
 
 		File exportedFile = null;
@@ -918,6 +891,7 @@ public class MobileExporter
 				Utils.closeInputStream(zipStream);
 
 				addZipEntry(moduleName + "/" + renameMap.get("spec_json.js"), warStream, Utils.getUTF8EncodedStream(specDataString));
+				addZipEntry(moduleName + "/" + renameMap.get("plugins_spec_json.js"), warStream, Utils.getUTF8EncodedStream(serviceSpecDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("form_json.js"), warStream, Utils.getUTF8EncodedStream(modelDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
@@ -1000,6 +974,7 @@ public class MobileExporter
 
 		addRenameEntries(renameMap, moduleName + "/", "form_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "spec_json", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "plugins_spec_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");
@@ -1453,5 +1428,48 @@ public class MobileExporter
 			mediaOrder = lst;
 		}
 		return mediaOrder;
+	}
+
+	public JSONObject getSpecAsJSON(WebObjectSpecification[] allWebObjectSpecifications) throws IOException
+	{
+		JSONObject spec = new JSONObject();
+
+		if (allWebObjectSpecifications == null) return spec;
+
+		for (WebObjectSpecification webObjectSpecification : allWebObjectSpecifications)
+		{
+			try (InputStream stream = webObjectSpecification.getSpecURL().openStream())
+			{
+				String content = IOUtils.toString(stream, Charset.forName("UTF8"));
+				JSONObject json = new JSONObject(content);
+				JSONObject properties = json.optJSONObject("model");
+				if (properties != null)
+				{
+					// strip it a bit
+					properties.keys().forEachRemaining(key -> {
+						if (properties.get(key) instanceof JSONObject property)
+						{
+							property.remove("default");
+							property.remove("tags");
+							property.remove("values");
+						}
+						else
+						{
+							// replace the type string with a json object for easer use in the client
+							JSONObject property = new JSONObject();
+							property.put("type", properties.get(key));
+							properties.put(key, property);
+						}
+					});
+				}
+				JSONObject api = json.optJSONObject("api");
+				JSONObject component = new JSONObject();
+				component.put("model", properties);
+				component.put("api", api);
+
+				spec.put(webObjectSpecification.getName(), component);
+			}
+		}
+		return spec;
 	}
 }

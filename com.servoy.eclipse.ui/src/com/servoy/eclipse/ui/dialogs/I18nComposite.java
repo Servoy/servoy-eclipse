@@ -226,7 +226,7 @@ public class I18nComposite extends Composite
 			}
 		}
 		this.i18nDatasource = vI18NDatasource;
-		this.showAISuggestion = showAISuggestion;
+		this.showAISuggestion = showAISuggestion && getAISuggestionModel() != null;
 		initialise(addActionColumns);
 	}
 
