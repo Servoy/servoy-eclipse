@@ -95,6 +95,8 @@ final class CustomTypeMetaType extends DefaultMetaType
 		// no API → hybrid type: satisfies the IRSimpleType cast AND behaves as IRRecordType
 		CustomTypeRecordType custom = instances.computeIfAbsent(type, t -> new CustomTypeRecordType(typeSystem, t));
 		custom.init(type, typeSystem);
+		instances.clear(); // recursion guard: entries are only needed during construction of this type's
+		// call tree; clear afterward so stale entries don't affect future calls
 		return custom;
 	}
 
