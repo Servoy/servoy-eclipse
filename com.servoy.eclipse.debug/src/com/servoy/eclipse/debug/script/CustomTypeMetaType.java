@@ -19,9 +19,11 @@ package com.servoy.eclipse.debug.script;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.dltk.compiler.problem.IProblemCategory;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
@@ -48,6 +50,8 @@ import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
  */
 final class CustomTypeMetaType extends DefaultMetaType
 {
+	private static final ConcurrentHashMap<Type, CustomTypeRecordType> instances = new ConcurrentHashMap<>();
+
 	private final ITypeSystem typeSystem;
 
 	public CustomTypeMetaType(ITypeSystem typeSystem)
@@ -89,7 +93,9 @@ final class CustomTypeMetaType extends DefaultMetaType
 		}
 
 		// no API → hybrid type: satisfies the IRSimpleType cast AND behaves as IRRecordType
-		return new CustomTypeRecordType(typeSystem, type);
+		CustomTypeRecordType custom = instances.computeIfAbsent(type, t -> new CustomTypeRecordType(typeSystem, t));
+		custom.init(type, typeSystem);
+		return custom;
 	}
 
 	@Override
@@ -142,19 +148,27 @@ final class CustomTypeMetaType extends DefaultMetaType
 	{
 		private final Map<String, IRRecordMember> members;
 
-		CustomTypeRecordType(ITypeSystem typeSystem, Type type)
+		private CustomTypeRecordType(ITypeSystem typeSystem, Type type)
 		{
 			super(typeSystem, type);
-			Map<String, IRRecordMember> map = new LinkedHashMap<>();
-			for (Member member : type.getMembers())
+			members = new HashMap<>();
+		}
+
+		/**
+		 * will only initalizes itself once as long as it doesn't have members..
+		 * @param type
+		 * @param typeSystem
+		 */
+		private void init(Type type, ITypeSystem typeSystem)
+		{
+			if (members.isEmpty())
 			{
-				// Use RTypes.any() instead of RTypes.create(...) to avoid recursive
-				// re-entry into CustomTypeMetaType.toRType via TypeImpl.toRType → RTypes.simple.
-				// Member types don't need to be precise here; this record type only exists
-				// to allow plain object-literal assignment without type errors.
-				map.put(member.getName(), new OptionalRecordMember(member.getName(), RTypes.any(), member));
+				for (Member member : type.getMembers())
+				{
+					IRType memberType = member.getType() != null ? RTypes.create(typeSystem, member.getType()) : RTypes.any();
+					members.put(member.getName(), new OptionalRecordMember(member.getName(), memberType, member));
+				}
 			}
-			this.members = map;
 		}
 
 		/** Private constructor used by makeImmutable. */
@@ -163,6 +177,7 @@ final class CustomTypeMetaType extends DefaultMetaType
 			super(declaration);
 			this.members = members;
 		}
+
 
 		// --- IRRecordType ---
 
@@ -177,6 +192,7 @@ final class CustomTypeMetaType extends DefaultMetaType
 		{
 			return members.values();
 		}
+
 
 		@Override
 		public void init(ITypeSystem context, org.eclipse.emf.common.util.EList<Member> members)
