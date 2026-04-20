@@ -148,8 +148,11 @@ final class CustomTypeMetaType extends DefaultMetaType
 			Map<String, IRRecordMember> map = new LinkedHashMap<>();
 			for (Member member : type.getMembers())
 			{
-				IRType memberType = member.getType() != null ? RTypes.create(typeSystem, member.getType()) : RTypes.any();
-				map.put(member.getName(), new OptionalRecordMember(member.getName(), memberType, member));
+				// Use RTypes.any() instead of RTypes.create(...) to avoid recursive
+				// re-entry into CustomTypeMetaType.toRType via TypeImpl.toRType → RTypes.simple.
+				// Member types don't need to be precise here; this record type only exists
+				// to allow plain object-literal assignment without type errors.
+				map.put(member.getName(), new OptionalRecordMember(member.getName(), RTypes.any(), member));
 			}
 			this.members = map;
 		}
