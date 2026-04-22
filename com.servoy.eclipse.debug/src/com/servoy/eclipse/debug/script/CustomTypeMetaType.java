@@ -214,7 +214,7 @@ final class CustomTypeMetaType extends DefaultMetaType
 				for (IRRecordMember otherMember : other.getMembers())
 				{
 					IRRecordMember self = members.get(otherMember.getName());
-					if (self == null) continue;
+					if (self == null) return TypeCompatibility.FALSE;
 					if (!self.getType().isAssignableFrom(otherMember.getType()).ok())
 						return TypeCompatibility.FALSE;
 				}
