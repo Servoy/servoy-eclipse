@@ -479,6 +479,8 @@ public class TypeCreator extends TypeCache
 
 	private final MetaType javaMetaType = new JavaRuntimeMetaType(servoyStaticTypeSystem);
 
+	private final MetaType customTypeMetaType = new CustomTypeMetaType(servoyStaticTypeSystem);
+
 	public TypeCreator()
 	{
 		super("servoy", "javascript");
@@ -3166,12 +3168,22 @@ public class TypeCreator extends TypeCache
 		{
 			if (memberType.getName().equals("Array<" + Record.JS_RECORD + '>'))
 			{
+				if (recordConfig == null)
+				{
+					// no datasource known - return Array<JSRecord> unparameterized
+					return TypeCreator.clone(member, TypeUtil.arrayOf(getTypeRef(context, Record.JS_RECORD)));
+				}
 				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + recordConfig + '>'));
 			}
-			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
-				memberType.getName().equals(QBJoin.class.getSimpleName()))
+			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()))
 			{
 				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + recordConfig + '>'));
+			}
+			if (memberType.getName().equals(QBJoin.class.getSimpleName()))
+			{
+				// QBJoin returned by add() targets a datasource passed as a runtime argument - we can't
+				// know it statically, so return unparameterized QBJoin rather than QBJoin<parentDatasource>
+				return TypeCreator.clone(member, getTypeRef(context, QBJoin.class.getSimpleName()));
 			}
 
 			if (memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
@@ -3279,11 +3291,17 @@ public class TypeCreator extends TypeCache
 						}
 						else if (member.getName().equals("getParentRecords"))
 						{
-							// its really a relation, unrelate it.
+							// if this is a related foundset, the parent records come from the primary datasource of the relation
 							Relation relation = fs.getRelation(config);
 							if (relation != null)
 							{
 								overrideRecordConfig = relation.getPrimaryDataSource();
+							}
+							else
+							{
+								// no relation known - we can't determine the parent's datasource,
+								// so return unparameterized Array<JSRecord>
+								overrideRecordConfig = null;
 							}
 						}
 					}
@@ -5325,6 +5343,8 @@ public class TypeCreator extends TypeCache
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();
 				type.setName(ElementUtil.CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
 				type.setKind(TypeKind.JAVA);
+				type.setMetaType(customTypeMetaType);
+
 				if (iPropertyType instanceof ICustomType< ? >)
 				{
 					String extendsName = ((ICustomType< ? >)iPropertyType).getExtends();

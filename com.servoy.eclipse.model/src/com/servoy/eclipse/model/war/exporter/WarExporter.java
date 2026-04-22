@@ -172,7 +172,6 @@ public class WarExporter
 		"jakarta.persistence-api_*.jar", //
 		"jakarta.mail-api_*.jar", //
 		"jakarta.activation-api_*.jar", //
-		"org.apache.james.apache-mime4j_*.jar", //
 		"xstream_*.jar", //
 		"org.jsoup_*.jar", //
 		"com.github.ua-parser.uap-java_*.jar", //

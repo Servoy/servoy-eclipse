@@ -60,6 +60,7 @@ import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -215,7 +216,9 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 			}
 		}
 		PersistContext context = getPersistContext();
-		if (context != null && context.getContext() instanceof Form frm && !frm.getName().equals(((Form)component.getParent()).getName()))
+		Form parentForm = (Form)component.getAncestor(IRepository.FORMS);
+		if (context != null && context.getContext() instanceof Form frm && //
+			parentForm != null && !frm.getName().equals(parentForm.getName()))
 		{
 			//component without modifications on the child form, should not allow delete for columns
 			return true;
