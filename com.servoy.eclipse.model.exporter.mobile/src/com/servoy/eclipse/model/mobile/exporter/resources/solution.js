@@ -22,7 +22,7 @@ ${endloop_scopes}
 
 			// define all variables on the toplevel, scope and form
 			// also include all the servoy scripting scope variables: "foundset","controller","elements","currentcontroller"
-			var windowVariablesArray = [${loop_variables}"${variableName}",${endloop_variables}"foundset","controller","elements","currentcontroller"];
+			var windowVariablesArray = [${loop_variables}"${variableName}",${endloop_variables}"foundset","controller","elements","currentcontroller","containers"];
 			for(var i = 0;i<windowVariablesArray.length;i++) {
 				_ServoyUtils_.defineWindowVariable(windowVariablesArray[i],true);
 			}
