@@ -102,6 +102,7 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.lc.member.NativeJavaField;
 import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
@@ -1932,6 +1933,11 @@ public class TypeCreator extends TypeCache
 
 				if (object != null)
 				{
+					if (object instanceof NativeJavaField njf)
+					{
+						// Rhino returns now a NativeJavaField but we just need the Field.
+						object = njf.raw();
+					}
 					if (type == INSTANCE_METHOD || type == STATIC_METHOD)
 					{
 						MemberBox[] memberbox = null;

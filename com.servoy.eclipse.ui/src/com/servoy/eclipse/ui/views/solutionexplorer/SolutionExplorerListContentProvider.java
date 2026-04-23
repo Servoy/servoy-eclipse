@@ -2460,8 +2460,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						real, uiActivator.loadImageFromBundle("constant.png"));
 
 					// this field is a constant
-					Field field = (Field)ijm.getField((String)element, true);
-					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(field, ClientSupport.Default));
+					NativeJavaField field = (NativeJavaField)ijm.getField((String)element, true);
+					node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(field.raw(), ClientSupport.Default));
 				}
 				else
 				{
@@ -2479,7 +2479,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		Object[] arrays;
 		if (!skipFields)
 		{
-			List fields = ijm.getFieldIds(false);
+			List<String> fields = ijm.getFieldIds(false);
 
 			if (excludeMethodNames != null) fields.removeAll(Arrays.asList(excludeMethodNames));
 
@@ -2524,7 +2524,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		if (!skipMethods)
 		{
-			List names = ijm.getMethodIds(false);
+			List<String> names = ijm.getMethodIds(false);
 
 			if (ijm instanceof InstanceJavaMembers)
 			{
@@ -3802,16 +3802,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(getReturnType(originalClass, bpo)) + " " + name +
 						"</b>";
 				}
-				else if (bp instanceof Field)
+				else if (bp instanceof NativeJavaField njf)
 				{
-					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name +
+					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(njf.raw().getType()) + " " + name +
 						"</b>";
 				}
 				else if (bp == null)
 				{
 					// test if it is a Constant.
 					bp = ijm.getField(name, true);
-					if (bp instanceof Field)
+					if (bp instanceof NativeJavaField)
 					{
 						tmp = "<b>" + prefix + name + "</b>";
 					}
