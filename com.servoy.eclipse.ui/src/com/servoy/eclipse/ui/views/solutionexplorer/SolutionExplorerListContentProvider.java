@@ -89,6 +89,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.lc.member.NativeJavaField;
 import org.sablo.specification.IFunctionParameters;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.Package.ZipPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectApiFunctionDefinition;
@@ -471,7 +472,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT)
 			{
-				lm = createComponentFileList(un);
+				var realobject = un.parent.getRealObject();
+				if (realobject instanceof ZipPackageReader)
+				{
+					WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
+					lm = getWebComponentMembersForZippedProjects(un, spec);
+				}
+				else lm = createComponentFileList(un);
 				key = null;
 			}
 			else if (type == UserNodeType.WEB_OBJECT_FOLDER)
@@ -2710,6 +2717,70 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return returnType;
 	}
 
+	private void fillNodesFromSpec(WebObjectSpecification spec, String prefix, String displayName, Object source, boolean skipCssPosition,
+		List<SimpleUserNode> nodes, SortedList<SimpleUserNode> sortedApis)
+	{
+		extractApiDocs(spec);
+
+		Map<String, PropertyDescription> properties = spec.getProperties();
+		SortedList<PropertyDescription> sortedProperties = new SortedList<PropertyDescription>(new Comparator<PropertyDescription>()
+		{
+			@Override
+			public int compare(PropertyDescription o1, PropertyDescription o2)
+			{
+				return o1.getName().toString().compareToIgnoreCase(o2.getName().toString());
+			}
+		}, properties.values());
+		for (PropertyDescription pd : sortedProperties)
+		{
+			if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
+
+			String name = pd.getName();
+			// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
+			// and skip the dataprovider properties (those are not accesable through scripting)
+			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
+			{
+				if (skipCssPosition && name.equals("cssPosition")) continue;
+
+				nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
+					new WebObjectFieldFeedback(pd, displayName, prefix + name), source,
+					propertiesIcon));
+			}
+		}
+		Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
+		for (final WebObjectApiFunctionDefinition api : apis.values())
+		{
+			sortedApis.add(this.getApiNode(api, prefix, displayName, source));
+		}
+	}
+
+	private SimpleUserNode[] getWebComponentMembersForZippedProjects(SimpleUserNode un, WebObjectSpecification spec)
+	{
+
+		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+		SortedList<SimpleUserNode> sortedApis = new SortedList<SimpleUserNode>(NameComparator.INSTANCE);
+
+		if (spec != null)
+		{
+			fillNodesFromSpec(spec, "", spec.getDisplayName(), spec, false, nodes, sortedApis);
+			if (spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
+				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0)
+			{
+				if (un.parent.getType() != UserNodeType.SERVICES_NONPROJECT_PACKAGE)
+					sortedApis.addAll(getJSMethodsFromClassWebObjectSpec("", spec, HasRuntimeStyleClass.class));
+			}
+		}
+		if (un.parent.getType() != UserNodeType.SERVICES_NONPROJECT_PACKAGE)
+		{
+			sortedApis.addAll(getJSMethodsFromClassWebObjectSpec("", spec, HasRuntimeFormName.class));
+			sortedApis.addAll(getJSMethodsFromClassWebObjectSpec("", spec, HasRuntimeName.class));
+			sortedApis.addAll(getJSMethodsFromClassWebObjectSpec("", spec, HasRuntimeElementType.class));
+			sortedApis.addAll(getJSMethodsFromClassWebObjectSpec("", spec, HasRuntimeDesignTimeProperty.class));
+			sortedApis.addAll(getJSMethodsFromClassWebObjectSpec("", spec, HasRuntimeClientProperty.class));
+		}
+		nodes.addAll(sortedApis);
+		return nodes.toArray(new SimpleUserNode[nodes.size()]);
+	}
 
 	private SimpleUserNode[] getWebComponentMembers(String prefix, final IBasicWebComponent webcomponent, SimpleUserNode un)
 	{
@@ -2726,39 +2797,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
 		if (spec != null)
 		{
-			extractApiDocs(spec);
-
-			Map<String, PropertyDescription> properties = spec.getProperties();
-			SortedList<PropertyDescription> sortedProperties = new SortedList<PropertyDescription>(new Comparator<PropertyDescription>()
-			{
-
-				@Override
-				public int compare(PropertyDescription o1, PropertyDescription o2)
-				{
-					return o1.getName().toString().compareToIgnoreCase(o2.getName().toString());
-				}
-			}, properties.values());
-			for (PropertyDescription pd : sortedProperties)
-			{
-				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
-
-				String name = pd.getName();
-				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
-				// and skip the dataprovider properties (those are not accesable through scripting)
-				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
-				{
-					if (un.getForm().isResponsiveLayout() && name.equals("cssPosition")) continue;
-
-					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS,
-						new WebObjectFieldFeedback(pd, webcomponent.getName(), prefixForWebComponentMembers + name), webcomponent,
-						propertiesIcon));
-				}
-			}
-			Map<String, WebObjectApiFunctionDefinition> apis = spec.getApiFunctions();
-			for (final WebObjectApiFunctionDefinition api : apis.values())
-			{
-				sortedApis.add(this.getApiNode(api, prefixForWebComponentMembers, webcomponent.getName(), webcomponent));
-			}
+			fillNodesFromSpec(spec, prefixForWebComponentMembers, webcomponent.getName(), webcomponent, un.getForm().isResponsiveLayout(), nodes, sortedApis);
 			if (spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
 				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0)
 			{
@@ -2938,6 +2977,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 		}
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
+	}
+
+	private List<SimpleUserNode> getJSMethodsFromClassWebObjectSpec(String prefix, final WebObjectSpecification webcomponent, Class< ? > clazz)
+	{
+		return Arrays.asList(getJSMethodsViaJavaMembers(new InstanceJavaMembers(new DummyScope(), clazz), clazz,
+			ScriptObjectRegistry.getScriptObjectForClass(clazz), webcomponent.getName(), prefix, UserNodeType.FORM_ELEMENTS, webcomponent, null));
 	}
 
 	private List<SimpleUserNode> getJSMethodsFromClass(String prefix, final IBasicWebComponent webcomponent, Class< ? > clazz)
