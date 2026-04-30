@@ -230,6 +230,10 @@ final class CustomTypeMetaType extends DefaultMetaType
 		@Override
 		public IRRecordType makeImmutable(Map<Object, Object> visited)
 		{
+			// cycle guard: if we are already being made immutable up the call stack, return this
+			if (visited.containsKey(this)) return (IRRecordType)visited.get(this);
+			visited.put(this, this); // placeholder; updated below if we produce a new instance
+
 			boolean changed = false;
 			Map<String, IRRecordMember> copy = new LinkedHashMap<>();
 			for (Map.Entry<String, IRRecordMember> e : members.entrySet())
@@ -339,12 +343,18 @@ final class CustomTypeMetaType extends DefaultMetaType
 		@Override
 		public IRRecordMember makeImmutable(Map<Object, Object> visited)
 		{
+			// cycle guard: prevent infinite recursion if this member is already being made immutable
+			if (visited.containsKey(this)) return (IRRecordMember)visited.get(this);
+			visited.put(this, this);
+
 			if (type instanceof ImmutableType< ? > t)
 			{
 				IRType immutableType = (IRType)t.makeImmutable(visited);
 				if (immutableType != type)
 				{
-					return new OptionalRecordMember(name, immutableType, source);
+					OptionalRecordMember result = new OptionalRecordMember(name, immutableType, source);
+					visited.put(this, result);
+					return result;
 				}
 			}
 			return this;
