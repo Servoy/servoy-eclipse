@@ -659,7 +659,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					prefix.append(menuItemsHierarchy.get(i).getName());
 				}
 				prefix.append("')");
-				;
 				lm = getJSMethods(JSMenuItem.class, IExecutingEnviroment.TOPLEVEL_MENUS + prefix, null, UserNodeType.MENU_ITEM, null, null);
 			}
 			else if (type == UserNodeType.PLUGINS)
@@ -2481,7 +2480,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 
 		ITagResolver resolver = new TagResolver(elementName, (prefix == null ? "" : prefix));
-		if (!elementName.endsWith(".")) elementName = elementName + ".";
+		if (elementName != "" && !elementName.endsWith(".")) elementName = elementName + ".";
 
 		Object[] arrays;
 		if (!skipFields)
@@ -2602,6 +2601,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (actionType != UserNodeType.RETURNTYPE_ELEMENT)
 					{
 						codePrefix = elementName;
+						if (codePrefix.equals(""))
+						{
+							codePrefix = "elementName" + ".";
+							if (real instanceof WebObjectSpecification wos) codePrefix = wos.getDisplayName() + ".";
+						}
 					}
 
 					SimpleUserNode node = new UserNode(displayName, actionType,
@@ -2982,7 +2986,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private List<SimpleUserNode> getJSMethodsFromClassWebObjectSpec(String prefix, final WebObjectSpecification webcomponent, Class< ? > clazz)
 	{
 		return Arrays.asList(getJSMethodsViaJavaMembers(new InstanceJavaMembers(new DummyScope(), clazz), clazz,
-			ScriptObjectRegistry.getScriptObjectForClass(clazz), webcomponent.getName(), prefix, UserNodeType.FORM_ELEMENTS, webcomponent, null));
+			ScriptObjectRegistry.getScriptObjectForClass(clazz), "", prefix, UserNodeType.FORM_ELEMENTS, webcomponent, null));
 	}
 
 	private List<SimpleUserNode> getJSMethodsFromClass(String prefix, final IBasicWebComponent webcomponent, Class< ? > clazz)
