@@ -213,7 +213,7 @@ export class PopupMenuService {
 		this.menu.style.visibility = 'hidden';
 		if (popup.cssClass) this.menu.classList.add(popup.cssClass);
 
-		this.generateMenuItems(popup.items, this.menu, false, 'svypopupmenu');
+		this.generateMenuItems(popup.items, this.menu, false, 'svypopupmenu',true);
 
 		this.menu.style.left = 0 + 'px';
 		this.menu.style.top = 0 + 'px';
@@ -283,7 +283,7 @@ export class PopupMenuService {
 		});
 	}
 
-	private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean, parentId: string): void {
+	private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean, parentId: string,enabled: boolean): void {
 		if (generateList) {
 			const subMenu = this.doc.createElement('div');
 			subMenu.classList.add('dropdown-menu');
@@ -294,8 +294,11 @@ export class PopupMenuService {
 			this.subMenuToPopperMap.set(subMenu, createPopper(parent, subMenu, {
 				placement: 'right-start'
 			}));
-			parent.addEventListener('mouseenter', this.hoverMenuItemListener);
-			parent.addEventListener('mouseleave', this.hoverMenuItemListener);
+			// do not add hover listeners for disabled menu items, as we don't want to show the submenu in that case
+			if (enabled !== false){
+				parent.addEventListener('mouseenter', this.hoverMenuItemListener);
+				parent.addEventListener('mouseleave', this.hoverMenuItemListener);
+			}
 			subMenu.addEventListener('pointerdown', this.handleMobileDevice);
 			subMenu.addEventListener('mouseenter', this.hoverMenuListener);
 			subMenu.addEventListener('mouseleave', this.hoverMenuListener);
@@ -370,7 +373,7 @@ export class PopupMenuService {
 				}
 				if (item.items) {
 					menuItem.classList.add('dropdown-submenu');
-					this.generateMenuItems(item.items, menuItem, true, menuItemId);
+					this.generateMenuItems(item.items, menuItem, true, menuItemId,item.enabled);
 				}
 			} else {
 				const hr = this.doc.createElement('hr');
