@@ -104,11 +104,17 @@ export class WindowService {
                 return;
             }
 
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
+            const existingDialogs = this.doc.getElementsByClassName('svy-dialog');
+            if (this.doc.getElementById('mainForm') && existingDialogs.length < 1) {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
                 this.doc.getElementById('mainForm').dispatchEvent(customEvent);
+            } else {
+                const disableEvent = new CustomEvent('disableTabseq', {
+                    bubbles: true
+                });
+                Array.from(existingDialogs).forEach(el => el.dispatchEvent(disableEvent));
             }
 
             if (instance.storeBounds) {
@@ -297,11 +303,17 @@ export class WindowService {
                 }
             }
             instance.hide();
-            if (this.doc.getElementById('mainForm') && this.doc.getElementsByClassName('svy-dialog').length < 1) {
+            const remainingDialogs = this.doc.getElementsByClassName('svy-dialog');
+            if (this.doc.getElementById('mainForm') && remainingDialogs.length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
                 this.doc.getElementById('mainForm').dispatchEvent(customEvent);
+            } else if (remainingDialogs.length > 0) {
+                const enableEvent = new CustomEvent('enableTabseq', {
+                    bubbles: true
+                });
+                remainingDialogs[remainingDialogs.length - 1].dispatchEvent(enableEvent);
             }
         }
     }
