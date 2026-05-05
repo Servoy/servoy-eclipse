@@ -66,8 +66,8 @@ import { FormService } from '../../form.service';
     }
 
     firstElementFocused(event: Event) {
-      const firstTabIndex = parseInt(this.doc.getElementById('tabStart').getAttribute('tabindex'), 10);
-      const lastTabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
+      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart').getAttribute('tabindex'), 10);
+      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop').getAttribute('tabindex'), 10);
       if (this.firstTimeFocus === true) {						
         for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
           const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
@@ -94,8 +94,8 @@ import { FormService } from '../../form.service';
     }
 
     lastElementFocused(event: Event) {
-      const firstTabIndex = parseInt(this.doc.getElementById('tabStart').getAttribute('tabindex'), 10);
-      const lastTabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
+      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart').getAttribute('tabindex'), 10);
+      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop').getAttribute('tabindex'), 10);
       for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
         const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
         // if there is no focusable element in the window, then newTarget == e.target,
