@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { I18NProvider } from '../i18n_provider.service';
 
@@ -14,6 +14,27 @@ export class FileUploadWindowComponent {
     readonly title = signal<string>(undefined);
     readonly multiselect = signal<boolean>(undefined);
     readonly filter = signal<string>(undefined);
+
+    readonly parsedFilter = computed(() => {
+        const filterValue = this.filter();
+        if (!filterValue || !filterValue.includes('maxUploadFileSize=')) {
+            return { acceptFilter: filterValue, maxUploadFileSize: 0 };
+        }
+        const filters = filterValue.split(',');
+        const cleanedFilter: string[] = [];
+        let maxUploadFileSize = 0;
+        for (const f of filters) {
+            if (f.includes('maxUploadFileSize=')) {
+                const sizeValue = f.split('maxUploadFileSize=')[1];
+                if (sizeValue && !isNaN(Number(sizeValue))) {
+                    maxUploadFileSize = Number(sizeValue);
+                }
+            } else {
+                cleanedFilter.push(f);
+            }
+        }
+        return { acceptFilter: cleanedFilter.join(','), maxUploadFileSize };
+    });
 
     i18n_upload = 'Upload';
     i18n_chooseFiles = 'Select a file';
@@ -84,7 +105,6 @@ export class FileUploadWindowComponent {
 
     // Add a property to track files that exceed the size limit
     oversizedFiles: Set<string> = new Set<string>();
-    
     fileChange($event: Event): void {
         if (!this.isMultiselect()) {
             this.uploadFiles.length = 0;
@@ -99,7 +119,8 @@ export class FileUploadWindowComponent {
             const fileSizeKB = file.size / (1024); // bytes to kilobytes
             
             // Check if file exceeds max size (if a max size is set)
-            if (this.maxUploadFileSize > 0 && fileSizeKB > this.maxUploadFileSize) {
+            const maxUploadFileSize = this.parsedFilter().maxUploadFileSize;
+            if (maxUploadFileSize > 0 && fileSizeKB > maxUploadFileSize) {
                 this.oversizedFiles.add(file.name);
             }
             
@@ -112,38 +133,13 @@ export class FileUploadWindowComponent {
         target.value = ''; 
     }
 
-    // Add a property to store the max upload file size
-    maxUploadFileSize: number = 0;
-    
     getAcceptFilter(): string {
-        // If filter contains maxUploadFileSize information, extract it
-        const filterValue = this.filter();
-        if (filterValue && filterValue.includes('maxUploadFileSize=')) {
-            const filters = filterValue.split(',');
-            let cleanedFilter: string[] = [];
-            
-            for (const filter of filters) {
-                if (filter.includes('maxUploadFileSize=')) {
-                    const parts = filter.split('maxUploadFileSize=');
-                    const sizeValue = parts[1]; // Get the part after 'maxUploadFileSize='
-                    if (sizeValue && !isNaN(Number(sizeValue))) {
-                        this.maxUploadFileSize = Number(sizeValue);
-                    }
-                } else {
-                    cleanedFilter.push(filter);
-                }
-            }
-            
-            // Update filter without the maxUploadFileSize entry
-            this.filter.set(cleanedFilter.join(','));
-        }
-		
-        return filterValue;
+        return this.parsedFilter().acceptFilter;
     }
 
     // Helper method to get display name (with asterisk for oversized files)
     getDisplayName(file: File): string {
-        return this.oversizedFiles.has(file.name) ? file.name + ' ( > ' + this.maxUploadFileSize + ' KB )'  : file.name;
+        return this.oversizedFiles.has(file.name) ? file.name + ' ( > ' + this.parsedFilter().maxUploadFileSize + ' KB )' : file.name;
     }
     
     // Helper method to check if a file is valid for upload
