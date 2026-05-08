@@ -35,7 +35,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IContentSpecConstants;
@@ -46,12 +45,12 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RuntimeProperty;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
@@ -140,7 +139,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		}
 
 		updatableJSON.put(propertyName, currentPropertyValue);
-		getParentComponent().flagChanged();
+		getParent().flagChanged();
 	}
 
 	public void removeProperty()
@@ -150,7 +149,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		{
 			valuesJSON.remove(keyToRemove);
 		}
-		getParentComponent().flagChanged();
+		getParent().flagChanged();
 	}
 
 	@Override
@@ -175,7 +174,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 				customType.setTypeName(typeName);
 				return customType;
 			}
-			else if (WebObjectImpl.isArrayOfCustomJSONObject(pd.getType()) && value instanceof JSONArray)
+			else if (PersistHelper.isArrayOfCustomJSONObject(pd.getType()) && value instanceof JSONArray)
 			{
 				ArrayList<IChildWebObject> customArray = new ArrayList<IChildWebObject>();
 				PropertyDescription elementPD = (pd.getType() instanceof ICustomType< ? >) ? ((ICustomType< ? >)pd.getType()).getCustomJSONTypeDefinition()
@@ -231,7 +230,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		return (pd.getType() instanceof IDesignValueConverter< ? >) ? (IDesignValueConverter< ? >)pd.getType() : null;
 	}
 
-	private WebCustomType createWebCustomType(Object propertyDescriptionArg, final String jsonKey, final int index, UUID uuidArg)
+	private WebCustomType createWebCustomType(PropertyDescription propertyDescriptionArg, final String jsonKey, final int index, UUID uuidArg)
 	{
 		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index,
 			uuidArg != null ? uuidArg : UUID.randomUUID());
@@ -292,7 +291,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	public void clearProperty(String propertyName)
 	{
 		getJson(true, false).remove(propertyName);
-		getParentComponent().flagChanged();
+		getParent().flagChanged();
 		// force form component cache reload
 		getAncestor(Form.class).setLastModified(System.currentTimeMillis());
 		initializeElement();
@@ -309,7 +308,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		{
 			((JSONObject)((JSONArray)customProperty).get(propertyIndex)).remove(propertyName);
 		}
-		getParentComponent().flagChanged();
+		getParent().flagChanged();
 		// force form component cache reload
 		getAncestor(Form.class).setLastModified(System.currentTimeMillis());
 		initializeElement();
@@ -333,9 +332,9 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	{
 		// the "current" prefix in names is there because we go through the fcPropAndCompPath array - in case of nested form components; so all these variables
 		// will point to the the current place in that path that we go through
-		FormElement currentNgFormElementOfParentFC = FormElementHelper.INSTANCE.getFormElement(getParentComponent(), fs, new PropertyPath(), true);
+		FormElement currentNgFormElementOfParentFC = FormElementHelper.INSTANCE.getFormElement((IFormElement)getParent(), fs, new PropertyPath(), true);
 
-		JSONObject currentFCPropertyValue = (JSONObject)getParentComponent().getProperty(getRootFCPropertyNameInParent()); // rootFCPropertyNameInParent is fcPropAndCompPath[1]
+		JSONObject currentFCPropertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(getRootFCPropertyNameInParent()); // rootFCPropertyNameInParent is fcPropAndCompPath[1]
 		PropertyDescription currentFCCachedPD = FormComponentPropertyType.INSTANCE.getPropertyDescription(getRootFCPropertyNameInParent(),
 			currentFCPropertyValue, fs);
 		Form currentFCPersist = FormComponentPropertyType.INSTANCE.getForm(currentFCPropertyValue, fs);
@@ -454,22 +453,16 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	}
 
 	@Override
-	public IBasicWebComponent getParentComponent()
-	{
-		return (IBasicWebComponent)getParent();
-	}
-
-	@Override
-	public void updateJSON()
-	{
-	}
-
-	@Override
 	public JSONObject getJson()
 	{
 		return getJson(false, false);
 	}
 
+	@Override
+	public void setJson(JSONObject arg)
+	{
+
+	}
 
 	private JSONObject getJson(boolean forMutation, boolean flattened)
 	{
@@ -573,7 +566,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	@Override
 	public String toString()
 	{
-		return getParentComponent().getName() + "." + getFcPropAndCompPathAsString();
+		return ((IBasicWebObject)getParent()).getName() + "." + getFcPropAndCompPathAsString();
 	}
 
 	@Override
@@ -635,9 +628,9 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		String jsonKey;
 		int index;
 
-		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, UUID uuid)
+		public WebFormComponentCustomType(IBasicWebObject parentWebObject, PropertyDescription propertyDescription, String jsonKey, int index, UUID uuid)
 		{
-			super(parentWebObject, propertyDescription, jsonKey, index, false, uuid);
+			super(parentWebObject, propertyDescription, jsonKey, index, uuid);
 			this.jsonKey = jsonKey;
 			this.index = index;
 		}
@@ -669,7 +662,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		@Override
 		public String toString()
 		{
-			return WebCustomType.class.getSimpleName() + " -> " + webObjectImpl.toString(); //$NON-NLS-1$
+			return WebCustomType.class.getSimpleName() + " -> " + getTypeName(); //$NON-NLS-1$
 		}
 
 		@Override

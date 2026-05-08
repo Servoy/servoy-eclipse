@@ -72,7 +72,6 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
@@ -212,7 +211,7 @@ public class GhostHandler implements IServerService
 					{
 						for (String key : properties.keySet())
 						{
-							if (((WebObjectImpl)((WebComponent)basicWebComponent).getImplementation()).getPropertyDescription().isArrayReturnType(key))
+							if (((WebComponent)basicWebComponent).getPropertyDescription().isArrayReturnType(key))
 							{
 								LocationCache.getINSTANCE().clearParent(basicWebComponent.getUUID() + key);
 							}
@@ -286,8 +285,9 @@ public class GhostHandler implements IServerService
 								IChildWebObject[] ghostsOfThisProp = (IChildWebObject[])(dropPropEntry.getValue() instanceof IChildWebObject[]
 									? dropPropEntry.getValue() : new IChildWebObject[] { (IChildWebObject)dropPropEntry.getValue() });
 
-								for (IChildWebObject ghostWebObject : ghostsOfThisProp)
+								for (int index = 0; index < ghostsOfThisProp.length; index++)
 								{
+									IChildWebObject ghostWebObject = ghostsOfThisProp[index];
 									if (ghostWebObject != null)
 									{
 										String ghostCaptionText = null;
@@ -300,7 +300,7 @@ public class GhostHandler implements IServerService
 										if (ghostCaptionText == null)
 										{
 											ghostCaptionText = dropPropEntry.getKey() +
-												(ghostWebObject.getIndex() >= 0 ? "[" + ghostWebObject.getIndex() + "]" : "");
+												"[" + index + "]";
 
 											// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
 											if (ghostWebObject instanceof WebCustomType && ghostWebObject.hasProperty("text"))
@@ -316,7 +316,7 @@ public class GhostHandler implements IServerService
 
 											PersistIdentifier ghostID = getGhostPersistIdentifier(webComponent, ghostWebObject);
 
-											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID.toJSONString(), ghostWebObject.getIndex(),
+											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID.toJSONString(), index,
 												ghostWebObject.getTypeName(),
 												inherited || ghostWebObject instanceof WebCustomType custom && custom.getExtendsID() != null);
 										}
@@ -344,7 +344,7 @@ public class GhostHandler implements IServerService
 //				Iterator<Entry<String, Object>> childPersistMappedPropertiesIterator = webComponent.getPersistMappedPropertiesReadOnly().entrySet().iterator();
 				TreeMap<String, Object> sortedAndDroppableProps = new TreeMap<>();
 
-				PropertyDescription spec = ((WebObjectImpl)webComponent.getImplementation()).getPropertyDescription();
+				PropertyDescription spec = webComponent.getPropertyDescription();
 
 				if (spec != null) // can be null if the developer introduced a syntax error for example in the spec file while editing it
 				{

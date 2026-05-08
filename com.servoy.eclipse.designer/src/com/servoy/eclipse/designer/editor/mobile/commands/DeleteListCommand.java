@@ -28,8 +28,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.property.SetValueCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MobileListModel;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PersistPropertyHandler;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -38,7 +38,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Command to delete inset list (tabpanel) and containing form.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -53,7 +53,8 @@ public class DeleteListCommand extends CompoundCommand
 				"",
 				PersistPropertySource.createPersistPropertySource(model.form, false),
 				StaticContentSpecLoader.PROPERTY_VIEW.getPropertyName(),
-				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IForm.LOCKED_RECORD_VIEW)))));
+				Integer
+					.valueOf(((ValuesConfig)PersistPropertyHandler.VIEW_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(IForm.LOCKED_RECORD_VIEW)))));
 		}
 		add(new DeleteListItemsCommand(model));
 	}
@@ -134,7 +135,7 @@ public class DeleteListCommand extends CompoundCommand
 				if (model.component != null)
 				{
 					// inset list
-					repository.undeleteObject(model.form, model.component);
+					repository.undeleteObject(model.form, model.component, -1);
 					changes.add(model.component);
 				}
 				else
@@ -142,27 +143,27 @@ public class DeleteListCommand extends CompoundCommand
 					// form list
 					if (model.header != null)
 					{
-						repository.undeleteObject(model.form, model.header);
+						repository.undeleteObject(model.form, model.header, -1);
 						changes.add(model.header);
 					}
 					if (model.button != null)
 					{
-						repository.undeleteObject(model.form, model.button);
+						repository.undeleteObject(model.form, model.button, -1);
 						changes.add(model.button);
 					}
 					if (model.subtext != null)
 					{
-						repository.undeleteObject(model.form, model.subtext);
+						repository.undeleteObject(model.form, model.subtext, -1);
 						changes.add(model.subtext);
 					}
 					if (model.countBubble != null)
 					{
-						repository.undeleteObject(model.form, model.countBubble);
+						repository.undeleteObject(model.form, model.countBubble, -1);
 						changes.add(model.countBubble);
 					}
 					if (model.image != null)
 					{
-						repository.undeleteObject(model.form, model.image);
+						repository.undeleteObject(model.form, model.image, -1);
 						changes.add(model.image);
 					}
 				}

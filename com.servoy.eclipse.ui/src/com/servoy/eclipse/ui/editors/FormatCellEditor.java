@@ -97,14 +97,14 @@ public class FormatCellEditor extends TextDialogCellEditor
 				{
 					PropertyDescription customTypePD = wct.getPropertyDescription();
 					pd = customTypePD.getProperty(propertyName);
-					IBasicWebObject parent = wct.getParent();
+					IBasicWebObject parent = (IBasicWebObject)wct.getParent();
 					while (pd == null)
 					{
 						if (parent instanceof WebCustomType p)
 						{
 							customTypePD = p.getPropertyDescription();
 							pd = customTypePD.getProperty(propertyName);
-							parent = p.getParent();
+							parent = (IBasicWebObject)p.getParent();
 						}
 						else
 						{

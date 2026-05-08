@@ -1052,7 +1052,7 @@ public class VisualFormEditorPartsPage extends Composite
 			{
 				try
 				{
-					((IDeveloperRepository)form.getRootObject().getRepository()).undeleteObject(form, part);
+					((IDeveloperRepository)form.getRootObject().getRepository()).undeleteObject(form, part, -1);
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, part, false);
 				}
 				catch (RepositoryException e)

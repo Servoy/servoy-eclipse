@@ -58,7 +58,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -159,7 +158,7 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 				Object value = element;
 				if (value == null && persistContext != null && persistContext.getPersist() instanceof WebComponent wc && !wc.hasProperty(property))
 				{
-					value = ((WebObjectImpl)wc.getImplementation()).getPropertyDefaultValue(property);
+					value = wc.getPropertyDefaultValueClone(property);
 				}
 				if (value instanceof JSONObject) return withSolutionContextForCell.getText(designToChooserConv.convertJSONValueToChooserValue(value)); // properties view cell label provider
 				else return withSolutionContextForChooser.getText(value);

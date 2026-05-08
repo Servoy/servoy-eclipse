@@ -20,7 +20,6 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -217,17 +216,6 @@ public class ChangeParentCommand extends Command
 		{
 			Arrays.sort(sortedChildArray, PositionComparator.XY_PERSIST_COMPARATOR);
 		}
-		else if (childPositionClass == IChildWebObject.class)
-		{
-			Arrays.sort(sortedChildArray, new Comparator<IPersist>()
-			{
-				@Override
-				public int compare(IPersist o1, IPersist o2)
-				{
-					return ((IChildWebObject)o1).getIndex() - ((IChildWebObject)o2).getIndex();
-				}
-			});
-		}
 		return new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
 	}
 
@@ -292,10 +280,6 @@ public class ChangeParentCommand extends Command
 					if (persist instanceof ISupportBounds)
 					{
 						((ISupportBounds)persist).setLocation(new Point(i + 1, i + 1));
-					}
-					else if (persist instanceof IChildWebObject)
-					{
-						((IChildWebObject)persist).setIndex(i);
 					}
 					if (!changes.contains(persist)) changes.add(persist);
 				}

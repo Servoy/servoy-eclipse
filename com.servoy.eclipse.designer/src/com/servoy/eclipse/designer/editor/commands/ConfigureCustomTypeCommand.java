@@ -55,18 +55,13 @@ import com.servoy.eclipse.ui.dialogs.autowizard.FormComponentTreeSelectDialog;
 import com.servoy.eclipse.ui.dialogs.autowizard.PropertyWizardDialogConfigurator;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IBasicWebComponent;
-import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
-import com.servoy.j2db.util.PersistHelper;
 
 /**
  * @author emera
@@ -144,13 +139,12 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 									IChildWebObject[] arr = (IChildWebObject[])prop;
 									for (IChildWebObject obj : arr)
 									{
-										if (obj instanceof WebCustomType)
+										if (obj instanceof WebCustomType wct)
 										{
-											WebCustomType wct = (WebCustomType)obj;
 											JSONObject object = wct.getFlattenedJson();
 											Map<String, Object> map = getAsMap(object);
 											previousColumns.add(object.get("svyUUID"));
-											map.put("inherited", isInherited(wct, webComponent));
+											map.put("inherited", wct.getExtendsID() != null);
 											input.add(map);
 											Map<String, Object> originalMap = new HashMap<String, Object>();
 											map.forEach((key, value) -> originalMap.put(key, value));
@@ -202,30 +196,6 @@ public class ConfigureCustomTypeCommand extends AbstractHandler implements IHand
 		}
 		return null;
 	}
-
-	private boolean isInherited(WebCustomType custom, IBasicWebComponent component)
-	{
-		if (custom.getExtendsID() != null) return true;
-		IPersist parentComponent = PersistHelper.getSuperPersist(component);
-		if (parentComponent instanceof IBasicWebObject indexed)
-		{
-			Object value = indexed.getProperty(custom.getJsonKey());
-			if (value instanceof IChildWebObject[] arrayValue && custom.getIndex() < arrayValue.length)
-			{
-				return true;
-			}
-		}
-		PersistContext context = getPersistContext();
-		Form parentForm = (Form)component.getAncestor(IRepository.FORMS);
-		if (context != null && context.getContext() instanceof Form frm && //
-			parentForm != null && !frm.getName().equals(parentForm.getName()))
-		{
-			//component without modifications on the child form, should not allow delete for columns
-			return true;
-		}
-		return false;
-	}
-
 
 	public PersistContext getPersistContext()
 	{

@@ -67,15 +67,14 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPositionUtils;
-import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
-import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -498,7 +497,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					refreshTemplate.add(formElementPersist);
 				}
 			}
-			if (formElementPersist instanceof ChildWebComponent || formElementPersist.getParent() instanceof Portal)
+			if (formElementPersist.getParent() instanceof Portal)
 			{
 				ghost = true;
 			}
@@ -534,9 +533,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 		}
-		if (formElementPersist instanceof ISupportsIndexedChildren)
+		if (formElementPersist instanceof IBasicWebObject && formElementPersist instanceof ISupportChilds supportChilds)
 		{
-			ISupportsIndexedChildren supportChilds = (ISupportsIndexedChildren)formElementPersist;
 			ghost = ghost || supportChilds.getAllObjects().hasNext();
 		}
 		return ghost;
@@ -975,8 +973,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
-						if (element.getPersistIfAvailable() instanceof ISupportsIndexedChildren &&
-							((ISupportsIndexedChildren)element.getPersistIfAvailable()).getAllObjects().hasNext())
+						if (element.getPersistIfAvailable() instanceof IBasicWebObject &&
+							element.getPersistIfAvailable() instanceof ISupportChilds supportChilds &&
+							supportChilds.getAllObjects().hasNext())
 						{
 							ghost = true;
 						}

@@ -77,9 +77,11 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Factory for adapters for the Properties view in the designer.
@@ -301,7 +303,19 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 					if (propertyDescription != null)
 					{
-						persistProperties = new WebComponentPropertySource(persistContext, false, propertyDescription);
+						if (persist instanceof WebComponent webComponent && webComponent.getExtendsID() != null)
+						{
+							// use the flattened web component
+							persistProperties = new WebComponentPropertySource(
+								PersistContext.create(
+									PersistHelper.getFlattenedPersist(servoyProject.getEditingFlattenedSolution(), (Form)context, webComponent),
+									context),
+								false, propertyDescription);
+						}
+						else
+						{
+							persistProperties = new WebComponentPropertySource(persistContext, false, propertyDescription);
+						}
 					}
 				}
 				else if (persist instanceof WebCustomType)
@@ -358,7 +372,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 							public String toString()
 							{
 								final WebFormComponentChildType child = (WebFormComponentChildType)getPersist();
-								return child.getParentComponent().getName() + '.' + child.getFcPropAndCompPathAsString() + " (" +
+								return ((IBasicWebComponent)child.getParent()).getName() + '.' + child.getFcPropAndCompPathAsString() + " (" +
 									getPropertyDescription().getName() + ')';
 							}
 						};

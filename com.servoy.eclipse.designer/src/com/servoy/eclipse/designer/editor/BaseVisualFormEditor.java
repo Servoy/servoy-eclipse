@@ -721,7 +721,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 
 									for (PropertyDescription pd : spec.getProperties(MenuPropertyType.INSTANCE))
 									{
-										if (Utils.equalObjects(webComponent.getFlattenedJson().opt(pd.getName()), menu.getUUID()))
+										if (Utils.equalObjects(webComponent.getProperty(pd.getName()), menu.getUUID()))
 										{
 											changedChildren.add(o);
 											break;

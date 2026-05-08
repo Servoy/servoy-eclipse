@@ -24,11 +24,11 @@ import org.sablo.specification.PropertyDescription;
 
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.FlattenedWebComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.util.PersistIdentifier;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -93,8 +93,13 @@ public class PersistFinder
 
 			if (searchPersist instanceof WebFormComponentChildType fcChild) pd = fcChild.getPropertyDescription();
 			if (searchPersist instanceof WebComponent wc)
-				pd = (wc.getImplementation() instanceof WebObjectImpl wcImpl ? wcImpl.getPropertyDescription() : null);
-
+			{
+				pd = wc.getPropertyDescription();
+				if (wc.getExtendsID() != null)
+				{
+					searchPersist = new FlattenedWebComponent(wc);
+				}
+			}
 			if (pd != null)
 			{
 				Map<String, PropertyDescription> customMap = pd.getCustomJSONProperties();

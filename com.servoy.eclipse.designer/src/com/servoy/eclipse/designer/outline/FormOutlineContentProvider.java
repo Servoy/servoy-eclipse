@@ -46,6 +46,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -459,7 +460,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 									// create the fake / design-time-only persist that represents this 1 (one) property of type form component from the form component component
 									persistChildrenAsList.add(new WebFormComponentChildType(
 										formComponentComponentPersistArg instanceof WebFormComponentChildType
-											? ((WebFormComponentChildType)formComponentComponentPersistArg).getParentComponent()
+											? formComponentComponentPersistArg.getAncestor(IBasicWebComponent.class)
 											: (IBasicWebObject)formComponentComponentNGElement.getPersistIfAvailable(),
 										feComponentAndPropertyNamePath, ModelUtils.getEditingFlattenedSolution(form)));
 									if (stopOnFirstFound && !firstFound)

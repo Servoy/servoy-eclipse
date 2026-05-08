@@ -165,7 +165,6 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.CSSPosition;
-import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec.Element;
@@ -215,13 +214,11 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
-import com.servoy.j2db.server.ngclient.property.ICanBeLinkedToFoundset;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
@@ -2381,7 +2378,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					persistContext);
 				if (desc != null)
 				{
-					if (desc.hasDefault() && !WebObjectImpl.isPersistMappedProperty(desc)) // persist mapped property defaults are handled in WebObjectImpl directly
+					if (desc.hasDefault() && !PersistHelper.isPersistMappedProperty(desc)) // persist mapped property defaults are handled in WebComponent directly
 					{
 						Object defaultValue = desc.getDefaultValue();
 						if (desc.getType() instanceof IDesignValueConverter)
@@ -2471,19 +2468,13 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 
 		// first check if this is a handler that is set
-		if (persistContext.getPersist() instanceof WebComponent &&
-			((WebComponent)persistContext.getPersist()).getImplementation() instanceof WebObjectImpl &&
-			((WebObjectImpl)((WebComponent)persistContext.getPersist()).getImplementation()).getPropertyDescription() instanceof WebObjectSpecification)
+		if (persistContext.getPersist() instanceof WebComponent webComponent &&
+			webComponent.getPropertyDescription() instanceof WebObjectSpecification spec && spec.getHandler((String)id) != null)
 		{
-			WebObjectSpecification spec = (WebObjectSpecification)((WebObjectImpl)((WebComponent)persistContext.getPersist()).getImplementation())
-				.getPropertyDescription();
-			if (spec.getHandler((String)id) != null)
-			{
-				Object defaultValue = getDefaultPersistValue(id);
-				Object propertyValue = getPersistPropertyValue(id);
-				return defaultValue != propertyValue &&
-					(defaultValue == null || !defaultValue.equals(propertyValue));
-			}
+			Object defaultValue = getDefaultPersistValue(id);
+			Object propertyValue = getPersistPropertyValue(id);
+			return defaultValue != propertyValue &&
+				(defaultValue == null || !defaultValue.equals(propertyValue));
 		}
 
 		if (persistContext.getPersist() instanceof LayoutContainer && ("class".equals(id) || "style".equals(id)))
@@ -2688,8 +2679,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				// for example servoy-extra table component defines it's foundset as "default" : {"foundsetSelector":""} (which means "Form foundset" not "-none-")
 				PropertyDescription specPD = null;
 				if (beanPropertyPersist instanceof IChildWebObject) specPD = ((IChildWebObject)beanPropertyPersist).getPropertyDescription();
-				if (beanPropertyPersist instanceof WebComponent && ((WebComponent)beanPropertyPersist).getImplementation() instanceof WebObjectImpl)
-					specPD = ((WebObjectImpl)(((WebComponent)beanPropertyPersist).getImplementation())).getPropertyDescription();
+				if (beanPropertyPersist instanceof WebComponent webComponent)
+					specPD = webComponent.getPropertyDescription();
 				if (beanPropertyPersist instanceof WebFormComponentChildType wfcct) specPD = wfcct.getPropertyDescription();
 
 				if (specPD != null)
@@ -2698,12 +2689,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					PropertyDescription propDescription = specPD.getProperty((String)id);
 					if (propDescription != null)
 					{
-						if (propDescription.hasDefault() && !WebObjectImpl.isPersistMappedProperty(propDescription)) // persist mapped prop. default values are handled directly in WebObjectImpl, so ignore those
+						if (propDescription.hasDefault() && !PersistHelper.isPersistMappedProperty(propDescription)) // persist mapped prop. default values are handled directly in WebObjectImpl, so ignore those
 						{
 							// so this is a property that has a default value defined in the .spec file; default might not be null
 							defaultSpecValue = propDescription.getDefaultValue();
 							isDefaultValue = Utils.areJSONEqual(defaultSpecValue,
-								ServoyJSONObject.nullToJsonNull(WebObjectImpl.convertFromJavaType(propDescription, value)));
+								ServoyJSONObject.nullToJsonNull(PersistHelper.convertFromJavaType(propDescription, value)));
 
 						}
 					}
@@ -2889,11 +2880,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			IPersist persistThatCouldBeExtended = (IPersist)beanPropertyPersist;
 
 			String topMostKey = (String)id;
-			int index = -1;
-			if (persistThatCouldBeExtended instanceof IChildWebObject)
-			{
-				index = ((IChildWebObject)persistThatCouldBeExtended).getIndex();
-			}
 			while (persistThatCouldBeExtended instanceof IChildWebObject)
 			{
 				topMostKey = ((IChildWebObject)persistThatCouldBeExtended).getJsonKey();
@@ -2910,39 +2896,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					if (persistThatCouldBeExtended instanceof IBasicWebObject)
 					{
-						JSONObject ownJson = (JSONObject)((IBasicWebObject)persistThatCouldBeExtended).getOwnProperty(
-							StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
-						if (!ServoyJSONObject.isJavascriptNullOrUndefined(ownJson) && ownJson.has(topMostKey))
-						{
-							if (ownJson.get(topMostKey) instanceof JSONArray arr)
-							{
-								if (index >= 0 && index < arr.length())
-								{
-									JSONObject item = arr.getJSONObject(index);
-									if (item.has((String)id))
-									{
-										inheritedValue = item.get((String)id);
-									}
-								}
-							}
-							else if (ownJson.get(topMostKey) instanceof JSONObject)
-							{
-								if (((JSONObject)ownJson.get(topMostKey)).has((String)id))
-								{
-									inheritedValue = ((JSONObject)ownJson.get(topMostKey)).get((String)id);
-								}
-								else
-								{
-									inheritedValue = ownJson.get(topMostKey);
-								}
-							}
-							else if (Utils.equalObjects(id, topMostKey))
-							{
-								inheritedValue = ownJson.get(topMostKey);
-							}
-						}
+						inheritedValue = ((AbstractBase)persistThatCouldBeExtended).getProperty((String)id);
 					}
-					else inheritedValue = ((AbstractBase)persistThatCouldBeExtended).getProperty((String)id);
 				}
 			}
 		}
@@ -3837,15 +3792,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(WebComponent.class);
 		}
-		if (forFoundsetName == null)
-		{
-			forFoundsetName = differentFoundsetDueToComponent(propertyDescription, persistContainingFoundsetProperty);
-			if (forFoundsetName != null)
-			{
-				// so it's a child component linked to the foundset property of (another) parent component; so we must be looking in the parent component for the foundset property
-				persistContainingFoundsetProperty = persistContainingFoundsetProperty.getParent().getAncestor(IRepository.WEBCOMPONENTS);
-			}
-		}
 		if (forFoundsetName != null)
 		{
 			try
@@ -3901,22 +3847,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 		}
 		return new Pair<String, ITable>(forFoundsetName, forFoundsetTable);
-	}
-
-	/**
-	 * Checks to see if a property should point to a different foundset then the form's foundset because it is a child property of a foundset(property)-linked child component.
-	 * If it is, then it return the name of the foundset property
-	 * @param webComponent context persist that could be a web component (if propertyDescription is a property or nested property of a webcomponent).
-	 */
-	private static String differentFoundsetDueToComponent(PropertyDescription propertyDescription, IPersist webComponent)
-	{
-		String forFoundsetName = null;
-		if (propertyDescription.getType() instanceof ICanBeLinkedToFoundset< ? , ? > && webComponent instanceof ChildWebComponent)
-		{
-			PropertyDescription childComponentPD = ((ChildWebComponent)webComponent).getPropertyDescription();
-			if (childComponentPD.getConfig() != null) forFoundsetName = ((ComponentTypeConfig)childComponentPD.getConfig()).forFoundset;
-		}
-		return forFoundsetName;
 	}
 
 	private static String differentFoundsetDueToProperty(PropertyDescription propertyDescription, PersistContext persistContext)
