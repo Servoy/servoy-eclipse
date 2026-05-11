@@ -77,12 +77,6 @@
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
-                    <artifactId>com.equo.chromium.cef.gtk.linux.aarch64</artifactId>
-                    <version>138.0.10</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
-                    <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.x86_64</artifactId>
                     <version>138.0.10</version>
                     <type>jar</type>
@@ -479,21 +473,20 @@
                     <type>jar</type>
                 </dependency>
                 <dependency>
-                    <groupId>org.hibernate.common</groupId>
-                    <artifactId>hibernate-commons-annotations</artifactId>
-                    <version>5.1.2.Final</version>
-                    <type>jar</type>
-                </dependency>
-                <dependency>
                     <groupId>org.hibernate.orm</groupId>
                     <artifactId>hibernate-core</artifactId>
-                    <version>7.3.3-SERVOY3</version>
+                    <version>7.4.0-SERVOY3</version>
                     <type>jar</type>
                 </dependency>
+				<dependency>
+		            <groupId>org.hibernate.orm</groupId>
+		            <artifactId>hibernate-vector</artifactId>
+                    <version>7.4.0-SERVOY3</version>
+        		</dependency>  
                 <dependency>
                   <groupId>org.hibernate.orm</groupId>
                   <artifactId>hibernate-community-dialects</artifactId>
-                  <version>7.3.2.Final</version>
+                    <version>7.4.0-SERVOY3</version>
                 </dependency>
                 <dependency>
                     <groupId>org.hibernate.models</groupId>

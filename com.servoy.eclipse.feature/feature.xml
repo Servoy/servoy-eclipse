@@ -267,7 +267,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.hibernate.orm.core"
-         version="5.6.15.Servoy3"/>
+         version="5.6.15.Servoy3"/> <!--RAGTEST -->
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
