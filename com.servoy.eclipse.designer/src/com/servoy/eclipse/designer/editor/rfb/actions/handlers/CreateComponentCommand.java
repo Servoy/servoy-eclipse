@@ -71,7 +71,6 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.CSSPositionUtils;
-import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -103,7 +102,6 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
@@ -268,7 +266,7 @@ public class CreateComponentCommand extends BaseRestorableCommand
 				{
 					// see if target has a 'component' or 'component[]' typed property
 					WebComponent parentWebComponent = (WebComponent)dropTarget;
-					PropertyDescription propertyDescription = ((WebObjectImpl)parentWebComponent.getImplementation()).getPropertyDescription();
+					PropertyDescription propertyDescription = parentWebComponent.getPropertyDescription();
 
 					// TODO add a visual way for the user to drop to a specific property (if there is more then one property that supports components)
 					// TODO also add a way of adding to a specific index in a component array and also just moving component ghosts in a component array property
@@ -280,18 +278,15 @@ public class CreateComponentCommand extends BaseRestorableCommand
 							if (property.getType() instanceof ComponentPropertyType)
 							{
 								// simple component type
-								return new IPersist[] { createNestedWebComponent(form, parentWebComponent, property, name, propertyName, -1,
+								return new IPersist[] { createNestedWebComponent(form, parentWebComponent, property, name, propertyName,
 									args.getLocation(), args.getSize()) };
 							}
 							else if (PropertyUtils.isCustomJSONArrayPropertyType(property.getType()) &&
 								((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType)
 							{
 								// array of component types
-								int index = 0;
-								IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWebComponent.getProperty(propertyName);
-								if (arrayOfChildComponents != null) index = arrayOfChildComponents.length;
 								return new IPersist[] { createNestedWebComponent(form, parentWebComponent,
-									((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index,
+									((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName,
 									args.getLocation(), args.getSize()) };
 							}
 						}
@@ -793,28 +788,28 @@ public class CreateComponentCommand extends BaseRestorableCommand
 		return newPersists;
 	}
 
-	private static ChildWebComponent createNestedWebComponent(Form form, WebComponent parentWebComponent, PropertyDescription pd,
+	//TODO do still support this?, should we reuse custom type
+	private static WebCustomType createNestedWebComponent(Form form, WebComponent parentWebComponent, PropertyDescription pd,
 		String componentSpecName,
-		String propertyName, int indexIfInArray, Point location, Dimension size)
+		String propertyName, Point location, Dimension size)
 	{
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentSpecName);
 		if (spec != null)
 		{
-			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWebComponent, pd, propertyName, indexIfInArray);
+			WebCustomType webComponent = WebCustomType.createNewInstance(parentWebComponent, pd, propertyName, -1);
 			webComponent.setTypeName(componentSpecName);
 
 			// not sure if location and size are still needed to be set in children here... maybe it is (if parent wants to use them at runtime)
 			int xRelativeToParent = Math.max(0, (int)(location.x - parentWebComponent.getLocation().getX()));
 			int yRelativeToParent = Math.max(0, (int)(location.y - parentWebComponent.getLocation().getY()));
-			webComponent.setLocation(new Point(xRelativeToParent, yRelativeToParent));
-			webComponent.setSize(size);
+			//webComponent.setLocation(new Point(xRelativeToParent, yRelativeToParent));
+			//webComponent.setSize(size);
 			PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 			if (description != null && description.getDefaultValue() instanceof JSONObject)
 			{
-				webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
-					((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+				//webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+				//	((JSONObject)description.getDefaultValue()).optInt("height", 80)));
 			}
-			parentWebComponent.insertChild(webComponent);
 
 			return webComponent;
 		}

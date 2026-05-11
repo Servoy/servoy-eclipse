@@ -44,7 +44,6 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IParentOverridable;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -80,6 +79,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -103,7 +103,6 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
@@ -337,22 +336,8 @@ public class ElementUtil
 			// no override
 			return persist;
 		}
-		IChildWebObject webObject = null;
 		IParentOverridable childOfParent = null;
-		if (persist instanceof IChildWebObject)
-		{
-			webObject = (IChildWebObject)persist;
-			ISupportChilds parent = persist.getParent();
-			if (parent instanceof IChildWebObject)
-			{
-				// Nested web objects
-				parent = (ISupportChilds)getOverridePersist(PersistContext.create(parent, persistContext.getContext()));
-				return getWebObjectChild(parent, webObject);
-			}
-
-			persist = parent;
-		}
-		else if (persist instanceof IParentOverridable)
+		if (persist instanceof IParentOverridable)
 		{
 			childOfParent = (IParentOverridable)persist;
 			persist = childOfParent.getParentToOverride();
@@ -372,7 +357,11 @@ public class ElementUtil
 		{
 			// override does not exist yet, create it
 			ISupportChilds parent = (Form)context;
-			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form) &&
+			if (persist instanceof IChildWebObject)
+			{
+				parent = (ISupportChilds)getOverridePersist(PersistContext.create(persist.getParent(), persistContext.getContext()));
+			}
+			else if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form) &&
 				!(parentPersist.getParent() instanceof CSSPositionLayoutContainer))
 			{
 				parent = null;
@@ -393,27 +382,40 @@ public class ElementUtil
 				}
 			}
 
-			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
-			((AbstractBase)newPersist).copyPropertiesMap(null, true);
-			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getUUID().toString());
-			if (persist instanceof WebComponent webComponent && newPersist instanceof WebComponent newWebComponent)
+			if (persist instanceof IChildWebObject)
 			{
-				List<WebCustomType> customTypes = new ArrayList<>();
-				for (IPersist child : webComponent.getAllObjectsAsList())
+				// override all its sibblings
+				List<IPersist> children = PersistHelper.getHierarchyChildren((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)parent));
+				for (IPersist child : children)
 				{
-					if (child instanceof WebCustomType custom)
+					if (child instanceof WebCustomType parentCustomType)
 					{
-						customTypes.add(custom);
+						IPersist existingOverride = (IPersist)parent.acceptVisitor(o -> {
+							if (o instanceof ISupportExtendsID &&
+								Utils.equalObjects(((ISupportExtendsID)o).getExtendsID(), parentCustomType.getUUID().toString()))
+							{
+								return o;
+							}
+							return IPersistVisitor.CONTINUE_TRAVERSAL;
+						});
+						if (existingOverride == null)
+						{
+							WebCustomType customType = WebCustomType.createNewInstance((IBasicWebObject)parent, parentCustomType.getPropertyDescription(),
+								parentCustomType.getJsonKey(), -1);
+							customType.setExtendsID(parentCustomType.getUUID().toString());
+							if (Utils.equalObjects(parentCustomType.getUUID(), persist.getUUID()))
+							{
+								newPersist = customType;
+							}
+						}
 					}
 				}
-				Iterator<WebCustomType> customTypeIterator = customTypes.iterator();
-				for (IPersist child : newWebComponent.getAllObjectsAsList())
-				{
-					if (child instanceof WebCustomType custom && customTypeIterator.hasNext())
-					{
-						custom.setExtendsID(customTypeIterator.next().getUUID().toString());
-					}
-				}
+			}
+			else
+			{
+				newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
+				((AbstractBase)newPersist).copyPropertiesMap(null, true);
+				((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getUUID().toString());
 			}
 			if (CSSPositionUtils.useCSSPosition(persist))
 			{
@@ -425,31 +427,11 @@ public class ElementUtil
 			}
 
 		}
-		if (webObject != null)
-		{
-			return getWebObjectChild(newPersist, webObject);
-		}
 		if (childOfParent != null)
 		{
 			newPersist = childOfParent.newOverwrittenParent(newPersist);
 		}
 		return newPersist;
-	}
-
-	private static IPersist getWebObjectChild(IPersist parent, IChildWebObject webObject)
-	{
-		Object newWebObject = ((AbstractBase)parent).getProperty(webObject.getJsonKey());
-		if (newWebObject instanceof IChildWebObject)
-		{
-			return (IChildWebObject)newWebObject;
-		}
-		if (newWebObject instanceof Object[])
-		{
-			return (IPersist)((Object[])newWebObject)[webObject.getIndex()];
-		}
-
-		ServoyLog.logError("Cannot find the override custom type in: " + newWebObject, null);
-		return webObject;
 	}
 
 	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();

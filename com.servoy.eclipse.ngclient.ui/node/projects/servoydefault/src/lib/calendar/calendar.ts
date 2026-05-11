@@ -190,7 +190,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             (this.inputElementRef.nativeElement as HTMLInputElement).value = currentValue;
             this.picker.dates.formatInput =  (date: DateTime) => date?this.formattingService.format(date, this.format, false):'';
             this.picker.dates.parseInput =  (value: string) => {
-                const parsed = this.formattingService.parse(value?value.trim():null, this.format, true, this.dataProviderID);
+                const parsed = this.formattingService.parse(value?value.trim():null, this.format, true, this.dataProviderID, true);
                 if (parsed instanceof Date && !isNaN(parsed.getTime())) return  new DateTime(parsed);
                 return null;
             };

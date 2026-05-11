@@ -81,27 +81,15 @@ public class ReorderCustomTypesCommand extends Command
 				}
 			});
 
-			setIndexes(property);
 			source.getParent().setProperty(jsonKey, asList.toArray(new IChildWebObject[0]));
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
 		}
 	}
 
-	/**
-	 * Sets the correct index in the array for each IChildWebObject
-	 */
-	private void setIndexes(IChildWebObject[] array)
-	{
-		for (int i = 0; i < array.length; i++)
-		{
-			array[i].setIndex(i);
-		}
-	}
 
 	@Override
 	public void undo()
 	{
-		setIndexes(oldValue);
 		source.getParent().setProperty(source.getJsonKey(), oldValue);
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
 	}

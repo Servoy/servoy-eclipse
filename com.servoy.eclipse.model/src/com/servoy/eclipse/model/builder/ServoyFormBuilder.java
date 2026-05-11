@@ -42,13 +42,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.CustomJSONPropertyType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.types.FunctionPropertyType;
 
@@ -1641,22 +1639,22 @@ public class ServoyFormBuilder
 			}
 			if (spec != null)
 			{
-				addWebComponentMissingReferences((WebComponent)o, spec, ((WebComponent)o).getFlattenedJson(), flattenedSolution, form, markerResource);
+				addWebComponentMissingReferences((WebComponent)o, spec, flattenedSolution, form, markerResource);
 			}
 		}
 	}
 
-	private static void addWebComponentMissingReferences(WebComponent wc, PropertyDescription spec, JSONObject json, FlattenedSolution flattenedSolution,
+	private static void addWebComponentMissingReferences(IBasicWebObject wc, PropertyDescription spec, FlattenedSolution flattenedSolution,
 		Form form, IResource markerResource)
 	{
-		if (spec != null && json != null)
+		if (spec != null && wc != null)
 		{
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			if (properties != null)
 			{
 				for (PropertyDescription pd : properties.values())
 				{
-					Object value = json.opt(pd.getName());
+					Object value = wc.getProperty(pd.getName());
 					if (value != null && !"".equals(value) && value != JSONObject.NULL)
 					{
 						if (pd.getType() instanceof MediaPropertyType)
@@ -1757,31 +1755,18 @@ public class ServoyFormBuilder
 									IMarker.PRIORITY_LOW, null, wc);
 							}
 						}
-						else if (pd.getType() instanceof CustomJSONPropertyType< ? >)
-						{
-							if (value instanceof JSONObject)
-							{
-								addWebComponentMissingReferences(wc, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(), (JSONObject)value,
-									flattenedSolution, form, markerResource);
-							}
-							else if (value instanceof JSONArray)
-							{
-								JSONArray arr = ((JSONArray)value);
-								for (int i = 0; i < arr.length(); i++)
-								{
-									if (arr.get(i) instanceof JSONObject)
-									{
-										addWebComponentMissingReferences(wc, ((CustomJSONPropertyType)pd.getType()).getCustomJSONTypeDefinition(),
-											(JSONObject)arr.get(i), flattenedSolution, form, markerResource);
-									}
-								}
-							}
-						}
 					}
 				}
 			}
+			wc.getAllObjects().forEachRemaining(child -> {
+				if (child instanceof WebCustomType customType)
+				{
+					addWebComponentMissingReferences(customType, customType.getPropertyDescription(), flattenedSolution, form, markerResource);
+				}
+			});
 		}
 	}
+
 
 	public static void addFormVariablesHideTableColumn(IResource markerResource, Form form, ITable table)
 	{

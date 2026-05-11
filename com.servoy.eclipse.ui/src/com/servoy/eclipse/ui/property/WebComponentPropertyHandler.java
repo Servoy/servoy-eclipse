@@ -39,6 +39,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IFormElement;
@@ -132,9 +133,9 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				(propertyDescription.hasDefault() || propertyDescription.getType().defaultValue(propertyDescription) != null)) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
 			{
 				// if null is coming from parent and is a value that is was set, it is not a default, return it
-				if (webObject.getParentComponent().getExtendsID() != null)
+				if (webObject.getAncestor(IBasicWebComponent.class).getExtendsID() != null)
 				{
-					List<AbstractBase> overrideHierarchy = PersistHelper.getOverrideHierarchy(webObject.getParentComponent());
+					List<AbstractBase> overrideHierarchy = PersistHelper.getOverrideHierarchy(webObject.getAncestor(IBasicWebComponent.class));
 					if (overrideHierarchy != null && overrideHierarchy.size() > 1) // list should contain as first item the component itself, so start with the first parent
 					{
 						String propertyName = getName();

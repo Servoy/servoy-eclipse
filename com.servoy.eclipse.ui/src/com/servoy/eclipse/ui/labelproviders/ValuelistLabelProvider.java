@@ -33,8 +33,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Label provider for value lists.
@@ -65,8 +65,8 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 		{
 			PropertyDescription specPD = null;
 			if (persist instanceof IChildWebObject) specPD = ((IChildWebObject)persist).getPropertyDescription();
-			if (persist instanceof WebComponent && ((WebComponent)persist).getImplementation() instanceof WebObjectImpl)
-				specPD = ((WebObjectImpl)(((WebComponent)persist).getImplementation())).getPropertyDescription();
+			if (persist instanceof WebComponent wc)
+				specPD = wc.getPropertyDescription();
 			if (specPD != null)
 			{
 				Map<String, PropertyDescription> allProperties = specPD.getProperties();
@@ -77,7 +77,7 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 					{
 						if (propDescription.getType() instanceof ValueListPropertyType)
 						{
-							if (propDescription.hasDefault() && !WebObjectImpl.isPersistMappedProperty(propDescription))
+							if (propDescription.hasDefault() && !PersistHelper.isPersistMappedProperty(propDescription))
 							{
 								return propDescription.getDefaultValue().toString();
 							}

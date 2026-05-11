@@ -39,7 +39,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -52,8 +51,6 @@ import com.servoy.eclipse.ui.wizards.ICheckBoxView;
 import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IBasicWebComponent;
-import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
@@ -80,6 +77,8 @@ public class FormElementDeleteCommand extends Command
 
 	/** Object to remove from. */
 	private ISupportChilds[] parents;
+
+	private Integer[] childIndexes;
 
 	private final Set<Form> subforms = new HashSet<Form>();
 
@@ -108,6 +107,7 @@ public class FormElementDeleteCommand extends Command
 		{
 			throw new IllegalArgumentException();
 		}
+		childIndexes = new Integer[children.length];
 		for (int i = 0; i < children.length; i++)
 		{
 			IPersist child = children[i];
@@ -118,6 +118,14 @@ public class FormElementDeleteCommand extends Command
 			else if (child instanceof IFlattenedPersistWrapper wp)
 			{
 				children[i] = wp.getWrappedPersist();
+			}
+			if (child instanceof IChildWebObject childObject)
+			{
+				childIndexes[i] = childObject.getIndex();
+			}
+			else
+			{
+				childIndexes[i] = Integer.valueOf(-1);
 			}
 		}
 		this.children = children;
@@ -222,21 +230,19 @@ public class FormElementDeleteCommand extends Command
 		String label = "delete element";
 
 		ArrayList<IPersist> confirmedChildren = new ArrayList<IPersist>();
-		for (IPersist child : children)
+		ArrayList<Integer> confirmedChildrenIndexes = new ArrayList<Integer>();
+		for (int i = 0; i < children.length; i++)
 		{
+			IPersist child = children[i];
 			List<IPersist> childStructure = new ArrayList<IPersist>();
 			childStructure.add(child);
 			if (child instanceof LayoutContainer)
 			{
 				childStructure.addAll(((LayoutContainer)child).getFlattenedFormElementsAndLayoutContainers());
 			}
-			if (child instanceof WebCustomType custom)
+			if (child instanceof WebCustomType custom && custom.getExtendsID() != null)
 			{
-				IBasicWebComponent component = custom.getParentComponent();
-				if (component.getExtendsID() != null && isInherited(custom, component))
-				{
-					return;
-				}
+				return;
 			}
 			List<IPersist> overriding = new ArrayList<IPersist>();
 			for (IPersist currentPersist : childStructure)
@@ -255,6 +261,8 @@ public class FormElementDeleteCommand extends Command
 				{
 					Set<IPersist> distinctChildren = dialog.overridingPersists.stream().collect(Collectors.toSet());
 					confirmedChildren.addAll(distinctChildren);
+					confirmedChildrenIndexes.addAll(overriding.stream().filter(distinctChildren::contains)
+						.map(p -> p instanceof IChildWebObject ? ((IChildWebObject)p).getIndex() : Integer.valueOf(-1)).collect(Collectors.toList()));
 					for (IPersist p : distinctChildren)
 					{
 						Form subform = (Form)p.getAncestor(IRepository.FORMS);
@@ -273,7 +281,8 @@ public class FormElementDeleteCommand extends Command
 				if (name == null) name = child.toString();
 
 				MessageDialog dialog = new MessageDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-					"Element has security info", null, "The element '" + name + "' has security info defined. Do you want to proceed with the deletion (security info will be lost)?",
+					"Element has security info", null,
+					"The element '" + name + "' has security info defined. Do you want to proceed with the deletion (security info will be lost)?",
 					MessageDialog.QUESTION, new String[] { "Yes", "No" }, 1);
 				if (dialog.open() != Window.OK)
 				{
@@ -281,9 +290,10 @@ public class FormElementDeleteCommand extends Command
 				}
 			}
 			confirmedChildren.add(child);
+			confirmedChildrenIndexes.add(childIndexes[i]);
 		}
 		children = confirmedChildren.toArray(new IPersist[confirmedChildren.size()]);
-
+		childIndexes = confirmedChildrenIndexes.toArray(new Integer[confirmedChildrenIndexes.size()]);
 		if (children.length > 1) label += 's';
 		for (IPersist child : children)
 		{
@@ -294,28 +304,6 @@ public class FormElementDeleteCommand extends Command
 		}
 		setLabel(label);
 		if (children.length > 0) redo();
-	}
-
-	private boolean isInherited(WebCustomType custom, IBasicWebComponent component)
-	{
-		if (custom.getExtendsID() != null) return true;
-		IPersist parentComponent = PersistHelper.getSuperPersist(component);
-		if (parentComponent instanceof IBasicWebObject indexed)
-		{
-			Object value = indexed.getProperty(custom.getJsonKey());
-			if (value instanceof IChildWebObject[] arrayValue && custom.getIndex() < arrayValue.length)
-			{
-				Display.getDefault().asyncExec(() -> {
-					String message = "Canot delete inherited " + custom.getJsonKey() + ", check the log for more details.";
-					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-						"Cannot delete", message);
-				});
-				ServoyLog.logError(new Exception("Cannot delete custom type " + custom.getUUID() +
-					" because is inherited from the parent component " + parentComponent.getUUID()));
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -357,7 +345,7 @@ public class FormElementDeleteCommand extends Command
 		{
 			try
 			{
-				((IDeveloperRepository)parents[i].getRootObject().getRepository()).undeleteObject(parents[i], children[i]);
+				((IDeveloperRepository)parents[i].getRootObject().getRepository()).undeleteObject(parents[i], children[i], childIndexes[i]);
 			}
 			catch (RepositoryException e)
 			{

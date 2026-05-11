@@ -42,7 +42,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.AvoidMultipleExecutionsJob;
-import com.servoy.j2db.persistence.WebObjectRegistry;
 
 import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
 
@@ -106,7 +105,6 @@ public class NGPackageManager extends BaseNGPackageManager
 			servoyModel.addActiveProjectListener(activeProjectListenerForRegisteringResources);
 		}
 
-		WebObjectRegistry.startTracking();
 	}
 
 	@Override
@@ -199,12 +197,4 @@ public class NGPackageManager extends BaseNGPackageManager
 
 		return newProject;
 	}
-
-	@Override
-	public void ngPackagesChanged(ILoadedNGPackagesListener.CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
-	{
-		super.ngPackagesChanged(changeReason, loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
-		WebObjectRegistry.clearWebObjectCaches();
-	}
-
 }

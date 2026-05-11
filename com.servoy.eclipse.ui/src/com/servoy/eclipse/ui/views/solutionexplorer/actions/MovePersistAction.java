@@ -57,7 +57,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -251,10 +250,9 @@ public class MovePersistAction extends AbstractMovePersistAction
 			{
 				public Object visit(IPersist o)
 				{
-					if (o instanceof WebComponent)
+					if (o instanceof WebComponent wc)
 					{
-						WebComponent wc = (WebComponent)o;
-						PropertyDescription pd = ((WebObjectImpl)wc.getImplementation()).getPropertyDescription();
+						PropertyDescription pd = wc.getPropertyDescription();
 						if (pd instanceof WebObjectSpecification)
 						{
 							for (String handler : ((WebObjectSpecification)pd).getHandlers().keySet())

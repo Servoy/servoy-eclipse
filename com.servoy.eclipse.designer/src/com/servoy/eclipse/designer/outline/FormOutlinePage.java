@@ -249,10 +249,10 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								return true;
 							}
 
-							IBasicWebComponent customTypeParent = iChildWebObject.getParentComponent();
+							IBasicWebComponent customTypeParent = iChildWebObject.getAncestor(IBasicWebComponent.class);
 							for (IPersist p : dragObjects)
 							{
-								if (!(p instanceof IChildWebObject) || ((IChildWebObject)p).getParentComponent() != customTypeParent)
+								if (!(p instanceof IChildWebObject) || p.getAncestor(IBasicWebComponent.class) != customTypeParent)
 								{
 									return false;
 								}

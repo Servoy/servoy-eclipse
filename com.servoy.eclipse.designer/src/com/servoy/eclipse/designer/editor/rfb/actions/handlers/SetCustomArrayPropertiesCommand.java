@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -89,7 +91,7 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 		{
 			Map<String, Object> row = result.get(i);
 			WebCustomType[] customType = new WebCustomType[1];
-			Object uuid = row.get("svyUUID");
+			UUID uuid = Utils.getAsUUID(row.get("svyUUID"), false);
 			if (uuid == null)
 			{
 				String name = typeName + "_" + id.incrementAndGet();
@@ -101,21 +103,23 @@ public class SetCustomArrayPropertiesCommand extends BaseRestorableCommand
 			}
 			else
 			{
-				customType[0] = (WebCustomType)webComponent.getChild(Utils.getAsUUID(uuid, false));
+				customType[0] = (WebCustomType)webComponent.getChild(uuid);
 				if (customType[0] == null && webComponent != parentWebComponent)
 				{
-					customType[0] = (WebCustomType)parentWebComponent.getChild(Utils.getAsUUID(uuid, false));
+					customType[0] = (WebCustomType)parentWebComponent.getChild(uuid);
 					if (customType[0] != null)
 					{
 						Object webComponents = webComponent.getProperty(customType[0].getJsonKey());
-						if (webComponents instanceof Object[])
+						if (webComponents instanceof Object[] wcArray)
 						{
 							// inheritance by index for custom types
-							customType[0] = (WebCustomType)((Object[])webComponents)[customType[0].getIndex()];
+							customType[0] = Arrays.asList(wcArray).stream()
+								.filter(wc -> wc instanceof WebCustomType webCustomType && uuid.toString().equals(webCustomType.getExtendsID())).findFirst()
+								.map(wc -> (WebCustomType)wc).orElse(null);
 						}
 					}
 				}
-				previousItemsUUIDSCopy.remove(uuid); //it was updated, remove it from the set
+				previousItemsUUIDSCopy.remove(uuid.toString()); //it was updated, remove it from the set
 			}
 			if (customType[0] != null)
 			{

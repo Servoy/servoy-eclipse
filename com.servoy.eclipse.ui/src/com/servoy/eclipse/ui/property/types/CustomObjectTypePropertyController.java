@@ -34,7 +34,6 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONObject;
 
@@ -212,21 +211,20 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 				parentKey = String.valueOf(id);
 				indexInArray = -1;
 			}
-			ISupportsIndexedChildren parent;
+			IBasicWebObject parent;
 			if (oldPropertyValue != null)
 			{
 				// in this scenario the old value is not null (for example when clearing a column)
 				// so the persist context is the array item itself, and we require the parent persist of the array
-				parent = (ISupportsIndexedChildren)persistContext.getPersist().getParent();
+				parent = (IBasicWebObject)persistContext.getPersist().getParent();
 			}
 			else
 			{
-				parent = (ISupportsIndexedChildren)persistContext.getPersist();
+				parent = (IBasicWebObject)persistContext.getPersist();
 			}
-			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)parent, propertyDescription, parentKey, indexInArray, true);
+			newPropertyValue = WebCustomType.createNewInstance(parent, propertyDescription, parentKey, indexInArray);
 			typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType());
 			newPropertyValue.setTypeName(typeName);
-			parent.setChild(newPropertyValue);
 		}
 		return newPropertyValue;
 	}

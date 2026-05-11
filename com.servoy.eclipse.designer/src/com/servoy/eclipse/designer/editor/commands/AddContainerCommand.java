@@ -73,7 +73,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
-import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -661,43 +660,37 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			}
 			if (index == -1) index = arrayValue != null ? arrayValue.length : 0;
 		}
-		if (parentWebObject instanceof ISupportsIndexedChildren)
+		WebCustomType customType = WebCustomType.createNewInstance(parentWebObject, targetPD, propertyName, index);
+		customType.setName(compName);
+		customType.setTypeName(typeName);
+
+		if (targetPD.getType() instanceof NGCustomJSONObjectType)
 		{
-			ISupportsIndexedChildren parentSupportsChildren = (ISupportsIndexedChildren)parentWebObject;
-			WebCustomType customType = WebCustomType.createNewInstance(parentWebObject, targetPD, propertyName, index, true);
-			customType.setName(compName);
-			customType.setTypeName(typeName);
-
-			if (targetPD.getType() instanceof NGCustomJSONObjectType)
+			Collection<String> allPropertiesNames = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getAllPropertiesNames();
+			for (String string : allPropertiesNames)
 			{
-				Collection<String> allPropertiesNames = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getAllPropertiesNames();
-				for (String string : allPropertiesNames)
+				PropertyDescription property = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getProperty(string);
+				if (template != null && template.hasProperty(string))
 				{
-					PropertyDescription property = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getProperty(string);
-					if (template != null && template.hasProperty(string))
-					{
-						Object propValue = template.getProperty(string);
+					Object propValue = template.getProperty(string);
 
-						if (property.getTag("wizard") != null && property.getTag("wizard") instanceof JSONObject &&
-							((JSONObject)property.getTag("wizard")).has("unique") && ((JSONObject)property.getTag("wizard")).get("unique").equals(true))
-						{
-							propValue = createUniqueID(property, arrayValue, propValue.toString());
-						}
-
-						customType.setProperty(string, propValue);
-					}
-					else if (property != null && property.getInitialValue() != null)
+					if (property.getTag("wizard") != null && property.getTag("wizard") instanceof JSONObject &&
+						((JSONObject)property.getTag("wizard")).has("unique") && ((JSONObject)property.getTag("wizard")).get("unique").equals(true))
 					{
-						Object initialValue = property.getInitialValue();
-						if (initialValue != null) customType.setProperty(string, ServoyJSONObject.deepCloneJSONArrayOrObj(initialValue));
+						propValue = createUniqueID(property, arrayValue, propValue.toString());
 					}
+
+					customType.setProperty(string, propValue);
+				}
+				else if (property != null && property.getInitialValue() != null)
+				{
+					Object initialValue = property.getInitialValue();
+					if (initialValue != null) customType.setProperty(string, ServoyJSONObject.deepCloneJSONArrayOrObj(initialValue));
 				}
 			}
-
-			parentSupportsChildren.insertChild(customType); // if it is array it will make use of index given above in WebCustomType.createNewInstance(...) when inserting; otherwise it's a simple set to some property name anyway
-			return customType;
 		}
-		return null;
+
+		return customType;
 	}
 
 	private static String createUniqueID(PropertyDescription pd, IChildWebObject[] columns, String value)

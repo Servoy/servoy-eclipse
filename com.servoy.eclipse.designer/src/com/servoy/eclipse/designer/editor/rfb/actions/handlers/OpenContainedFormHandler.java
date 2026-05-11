@@ -81,22 +81,18 @@ public class OpenContainedFormHandler implements IServerService
 								Debug.log("Cannot open form with id " + ((IContainsFormID)persist).getContainsFormID() +
 									"in design editor (parent element uuid " + args.getString("uuid") + ")");
 							}
-							else if (persist instanceof WebCustomType)
+							else if (persist instanceof WebCustomType ghost)
 							{
-								WebCustomType ghost = (WebCustomType)persist;
-								JSONObject beanXML = ghost.getFlattenedJson();
-
-
 								Collection<PropertyDescription> forms = null;
 								forms = ((ICustomType< ? >)ghost.getPropertyDescription().getType()).getCustomJSONTypeDefinition().getProperties(
 									FormPropertyType.INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
 
 								for (PropertyDescription pd : Utils.iterate(forms))
 								{
-									open = openFormDesignEditor(s, beanXML.opt(pd.getName()));
+									open = openFormDesignEditor(s, ghost.getProperty(pd.getName()));
 									if (!open)
 									{
-										Debug.log("Cannot open form with uuid given by " + beanXML.opt(pd.getName()) +
+										Debug.log("Cannot open form with uuid given by " + ghost.getProperty(pd.getName()) +
 											" (or it is not a form) in design editor (Container uuid " + args.getString("uuid") + ")");
 									}
 								}

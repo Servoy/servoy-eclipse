@@ -47,7 +47,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.UUID;
@@ -103,10 +102,9 @@ public class PersistCloner
 			{
 				try
 				{
-					if (o instanceof WebComponent)
+					if (o instanceof WebComponent wc)
 					{
-						WebComponent wc = (WebComponent)o;
-						PropertyDescription pd = ((WebObjectImpl)wc.getImplementation()).getPropertyDescription();
+						PropertyDescription pd = wc.getPropertyDescription();
 						if (pd instanceof WebObjectSpecification)
 						{
 							for (String handler : ((WebObjectSpecification)pd).getHandlers().keySet())
