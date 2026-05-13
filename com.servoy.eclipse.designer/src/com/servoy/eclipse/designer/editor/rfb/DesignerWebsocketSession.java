@@ -582,6 +582,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs, layoutContainersOfComponentPersist,
 					childLayoutContainerToParentFormComponentComponentDesignIdMap);
 				renderGhosts = renderGhosts || newRenderGhosts || formHasGhosts(persist);
+				if (!renderGhosts && persist instanceof WebComponent webComponent)
+				{
+					// ghost could be deleted, just refresh ghosts in this case; can we improve this
+					PropertyDescription componentPd = webComponent.getPropertyDescription();
+					renderGhosts = componentPd != null && componentPd.getAllPropertiesNames().stream()
+						.map(componentPd::getProperty)
+						.anyMatch(childPd -> childPd != null && PersistHelper.isPersistMappedProperty(childPd));
+				}
 			}
 			else if (persist instanceof Part)
 			{
