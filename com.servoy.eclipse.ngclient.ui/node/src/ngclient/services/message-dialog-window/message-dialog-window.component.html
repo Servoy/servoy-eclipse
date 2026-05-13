@@ -1,5 +1,5 @@
 <div class="svy-message-dialog" #svyMessageDialog>
-  <h4 class="window-title window-header" [ngClass]="styleClass()"></h4>
+  <h4 class="window-title window-header" [class]="styleClass()"></h4>
   <div class="window-body">
     <div class="inner-content">
       <span [innerHTML]='message()'></span>
@@ -21,7 +21,7 @@
   </div>
   <div #buttons class="window-footer">
     @for (text of buttonsText(); track text; let idx = $index) {
-      <button class="svy-btn" [ngClass]="getButtonClass(idx)" (click)="dismiss(text)">{{ text }}</button>
+      <button class="svy-btn" [class]="getButtonClass(idx)" (click)="dismiss(text)">{{ text }}</button>
     }
   </div>
 </div>

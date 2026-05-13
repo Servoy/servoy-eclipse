@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import {
   Component, TemplateRef, ElementRef, AfterViewInit, Renderer2,
-  HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
+  ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
   DOCUMENT,
   input,
   viewChild, signal
@@ -33,12 +33,13 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     selector: 'servoycore-listformcomponent',
     styleUrls: ['./listformcomponent.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { '(keydown)': 'handleKeyDown($event)' },
     template: `
-    <div class="svy-listformcomponent" [ngClass]='styleClass()' #element>
+    <div class="svy-listformcomponent" [class]='styleClass()' #element>
       @if (useScrolling) {
         <ag-grid-angular #aggrid
           [gridOptions]="agGridOptions"
-          [ngStyle]="getAGGridStyle()"
+          [style]="getAGGridStyle()"
           [sabloTabseq]="tabSeq()"
           [sabloTabseqConfig]="{container: true, reservedGap: 1000}">
         </ag-grid-angular>
@@ -48,7 +49,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
         @if (cache&&containedForm()&&containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track row; let i = $index) {
-              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
                 @for (item of cache.items; track item) {
                   <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
@@ -61,7 +62,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
         @if (cache&&containedForm()&&!containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track trackByFn(i, row); let i = $index) {
-              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{'width' : getRowWidth()}" style="display:inline-block">
                 @for (item of cache.items; track item) {
                   <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
                   }  <!-- component or responsive div  -->
@@ -74,7 +75,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
       </div>
     
       <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-        <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+        <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [class]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
           @for (item of state.items; track item) {
             <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
           }
@@ -83,7 +84,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
       <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
         <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
           @for (item of state.items; track item) {
-            <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [style]="item.model.visible === false ? {'display': 'none'} : null" style="position:absolute"> <!-- wrapper div -->
               <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
             </div>
           }
@@ -193,7 +194,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         this.log = logFactory.getLogger('ListFormComponent');
     }
 
-    @HostListener('keydown', ['$event'])
     handleKeyDown(event: any) {
         const foundset = this._foundset();
         if (!foundset.multiSelect && event.key === 'ArrowUp' || event.key === 'ArrowDown') {

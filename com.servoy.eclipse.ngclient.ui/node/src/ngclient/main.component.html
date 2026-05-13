@@ -10,7 +10,7 @@
     <div class="svy-reconnecting" >{{i18n_reconnecting_feedback}}</div>
   }
   @if (hasDefaultNavigator() || navigatorForm != null) {
-    <div class="svy-main-window-navigator-container"  [ngStyle]="getNavigatorStyle()">
+    <div class="svy-main-window-navigator-container"  [style]="getNavigatorStyle()">
       @if (hasDefaultNavigator()) {
         <svy-default-navigator [name]="mainForm"></svy-default-navigator>
       }
@@ -20,7 +20,7 @@
     </div>
   }
   @if (mainForm != null) {
-    <div id="mainForm" class="svy-main-window-container" autoscroll="true" [ngStyle]="getFormStyle()"  [sabloTabseq]="1" [sabloTabseqConfig]="{container: true, reservedGap: 5000}">
+    <div id="mainForm" class="svy-main-window-container" autoscroll="true" [style]="getFormStyle()"  [sabloTabseq]="1" [sabloTabseqConfig]="{container: true, reservedGap: 5000}">
       <svy-form [name]="mainForm"></svy-form>
     </div>
   }
