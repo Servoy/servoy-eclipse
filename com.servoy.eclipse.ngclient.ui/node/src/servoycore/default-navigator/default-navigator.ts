@@ -1,13 +1,12 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { FormService } from '../../ngclient/form.service';
 import { ComponentCache } from '../../ngclient/types';
 
 @Component({
-    selector: 'svy-default-navigator',
-    templateUrl: './default-navigator.html',
-    styleUrls: ['./default-navigator.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'svy-default-navigator',
+  templateUrl: './default-navigator.html',
+  styleUrls: ['./default-navigator.css'],
+  standalone: false
 })
 export class DefaultNavigator {
 

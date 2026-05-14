@@ -1,12 +1,11 @@
-import { Component, ElementRef, ChangeDetectionStrategy, viewChild, signal } from '@angular/core';
+import { Component, ElementRef, viewChild, signal } from '@angular/core';
 
 @Component({
-    selector: 'servoycore-message-dialog-window',
-    templateUrl: './message-dialog-window.component.html',
-    styleUrls: ['./message-dialog-window.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    host: { '(document:keydown)': 'handleKeyboardEvent($event)' },
-    standalone: false
+  selector: 'servoycore-message-dialog-window',
+  templateUrl: './message-dialog-window.component.html',
+  styleUrls: ['./message-dialog-window.component.css'],
+  host: { '(document:keydown)': 'handleKeyboardEvent($event)' },
+  standalone: false
 })
 export class MessageDialogWindowComponent {
 

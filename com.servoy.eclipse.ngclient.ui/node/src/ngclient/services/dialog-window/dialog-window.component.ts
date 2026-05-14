@@ -1,15 +1,14 @@
-import { Component, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { Component, Inject, DOCUMENT } from '@angular/core';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
 
 import { FormService } from '../../form.service';
 
 @Component({
-    selector: 'servoycore-dialog-window',
-    templateUrl: './dialog-window.component.html',
-    styleUrls: ['./dialog-window.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'servoycore-dialog-window',
+  templateUrl: './dialog-window.component.html',
+  styleUrls: ['./dialog-window.component.css'],
+  standalone: false
 })
   export class DialogWindowComponent {
 

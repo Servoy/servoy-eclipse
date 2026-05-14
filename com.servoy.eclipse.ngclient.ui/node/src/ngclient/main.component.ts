@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnDestroy, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewContainerRef } from '@angular/core';
 
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
@@ -11,10 +11,9 @@ import { I18NListener, MainViewRefService } from '@servoy/public';
 import { WindowRefService } from '@servoy/public';
 
 @Component({
-    selector: 'svy-main',
-    templateUrl: './main.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+  selector: 'svy-main',
+  templateUrl: './main.component.html',
+  standalone: false
 })
 
 export class MainComponent implements OnInit, OnDestroy {

@@ -1,11 +1,10 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { LocalStorageService } from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
 
 @Component({
     templateUrl: './default-login-window.component.html',
     styleUrls: ['./default-login-window.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class DefaultLoginWindowComponent {

@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { AbstractFormComponent } from '../../ngclient/form/form_component.component';
 
 @Component({
     selector: 'servoycore-formcomponent-responsive-container',
     templateUrl: './formcomponent-responsive-container.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class ServoyCoreFormcomponentResponsiveCotainer {
