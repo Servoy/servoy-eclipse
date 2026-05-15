@@ -49,7 +49,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
         @if (cache&&containedForm()&&containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track row; let i = $index) {
-              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{height: getRowHeight() !== null ? getRowHeight() + 'px' : null, width: getRowWidth()}" style="display:inline-block; position: relative">
                 @for (item of cache.items; track item) {
                   <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
@@ -609,7 +609,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             rowStyle['margin-top'] = containedFormMargin.paddingTop;
             rowStyle['margin-bottom'] = containedFormMargin.paddingBottom;
         }
-        if(includeHeight) rowStyle['height.px'] = this.getRowHeight();
+        if(includeHeight && this.getRowHeight() !== null) rowStyle['height'] = this.getRowHeight() + 'px';
         return rowStyle;
     }
 
@@ -989,7 +989,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight() < 1) {
             aggridStyle['height'] = '100%';
         } else {
-            aggridStyle['height.px'] = this.responsiveHeight();
+            aggridStyle['height'] = this.responsiveHeight() + 'px';
         }
         return aggridStyle;
     }
