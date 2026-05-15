@@ -22,11 +22,10 @@
 	</parent>
   <groupId>eclipse.platform.ui</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.38.100-SNAPSHOT</version>
+  <version>3.38.100.v20251108-1551</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
-    <forceContextQualifier>z-servoypatch</forceContextQualifier>
     <code.ignoredWarnings>-warn:-deprecation,raw,unchecked</code.ignoredWarnings>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>

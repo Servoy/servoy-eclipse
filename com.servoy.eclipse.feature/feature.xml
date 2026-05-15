@@ -420,6 +420,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.eclipse.jface"
-         version="3.38.100.z-servoypatch"/>
+         version="3.38.100.v20251108-1551"/>
 
 </feature>
