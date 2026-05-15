@@ -418,4 +418,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          arch="x86_64"
          version="138.0.9"/>
 
+   <plugin
+         id="org.eclipse.jface"
+         version="3.38.100.z-servoypatch"/>
+
 </feature>
