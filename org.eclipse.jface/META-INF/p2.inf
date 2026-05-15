@@ -5,3 +5,6 @@ requires.0.name=com.genuitec.eclipse.theming.core.feature.feature.group
 requires.0.range = [0.0.1,2024.4.0.202412101111]
 requires.0.min = 0
 requires.0.max = 0
+provides.0.namespace = org.eclipse.equinox.p2.iu
+provides.0.name = org.eclipse.jface
+provides.0.version = 3.38.100.v20251108-1551
