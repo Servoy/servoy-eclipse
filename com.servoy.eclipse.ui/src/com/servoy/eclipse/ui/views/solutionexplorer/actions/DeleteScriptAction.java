@@ -165,9 +165,11 @@ public class DeleteScriptAction extends DeletePersistAction
 					String searchString = sm.getDeclaration();
 
 					int index = txt.indexOf(searchString);
-
-					startLine = countLines(txt.substring(0, index)) + 1; // 1 based.
-					endLine = startLine + countLines(sm.getDeclaration()); // begin and end line and last }
+					if (index >= 0)
+					{
+						startLine = countLines(txt.substring(0, index)) + 1; // 1 based.
+						endLine = startLine + countLines(sm.getDeclaration()); // begin and end line and last }
+					}
 				}
 				else if (persist instanceof ScriptVariable)
 				{
