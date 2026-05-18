@@ -175,14 +175,17 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 							IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
 
-							repository.deleteObject(editingNode);
-							if (editingNode instanceof MenuItem)
+							if (editingNode != null)
 							{
-								editingNode = editingNode.getAncestor(IRepository.MENUS);
+								repository.deleteObject(editingNode);
+								if (editingNode instanceof MenuItem)
+								{
+									editingNode = editingNode.getAncestor(IRepository.MENUS);
+								}
+								servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
+								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(true,
+									asList(new IPersist[] { editingNode }));
 							}
-							servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
-							ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(true,
-								asList(new IPersist[] { editingNode }));
 						}
 					}
 					else if (rootObject instanceof StringResource)
