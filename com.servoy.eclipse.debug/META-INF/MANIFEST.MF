@@ -50,6 +50,8 @@ Import-Package: com.servoy.eclipse.ngclient.ui,
  org.apache.commons.compress.archivers.tar;version="1.25.0",
  org.apache.commons.compress.compressors.gzip;version="1.25.0",
  org.apache.commons.compress.utils;version="1.25.0",
+ org.apache.commons.io;version="[2.22.0,3.0.0)",
+ org.apache.commons.io.build;version="[2.22.0,3.0.0)",
  org.apache.commons.text,
  org.eclipse.ui.internal.browser
 Automatic-Module-Name: com.servoy.eclipse.debug
