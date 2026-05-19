@@ -39,8 +39,6 @@ This project has Eclipse MCP servers configured in `opencode.json`. **Always pre
 ### Other Tools
 - **Use `eclipse-ide_formatFile`** or `eclipse-coder_formatFile` to format Java files after editing.
 - **Use `eclipse-context`** tools for workspace context, file history, and cached resources.
-- **Use `duck-duck-search`** for web searches.
-- **Use `webpage-reader`** for reading web pages.
 - **Use `time`** for time-related operations.
 
 ## Workflow for Code Changes

@@ -5,17 +5,9 @@
       "type": "remote",
       "url": "http://localhost:8085/mcp/eclipse-ide"
     },
-    "duck-duck-search": {
-      "type": "remote",
-      "url": "http://localhost:8085/mcp/duck-duck-search"
-    },
     "time": {
       "type": "remote",
       "url": "http://localhost:8085/mcp/time"
-    },
-    "webpage-reader": {
-      "type": "remote",
-      "url": "http://localhost:8085/mcp/webpage-reader"
     },
     "memory": {
       "type": "remote",
