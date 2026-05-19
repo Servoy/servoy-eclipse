@@ -234,6 +234,31 @@ public class ModelUtils
 				css = cssClasses.toArray(css);
 				cachedCssClasses.put(mediaStyleSheets, new Pair<Long, String[]>(Long.valueOf(lastModifiedTime), css));
 			}
+			if (spec != null)
+			{
+				PropertyDescription pd = spec.getProperty(styleClassProperty);
+				if (pd != null)
+				{
+					List<Object> values = pd.getValues();
+					if (values != null && !values.isEmpty())
+					{
+						Set<String> merged = new TreeSet<>(StringComparator.INSTANCE);
+						for (String c : css)
+						{
+							merged.add(c);
+						}
+						for (Object val : values)
+						{
+							merged.add(val.toString());
+						}
+						css = merged.toArray(new String[0]);
+					}
+					if (pd.hasDefault() && pd.getDefaultValue() != null)
+					{
+						defaultValue = NGStyleClassPropertyType.NG_INSTANCE.fromDesignValue(pd.getDefaultValue().toString(), pd, persist);
+					}
+				}
+			}
 		}
 		else
 		{
