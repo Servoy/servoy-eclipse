@@ -290,9 +290,10 @@ public class JSUnitToJavaRunner
 		try
 		{
 			Debugger oldDebugger = context.getDebugger();
-			JSUnitDebugger jsUnitDebugger = new JSUnitDebugger(oldDebugger);
+			JSUnitDebugger jsUnitDebugger = null;
 			if (useDebugMode && !(oldDebugger instanceof JSUnitDebugger))
 			{
+				jsUnitDebugger = new JSUnitDebugger(oldDebugger);
 				context.setGeneratingDebug(true);
 				context.setOptimizationLevel(-1);
 				context.setDebugger(jsUnitDebugger, null);
