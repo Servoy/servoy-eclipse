@@ -428,6 +428,30 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("openInBrowser", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				Form form = editorPart.getForm();
+				String formName = form.getName();
+				String solutionName = form.getSolution().getName();
+				int port = com.servoy.j2db.server.shared.ApplicationServerRegistry.get().getWebServerPort();
+				String url = "http://localhost:" + port + "/solution/" + solutionName + "/index.html?formpreview=" + formName;
+				Display.getDefault().asyncExec(() -> {
+					try
+					{
+						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new java.net.URL(url));
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Cannot open form in browser", e);
+					}
+				});
+				return null;
+			}
+		});
+
 		configuredHandlers.put("getComponentPropertyWithTags", new IServerService()
 		{
 			@Override

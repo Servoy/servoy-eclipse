@@ -96,7 +96,15 @@ public class Activator implements BundleActivator
 //									setClient(ngClient);
 //								}
 //								else 
-								if (requestParams.containsKey("nodebug"))
+								if (requestParams.containsKey("formpreview"))
+								{
+									String formName = requestParams.get("formpreview").get(0);
+
+									FormPreviewNGClient.setPendingTargetFormName(formName);
+									FormPreviewNGClient client = new FormPreviewNGClient(this, designerCallback, formName);
+									setClient(client);
+								}
+								else if (requestParams.containsKey("nodebug"))
 								{
 									setClient(new NGClient(this, designerCallback));
 								}

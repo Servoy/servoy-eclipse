@@ -71,6 +71,28 @@ public class IndexPageFilter implements Filter
 		request.getSession();
 		String requestURI = request.getRequestURI();
 
+		// FormPreview: bypass all authentication and serve index page directly
+		if (request.getParameter("formpreview") != null && requestURI.toLowerCase().contains("/solution/") &&
+			requestURI.toLowerCase().endsWith("/index.html"))
+		{
+
+			File projectFolder = Activator.getInstance().getSolutionProjectFolder();
+			if (projectFolder != null)
+			{
+				File distFolder = new File(projectFolder, "dist/app/browser");
+				File indexFile = new File(distFolder, "index.html");
+				if (indexFile.exists())
+				{
+					String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
+					String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
+					ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false);
+					AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,
+						contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
+					return;
+				}
+			}
+		}
+
 		if (AngularIndexPageWriter.handleShortSolutionRequest(request, response))
 		{
 			return;
@@ -104,7 +126,11 @@ public class IndexPageFilter implements Filter
 				requestURI.contains("/svy_oauth/"))
 			{
 				Pair<Boolean, String> showLogin = null;
-				if (OAuthHandler.isOAuthRequest(request))
+				if (request.getParameter("formpreview") != null)
+				{
+					showLogin = new Pair<>(Boolean.FALSE, null);
+				}
+				else if (OAuthHandler.isOAuthRequest(request))
 				{
 					showLogin = OAuthHandler.handleOauth(request, response);
 					if (Boolean.FALSE.equals(showLogin.getLeft()))
