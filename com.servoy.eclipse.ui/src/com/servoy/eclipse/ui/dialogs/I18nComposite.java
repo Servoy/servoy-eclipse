@@ -960,7 +960,7 @@ public class I18nComposite extends Composite
 					"   - Consider common UI/UX terminology\n\n" +
 					"Here you have a list of keys and translations that can help in generating new keys and translations. " +
 					"They are between curly brackets, comma separated and of the following pattern: languageCode_countryCode.key=translation, " +
-					"where languageCode_countryCode can be missing: " + translations.toString() + "\n\n" +
+					"where languageCode_countryCode can be missing: " + (translations != null ? translations.toString() : "{}") + "\n\n" +
 					"IMPORTANT: Always return ONLY the key name or translated text, no explanations or quotes.");
 		}
 		return aiSuggestionModel;
