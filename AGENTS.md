@@ -129,6 +129,7 @@ Located in `launch_targets/`:
 - No hardcoded secrets, credentials, or proprietary information
 - All code must be compatible with open source licenses (except GPL)
 - **Commit messages:** When the code is mostly AI-generated, the commit subject line must end with `[ai]`
+- **Commit messages for cases:** When a commit is related to a Jira case, the case number (e.g. `SVY-123`, `SVYX-456`, `SERVOY-293`) must be included in the commit subject line. Example: `SERVOY-293 fix NPE in WAR export copyRequiredBundles [ai]`
 
 ## Testing
 
