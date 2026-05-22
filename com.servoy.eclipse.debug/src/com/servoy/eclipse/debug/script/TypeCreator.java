@@ -98,7 +98,6 @@ import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.BeanProperty;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.JavaMembers;
-import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.NativePromise;
