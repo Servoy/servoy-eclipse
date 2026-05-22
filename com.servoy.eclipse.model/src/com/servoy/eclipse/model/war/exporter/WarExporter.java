@@ -1728,7 +1728,13 @@ public class WarExporter
 
 		for (File jarFile : jars)
 		{
-			String bundleSymbolicName = JarManager.getNameAndVersion(jarFile.toURI().toURL()).getLeft();
+			Pair<String, String> nameAndVersion = JarManager.getNameAndVersion(jarFile.toURI().toURL());
+			if (nameAndVersion == null)
+			{
+				ServoyLog.logWarning("Skipping jar without valid manifest in plugins directory: " + jarFile.getAbsolutePath(), null);
+				continue;
+			}
+			String bundleSymbolicName = nameAndVersion.getLeft();
 			if (bundleSymbolicName == null) continue;
 
 			bundleSymbolicName = bundleSymbolicName.split(";")[0].trim();
