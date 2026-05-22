@@ -23,6 +23,7 @@ This project has Eclipse MCP servers configured in `opencode.json`. **Always pre
 1. **Always call `eclipse-ide_getCompilationErrors`** after modifying code to check for compilation errors.
 2. If errors are found and have quick fixes available, **use `eclipse-ide_executeQuickFix`** to resolve them automatically.
 3. **Use `eclipse-coder_organizeImports`** to fix import issues after edits.
+4. **Spotbugs:** Spotbugs errors of the **two highest severity levels** are treated as blocking errors. Always try to fix these in any new or modified code to keep the codebase robust and clean.
 
 ### Git Operations
 - **Use `eclipse-git` tools** (`gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitBranch`, etc.) instead of command-line git.
