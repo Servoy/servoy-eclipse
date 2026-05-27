@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for com.servoy.eclipse.opencode
+Bundle-SymbolicName: com.servoy.eclipse.opencode.tests
+Bundle-Version: 2026.6.0.qualifier
+Bundle-Vendor: Servoy
+Fragment-Host: com.servoy.eclipse.opencode
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Import-Package: org.junit;version="4.0.0",
+ org.junit.rules;version="4.0.0"
+Automatic-Module-Name: com.servoy.eclipse.opencode.tests

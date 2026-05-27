@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.servoy.eclipse.opencode.OpencodePerspective"
+            icon="icons/aichat.png"
+            id="com.servoy.eclipse.opencode.OpencodePerspective"
+            name="Servoy AI">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.opencode.OpenCodeView"
+            icon="icons/aichat.png"
+            id="com.servoy.eclipse.opencode.OpenCodeView"
+            name="Servoy AI"
+            restorable="true">
+      </view>
+   </extension>
+</plugin>

@@ -174,7 +174,7 @@ public class RunNPMCommand extends WorkspaceJob
 				String str = null;
 				while ((str = br.readLine()) != null)
 				{
-//						str = str.replaceAll(".*?m", "");
+//						str = str.replaceAll(".*?m", "");
 //						str = str.replaceAll("\b", "");
 					writeConsole(console, str.trim());
 					// The date, hash and time represents the last output line of the NG build process.
@@ -220,11 +220,25 @@ public class RunNPMCommand extends WorkspaceJob
 	}
 
 	/**
-	 * @return -1 if the command has not yet finished running; EXIT_CODE_CANCELLED if it was cancelled by the user; otherwise the EXIT_CODE of the command that has been run by this job.
+	 * @return -1 if the command has not yet finished running; EXIT_CODE_CANCELLED if it was cancelled by the user;
+	 *         otherwise the EXIT_CODE of the command that has been run by this job.
 	 */
 	public int getExitCode()
 	{
 		return exitCode;
+	}
+
+	/**
+	 * Returns the underlying OS {@link Process}, or {@code null} if the process has not started yet or has already
+	 * been cleaned up by {@link #canceling()}.
+	 * <p>
+	 * Callers may use this to kill the process tree directly (e.g. during Eclipse shutdown) without going through
+	 * the normal {@link #canceling()} path.
+	 * </p>
+	 */
+	public Process getProcess()
+	{
+		return process;
 	}
 
 	private void writeConsole(StringOutputStream console, String message)
