@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -145,8 +146,19 @@ public class OpencodeFolderCreatorJob extends Job {
 			}
 		}
 
+		// Write / merge the opencode.json MCP config
+		List<IMcpEndpointProvider> providers = McpConfigWriter.collectProviders();
+		Path servoyOpencodeCfgDir = Path.of(System.getProperty("user.home"), ".servoy", "opencode");
+		try {
+			McpConfigWriter.mergeConfig(providers, servoyOpencodeCfgDir.resolve("opencode.json"));
+		} catch (IOException e) {
+			ServoyLog.logError("OpencodeFolderCreatorJob: failed to write opencode.json", e);
+			// non-fatal: opencode starts without the Servoy MCP endpoints configured
+		}
+		Map<String, String> mcpEnvVars = McpConfigWriter.buildEnvVars(providers);
+
 		// Start the opencode server
-		new RunOpencodeCommand(opencodeDir).schedule();
+		new RunOpencodeCommand(opencodeDir, mcpEnvVars).schedule();
 		return Status.OK_STATUS;
 	}
 
