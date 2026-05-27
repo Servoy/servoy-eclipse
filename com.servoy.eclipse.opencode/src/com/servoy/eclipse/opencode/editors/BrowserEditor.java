@@ -1,4 +1,4 @@
-package com.servoy.eclipse.ui.editors;
+package com.servoy.eclipse.opencode.editors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
@@ -12,7 +12,7 @@ import com.servoy.eclipse.ui.browser.IBrowser;
 
 public class BrowserEditor extends EditorPart
 {
-	public static final String EDITOR_ID = "com.servoy.eclipse.ui.editors.BrowserEditor";
+	public static final String EDITOR_ID = "com.servoy.eclipse.opencode.editors.BrowserEditor";
 
 	private IBrowser browser;
 

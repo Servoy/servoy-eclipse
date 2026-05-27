@@ -1,4 +1,4 @@
-package com.servoy.eclipse.ui.editors;
+package com.servoy.eclipse.opencode.editors;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
