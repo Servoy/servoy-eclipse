@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,15 +69,21 @@ public class RunOpencodeCommand extends Job {
 
 	private final File opencodeDir;
 	private final int retryCount;
+	private final Map<String, String> additionalEnvVars;
 
 	public RunOpencodeCommand(File opencodeDir) {
-		this(opencodeDir, 0);
+		this(opencodeDir, Map.of());
 	}
 
-	private RunOpencodeCommand(File opencodeDir, int retryCount) {
+	public RunOpencodeCommand(File opencodeDir, Map<String, String> additionalEnvVars) {
+		this(opencodeDir, 0, additionalEnvVars);
+	}
+
+	private RunOpencodeCommand(File opencodeDir, int retryCount, Map<String, String> additionalEnvVars) {
 		super("Running Servoy AI server");
 		this.opencodeDir = opencodeDir;
 		this.retryCount = retryCount;
+		this.additionalEnvVars = Map.copyOf(additionalEnvVars);
 		setUser(false);
 		setSystem(true);
 	}
@@ -101,7 +109,9 @@ public class RunOpencodeCommand extends Job {
 				List.of("exec", "--", "opencode", "serve",
 						"--port", String.valueOf(port),
 						"--hostname", "127.0.0.1"));
-		serverCommand.setExtraEnvironment(buildServoyXdgEnv());
+		Map<String, String> env = new HashMap<>(buildServoyXdgEnv());
+		env.putAll(additionalEnvVars);
+		serverCommand.setExtraEnvironment(Collections.unmodifiableMap(env));
 
 		Activator activator = Activator.getInstance();
 		if (activator == null) {
@@ -137,7 +147,7 @@ public class RunOpencodeCommand extends Job {
 			if (retryCount < MAX_RETRIES) {
 				ServoyLog.logInfo("OpenCode: unexpected exit (code " + exitCode + ") - scheduling retry " +
 						(retryCount + 1) + "/" + MAX_RETRIES + " in 5 s.");
-				new RunOpencodeCommand(opencodeDir, retryCount + 1).schedule(RETRY_DELAY_MS);
+				new RunOpencodeCommand(opencodeDir, retryCount + 1, additionalEnvVars).schedule(RETRY_DELAY_MS);
 			} else {
 				ServoyLog.logError("OpenCode: server exited unexpectedly (code " + exitCode + ") - no more retries.",
 						null);
