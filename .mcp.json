@@ -1,0 +1,43 @@
+{
+  "mcpServers": {
+    "eclipse-ide": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/eclipse-ide"
+    },
+    "time": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/time"
+    },
+    "memory": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/memory"
+    },
+    "eclipse-coder": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/eclipse-coder"
+    },
+    "eclipse-runner": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/eclipse-runner"
+    },
+    "eclipse-context": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/eclipse-context"
+    },
+    "eclipse-git": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/eclipse-git"
+    },
+    "eclipse-pde": {
+      "type": "http",
+      "url": "http://localhost:8085/mcp/eclipse-pde"
+    },
+    "atlassian": {
+      "type": "sse",
+      "url": "https://mcp.atlassian.com/v1/mcp",
+      "headers": {
+        "Authorization": "Basic ${ATLASSIAN_AUTH_BASIC}"
+      }
+    }
+  }
+}

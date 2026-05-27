@@ -122,6 +122,14 @@ Located in `launch_targets/`:
 - `eclipse_local.target` — Local development target
 - `open_source.target` — Open source target
 
+## Spec / Design Documents
+
+Feature specs and design documents live in **`docs/`** at the repository root.
+
+- Name files after the Jira case with a `.spec.md` extension: `docs/SVY-21080-embedded-opencode.spec.md`
+- Never place spec files inside a plugin or module subdirectory.
+- When asked to write a spec, always create it in `docs/` unless explicitly told otherwise.
+
 ## Code Style & Conventions
 
 - Follow existing code style and conventions for each language and module
