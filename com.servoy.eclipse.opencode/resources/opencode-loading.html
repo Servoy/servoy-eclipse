@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starting Servoy AIâ?¦</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.15);
+      border-top-color: #6c8ebf;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { font-size: 1.3rem; font-weight: 500; margin-bottom: 8px; }
+    p  { font-size: 0.9rem; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <h1>Starting Servoy AI</h1>
+  <p>Please wait while the AI server is starting up.</p>
+</body>
+</html>

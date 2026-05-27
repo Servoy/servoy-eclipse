@@ -11,13 +11,14 @@
       </perspective>
    </extension>
    <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            class="com.servoy.eclipse.opencode.editors.BrowserEditor"
-            default="false"
+         point="org.eclipse.ui.views">
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.opencode.OpenCodeView"
             icon="icons/aichat.png"
-            id="com.servoy.eclipse.opencode.editors.BrowserEditor"
-            name="Browser Editor">
-      </editor>
+            id="com.servoy.eclipse.opencode.OpenCodeView"
+            name="Servoy AI"
+            restorable="true">
+      </view>
    </extension>
 </plugin>
