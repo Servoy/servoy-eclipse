@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -100,6 +101,7 @@ public class RunOpencodeCommand extends Job {
 				List.of("exec", "--", "opencode", "serve",
 						"--port", String.valueOf(port),
 						"--hostname", "127.0.0.1"));
+		serverCommand.setExtraEnvironment(buildServoyXdgEnv());
 
 		Activator activator = Activator.getInstance();
 		if (activator == null) {
@@ -108,7 +110,8 @@ public class RunOpencodeCommand extends Job {
 		}
 
 		// Register both the outer job (this) and the inner command so stopServer()
-		// can cancel this job's monitor (preventing spurious retry) AND kill the OS process.
+		// can cancel this job's monitor (preventing spurious retry) AND kill the OS
+		// process.
 		activator.setServerJob(this);
 		activator.setServerCommand(serverCommand);
 
@@ -136,11 +139,38 @@ public class RunOpencodeCommand extends Job {
 						(retryCount + 1) + "/" + MAX_RETRIES + " in 5 s.");
 				new RunOpencodeCommand(opencodeDir, retryCount + 1).schedule(RETRY_DELAY_MS);
 			} else {
-				ServoyLog.logError("OpenCode: server exited unexpectedly (code " + exitCode + ") - no more retries.", null);
+				ServoyLog.logError("OpenCode: server exited unexpectedly (code " + exitCode + ") - no more retries.",
+						null);
 			}
 		}
 
 		return Status.OK_STATUS;
+	}
+
+	/**
+	 * Builds XDG environment variable overrides that redirect opencode's config,
+	 * data, and state directories to {@code {user.home}/.servoy/}. This keeps the
+	 * Servoy-managed opencode instance isolated from any standalone opencode
+	 * installation the user may have.
+	 * <p>
+	 * The override can be suppressed by setting the JVM property
+	 * {@code opencode.use.default.xdg=true}, which causes this method to return
+	 * an empty map so opencode falls back to its default XDG directories.
+	 * </p>
+	 *
+	 * @return a map of XDG environment variables to inject, or an empty map if the
+	 *         escape hatch property is set
+	 */
+	static Map<String, String> buildServoyXdgEnv() {
+		if (Boolean.getBoolean("opencode.use.default.xdg")) {
+			return Map.of();
+		}
+		String servoyHome = System.getProperty("user.home") + File.separator + ".servoy";
+		return Map.of(
+				"XDG_CONFIG_HOME", servoyHome,
+				"XDG_DATA_HOME", servoyHome,
+				"XDG_STATE_HOME", servoyHome,
+				"XDG_CACHE_HOME", servoyHome);
 	}
 
 	/**
@@ -176,7 +206,8 @@ public class RunOpencodeCommand extends Job {
 					// server not yet ready - keep polling
 				}
 			}
-			ServoyLog.logError("OpenCode: watchdog timed out - server did not respond on port " + port + " within 120 s.", null);
+			ServoyLog.logError(
+					"OpenCode: watchdog timed out - server did not respond on port " + port + " within 120 s.", null);
 		}, "opencode-watchdog");
 		watchdog.setDaemon(true);
 		watchdog.start();

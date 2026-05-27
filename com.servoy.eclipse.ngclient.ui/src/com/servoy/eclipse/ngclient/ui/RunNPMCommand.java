@@ -60,6 +60,19 @@ public class RunNPMCommand extends WorkspaceJob
 
 	private final ReentrantLock processLock = new ReentrantLock();
 
+	private Map<String, String> extraEnvironment = Map.of();
+
+	/**
+	 * Extra environment variables to inject into the child process environment
+	 * before the command is started. Must be called before {@link #runCommand}.
+	 *
+	 * @param extra the variables to inject; a defensive copy is taken
+	 */
+	public void setExtraEnvironment(Map<String, String> extra)
+	{
+		this.extraEnvironment = Map.copyOf(extra);
+	}
+
 	public RunNPMCommand(String familyJob, File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
 		super("Executing NPM command: " + commandArgsToString(commands));
@@ -140,6 +153,10 @@ public class RunNPMCommand extends WorkspaceJob
 			environment.put(pathkey, path);
 			environment.put("NODE_OPTIONS", "--max-old-space-size=4096");
 			environment.put("NG_PERSISTENT_BUILD_CACHE", "1");
+			if (!extraEnvironment.isEmpty())
+			{
+				environment.putAll(extraEnvironment);
+			}
 			builder.directory(projectFolder);
 			builder.redirectErrorStream(true);
 			if (commandArguments == NGClientConstants.NG_BUILD_COMMAND) // the command that runs the NG build
@@ -152,7 +169,7 @@ public class RunNPMCommand extends WorkspaceJob
 			allCmdLineArgs.add(nodePath.getCanonicalPath());
 			allCmdLineArgs.add(npmPath.getCanonicalPath());
 			allCmdLineArgs.addAll(commandArguments);
-//			allCmdLineArgs.add("--scripts-prepend-node-path");
+			//			allCmdLineArgs.add("--scripts-prepend-node-path");
 			writeConsole(console, "\n---- Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			writeConsole(console, "In dir: " + projectFolder);
 			builder.command(allCmdLineArgs);
@@ -174,8 +191,8 @@ public class RunNPMCommand extends WorkspaceJob
 				String str = null;
 				while ((str = br.readLine()) != null)
 				{
-//						str = str.replaceAll(".*?m", "");
-//						str = str.replaceAll("\b", "");
+					//						str = str.replaceAll(".*?m", "");
+					//						str = str.replaceAll("\b", "");
 					writeConsole(console, str.trim());
 					// The date, hash and time represents the last output line of the NG build process.
 					// The NG build is finished when this conditions is met.
@@ -268,7 +285,7 @@ public class RunNPMCommand extends WorkspaceJob
 				StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 
 				writeConsole(console, "Cancel requested by user... Trying to stop process...");
-//			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status
+				//			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status
 				process.destroy();
 				exitCode = EXIT_CODE_CANCELLED;
 
