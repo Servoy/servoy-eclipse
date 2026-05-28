@@ -44,12 +44,18 @@ public class OpencodePerspective implements IPerspectiveFactory {
 
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
-		// Hide the editor area - the browser view fills everything.
+		// Hide the editor area â the browser view fills the space.
 		layout.setEditorAreaVisible(false);
 
-		// Place the browser view to the left of the (hidden) editor area,
-		// taking the full width (ratio = 1.0).
+		// Browser view fills the full area.
 		layout.addStandaloneView(OpenCodeView.VIEW_ID, false, IPageLayout.LEFT, 1.0f, IPageLayout.ID_EDITOR_AREA);
+
+		// Console and other output views open at the bottom (bottom 25% of the view).
+		org.eclipse.ui.IFolderLayout bottom = layout.createFolder(
+			"bottom", IPageLayout.BOTTOM, 0.75f, OpenCodeView.VIEW_ID); //$NON-NLS-1$
+		bottom.addPlaceholder("org.eclipse.ui.console.ConsoleView"); //$NON-NLS-1$
+		bottom.addPlaceholder("org.eclipse.ui.console.ConsoleView:*"); //$NON-NLS-1$
+		bottom.addPlaceholder("org.eclipse.ui.views.AllMarkersView"); //$NON-NLS-1$
 
 		layout.setFixed(true);
 	}
