@@ -24,7 +24,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -157,8 +159,18 @@ public class OpencodeFolderCreatorJob extends Job {
 		}
 		Map<String, String> mcpEnvVars = McpConfigWriter.buildEnvVars(providers);
 
+		try {
+			ProviderConfigWriter.mergeProviderConfig(servoyOpencodeCfgDir.resolve("opencode.json")); //$NON-NLS-1$
+		} catch (IOException e) {
+			ServoyLog.logError("OpencodeFolderCreatorJob: failed to write provider config", e); //$NON-NLS-1$
+			// non-fatal: opencode starts without Servoy GenAI provider configured
+		}
+
+		Map<String, String> allEnvVars = new HashMap<>(mcpEnvVars);
+		allEnvVars.putAll(ProviderConfigWriter.buildProviderEnvVars());
+
 		// Start the opencode server
-		new RunOpencodeCommand(opencodeDir, mcpEnvVars).schedule();
+		new RunOpencodeCommand(opencodeDir, Collections.unmodifiableMap(allEnvVars)).schedule();
 		return Status.OK_STATUS;
 	}
 
