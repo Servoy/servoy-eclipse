@@ -2,9 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Opencode
 Bundle-SymbolicName: com.servoy.eclipse.opencode;singleton:=true
-Bundle-Version: 2026.6.0.qualifier
+Bundle-Version: 2026.3.1.qualifier
 Bundle-Vendor: Servoy
 Bundle-Activator: com.servoy.eclipse.opencode.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -15,4 +16,4 @@ Require-Bundle: org.eclipse.ui,
  com.servoy.eclipse.ngclient.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.opencode
-Export-Package: com.servoy.eclipse.opencode;version="2026.6.0"
+Export-Package: com.servoy.eclipse.opencode;version="2026.3.1"
