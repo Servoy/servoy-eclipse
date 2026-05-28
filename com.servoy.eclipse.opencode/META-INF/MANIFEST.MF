@@ -16,5 +16,4 @@ Require-Bundle: org.eclipse.ui,
  servoy_shared
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.opencode
-Import-Package: org.json
 Export-Package: com.servoy.eclipse.opencode;version="2026.6.0"

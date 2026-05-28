@@ -98,7 +98,7 @@ public class OpenCodeView extends ViewPart {
 			[data-component="icon-button"][data-variant="primary"]:not(:disabled):hover {
 			  background-color: #d4891e !important;
 			}
-			/* Hide the session sidebar toggle â not needed in the embedded view */
+			/* Hide the session sidebar toggle button â panel is opened via JS */
 			[data-component="icon-button"][data-icon="menu"].titlebar-icon {
 			  display: none !important;
 			}
@@ -367,59 +367,14 @@ public class OpenCodeView extends ViewPart {
 	}
 
 	/**
-	 * Resolves the URL to open for a project: queries the opencode REST API for
-	 * existing sessions, returning the most recently updated one. If no sessions
-	 * exist for this directory, creates a new one. Falls back to the bare project
-	 * URL if the API call fails.
+	 * Builds the URL to open for a project. Uses {@code /<base64>/session}
+	 * (no specific session ID) â the same path opencode's own UI navigates to
+	 * when opening a project, so it goes through the correct routing.
 	 */
 	private String resolveSessionUrl(int port, String projectPath) {
 		String encoded = Base64.getUrlEncoder().withoutPadding()
 				.encodeToString(projectPath.getBytes(StandardCharsets.UTF_8));
-		String base = "http://127.0.0.1:" + port + "/" + encoded; //$NON-NLS-1$
-		try {
-			String dirParam = java.net.URLEncoder.encode(projectPath, StandardCharsets.UTF_8);
-			String apiBase = "http://127.0.0.1:" + port; //$NON-NLS-1$
-
-			// List existing sessions for this directory
-			java.net.HttpURLConnection conn = (java.net.HttpURLConnection)
-				new java.net.URL(apiBase + "/session?directory=" + dirParam).openConnection(); //$NON-NLS-1$
-			conn.setConnectTimeout(3000);
-			conn.setReadTimeout(3000);
-			if (conn.getResponseCode() == 200) {
-				String body = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-				org.json.JSONArray sessions = new org.json.JSONArray(body);
-				if (sessions.length() > 0) {
-					// Find the most recently updated session
-					org.json.JSONObject best = sessions.getJSONObject(0);
-					long bestTime = best.optJSONObject("time") != null //$NON-NLS-1$
-						? best.getJSONObject("time").optLong("updated", 0) : 0; //$NON-NLS-1$ //$NON-NLS-2$
-					for (int i = 1; i < sessions.length(); i++) {
-						org.json.JSONObject s = sessions.getJSONObject(i);
-						long t = s.optJSONObject("time") != null //$NON-NLS-1$
-							? s.getJSONObject("time").optLong("updated", 0) : 0; //$NON-NLS-1$ //$NON-NLS-2$
-						if (t > bestTime) { best = s; bestTime = t; }
-					}
-					return base + "/session/" + best.getString("id"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-
-			// No sessions â create one
-			java.net.HttpURLConnection post = (java.net.HttpURLConnection)
-				new java.net.URL(apiBase + "/session?directory=" + dirParam).openConnection(); //$NON-NLS-1$
-			post.setRequestMethod("POST"); //$NON-NLS-1$
-			post.setConnectTimeout(3000);
-			post.setReadTimeout(3000);
-			post.setDoOutput(true);
-			post.getOutputStream().close(); // empty body
-			if (post.getResponseCode() == 200) {
-				String body = new String(post.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-				String id = new org.json.JSONObject(body).getString("id"); //$NON-NLS-1$
-				return base + "/session/" + id; //$NON-NLS-1$
-			}
-		} catch (Exception e) {
-			ServoyLog.logWarning("OpenCodeView: could not resolve session URL, using base URL", e); //$NON-NLS-1$
-		}
-		return base;
+		return "http://127.0.0.1:" + port + "/" + encoded + "/session"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private String getPageUrl(String bundlePath) {
