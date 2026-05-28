@@ -114,11 +114,29 @@ public class OpenCodeView extends ViewPart {
 			""";
 
 	private static final String INJECT_CSS_JS = "(function(){" + //$NON-NLS-1$
-			"  if (document.getElementById('servoy-brand')) return;" + //$NON-NLS-1$
-			"  var s = document.createElement('style');" + //$NON-NLS-1$
-			"  s.id = 'servoy-brand';" + //$NON-NLS-1$
-			"  s.textContent = " + toJsString(BRAND_CSS) + ";" + //$NON-NLS-1$ //$NON-NLS-2$
-			"  document.head.appendChild(s);" + //$NON-NLS-1$
+			// CSS: inject once
+			"  if (!document.getElementById('servoy-brand')) {" + //$NON-NLS-1$
+			"    var s = document.createElement('style');" + //$NON-NLS-1$
+			"    s.id = 'servoy-brand';" + //$NON-NLS-1$
+			"    s.textContent = " + toJsString(BRAND_CSS) + ";" + //$NON-NLS-1$ //$NON-NLS-2$
+			"    document.head.appendChild(s);" + //$NON-NLS-1$
+			"  }" + //$NON-NLS-1$
+			// Text replacement: run on every navigation (SPA-safe)
+			"  function fixText() {" + //$NON-NLS-1$
+			"    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);" + //$NON-NLS-1$
+			"    var n;" + //$NON-NLS-1$
+			"    while ((n = w.nextNode()) !== null) {" + //$NON-NLS-1$
+			"      if (n.nodeValue.trim() === 'Build anything') {" + //$NON-NLS-1$
+			"        n.nodeValue = 'What should we build in Servoy today?';" + //$NON-NLS-1$
+			"      }" + //$NON-NLS-1$
+			"    }" + //$NON-NLS-1$
+			"  }" + //$NON-NLS-1$
+			"  fixText();" + //$NON-NLS-1$
+			// Watch for dynamically rendered content (register observer once per page load)
+			"  if (!window._svyBrandObs) {" + //$NON-NLS-1$
+			"    window._svyBrandObs = new MutationObserver(fixText);" + //$NON-NLS-1$
+			"    window._svyBrandObs.observe(document.body, {childList: true, subtree: true});" + //$NON-NLS-1$
+			"  }" + //$NON-NLS-1$
 			"})();"; //$NON-NLS-1$
 
 	private IBrowser browser;
