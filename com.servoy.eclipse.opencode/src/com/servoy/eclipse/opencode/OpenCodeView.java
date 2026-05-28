@@ -66,7 +66,6 @@ public class OpenCodeView extends ViewPart {
 
 	private static final String DEFAULT_SERVER_URL = "http://127.0.0.1:" + RunOpencodeCommand.DEFAULT_PORT + "/";
 
-
 	/**
 	 * CSS injected into the opencode web app on every page load to apply Servoy
 	 * branding. Overrides the brand/interactive/button colour tokens with Servoy
@@ -175,54 +174,65 @@ public class OpenCodeView extends ViewPart {
 	// URL initialisation â called on every createPartControl
 	// -----------------------------------------------------------------------
 
-	/**
-	 * Returns {@code true} when Servoy AI is fully configured: both
-	 * {@code GENAI_API_KEY} and {@code SERVOY_SKILLS_ZIP} system properties are
-	 * set and non-blank, and the skills zip file actually exists on disk.
-	 */
+
 	private static boolean isServoyAiConfigured() {
 		String apiKey = System.getProperty(ProviderConfigWriter.ENV_API_KEY);
-		return apiKey != null && !apiKey.isBlank() && SkillsZipExtractor.getSkillsZipPath() != null;
+		return apiKey != null && !apiKey.isBlank() && SkillsZipExtractor.getSkillsZipSource() != null;
 	}
 
 	/**
-	 * Determines the correct initial URL and navigates to it. Called from
-	 * {@link #createPartControl} so it runs on every view creation, including
-	 * after a close/reopen.
+	 * Single state machine for the view URL. Re-entered whenever any precondition
+	 * changes (login completes, solution activated).
+	 * <ol>
+	 * <li>Login not yet done â show loading, wait for login event.</li>
+	 * <li>Login done, Servoy AI not configured â show "enable Servoy AI" page.</li>
+	 * <li>Dev/external-server override â use that URL directly.</li>
+	 * <li>No active solution â show "no solution" page, wait for project event.</li>
+	 * <li>All conditions met â start opencode (first time) and navigate.</li>
+	 * </ol>
 	 */
 	private void initUrl() {
-		// If Servoy AI is not configured, show the "not enabled" page.
+		if (browser == null || browser.isDisposed()) return;
+
+		// State 1: waiting for login
+		if (!com.servoy.eclipse.ui.dialogs.ServoyLoginDialog.isLoginComplete()) {
+			browser.setUrl(getPageUrl("/resources/opencode-loading.html")); //$NON-NLS-1$
+			com.servoy.eclipse.ui.dialogs.ServoyLoginDialog.addLoginListener(
+				username -> PlatformUI.getWorkbench().getDisplay().asyncExec(this::initUrl));
+			return;
+		}
+
+		// State 2: login done but Servoy AI not configured in Servoy Cloud
 		if (!isServoyAiConfigured()) {
 			browser.setUrl(getPageUrl("/resources/opencode-not-enabled.html")); //$NON-NLS-1$
 			return;
 		}
 
-		// Dev / external-server mode: honour the system property override.
+		// State 3: dev / external-server override
 		String overrideUrl = System.getProperty(OpencodePerspective.URL_PROPERTY);
 		if (overrideUrl != null) {
 			browser.setUrl(overrideUrl);
 			return;
 		}
 
+		// State 4: no active solution yet
 		String projectPath = getActiveProjectPath();
 		if (projectPath == null) {
-			// No active solution yet â show a warning and wait for one.
-			browser.setUrl(getPageUrl("/resources/opencode-no-solution.html"));
+			browser.setUrl(getPageUrl("/resources/opencode-no-solution.html")); //$NON-NLS-1$
 			registerActiveProjectListener();
 			return;
 		}
 
+		// State 5: all conditions met â start opencode if not already started
 		Activator activator = Activator.getInstance();
-		if (activator == null)
-			return;
+		if (activator == null) return;
+
+		activator.ensureServerStarting();
 
 		if (activator.isServerReady()) {
-			// Server already up (e.g. view was closed and reopened) â go directly.
 			browser.setUrl(buildProjectUrl(activator.getServerPort(), projectPath));
 		} else {
-			// Server still starting â show a loading page and let the switcher thread
-			// handle it.
-			browser.setUrl(getPageUrl("/resources/opencode-loading.html"));
+			browser.setUrl(getPageUrl("/resources/opencode-loading.html")); //$NON-NLS-1$
 			startUrlSwitcherThread();
 		}
 	}
@@ -274,28 +284,12 @@ public class OpenCodeView extends ViewPart {
 		}
 	}
 
-	/**
-	 * Called once a solution has just been activated (from the listener
-	 * callback, on the model's notification thread).
-	 */
-	private void onActiveSolutionAvailable() {
-		Activator activator = Activator.getInstance();
-		if (activator == null)
-			return;
 
-		if (activator.isServerReady()) {
-			String projectPath = getActiveProjectPath();
-			if (projectPath != null) {
-				String url = buildProjectUrl(activator.getServerPort(), projectPath);
-				PlatformUI.getWorkbench().getDisplay().asyncExec(() -> setUrl(url));
-			}
-		} else {
-			// Server still starting â show loading then let the switcher take over.
-			PlatformUI.getWorkbench().getDisplay()
-					.asyncExec(() -> setUrl(getPageUrl("/resources/opencode-loading.html")));
-			startUrlSwitcherThread();
-		}
+	/** Called when a solution is activated â re-enter the state machine on the UI thread. */
+	private void onActiveSolutionAvailable() {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(this::initUrl);
 	}
+
 
 	// -----------------------------------------------------------------------
 	// URL-switcher thread (server-starting path)
@@ -367,7 +361,6 @@ public class OpenCodeView extends ViewPart {
 		}
 		return DEFAULT_SERVER_URL;
 	}
-
 
 	// -----------------------------------------------------------------------
 	// Branding helpers

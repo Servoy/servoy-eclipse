@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,8 +42,7 @@ import org.junit.rules.TemporaryFolder;
  * Unit tests for the package-private {@link SkillsZipExtractor} and
  * {@link OpenCodeUtil} utility classes.
  * <p>
- * No OSGi runtime required â?? all methods under test are pure Java operating
- * on
+ * No OSGi runtime required -- all methods under test are pure Java operating on
  * in-memory values or temporary file-system resources. Methods that call
  * {@code ApplicationServerRegistry} are exercised with an empty server list
  * (the registry is absent outside OSGi).
@@ -82,6 +82,11 @@ public class SkillsZipExtractorTest {
 		return zipPath;
 	}
 
+	/** Opens the zip at the given path as a fresh ByteArrayInputStream. */
+	private ByteArrayInputStream zipStream(Path zipPath) throws IOException {
+		return new ByteArrayInputStream(Files.readAllBytes(zipPath));
+	}
+
 	private static final String SAMPLE_AGENTS_MD = "# Agent Instructions\n" +
 			"\n" +
 			"```yaml\n" +
@@ -96,51 +101,87 @@ public class SkillsZipExtractorTest {
 			"Do not break things.\n";
 
 	// -----------------------------------------------------------------------
-	// getSkillsZipPath
+	// getSkillsZipSource
 	// -----------------------------------------------------------------------
 
 	/** AC: When SERVOY_SKILLS_ZIP is not set, return null. */
 	@Test
 	public void getSkillsZipPath_propertyAbsent_returnsNull() {
 		System.clearProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY);
-		assertNull(SkillsZipExtractor.getSkillsZipPath());
+		assertNull(SkillsZipExtractor.getSkillsZipSource());
 	}
 
-	/** Property set but file does not exist â?? null. */
+	/** Property set but file does not exist -- null. */
 	@Test
 	public void getSkillsZipPath_nonExistentFile_returnsNull() {
 		System.setProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY, "/no/such/file.zip");
 		try {
-			assertNull(SkillsZipExtractor.getSkillsZipPath());
+			assertNull(SkillsZipExtractor.getSkillsZipSource());
 		} finally {
 			System.clearProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY);
 		}
 	}
 
-	/** Property set to an existing file â?? non-null path returned. */
+	/** Property set to an existing file -- non-null source returned. */
 	@Test
 	public void getSkillsZipPath_existingFile_returnsPath() throws IOException {
 		Path zip = createZip("opencode.json", "{}");
 		System.setProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY, zip.toString());
 		try {
-			assertNotNull(SkillsZipExtractor.getSkillsZipPath());
-			assertEquals(zip, SkillsZipExtractor.getSkillsZipPath());
+			assertNotNull(SkillsZipExtractor.getSkillsZipSource());
+			assertEquals(zip.toString(), SkillsZipExtractor.getSkillsZipSource());
 		} finally {
 			System.clearProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY);
 		}
 	}
 
+
+	/** HTTP URL is returned as-is â?? no file-existence check is performed. */
+	@Test
+	public void getSkillsZipSource_httpUrl_returnsUrlWithoutFileCheck() {
+		String url = "http://example.com/skills.zip?loginToken=abc123";
+		System.setProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY, url);
+		try {
+			assertEquals("HTTP URL must be returned as-is", url, SkillsZipExtractor.getSkillsZipSource());
+		} finally {
+			System.clearProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY);
+		}
+	}
+
+	/** HTTPS URL is returned as-is â?? no file-existence check is performed. */
+	@Test
+	public void getSkillsZipSource_httpsUrl_returnsUrlWithoutFileCheck() {
+		String url = "https://cloud.servoy.com/skills.zip?loginToken=abc123";
+		System.setProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY, url);
+		try {
+			assertEquals("HTTPS URL must be returned as-is", url, SkillsZipExtractor.getSkillsZipSource());
+		} finally {
+			System.clearProperty(SkillsZipExtractor.SKILLS_ZIP_PROPERTY);
+		}
+	}
+
+	/** openZipStream with a file path opens the file as a readable InputStream. */
+	@Test
+	public void openZipStream_filePath_openReadableStream() throws IOException {
+		Path zip = createZip("opencode.json", "{\"model\":\"test\"}");
+		try (java.io.InputStream is = SkillsZipExtractor.openZipStream(zip.toString())) {
+			assertNotNull("stream must not be null", is);
+			byte[] bytes = is.readAllBytes();
+			assertTrue("stream must contain zip bytes", bytes.length > 0);
+		}
+	}
+
 	// -----------------------------------------------------------------------
-	// extractToConfigDir â?? opencode.json
+	// extractToConfigDir -- opencode.json
 	// -----------------------------------------------------------------------
 
-	/** AC: zip with opencode.json â?? returns true and file is written. */
+	/** AC: zip with opencode.json -- returns true and file is written. */
 	@Test
 	public void extractToConfigDir_withOpencodeJson_returnsTrueAndWritesFile() throws IOException {
 		Path zip = createZip("opencode.json", "{\"model\":\"test\"}");
 		Path configDir = tmp.newFolder("config").toPath();
 
-		boolean result = SkillsZipExtractor.extractToConfigDir(zip, configDir);
+		boolean result = SkillsZipExtractor.extractToConfigDir(zipStream(zip), configDir);
 
 		assertTrue("should return true when opencode.json is present", result);
 		assertTrue("opencode.json must be created", Files.exists(configDir.resolve("opencode.json")));
@@ -149,7 +190,7 @@ public class SkillsZipExtractorTest {
 	}
 
 	/**
-	 * AC: zip without opencode.json â?? returns false (ProviderConfigWriter not
+	 * AC: zip without opencode.json -- returns false (ProviderConfigWriter not
 	 * skipped).
 	 */
 	@Test
@@ -157,14 +198,14 @@ public class SkillsZipExtractorTest {
 		Path zip = createZip(".opencode/rules.md", "# rules");
 		Path configDir = tmp.newFolder("config").toPath();
 
-		boolean result = SkillsZipExtractor.extractToConfigDir(zip, configDir);
+		boolean result = SkillsZipExtractor.extractToConfigDir(zipStream(zip), configDir);
 
 		assertFalse("should return false when opencode.json is absent", result);
 		assertFalse("opencode.json must NOT be created", Files.exists(configDir.resolve("opencode.json")));
 	}
 
 	// -----------------------------------------------------------------------
-	// extractToConfigDir â?? .opencode/ subdirectory
+	// extractToConfigDir -- .opencode/ subdirectory
 	// -----------------------------------------------------------------------
 
 	/** AC: .opencode/ entries are extracted preserving relative paths. */
@@ -173,7 +214,7 @@ public class SkillsZipExtractorTest {
 		Path zip = createZip(".opencode/rules.md", "agent rules", ".opencode/sub/other.txt", "sub content");
 		Path configDir = tmp.newFolder("config").toPath();
 
-		SkillsZipExtractor.extractToConfigDir(zip, configDir);
+		SkillsZipExtractor.extractToConfigDir(zipStream(zip), configDir);
 
 		assertTrue(".opencode/rules.md must exist",
 				Files.exists(configDir.resolve(".opencode/rules.md")));
@@ -193,7 +234,7 @@ public class SkillsZipExtractorTest {
 
 		// New zip does NOT contain old_file.txt
 		Path zip = createZip(".opencode/new_file.txt", "new content");
-		SkillsZipExtractor.extractToConfigDir(zip, configDir);
+		SkillsZipExtractor.extractToConfigDir(zipStream(zip), configDir);
 
 		assertFalse("old file must be deleted", Files.exists(oldFile));
 		assertTrue("new file must exist", Files.exists(configDir.resolve(".opencode/new_file.txt")));
@@ -203,26 +244,26 @@ public class SkillsZipExtractorTest {
 	// readZipEntry
 	// -----------------------------------------------------------------------
 
-	/** Entry exists â?? correct UTF-8 content returned. */
+	/** Entry exists -- correct UTF-8 content returned. */
 	@Test
 	public void readZipEntry_entryExists_returnsContent() throws IOException {
 		Path zip = createZip("AGENTS.MD", "# Hello\nWorld");
 
-		String result = SkillsZipExtractor.readZipEntry(zip, "AGENTS.MD");
+		String result = SkillsZipExtractor.readZipEntry(zipStream(zip), "AGENTS.MD");
 
 		assertEquals("# Hello\nWorld", result);
 	}
 
-	/** Entry absent â?? null returned. */
+	/** Entry absent -- null returned. */
 	@Test
 	public void readZipEntry_entryAbsent_returnsNull() throws IOException {
 		Path zip = createZip("opencode.json", "{}");
 
-		assertNull(SkillsZipExtractor.readZipEntry(zip, "AGENTS.MD"));
+		assertNull(SkillsZipExtractor.readZipEntry(zipStream(zip), "AGENTS.MD"));
 	}
 
 	// -----------------------------------------------------------------------
-	// updateAgentsYaml â?? scalar fields
+	// updateAgentsYaml -- scalar fields
 	// -----------------------------------------------------------------------
 
 	/** servoy_version field is replaced with the supplied value. */
@@ -302,15 +343,13 @@ public class SkillsZipExtractorTest {
 		assertFalse("absent field must not be inserted", result.contains("postgres_version"));
 	}
 
-
 	/**
 	 * Real-values round-trip: AGENTS.MD already has concrete values from a
 	 * previous startup; updateAgentsYaml replaces them with the new values
 	 * while preserving all custom user content.
 	 */
 	@Test
-	public void updateAgentsYaml_existingRealValues_replacedWithNewValues()
-	{
+	public void updateAgentsYaml_existingRealValues_replacedWithNewValues() {
 		String existing = "# Agent Instructions\n" +
 				"\n" +
 				"```yaml\n" +
@@ -342,16 +381,16 @@ public class SkillsZipExtractorTest {
 	}
 
 	// -----------------------------------------------------------------------
-	// writeOrUpdateAgentsMd â?? file create / update
+	// writeOrUpdateAgentsMd -- file create / update
 	// -----------------------------------------------------------------------
 
-	/** AC: AGENTS.MD absent â?? created from zip content, then YAML updated. */
+	/** AC: AGENTS.MD absent -- created from zip content, then YAML updated. */
 	@Test
 	public void writeOrUpdateAgentsMd_fileAbsent_createsFile() throws IOException {
 		Path zip = createZip("AGENTS.MD", SAMPLE_AGENTS_MD);
 		Path projectRoot = tmp.newFolder("project").toPath();
 
-		SkillsZipExtractor.writeOrUpdateAgentsMd(zip, projectRoot);
+		SkillsZipExtractor.writeOrUpdateAgentsMd(zipStream(zip), projectRoot);
 
 		Path agentsMd = projectRoot.resolve("AGENTS.MD");
 		assertTrue("AGENTS.MD must be created", Files.exists(agentsMd));
@@ -361,7 +400,7 @@ public class SkillsZipExtractorTest {
 	}
 
 	/**
-	 * AC: AGENTS.MD present â?? only YAML block updated, other content unchanged.
+	 * AC: AGENTS.MD present -- only YAML block updated, other content unchanged.
 	 */
 	@Test
 	public void writeOrUpdateAgentsMd_filePresent_updatesYamlOnly() throws IOException {
@@ -373,20 +412,20 @@ public class SkillsZipExtractorTest {
 		String existing = SAMPLE_AGENTS_MD + "\n## My Custom Rules\nDo not delete data.\n";
 		Files.writeString(agentsMd, existing, StandardCharsets.UTF_8);
 
-		SkillsZipExtractor.writeOrUpdateAgentsMd(zip, projectRoot);
+		SkillsZipExtractor.writeOrUpdateAgentsMd(zipStream(zip), projectRoot);
 
 		String content = Files.readString(agentsMd, StandardCharsets.UTF_8);
 		assertTrue("custom content must be preserved", content.contains("Do not delete data."));
 		assertFalse("placeholder must be replaced", content.contains("<servoy_version>"));
 	}
 
-	/** AGENTS.MD absent in zip â?? no file created at project root. */
+	/** AGENTS.MD absent in zip -- no file created at project root. */
 	@Test
 	public void writeOrUpdateAgentsMd_agentsMdAbsentInZip_noFileCreated() throws IOException {
 		Path zip = createZip("opencode.json", "{}");
 		Path projectRoot = tmp.newFolder("project").toPath();
 
-		SkillsZipExtractor.writeOrUpdateAgentsMd(zip, projectRoot);
+		SkillsZipExtractor.writeOrUpdateAgentsMd(zipStream(zip), projectRoot);
 
 		assertFalse("AGENTS.MD must not be created when absent in zip",
 				Files.exists(projectRoot.resolve("AGENTS.MD")));
@@ -409,7 +448,7 @@ public class SkillsZipExtractorTest {
 		assertEquals("should find the git root", root, found);
 	}
 
-	/** No .git directory in ancestry â?? null returned. */
+	/** No .git directory in ancestry -- null returned. */
 	@Test
 	public void findGitRoot_noGitDir_returnsNull() throws IOException {
 		Path dir = tmp.newFolder("no-git").toPath();

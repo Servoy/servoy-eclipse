@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.opencode;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,7 +73,7 @@ public class OpencodeFolderCreatorJob extends Job {
 		// entirely.
 		if (System.getProperty(ProviderConfigWriter.ENV_API_KEY) == null ||
 				System.getProperty(ProviderConfigWriter.ENV_API_KEY).isBlank() ||
-				SkillsZipExtractor.getSkillsZipPath() == null) {
+				SkillsZipExtractor.getSkillsZipSource() == null) {
 			ServoyLog
 					.logInfo("Servoy AI: not configured (GENAI_API_KEY or SERVOY_SKILLS_ZIP missing), skipping setup."); //$NON-NLS-1$
 			return Status.OK_STATUS;
@@ -164,23 +165,34 @@ public class OpencodeFolderCreatorJob extends Job {
 
 		// 1. Extract skills zip (if available)
 		boolean providerFromZip = false;
-		Path skillsZip = SkillsZipExtractor.getSkillsZipPath();
-		if (skillsZip != null) {
-			try {
-				providerFromZip = SkillsZipExtractor.extractToConfigDir(skillsZip, servoyOpencodeCfgDir);
+		String skillsZipSource = SkillsZipExtractor.getSkillsZipSource();
+		if (skillsZipSource != null) {
+			byte[] zipBytes;
+			try (InputStream is = SkillsZipExtractor.openZipStream(skillsZipSource)) {
+				zipBytes = is.readAllBytes();
 			} catch (IOException e) {
-				ServoyLog.logError("OpencodeFolderCreatorJob: failed to extract skills zip", e); //$NON-NLS-1$
+				ServoyLog.logError("OpencodeFolderCreatorJob: failed to open skills zip", e); //$NON-NLS-1$
+				zipBytes = null;
 			}
-
-			String projectRoot = OpenCodeUtil.getActiveProjectPath();
-			if (projectRoot != null) {
+			if (zipBytes != null) {
 				try {
-					SkillsZipExtractor.writeOrUpdateAgentsMd(skillsZip, Path.of(projectRoot));
+					providerFromZip = SkillsZipExtractor.extractToConfigDir(
+							new ByteArrayInputStream(zipBytes), servoyOpencodeCfgDir);
 				} catch (IOException e) {
-					ServoyLog.logError("OpencodeFolderCreatorJob: failed to write AGENTS.MD", e); //$NON-NLS-1$
+					ServoyLog.logError("OpencodeFolderCreatorJob: failed to extract skills zip", e); //$NON-NLS-1$
 				}
-			} else {
-				ServoyLog.logInfo("OpencodeFolderCreatorJob: no active project, AGENTS.MD skipped."); //$NON-NLS-1$
+
+				String projectRoot = OpenCodeUtil.getActiveProjectPath();
+				if (projectRoot != null) {
+					try {
+						SkillsZipExtractor.writeOrUpdateAgentsMd(
+								new ByteArrayInputStream(zipBytes), Path.of(projectRoot));
+					} catch (IOException e) {
+						ServoyLog.logError("OpencodeFolderCreatorJob: failed to write AGENTS.MD", e); //$NON-NLS-1$
+					}
+				} else {
+					ServoyLog.logInfo("OpencodeFolderCreatorJob: no active project, AGENTS.MD skipped."); //$NON-NLS-1$
+				}
 			}
 		}
 

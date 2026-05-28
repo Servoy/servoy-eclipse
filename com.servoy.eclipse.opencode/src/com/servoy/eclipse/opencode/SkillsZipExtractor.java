@@ -18,6 +18,8 @@
 package com.servoy.eclipse.opencode;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -36,7 +38,9 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * Extracts a skills zip into the user's opencode config directory and updates
  * the {@code AGENTS.MD} file in the active project root.
  * <p>
- * The zip path is read from the system property {@value #SKILLS_ZIP_PROPERTY}.
+ * The zip source is read from the system property
+ * {@value #SKILLS_ZIP_PROPERTY}.
+ * The value may be an HTTP/HTTPS URL or a local file path.
  * When the property is absent or the file does not exist the feature is
  * silently skipped.
  * </p>
@@ -50,7 +54,9 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  */
 class SkillsZipExtractor {
 
-	/** System property name that carries the absolute path to the skills zip. */
+	/**
+	 * System property name that carries the URL or absolute path to the skills zip.
+	 */
 	static final String SKILLS_ZIP_PROPERTY = "SERVOY_SKILLS_ZIP"; //$NON-NLS-1$
 
 	/** Hardcoded PostgreSQL version embedded in the AGENTS.MD YAML block. */
@@ -61,32 +67,56 @@ class SkillsZipExtractor {
 	private static final String OPENCODE_DIR_PREFIX = ".opencode/"; //$NON-NLS-1$
 
 	/**
-	 * Returns the zip {@link Path} from the system property, or {@code null} if
-	 * the property is absent or the file does not exist.
+	 * Returns the skills zip source (HTTP URL or file path) from the system
+	 * property, or {@code null} if the property is absent or the file does not
+	 * exist.
+	 * <p>
+	 * For HTTP/HTTPS URLs the value is returned as-is. For file paths, existence
+	 * is verified before returning.
+	 * </p>
 	 */
-	static Path getSkillsZipPath() {
+	static String getSkillsZipSource() {
 		String prop = System.getProperty(SKILLS_ZIP_PROPERTY);
 		if (prop == null || prop.isBlank())
 			return null;
-		Path p = Paths.get(prop);
-		return Files.exists(p) ? p : null;
+		if (prop.startsWith("http://") || prop.startsWith("https://")) //$NON-NLS-1$ //$NON-NLS-2$
+			return prop;
+		return Files.exists(Paths.get(prop)) ? prop : null;
+	}
+
+	/**
+	 * Opens an {@link InputStream} from the given source, which may be an
+	 * HTTP/HTTPS URL or a local file path.
+	 *
+	 * @param source HTTP/HTTPS URL or absolute file path
+	 * @return an open {@link InputStream} -- caller must close it
+	 * @throws IOException on network or file-system failure
+	 */
+	static InputStream openZipStream(String source) throws IOException {
+		if (source.startsWith("http://") || source.startsWith("https://")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return new URL(source).openStream();
+		}
+		return Files.newInputStream(Paths.get(source));
 	}
 
 	/**
 	 * Extracts the zip into the opencode config directory:
 	 * <ul>
-	 * <li>{@code .opencode/} subdirectory â fully deleted then re-extracted into
+	 * <li>{@code .opencode/} subdirectory -- fully deleted then re-extracted into
 	 * {@code configDir}</li>
-	 * <li>{@code opencode.json} â written into {@code configDir} as-is</li>
+	 * <li>{@code opencode.json} -- written into {@code configDir} as-is</li>
 	 * </ul>
+	 * <p>
+	 * Takes ownership of {@code zipStream} and closes it.
+	 * </p>
 	 *
-	 * @param zipFile   path to the skills zip
+	 * @param zipStream input stream over the zip bytes
 	 * @param configDir target directory (e.g. {@code ~/.servoy/opencode/})
 	 * @return {@code true} if {@code opencode.json} was written from the zip
 	 *         (caller should skip {@link ProviderConfigWriter})
 	 * @throws IOException on read/write failure
 	 */
-	static boolean extractToConfigDir(Path zipFile, Path configDir) throws IOException {
+	static boolean extractToConfigDir(InputStream zipStream, Path configDir) throws IOException {
 		Files.createDirectories(configDir);
 
 		// Delete existing .opencode/ directory completely
@@ -97,7 +127,7 @@ class SkillsZipExtractor {
 					try {
 						Files.delete(p);
 					} catch (IOException e) {
-						// log inline â non-fatal
+						// log inline -- non-fatal
 					}
 				});
 			}
@@ -105,10 +135,9 @@ class SkillsZipExtractor {
 
 		boolean wroteOpencodeJson = false;
 
-		try (ZipFile zf = new ZipFile(zipFile.toFile())) {
-			var entries = zf.entries();
-			while (entries.hasMoreElements()) {
-				ZipEntry entry = entries.nextElement();
+		try (ZipInputStream zis = new ZipInputStream(zipStream)) {
+			ZipEntry entry;
+			while ((entry = zis.getNextEntry()) != null) {
 				String name = entry.getName();
 
 				if (entry.isDirectory())
@@ -116,9 +145,7 @@ class SkillsZipExtractor {
 
 				if (OPENCODE_JSON.equals(name)) {
 					// Write opencode.json into configDir
-					try (var is = zf.getInputStream(entry)) {
-						Files.write(configDir.resolve(OPENCODE_JSON), is.readAllBytes());
-					}
+					Files.write(configDir.resolve(OPENCODE_JSON), zis.readAllBytes());
 					wroteOpencodeJson = true;
 
 				} else if (name.startsWith(OPENCODE_DIR_PREFIX)) {
@@ -126,9 +153,7 @@ class SkillsZipExtractor {
 					Path relative = Paths.get(name); // e.g. .opencode/foo/bar.txt
 					Path target = configDir.resolve(relative);
 					Files.createDirectories(target.getParent());
-					try (var is = zf.getInputStream(entry)) {
-						Files.write(target, is.readAllBytes());
-					}
+					Files.write(target, zis.readAllBytes());
 				}
 			}
 		}
@@ -144,12 +169,15 @@ class SkillsZipExtractor {
 	 * ({@code servoy_version}, {@code postgres_version},
 	 * {@code databases.active}).</li>
 	 * </ul>
+	 * <p>
+	 * Takes ownership of {@code zipStream} and closes it.
+	 * </p>
 	 *
-	 * @param zipFile     path to the skills zip
+	 * @param zipStream   input stream over the zip bytes
 	 * @param projectRoot project / git-root directory
 	 * @throws IOException on read/write failure
 	 */
-	static void writeOrUpdateAgentsMd(Path zipFile, Path projectRoot) throws IOException {
+	static void writeOrUpdateAgentsMd(InputStream zipStream, Path projectRoot) throws IOException {
 		String servoyVersion = ClientVersion.getMajorVersion() + "." + //$NON-NLS-1$
 				String.format("%02d", ClientVersion.getMiddleVersion()); //$NON-NLS-1$
 		String postgresVersion = POSTGRES_VERSION;
@@ -159,7 +187,7 @@ class SkillsZipExtractor {
 
 		if (!Files.exists(agentsMd)) {
 			// Create from zip content as-is
-			String content = readZipEntry(zipFile, AGENTS_MD);
+			String content = readZipEntry(zipStream, AGENTS_MD);
 			if (content != null) {
 				Files.writeString(agentsMd, content, StandardCharsets.UTF_8);
 			}
@@ -172,7 +200,12 @@ class SkillsZipExtractor {
 				}
 			}
 		} else {
-			// Update only the YAML block fields
+			// Update only the YAML block fields (zip stream not needed)
+			try {
+				zipStream.close();
+			} catch (IOException e) {
+				// ignore close failure
+			}
 			String existing = Files.readString(agentsMd, StandardCharsets.UTF_8);
 			String updated = updateAgentsYaml(existing, servoyVersion, postgresVersion, databases);
 			if (!updated.equals(existing)) {
@@ -207,23 +240,27 @@ class SkillsZipExtractor {
 	}
 
 	/**
-	 * Reads a named entry from the zip, or returns {@code null} if the entry is
-	 * absent.
+	 * Reads a named entry from the zip stream, or returns {@code null} if the
+	 * entry is absent.
+	 * <p>
+	 * Takes ownership of {@code zipStream} and closes it.
+	 * </p>
 	 *
-	 * @param zipFile   path to the zip
+	 * @param zipStream input stream over the zip bytes
 	 * @param entryName entry name exactly as it appears in the zip
 	 * @return UTF-8 decoded content, or {@code null} if not found
 	 * @throws IOException on read failure
 	 */
-	static String readZipEntry(Path zipFile, String entryName) throws IOException {
-		try (ZipFile zf = new ZipFile(zipFile.toFile())) {
-			ZipEntry entry = zf.getEntry(entryName);
-			if (entry == null)
-				return null;
-			try (var is = zf.getInputStream(entry)) {
-				return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+	static String readZipEntry(InputStream zipStream, String entryName) throws IOException {
+		try (ZipInputStream zis = new ZipInputStream(zipStream)) {
+			ZipEntry entry;
+			while ((entry = zis.getNextEntry()) != null) {
+				if (entryName.equals(entry.getName())) {
+					return new String(zis.readAllBytes(), StandardCharsets.UTF_8);
+				}
 			}
 		}
+		return null;
 	}
 
 	// -------------------------------------------------------------------------
@@ -296,7 +333,7 @@ class SkillsZipExtractor {
 				}
 				sb.append(line);
 			} else {
-				// Inside databases block â look for the active: line
+				// Inside databases block -- look for the active: line
 				if (!replacedActive && trimmed.startsWith("active:")) { //$NON-NLS-1$
 					int indent = line.length() - trimmed.length();
 					sb.append(line, 0, indent).append("active: ").append(buildYamlList(databases)); //$NON-NLS-1$
@@ -333,7 +370,7 @@ class SkillsZipExtractor {
 		return sb.toString();
 	}
 
-	/** Private constructor â static utility class. */
+	/** Private constructor -- static utility class. */
 	private SkillsZipExtractor() {
 	}
 }

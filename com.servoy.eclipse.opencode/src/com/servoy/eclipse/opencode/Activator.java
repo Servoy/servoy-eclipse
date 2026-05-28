@@ -62,11 +62,8 @@ public class Activator extends Plugin
 		super.start(context);
 		instance = this;
 
-		String urlOverride = System.getProperty(OpencodePerspective.URL_PROPERTY);
-		if (urlOverride == null)
-		{
-			new OpencodeFolderCreatorJob().schedule();
-		}
+		// Setup is deferred until the user has both logged in and has an active solution.
+		// OpenCodeView.initUrl() calls ensureServerStarting() when all conditions are met.
 	}
 
 	@Override
@@ -83,6 +80,22 @@ public class Activator extends Plugin
 	}
 
 	// --- server lifecycle ---
+
+	private volatile boolean setupStarted = false;
+
+	/**
+	 * Schedules {@link OpencodeFolderCreatorJob} the first time it is called (idempotent).
+	 * Must be called only after login is complete and an active solution is present.
+	 */
+	void ensureServerStarting()
+	{
+		String urlOverride = System.getProperty(OpencodePerspective.URL_PROPERTY);
+		if (urlOverride != null) return; // external server, nothing to do
+		if (setupStarted) return;
+		setupStarted = true;
+		log(IStatus.INFO, "OpenCode: prerequisites met Ã¢ scheduling setup job."); //$NON-NLS-1$
+		new OpencodeFolderCreatorJob().schedule();
+	}
 
 	/**
 	 * Called by {@link RunOpencodeCommand} once the server is ready to accept connections.

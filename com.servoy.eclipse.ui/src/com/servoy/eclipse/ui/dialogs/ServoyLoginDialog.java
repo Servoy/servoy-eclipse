@@ -73,9 +73,12 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	public static final String SERVOY_LOGIN_USERNAME = "USERNAME";
 	public static final String SERVOY_LOGIN_PASSWORD = "PASSWORD";
 	public static final String SERVOY_LOGIN_TOKEN = "TOKEN";
-//	public static final String CROWD_URL = "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/developer_auth/getAuthToken";
-	public static final String CROWD_URL = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
-		"/servoy-service/rest_ws/api/developer_auth/getAuthToken";
+	/** Base URL for all Servoy Cloud REST API endpoints. */
+	public static final String SERVOY_API_BASE = System.getProperty("servoy.api.url",
+		"https://middleware-prod.unifiedui.servoy-cloud.eu") + "/servoy-service/rest_ws/api/"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	//	public static final String CROWD_URL = "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/developer_auth/getAuthToken";
+	public static final String CROWD_URL = SERVOY_API_BASE + "developer_auth/getAuthToken"; //$NON-NLS-1$
 
 	private String dlgUsername = "";
 	private String dlgPassword = "";
@@ -170,17 +173,26 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	 */
 	public void notifyLoginListener(String finalUsername)
 	{
-		if (ServoyLoginDialog.servoyLoginListener != null)
+		notifyLoginListeners(finalUsername);
+	}
+
+	private static void notifyLoginListeners(String username)
+	{
+		ServoyLog.logInfo("ServoyLoginDialog.notifyLoginListeners: login complete, notifying " + //$NON-NLS-1$
+			loginListeners.size() + " listener(s)."); //$NON-NLS-1$
+		loginComplete = true;
+		for (IServoyLoginListener listener : loginListeners)
 		{
 			try
 			{
-				Display.getDefault().asyncExec(() -> ServoyLoginDialog.servoyLoginListener.onLogin(finalUsername));
+				Display.getDefault().asyncExec(() -> listener.onLogin(username));
 			}
 			catch (Exception ex)
 			{
 				ServoyLog.logError(ex);
 			}
 		}
+		loginListeners.clear();
 	}
 
 	private CompletableFuture<LoginTokenResponse> getLoginToken(String username, String password)
@@ -210,6 +222,18 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			{
 				JSONObject loginTokenJSON = new JSONObject(responseString);
 				String loginToken = loginTokenJSON.getString("token");
+				String skillEndpoint = loginTokenJSON.optString("skill_endpoint", null);
+				String svyAiKey = loginTokenJSON.optString("svy_ai_key", null);
+
+				if (svyAiKey != null && !svyAiKey.isBlank())
+				{
+					System.setProperty("GENAI_API_KEY", svyAiKey);
+				}
+				if (skillEndpoint != null && !skillEndpoint.isBlank())
+				{
+					System.setProperty("SERVOY_SKILLS_ZIP",
+						SERVOY_API_BASE + skillEndpoint + "?loginToken=" + loginToken); //$NON-NLS-1$
+				}
 				return new LoginTokenResponse(LoginTokenResponse.Status.OK, loginToken);
 			}
 			else if (response.statusCode() >= 500)
@@ -417,7 +441,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		else if (ServoyMessageDialog.openQuestion(getShell(), "Login required", "Do you want to exit the Developer?"))
 		{
 			// clean any listeners because nothing should be called anymore
-			servoyLoginListener = null;
+			loginListeners.clear();
 			// close this dialog
 			super.handleShellCloseEvent();
 			// exit the application
@@ -438,11 +462,26 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		return false;
 	}
 
-	private static IServoyLoginListener servoyLoginListener;
+	private static final java.util.concurrent.CopyOnWriteArrayList<IServoyLoginListener> loginListeners =
+		new java.util.concurrent.CopyOnWriteArrayList<>();
 
+	/** Set to {@code true} once the first login attempt (success or failure) has completed. */
+	private static volatile boolean loginComplete = false;
+
+	/** Returns {@code true} once the login flow has completed at least once this session. */
+	public static boolean isLoginComplete()
+	{
+		return loginComplete;
+	}
+
+	/**
+	 * Adds a listener that will be notified once when login completes.
+	 * All listeners are cleared automatically after {@link #notifyLoginListener}
+	 * fires, so there is no need to deregister manually.
+	 */
 	public static void addLoginListener(IServoyLoginListener loginListener)
 	{
-		ServoyLoginDialog.servoyLoginListener = loginListener;
+		if (loginListener != null) loginListeners.add(loginListener);
 	}
 
 	public static String getLoginToken(Consumer<String> onLogin)
@@ -462,8 +501,19 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		}
 		if (onLogin != null)
 		{
-			if (loginToken == null) new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin(onLogin);
-			else onLogin.accept(loginToken);
+			if (loginToken == null)
+			{
+				ServoyLog.logInfo("ServoyLoginDialog.getLoginToken: no stored token, opening login dialog."); //$NON-NLS-1$
+				new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin(onLogin);
+			}
+			else
+			{
+				ServoyLog.logInfo("ServoyLoginDialog.getLoginToken: stored token found, notifying listeners directly."); //$NON-NLS-1$
+				onLogin.accept(loginToken);
+				// Notify login listeners — same as doLogin() does after a fresh login.
+				// Without this, listeners registered before this call would never fire.
+				notifyLoginListeners(null);
+			}
 		}
 		return loginToken;
 	}
