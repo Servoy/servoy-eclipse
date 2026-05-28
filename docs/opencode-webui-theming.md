@@ -253,6 +253,7 @@ selectors instead. Current overrides:
 | Primary icon button (enabled) | `[data-component="icon-button"][data-variant="primary"]:not(:disabled)` | background → Servoy orange |
 | Primary icon button hover | same + `:hover` | background → darker orange |
 | Session sidebar toggle | `[data-component="icon-button"][data-icon="menu"].titlebar-icon` | `display: none` — not useful in the embedded Eclipse view |
+| Terminal toggle | `[aria-controls="terminal-panel"]` | `display: none` — terminal not useful in the embedded Eclipse view |
 
 **Key discovery**: `--button-primary-base` is **not** what opencode uses for the
 primary icon button background. The actual variable is `--icon-strong-base`.
