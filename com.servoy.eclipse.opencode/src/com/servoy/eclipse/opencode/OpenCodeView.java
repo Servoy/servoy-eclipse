@@ -106,6 +106,11 @@ public class OpenCodeView extends ViewPart {
 			[aria-controls="terminal-panel"] {
 			  display: none !important;
 			}
+			/* Hide sidebar rail content (project switcher, settings, help)
+			   but keep its width so the layout does not shift */
+			[data-component="sidebar-rail"] {
+			  visibility: hidden !important;
+			}
 			""";
 
 	private static final String INJECT_CSS_JS = "(function(){" + //$NON-NLS-1$
