@@ -99,6 +99,10 @@ public class OpenCodeView extends ViewPart {
 			[data-component="icon-button"][data-variant="primary"]:not(:disabled):hover {
 			  background-color: #d4891e !important;
 			}
+			/* Hide the session sidebar toggle â not needed in the embedded view */
+			[data-component="icon-button"][data-icon="menu"].titlebar-icon {
+			  display: none !important;
+			}
 			""";
 
 	private static final String INJECT_CSS_JS = "(function(){" + //$NON-NLS-1$

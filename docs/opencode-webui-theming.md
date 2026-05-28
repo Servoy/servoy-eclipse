@@ -243,6 +243,24 @@ Re-run after upgrading the `opencode-ai` npm package to check for changes.
 
 ---
 
+## UI element overrides (direct CSS rules)
+
+Some opencode elements don't use the CSS variable system and need direct attribute
+selectors instead. Current overrides:
+
+| Element | Selector | Change |
+|---------|----------|--------|
+| Primary icon button (enabled) | `[data-component="icon-button"][data-variant="primary"]:not(:disabled)` | background → Servoy orange |
+| Primary icon button hover | same + `:hover` | background → darker orange |
+| Session sidebar toggle | `[data-component="icon-button"][data-icon="menu"].titlebar-icon` | `display: none` — not useful in the embedded Eclipse view |
+
+**Key discovery**: `--button-primary-base` is **not** what opencode uses for the
+primary icon button background. The actual variable is `--icon-strong-base`.
+Always inspect the computed styles on the specific element rather than assuming
+variable names from the design token list.
+
+---
+
 ## Notes for future tweaks
 
 - Re-run the inspection snippet after each `opencode-ai` npm upgrade — new variables
