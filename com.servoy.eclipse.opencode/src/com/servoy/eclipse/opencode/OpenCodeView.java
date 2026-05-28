@@ -158,7 +158,7 @@ public class OpenCodeView extends ViewPart {
 		browser.addLocationListener(new org.eclipse.swt.browser.LocationAdapter() {
 			@Override
 			public void changed(org.eclipse.swt.browser.LocationEvent event) {
-				browser.execute(INJECT_CSS_JS);
+				//browser.execute(INJECT_CSS_JS);
 			}
 		});
 		initUrl();
@@ -252,12 +252,10 @@ public class OpenCodeView extends ViewPart {
 
 		activator.ensureServerStarting();
 
-		if (activator.isServerReady()) {
-			browser.setUrl(buildProjectUrl(activator.getServerPort(), projectPath));
-		} else {
-			browser.setUrl(getPageUrl("/resources/opencode-loading.html")); //$NON-NLS-1$
-			startUrlSwitcherThread();
-		}
+		// Always resolve session via the switcher thread â it may need to wait for
+		// server startup AND call the REST API to get/create a session.
+		browser.setUrl(getPageUrl("/resources/opencode-loading.html")); //$NON-NLS-1$
+		startUrlSwitcherThread();
 	}
 
 	// -----------------------------------------------------------------------
@@ -334,14 +332,15 @@ public class OpenCodeView extends ViewPart {
 				if (started) {
 					String projectPath = getActiveProjectPath();
 					targetUrl = projectPath != null
-							? buildProjectUrl(activator.getServerPort(), projectPath)
-							: "http://127.0.0.1:" + activator.getServerPort() + "/";
+							? resolveSessionUrl(activator.getServerPort(), projectPath)
+							: "http://127.0.0.1:" + activator.getServerPort() + "/"; //$NON-NLS-1$
 				} else {
 					targetUrl = DEFAULT_SERVER_URL;
 				}
 
 				PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
 					if (getSite() != null && getSite().getPage().isPartVisible(OpenCodeView.this)) {
+						ServoyLog.logInfo("opencode the url is: " + targetUrl );
 						setUrl(targetUrl);
 					}
 				});
@@ -367,10 +366,60 @@ public class OpenCodeView extends ViewPart {
 		return OpenCodeUtil.getActiveProjectPath();
 	}
 
-	private String buildProjectUrl(int port, String projectPath) {
+	/**
+	 * Resolves the URL to open for a project: queries the opencode REST API for
+	 * existing sessions, returning the most recently updated one. If no sessions
+	 * exist for this directory, creates a new one. Falls back to the bare project
+	 * URL if the API call fails.
+	 */
+	private String resolveSessionUrl(int port, String projectPath) {
 		String encoded = Base64.getUrlEncoder().withoutPadding()
 				.encodeToString(projectPath.getBytes(StandardCharsets.UTF_8));
-		return "http://127.0.0.1:" + port + "/" + encoded;
+		String base = "http://127.0.0.1:" + port + "/" + encoded; //$NON-NLS-1$
+		try {
+			String dirParam = java.net.URLEncoder.encode(projectPath, StandardCharsets.UTF_8);
+			String apiBase = "http://127.0.0.1:" + port; //$NON-NLS-1$
+
+			// List existing sessions for this directory
+			java.net.HttpURLConnection conn = (java.net.HttpURLConnection)
+				new java.net.URL(apiBase + "/session?directory=" + dirParam).openConnection(); //$NON-NLS-1$
+			conn.setConnectTimeout(3000);
+			conn.setReadTimeout(3000);
+			if (conn.getResponseCode() == 200) {
+				String body = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+				org.json.JSONArray sessions = new org.json.JSONArray(body);
+				if (sessions.length() > 0) {
+					// Find the most recently updated session
+					org.json.JSONObject best = sessions.getJSONObject(0);
+					long bestTime = best.optJSONObject("time") != null //$NON-NLS-1$
+						? best.getJSONObject("time").optLong("updated", 0) : 0; //$NON-NLS-1$ //$NON-NLS-2$
+					for (int i = 1; i < sessions.length(); i++) {
+						org.json.JSONObject s = sessions.getJSONObject(i);
+						long t = s.optJSONObject("time") != null //$NON-NLS-1$
+							? s.getJSONObject("time").optLong("updated", 0) : 0; //$NON-NLS-1$ //$NON-NLS-2$
+						if (t > bestTime) { best = s; bestTime = t; }
+					}
+					return base + "/session/" + best.getString("id"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+
+			// No sessions â create one
+			java.net.HttpURLConnection post = (java.net.HttpURLConnection)
+				new java.net.URL(apiBase + "/session?directory=" + dirParam).openConnection(); //$NON-NLS-1$
+			post.setRequestMethod("POST"); //$NON-NLS-1$
+			post.setConnectTimeout(3000);
+			post.setReadTimeout(3000);
+			post.setDoOutput(true);
+			post.getOutputStream().close(); // empty body
+			if (post.getResponseCode() == 200) {
+				String body = new String(post.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+				String id = new org.json.JSONObject(body).getString("id"); //$NON-NLS-1$
+				return base + "/session/" + id; //$NON-NLS-1$
+			}
+		} catch (Exception e) {
+			ServoyLog.logWarning("OpenCodeView: could not resolve session URL, using base URL", e); //$NON-NLS-1$
+		}
+		return base;
 	}
 
 	private String getPageUrl(String bundlePath) {
