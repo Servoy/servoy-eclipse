@@ -149,21 +149,48 @@ public class OpencodeFolderCreatorJob extends Job {
 		}
 
 		// Write / merge the opencode.json MCP config
+		Path servoyOpencodeCfgDir = Path.of(System.getProperty("user.home"), ".servoy", "opencode"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		// 1. Extract skills zip (if available)
+		boolean providerFromZip = false;
+		Path skillsZip = SkillsZipExtractor.getSkillsZipPath();
+		if (skillsZip != null) {
+			try {
+				providerFromZip = SkillsZipExtractor.extractToConfigDir(skillsZip, servoyOpencodeCfgDir);
+			} catch (IOException e) {
+				ServoyLog.logError("OpencodeFolderCreatorJob: failed to extract skills zip", e); //$NON-NLS-1$
+			}
+
+			String projectRoot = OpenCodeUtil.getActiveProjectPath();
+			if (projectRoot != null) {
+				try {
+					SkillsZipExtractor.writeOrUpdateAgentsMd(skillsZip, Path.of(projectRoot));
+				} catch (IOException e) {
+					ServoyLog.logError("OpencodeFolderCreatorJob: failed to write AGENTS.MD", e); //$NON-NLS-1$
+				}
+			} else {
+				ServoyLog.logInfo("OpencodeFolderCreatorJob: no active project, AGENTS.MD skipped."); //$NON-NLS-1$
+			}
+		}
+
+		// 2. Merge MCP endpoints (always)
 		List<IMcpEndpointProvider> providers = McpConfigWriter.collectProviders();
-		Path servoyOpencodeCfgDir = Path.of(System.getProperty("user.home"), ".servoy", "opencode");
 		try {
-			McpConfigWriter.mergeConfig(providers, servoyOpencodeCfgDir.resolve("opencode.json"));
+			McpConfigWriter.mergeConfig(providers, servoyOpencodeCfgDir.resolve("opencode.json")); //$NON-NLS-1$
 		} catch (IOException e) {
-			ServoyLog.logError("OpencodeFolderCreatorJob: failed to write opencode.json", e);
+			ServoyLog.logError("OpencodeFolderCreatorJob: failed to write opencode.json", e); //$NON-NLS-1$
 			// non-fatal: opencode starts without the Servoy MCP endpoints configured
 		}
 		Map<String, String> mcpEnvVars = McpConfigWriter.buildEnvVars(providers);
 
-		try {
-			ProviderConfigWriter.mergeProviderConfig(servoyOpencodeCfgDir.resolve("opencode.json")); //$NON-NLS-1$
-		} catch (IOException e) {
-			ServoyLog.logError("OpencodeFolderCreatorJob: failed to write provider config", e); //$NON-NLS-1$
-			// non-fatal: opencode starts without Servoy GenAI provider configured
+		// 3. Provider config fallback (only if zip did not supply opencode.json)
+		if (!providerFromZip) {
+			try {
+				ProviderConfigWriter.mergeProviderConfig(servoyOpencodeCfgDir.resolve("opencode.json")); //$NON-NLS-1$
+			} catch (IOException e) {
+				ServoyLog.logError("OpencodeFolderCreatorJob: failed to write provider config", e); //$NON-NLS-1$
+				// non-fatal: opencode starts without Servoy GenAI provider configured
+			}
 		}
 
 		Map<String, String> allEnvVars = new HashMap<>(mcpEnvVars);

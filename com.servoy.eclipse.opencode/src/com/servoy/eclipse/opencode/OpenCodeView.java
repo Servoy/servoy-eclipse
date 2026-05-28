@@ -22,7 +22,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
@@ -275,37 +274,7 @@ public class OpenCodeView extends ViewPart {
 	 * @return the path, or {@code null} if no solution is active
 	 */
 	private String getActiveProjectPath() {
-		IServoyModel model = ServoyModelFinder.getServoyModel();
-		if (model == null)
-			return null;
-		ServoyProject activeProject = model.getActiveProject();
-		if (activeProject == null)
-			return null;
-		IProject eclipseProject = activeProject.getProject();
-		if (eclipseProject == null)
-			return null;
-		java.net.URI uri = eclipseProject.getLocationURI();
-		if (uri == null)
-			return null;
-		try {
-			java.nio.file.Path projectDir = java.nio.file.Paths.get(uri);
-			java.nio.file.Path gitRoot = findGitRoot(projectDir);
-			return gitRoot != null ? gitRoot.toString() : projectDir.toString();
-		} catch (Exception e) {
-			ServoyLog.logError("OpenCodeView: cannot resolve active project path", e);
-			return null;
-		}
-	}
-
-	private java.nio.file.Path findGitRoot(java.nio.file.Path dir) {
-		java.nio.file.Path current = dir;
-		while (current != null) {
-			if (java.nio.file.Files.isDirectory(current.resolve(".git"))) {
-				return current;
-			}
-			current = current.getParent();
-		}
-		return null;
+		return OpenCodeUtil.getActiveProjectPath();
 	}
 
 	private String buildProjectUrl(int port, String projectPath) {
