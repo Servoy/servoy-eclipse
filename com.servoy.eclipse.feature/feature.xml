@@ -418,4 +418,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.jface"
          version="3.38.100.v20251108-1551"/>
 
+   <plugin
+         id="com.servoy.eclipse.opencode"
+         version="0.0.0"/>
+
 </feature>
