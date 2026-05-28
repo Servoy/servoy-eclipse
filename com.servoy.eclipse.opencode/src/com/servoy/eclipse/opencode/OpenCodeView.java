@@ -119,11 +119,27 @@ public class OpenCodeView extends ViewPart {
 	// -----------------------------------------------------------------------
 
 	/**
+	 * Returns {@code true} when Servoy AI is fully configured: both
+	 * {@code GENAI_API_KEY} and {@code SERVOY_SKILLS_ZIP} system properties are
+	 * set and non-blank, and the skills zip file actually exists on disk.
+	 */
+	private static boolean isServoyAiConfigured() {
+		String apiKey = System.getProperty(ProviderConfigWriter.ENV_API_KEY);
+		return apiKey != null && !apiKey.isBlank() && SkillsZipExtractor.getSkillsZipPath() != null;
+	}
+
+	/**
 	 * Determines the correct initial URL and navigates to it. Called from
 	 * {@link #createPartControl} so it runs on every view creation, including
 	 * after a close/reopen.
 	 */
 	private void initUrl() {
+		// If Servoy AI is not configured, show the "not enabled" page.
+		if (!isServoyAiConfigured()) {
+			browser.setUrl(getPageUrl("/resources/opencode-not-enabled.html")); //$NON-NLS-1$
+			return;
+		}
+
 		// Dev / external-server mode: honour the system property override.
 		String overrideUrl = System.getProperty(OpencodePerspective.URL_PROPERTY);
 		if (overrideUrl != null) {
@@ -294,4 +310,5 @@ public class OpenCodeView extends ViewPart {
 		}
 		return DEFAULT_SERVER_URL;
 	}
+
 }

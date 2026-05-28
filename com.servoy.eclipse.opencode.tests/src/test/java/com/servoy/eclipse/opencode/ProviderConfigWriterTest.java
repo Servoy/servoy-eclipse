@@ -35,9 +35,8 @@ import org.junit.rules.TemporaryFolder;
  * Unit tests for the package-private {@link ProviderConfigWriter} utility
  * class.
  * <p>
- * No OSGi runtime is required �?? all methods under test are pure Java and
- * operate
- * on in-memory values or temporary file-system resources.
+ * No OSGi runtime is required â all methods under test are pure Java and
+ * operate on in-memory values or temporary file-system resources.
  * </p>
  *
  * @author jcompagner
@@ -49,197 +48,208 @@ public class ProviderConfigWriterTest {
 	public TemporaryFolder tmp = new TemporaryFolder();
 
 	// -----------------------------------------------------------------------
-	// Test 1: buildProviderEnvVars
-	// -----------------------------------------------------------------------
-
-	/** Map contains GENAI_API_KEY �?? DEFAULT_API_KEY and no other keys. */
-	@Test
-	public void buildProviderEnvVars_returnsApiKey() {
-		Map<String, String> env = ProviderConfigWriter.buildProviderEnvVars();
-		assertTrue("GENAI_API_KEY must be present", env.containsKey(ProviderConfigWriter.ENV_API_KEY));
-		assertEquals("Value must equal DEFAULT_API_KEY",
-				ProviderConfigWriter.DEFAULT_API_KEY,
-				env.get(ProviderConfigWriter.ENV_API_KEY));
-		assertEquals("Map must contain exactly one entry", 1, env.size());
-	}
-
-	// -----------------------------------------------------------------------
-	// Test 2: mergeProviderConfig - fresh file creation
+	// buildProviderEnvVars â returns empty when property not set
 	// -----------------------------------------------------------------------
 
 	/**
-	 * Non-existent file is created; result contains $schema, provider, model,
-	 * small_model with the correct values from PROVIDER_CONFIG_JSON.
+	 * When GENAI_API_KEY system property is absent, buildProviderEnvVars() returns
+	 * an empty map.
 	 */
 	@Test
-	public void mergeProviderConfig_freshFile_createsAllFields() throws IOException {
-		Path configFile = tmp.getRoot().toPath().resolve("opencode.json");
+	public void buildProviderEnvVars_propertyAbsent_returnsEmptyMap() {
+		String saved = System.getProperty(ProviderConfigWriter.ENV_API_KEY);
+		try {
+			System.clearProperty(ProviderConfigWriter.ENV_API_KEY);
+			Map<String, String> env = ProviderConfigWriter.buildProviderEnvVars();
+			assertTrue("Map must be empty when property is absent", env.isEmpty());
+		} finally {
+			if (saved != null)
+				System.setProperty(ProviderConfigWriter.ENV_API_KEY, saved);
+		}
+	}
+
+	/**
+	 * When GENAI_API_KEY system property is blank, buildProviderEnvVars() returns
+	 * an empty map.
+	 */
+	@Test
+	public void buildProviderEnvVars_propertyBlank_returnsEmptyMap() {
+		String saved = System.getProperty(ProviderConfigWriter.ENV_API_KEY);
+		try {
+			System.setProperty(ProviderConfigWriter.ENV_API_KEY, "   "); //$NON-NLS-1$
+			Map<String, String> env = ProviderConfigWriter.buildProviderEnvVars();
+			assertTrue("Map must be empty when property is blank", env.isEmpty());
+		} finally {
+			if (saved != null)
+				System.setProperty(ProviderConfigWriter.ENV_API_KEY, saved);
+			else
+				System.clearProperty(ProviderConfigWriter.ENV_API_KEY);
+		}
+	}
+
+	/**
+	 * When GENAI_API_KEY system property has a non-blank value,
+	 * buildProviderEnvVars()
+	 * returns a single-entry map containing exactly that key and value.
+	 */
+	@Test
+	public void buildProviderEnvVars_propertySet_returnsSingleEntryMap() {
+		String saved = System.getProperty(ProviderConfigWriter.ENV_API_KEY);
+		try {
+			System.setProperty(ProviderConfigWriter.ENV_API_KEY, "test-api-key-123"); //$NON-NLS-1$
+			Map<String, String> env = ProviderConfigWriter.buildProviderEnvVars();
+			assertEquals("Map must contain exactly one entry", 1, env.size());
+			assertTrue("GENAI_API_KEY must be present", env.containsKey(ProviderConfigWriter.ENV_API_KEY));
+			assertEquals("Value must match the system property", "test-api-key-123", //$NON-NLS-1$
+					env.get(ProviderConfigWriter.ENV_API_KEY));
+		} finally {
+			if (saved != null)
+				System.setProperty(ProviderConfigWriter.ENV_API_KEY, saved);
+			else
+				System.clearProperty(ProviderConfigWriter.ENV_API_KEY);
+		}
+	}
+
+	// -----------------------------------------------------------------------
+	// mergeProviderConfig â file does not exist: no-op
+	// -----------------------------------------------------------------------
+
+	/**
+	 * When the config file does not exist, mergeProviderConfig() is a no-op:
+	 * no file is created.
+	 */
+	@Test
+	public void mergeProviderConfig_fileAbsent_noFileCreated() throws IOException {
+		Path configFile = tmp.getRoot().toPath().resolve("opencode.json"); //$NON-NLS-1$
 
 		ProviderConfigWriter.mergeProviderConfig(configFile);
 
-		assertTrue("opencode.json must be created", Files.exists(configFile));
-		String content = Files.readString(configFile, StandardCharsets.UTF_8);
-		assertTrue("$schema must be present", content.contains("$schema"));
-		assertTrue("$schema URL must be correct", content.contains(McpConfigWriter.SCHEMA_URL));
-		assertTrue("provider block must be present", content.contains("\"provider\""));
-		assertTrue("litellm provider must be present", content.contains("\"litellm\""));
-		assertTrue("apiKey env-var reference must be present",
-				content.contains("{env:" + ProviderConfigWriter.ENV_API_KEY + "}"));
-		assertTrue("baseURL must be present", content.contains("genai.servoy-cloud.eu"));
-		assertTrue("model must be present", content.contains("\"model\""));
-		assertTrue("model value must be correct",
-				content.contains("litellm/eu.anthropic.claude-sonnet-4-6"));
-		assertTrue("small_model must be present", content.contains("\"small_model\""));
-		assertTrue("small_model value must be correct",
-				content.contains("litellm/eu.anthropic.claude-haiku-4-5-20251001-v1:0"));
+		assertFalse("No file must be created when the config file does not exist", Files.exists(configFile));
 	}
 
 	// -----------------------------------------------------------------------
-	// Test 3: mergeProviderConfig - existing MCP file gets provider fields added
+	// mergeProviderConfig â existing file with $schema: unchanged
 	// -----------------------------------------------------------------------
 
 	/**
-	 * File that already has an mcp block gets provider, model, small_model added
-	 * without disturbing the mcp content.
+	 * A file that already has the $schema key is returned unchanged (skip-write).
 	 */
 	@Test
-	public void mergeProviderConfig_existingMcpFile_addsProviderFields() throws IOException {
-		Path configFile = tmp.getRoot().toPath().resolve("opencode.json");
-		String existing = "{\n" +
-				"  \"$schema\": \"https://opencode.ai/config.json\",\n" +
-				"  \"mcp\": {\n" +
-				"    \"eclipse-ide\": {\n" +
-				"      \"type\": \"remote\",\n" +
-				"      \"url\": \"http://localhost:{env:MCP_PORT}/mcp/eclipse-ide\"\n" +
-				"    }\n" +
-				"  }\n" +
-				"}\n";
+	public void mergeProviderConfig_schemaAlreadyPresent_fileUnchanged() throws IOException {
+		Path configFile = tmp.getRoot().toPath().resolve("opencode.json"); //$NON-NLS-1$
+		String existing = "{\n" + //$NON-NLS-1$
+				"  \"$schema\": \"https://opencode.ai/config.json\",\n" + //$NON-NLS-1$
+				"  \"mcp\": {}\n" + //$NON-NLS-1$
+				"}\n"; //$NON-NLS-1$
 		Files.writeString(configFile, existing, StandardCharsets.UTF_8);
+		long modifiedBefore = Files.getLastModifiedTime(configFile).toMillis();
 
-		ProviderConfigWriter.mergeProviderConfig(configFile);
-
-		String content = Files.readString(configFile, StandardCharsets.UTF_8);
-		// Provider fields added
-		assertTrue("provider block must be added", content.contains("\"provider\""));
-		assertTrue("model must be added", content.contains("\"model\""));
-		assertTrue("small_model must be added", content.contains("\"small_model\""));
-		// MCP block untouched
-		assertTrue("mcp block must still be present", content.contains("\"mcp\""));
-		assertTrue("eclipse-ide entry must be preserved", content.contains("\"eclipse-ide\""));
-		assertTrue("MCP URL must be preserved",
-				content.contains("http://localhost:{env:MCP_PORT}/mcp/eclipse-ide"));
-	}
-
-	// -----------------------------------------------------------------------
-	// Test 4: mergeProviderConfig - already correct, file unchanged
-	// -----------------------------------------------------------------------
-
-	/**
-	 * Calling mergeProviderConfig() twice does not change the file content on the
-	 * second call (skip-if-unchanged).
-	 */
-	@Test
-	public void mergeProviderConfig_alreadyCorrect_fileUnchanged() throws IOException {
-		Path configFile = tmp.getRoot().toPath().resolve("opencode.json");
-
-		// First call �?? creates the file
-		ProviderConfigWriter.mergeProviderConfig(configFile);
-		String afterFirst = Files.readString(configFile, StandardCharsets.UTF_8);
-		long lastModifiedAfterFirst = Files.getLastModifiedTime(configFile).toMillis();
-
-		// Brief pause to ensure any write would change the timestamp
 		try {
 			Thread.sleep(50);
 		} catch (InterruptedException ie) {
 			Thread.currentThread().interrupt();
 		}
 
-		// Second call �?? must be a no-op
 		ProviderConfigWriter.mergeProviderConfig(configFile);
-		String afterSecond = Files.readString(configFile, StandardCharsets.UTF_8);
-		long lastModifiedAfterSecond = Files.getLastModifiedTime(configFile).toMillis();
 
-		assertEquals("File content must not change on second call", afterFirst, afterSecond);
-		assertEquals("File must not be rewritten when content is unchanged",
-				lastModifiedAfterFirst, lastModifiedAfterSecond);
+		String after = Files.readString(configFile, StandardCharsets.UTF_8);
+		assertEquals("File content must not change when $schema is already present", existing, after);
+		assertEquals("File must not be rewritten", modifiedBefore, Files.getLastModifiedTime(configFile).toMillis());
 	}
 
 	// -----------------------------------------------------------------------
-	// Test 5: mergeProviderConfig - stale provider block replaced
+	// mergeProviderConfig â existing file without $schema: schema inserted
 	// -----------------------------------------------------------------------
 
 	/**
-	 * File with an outdated provider block (different baseURL or models) gets the
-	 * provider block replaced with the current PROVIDER_CONFIG_JSON values.
+	 * A file without the $schema key gets the schema inserted; all other keys are
+	 * left untouched.
 	 */
 	@Test
-	public void mergeProviderConfig_staleProviderBlock_replaced() throws IOException {
-		Path configFile = tmp.getRoot().toPath().resolve("opencode.json");
-		String stale = "{\n" +
-				"  \"$schema\": \"https://opencode.ai/config.json\",\n" +
-				"  \"provider\": {\n" +
-				"    \"litellm\": {\n" +
-				"      \"npm\": \"@ai-sdk/openai-compatible\",\n" +
-				"      \"name\": \"OldLiteLLM\",\n" +
-				"      \"options\": {\n" +
-				"        \"apiKey\": \"{env:GENAI_API_KEY}\",\n" +
-				"        \"baseURL\": \"https://old-genai.example.com/v1\"\n" +
-				"      },\n" +
-				"      \"models\": {}\n" +
-				"    }\n" +
-				"  },\n" +
-				"  \"model\": \"litellm/old-model\",\n" +
-				"  \"small_model\": \"litellm/old-small-model\"\n" +
-				"}\n";
-		Files.writeString(configFile, stale, StandardCharsets.UTF_8);
-
-		ProviderConfigWriter.mergeProviderConfig(configFile);
-
-		String content = Files.readString(configFile, StandardCharsets.UTF_8);
-		// Old values gone
-		assertFalse("Old baseURL must be replaced", content.contains("old-genai.example.com"));
-		assertFalse("Old model must be replaced", content.contains("litellm/old-model\""));
-		assertFalse("Old small_model must be replaced", content.contains("litellm/old-small-model\""));
-		// New values present
-		assertTrue("New baseURL must be present", content.contains("genai.servoy-cloud.eu"));
-		assertTrue("New model must be present",
-				content.contains("litellm/eu.anthropic.claude-sonnet-4-6"));
-		assertTrue("New small_model must be present",
-				content.contains("litellm/eu.anthropic.claude-haiku-4-5-20251001-v1:0"));
-	}
-
-	// -----------------------------------------------------------------------
-	// Test 6: mergeProviderConfig - user-added keys preserved
-	// -----------------------------------------------------------------------
-
-	/**
-	 * User-added top-level keys (e.g. a custom theme key) survive a
-	 * mergeProviderConfig() call untouched.
-	 */
-	@Test
-	public void mergeProviderConfig_userAddedKeys_preserved() throws IOException {
-		Path configFile = tmp.getRoot().toPath().resolve("opencode.json");
-		String existing = "{\n" +
-				"  \"$schema\": \"https://opencode.ai/config.json\",\n" +
-				"  \"theme\": \"dark\",\n" +
-				"  \"keybindings\": \"vim\"\n" +
-				"}\n";
+	public void mergeProviderConfig_schemaMissing_schemaInserted() throws IOException {
+		Path configFile = tmp.getRoot().toPath().resolve("opencode.json"); //$NON-NLS-1$
+		String existing = "{\n" + //$NON-NLS-1$
+				"  \"mcp\": {\n" + //$NON-NLS-1$
+				"    \"eclipse-ide\": {\n" + //$NON-NLS-1$
+				"      \"type\": \"remote\",\n" + //$NON-NLS-1$
+				"      \"url\": \"http://localhost:{env:MCP_PORT}/mcp/eclipse-ide\"\n" + //$NON-NLS-1$
+				"    }\n" + //$NON-NLS-1$
+				"  }\n" + //$NON-NLS-1$
+				"}\n"; //$NON-NLS-1$
 		Files.writeString(configFile, existing, StandardCharsets.UTF_8);
 
 		ProviderConfigWriter.mergeProviderConfig(configFile);
 
 		String content = Files.readString(configFile, StandardCharsets.UTF_8);
-		assertTrue("theme key must be preserved", content.contains("\"theme\""));
-		assertTrue("theme value must be preserved", content.contains("\"dark\""));
-		assertTrue("keybindings key must be preserved", content.contains("\"keybindings\""));
-		assertTrue("keybindings value must be preserved", content.contains("\"vim\""));
-		// Provider fields also added
-		assertTrue("provider block must be added", content.contains("\"provider\""));
-		assertTrue("model must be added", content.contains("\"model\""));
+		assertTrue("$schema must be inserted", content.contains("\"$schema\"")); //$NON-NLS-1$
+		assertTrue("$schema URL must be correct", content.contains(McpConfigWriter.SCHEMA_URL));
+		// Existing content preserved
+		assertTrue("mcp block must be preserved", content.contains("\"mcp\"")); //$NON-NLS-1$
+		assertTrue("eclipse-ide entry must be preserved", content.contains("\"eclipse-ide\"")); //$NON-NLS-1$
+		assertTrue("MCP URL must be preserved", //$NON-NLS-1$
+				content.contains("http://localhost:{env:MCP_PORT}/mcp/eclipse-ide")); //$NON-NLS-1$
 	}
 
 	// -----------------------------------------------------------------------
-	// Test 7: mergeProviderConfig - mcp block byte-for-byte unchanged
+	// mergeProviderConfig â provider/model keys from zip are preserved as-is
+	// -----------------------------------------------------------------------
+
+	/**
+	 * The simplified mergeProviderConfig() does NOT touch provider, model, or
+	 * small_model keys. A file containing those keys from the zip is left
+	 * byte-for-byte unchanged (beyond any $schema insertion).
+	 */
+	@Test
+	public void mergeProviderConfig_providerKeysFromZip_notTouched() throws IOException {
+		Path configFile = tmp.getRoot().toPath().resolve("opencode.json"); //$NON-NLS-1$
+		String existing = "{\n" + //$NON-NLS-1$
+				"  \"$schema\": \"https://opencode.ai/config.json\",\n" + //$NON-NLS-1$
+				"  \"provider\": {\n" + //$NON-NLS-1$
+				"    \"litellm\": { \"name\": \"FromZip\" }\n" + //$NON-NLS-1$
+				"  },\n" + //$NON-NLS-1$
+				"  \"model\": \"litellm/zip-model\",\n" + //$NON-NLS-1$
+				"  \"small_model\": \"litellm/zip-small\"\n" + //$NON-NLS-1$
+				"}\n"; //$NON-NLS-1$
+		Files.writeString(configFile, existing, StandardCharsets.UTF_8);
+
+		ProviderConfigWriter.mergeProviderConfig(configFile);
+
+		String content = Files.readString(configFile, StandardCharsets.UTF_8);
+		assertEquals("File must be byte-for-byte unchanged", existing, content);
+		assertTrue("Zip provider must be preserved", content.contains("FromZip")); //$NON-NLS-1$
+		assertTrue("Zip model must be preserved", content.contains("zip-model")); //$NON-NLS-1$
+		assertTrue("Zip small_model must be preserved", content.contains("zip-small")); //$NON-NLS-1$
+	}
+
+	// -----------------------------------------------------------------------
+	// mergeProviderConfig â user-added keys preserved
+	// -----------------------------------------------------------------------
+
+	/**
+	 * User-added top-level keys (e.g. theme, keybindings) survive a
+	 * mergeProviderConfig() call untouched.
+	 */
+	@Test
+	public void mergeProviderConfig_userAddedKeys_preserved() throws IOException {
+		Path configFile = tmp.getRoot().toPath().resolve("opencode.json"); //$NON-NLS-1$
+		String existing = "{\n" + //$NON-NLS-1$
+				"  \"$schema\": \"https://opencode.ai/config.json\",\n" + //$NON-NLS-1$
+				"  \"theme\": \"dark\",\n" + //$NON-NLS-1$
+				"  \"keybindings\": \"vim\"\n" + //$NON-NLS-1$
+				"}\n"; //$NON-NLS-1$
+		Files.writeString(configFile, existing, StandardCharsets.UTF_8);
+
+		ProviderConfigWriter.mergeProviderConfig(configFile);
+
+		String content = Files.readString(configFile, StandardCharsets.UTF_8);
+		assertTrue("theme key must be preserved", content.contains("\"theme\"")); //$NON-NLS-1$
+		assertTrue("theme value must be preserved", content.contains("\"dark\"")); //$NON-NLS-1$
+		assertTrue("keybindings key must be preserved", content.contains("\"keybindings\"")); //$NON-NLS-1$
+		assertTrue("keybindings value must be preserved", content.contains("\"vim\"")); //$NON-NLS-1$
+	}
+
+	// -----------------------------------------------------------------------
+	// mergeProviderConfig â mcp block byte-for-byte unchanged
 	// -----------------------------------------------------------------------
 
 	/**
@@ -248,21 +258,20 @@ public class ProviderConfigWriterTest {
 	 */
 	@Test
 	public void mergeProviderConfig_mcpBlockUnchanged() throws IOException {
-		Path configFile = tmp.getRoot().toPath().resolve("opencode.json");
-		// The mcp block has a very specific format that must be preserved exactly
-		String mcpBlock = "    \"eclipse-ide\": {\n" +
-				"      \"type\": \"remote\",\n" +
-				"      \"url\": \"http://localhost:{env:MCP_PORT}/mcp/eclipse-ide\",\n" +
-				"      \"headers\": {\n" +
-				"        \"Authorization\": \"Bearer {env:MCP_AUTH_TOKEN}\"\n" +
-				"      }\n" +
-				"    }";
-		String existing = "{\n" +
-				"  \"$schema\": \"https://opencode.ai/config.json\",\n" +
-				"  \"mcp\": {\n" +
-				mcpBlock + "\n" +
-				"  }\n" +
-				"}\n";
+		Path configFile = tmp.getRoot().toPath().resolve("opencode.json"); //$NON-NLS-1$
+		String mcpBlock = "    \"eclipse-ide\": {\n" + //$NON-NLS-1$
+				"      \"type\": \"remote\",\n" + //$NON-NLS-1$
+				"      \"url\": \"http://localhost:{env:MCP_PORT}/mcp/eclipse-ide\",\n" + //$NON-NLS-1$
+				"      \"headers\": {\n" + //$NON-NLS-1$
+				"        \"Authorization\": \"Bearer {env:MCP_AUTH_TOKEN}\"\n" + //$NON-NLS-1$
+				"      }\n" + //$NON-NLS-1$
+				"    }"; //$NON-NLS-1$
+		String existing = "{\n" + //$NON-NLS-1$
+				"  \"$schema\": \"https://opencode.ai/config.json\",\n" + //$NON-NLS-1$
+				"  \"mcp\": {\n" + //$NON-NLS-1$
+				mcpBlock + "\n" + //$NON-NLS-1$
+				"  }\n" + //$NON-NLS-1$
+				"}\n"; //$NON-NLS-1$
 		Files.writeString(configFile, existing, StandardCharsets.UTF_8);
 
 		ProviderConfigWriter.mergeProviderConfig(configFile);

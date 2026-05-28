@@ -22,20 +22,22 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Writes the Servoy GenAI gateway provider configuration into
- * {@code opencode.json} ({@code provider}, {@code model},
- * {@code small_model} top-level keys).
+ * Handles the GenAI API key environment variable and the {@code $schema} field
+ * inside {@code opencode.json}.
+ * <p>
+ * Provider configuration (models, LiteLLM block, etc.) now comes entirely from
+ * the skills zip ({@code SERVOY_SKILLS_ZIP}). This class no longer owns or
+ * hard-codes any provider, model, or small_model values.
+ * </p>
  * <p>
  * All methods are package-private static so they can be exercised from
  * {@code com.servoy.eclipse.opencode.tests} without an OSGi runtime.
  * </p>
  * <p>
- * {@link McpConfigWriter} owns the {@code mcp} block; this class owns
- * {@code provider}, {@code model}, and {@code small_model}. Neither disturbs
+ * {@link McpConfigWriter} owns the {@code mcp} block. Neither class disturbs
  * the other's fields or any user-added entries.
  * </p>
  *
@@ -48,93 +50,54 @@ class ProviderConfigWriter {
 	static final String ENV_API_KEY = "GENAI_API_KEY"; //$NON-NLS-1$
 
 	/**
-	 * Hardcoded API key value �?? will be replaced by a cloud-supplied key in a
-	 * future ticket.
-	 */
-	static final String DEFAULT_API_KEY = System.getProperty(ENV_API_KEY); //$NON-NLS-1$
-
-	/**
-	 * Full provider/model config fragment. The {@code apiKey} value is the
-	 * env-var reference {@code {env:GENAI_API_KEY}} so the secret stays off disk.
-	 * In a future ticket this constant is replaced by whatever Servoy Cloud
-	 * returns.
-	 */
-	static final String PROVIDER_CONFIG_JSON = """
-			{
-			  "provider": {
-			    "litellm": {
-			      "npm": "@ai-sdk/openai-compatible",
-			      "name": "LiteLLM",
-			      "options": {
-			        "apiKey": "{env:GENAI_API_KEY}",
-			        "baseURL": "https://genai.servoy-cloud.eu/v1"
-			      },
-			      "models": {
-			        "eu.anthropic.claude-sonnet-4-6": { "name": "Claude Sonnet 4.6" },
-			        "eu.anthropic.claude-haiku-4-5-20251001-v1:0": { "name": "Claude Haiku 4.5" },
-			        "eu.anthropic.claude-opus-4-7": { "name": "Claude Opus 4.7" }
-			      }
-			    }
-			  },
-			  "model": "litellm/eu.anthropic.claude-sonnet-4-6",
-			  "small_model": "litellm/eu.anthropic.claude-haiku-4-5-20251001-v1:0"
-			}
-			""";
-
-	/**
-	 * Returns the environment variables that must be passed to the opencode
-	 * child process so that the {@code {env:GENAI_API_KEY}} reference in
+	 * Returns the environment variables that must be passed to the opencode child
+	 * process so that the {@code {env:GENAI_API_KEY}} reference in
 	 * {@code opencode.json} resolves correctly.
+	 * <p>
+	 * Reads {@code System.getProperty(ENV_API_KEY)} on every call (no caching).
+	 * Returns an empty map when the property is absent or blank.
+	 * </p>
 	 *
-	 * @return unmodifiable map with a single entry {@code GENAI_API_KEY} �??
-	 *         {@link #DEFAULT_API_KEY}
+	 * @return unmodifiable map â either empty or a single-entry map with
+	 *         {@code GENAI_API_KEY}
 	 */
 	static Map<String, String> buildProviderEnvVars() {
-		Map<String, String> envVars = new HashMap<>();
-		envVars.put(ENV_API_KEY, DEFAULT_API_KEY);
-		return Collections.unmodifiableMap(envVars);
+		String apiKey = System.getProperty(ENV_API_KEY);
+		if (apiKey == null || apiKey.isBlank()) {
+			return Collections.emptyMap();
+		}
+		return Collections.singletonMap(ENV_API_KEY, apiKey);
 	}
 
 	/**
-	 * Merges the Servoy GenAI provider configuration into the opencode.json at
-	 * {@code configFile}. Creates the file (and parent directories) if absent;
-	 * merges into the existing content if present.
-	 * <p>
-	 * Keys managed by this method: {@code $schema}, {@code provider},
-	 * {@code model}, {@code small_model}. All other keys (e.g. {@code mcp} written
-	 * by {@link McpConfigWriter}) are left untouched.
-	 * </p>
+	 * Ensures the {@code $schema} field is present in the opencode.json at
+	 * {@code configFile}. If the file does not exist, returns immediately (nothing
+	 * to do). If the file exists, reads it, calls {@link #mergeIntoExisting}, and
+	 * writes back only if the content changed.
 	 *
 	 * @param configFile target path, e.g. {@code ~/.servoy/opencode/opencode.json}
 	 * @throws IOException if the file cannot be read or written
 	 */
 	static void mergeProviderConfig(Path configFile) throws IOException {
-		String existingJson = null;
-		if (Files.exists(configFile)) {
-			try {
-				existingJson = Files.readString(configFile, StandardCharsets.UTF_8);
-			} catch (IOException e) {
-				// Fall through �?? regenerate from scratch
-				existingJson = null;
-			}
+		if (!Files.exists(configFile)) {
+			return;
 		}
 
-		String newJson;
-		if (existingJson == null) {
-			newJson = buildFreshJson();
-		} else {
-			newJson = mergeIntoExisting(existingJson);
+		String existingJson;
+		try {
+			existingJson = Files.readString(configFile, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			// Cannot read â leave the file as-is
+			return;
 		}
+
+		String newJson = mergeIntoExisting(existingJson);
 
 		// Skip write if nothing changed
 		if (newJson.equals(existingJson)) {
 			return;
 		}
 
-		Path parent = configFile.getParent();
-		if (parent != null && !Files.exists(parent)) {
-			Files.createDirectories(parent);
-		}
 		Files.writeString(configFile, newJson, StandardCharsets.UTF_8);
 	}
 
@@ -143,35 +106,8 @@ class ProviderConfigWriter {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Generates a fresh opencode.json containing only {@code $schema},
-	 * {@code provider}, {@code model}, and {@code small_model} parsed from
-	 * {@link #PROVIDER_CONFIG_JSON}.
-	 */
-	private static String buildFreshJson() {
-		// Parse the three top-level values we care about from PROVIDER_CONFIG_JSON
-		String providerJson = extractTopLevelObject(PROVIDER_CONFIG_JSON, "provider"); //$NON-NLS-1$
-		String model = extractTopLevelString(PROVIDER_CONFIG_JSON, "model"); //$NON-NLS-1$
-		String smallModel = extractTopLevelString(PROVIDER_CONFIG_JSON, "small_model"); //$NON-NLS-1$
-
-		StringBuilder sb = new StringBuilder();
-		sb.append("{\n"); //$NON-NLS-1$
-		sb.append("  \"$schema\": \"").append(McpConfigWriter.SCHEMA_URL).append("\",\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (providerJson != null) {
-			sb.append("  \"provider\": ").append(providerJson).append(",\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		if (model != null) {
-			sb.append("  \"model\": \"").append(model).append("\",\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		if (smallModel != null) {
-			sb.append("  \"small_model\": \"").append(smallModel).append("\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		sb.append("}\n"); //$NON-NLS-1$
-		return sb.toString();
-	}
-
-	/**
-	 * Merges provider, model, and small_model from {@link #PROVIDER_CONFIG_JSON}
-	 * into the existing JSON string, preserving all other keys.
+	 * Ensures {@code $schema} is present in the existing JSON string.
+	 * All other keys (provider, model, mcp, user-added keys) are left untouched.
 	 */
 	private static String mergeIntoExisting(String existingJson) {
 		String result = existingJson;
@@ -184,24 +120,6 @@ class ProviderConfigWriter {
 						"\n  \"$schema\": \"" + McpConfigWriter.SCHEMA_URL + "\"," + //$NON-NLS-1$ //$NON-NLS-2$
 						result.substring(firstBrace + 1);
 			}
-		}
-
-		// Upsert provider (object value)
-		String providerJson = extractTopLevelObject(PROVIDER_CONFIG_JSON, "provider"); //$NON-NLS-1$
-		if (providerJson != null) {
-			result = upsertTopLevelObject(result, "provider", providerJson); //$NON-NLS-1$
-		}
-
-		// Upsert model (string value)
-		String model = extractTopLevelString(PROVIDER_CONFIG_JSON, "model"); //$NON-NLS-1$
-		if (model != null) {
-			result = upsertTopLevelString(result, "model", model); //$NON-NLS-1$
-		}
-
-		// Upsert small_model (string value)
-		String smallModel = extractTopLevelString(PROVIDER_CONFIG_JSON, "small_model"); //$NON-NLS-1$
-		if (smallModel != null) {
-			result = upsertTopLevelString(result, "small_model", smallModel); //$NON-NLS-1$
 		}
 
 		return result;
@@ -276,7 +194,7 @@ class ProviderConfigWriter {
 		String searchKey = "\"" + key + "\""; //$NON-NLS-1$ //$NON-NLS-2$
 		int keyPos = json.indexOf(searchKey);
 		if (keyPos >= 0) {
-			// Key exists �?? replace its value
+			// Key exists â replace its value
 			int colonPos = json.indexOf(':', keyPos + searchKey.length());
 			if (colonPos < 0)
 				return json;
@@ -289,7 +207,7 @@ class ProviderConfigWriter {
 			// Replace from opening quote to closing quote (inclusive)
 			return json.substring(0, quoteStart) + "\"" + value + "\"" + json.substring(quoteEnd + 1); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		// Key absent �?? insert before the closing brace of the root object
+		// Key absent â insert before the closing brace of the root object
 		return insertTopLevelEntry(json, "\"" + key + "\": \"" + value + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
@@ -307,7 +225,7 @@ class ProviderConfigWriter {
 		String searchKey = "\"" + key + "\""; //$NON-NLS-1$ //$NON-NLS-2$
 		int keyPos = json.indexOf(searchKey);
 		if (keyPos >= 0) {
-			// Key exists �?? replace the entire object value
+			// Key exists â replace the entire object value
 			int colonPos = json.indexOf(':', keyPos + searchKey.length());
 			if (colonPos < 0)
 				return json;
@@ -331,7 +249,7 @@ class ProviderConfigWriter {
 			// Replace from opening brace to closing brace (inclusive)
 			return json.substring(0, braceStart) + objectJson + json.substring(pos + 1);
 		}
-		// Key absent �?? insert before the closing brace of the root object
+		// Key absent â insert before the closing brace of the root object
 		return insertTopLevelEntry(json, "\"" + key + "\": " + objectJson); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -339,7 +257,7 @@ class ProviderConfigWriter {
 	 * Inserts a new key-value fragment before the last closing brace of the root
 	 * JSON object, adding a comma if necessary.
 	 */
-	private static String insertTopLevelEntry(String json, String fragment) {
+	static String insertTopLevelEntry(String json, String fragment) {
 		int lastBrace = json.lastIndexOf('}');
 		if (lastBrace < 0)
 			return json;
@@ -348,7 +266,7 @@ class ProviderConfigWriter {
 		return before + comma + "\n  " + fragment + "\n" + json.substring(lastBrace); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	/** Private constructor �?? static utility class. */
+	/** Private constructor â static utility class. */
 	private ProviderConfigWriter() {
 	}
 }
