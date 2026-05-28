@@ -262,6 +262,41 @@ public class SkillsZipExtractorTest {
 		assertNull(SkillsZipExtractor.readZipEntry(zipStream(zip), "AGENTS.MD"));
 	}
 
+
+	/** Entry name matching is case-insensitive: zip has "AGENTS.md", we ask for "AGENTS.MD". */
+	@Test
+	public void readZipEntry_caseInsensitive_findsEntry() throws IOException {
+		Path zip = createZip("AGENTS.md", "# Hello");
+
+		String result = SkillsZipExtractor.readZipEntry(zipStream(zip), "AGENTS.MD");
+
+		assertEquals("Entry with different case must still be found", "# Hello", result);
+	}
+
+	/** extractToConfigDir recognises opencode.json regardless of case in the zip. */
+	@Test
+	public void extractToConfigDir_opencodeJsonMixedCase_extracted() throws IOException {
+		Path zip = createZip("Opencode.Json", "{\"model\":\"test\"}");
+		Path configDir = tmp.newFolder("config").toPath();
+
+		boolean result = SkillsZipExtractor.extractToConfigDir(zipStream(zip), configDir);
+
+		assertTrue("should return true for case-variant opencode.json", result);
+		assertTrue("opencode.json must be created", Files.exists(configDir.resolve("opencode.json")));
+	}
+
+	/** writeOrUpdateAgentsMd finds AGENTS.MD with lower-case extension in the zip. */
+	@Test
+	public void writeOrUpdateAgentsMd_agentsMdLowerCase_createsFile() throws IOException {
+		Path zip = createZip("AGENTS.md", SAMPLE_AGENTS_MD);
+		Path projectRoot = tmp.newFolder("project").toPath();
+
+		SkillsZipExtractor.writeOrUpdateAgentsMd(zipStream(zip), projectRoot);
+
+		assertTrue("AGENTS.MD must be created even when zip entry is AGENTS.md",
+				Files.exists(projectRoot.resolve("AGENTS.MD")));
+	}
+
 	// -----------------------------------------------------------------------
 	// updateAgentsYaml -- scalar fields
 	// -----------------------------------------------------------------------

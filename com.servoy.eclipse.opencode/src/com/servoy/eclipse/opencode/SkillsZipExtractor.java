@@ -143,12 +143,12 @@ class SkillsZipExtractor {
 				if (entry.isDirectory())
 					continue;
 
-				if (OPENCODE_JSON.equals(name)) {
+				if (OPENCODE_JSON.equalsIgnoreCase(name)) {
 					// Write opencode.json into configDir
 					Files.write(configDir.resolve(OPENCODE_JSON), zis.readAllBytes());
 					wroteOpencodeJson = true;
 
-				} else if (name.startsWith(OPENCODE_DIR_PREFIX)) {
+				} else if (name.toLowerCase().startsWith(OPENCODE_DIR_PREFIX)) {
 					// Extract .opencode/ entries preserving relative structure
 					Path relative = Paths.get(name); // e.g. .opencode/foo/bar.txt
 					Path target = configDir.resolve(relative);
@@ -255,7 +255,7 @@ class SkillsZipExtractor {
 		try (ZipInputStream zis = new ZipInputStream(zipStream)) {
 			ZipEntry entry;
 			while ((entry = zis.getNextEntry()) != null) {
-				if (entryName.equals(entry.getName())) {
+				if (entryName.equalsIgnoreCase(entry.getName())) {
 					return new String(zis.readAllBytes(), StandardCharsets.UTF_8);
 				}
 			}
