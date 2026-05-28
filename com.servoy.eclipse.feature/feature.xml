@@ -420,6 +420,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.opencode"
-         version="0.0.0"/>
+         version="2026.3.1.qualifier"/>
 
 </feature>
