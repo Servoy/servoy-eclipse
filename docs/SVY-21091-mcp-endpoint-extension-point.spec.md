@@ -182,14 +182,14 @@ look like:
       "type": "remote",
       "url": "http://localhost:{env:MCP_PORT}/mcp/eclipse-ide",
       "headers": {
-        "Authorization": "Basic {env:MCP_AUTH_TOKEN}"
+        "Authorization": "Bearer {env:MCP_AUTH_TOKEN}"
       }
     },
     "eclipse-coder": {
       "type": "remote",
       "url": "http://localhost:{env:MCP_PORT}/mcp/eclipse-coder",
       "headers": {
-        "Authorization": "Basic {env:MCP_AUTH_TOKEN}"
+        "Authorization": "Bearer {env:MCP_AUTH_TOKEN}"
       }
     }
   }
@@ -210,7 +210,7 @@ Create the parent directory if needed.
 endpoint check whether:
 - the server name key is present in the `mcp` object, **and**
 - the existing `url` value already uses the `{env:MCP_PORT}` template (correct form), **and**
-- the existing `headers.Authorization` value matches `Basic {env:MCP_AUTH_TOKEN}` (or
+- the existing `headers.Authorization` value matches `Bearer {env:MCP_AUTH_TOKEN}` (or
   is absent when no auth token is provided).
 
 If all three conditions hold for an entry, leave it unchanged. Otherwise (the entry
@@ -400,7 +400,7 @@ value types remain package-private and unexported.
       writes (or merges into) `{user.home}/.servoy/opencode/opencode.json`
       containing an `mcp` entry for each contributed URL, with:
       - `"url": "http://localhost:{env:MCP_PORT}/mcp/<name>"` (port replaced)
-      - `"headers": {"Authorization": "Basic {env:MCP_AUTH_TOKEN}"}` (when a token
+      - `"headers": {"Authorization": "Bearer {env:MCP_AUTH_TOKEN}"}` (when a token
         is provided)
 - [ ] `MCP_PORT` is set to the actual port extracted from the contributed URLs and
       passed to the opencode child process.
