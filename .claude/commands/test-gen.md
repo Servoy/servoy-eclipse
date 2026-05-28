@@ -40,7 +40,25 @@ when you need the OSGi container.
 Read an existing test in the target test project to check whether it uses
 `org.junit.jupiter.api.Test` (JUnit 5) or `org.junit.Test` (JUnit 4). Match it.
 
-### 5. Write the tests
+### 5. Check for spec-defined test cases and existing test files
+
+Before writing anything:
+
+**A. Spec-defined test cases** — look for a `## 7. Test cases` (or similarly
+numbered) section in the spec. If a table of named test cases is present, those
+cases are your **primary obligation**: implement every row in that table exactly
+as named. Do not rename, merge, or skip them. You may add further tests on top
+(edge cases, error paths) but the spec-named cases must be present verbatim.
+
+**B. Existing test file** — use `eclipse-ide_fileSearch` for the expected test
+class name (e.g. `ProviderConfigWriterTest`). If the file already exists:
+- Read it in full.
+- Check which spec-named cases are already implemented.
+- Add only the missing ones; do not rewrite or delete existing tests.
+- If all spec-named cases are already present, only add extra coverage (edge
+  cases, error paths) that is genuinely missing.
+
+### 6. Write the tests
 
 Cover all of:
 
@@ -67,14 +85,15 @@ For each test class:
 - One assertion concept per test
 - Use `@BeforeEach` / `@AfterEach` for setup/teardown, not static state
 
-Create files with `eclipse-coder_createFile`.
+Create files with `eclipse-coder_createFile`. Add to existing files with
+`eclipse-coder_insertIntoFile` or `eclipse-coder_replaceString`.
 
-After creating each file:
+After creating or modifying each file:
 1. `eclipse-ide_getCompilationErrors` — fix any errors
 2. `eclipse-coder_organizeImports`
 3. `eclipse-coder_formatFile`
 
-### 6. Run the tests
+### 7. Run the tests
 
 ```
 eclipse-ide_runClassTests  (for standard JUnit)
@@ -83,6 +102,6 @@ eclipse-pde_runJUnitPluginTestClass  (for OSGi plugin tests)
 
 If tests fail, diagnose and fix. Do not leave failing tests.
 
-### 7. Output
+### 8. Output
 
 List each test file created and what acceptance criteria / requirements it covers.

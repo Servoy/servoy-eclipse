@@ -87,6 +87,10 @@ Read these files first to understand conventions:
 
 Implement everything described in the spec's "Implementation plan" section.
 
+**Do NOT create test classes or test files.** Test generation is handled
+separately in Phase 4. If the implementation plan lists a test file step,
+skip it — production code only.
+
 Mandatory post-edit workflow for every Java file you touch:
 1. eclipse-coder_organizeImports
 2. eclipse-coder_formatFile
