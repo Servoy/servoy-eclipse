@@ -241,7 +241,7 @@ class McpConfigWriter {
 		String desiredAuthHeader = null;
 		for (String[] entry : contributed.values()) {
 			if (entry[1] != null) {
-				desiredAuthHeader = "Basic {env:" + ENV_TOKEN + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+				desiredAuthHeader = "Bearer {env:" + ENV_TOKEN + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 			}
 		}
