@@ -490,4 +490,36 @@ public class SkillsZipExtractorTest {
 
 		assertNull("should return null when no .git found", OpenCodeUtil.findGitRoot(dir));
 	}
+
+	// -----------------------------------------------------------------------
+	// getPostgresVersion
+	// -----------------------------------------------------------------------
+
+	/**
+	 * AC: When the ApplicationServerRegistry is unavailable (outside OSGi, as in
+	 * this test), getPostgresVersion() must return the POSTGRES_VERSION fallback
+	 * constant rather than throwing.
+	 */
+	@Test
+	public void getPostgresVersion_registryUnavailable_returnsFallbackConstant() {
+		// ApplicationServerRegistry.exists() returns false outside OSGi
+		String version = SkillsZipExtractor.getPostgresVersion();
+		assertEquals("must fall back to POSTGRES_VERSION when registry is absent",
+				SkillsZipExtractor.POSTGRES_VERSION, version);
+	}
+
+	/** AC: The POSTGRES_VERSION constant is present and non-blank (spec section 3.3). */
+	@Test
+	public void getPostgresVersion_fallbackConstantNonBlank() {
+		assertNotNull("POSTGRES_VERSION must not be null", SkillsZipExtractor.POSTGRES_VERSION);
+		assertFalse("POSTGRES_VERSION must not be blank", SkillsZipExtractor.POSTGRES_VERSION.isBlank());
+	}
+
+	/** The fallback constant has the expected major.minor format (digit(s).digit(s)). */
+	@Test
+	public void getPostgresVersion_fallbackConstantMatchesMajorMinorFormat() {
+		assertTrue("POSTGRES_VERSION must match major.minor format",
+				SkillsZipExtractor.POSTGRES_VERSION.matches("\\d+\\.\\d+"));
+	}
+
 }

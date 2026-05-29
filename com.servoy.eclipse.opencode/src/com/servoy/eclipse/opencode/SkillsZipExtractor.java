@@ -32,7 +32,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.servoy.j2db.ClientVersion;
+import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.ITransactionConnection;
 
 /**
  * Extracts a skills zip into the user's opencode config directory and updates
@@ -180,7 +183,7 @@ class SkillsZipExtractor {
 	static void writeOrUpdateAgentsMd(InputStream zipStream, Path projectRoot) throws IOException {
 		String servoyVersion = ClientVersion.getMajorVersion() + "." + //$NON-NLS-1$
 				String.format("%02d", ClientVersion.getMiddleVersion()); //$NON-NLS-1$
-		String postgresVersion = POSTGRES_VERSION;
+		String postgresVersion = getPostgresVersion();
 		List<String> databases = getDatabaseNames();
 
 		Path agentsMd = projectRoot.resolve(AGENTS_MD);
@@ -266,6 +269,44 @@ class SkillsZipExtractor {
 	// -------------------------------------------------------------------------
 	// Private helpers
 	// -------------------------------------------------------------------------
+
+	/**
+	 * Queries the first enabled PostgreSQL server in the Servoy server registry
+	 * and returns its version as {@code "major.minor"} (e.g. {@code "17.6"}).
+	 * Falls back to {@link #POSTGRES_VERSION} when no PostgreSQL server is
+	 * available or reachable.
+	 */
+	static String getPostgresVersion() {
+		try {
+			if (!ApplicationServerRegistry.exists())
+				return POSTGRES_VERSION;
+			String[] names = ApplicationServerRegistry.get().getServerManager()
+					.getServerNames(true, false, false, false);
+			if (names == null)
+				return POSTGRES_VERSION;
+			for (String name : names) {
+				try {
+					IServer server = ApplicationServerRegistry.get().getServerManager()
+							.getServer(name, true, false);
+					if (server == null)
+						continue;
+					String productName = server.getDatabaseProductName();
+					if (productName != null && productName.toLowerCase().contains("postgresql")) { //$NON-NLS-1$
+						IServerInternal si = (IServerInternal) server;
+						try (ITransactionConnection conn = si.getConnection()) {
+							java.sql.DatabaseMetaData md = conn.getMetaData();
+							return md.getDatabaseMajorVersion() + "." + md.getDatabaseMinorVersion(); //$NON-NLS-1$
+						}
+					}
+				} catch (Exception e) {
+					// skip this server, try the next one
+				}
+			}
+		} catch (Exception e) {
+			// fall through to default
+		}
+		return POSTGRES_VERSION;
+	}
 
 	/**
 	 * Returns the list of enabled non-system database server names from
