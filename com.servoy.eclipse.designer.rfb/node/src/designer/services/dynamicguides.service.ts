@@ -216,23 +216,25 @@ this.snapToEndEnabled = !event.shiftKey;
 				return new DOMRect(this.initialRectangle.left + deltaX, this.initialRectangle.top + deltaY, 
 					this.initialRectangle.width, this.initialRectangle.height);
 			}
-			else {
-				let top = this.initialRectangle.top;
-				let left = this.initialRectangle.left;
-				let width = this.initialRectangle.width;
-				let height = this.initialRectangle.height;
-				if (resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
-					const closerToTheLeft = this.pointCloserToTopOrLeftSide(point, this.initialRectangle, 'x');
-					left = closerToTheLeft ? this.initialRectangle.left + deltaX : this.initialRectangle.left;
-					width = closerToTheLeft ? this.initialRectangle.width - deltaX : this.initialRectangle.width + deltaX;
-				}
-				if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
-					const closerToTheTop = this.pointCloserToTopOrLeftSide(point, this.initialRectangle, 'y');
-					top = closerToTheTop ? this.initialRectangle.top + deltaY : this.initialRectangle.top;
-					height = closerToTheTop ? this.initialRectangle.height - deltaY : this.initialRectangle.height + deltaY;
-				}
-				return new DOMRect(left, top, width, height);
+		else {
+			let top = this.initialRectangle.top;
+			let left = this.initialRectangle.left;
+			let width = this.initialRectangle.width;
+			let height = this.initialRectangle.height;
+			const resizesLeft = resizing.indexOf('w') >= 0;
+			const resizesRight = resizing.indexOf('e') >= 0;
+			const resizesTop = resizing.indexOf('n') >= 0;
+			const resizesBottom = resizing.indexOf('s') >= 0;
+			if (resizesRight || resizesLeft) {
+				left = resizesLeft ? this.initialRectangle.left + deltaX : this.initialRectangle.left;
+				width = resizesLeft ? this.initialRectangle.width - deltaX : this.initialRectangle.width + deltaX;
 			}
+			if (resizesBottom || resizesTop) {
+				top = resizesTop ? this.initialRectangle.top + deltaY : this.initialRectangle.top;
+				height = resizesTop ? this.initialRectangle.height - deltaY : this.initialRectangle.height + deltaY;
+			}
+			return new DOMRect(left, top, width, height);
+		}
 		}
         return this.element?.getBoundingClientRect();
     }
@@ -503,10 +505,12 @@ this.snapToEndEnabled = !event.shiftKey;
 	private handleHorizontalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
-		if (!resizing || resizing.indexOf('e') >= 0 || resizing.indexOf('w') >= 0) {
+		const resizesLeft = !!resizing && resizing.indexOf('w') >= 0;
+		const resizesRight = !!resizing && resizing.indexOf('e') >= 0;
+		if (!resizing || resizesLeft || resizesRight) {
 			let snapX, guideX;
             // left edge
-			if (!resizing || resizing.indexOf('w') >= 0) {
+			if (!resizing || resizesLeft) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.leftPos);
 				if (snapX?.uuid) {
 					properties.left = this.leftPos.get(snapX.uuid);
@@ -529,36 +533,42 @@ this.snapToEndEnabled = !event.shiftKey;
 					if (!properties.cssPosition['left']) properties.cssPosition['left'] = properties.left;
 					guideX = properties.left;
 					if (resizing) {
-						properties['width'] = this.rightPos.get(snapX.uuid) - properties.left;
+						// w-resize: the right edge of the dragged element stays put,
+						// width grows/shrinks from the new (snapped) left edge.
+						properties['width'] = rect.right - properties.left;
 					}
 				}
 			}
 			//if not found, check the right edge as well
-			if(!snapX && (!resizing || resizing.indexOf('e') >= 0)) {
+			if (!snapX && (!resizing || resizesRight)) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.rightPos);
 				guideX = this.rightPos.get(snapX?.uuid);
-				properties.left = snapX ? this.rightPos.get(snapX.uuid) : properties.left;
+				if (!resizing && snapX) {
+					properties.left = this.rightPos.get(snapX.uuid);
+				}
 				if (!snapX) {
 					snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.leftPos);
 					if (snapX?.uuid) {
-						properties.left = this.leftPos.get(snapX.uuid);
+						if (!resizing) {
+							properties.left = this.leftPos.get(snapX.uuid);
+						}
 						guideX = this.leftPos.get(snapX.uuid);
 						snapX.prop = 'left';
 					}
 				}
 				if (snapX) {
 					properties.cssPosition['right'] = snapX;
-					if (resizing) {
-						properties.left = rect.left;
-					}
-					else {
+					if (!resizing) {
 						properties.left -= rect.width;
+						if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
 					}
-					if (!properties.cssPosition['right']) properties.cssPosition['right'] = properties.left;
 				}
-				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, resizing, guideX - properties.left, 'width'))
+				// e-resize: left edge is unchanged, so width is anchored to rect.left.
+				// non-resize: left has just been adjusted above, so use the (mutated) properties.left.
+				const widthAnchor = resizing ? rect.left : properties.left;
+				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, resizing, guideX - widthAnchor, 'width'))
 				{
-					properties['width'] = guideX - properties.left;
+					properties['width'] = guideX - widthAnchor;
 				}
 			}
 
@@ -592,10 +602,12 @@ this.snapToEndEnabled = !event.shiftKey;
 	private handleVerticalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
-		if (!resizing || resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
+		const resizesTop = !!resizing && resizing.indexOf('n') >= 0;
+		const resizesBottom = !!resizing && resizing.indexOf('s') >= 0;
+		if (!resizing || resizesTop || resizesBottom) {
 			let snapY, guideY;
             // top edge
-			if (!resizing || resizing.indexOf('n') >= 0) {
+			if (!resizing || resizesTop) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.topPos);
 				if (snapY?.uuid) {
 					properties.top = this.topPos.get(snapY.uuid);
@@ -617,37 +629,43 @@ this.snapToEndEnabled = !event.shiftKey;
 					properties.cssPosition['top'] = snapY;
 					guideY = properties.top;
 					if (resizing) {
-						properties['height'] = this.bottomPos.get(snapY.uuid) - properties.top;
+						// n-resize: the bottom edge of the dragged element stays put,
+						// height grows/shrinks from the new (snapped) top edge.
+						properties['height'] = rect.bottom - properties.top;
 					}
 				}
 			}
             //if not found, check the bottom edge as well
-			if (!snapY && (!resizing || resizing.indexOf('s') >= 0)) {
+			if (!snapY && (!resizing || resizesBottom)) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.bottomPos);
 				if (snapY?.uuid) {
 					guideY = this.bottomPos.get(snapY.uuid);
-					properties.top = snapY ? this.bottomPos.get(snapY.uuid) : properties.top;
+					if (!resizing) {
+						properties.top = this.bottomPos.get(snapY.uuid);
+					}
 				}
 				if (!snapY) {
 					snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.topPos);
 					if (snapY?.uuid) {
-						properties.top = this.topPos.get(snapY.uuid);
+						if (!resizing) {
+							properties.top = this.topPos.get(snapY.uuid);
+						}
 						guideY = this.topPos.get(snapY.uuid);
 						snapY.prop = 'top';
 					}
 				}
 				if (snapY) {
 					properties.cssPosition['bottom'] = snapY;
-					if (resizing) {
-						properties.top = rect.top;
-					}
-					else {
+					if (!resizing) {
 						properties.top -= rect.height;
 					}
 				}
-				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, resizing, guideY - properties.top, 'height'))
+				// s-resize: top edge is unchanged, so height is anchored to rect.top.
+				// non-resize: top has just been adjusted above, so use the (mutated) properties.top.
+				const heightAnchor = resizing ? rect.top : properties.top;
+				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, resizing, guideY - heightAnchor, 'height'))
 				{
-					properties['height'] = guideY - properties.top;
+					properties['height'] = guideY - heightAnchor;
 				}
 			}
 			if (!snapY && !resizing) {
