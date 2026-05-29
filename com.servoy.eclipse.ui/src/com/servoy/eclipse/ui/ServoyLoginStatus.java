@@ -93,6 +93,8 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 
 	private void showPopUp()
 	{
+		GenaiUsageCache.refreshIfStale();
+
 		Menu menu = new Menu(statusBtn);
 		statusBtn.setMenu(menu);
 		MenuItem cloudMenu = new MenuItem(menu, SWT.NONE);
@@ -119,6 +121,35 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 			}
 		});
 
+		String genaiApiKey = System.getProperty("GENAI_API_KEY"); //$NON-NLS-1$
+		if (genaiApiKey != null && !genaiApiKey.isBlank())
+		{
+			MenuItem spendMenu = new MenuItem(menu, SWT.NONE);
+			GenaiUsageCache.SpendInfo cachedInfo = GenaiUsageCache.getCached();
+			spendMenu.setText(cachedInfo != null ? GenaiUsageCache.formatSpend(cachedInfo) : "AI usage: loading..."); //$NON-NLS-1$
+			spendMenu.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					try
+					{
+						PlatformUI.getWorkbench()
+							.getBrowserSupport()
+							.getExternalBrowser()
+							.openURL(URI.create(
+								"https://admin.servoy-cloud.eu/solutions/svyCloud/index.html?loginToken=" + ServoyLoginDialog.getLoginToken(null) +
+									"#svyCloudLogin")
+								.toURL());
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+				}
+			});
+		}
+
 		MenuItem logoutMenu = new MenuItem(menu, SWT.NONE);
 		logoutMenu.setText("Logout");
 		logoutMenu.addSelectionListener(new SelectionAdapter()
@@ -127,6 +158,7 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 			public void widgetSelected(SelectionEvent e)
 			{
 				ServoyLoginDialog.clearSavedInfo();
+				GenaiUsageCache.clear();
 				new ServoyLoginDialog(getWorkbenchWindow().getShell()).doLogin(null);
 			}
 		});
