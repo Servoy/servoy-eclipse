@@ -158,7 +158,7 @@ public class OpenCodeView extends ViewPart {
 		browser.addLocationListener(new org.eclipse.swt.browser.LocationAdapter() {
 			@Override
 			public void changed(org.eclipse.swt.browser.LocationEvent event) {
-				//browser.execute(INJECT_CSS_JS);
+				browser.execute(INJECT_CSS_JS);
 			}
 		});
 		initUrl();
