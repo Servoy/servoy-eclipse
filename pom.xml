@@ -244,10 +244,10 @@
 								</goals>
 								<configuration>
 									<target>
-										<delete>
+										<delete quiet="true">
 											<fileset
 												dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
-												includes="TEST*.xml" />
+												includes="TEST*.xml" erroronmissingdir="false"/>
 										</delete>
 									</target>
 								</configuration>
