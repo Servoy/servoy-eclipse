@@ -63,17 +63,16 @@ pipeline {
         }
         
        failure {
-            // Nu met dubbele quotes, zodat de URL netjes uit de kluis wordt gehaald
-            office365ConnectorSend webhookUrl: "${TEAMS_WEBHOOK}", status: 'Failed'
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Failed'
         }
         
         unstable {
-            office365ConnectorSend webhookUrl: "${TEAMS_WEBHOOK}", status: 'Unstable'
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Unstable'
             build job: 'build', wait: false
         }
         
         fixed {
-            office365ConnectorSend webhookUrl: "${TEAMS_WEBHOOK}", status: 'Back to Normal'
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Back to Normal'
         }
         
         success {
