@@ -7,10 +7,6 @@ pipeline {
         buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '3'))
     }
     
-    triggers {
-        githubPush()
-    }
-    
     parameters {
         string(name: 'goals', defaultValue: 'clean install -Ponly_product', trim: false)
     }
