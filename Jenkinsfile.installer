@@ -5,6 +5,8 @@ pipeline {
         quietPeriod(160)
         // Strikte log-rotatie van de product-build (max 3 builds bewaren)
         buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '3'))
+        
+        withFolderProperties()
     }
     
     parameters {
