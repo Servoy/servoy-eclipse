@@ -26,4 +26,5 @@ Require-Bundle: jabsorb;bundle-version="1.3.3",
  org.eclipse.ui.intro,
  com.servoy.eclipse.notification,
  com.servoy.eclipse.ngclient.ui
+Export-Package: com.servoy.eclipse.designer.webpackage.endpoint
 Automatic-Module-Name: com.servoy.eclipse.designer.wpm
