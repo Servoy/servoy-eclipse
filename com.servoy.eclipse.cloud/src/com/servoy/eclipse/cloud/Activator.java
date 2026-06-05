@@ -50,8 +50,9 @@ import com.servoy.eclipse.model.util.ServoyLog;
 public class Activator extends AbstractUIPlugin {
 	// private static final String CROWD =
 	// "https://middleware-dev.unifiedui.servoy-cloud.eu/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
-	private static final String CROWD = System.getProperty("servoy.api.url", "https://middleware-prod.unifiedui.servoy-cloud.eu") +
-		"/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
+	private static final String CROWD = System.getProperty("servoy.api.url",
+			"https://middleware-prod.unifiedui.servoy-cloud.eu")
+			+ "/servoy-service/rest_ws/api/developer/getApplications?loginToken=";
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.cloud"; //$NON-NLS-1$
@@ -72,6 +73,9 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public void checkoutFromCloud(String loginToken, String username, String password) {
+		if (Boolean.getBoolean("servoy.cloud.skipCheckout")) {
+			return;
+		}
 		Job.create("Checkout from ServoyCloud", (monitor) -> {
 			String uri = null;
 			try {
@@ -87,7 +91,7 @@ public class Activator extends AbstractUIPlugin {
 							ServoyLog.logInfo("The Servoy Cloud didn't give back any applications");
 							return;
 						}
- 						JSONObject json = new JSONObject(body);
+						JSONObject json = new JSONObject(body);
 						JSONArray jsonArray = json.optJSONArray("applications");
 						if (jsonArray != null && jsonArray.length() > 0) {
 							// we need to ask which one to install.
@@ -171,7 +175,8 @@ public class Activator extends AbstractUIPlugin {
 									StandardCopyOption.ATOMIC_MOVE);
 						}
 						if (!tmpDir.delete()) {
-							FileUtils.delete(workspaceFile, FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.IGNORE_ERRORS);
+							FileUtils.delete(workspaceFile,
+									FileUtils.RECURSIVE | FileUtils.RETRY | FileUtils.IGNORE_ERRORS);
 						}
 						monitor.subTask("Importing the solution");
 						List<File> projectsFiles = new ArrayList<>();
