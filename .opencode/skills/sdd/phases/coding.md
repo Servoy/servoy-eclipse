@@ -56,7 +56,29 @@ After modifying each Java file:
 
 **Zero compilation errors must remain when you finish.**
 
-### 5. Output
+### 5. Verify diff cleanliness
+
+After all changes are done, run:
+```
+git diff --stat
+```
+
+Check that only the expected files changed. If a file shows a very large diff
+(thousands of lines) when you only modified a few lines, this is likely because
+the file had incorrect line endings (`\r\n` instead of `\n`). This is acceptable —
+`formatFile` corrects line endings to `\n` which is the project standard.
+Commit the full diff in that case.
+
+### 6. Tool usage rules
+
+- **ALWAYS use `eclipse-coder` tools** (`replaceString`, `replaceFileContent`,
+  `insertIntoFile`, `createFile`) for all code changes — never the built-in `edit`
+  tool. The `edit` tool does not trigger Eclipse workspace refresh, causing the
+  IDE to be out of sync.
+- **ALWAYS use `eclipse-coder_formatFile`** after changes — it enforces consistent
+  formatting and correct line endings (`\n`).
+
+### 7. Output
 
 Your final message must be a bulleted list of every file created or modified:
 

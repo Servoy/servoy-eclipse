@@ -1,48 +1,79 @@
-# Atlassian MCP Server Setup
+# Atlassian Jira API Setup
 
-The `opencode.json` in this project is configured to use Atlassian's official remote MCP server. This gives AI tools access to Jira and Confluence data.
+This project uses the Jira REST API (v3) with Basic authentication for all Jira access:
+reading issues, downloading attachments, searching, and posting comments.
 
 ## Prerequisites
 
 - An Atlassian Cloud account with access to https://servoy-cloud.atlassian.net
-- A personal MCP API token (not a regular API token)
-- Your organization admin must have enabled API token authentication for the Rovo MCP server
+- A personal API token (standard, no special scopes needed)
 
-## Step 1: Create an MCP API Token
+## Step 1: Create an API Token
 
-Go to https://id.atlassian.com/manage-profile/security/api-tokens?autofillToken&expiryDays=max&appId=mcp&selectedScopes=all and create a new token with MCP scopes.
+Go to https://id.atlassian.com/manage-profile/security/api-tokens and create a new token.
+This is a regular API token — no special scopes or MCP-specific token needed.
 
 ## Step 2: Set the Environment Variable
 
-The `ATLASSIAN_AUTH_BASIC` environment variable must contain the base64-encoded value of `your-email:your-mcp-token`.
+The `ATLASSIAN_AUTH_BASIC` environment variable must contain the **base64-encoded** value
+of `your-email:your-api-token`.
 
 ### PowerShell (Windows)
 
 ```powershell
-$env:ATLASSIAN_AUTH_BASIC = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("your.email@servoy.com:YOUR_MCP_TOKEN"))
+$env:ATLASSIAN_AUTH_BASIC = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("your.email@servoy.com:YOUR_API_TOKEN"))
 ```
 
 ### Bash (Linux/Mac)
 
 ```bash
-export ATLASSIAN_AUTH_BASIC=$(echo -n "your.email@servoy.com:YOUR_MCP_TOKEN" | base64)
+export ATLASSIAN_AUTH_BASIC=$(echo -n "your.email@servoy.com:YOUR_API_TOKEN" | base64)
 ```
 
-Replace `your.email@servoy.com` with your Atlassian email and `YOUR_MCP_TOKEN` with the token from step 1.
+To make this permanent, add it to your shell profile or set it as a system environment variable.
 
-To make this permanent, add the export to your shell profile (e.g. `~/.bashrc`, `~/.zshrc`) or set it as a system environment variable on Windows.
+## Step 3: opencode.json Configuration
 
-## Step 3: Start opencode
+No Atlassian MCP server is needed. Remove any `"atlassian"` entry from the `"mcp"` section
+in `opencode.json`. All Jira access goes through the REST API using curl with Basic auth.
 
-Start opencode from the same terminal where you set the environment variable. The Atlassian MCP server should now be available.
+## How It Works
 
-## How it works
+The SDD pipeline (and any agent needing Jira access) uses curl against the direct
+tenant URL with the Basic auth header:
 
-The `opencode.json` uses the variable syntax `{env:ATLASSIAN_AUTH_BASIC}` to inject the environment variable into the Authorization header at startup.
+```bash
+curl -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
+  "https://servoy-cloud.atlassian.net/rest/api/3/issue/SVY-12345"
+```
+
+### Common API Endpoints
+
+| Action | Endpoint |
+|--------|----------|
+| Get issue | `GET /rest/api/3/issue/{issueKey}` |
+| Get issue with specific fields | `GET /rest/api/3/issue/{issueKey}?fields=summary,description,comment,attachment` |
+| Download attachment | `GET /rest/api/3/attachment/content/{attachmentId}` |
+| Search (JQL) | `GET /rest/api/3/search?jql={jql}` |
+| Get comments | `GET /rest/api/3/issue/{issueKey}/comment` |
+| Add comment | `POST /rest/api/3/issue/{issueKey}/comment` |
+
+All endpoints are relative to `https://servoy-cloud.atlassian.net`.
+
+## Why Not the Atlassian MCP Server?
+
+We tested the official Atlassian MCP server at `mcp.atlassian.com`. Issues found:
+
+1. **OAuth-only** — requires `opencode mcp auth atlassian` browser flow, tokens expire
+2. **No attachment downloads** — the MCP toolset has no tool to download attachment content
+3. **Search broken** — returns 403 "The app is not installed on this instance"
+4. **Less reliable** — the REST API with Basic auth works for everything, including
+   private security-level issues, attachments, and search
+
+The REST API with a standard API token is simpler, more complete, and more reliable.
 
 ## Troubleshooting
 
-- **"Your site admin must authorize this app"** â A site admin must first authorize the MCP app.
-- **"slauthtoken: authorization header found, 'slauth' prefix missing"** â You're using a regular API token instead of an MCP token. Create one via the link in Step 1.
-- **Authentication fails** â Verify your admin has enabled API token auth in the Rovo MCP server settings (Atlassian Administration > Security > Rovo MCP server).
-- **Token expired** â Create a new token and update the environment variable.
+- **401 Unauthorized** — your API token is expired or invalid. Create a new one at the URL above.
+- **403 Forbidden** — you don't have permission to access that resource (e.g., private issue you're not on).
+- **404 Not Found** — the issue key or attachment ID doesn't exist.

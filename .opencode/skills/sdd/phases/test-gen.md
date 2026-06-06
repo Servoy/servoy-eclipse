@@ -148,9 +148,81 @@ drives your test type decision.
 
 | What you're testing | Test type | Where |
 |---------------------|-----------|-------|
-| Pure Java logic (POJOs, utilities, parsers) | JUnit | Feature-specific `*.tests` project |
+| Pure Java logic (POJOs, utilities, parsers) | JUnit | Feature-specific `*.tests` fragment project |
 | Code using Eclipse APIs, OSGi services, workspace | Plugin JUnit | `com.servoy.eclipse.tests` |
 | Code using ServoyModel, solution loading | Plugin JUnit | `com.servoy.eclipse.tests` |
+
+**Always check** if a `<plugin>.tests` fragment project already exists for the plugin
+containing the class you changed. Use `eclipse-ide_listProjects` and look for
+`<plugin-name>.tests`.
+
+**If it does NOT exist, create it** following this template:
+
+#### Project structure for `<plugin>.tests`
+
+```
+<plugin>.tests/
+âââ .project                  (PDE + Java natures)
+âââ .classpath                (src/test/java with test="true" attribute)
+âââ .gitignore                (/bin/ and /target/)
+âââ META-INF/
+â   âââ MANIFEST.MF          (Fragment-Host: <plugin>)
+âââ build.properties          (source.. = src/test/java)
+âââ pom.xml                   (eclipse-test-plugin packaging)
+âââ src/test/java/            (test sources)
+```
+
+Key points:
+- **Fragment-Host:** set to the plugin under test (gives package-private access)
+- **Import-Package:** `org.junit;version="4.0.0"` (JUnit 4 is available in the target)
+- **.classpath:** source entry MUST have `<attribute name="test" value="true"/>`
+- **pom.xml:** packaging is `eclipse-test-plugin`, parent is the root `servoy-eclipse`
+- **Root pom.xml:** add the new module to the `<modules>` section in the `plugins` profile
+- **Bundle-Version:** match the parent version (check root pom.xml)
+
+After creating the project files, import it into Eclipse:
+```
+eclipse-ide_openProject(directoryPath="<absolute-path-to-project>")
+```
+This makes the project available in the workspace immediately without asking the user.
+
+#### Important: Instantiating package-private classes
+
+When testing code that uses classes with package-private constructors from OTHER bundles
+(e.g. `ScriptCalculation` from `servoy_shared`), use reflection with `getDeclaredConstructors()`:
+
+```java
+@SuppressWarnings("unchecked")
+private ScriptCalculation createScriptCalculation() throws Exception
+{
+    Constructor<?>[] ctors = ScriptCalculation.class.getDeclaredConstructors();
+    Constructor<ScriptCalculation> ctor = (Constructor<ScriptCalculation>)ctors[0];
+    ctor.setAccessible(true);
+    return ctor.newInstance((Object)null, com.servoy.j2db.util.UUID.randomUUID());
+}
+```
+
+Note: use `com.servoy.j2db.util.UUID` (NOT `java.util.UUID`) â Servoy has its own UUID class.
+
+#### Running tests
+
+The runner depends on what the test needs, NOT on whether it's in a fragment:
+
+- **Pure logic tests (no OSGi):** `eclipse-ide_runClassTests(projectName, className)`
+- **Integration tests (needs OSGi/workspace):** `eclipse-pde_runJUnitPluginTestClass(projectName, className)`
+
+Both types can live in the same fragment project.
+
+#### Naming convention
+
+Use this naming convention so the correct runner is obvious:
+
+| Test type | Class name suffix | Runner |
+|-----------|------------------|--------|
+| Unit test (pure logic) | `*Test` | `eclipse-ide_runClassTests` |
+| Integration test (needs OSGi) | `*IntegrationTest` | `eclipse-pde_runJUnitPluginTestClass` |
+
+Examples: `SolutionSerializerTest` (unit), `EclipseRepositoryIntegrationTest` (integration)
 
 Use `eclipse-ide_listProjects` to find existing test projects. If a
 feature-specific test project already exists (e.g. `com.servoy.eclipse.opencode.tests`),
@@ -182,13 +254,14 @@ Cover all of:
 (use `assertTimeoutPreemptively`)
 
 For each test class:
-- Name: `<ClassUnderTest>Test`
+- Name: `<ClassUnderTest>Test` for unit tests, `<ClassUnderTest>IntegrationTest` for OSGi tests
 - Use `@Nested` classes to group by scenario
 - Use `@DisplayName` on class and methods
 - One assertion concept per test (use `assertAll` for related checks)
 - No `public` modifier needed
 
-Create files with the Write tool or eclipse-coder tools.
+Create files with eclipse-coder tools (NEVER use the built-in `edit` tool — it
+does not trigger Eclipse workspace refresh).
 
 After creating or modifying each file:
 1. `eclipse-coder_organizeImports`
@@ -197,9 +270,12 @@ After creating or modifying each file:
 
 ### 7. Run the tests
 
-Use the correct runner based on test type:
-- **JUnit:** `eclipse-ide_runClassTests(projectName, className)`
-- **Plugin JUnit:** `eclipse-pde_runJUnitPluginTestClass(projectName, className)`
+Use the correct runner based on the naming convention:
+- **`*Test` (unit tests):** `eclipse-ide_runClassTests(projectName, className)`
+- **`*IntegrationTest` (needs OSGi):** `eclipse-pde_runJUnitPluginTestClass(projectName, className)`
+
+If tests fail with `ClassNotFoundException`, the project may need a rebuild.
+Ask the user to do **Project > Clean** on the test project.
 
 If tests fail, diagnose and fix. Do not leave failing tests.
 
