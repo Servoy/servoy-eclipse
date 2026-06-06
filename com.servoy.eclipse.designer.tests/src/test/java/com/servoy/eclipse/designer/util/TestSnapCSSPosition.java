@@ -17,12 +17,13 @@
 
 package com.servoy.eclipse.designer.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionUtils;
@@ -31,7 +32,8 @@ import com.servoy.j2db.persistence.CSSPositionUtils;
  * Unit tests for css position when snapping to a component edge.
  * @author emera
  */
-public class TestSnapCSSPosition
+@DisplayName("SnapCSSPosition")
+class TestSnapCSSPosition
 {
 	@Test
 	public void testSnapToRight1() throws Exception
@@ -47,12 +49,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be set to the computed value", "340", newPosition.left);
-		assertEquals("css pos width should not be changed", "100", newPosition.width);
+		assertEquals("340", newPosition.left, "css pos left should be set to the computed value");
+		assertEquals("100", newPosition.width, "css pos width should not be changed");
 	}
 
 	@Test
@@ -69,12 +71,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be set to the computed value", "340", newPosition.left);
-		assertEquals("css pos width should be set to the computed value", "100", newPosition.width);
+		assertEquals("340", newPosition.left, "css pos left should be set to the computed value");
+		assertEquals("100", newPosition.width, "css pos width should be set to the computed value");
 	}
 
 	@Test
@@ -92,12 +94,12 @@ public class TestSnapCSSPosition
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
 		//target has top-left anchor, so the right should not be set
-		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos left should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos right should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be computed", "160", newPosition.left);
-		assertEquals("css pos width should not be changed", "100", newPosition.width);
+		assertEquals("160", newPosition.left, "css pos left should be computed");
+		assertEquals("100", newPosition.width, "css pos width should not be changed");
 	}
 
 	@Test
@@ -114,12 +116,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be set to the right value copied from the target", "440", newPosition.left);
-		assertEquals("css pos width should not be changed", "100", newPosition.width);
+		assertEquals("440", newPosition.left, "css pos left should be set to the right value copied from the target");
+		assertEquals("100", newPosition.width, "css pos width should not be changed");
 	}
 
 	@Test
@@ -136,12 +138,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos left should NOT be set because target has top-right anchors", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.left), "css pos left should NOT be set because target has top-right anchors");
+		assertTrue(CSSPositionUtils.isSet(newPosition.right), "css pos right should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos right should be set to the right value copied from the target", "100", newPosition.right);
-		assertEquals("css pos width should not be changed", "100", newPosition.width);
+		assertEquals("100", newPosition.right, "css pos right should be set to the right value copied from the target");
+		assertEquals("100", newPosition.width, "css pos width should not be changed");
 	}
 
 	@Test
@@ -158,12 +160,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.top));
-		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertFalse(CSSPositionUtils.isSet(newPosition.top), "css pos top should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.bottom), "css pos bottom should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
-		assertEquals("css pos bottom should be set to the computed value", "300", newPosition.bottom);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("300", newPosition.bottom, "css pos bottom should be set to the computed value");
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 
 	@Test
@@ -180,12 +182,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos bottom should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos top should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
-		assertEquals("css pos top should be set to the computed value", "300", newPosition.top);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("300", newPosition.top, "css pos top should be set to the computed value");
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 	
 	@Test
@@ -202,12 +204,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos bottom should NOT be set because the target has top anchor", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos bottom should NOT be set because the target has top anchor");
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos top should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
-		assertEquals("css pos top should be set to the computed value", "7", newPosition.top);
-		assertEquals("css pos height should not be changed", "43", newPosition.height);
+		assertEquals("7", newPosition.top, "css pos top should be set to the computed value");
+		assertEquals("43", newPosition.height, "css pos height should not be changed");
 	}
 
 	@Test
@@ -229,18 +231,18 @@ public class TestSnapCSSPosition
 		targetPosition = new CSSPosition("269", "160", "-1", "340", "0", "30");
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.left), "css pos left should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.right), "css pos right should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos right should be set to the right value copied from the target", "386", newPosition.right);
+		assertEquals("386", newPosition.right, "css pos right should be set to the right value copied from the target");
 
-		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos top should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos bottom should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
-		assertEquals("css pos top should be set to the computed value", "269", newPosition.top);
-		assertEquals("css pos height should be set", "30", newPosition.height);
+		assertEquals("269", newPosition.top, "css pos top should be set to the computed value");
+		assertEquals("30", newPosition.height, "css pos height should be set");
 	}
 	
 	@Test
@@ -257,12 +259,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be set to the computed value", "calc(30% + 240px)", newPosition.left);
-		assertEquals("css pos width should not be changed", "80", newPosition.width);
+		assertEquals("calc(30% + 240px)", newPosition.left, "css pos left should be set to the computed value");
+		assertEquals("80", newPosition.width, "css pos width should not be changed");
 	}
 	
 	@Test
@@ -279,12 +281,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be set to the computed value", "calc(30% + 200px)", newPosition.left);
-		assertEquals("css pos width should be changed", "calc(50% - 200px)", newPosition.width);
+		assertEquals("calc(30% + 200px)", newPosition.left, "css pos left should be set to the computed value");
+		assertEquals("calc(50% - 200px)", newPosition.width, "css pos width should be changed");
 	}
 	
 	@Test
@@ -301,12 +303,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be set to the value computed from the target", "calc(30% - 80px)", newPosition.left);
-		assertEquals("css pos width should not be changed", "80", newPosition.width);
+		assertEquals("calc(30% - 80px)", newPosition.left, "css pos left should be set to the value computed from the target");
+		assertEquals("80", newPosition.width, "css pos width should not be changed");
 	}
 	
 	@Test
@@ -323,12 +325,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.left), "css pos left should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.right), "css pos right should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos right should be set to the computed value", "calc(20% + 240px)", newPosition.right);
-		assertEquals("css pos width should be set", "80", newPosition.width);
+		assertEquals("calc(20% + 240px)", newPosition.right, "css pos right should be set to the computed value");
+		assertEquals("80", newPosition.width, "css pos width should be set");
 	}
 	
 	@Test
@@ -345,12 +347,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.setCssValue(json, property, newPosition, old, targetPosition, containerSize, targetContainerSize, null);
 
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos left should be set to the right value copied from the target", "80%", newPosition.left);
-		assertEquals("css pos width should not be changed", "100", newPosition.width);
+		assertEquals("80%", newPosition.left, "css pos left should be set to the right value copied from the target");
+		assertEquals("100", newPosition.width, "css pos width should not be changed");
 	}
 	
 	@Test
@@ -364,12 +366,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "left", "right", "width");
 
-		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertFalse(CSSPositionUtils.isSet(newPosition.left), "css pos left should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.right), "css pos right should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
-		assertEquals("css pos right should be set to the right value computed from the target", "calc(20% + 120px)", newPosition.right);
-		assertEquals("css pos width should not be changed", "80", newPosition.width);
+		assertEquals("calc(20% + 120px)", newPosition.right, "css pos right should be set to the right value computed from the target");
+		assertEquals("80", newPosition.width, "css pos width should not be changed");
 	}
 	
 	@Test
@@ -383,12 +385,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "left", "right", "width");
 
-		assertFalse("css pos width should NOT be set", CSSPositionUtils.isSet(newPosition.width));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
+		assertFalse(CSSPositionUtils.isSet(newPosition.width), "css pos width should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.right), "css pos right should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
 
-		assertEquals("css pos right should be set to the right value computed from the target", "calc(45% - 40px)", newPosition.right);
-		assertEquals("css pos left should be set to the left value computed from the target", "calc(55% - 40px)", newPosition.left);
+		assertEquals("calc(45% - 40px)", newPosition.right, "css pos right should be set to the right value computed from the target");
+		assertEquals("calc(55% - 40px)", newPosition.left, "css pos left should be set to the left value computed from the target");
 	}
 	
 	@Test
@@ -402,12 +404,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "top", "bottom", "height");
 
-		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.top));
-		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertFalse(CSSPositionUtils.isSet(newPosition.top), "css pos top should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.bottom), "css pos bottom should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
-		assertEquals("css pos bottom should be set to the bottom value computed from the target", "calc(20% + 105px)", newPosition.bottom);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("calc(20% + 105px)", newPosition.bottom, "css pos bottom should be set to the bottom value computed from the target");
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 	
 	@Test
@@ -421,13 +423,13 @@ public class TestSnapCSSPosition
 		java.awt.Dimension targetContainerSize = new java.awt.Dimension(640, 480);
 		SnapToComponentUtil.snapToMiddle(newPosition, old, containerSize, targetPosition, targetContainerSize, null, "top", "bottom", "height");
 
-		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertFalse("css pos height NOT should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos top should be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.bottom), "css pos bottom should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.height), "css pos height NOT should be set");
 
-		assertEquals("css pos top should be set to the bottom value computed from the target", "225", newPosition.top);
-		assertEquals("css pos bottom should be set to the bottom value computed from the target", "225", newPosition.bottom);
-		assertEquals("css pos height should be unset", "-1", newPosition.height);
+		assertEquals("225", newPosition.top, "css pos top should be set to the bottom value computed from the target");
+		assertEquals("225", newPosition.bottom, "css pos bottom should be set to the bottom value computed from the target");
+		assertEquals("-1", newPosition.height, "css pos height should be unset");
 	}
 	
 	@Test
@@ -442,12 +444,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
-		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos top should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos bottom should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
 		assertEquals("295", newPosition.top);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 	
 	@Test
@@ -462,12 +464,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
-		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos bottom should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos top should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
 		assertEquals("83", newPosition.top);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 	
 	@Test
@@ -482,12 +484,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
-		assertTrue("css pos top should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertFalse("css pos bottom should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos top should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos bottom should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
 		assertEquals("calc(10% + 160px)", newPosition.top);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 	
 	@Test
@@ -502,12 +504,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
-		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos bottom should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos top should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
 		assertEquals("10%", newPosition.top);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 	
 	@Test
@@ -522,12 +524,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToDist(newPosition, old, containerSize, "top", "bottom", "height", targetPosition1, targetPosition2, containerSize, containerSize, pos, null, null);
 
-		assertTrue("css pos bottom should be set", CSSPositionUtils.isSet(newPosition.top));
-		assertFalse("css pos top should NOT be set", CSSPositionUtils.isSet(newPosition.bottom));
-		assertTrue("css pos height should be set", CSSPositionUtils.isSet(newPosition.height));
+		assertTrue(CSSPositionUtils.isSet(newPosition.top), "css pos bottom should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.bottom), "css pos top should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.height), "css pos height should be set");
 
 		assertEquals("calc(10% + 80px)", newPosition.top);
-		assertEquals("css pos height should not be changed", "30", newPosition.height);
+		assertEquals("30", newPosition.height, "css pos height should not be changed");
 	}
 	
 	@Test
@@ -539,12 +541,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, null, null, "left", "right", "width", null);
 
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
-		assertFalse("css pos left should NOT be set", CSSPositionUtils.isSet(newPosition.left));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertTrue(CSSPositionUtils.isSet(newPosition.right), "css pos right should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.left), "css pos left should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
 		assertEquals("20%", newPosition.right);
-		assertEquals("css pos width should be the same as the target width", "40%", newPosition.width);
+		assertEquals("40%", newPosition.width, "css pos width should be the same as the target width");
 	}
 	
 	@Test
@@ -556,12 +558,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, null, null, "left", "right", "width", null);
 
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
 		assertEquals("20%", newPosition.left);
-		assertEquals("css pos width should be the same as the target width", "40%", newPosition.width);
+		assertEquals("40%", newPosition.width, "css pos width should be the same as the target width");
 	}
 	
 	@Test
@@ -575,12 +577,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToEndSize(newPosition, containerSize, targetPosition, containerSize, siblingPosition, containerSize, "left", "right", "width", start);
 
-		assertTrue("css pos left should be set", CSSPositionUtils.isSet(newPosition.left));
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should be set");
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
 		assertEquals("calc(40% + 16px)", newPosition.left);
-		assertEquals("css pos width should be computed", "calc(20% - 16px)", newPosition.width);
+		assertEquals("calc(20% - 16px)", newPosition.width, "css pos width should be computed");
 	}
 
 	@Test
@@ -592,12 +594,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToSameSize(newPosition, containerSize, targetPosition, containerSize, "left", "right", "width");
 
-		assertTrue("css pos left should not be changed", CSSPositionUtils.isSet(newPosition.left));
-		assertFalse("css pos right should NOT be set", CSSPositionUtils.isSet(newPosition.right));
-		assertTrue("css pos width should be set", CSSPositionUtils.isSet(newPosition.width));
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should not be changed");
+		assertFalse(CSSPositionUtils.isSet(newPosition.right), "css pos right should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.width), "css pos width should be set");
 
 		assertEquals("27%", newPosition.left);
-		assertEquals("css pos width should be the same as the target width", "40%", newPosition.width);
+		assertEquals("40%", newPosition.width, "css pos width should be the same as the target width");
 	}
 	
 	@Test
@@ -609,12 +611,12 @@ public class TestSnapCSSPosition
 		java.awt.Dimension containerSize = new java.awt.Dimension(640, 480); // use the same container size
 		SnapToComponentUtil.snapToSameSize(newPosition, containerSize, targetPosition, containerSize, "left", "right", "width");
 
-		assertTrue("css pos left should not be changed", CSSPositionUtils.isSet(newPosition.left));
-		assertFalse("css pos width should NOT be set", CSSPositionUtils.isSet(newPosition.width));
-		assertTrue("css pos right should be set", CSSPositionUtils.isSet(newPosition.right));
+		assertTrue(CSSPositionUtils.isSet(newPosition.left), "css pos left should not be changed");
+		assertFalse(CSSPositionUtils.isSet(newPosition.width), "css pos width should NOT be set");
+		assertTrue(CSSPositionUtils.isSet(newPosition.right), "css pos right should be set");
 
 		assertEquals("27%", newPosition.left);
-		assertEquals("css pos right should be computed from the target and left values", "33%", newPosition.right);
+		assertEquals("33%", newPosition.right, "css pos right should be computed from the target and left values");
 	}
 	
 	@Test

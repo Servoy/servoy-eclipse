@@ -7,9 +7,8 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2024.6.0.3980_rc</version>
+		<version>2026.9.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>com.servoy.eclipse.tests</artifactId>
-	<version>2024.6.0.3980_rc</version>
+	<artifactId>com.servoy.eclipse.designer.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 </project>
