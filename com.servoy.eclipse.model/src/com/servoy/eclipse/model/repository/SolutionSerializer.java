@@ -1097,7 +1097,9 @@ public class SolutionSerializer
 	{
 	    if (abstractScriptProvider == null) return false;
 
-	    ScriptMethod parentMethod = PersistHelper.getOverridenMethod((ScriptMethod)abstractScriptProvider);
+	    ScriptMethod parentMethod = abstractScriptProvider instanceof ScriptMethod
+	        ? PersistHelper.getOverridenMethod((ScriptMethod)abstractScriptProvider)
+	        : null;
 	    MethodArgument[] parentMethodArguments = null;
 
 	    if (parentMethod != null)
