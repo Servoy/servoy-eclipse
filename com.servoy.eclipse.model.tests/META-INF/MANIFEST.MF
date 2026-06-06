@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for com.servoy.eclipse.model
+Bundle-SymbolicName: com.servoy.eclipse.model.tests
+Bundle-Version: 2026.9.0.qualifier
+Bundle-Vendor: Servoy
+Fragment-Host: com.servoy.eclipse.model
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Import-Package: org.junit;version="4.0.0"
+Automatic-Module-Name: com.servoy.eclipse.model.tests

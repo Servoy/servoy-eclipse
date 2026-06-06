@@ -627,6 +627,7 @@
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
+				<module>com.servoy.eclipse.model.tests</module>
 			</modules>
 			<build>
 			 <plugins>
