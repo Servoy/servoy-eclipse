@@ -32,6 +32,10 @@
     "eclipse-pde": {
       "type": "remote",
       "url": "http://localhost:8085/mcp/eclipse-pde"
+    },
+    "angular-cli": {
+      "type": "local",
+      "command": ["npx", "-y", "@angular/cli", "mcp"]
     }
   }
 }
