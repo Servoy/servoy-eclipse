@@ -27,6 +27,8 @@ Read these files first:
 - `AGENTS.md` — code conventions, build commands, testing, gotchas
 - The spec file — this is your implementation contract
 - Look at existing code in the target module to understand patterns
+- Use `angular-cli_get_best_practices` to review Angular 21 coding standards
+- Use `angular-cli_find_examples` when working with newer Angular features
 
 ### 2. Read the spec
 
@@ -70,10 +72,27 @@ For each step in the implementation plan:
 ### 5. Post-edit workflow
 
 After modifying TypeScript files:
-1. Run `npx ng lint` to check for linting errors — fix any issues
-2. Verify the code compiles by running `npx ng build ngclient2 --configuration development` (or the relevant library build)
+1. **Quick typecheck** (fast, no output generated):
+   ```bash
+   npx tsc --noEmit -p src/tsconfig.app.json
+   ```
+   For library changes, use the library's tsconfig:
+   ```bash
+   npx tsc --noEmit -p projects/servoy-public/tsconfig.lib.json
+   ```
+2. **Lint** — fix any issues:
+   ```bash
+   npx ng lint
+   ```
+3. **Full build** (final validation, only needed at end or if typecheck passes but runtime issues are suspected):
+   ```bash
+   npx ng build ngclient2 --configuration development
+   ```
 
-**Zero lint errors and zero compilation errors must remain when you finish.**
+Run steps 1 and 2 when you've completed a logical unit of work (e.g. finished
+a component, service, or a set of related changes). Step 3 only at the very end.
+
+**Zero typecheck errors and zero lint errors must remain when you finish.**
 
 ### 6. Verify diff cleanliness
 

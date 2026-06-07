@@ -64,6 +64,9 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 
 | Task | Command |
 |------|---------|
+| Quick typecheck (no output) | `npx tsc --noEmit -p src/tsconfig.app.json` |
+| Typecheck library | `npx tsc --noEmit -p projects/servoy-public/tsconfig.lib.json` |
+| Lint | `npx ng lint` |
 | Build library (required first) | `npm run build_lib` |
 | Build application (production) | `npm run build` |
 | Build application (debug/watch) | `npm run build_debug` |
@@ -71,6 +74,11 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 | Serve locally | `npm start` |
 
 The `@servoy/public` library must be built before the application because the app depends on it via `"@servoy/public": "file:dist-public"`.
+
+**Validation workflow after code changes:**
+1. `npx tsc --noEmit -p src/tsconfig.app.json` — fast TypeScript validation
+2. `npx ng lint` — ESLint check
+3. `npx ng build ngclient2 --configuration development` — full build (only at end)
 
 ---
 
@@ -155,6 +163,19 @@ ESLint configuration (`.eslintrc.json`):
 ---
 
 ## 6. Code Conventions
+
+### Angular CLI MCP Tools
+
+Use these tools for Angular-specific guidance:
+- **`angular-cli_get_best_practices`** — official Angular coding standards for our version (Angular 21)
+- **`angular-cli_find_examples`** — find modern code examples (signals, control flow, deferrable views, etc.)
+- **`angular-cli_search_documentation`** — search angular.dev docs for API details
+- **`angular-cli_list_projects`** — get workspace project info (names, types, test framework)
+
+Consult `get_best_practices` before writing new components or refactoring existing ones.
+Use `find_examples` when working with newer Angular features (signal inputs, model inputs, etc.).
+
+### General Rules
 
 - Follow existing patterns in neighboring files — consistency over personal preference
 - Use Angular signals (`signal`, `computed`, `effect`) for reactive state in new code
