@@ -46,6 +46,65 @@ ngclient2 (main application)
 | `@servoy/window` | `projects/window/` | Window service |
 | `@servoy/ngclientutils` | `projects/ngclientutils/` | Client utility services |
 
+## Sablo WebSocket architecture (server ↔ client)
+
+The Servoy runtime uses **Sablo** as its communication layer between Java (server)
+and Angular (client). Understanding this flow is essential for debugging service
+API issues.
+
+### How server-side Java calls a client-side service API
+
+```
+Java (server)                          Angular (client)
+─────────────────────────────────────────────────────────────
+1. BaseWindow.sendSyncMessage()
+   → sends JSON via WebSocket
+     with `smsgid` (expects response)
+                                       2. WebsocketService receives message
+                                          → sees `smsgid` → knows server is waiting
+                                       3. ServicesService.callServiceApi()
+                                          → dispatches to the plugin service
+                                          → e.g. DialogsService.showQuestionDialog()
+                                       4. Return value (or Promise) is captured
+                                          → Promise.resolve(returnValue).then(...)
+                                          → sends response back with same `smsgid`
+5. BaseWindow.waitResponse() unblocks
+   → server code continues with result
+```
+
+### Key files
+
+| File | Role |
+|------|------|
+| `src/sablo/websocket.service.ts` | WebSocket message handling, dispatches incoming calls |
+| `src/sablo/services.service.ts` | `callServiceApi()` — dispatches to service instances, handles return values |
+| Server: `BaseWindow.java` | `sendSyncMessage()` / `waitResponse()` — blocking call from Java |
+| Server: `ClientSideTypeCache.java` | Sends client-side spec info (type converters, `shouldReturnValue` flag) |
+
+### Important concepts
+
+- **`smsgid`** — Server Message ID. When present in a message, the client MUST send
+  a response. The server thread blocks until the response arrives.
+- **`shouldReturnValue`** — Flag in the client-side spec that tells
+  `callServiceApi()` to await the service function's return value (including Promises)
+  before responding to the server. Without this flag, fire-and-forget calls return
+  `undefined` immediately.
+- **`waitForLoading()`** — Deferred pattern in `handleNormalServiceApis` that queues
+  incoming API calls until the client-side service is fully loaded (introduced SVY-19700).
+- **Service specs** — `.spec` files on the server define API functions, their parameters,
+  return types, and whether they need type conversion. `ClientSideTypeCache` serializes
+  relevant parts to the client.
+
+### Common pitfalls
+
+- If `serviceCallSpec` is `undefined` (spec not yet loaded or no type info needed),
+  the client must still propagate the return value — otherwise the server unblocks
+  immediately with `undefined`.
+- Async service functions (like dialogs) return a **Promise**. The websocket layer
+  uses `Promise.resolve(returnValue).then(...)` to handle both sync and async returns.
+- Pre-login calls can hit timing issues where specs haven't loaded yet — the
+  `|| serviceCallSpec === undefined` fallback ensures return values are still propagated.
+
 ## Angular development essentials
 
 When writing code for this project, you are writing an **Angular application**:
