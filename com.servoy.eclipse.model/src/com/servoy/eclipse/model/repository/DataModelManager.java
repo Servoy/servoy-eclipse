@@ -1921,7 +1921,8 @@ public class DataModelManager implements IServerInfoManager
 					for (String tableName : server.getTableAndViewNames(true))
 					{
 						if (!tableNames.contains(tableName)) continue;
-						if (!serverInformationFolder.getFile(tableName + DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT).exists())
+						if (serverInformationFolder != null &&
+							!serverInformationFolder.getFile(tableName + DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT).exists())
 						{
 							addMissingDBIMarker(server.getName(), tableName, true);
 						}
