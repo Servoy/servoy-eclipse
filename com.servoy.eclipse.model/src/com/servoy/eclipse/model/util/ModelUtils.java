@@ -597,7 +597,14 @@ public class ModelUtils
 
 	public static boolean isTestRunning()
 	{
-		return Platform.getBundle("org.eclipse.pde.junit.runtime") != null;
+		boolean pdeTest = Platform.getBundle("org.eclipse.pde.junit.runtime") != null;
+		boolean tychoTest = Platform.getBundle("org.eclipse.tycho.surefire.osgibooter") != null;
+		if (pdeTest || tychoTest)
+		{
+			ServoyLog.logInfo("Test mode detected (pde=" + pdeTest + ", tycho=" + tychoTest + ")");
+			return true;
+		}
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
