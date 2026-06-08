@@ -19,11 +19,7 @@
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho.version}</version>
 				<configuration>
-				<argLine>
-        -Xmx1024m 
-        -Dosgi.resolverDebugging=true 
-        -Dosgi.debug=true
-    </argLine>
+				<argLine>-Dosgi.resolverDebugging=true -Dosgi.debug=true</argLine>
 					<useUIHarness>false</useUIHarness>
 					<dependencies>
                         <dependency>
