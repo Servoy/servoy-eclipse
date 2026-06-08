@@ -40,7 +40,7 @@ import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
  * @author jcompagner
  *
  */
-public class RunNPMCommand extends WorkspaceJob
+public class RunNPMCommand extends WorkspaceJob implements IRunNPMCommand
 {
 
 	/** this is the value returned by {@link #getExitCode()} in case the job was cancelled... */

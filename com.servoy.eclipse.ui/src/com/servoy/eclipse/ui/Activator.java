@@ -448,6 +448,12 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public void showLoginAndStart()
 	{
+		if (ModelUtils.isTestRunning())
+		{
+			ServoyLog.logInfo("Skipping login and start page in test mode");
+			new ServoyLoginDialog(null).notifyLoginListener(null);
+			return;
+		}
 		try
 		{
 			//wait some more time for the progress information dialog from solution model to close
