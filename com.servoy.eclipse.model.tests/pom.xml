@@ -19,7 +19,7 @@
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho.version}</version>
 				<configuration>
-				<argLine>-Dosgi.resolverDebugging=true -consoleLog -debug ${project.basedir}/debug.options</argLine>
+				<argLine>-Dosgi.resolverDebugging=true -Dosgi.debug=${project.basedir}/debug.options</argLine>
 					<useUIHarness>false</useUIHarness>
 					<dependencies>
                         <dependency>
