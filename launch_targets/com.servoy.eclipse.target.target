@@ -66,43 +66,43 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.aarch64</artifactId>
-                    <version>144.0.4</version>
+                    <version>144.0.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.x86_64</artifactId>
-                    <version>144.0.4</version>
+                    <version>144.0.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.aarch64</artifactId>
-                    <version>144.0.4</version>
+                    <version>144.0.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.x86_64</artifactId>
-                    <version>144.0.4</version>
+                    <version>144.0.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.aarch64</artifactId>
-                    <version>144.0.4</version>
+                    <version>144.0.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.x86_64</artifactId>
-                    <version>144.0.4</version>
+                    <version>144.0.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium</artifactId>
-                    <version>144.0.4</version>
+                    <version>144.0.5</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -114,25 +114,25 @@
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
-                    <version>2.21</version>
+                    <version>2.22</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.21.3</version>
+                    <version>2.22.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.21.3</version>
+                    <version>2.22.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.dataformat</groupId>
                     <artifactId>jackson-dataformat-yaml</artifactId>
-                    <version>2.21.3</version>
+                    <version>2.22.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -252,7 +252,7 @@
                 <dependency>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex</artifactId>
-                    <version>3.5.3</version>
+                    <version>3.6.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -318,7 +318,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.18.8</version>
+                    <version>1.18.10</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
