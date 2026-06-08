@@ -570,8 +570,13 @@ public class ModelUtils
 		throw new RuntimeException("Expected to find exactly one compatible '" + IUnexpectedSituationHandler.EXTENSION_ID + "' extension. Found:\n" + handlers);
 	}
 
+	public static boolean isTestRunning()
+	{
+		return Platform.getBundle("org.eclipse.pde.junit.runtime") != null;
+	}
+
 	@SuppressWarnings("unchecked")
-	public static <T> T getAdapter(Object object, Class< ? extends T> adapter)
+	public static <T> T getAdapter(Object object, Class<T> adapter)
 	{
 		if (object == null)
 		{

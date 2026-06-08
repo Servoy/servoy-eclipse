@@ -660,7 +660,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					int fromSourceIndex = location.indexOf("file:/");
 					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists() || sourceChanged)
 					{
-						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
+						IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
 							Arrays.asList("run", "build_lib_debug_nowatch"));
 						try
 						{
@@ -687,7 +687,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					packageToInstall.forEach(packageName -> command.add(packageName));
 					command.add("./dist-public/"); // also add the public api
 					command.add("--legacy-peer-deps");
-					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
+					IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
 					try
 					{
 						npmCommand.runCommand(monitor);
