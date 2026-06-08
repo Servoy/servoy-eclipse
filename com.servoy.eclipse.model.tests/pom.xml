@@ -20,13 +20,7 @@
 				<version>${tycho.version}</version>
 				<configuration>
 					<useUIHarness>false</useUIHarness>
-					<dependencies>
-						<dependency>
-							<type>eclipse-feature</type>
-							<artifactId>com.servoy.eclipse.feature</artifactId>
-							<version>0.0.0</version>
-						</dependency>
-					</dependencies>
+					<testRuntime>none</testRuntime>
 				</configuration>
 			</plugin>
 		</plugins>
