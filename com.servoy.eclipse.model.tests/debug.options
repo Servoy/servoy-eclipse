@@ -1,0 +1,8 @@
+# Debug de OSGi resolver (de "Fragment-Host" logica)
+org.eclipse.osgi/debug=true
+org.eclipse.osgi/debug/bundleTime=true
+org.eclipse.osgi/resolver=true
+org.eclipse.osgi/resolver/debug=true
+org.eclipse.osgi/resolver/wiring=true
+# Debug de classloader
+org.eclipse.osgi/debug/loader=true
