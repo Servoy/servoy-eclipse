@@ -12,30 +12,4 @@
 	</parent>
 	<artifactId>com.servoy.eclipse.model.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-surefire-plugin</artifactId>
-				<version>${tycho.version}</version>
-				<configuration>
-				<argLine>-Dosgi.resolverDebugging=true -Dosgi.debug=${project.basedir}/debug.options</argLine>
-					<useUIHarness>false</useUIHarness>
-					<dependencies>
-                        <dependency>
-                            <type>eclipse-plugin</type>
-                            <artifactId>com.servoy.eclipse.model</artifactId>
-                            <version>0.0.0</version> </dependency>
-                    </dependencies>
-					<bundleStartLevel>
-                        <bundle>
-                            <id>com.servoy.eclipse.model</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                    </bundleStartLevel>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

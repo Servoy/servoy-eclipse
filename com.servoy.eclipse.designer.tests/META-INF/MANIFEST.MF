@@ -7,8 +7,8 @@ Bundle-Vendor: Servoy
 Fragment-Host: com.servoy.eclipse.designer
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: org.apache.commons.io;version="2.8.0",
- org.junit.jupiter.api,
- org.junit.jupiter.api.extension,
- org.junit.jupiter.params,
- org.junit.jupiter.params.provider
+ org.junit.jupiter.api;version="[5.0.0,6.0.0)",
+ org.junit.jupiter.api.extension;version="[5.0.0,6.0.0)",
+ org.junit.jupiter.params;version="[5.0.0,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.0.0,6.0.0)"
 Automatic-Module-Name: com.servoy.eclipse.designer.tests
