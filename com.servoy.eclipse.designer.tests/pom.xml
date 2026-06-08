@@ -11,4 +11,23 @@
 	</parent>
 	<artifactId>com.servoy.eclipse.designer.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<useUIHarness>false</useUIHarness>
+					<dependencies>
+						<dependency>
+							<type>eclipse-plugin</type>
+							<artifactId>com.servoy.eclipse.designer</artifactId>
+							<version>0.0.0</version>
+						</dependency>
+					</dependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
