@@ -229,7 +229,9 @@ public class ServoyLoginDialog extends TitleAreaDialog
 				{
 					System.setProperty("GENAI_API_KEY", svyAiKey);
 				}
-				if (skillEndpoint != null && !skillEndpoint.isBlank())
+				String existingSkillsZip = System.getProperty("SERVOY_SKILLS_ZIP"); //$NON-NLS-1$
+				if (skillEndpoint != null && !skillEndpoint.isBlank() &&
+					(existingSkillsZip == null || existingSkillsZip.isBlank()))
 				{
 					System.setProperty("SERVOY_SKILLS_ZIP",
 						SERVOY_API_BASE + skillEndpoint + "?loginToken=" + loginToken); //$NON-NLS-1$
