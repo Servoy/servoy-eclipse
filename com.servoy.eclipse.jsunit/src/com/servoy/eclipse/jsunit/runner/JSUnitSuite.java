@@ -23,6 +23,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.mozilla.javascript.Scriptable;
 
@@ -49,6 +51,9 @@ public class JSUnitSuite extends TestSuite
 	private boolean useFileInStackQualifiedName = false;
 	private String[] stackElementFilters;
 	private boolean useDebugger;
+	private Map<String, Map<String, Map<String, Map<Integer, Integer>>>> lineNumbers;
+	// sourceName -> functionName -> reachable line numbers (saved from runner on releaseScopes)
+	private Map<String, Map<String, Set<Integer>>> reachableLines;
 
 	public static Test suite()
 	{
@@ -194,6 +199,8 @@ public class JSUnitSuite extends TestSuite
 	 */
 	protected void releaseScopes()
 	{
+		this.lineNumbers = runner.getLineNumbers();
+		this.reachableLines = runner.getReachableLines();
 		runner = null;
 	}
 
@@ -273,4 +280,27 @@ public class JSUnitSuite extends TestSuite
 		}
 	}
 
+	public Map<String, Map<String, Map<String, Map<Integer, Integer>>>> getLineNumbers()
+	{
+		if (runner != null)
+		{
+			return runner.getLineNumbers();
+		}
+		return lineNumbers;
+	}
+
+	/**
+	 * Returns all executable lines per source file and function name, as collected at Rhino compile time.
+	 * Available after the suite has run (scopes have been released).
+	 *
+	 * @return map of sourceName -> functionName -> set of reachable line numbers, or null if no debug run has occurred
+	 */
+	public Map<String, Map<String, Set<Integer>>> getReachableLines()
+	{
+		if (runner != null)
+		{
+			return runner.getReachableLines();
+		}
+		return reachableLines;
+	}
 }
