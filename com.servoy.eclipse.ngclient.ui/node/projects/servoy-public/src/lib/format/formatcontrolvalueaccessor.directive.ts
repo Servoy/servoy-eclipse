@@ -355,4 +355,3 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     }
 }
 
-
