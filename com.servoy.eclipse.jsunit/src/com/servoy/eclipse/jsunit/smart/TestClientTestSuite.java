@@ -38,6 +38,8 @@ public class TestClientTestSuite extends ApplicationJSTestSuite
 
 	private final TestTarget target;
 
+	private static volatile TestClientTestSuite lastRunSuite;
+
 	public TestClientTestSuite(IApplication application, TestTarget target)
 	{
 		super(application, target, false);
@@ -64,12 +66,25 @@ public class TestClientTestSuite extends ApplicationJSTestSuite
 		J2DBGlobals.setServiceProvider(staticSuiteApplication);
 		try
 		{
-			return new TestClientTestSuite(staticSuiteApplication, staticTarget);
+			TestClientTestSuite suite = new TestClientTestSuite(staticSuiteApplication, staticTarget);
+			lastRunSuite = suite;
+			return suite;
 		}
 		finally
 		{
 			J2DBGlobals.setServiceProvider(prevServiceProvider);
 		}
+	}
+
+	/**
+	 * Returns the most recently created suite instance. Coverage data is available on this suite
+	 * after runJUnitClass() returns (scopes have been released by then).
+	 *
+	 * @return the last run suite, or null if no run has occurred yet
+	 */
+	public static TestClientTestSuite getLastRunSuite()
+	{
+		return lastRunSuite;
 	}
 
 }

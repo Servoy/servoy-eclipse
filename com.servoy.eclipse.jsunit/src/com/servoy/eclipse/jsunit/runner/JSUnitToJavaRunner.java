@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
@@ -54,6 +55,8 @@ public class JSUnitToJavaRunner
 	private static final String jsUnitToJava;
 	private static String curentlyExecutingTest = null;
 	private Map<String, Map<String, Map<String, Map<Integer, Integer>>>> lineNumbers;
+	// sourceName -> functionName -> reachable line numbers (captured at compile time)
+	private Map<String, Map<String, Set<Integer>>> reachableLines;
 
 	protected static interface RhinoContextRunnable<T, X extends Exception>
 	{
@@ -321,6 +324,10 @@ public class JSUnitToJavaRunner
 					// just one call will actually get the line numbers, the rest should be empty
 					lineNumbers = jsUnitDebugger.getLineNumbers();
 				}
+				if (jsUnitDebugger != null && jsUnitDebugger.getReachableLines() != null && jsUnitDebugger.getReachableLines().size() > 0)
+				{
+					reachableLines = jsUnitDebugger.getReachableLines();
+				}
 			}
 		}
 		finally
@@ -332,6 +339,17 @@ public class JSUnitToJavaRunner
 	public Map<String, Map<String, Map<String, Map<Integer, Integer>>>> getLineNumbers()
 	{
 		return lineNumbers;
+	}
+
+	/**
+	 * Returns all executable lines per source file and function name, as collected at compile time.
+	 * Keys are source names (e.g. "globals.js", "forms/myForm.js") and function names.
+	 *
+	 * @return map of sourceName -> functionName -> set of reachable line numbers, or null if no debug run has occurred
+	 */
+	public Map<String, Map<String, Set<Integer>>> getReachableLines()
+	{
+		return reachableLines;
 	}
 
 //	private static void close(final Writer writer)
