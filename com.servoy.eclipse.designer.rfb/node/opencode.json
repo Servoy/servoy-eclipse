@@ -1,0 +1,47 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": {
+    "sdd": {
+      "path": ".opencode/skills/sdd/SKILL.md",
+      "description": "Use when the user wants to run the full Spec-Driven Development pipeline: Jira issue to spec, implementation, code review, test generation, and test review. Triggered by 'sdd', 'spec driven development', or a Jira issue key like SVY-12345."
+    }
+  },
+  "mcp": {
+    "eclipse-ide": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/eclipse-ide"
+    },
+    "time": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/time"
+    },
+    "memory": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/memory"
+    },
+    "eclipse-coder": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/eclipse-coder"
+    },
+    "eclipse-runner": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/eclipse-runner"
+    },
+    "eclipse-context": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/eclipse-context"
+    },
+    "eclipse-git": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/eclipse-git"
+    },
+    "eclipse-pde": {
+      "type": "remote",
+      "url": "http://localhost:8087/mcp/eclipse-pde"
+    },
+    "angular-cli": {
+      "type": "local",
+      "command": ["npx", "-y", "@angular/cli", "mcp"]
+    }
+  }
+}
