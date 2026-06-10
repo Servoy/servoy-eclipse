@@ -36,7 +36,7 @@
               "src/favicon.ico",
               {
                     "glob": "*.js",
-                    "input": "../node_modules/@angular/common/locales",
+                    "input": "locales/angular",
                     "output": "/locales/angular"
               }
             ],

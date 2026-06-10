@@ -821,6 +821,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						"Node NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) +
 							" s.");
 
+					if (copyAngularLocales(this.projectFolder))
+					{
+						writeConsole(console, "- copying Angular locale files to locales/angular");
+					}
+					else
+					{
+						writeConsole(console, "- WARNING: Angular locale files not found or copy failed, skipping");
+					}
+
 					if (SOURCE_DEBUG)
 					{
 						writeConsole(console,
@@ -1484,6 +1493,30 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		{
 			throw new RuntimeException("Error generating NGClient2 production resources", e);
 		}
+	}
+
+	static boolean copyAngularLocales(File projectFolder)
+	{
+		File localesDest = new File(projectFolder, "locales/angular");
+		File localesSource = new File(projectFolder.getParentFile(), "node_modules/@angular/common/locales");
+		if (!localesSource.isDirectory())
+		{
+			localesSource = new File(projectFolder, "node_modules/@angular/common/locales");
+		}
+		if (localesSource.isDirectory())
+		{
+			localesDest.mkdirs();
+			try
+			{
+				FileUtils.copyDirectory(localesSource, localesDest, (File f) -> f.isDirectory() || f.getName().endsWith(".js"));
+			}
+			catch (IOException e)
+			{
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private interface LayoutTemplates
