@@ -354,7 +354,7 @@ public class I18nComposite extends Composite
 			tableContainer.setLayout(new FillLayout());
 		}
 
-		if (showAISuggestion)
+		if (showAISuggestion && getAISuggestionModel() != null)
 		{
 			// Initialize dynamic field maps
 			localeLabels = new HashMap<>();
