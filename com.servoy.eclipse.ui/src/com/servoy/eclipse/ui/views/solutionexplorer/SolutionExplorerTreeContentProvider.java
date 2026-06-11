@@ -3634,8 +3634,11 @@ public class SolutionExplorerTreeContentProvider
 						else if (persist instanceof Menu)
 						{
 							PlatformSimpleUserNode menusNode = findChildNode(node, Messages.TreeStrings_Menus);
-							addMenusNodeChildren(menusNode, UserNodeType.MENU, true);
-							view.refreshTreeNodeFromModel(menusNode);
+							if (menusNode != null)
+							{
+								addMenusNodeChildren(menusNode, UserNodeType.MENU, true);
+								view.refreshTreeNodeFromModel(menusNode);
+							}
 
 							PlatformSimpleUserNode menuFoundsetsNode = findChildNode(node, Messages.TreeStrings_Datasources);
 							if (menuFoundsetsNode != null)
