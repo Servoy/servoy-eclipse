@@ -20,6 +20,7 @@ package com.servoy.eclipse.debug.script;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -148,6 +149,8 @@ final class CustomTypeMetaType extends DefaultMetaType
 	 */
 	private static final class CustomTypeRecordType extends RSimpleType implements IRRecordType
 	{
+		private static final ThreadLocal<Set<Long>> ASSIGNABLE_GUARD = ThreadLocal.withInitial(HashSet::new);
+
 		private final Map<String, IRRecordMember> members;
 
 		private CustomTypeRecordType(ITypeSystem typeSystem, Type type)
@@ -207,22 +210,32 @@ final class CustomTypeMetaType extends DefaultMetaType
 		@Override
 		public TypeCompatibility isAssignableFrom(IRType type)
 		{
-			// Accept any IRRecordType whose members are compatible (same logic as RRecordType)
-			if (type instanceof IRRecordType other)
+			long pairKey = System.identityHashCode(this) * 31L + System.identityHashCode(type);
+			Set<Long> guard = ASSIGNABLE_GUARD.get();
+			if (!guard.add(pairKey))
 			{
-				if (members.isEmpty()) return TypeCompatibility.TRUE;
-				for (IRRecordMember otherMember : other.getMembers())
-				{
-					IRRecordMember self = members.get(otherMember.getName());
-					if (self == null) return TypeCompatibility.FALSE;
-					if (!self.getType().isAssignableFrom(otherMember.getType()).ok())
-						return TypeCompatibility.FALSE;
-				}
-				// all our members are always optional (see OptionalRecordMember.isOptional),
-				// so we never need to reject based on missing members — {} is always valid
 				return TypeCompatibility.TRUE;
 			}
-			return super.isAssignableFrom(type);
+			try
+			{
+				if (type instanceof IRRecordType other)
+				{
+					if (members.isEmpty()) return TypeCompatibility.TRUE;
+					for (IRRecordMember otherMember : other.getMembers())
+					{
+						IRRecordMember self = members.get(otherMember.getName());
+						if (self == null) return TypeCompatibility.FALSE;
+						if (!self.getType().isAssignableFrom(otherMember.getType()).ok())
+							return TypeCompatibility.FALSE;
+					}
+					return TypeCompatibility.TRUE;
+				}
+				return super.isAssignableFrom(type);
+			}
+			finally
+			{
+				guard.remove(pairKey);
+			}
 		}
 
 		// --- ImmutableType (required by IRRecordType extends ImmutableType<IRRecordType>) ---
