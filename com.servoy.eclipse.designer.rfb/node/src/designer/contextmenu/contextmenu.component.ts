@@ -822,6 +822,18 @@ export class ContextMenuComponent implements OnInit {
 			return { 'background-image': 'url(designer/assets/toolbar/icons/designsize/desktop_preview.png)' };
 		};
 		this.menuItems.push(entry);
+
+		entry = new ContextmenuItem(
+			'Run Cypress Form Tests',
+			() => {
+				this.hide();
+				this.editorSession.executeAction('runCypressFormTest');
+			}
+		);
+		entry.getIconStyle = () => {
+			return { 'background-image': 'url(designer/assets/toolbar/icons/designsize/desktop_preview.png)' };
+		};
+		this.menuItems.push(entry);
 	}
 
 	private hasSelection(selectionSize?: number): boolean {

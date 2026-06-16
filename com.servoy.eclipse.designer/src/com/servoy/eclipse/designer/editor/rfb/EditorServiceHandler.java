@@ -452,6 +452,26 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("runCypressFormTest", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				Display.getDefault().asyncExec(() -> {
+					try
+					{
+						org.eclipse.ui.handlers.IHandlerService handlerService = PlatformUI.getWorkbench().getService(org.eclipse.ui.handlers.IHandlerService.class);
+						handlerService.executeCommand("com.servoy.eclipse.developer.mcp.commands.runCypressFormTest", null);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("Cannot run Cypress form test", e);
+					}
+				});
+				return null;
+			}
+		});
+
 		configuredHandlers.put("getComponentPropertyWithTags", new IServerService()
 		{
 			@Override
