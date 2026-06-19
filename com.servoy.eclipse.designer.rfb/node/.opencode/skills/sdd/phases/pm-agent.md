@@ -5,7 +5,13 @@ complete, developer-ready spec file under `docs/`.
 
 ## Input
 
-You receive a Jira issue key or URL (e.g. `SVY-21080`).
+You receive a Jira issue key or URL (e.g. `SVY-21080`) and optionally a
+**user context** string — free-form text the user provided alongside the key to
+clarify intent, scope, or details not captured in the Jira ticket.
+
+Treat user context as authoritative supplementary information. It takes
+precedence over ambiguities in the ticket and should be woven into the spec if needed, 
+(especially Goal, Background, and Design sections).
 
 ## Jira API Access
 
@@ -17,21 +23,21 @@ environment variable (base64-encoded `email:api-token`).
 
 ```bash
 curl -s -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://servoy-cloud.atlassian.net/rest/api/3/issue/{ISSUE_KEY}?fields=summary,description,comment,attachment,issuelinks,subtasks,status,priority,components,fixVersions,labels"
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}?fields=summary,description,comment,attachment,issuelinks,subtasks,status,priority,components,fixVersions,labels"
 ```
 
 ### Downloading an attachment
 
 ```bash
 curl -s -L -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://servoy-cloud.atlassian.net/rest/api/3/attachment/content/{ATTACHMENT_ID}"
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/attachment/content/{ATTACHMENT_ID}"
 ```
 
 ### Searching issues (JQL)
 
 ```bash
 curl -s -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://servoy-cloud.atlassian.net/rest/api/3/search?jql={URL_ENCODED_JQL}&fields=summary,status"
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/search?jql={URL_ENCODED_JQL}&fields=summary,status"
 ```
 
 ### PowerShell note
@@ -40,7 +46,7 @@ In PowerShell, use `$env:ATLASSIAN_AUTH_BASIC` instead of `$ATLASSIAN_AUTH_BASIC
 
 ```powershell
 $token = $env:ATLASSIAN_AUTH_BASIC
-curl -s -H "Authorization: Basic $token" "https://servoy-cloud.atlassian.net/rest/api/3/issue/SVY-21080"
+curl -s -H "Authorization: Basic $token" "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/SVY-21080"
 ```
 
 ## Steps

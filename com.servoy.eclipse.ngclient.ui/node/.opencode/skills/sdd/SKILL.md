@@ -22,10 +22,13 @@ You control exactly what information flows between phases via the `task` prompt.
 
 ## Input
 
-The user provides a Jira issue key or URL, e.g.:
-`SVY-21234` or `https://servoy-cloud.atlassian.net/browse/SVY-21234`
+The user provides a Jira issue key or URL, optionally followed by extra context, e.g.:
+`SVY-21080 some text meant to give more context about the case`
 
-Record this as `ISSUE_KEY`.
+Parse the first token as the issue key/URL. Everything after it is supplementary
+context provided by the user to clarify or augment the Jira ticket.
+
+Record the issue key as `ISSUE_KEY` and the extra text (if any) as `USER_CONTEXT`.
 
 ---
 
@@ -39,6 +42,7 @@ task(subagent_type='general', prompt="""
 <contents of phases/pm-agent.md>
 
 Issue: ISSUE_KEY
+User context: USER_CONTEXT (or "None" if the user provided no extra text)
 """)
 ```
 
