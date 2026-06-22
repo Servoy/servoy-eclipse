@@ -58,7 +58,7 @@ curl -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
 | Get comments | `GET /rest/api/3/issue/{issueKey}/comment` |
 | Add comment | `POST /rest/api/3/issue/{issueKey}/comment` |
 
-All endpoints are relative to `https://servoy-cloud.atlassian.net`.
+All endpoints are relative to `https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3`.
 
 ## Why Not the Atlassian MCP Server?
 

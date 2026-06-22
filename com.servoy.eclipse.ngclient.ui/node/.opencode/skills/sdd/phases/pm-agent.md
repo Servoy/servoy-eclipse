@@ -16,7 +16,7 @@ precedence over ambiguities in the ticket and should be woven into the spec if n
 ## Jira API Access
 
 Use the Jira REST API v3 with Basic authentication via curl. The base URL is
-`https://servoy-cloud.atlassian.net` and authentication uses the `ATLASSIAN_AUTH_BASIC`
+`https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3` and authentication uses the `ATLASSIAN_AUTH_BASIC`
 environment variable (base64-encoded `email:api-token`).
 
 ### Reading an issue
