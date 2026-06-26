@@ -99,6 +99,13 @@ public class NewSolutionWizardDefaultPackages
 	// map with <name, version> of downloaded packages
 	private final HashMap<String, String> downloadedPackages = new HashMap<String, String>();
 
+
+	private static boolean isSafeFileComponent(String value)
+	{
+		return value != null && value.length() > 0 && !value.contains("..") && value.indexOf('/') == -1 && value.indexOf('\\') == -1 &&
+			value.matches("[A-Za-z0-9._-]+");
+	}
+
 	public void setup(List<JSONObject> packages) throws IOException
 	{
 		File packagesFolder = new File(Activator.getDefault().getStateLocation().toFile(), "wizardpackages");
@@ -136,7 +143,7 @@ public class NewSolutionWizardDefaultPackages
 						{
 							String version = latestRelease.optString("version");
 
-							if (version != null && (!downloadedPackages.containsKey(name) ||
+							if (version != null && isSafeFileComponent(version) && (!downloadedPackages.containsKey(name) ||
 								(downloadedPackages.containsKey(name) && !version.equals(downloadedPackages.get(name)))))
 							{
 								String url = latestRelease.optString("url");
@@ -155,8 +162,12 @@ public class NewSolutionWizardDefaultPackages
 										Utils.streamCopy(in, out);
 										String oldVersion = downloadedPackages.put(name, version);
 
-										File oldPackageFile = new File(packagesFolder, name + "_" + oldVersion);
-										oldPackageFile.delete();
+
+										if (isSafeFileComponent(oldVersion))
+										{
+											File oldPackageFile = new File(packagesFolder, name + "_" + oldVersion);
+											oldPackageFile.delete();
+										}
 									}
 									catch (Exception ex)
 									{
