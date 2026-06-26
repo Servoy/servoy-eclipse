@@ -181,9 +181,21 @@ public class NewSolutionWizardDefaultPackages
 	 * @param name the name of the package
 	 * @return a pair containing the version and the package input stream
 	 */
+	private boolean isValidPackageOrSolutionName(String name)
+	{
+		if (name == null || name.length() == 0) return false;
+		if (name.contains("..") || name.indexOf('/') != -1 || name.indexOf('\\') != -1) return false;
+		return name.matches("[A-Za-z0-9._-]+");
+	}
+
 	//public Pair<String, InputStream> getPackage(String name)
 	public Pair<String, File> getPackage(String name)
 	{
+		if (!isValidPackageOrSolutionName(name))
+		{
+			ServoyLog.logError(new IllegalArgumentException("Invalid package/solution name: " + name));
+			return null;
+		}
 		try
 		{
 			if (downloadedPackages.containsKey(name))
