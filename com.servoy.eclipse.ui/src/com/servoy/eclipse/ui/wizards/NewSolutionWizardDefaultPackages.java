@@ -131,7 +131,7 @@ public class NewSolutionWizardDefaultPackages
 		for (JSONObject p : packages)
 		{
 			String name = p.optString("name");
-			if (name != null)
+			if (isSafeFileComponent(name))
 			{
 				if (allPackages.indexOf(name) != -1)
 				{
