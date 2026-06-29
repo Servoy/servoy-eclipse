@@ -468,7 +468,7 @@ export class FormattingService {
         }
         // scientific notation case
         if (servoyFormat.indexOf('E') > -1) {
-            const frmt = /([0#.,]+)+E0+.*/.exec(patchedFormat)[1];
+            const frmt = /([0#.,]+)E0+.*/.exec(patchedFormat)[1];
             let integerDigits = 0;
             let fractionalDigits = 0;
             let countIntegerState = true;
