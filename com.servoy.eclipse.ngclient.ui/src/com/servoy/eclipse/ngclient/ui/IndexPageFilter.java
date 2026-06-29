@@ -182,7 +182,13 @@ public class IndexPageFilter implements Filter
 			else
 			{
 				String normalize = Paths.get(requestURI.replace(':', '_')).normalize().toString();
-				File file = new File(distFolder, normalize);
+				File canonicalDistFolder = distFolder.getCanonicalFile();
+				File file = new File(distFolder, normalize).getCanonicalFile();
+				if (!file.toPath().startsWith(canonicalDistFolder.toPath()))
+				{
+					chain.doFilter(servletRequest, servletResponse);
+					return;
+				}
 				String localeId = request.getParameter("localeid");
 				if (requestURI.startsWith("/locales/") && localeId != null && !file.exists())
 				{
@@ -190,8 +196,12 @@ public class IndexPageFilter implements Filter
 					String[] locales = NGLocalesFilter.generateLocaleIds(localeId);
 					for (String locale : locales)
 					{
-						file = new File(distFolder, normalize.replace(localeId, locale));
-						if (file.exists()) break;
+						File candidate = new File(distFolder, normalize.replace(localeId, locale)).getCanonicalFile();
+						if (candidate.toPath().startsWith(canonicalDistFolder.toPath()) && candidate.exists())
+						{
+							file = candidate;
+							break;
+						}
 					}
 				}
 				if (file.exists() && !file.isDirectory() && !file.getName().equals("favicon.ico"))
