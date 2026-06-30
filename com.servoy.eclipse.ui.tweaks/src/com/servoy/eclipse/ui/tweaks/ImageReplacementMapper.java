@@ -241,6 +241,8 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png"));
 			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.ui.console/$nl$/icons/full/cview16/console_view.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png"));
+			urlReplacements.put(URI.create("platform:/plugin/com.servoy.eclipse.ngclient.ui/images/npmconsole.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png"));
 			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/pin.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/pin_view.png"));
 			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/pin.png"),
