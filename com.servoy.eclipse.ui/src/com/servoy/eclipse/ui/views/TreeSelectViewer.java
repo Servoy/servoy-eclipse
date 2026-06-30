@@ -19,7 +19,9 @@ package com.servoy.eclipse.ui.views;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
@@ -721,7 +723,9 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 				Object parent = contentProvider.getParent(value);
 				List<Object> path = new ArrayList<Object>();
 				path.add(value);
-				while (parent != null)
+				Set<Object> visited = new HashSet<>();
+				visited.add(value);
+				while (parent != null && visited.add(parent))
 				{
 					path.add(parent);
 					parent = contentProvider.getParent(parent);
