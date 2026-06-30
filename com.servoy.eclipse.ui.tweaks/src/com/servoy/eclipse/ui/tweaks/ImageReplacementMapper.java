@@ -739,6 +739,8 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/servoy-tutorials.png"));
 			urlReplacements.put(URI.create("platform:/plugin/com.servoy.eclipse.ui/icons/open_debug_client.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/open_debug_client.png"));
+			urlReplacements.put(URI.create("platform:/plugin/com.servoy.eclipse.opencode/icons/aichat.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.opencode/{0}/aichat.png"));
 		}
 		catch (Exception e)
 		{
