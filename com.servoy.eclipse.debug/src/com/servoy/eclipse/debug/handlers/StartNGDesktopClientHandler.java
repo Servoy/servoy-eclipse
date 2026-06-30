@@ -230,10 +230,22 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		monitor.done();
 	}
 
+	private static Path validatePathWithinBase(Path path, Path baseDir) throws IOException
+	{
+		Path normalized = path.normalize().toAbsolutePath();
+		Path normalizedBase = baseDir.normalize().toAbsolutePath();
+		if (!normalized.startsWith(normalizedBase))
+		{
+			throw new IOException("Path traversal detected: " + path + " is not within " + baseDir);
+		}
+		return normalized;
+	}
+
 	private boolean archiveUpdateNeeded() throws IOException
 	{
 		String versionFilename = NGDESKTOP_PREFIX + "-archive.version";
-		File currentVersionFile = Paths.get(LOCAL_PATH + versionFilename).normalize().toFile();
+		Path basePath = Paths.get(LOCAL_PATH).normalize().toAbsolutePath();
+		File currentVersionFile = validatePathWithinBase(Paths.get(LOCAL_PATH, versionFilename), basePath).toFile();
 		if (!currentVersionFile.exists())
 			return true;
 		URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
@@ -294,8 +306,9 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	private void downloadVersionFile() throws IOException
 	{
-		File versionFilename = new File(NGDESKTOP_PREFIX + "-archive.version");
-		File currentVersionFile = Paths.get(LOCAL_PATH + versionFilename).normalize().toFile();
+		String versionFilename = NGDESKTOP_PREFIX + "-archive.version";
+		Path basePath = Paths.get(LOCAL_PATH).normalize().toAbsolutePath();
+		File currentVersionFile = validatePathWithinBase(Paths.get(LOCAL_PATH, versionFilename), basePath).toFile();
 		URL remoteVersionURL = new URL(DOWNLOAD_URL + NGDESKTOP_VERSION + "/" + versionFilename);
 		try (InputStream remoteStream = remoteVersionURL.openStream();
 			OutputStream localStream = new FileOutputStream(currentVersionFile))
@@ -309,10 +322,18 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	private void deleteVersionFile()
 	{//this will enforce a new download
-		File currentVersionFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + "-archive.version").normalize().toFile();
-		if (currentVersionFile.exists())
+		try
 		{
-			currentVersionFile.delete();
+			Path basePath = Paths.get(LOCAL_PATH).normalize().toAbsolutePath();
+			File currentVersionFile = validatePathWithinBase(Paths.get(LOCAL_PATH, NGDESKTOP_PREFIX + "-archive.version"), basePath).toFile();
+			if (currentVersionFile.exists())
+			{
+				currentVersionFile.delete();
+			}
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError("Invalid path for version file", e);
 		}
 	}
 
@@ -347,17 +368,22 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
 			File.separator + "servoy.json";
 
-		File configFile = Paths.get(LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + configLocation).normalize().toFile();// + fileUrl);
-		JSONObject configObject = getJsonObj(configFile, solutionUrl);
-
-		try (FileWriter file = new FileWriter(configFile);
-			BufferedWriter out = new BufferedWriter(file);)
+		try
 		{
-			out.write(configObject.toString());
+			Path basePath = Paths.get(LOCAL_PATH).normalize().toAbsolutePath();
+			File configFile = validatePathWithinBase(
+				Paths.get(LOCAL_PATH, NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + configLocation), basePath).toFile();
+			JSONObject configObject = getJsonObj(configFile, solutionUrl);
+
+			try (FileWriter file = new FileWriter(configFile);
+				BufferedWriter out = new BufferedWriter(file);)
+			{
+				out.write(configObject.toString());
+			}
 		}
 		catch (IOException e1)
 		{
-			ServoyLog.logError("Error writing  in servoy.json file " + configFile.getAbsolutePath(), e1);
+			ServoyLog.logError("Error writing in servoy.json file", e1);
 		}
 	}
 
@@ -529,22 +555,32 @@ class DownloadNgDesktop implements IRunnableWithProgress
 		}
 	}
 
-	private Path makeDirs()
+	private Path makeDirs() throws IOException
 	{
 		String fString = Activator.getDefault().getStateLocation().toOSString();
+		Path basePath = Paths.get(fString).normalize().toAbsolutePath();
 		if (Utils.isAppleMacOS())
 		{
 			fString += File.separator + "servoyngdesktop" + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-mac" +
 				StartNGDesktopClientHandler.ARCHITECTURE;
 		}
 		File f = new File(fString);
+		Path resolved = f.toPath().toAbsolutePath().normalize();
+		if (!resolved.startsWith(basePath))
+		{
+			throw new IOException("Path traversal detected in makeDirs: " + fString);
+		}
 		f.mkdirs();
-		return f.toPath().toAbsolutePath().normalize();
+		return resolved;
 	}
 
 	private void processEntry(Path outputPath, TarArchiveEntry entry, InputStream in) throws IOException
 	{
 		Path path = outputPath.resolve(entry.getName()).normalize();
+		if (!path.startsWith(outputPath))
+		{
+			throw new IOException("Path traversal detected in archive entry: " + entry.getName());
+		}
 		if (entry.isDirectory())
 		{
 			Files.createDirectories(path);
@@ -553,6 +589,11 @@ class DownloadNgDesktop implements IRunnableWithProgress
 		{
 			Files.createDirectories(path.getParent());
 			String dest = entry.getLinkName();
+			Path linkTarget = path.getParent().resolve(dest).normalize();
+			if (!linkTarget.startsWith(outputPath))
+			{
+				throw new IOException("Symlink path traversal detected: " + dest);
+			}
 			Files.createSymbolicLink(path, Paths.get(dest));
 		}
 		else
