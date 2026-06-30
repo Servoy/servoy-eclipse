@@ -421,6 +421,13 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
 			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
+			Path basePath = Paths.get(LOCAL_PATH).normalize().toAbsolutePath();
+			Path commandPath = Paths.get(command).normalize().toAbsolutePath();
+			if (!commandPath.startsWith(basePath))
+			{
+				throw new IOException("Path traversal detected in NGDesktop command: " + command);
+			}
+			command = commandPath.toString();
 			monitor.beginTask("Open NGDesktop", 3);
 
 			ProcessBuilder builder = new ProcessBuilder();
