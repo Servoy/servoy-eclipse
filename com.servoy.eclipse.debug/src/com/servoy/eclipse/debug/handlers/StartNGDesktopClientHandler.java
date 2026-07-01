@@ -459,6 +459,13 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				throw new IOException("Executable real path escapes install directory: " + commandRealPath);
 			}
 
+			String commandName = commandRealPath.getFileName().toString();
+			String expectedCommandName = Utils.isAppleMacOS() ? (NGDESKTOP_APP_NAME + ".app") : (NGDESKTOP_APP_NAME + extension);
+			if (!expectedCommandName.equals(commandName))
+			{
+				throw new IOException("Unexpected executable name: " + commandName);
+			}
+
 			String command = commandRealPath.toString();
 			monitor.beginTask("Open NGDesktop", 3);
 
