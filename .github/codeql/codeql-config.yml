@@ -1,4 +1,5 @@
 paths-ignore:
-  - com.servoy.eclipse.designer.rfb/src/rfb/angular/js
-  - com.servoy.eclipse.designer.rib
-  - com.servoy.eclipse.firststeps
+  - "com.servoy.eclipse.designer.rfb/src/rfb/angular/js"
+  - "com.servoy.eclipse.designer.rib"
+  - "com.servoy.eclipse.firststeps"
+  - "**/*.min.js"
