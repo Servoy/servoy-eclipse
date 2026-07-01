@@ -3,3 +3,5 @@ paths-ignore:
   - "com.servoy.eclipse.designer.rib"
   - "com.servoy.eclipse.firststeps"
   - "**/*.min.js"
+  - "com.servoy.eclipse.ngclient.ui/component-templates"
+  - "com.servoy.eclipse.ngclient.ui/packagetemplate"
