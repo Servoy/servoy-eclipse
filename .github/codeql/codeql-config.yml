@@ -5,3 +5,4 @@ paths-ignore:
   - "**/*.min.js"
   - "com.servoy.eclipse.ngclient.ui/component-templates"
   - "com.servoy.eclipse.ngclient.ui/packagetemplate"
+  - "com.servoy.eclipse.model.exporter.mobile/src/com/servoy/eclipse/model/mobile/exporter/resources/solution.js"
