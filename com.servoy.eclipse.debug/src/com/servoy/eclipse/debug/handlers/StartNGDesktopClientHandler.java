@@ -445,7 +445,21 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			{
 				throw new IOException("Executable does not exist: " + commandPath);
 			}
-			String command = commandPath.toString();
+
+			Path baseRealPath = basePath.toRealPath(LinkOption.NOFOLLOW_LINKS);
+			Path installDirRealPath = installDirPath.toRealPath(LinkOption.NOFOLLOW_LINKS);
+			Path commandRealPath = commandPath.toRealPath(LinkOption.NOFOLLOW_LINKS);
+
+			if (!installDirRealPath.startsWith(baseRealPath))
+			{
+				throw new IOException("Install directory real path escapes base path: " + installDirRealPath);
+			}
+			if (!commandRealPath.startsWith(installDirRealPath))
+			{
+				throw new IOException("Executable real path escapes install directory: " + commandRealPath);
+			}
+
+			String command = commandRealPath.toString();
 			monitor.beginTask("Open NGDesktop", 3);
 
 			ProcessBuilder builder = new ProcessBuilder();
