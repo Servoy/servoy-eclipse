@@ -420,14 +420,32 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			});
 
 			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
-			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + ARCHITECTURE + File.separator + NGDESKTOP_APP_NAME + extension;
-			Path basePath = Paths.get(LOCAL_PATH).normalize().toAbsolutePath();
-			Path commandPath = Paths.get(command).normalize().toAbsolutePath();
-			if (!commandPath.startsWith(basePath))
+			String safePrefix = NGDESKTOP_PREFIX;
+			if (!Pattern.compile("^" + Pattern.quote(NGDESKTOP_APP_NAME) + "-\\d+\\.\\d+\\.\\d+$").matcher(safePrefix).matches())
 			{
-				throw new IOException("Path traversal detected in NGDesktop command: " + command);
+				ServoyLog.logInfo("Invalid NGDesktop prefix value '" + safePrefix + "'. Falling back to default prefix.");
+				safePrefix = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
 			}
-			command = commandPath.toString();
+			Path basePath = Paths.get(LOCAL_PATH).normalize().toAbsolutePath();
+			Path installDirPath = basePath.resolve(safePrefix + PLATFORM + ARCHITECTURE).normalize();
+			Path commandPath = installDirPath.resolve(NGDESKTOP_APP_NAME + extension).normalize();
+			if (!installDirPath.startsWith(basePath))
+			{
+				throw new IOException("Install directory escapes base path: " + installDirPath);
+			}
+			if (!Files.isDirectory(installDirPath))
+			{
+				throw new IOException("Install directory does not exist: " + installDirPath);
+			}
+			if (!commandPath.startsWith(installDirPath))
+			{
+				throw new IOException("Executable path escapes install directory: " + commandPath);
+			}
+			if (!Files.isRegularFile(commandPath) && !Files.isDirectory(commandPath)) // .app on macOS is a directory
+			{
+				throw new IOException("Executable does not exist: " + commandPath);
+			}
+			String command = commandPath.toString();
 			monitor.beginTask("Open NGDesktop", 3);
 
 			ProcessBuilder builder = new ProcessBuilder();
