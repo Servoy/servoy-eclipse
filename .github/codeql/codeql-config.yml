@@ -1,0 +1,4 @@
+paths-ignore:
+  - com.servoy.eclipse.designer.rfb/src/rfb/angular/js/libs
+  - com.servoy.eclipse.designer.rib
+  - com.servoy.eclipse.firststeps
