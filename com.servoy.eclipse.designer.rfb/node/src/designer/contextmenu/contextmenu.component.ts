@@ -373,7 +373,7 @@ export class ContextMenuComponent implements OnInit {
 				if (node.parentElement.closest('.svy-listformcomponent')) return 'disabled';
 				if (node.parentElement.closest('.svy-formcomponent')) return 'disabled';
 				if (node.parentElement.closest('.inherited_element')) return 'disabled';
-				if (node.classList.contains('svy-layoutcontainer')) return 'disabled';
+				if (node.classList.contains('svy-layoutcontainer') || node.classList.contains('ghost')) return 'disabled';
 			}
 			return ''
 		};
