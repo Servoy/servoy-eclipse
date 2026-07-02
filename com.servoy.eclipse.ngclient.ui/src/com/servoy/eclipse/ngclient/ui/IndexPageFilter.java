@@ -138,7 +138,17 @@ public class IndexPageFilter implements Filter
 						if (showLogin.getRight() == null) return; // oauth was successful but the cloud returned html
 						request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
 						String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
-						response.sendRedirect(request.getRequestURI().replace("/svy_oauth", "") + (queryString != null ? "?" + queryString : ""));
+						String redirectBasePath = request.getRequestURI().replace("/svy_oauth", "");
+						String redirectTarget = redirectBasePath + (queryString != null ? "?" + queryString : "");
+						if (!redirectTarget.startsWith("/") || redirectTarget.startsWith("//") || redirectTarget.contains("://") ||
+							redirectTarget.indexOf('\r') != -1 || redirectTarget.indexOf('\n') != -1)
+						{
+							response.sendRedirect(redirectBasePath.startsWith("/") ? redirectBasePath : "/");
+						}
+						else
+						{
+							response.sendRedirect(redirectTarget);
+						}
 						return;
 					}
 				}
