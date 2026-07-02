@@ -201,10 +201,32 @@ export class ContextMenuComponent implements OnInit {
 				}
 			}
 
-			this.show(event);
-			this.adjustMenuPosition(this.element.nativeElement);
 			event.preventDefault();
 			event.stopPropagation();
+
+			// Dynamically check if Cypress form test exists before showing menu
+			void this.editorSession.hasCypressFormTest().then((hasCypressTest: boolean) => {
+				this.menuItems = this.menuItems.filter(item => item.text !== 'Run Cypress Form Test');
+				if (hasCypressTest) {
+					const cypressEntry = new ContextmenuItem(
+						'Run Cypress Form Test',
+						() => {
+							this.hide();
+							this.editorSession.executeAction('runCypressFormTest');
+						}
+					);
+					cypressEntry.getIconStyle = () => {
+						return { 'background-image': 'url(designer/assets/toolbar/icons/designsize/desktop_preview.png)' };
+					};
+					this.menuItems.push(cypressEntry);
+				}
+				this.show(event);
+				this.adjustMenuPosition(this.element.nativeElement);
+			}).catch(() => {
+				// If the backend call fails, still show the menu without the Cypress item
+				this.show(event);
+				this.adjustMenuPosition(this.element.nativeElement);
+			});
 		});
 		// for some reason click event is not always triggered
 		this.editorContentService.getBodyElement().addEventListener('mouseup', (event: MouseEvent) => {
@@ -816,18 +838,6 @@ export class ContextMenuComponent implements OnInit {
 			() => {
 				this.hide();
 				this.editorSession.executeAction('openInBrowser');
-			}
-		);
-		entry.getIconStyle = () => {
-			return { 'background-image': 'url(designer/assets/toolbar/icons/designsize/desktop_preview.png)' };
-		};
-		this.menuItems.push(entry);
-
-		entry = new ContextmenuItem(
-			'Run Cypress Form Tests',
-			() => {
-				this.hide();
-				this.editorSession.executeAction('runCypressFormTest');
 			}
 		);
 		entry.getIconStyle = () => {

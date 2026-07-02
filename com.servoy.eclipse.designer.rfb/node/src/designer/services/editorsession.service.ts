@@ -395,6 +395,10 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService<Array<string>>('formeditor', 'getSuperForms');
     }
 
+    hasCypressFormTest() {
+        return this.wsSession.callService<boolean>('formeditor', 'hasCypressFormTest');
+    }
+
     setCssAnchoring(selection: Array<string>, anchors: { top: string; left: string; bottom: string; right: string }) {
         void this.wsSession.callService('formeditor', 'setCssAnchoring', { 'selection': selection, 'anchors': anchors }, true);
     }

@@ -472,6 +472,22 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("hasCypressFormTest", new IServerService()
+		{
+			// Cache form name at registration time so this handler is safe to call off the UI thread.
+			private final String cachedFormName = editorPart.getForm() != null ? editorPart.getForm().getName() : null;
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				if (cachedFormName == null) return Boolean.FALSE;
+				java.nio.file.Path workspaceRoot = org.eclipse.core.resources.ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
+				java.nio.file.Path specFile = workspaceRoot.resolve("jenkins-custom").resolve("e2e-test-scripts")
+					.resolve("cypress").resolve("e2e-form").resolve(cachedFormName + ".spec.cy.js");
+				return Boolean.valueOf(java.nio.file.Files.exists(specFile));
+			}
+		});
+
 		configuredHandlers.put("getComponentPropertyWithTags", new IServerService()
 		{
 			@Override
@@ -655,6 +671,21 @@ public class EditorServiceHandler implements IServerService
 	@Override
 	public Object executeMethod(final String methodName, final JSONObject args)
 	{
+		// hasCypressFormTest only does filesystem I/O – no SWT access needed.
+		// Running it outside the UI thread avoids blocking when the UI thread is busy
+		// (e.g. after project.refreshLocal() during test generation).
+		if ("hasCypressFormTest".equals(methodName))
+		{
+			try
+			{
+				return configuredHandlers.get(methodName).executeMethod(methodName, args);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+				return Boolean.FALSE;
+			}
+		}
 		try
 		{
 			return UIUtils.runInUI(new Callable<Object>()
