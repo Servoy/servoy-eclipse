@@ -139,16 +139,15 @@ public class IndexPageFilter implements Filter
 						request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
 						String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
 						String redirectBasePath = request.getRequestURI().replace("/svy_oauth", "");
-						String redirectTarget = redirectBasePath + (queryString != null ? "?" + queryString : "");
-						if (!redirectTarget.startsWith("/") || redirectTarget.startsWith("//") || redirectTarget.contains("://") ||
-							redirectTarget.indexOf('\r') != -1 || redirectTarget.indexOf('\n') != -1)
+						if (!redirectBasePath.startsWith("/") || redirectBasePath.startsWith("//"))
 						{
-							response.sendRedirect(redirectBasePath.startsWith("/") ? redirectBasePath : "/");
+							redirectBasePath = "/";
 						}
-						else
-						{
-							response.sendRedirect(redirectTarget);
-						}
+
+						boolean hasSafeQuery = queryString != null && queryString.indexOf('\r') == -1 && queryString.indexOf('\n') == -1 &&
+							!queryString.startsWith("//") && !queryString.contains("://");
+						String redirectTarget = hasSafeQuery ? (redirectBasePath + "?" + queryString) : redirectBasePath;
+						response.sendRedirect(redirectTarget);
 						return;
 					}
 				}
