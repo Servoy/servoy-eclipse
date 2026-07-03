@@ -550,7 +550,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			if (parentForm != null && (formHierarchy.contains(parentForm) || ((Form)parentForm).isFormComponent().booleanValue()))
 			{
 				refresh();
-				Display.getDefault().asyncExec(this::defaultExpand);
 				return;
 			}
 		}
