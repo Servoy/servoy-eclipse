@@ -435,6 +435,31 @@ public class EditorServiceHandler implements IServerService
 			{
 				Form form = editorPart.getForm();
 				String formName = form.getName();
+
+				String markerErrors = checkFormMarkersForPreview(form);
+				if (markerErrors != null)
+				{
+					Display.getDefault().asyncExec(() -> {
+						org.eclipse.jface.dialogs.MessageDialog.openError(
+							org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+							"Cannot open form in browser",
+							markerErrors);
+					});
+					return null;
+				}
+
+				String validationError = validateFormPropertiesForPreview(form);
+				if (validationError != null)
+				{
+					Display.getDefault().asyncExec(() -> {
+						org.eclipse.jface.dialogs.MessageDialog.openError(
+							org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+							"Cannot open form in browser",
+							validationError);
+					});
+					return null;
+				}
+
 				String solutionName = form.getSolution().getName();
 				int port = com.servoy.j2db.server.shared.ApplicationServerRegistry.get().getWebServerPort();
 				String url = "http://localhost:" + port + "/solution/" + solutionName + "/index.html?formpreview=" + formName;
@@ -703,5 +728,160 @@ public class EditorServiceHandler implements IServerService
 		}
 
 		return null;
+	}
+
+
+	private static String checkFormMarkersForPreview(Form form)
+	{
+		try
+		{
+			org.eclipse.core.resources.IProject project = com.servoy.eclipse.core.ServoyModelManager.getServoyModelManager()
+				.getServoyModel().getActiveProject().getProject();
+			String formName = form.getName();
+			java.util.List<String> errors = new java.util.ArrayList<>();
+
+			org.eclipse.core.resources.IFile frmFile = project.getFile("forms/" + formName + ".frm");
+			if (frmFile.exists())
+			{
+				collectErrorMarkersForPreview(frmFile, org.eclipse.core.resources.IResource.DEPTH_ZERO, errors);
+			}
+
+			org.eclipse.core.resources.IFolder formFolder = project.getFolder("forms/" + formName);
+			if (formFolder.exists())
+			{
+				collectErrorMarkersForPreview(formFolder, org.eclipse.core.resources.IResource.DEPTH_INFINITE, errors);
+			}
+
+			org.eclipse.core.resources.IFile jsFile = project.getFile("forms/" + formName + ".js");
+			if (jsFile.exists())
+			{
+				collectErrorMarkersForPreview(jsFile, org.eclipse.core.resources.IResource.DEPTH_ZERO, errors);
+			}
+
+			if (errors.isEmpty()) return null;
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("Form '").append(formName).append("' has compilation errors:\n\n");
+			for (String error : errors)
+			{
+				sb.append(error).append("\n");
+			}
+			sb.append("\nFix these before opening in browser.");
+			return sb.toString();
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Error checking form markers for preview", e);
+			return null;
+		}
+	}
+
+	private static void collectErrorMarkersForPreview(org.eclipse.core.resources.IResource resource, int depth, java.util.List<String> errors)
+		throws org.eclipse.core.runtime.CoreException
+	{
+		org.eclipse.core.resources.IMarker[] markers = resource.findMarkers(org.eclipse.core.resources.IMarker.PROBLEM, true, depth);
+		for (org.eclipse.core.resources.IMarker marker : markers)
+		{
+			int severity = marker.getAttribute(org.eclipse.core.resources.IMarker.SEVERITY, -1);
+			if (severity == org.eclipse.core.resources.IMarker.SEVERITY_ERROR)
+			{
+				String message = marker.getAttribute(org.eclipse.core.resources.IMarker.MESSAGE, "Unknown error");
+				int lineNumber = marker.getAttribute(org.eclipse.core.resources.IMarker.LINE_NUMBER, -1);
+				if (lineNumber > 0)
+				{
+					errors.add("- " + message + " (line " + lineNumber + ")");
+				}
+				else
+				{
+					errors.add("- " + message);
+				}
+			}
+		}
+	}
+
+	private static String validateFormPropertiesForPreview(Form form)
+	{
+		try
+		{
+			org.sablo.specification.SpecProviderState specState = org.sablo.specification.WebComponentSpecProvider.getSpecProviderState();
+			if (specState == null) return null;
+
+			java.util.List<String> errors = new java.util.ArrayList<>();
+			validateComponentsForPreview(form.getWebComponents(), specState, errors);
+			validateContainersForPreview(form.getLayoutContainers(), specState, errors);
+
+			if (errors.isEmpty()) return null;
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("Form '").append(form.getName()).append("' has property type mismatches that will cause runtime errors:\n\n");
+			for (String error : errors)
+			{
+				sb.append(error).append("\n");
+			}
+			sb.append("\nFix these before opening in browser.");
+			return sb.toString();
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Error validating form properties for preview", e);
+			return null;
+		}
+	}
+
+	private static void validateComponentsForPreview(java.util.Iterator<com.servoy.j2db.persistence.WebComponent> webComponents,
+		org.sablo.specification.SpecProviderState specState, java.util.List<String> errors)
+	{
+		while (webComponents.hasNext())
+		{
+			com.servoy.j2db.persistence.WebComponent wc = webComponents.next();
+			String typeName = wc.getTypeName();
+			if (typeName == null) continue;
+
+			org.sablo.specification.WebObjectSpecification spec = specState.getWebObjectSpecification(typeName);
+			if (spec == null) continue;
+
+			String componentName = wc.getName() != null ? wc.getName() : typeName;
+			org.json.JSONObject json = wc.getFlattenedJson();
+			if (json == null) continue;
+
+			java.util.Map<String, org.sablo.specification.PropertyDescription> properties = spec.getProperties();
+			for (java.util.Map.Entry<String, org.sablo.specification.PropertyDescription> entry : properties.entrySet())
+			{
+				String propName = entry.getKey();
+				if (!json.has(propName)) continue;
+
+				org.sablo.specification.PropertyDescription pd = entry.getValue();
+				Object value = json.opt(propName);
+				if (value == null || value instanceof org.json.JSONObject || value instanceof org.json.JSONArray) continue;
+
+				Object defaultValue = pd.getDefaultValue();
+				if (defaultValue instanceof Boolean && !(value instanceof Boolean))
+				{
+					errors.add("- Component '" + componentName + "', property '" + propName + "': expected boolean but found String \"" + value + "\"");
+					continue;
+				}
+
+				org.sablo.specification.property.IPropertyType< ? > type = pd.getType();
+				if (type != null)
+				{
+					String tn = type.getName();
+					if (("boolean".equals(tn) || "enabled".equals(tn) || "visible".equals(tn) || "protected".equals(tn)) && !(value instanceof Boolean))
+					{
+						errors.add("- Component '" + componentName + "', property '" + propName + "': expected boolean but found String \"" + value + "\"");
+					}
+				}
+			}
+		}
+	}
+
+	private static void validateContainersForPreview(java.util.Iterator<com.servoy.j2db.persistence.LayoutContainer> containers,
+		org.sablo.specification.SpecProviderState specState, java.util.List<String> errors)
+	{
+		while (containers.hasNext())
+		{
+			com.servoy.j2db.persistence.LayoutContainer container = containers.next();
+			validateComponentsForPreview(container.getWebComponents(), specState, errors);
+			validateContainersForPreview(container.getLayoutContainers(), specState, errors);
+		}
 	}
 }
