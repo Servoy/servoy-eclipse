@@ -145,6 +145,8 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 ## Testing
 
 - **Java plugin tests:** `com.servoy.eclipse.tests` (eclipse-test-plugin packaging)
+- **Debug type system tests:** `com.servoy.eclipse.debug.tests` â `ViewFoundSetTypeHierarchyIntegrationTest` [Plugin JUnit]
+- **Designer tests:** `com.servoy.eclipse.designer.tests` â `TestCssValues`, `TestSnapCSSPosition` [JUnit]
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
 - **WPM tests:** `com.servoy.eclipse.designer.wpm/node/src/test.ts`

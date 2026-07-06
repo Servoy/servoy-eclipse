@@ -3445,6 +3445,7 @@ public class TypeCreator extends TypeCache
 		private Type createBaseType(String context, String fullTypeName, Class< ? > foundsetClass)
 		{
 			Type type = TypeCreator.this.createType(context, fullTypeName, foundsetClass);
+			type.setSuperType(getType(context, FoundSet.JS_FOUNDSET));
 			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
