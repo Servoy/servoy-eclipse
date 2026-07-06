@@ -72,6 +72,9 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
           }
           <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
         }
+        @if (servoyApi.isInDesigner() && (!cache || !containedForm())) {
+          <div class="svy-listformcomponent-designer-placeholder"></div>
+        }
       </div>
     
       <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
