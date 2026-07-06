@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { EventLike, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener } from '@servoy/public';
+import { Injectable, TemplateRef } from '@angular/core';
+import { EventLike, IComponentCache, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener } from '@servoy/public';
 import { SabloService } from '../sablo/sablo.service';
 import { FormService } from '../ngclient/form.service';
 import { LocaleService } from '../ngclient/locale.service';
@@ -97,6 +97,10 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
 
     isInTestingMode(): boolean {
         return false;
+    }
+
+    getTemplateForFormComponentChild(_formName: string, _item: IComponentCache): TemplateRef<any> {
+        return null;
     }
 }
 

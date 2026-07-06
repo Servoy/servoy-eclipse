@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, TemplateRef } from '@angular/core';
 import { getLocaleNumberSymbol, NumberSymbol } from '@angular/common';
 import { EventLike, JSEvent } from '../jsevent';
 import {PopupForm} from '../utils/popupform';
@@ -117,6 +117,13 @@ export abstract class ServoyPublicService {
      * Returns the value of the testing mode flag (servoy.ngclient.testingMode) from the admin page
      */
     public abstract isInTestingMode(): boolean;
+
+    /**
+     * Returns a TemplateRef for rendering a child component inside a formcomponent property.
+     * The formName identifies which form hosts the component that needs to render formcomponent children.
+     * The item should have a 'type' property with the camelCased component directive name.
+     */
+    public abstract getTemplateForFormComponentChild(formName: string, item: IComponentCache): TemplateRef<any>;
 }
 
 /** 

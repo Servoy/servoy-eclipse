@@ -1,5 +1,5 @@
 import { NumberSymbol } from '@angular/common';
-import { Injectable, NgModule } from '@angular/core';
+import { Injectable, NgModule, TemplateRef } from '@angular/core';
 import { EventLike, JSEvent } from '../jsevent';
 import { PopupForm } from '../utils/popupform';
 import { I18NListener, IComponentCache, IFormCache, Locale, ServoyPublicService } from '../services/servoy_public.service';
@@ -127,6 +127,10 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
 
     public isInTestingMode(): boolean {
         return false;
+    }
+
+    public getTemplateForFormComponentChild(_formName: string, _item: IComponentCache): TemplateRef<any> {
+        return null;
     }
 }
 @NgModule({
