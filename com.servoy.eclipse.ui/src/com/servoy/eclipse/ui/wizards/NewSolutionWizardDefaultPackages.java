@@ -236,7 +236,7 @@ public class NewSolutionWizardDefaultPackages
 		{
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
 			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
 			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
