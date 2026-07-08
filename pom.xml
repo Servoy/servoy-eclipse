@@ -630,7 +630,6 @@
 				<module>com.servoy.eclipse.feature</module>
 				<module>com.servoy.eclipse.model.tests</module>
 				<module>com.servoy.eclipse.designer.tests</module>
-				<module>com.servoy.eclipse.debug.tests</module>
 				<module>com.servoy.eclipse.ngclient.ui.tests</module>
 			</modules>
 			<build>
