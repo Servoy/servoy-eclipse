@@ -51,7 +51,18 @@ public class WebPackagesServiceHandler
 		String method = msg.getString("method");
 		IDeveloperService iServerService = configuredHandlers.get(method);
 		Object result = iServerService.executeMethod(msg);
-		if (result == null) return null;
+		if (result == null)
+		{
+			if ("install".equals(method))
+			{
+				IDeveloperService packagesService = configuredHandlers.get(GetAllInstalledPackages.CLIENT_SERVER_METHOD);
+				if (packagesService instanceof GetAllInstalledPackages)
+				{
+					((GetAllInstalledPackages)packagesService).reloadPackages();
+				}
+			}
+			return null;
+		}
 		JSONObject jsonResult = new JSONObject();
 
 		if ("install".equals(method)) // there is an error during install, the result contains the error message
