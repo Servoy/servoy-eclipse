@@ -504,7 +504,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					Boolean[] importDatasources = new Boolean[] { null };
 					for (String name : solutions.keySet())
 					{
-						boolean shouldAskOverwrite = (sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name));
+						boolean shouldAskOverwrite = overwriteModules || (sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name));
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
 							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
