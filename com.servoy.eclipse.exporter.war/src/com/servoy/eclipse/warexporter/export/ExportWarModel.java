@@ -208,6 +208,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		overwriteGroups = Utils.getAsBoolean(settings.get("export.overwriteGroups"));
 		addUsersToAdminGroup = Utils.getAsBoolean(settings.get("export.addUsersToAdminGroup"));
 		upgradeRepository = Utils.getAsBoolean(settings.get("export.upgradeRepository"));
+		setSkipDatabaseViewsUpdate(Utils.getAsBoolean(settings.get("export.skipDatabaseViewsUpdate")));
 
 		contextFileName = settings.get("export.tomcat.contextFileName");
 		createTomcatContextXML = Utils.getAsBoolean(settings.get("export.tomcat.createTomcatContextXML"));
@@ -429,6 +430,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.overwriteGroups", overwriteGroups);
 		settings.put("export.addUsersToAdminGroup", addUsersToAdminGroup);
 		settings.put("export.upgradeRepository", upgradeRepository);
+		settings.put("export.skipDatabaseViewsUpdate", isSkipDatabaseViewsUpdate());
 		settings.put("export.tomcat.contextFileName", contextFileName);
 		settings.put("export.tomcat.createTomcatContextXML", createTomcatContextXML);
 		settings.put("export.tomcat.antiResourceLocking", antiResourceLocking);
