@@ -1,12 +1,12 @@
 package com.servoy.eclipse.ui.property.types;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.property.CustomJSONArrayType;
@@ -41,7 +41,7 @@ public class TestCustomArrayPropertySourceGetDefault {
 	private PersistContext persistContext;
 	private CustomArrayTypePropertyController controller;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		tabObjectType = new CustomJSONObjectType<>(TAB_TYPE_NAME, null);
 		PropertyDescription tabObjectDef = new PropertyDescriptionBuilder().withName(TAB_TYPE_NAME)
@@ -75,10 +75,10 @@ public class TestCustomArrayPropertySourceGetDefault {
 		ArrayPropertyChildId id = new ArrayPropertyChildId(TABS_PROPERTY, 1);
 		Object result = source.getDefaultElementProperty(id);
 
-		assertNotNull("should not return null for custom type array element", result);
-		assertTrue("should return a WebCustomType instance", result instanceof WebCustomType);
-		assertEquals("should set the correct type name", "tab", ((WebCustomType) result).getTypeName());
-		assertEquals("parent should be the webComponent", webComponent, ((WebCustomType) result).getParent());
+		assertNotNull(result, "should not return null for custom type array element");
+		assertTrue(result instanceof WebCustomType, "should return a WebCustomType instance");
+		assertEquals("tab", ((WebCustomType) result).getTypeName(), "should set the correct type name");
+		assertEquals(webComponent, ((WebCustomType) result).getParent(), "parent should be the webComponent");
 	}
 
 	@Test
@@ -91,11 +91,11 @@ public class TestCustomArrayPropertySourceGetDefault {
 		Object result0 = source.getDefaultElementProperty(id0);
 		Object result2 = source.getDefaultElementProperty(id2);
 
-		assertNotNull("result at index 0 should not be null", result0);
-		assertNotNull("result at index 2 should not be null", result2);
-		assertTrue("result at index 0 should be WebCustomType", result0 instanceof WebCustomType);
-		assertTrue("result at index 2 should be WebCustomType", result2 instanceof WebCustomType);
-		assertTrue("results should be distinct instances", result0 != result2);
+		assertNotNull(result0, "result at index 0 should not be null");
+		assertNotNull(result2, "result at index 2 should not be null");
+		assertTrue(result0 instanceof WebCustomType, "result at index 0 should be WebCustomType");
+		assertTrue(result2 instanceof WebCustomType, "result at index 2 should be WebCustomType");
+		assertTrue(result0 != result2, "results should be distinct instances");
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class TestCustomArrayPropertySourceGetDefault {
 
 		Object result = source.getDefaultElementProperty("someStringId");
 
-		assertNull("should return null when id is not ArrayPropertyChildId", result);
+		assertNull(result, "should return null when id is not ArrayPropertyChildId");
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class TestCustomArrayPropertySourceGetDefault {
 		ArrayPropertyChildId id = new ArrayPropertyChildId(TABS_PROPERTY, 0);
 		Object result = source.getDefaultElementProperty(id);
 
-		assertEquals("should return the declared default value", defaultValue, result);
+		assertEquals(defaultValue, result, "should return the declared default value");
 	}
 
 	@Test
@@ -140,8 +140,8 @@ public class TestCustomArrayPropertySourceGetDefault {
 		ArrayPropertyChildId id = new ArrayPropertyChildId(TABS_PROPERTY, 1);
 		source.defaultResetProperty(id);
 
-		assertNotNull("array element should not be null after reset", array[1]);
-		assertTrue("array element should be a WebCustomType after reset", array[1] instanceof WebCustomType);
+		assertNotNull(array[1], "array element should not be null after reset");
+		assertTrue(array[1] instanceof WebCustomType, "array element should be a WebCustomType after reset");
 	}
 
 	@Test
@@ -153,9 +153,9 @@ public class TestCustomArrayPropertySourceGetDefault {
 		ArrayPropertyChildId id = new ArrayPropertyChildId(TABS_PROPERTY, 0);
 		source.defaultResetProperty(id);
 
-		assertNotNull("array element at index 0 should not be null after reset", array[0]);
-		assertTrue("array element at index 0 should be WebCustomType", array[0] instanceof WebCustomType);
-		assertEquals("existing1 should remain unchanged", "existing1", array[1]);
+		assertNotNull(array[0], "array element at index 0 should not be null after reset");
+		assertTrue(array[0] instanceof WebCustomType, "array element at index 0 should be WebCustomType");
+		assertEquals("existing1", array[1], "existing1 should remain unchanged");
 	}
 
 	@Test
@@ -165,7 +165,7 @@ public class TestCustomArrayPropertySourceGetDefault {
 
 		Object result = source.getDefaultElementProperty(TABS_PROPERTY);
 
-		assertNull("whole-array reset should return null for non-ArrayPropertyChildId", result);
+		assertNull(result, "whole-array reset should return null for non-ArrayPropertyChildId");
 	}
 
 	@Test
@@ -178,9 +178,9 @@ public class TestCustomArrayPropertySourceGetDefault {
 		ArrayPropertyChildId id = new ArrayPropertyChildId(TABS_PROPERTY, 0);
 		source.defaultResetProperty(id);
 
-		assertTrue("reset element should be a WebCustomType", array[0] instanceof WebCustomType);
-		assertTrue("reset value should differ from original (replacement, not mutation)",
-				!originalValue.equals(array[0]));
+		assertTrue(array[0] instanceof WebCustomType, "reset element should be a WebCustomType");
+		assertTrue(!originalValue.equals(array[0]),
+				"reset value should differ from original (replacement, not mutation)");
 	}
 
 	private static class TestableWebComponent extends WebComponent {
