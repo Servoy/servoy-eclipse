@@ -16,7 +16,8 @@
 
    <launcherArgs>
       <vmArgs>-Xms512m
--Xmx2G
+-Xmx3G
+-XX:+UseCompactObjectHeaders
 --add-modules=ALL-SYSTEM
 --add-exports java.desktop/sun.java2d=ALL-UNNAMED
 -Dp2.trustedAuthorities=https://download.servoy.com,https://developer.servoy.com,https://download.eclipse.org,https://build.servoy.com/
