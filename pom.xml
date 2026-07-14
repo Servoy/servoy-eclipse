@@ -16,6 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
+		<servoy.ai.repo.url>https://build.servoy.com/latest/servoy_ai/</servoy.ai.repo.url>
 <!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
         <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
 -->
@@ -38,7 +39,7 @@
     <repositories>
        <repository>
           <id>servoy-ai-repo</id>
-          <url>https://build.servoy.com/latest/servoy_ai/</url>
+          <url>${servoy.ai.repo.url}</url>
           <layout>p2</layout>
        </repository>
     </repositories>
