@@ -508,7 +508,7 @@ public class EditorServiceHandler implements IServerService
 				if (cachedFormName == null) return Boolean.FALSE;
 				java.nio.file.Path workspaceRoot = org.eclipse.core.resources.ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
 				java.nio.file.Path specFile = workspaceRoot.resolve("jenkins-custom").resolve("e2e-test-scripts")
-					.resolve("cypress").resolve("e2e-form").resolve(cachedFormName + ".spec.cy.js");
+					.resolve("cypress").resolve("cy-form").resolve(cachedFormName + ".spec.cy.js");
 				return Boolean.valueOf(java.nio.file.Files.exists(specFile));
 			}
 		});
