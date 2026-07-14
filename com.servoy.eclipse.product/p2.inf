@@ -5,3 +5,8 @@ properties.0.value = Servoy 2026.9.0_rc
 #Adding copyright for the Servoy product IU
 copyright = Copyright (c) 1997-2026 Servoy BV. All rights reserved.\nVisit http://www.servoy.com\n\nThis computer program is protected by copyright law and international treaties.\nUnauthorized reproduction or distribution of this program, or any\nportion of it, may result in severe civil and criminal penalties,\nand will be prosecuted to the maximum extent possible under law.
 copyright.location = http://download.servoy.com/developer/copyright.html
+
+requires.0.namespace = org.eclipse.equinox.p2.iu
+requires.0.name = com.servoy.eclipse.servoypilot.feature.feature.group
+requires.0.range = 0.0.0
+requires.0.greedy = true
