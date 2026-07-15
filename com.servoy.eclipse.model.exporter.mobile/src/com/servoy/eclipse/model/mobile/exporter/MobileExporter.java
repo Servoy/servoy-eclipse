@@ -54,11 +54,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.sablo.specification.ClientSideTypeCache;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectHandlerFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.websocket.utils.JSONUtils.EmbeddableJSONWriter;
 
 import com.servoy.base.nongwt.test.LineMapper;
 import com.servoy.base.persistence.constants.IComponentConstants;
@@ -765,6 +767,8 @@ public class MobileExporter
 
 		String specDataString = "var _specdata_ = " + componentsSpec.toString();
 		String serviceSpecDataString = "var _servicespecdata_ = " + servicesSpec.toString();
+		String clientSideTypesDataString = getClientSideTypesAsJS(
+			WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications());
 
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
@@ -791,6 +795,10 @@ public class MobileExporter
 			outputFile = new File(tmpP, "plugins_spec_json.js");
 			Utils.writeTXTFile(outputFile, serviceSpecDataString);
 			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/plugins_spec_json.js"), serviceSpecDataString);
+
+			outputFile = new File(tmpP, "clientsidetypes_json.js");
+			Utils.writeTXTFile(outputFile, clientSideTypesDataString);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/clientsidetypes_json.js"), clientSideTypesDataString);
 		}
 
 		File exportedFile = null;
@@ -895,6 +903,8 @@ public class MobileExporter
 				addZipEntry(moduleName + "/" + renameMap.get("form_json.js"), warStream, Utils.getUTF8EncodedStream(modelDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
+				addZipEntry(moduleName + "/" + renameMap.get("clientsidetypes_json.js"), warStream,
+					Utils.getUTF8EncodedStream(clientSideTypesDataString));
 
 				// for unit test client
 				if (useTestWar && testSuiteCode != null)
@@ -975,6 +985,7 @@ public class MobileExporter
 		addRenameEntries(renameMap, moduleName + "/", "form_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "spec_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "plugins_spec_json", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "clientsidetypes_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");
@@ -1471,5 +1482,45 @@ public class MobileExporter
 			}
 		}
 		return spec;
+	}
+
+	/**
+	 * Builds the JS file content that holds the two client-side-types globals that are forwarded to the Angular TypesRegistry:
+	 * <ul>
+	 * <li><code>_clientsidetypes_</code> - the component client-side specs (<code>{p, ftd, h, a}</code> per component name)</li>
+	 * <li><code>_serviceclientsidetypes_</code> - the service client-side specs (<code>{p, ftd, h, a}</code> per service scripting name)</li>
+	 * </ul>
+	 * The payload is produced by the exact same server serialization ({@link ClientSideTypeCache}) so it cannot drift from what a real
+	 * NGClient sends over the websocket. Objects with no client-side-conversion types (null results) are omitted.
+	 */
+	private String getClientSideTypesAsJS(WebObjectSpecification[] allComponentSpecifications)
+	{
+		// components: build { "<comp>": {p,ftd,h,a}, ... } from ClientSideTypeCache (same source the server uses lazily per container)
+		StringBuilder components = new StringBuilder();
+		components.append('{');
+		if (allComponentSpecifications != null)
+		{
+			boolean first = true;
+			ClientSideTypeCache clientSideTypeCache = WebComponentSpecProvider.getInstance().getClientSideTypeCache();
+			for (WebObjectSpecification componentSpecification : allComponentSpecifications)
+			{
+				EmbeddableJSONWriter clientSideSpec = clientSideTypeCache.getClientSideSpecFor(componentSpecification);
+				if (clientSideSpec != null)
+				{
+					if (!first) components.append(',');
+					first = false;
+					components.append(JSONObject.quote(componentSpecification.getName()));
+					components.append(':');
+					components.append(clientSideSpec.toJSONString());
+				}
+			}
+		}
+		components.append('}');
+
+		// services: reuse the exact same source the server uses on fresh window connect (ClientSideSpecState.sendAllServiceClientSideSpecs)
+		EmbeddableJSONWriter serviceClientSideSpecs = WebServiceSpecProvider.getInstance().getClientSideSpecs();
+		String servicesString = serviceClientSideSpecs != null ? serviceClientSideSpecs.toJSONString() : "{}";
+
+		return "var _clientsidetypes_ = " + components.toString() + ";\nvar _serviceclientsidetypes_ = " + servicesString + ";";
 	}
 }
