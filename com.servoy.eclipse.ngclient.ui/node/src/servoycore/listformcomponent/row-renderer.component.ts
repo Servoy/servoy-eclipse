@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 
 import { AgRendererComponent } from 'ag-grid-angular';
 import { ICellRendererParams, IAfterGuiAttachedParams } from 'ag-grid-community';
@@ -9,11 +9,13 @@ import { ListFormComponent } from './listformcomponent';
     templateUrl: './row-renderer.component.html',
     standalone: false
 })
-export class RowRenderer implements AgRendererComponent {
+export class RowRenderer implements AgRendererComponent, AfterViewInit {
 
     lfc: ListFormComponent;
     foundsetRows: any[];
     startIndex: number;
+
+    constructor(private elementRef: ElementRef) {}
 
     @HostListener('registerCSTS', ['$event'])
     registerCSTS(event: Event) {
@@ -36,6 +38,10 @@ export class RowRenderer implements AgRendererComponent {
         this.foundsetRows = params.data;
         this.startIndex =(params.node.rowIndex - this.lfc._foundset().viewPort.startIndex) * this.lfc.numberOfColumns;
 
+    }
+
+    ngAfterViewInit(): void {
+        this.lfc.onRowRendererAfterViewInit(this.elementRef);
     }
 
     afterGuiAttached?(params?: IAfterGuiAttachedParams): void {
