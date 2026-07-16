@@ -158,6 +158,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     resizeObserver: ResizeObserver;
     resizeTimeout: any;
     previousWidth = 0;
+    private rowHeightMeasured = false;
 
     // used for paging
     page = 0;
@@ -318,7 +319,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     }
                 },
                 columnDefs: [
-                    { cellRenderer: 'row-renderer', autoHeight: true }
+                    { cellRenderer: 'row-renderer', autoHeight: !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0 ? false : true }
                 ],
                 rowModelType: 'serverSide',
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
@@ -529,23 +530,26 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 this.resizeObserver = new ResizeObserver((entries) => {
                     const newWidth = entries[0].contentRect.width;
                     if(newWidth !== this.previousWidth) {
-                        if(this.resizeTimeout) {
-                            clearTimeout(this.resizeTimeout);
-                        }
-                        this.resizeTimeout = setTimeout(() => {
-                            const agGrid = this.agGrid();
-                            if(!agGrid.api.isDestroyed()) {
-                                this.numberOfColumns = this.calculateNumberOfColumns();
-                                this.resizeTimeout = null;
-                                agGrid.api.refreshServerSide({ purge: true });
-                                const foundset = this._foundset();
-                                agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
-                                setTimeout(() => {
-                                    this.scrollToSelection();
-                                }, 200);
-                            }
-                        }, 200);
                         this.previousWidth = newWidth;
+                        const newNumberOfColumns = this.calculateNumberOfColumns();
+                        if(newNumberOfColumns !== this.numberOfColumns) {
+                            if(this.resizeTimeout) {
+                                clearTimeout(this.resizeTimeout);
+                            }
+                            this.resizeTimeout = setTimeout(() => {
+                                const agGrid = this.agGrid();
+                                if(!agGrid.api.isDestroyed()) {
+                                    this.numberOfColumns = this.calculateNumberOfColumns();
+                                    this.resizeTimeout = null;
+                                    agGrid.api.refreshServerSide({ purge: true });
+                                    const foundset = this._foundset();
+                                    agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
+                                    setTimeout(() => {
+                                        this.scrollToSelection();
+                                    }, 200);
+                                }
+                            }, 200);
+                        }
                     }
                 });
                 this.resizeObserver.observe(this.element().nativeElement);
@@ -619,6 +623,23 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     getRowHeight(): number {
         const containedForm = this.containedForm();
         return containedForm.formHeight ? containedForm.formHeight : null;
+    }
+
+    onRowRendererAfterViewInit(elementRef: ElementRef): void {
+        if (!this.rowHeightMeasured && !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0) {
+            this.rowHeightMeasured = true;
+            requestAnimationFrame(() => {
+                const contentEl = elementRef.nativeElement.querySelector(':first-child');
+                const measuredHeight = contentEl ? contentEl.scrollHeight : elementRef.nativeElement.scrollHeight;
+                if (measuredHeight > 0) {
+                    const agGrid = this.agGrid();
+                    if (agGrid && !agGrid.api.isDestroyed()) {
+                        agGrid.api.setGridOption('rowHeight', measuredHeight);
+                        agGrid.api.resetRowHeights();
+                    }
+                }
+            });
+        }
     }
 
     getRowWidth(): string {
