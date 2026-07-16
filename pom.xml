@@ -632,7 +632,6 @@
 				<module>com.servoy.eclipse.model.tests</module>
 				<module>com.servoy.eclipse.ui.tests</module>
 				<module>com.servoy.eclipse.designer.tests</module>
-				<module>com.servoy.eclipse.docgenerator.tests</module>
 				<module>j2db_documentation.tests</module>
 				<module>com.servoy.eclipse.ngclient.ui.tests</module>
 			</modules>
