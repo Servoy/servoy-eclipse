@@ -194,6 +194,7 @@
 		<xs:attribute name="optional" type="xs:boolean" use="optional"></xs:attribute>
 		<xs:attribute name="type" type="xs:string" use="optional"></xs:attribute>
 		<xs:attribute name="typecode" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="jstype" type="xs:string" use="optional"></xs:attribute>
 	</xs:complexType>
 
 	<xs:complexType name="see">

@@ -2079,7 +2079,23 @@ public class TypeCreator extends TypeCache
 										}
 										else if (paramType != null)
 										{
-											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+											String paramTypeStr = param.getType();
+											if (paramTypeStr != null && paramTypeStr.contains("<"))
+											{
+												JSDocTypeParser parse = new JSDocTypeParser();
+												try
+												{
+													parameter.setType(parse.parse(paramTypeStr));
+												}
+												catch (ParseException e)
+												{
+													parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+												}
+											}
+											else
+											{
+												parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+											}
 										}
 										else
 										{

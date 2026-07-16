@@ -150,6 +150,8 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
 - **WPM tests:** `com.servoy.eclipse.designer.wpm/node/src/test.ts`
+- **SVY-21118 jsType in signatures:** `j2db_documentation.tests` → `FunctionDocumentationTest` [Plugin JUnit] — tests that `getJSType()` is used in signature generation when set on a parameter
+- **SVY-21118 doc generator parsing:** `com.servoy.eclipse.docgenerator.tests` → `DocumentedParameterDataTest` [Plugin JUnit, requires m2e in target] — tests that `{Object<String>}` in `@param` descriptions is extracted as jsType
 
 ## Dependencies
 

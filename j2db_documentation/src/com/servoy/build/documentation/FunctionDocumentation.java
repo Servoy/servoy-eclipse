@@ -286,7 +286,15 @@ public class FunctionDocumentation implements Comparable<FunctionDocumentation>,
 						}
 						else
 						{
-							sb.append(getClassStringType(parDocType));
+							String jsType = parDoc.getJSType();
+							if (jsType != null && !jsType.isEmpty())
+							{
+								sb.append(jsType);
+							}
+							else
+							{
+								sb.append(getClassStringType(parDocType));
+							}
 						}
 					}
 					else return null;
