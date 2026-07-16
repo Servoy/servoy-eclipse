@@ -769,6 +769,9 @@ public class MobileExporter
 		String serviceSpecDataString = "var _servicespecdata_ = " + servicesSpec.toString();
 		String clientSideTypesDataString = getClientSideTypesAsJS(
 			WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications());
+		String serverScriptsDataString = doServerScriptExport(
+			NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(WebServiceSpecProvider.getSpecProviderState()),
+			WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications());
 
 		// Write files for running from java source
 		File tmpP = new File(outputFolder.getParent() + "/src/com/servoy/mobile/public");
@@ -799,6 +802,10 @@ public class MobileExporter
 			outputFile = new File(tmpP, "clientsidetypes_json.js");
 			Utils.writeTXTFile(outputFile, clientSideTypesDataString);
 			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/clientsidetypes_json.js"), clientSideTypesDataString);
+
+			outputFile = new File(tmpP, "serverscripts.js");
+			Utils.writeTXTFile(outputFile, serverScriptsDataString);
+			Utils.writeTXTFile(new File(outputFolder, MOBILE_MODULE_NAME + "/serverscripts.js"), serverScriptsDataString);
 		}
 
 		File exportedFile = null;
@@ -900,6 +907,7 @@ public class MobileExporter
 
 				addZipEntry(moduleName + "/" + renameMap.get("spec_json.js"), warStream, Utils.getUTF8EncodedStream(specDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("plugins_spec_json.js"), warStream, Utils.getUTF8EncodedStream(serviceSpecDataString));
+				addZipEntry(moduleName + "/" + renameMap.get("serverscripts.js"), warStream, Utils.getUTF8EncodedStream(serverScriptsDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("form_json.js"), warStream, Utils.getUTF8EncodedStream(modelDataString));
 				addZipEntry(moduleName + "/" + renameMap.get("solution_json.js"), warStream, Utils.getUTF8EncodedStream(formJson));
 				addZipEntry(moduleName + "/" + renameMap.get("solution.js"), warStream, Utils.getUTF8EncodedStream(solutionJavascript));
@@ -986,6 +994,7 @@ public class MobileExporter
 		addRenameEntries(renameMap, moduleName + "/", "spec_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "plugins_spec_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "clientsidetypes_json", ".js");
+		addRenameEntries(renameMap, moduleName + "/", "serverscripts", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution_json", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "solution", ".js");
 		addRenameEntries(renameMap, moduleName + "/", "servoy_utils", ".js");
@@ -1477,6 +1486,35 @@ public class MobileExporter
 				JSONObject component = new JSONObject();
 				component.put("model", properties);
 				component.put("api", api);
+				JSONObject types = json.optJSONObject("types");
+				if (types != null)
+				{
+					types.keys().forEachRemaining(typeName -> {
+						JSONObject typeDef = types.optJSONObject(typeName);
+						if (typeDef != null)
+						{
+							JSONObject typeModel = typeDef.optJSONObject("model");
+							if (typeModel != null)
+							{
+								typeModel.keys().forEachRemaining(key -> {
+									if (typeModel.get(key) instanceof JSONObject prop)
+									{
+										prop.remove("default");
+										prop.remove("tags");
+										prop.remove("values");
+									}
+									else
+									{
+										JSONObject prop = new JSONObject();
+										prop.put("type", typeModel.get(key));
+										typeModel.put(key, prop);
+									}
+								});
+							}
+						}
+					});
+					component.put("types", types);
+				}
 
 				spec.put(webObjectSpecification.getName(), component);
 			}
@@ -1522,5 +1560,64 @@ public class MobileExporter
 		String servicesString = serviceClientSideSpecs != null ? serviceClientSideSpecs.toJSONString() : "{}";
 
 		return "var _clientsidetypes_ = " + components.toString() + ";\nvar _serviceclientsidetypes_ = " + servicesString + ";";
+	}
+
+	private String doServerScriptExport(WebObjectSpecification[] serviceSpecs, WebObjectSpecification[] componentSpecs)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("var _serverscriptsdata_ = {\"services\":{");
+		boolean firstService = true;
+		if (serviceSpecs != null)
+		{
+			for (WebObjectSpecification spec : serviceSpecs)
+			{
+				java.net.URL serverScriptURL = spec.getServerScript(false);
+				if (serverScriptURL != null)
+				{
+					try (InputStream stream = serverScriptURL.openStream())
+					{
+						String content = IOUtils.toString(stream, Charset.forName("UTF8"));
+						if (!firstService) sb.append(',');
+						firstService = false;
+						sb.append(JSONObject.quote(spec.getName()));
+						sb.append(":{\"script\":function($scope){");
+						sb.append(content);
+						sb.append("}}");
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError("Error reading server script for service: " + spec.getName(), e);
+					}
+				}
+			}
+		}
+		sb.append("},\"components\":{");
+		boolean firstComponent = true;
+		if (componentSpecs != null)
+		{
+			for (WebObjectSpecification spec : componentSpecs)
+			{
+				java.net.URL serverScriptURL = spec.getServerScript(false);
+				if (serverScriptURL != null)
+				{
+					try (InputStream stream = serverScriptURL.openStream())
+					{
+						String content = IOUtils.toString(stream, Charset.forName("UTF8"));
+						if (!firstComponent) sb.append(',');
+						firstComponent = false;
+						sb.append(JSONObject.quote(spec.getName()));
+						sb.append(":{\"script\":function($scope){");
+						sb.append(content);
+						sb.append("}}");
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError("Error reading server script for component: " + spec.getName(), e);
+					}
+				}
+			}
+		}
+		sb.append("}};");
+		return sb.toString();
 	}
 }
