@@ -1,6 +1,6 @@
 #Adding description for the Servoy updates
 properties.0.name = org.eclipse.equinox.p2.description
-properties.0.value = Servoy 2026.6.0_rc
+properties.0.value = Servoy 2026.6.1_rc
 
 #Adding copyright for the Servoy product IU
 copyright = Copyright (c) 1997-2026 Servoy BV. All rights reserved.\nVisit http://www.servoy.com\n\nThis computer program is protected by copyright law and international treaties.\nUnauthorized reproduction or distribution of this program, or any\nportion of it, may result in severe civil and criminal penalties,\nand will be prosecuted to the maximum extent possible under law.
