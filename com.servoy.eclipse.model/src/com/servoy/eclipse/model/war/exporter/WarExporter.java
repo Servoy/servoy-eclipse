@@ -182,7 +182,7 @@ public class WarExporter
 		"de.inetsoftware.jlessc_*.jar", "wrapped.com.servoy.tus-java-server_*.jar", //
 		"com.fasterxml.jackson.core.jackson-core_*.jar", "com.fasterxml.jackson.core.jackson-databind_*.jar", //
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
-		"wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
+		"stax2-api-*.jar", "woodstox-core-*.jar", "jackson-dataformat-xml-*.jar", "wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
 		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
 		"org.owasp.encoder_*.jar" };
 
