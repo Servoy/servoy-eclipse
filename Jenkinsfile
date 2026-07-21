@@ -27,12 +27,6 @@ pipeline {
     }
     
     stages {
-        stage('Checkout') {
-            steps {
-                // checkout scm haalt automatisch de juiste branch/commit op die de build triggerde
-                checkout scm
-            }
-        }
         stage('Build with Tycho 5') {
             steps {
                 configFileProvider([

@@ -24,11 +24,6 @@ pipeline {
     }
     
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
         stage('Build Product Update Site') {
             steps {
                 configFileProvider([
