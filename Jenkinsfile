@@ -7,9 +7,15 @@ pipeline {
         buildDiscarder(logRotator(daysToKeepStr: '40', numToKeepStr: '70'))
     }
     
-    triggers {
-        // Zorgt ervoor dat het vinkje voor GitHub polling in de UI geactiveerd blijft
-        githubPush()
+   triggers {
+        GenericTrigger(
+            genericVariables: [
+                [key: 'ref', value: '$.ref']
+            ],
+            token: 'servoy-eclipse',
+            regexpFilterText: '$ref',
+            regexpFilterExpression: "^refs/heads/${env.BRANCH}\$"
+        )
     }
     
     parameters {
