@@ -10,7 +10,7 @@ pipeline {
     }
     
     parameters {
-        string(name: 'goals', defaultValue: 'clean install -Ponly_product', trim: false)
+        string(name: 'goals', defaultValue: 'clean install -Ponly_product -Dservoy.ai.repo.url=file:///data/www/latest/servoy_ai/', trim: false)
     }
     
     environment {
@@ -23,12 +23,8 @@ pipeline {
         maven 'Maven 3.9.16'
     }
     
+
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
         stage('Build Product Update Site') {
             steps {
                 configFileProvider([

@@ -7,9 +7,15 @@ pipeline {
         buildDiscarder(logRotator(daysToKeepStr: '40', numToKeepStr: '70'))
     }
     
-    triggers {
-        // Zorgt ervoor dat het vinkje voor GitHub polling in de UI geactiveerd blijft
-        githubPush()
+   triggers {
+        GenericTrigger(
+            genericVariables: [
+                [key: 'ref', value: '$.ref']
+            ],
+            token: 'servoy-eclipse',
+            regexpFilterText: '$ref',
+            regexpFilterExpression: "^refs/heads/${env.BRANCH}\$"
+        )
     }
     
     parameters {
@@ -27,12 +33,6 @@ pipeline {
     }
     
     stages {
-        stage('Checkout') {
-            steps {
-                // checkout scm haalt automatisch de juiste branch/commit op die de build triggerde
-                checkout scm
-            }
-        }
         stage('Build with Tycho 5') {
             steps {
                 configFileProvider([
