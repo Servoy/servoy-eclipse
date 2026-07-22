@@ -351,6 +351,11 @@ public class EclipseMessages implements ICustomMessageLoader
 					{
 						for (Solution s : allSolutions)
 						{
+							if (s == null)
+							{
+								ServoyLog.logError("Null solution encountered in allSolutions array while writing i18n messages", null);
+								continue;
+							}
 							String i18nDataSource = s.getI18nDataSource();
 							if (i18nDataSource != null)
 							{
