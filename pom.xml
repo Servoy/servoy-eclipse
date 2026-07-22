@@ -379,8 +379,8 @@
 								</goals>
 								<configuration>
 									<target>
-										<delete>
-											<fileset quiet="true"
+										<delete quiet="true">
+											<fileset
 												dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
 												includes="TEST*.xml" />
 										</delete>
@@ -414,8 +414,8 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <delete>
-                                            <fileset quiet="true"
+                                        <delete quiet="true">
+                                            <fileset
                                                 dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
                                                 includes="TEST*.xml" />
                                         </delete>
