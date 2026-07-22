@@ -128,7 +128,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <repositories>
       <repository location="https://download.servoy.com/developer/latest/" name="Servoy Latest Releases" enabled="true" />
-      <repository location="https://download.servoy.com/developer/lts" name="Servoy LTS Releases" enabled="false" />
+      <repository location="https://download.servoy.com/developer/lts_2026" name="Servoy 2026 LTS Releases" enabled="false" />
       <repository location="https://download.servoy.com/developer/latest/releasecandidate" name="Servoy Latest Release Candidates" enabled="true" />
       <repository location="https://developer.servoy.com/sqlexplorer/" name="SQLExplorer" enabled="true" />
       <repository location="https://download.eclipse.org/eclipse/updates/4.39" name="Eclipse Release" enabled="true" />
