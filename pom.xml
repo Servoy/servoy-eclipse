@@ -415,7 +415,7 @@
                                 <configuration>
                                     <target>
                                         <delete>
-                                            <fileset
+                                            <fileset quiet="true"
                                                 dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
                                                 includes="TEST*.xml" />
                                         </delete>
