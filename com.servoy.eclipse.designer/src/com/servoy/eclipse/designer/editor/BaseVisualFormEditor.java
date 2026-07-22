@@ -752,6 +752,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	{
 		final boolean hasFormReference[] = { false };
 		Form flattenedForm = fs.getFlattenedForm(form);
+		if (flattenedForm == null) return false;
 		flattenedForm.acceptVisitor(new IPersistVisitor()
 		{
 			@Override
