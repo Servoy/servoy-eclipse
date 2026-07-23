@@ -84,6 +84,7 @@ public class RunClientTests extends RunJSUnitTests
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
 				{
+					System.err.println("[DIAG-WAITJOB] waitForSolutionToLoad RUNNING, port=" + port);
 					try
 					{
 						monitor.beginTask("waiting for debugger to start...", IProgressMonitor.UNKNOWN);
@@ -105,12 +106,23 @@ public class RunClientTests extends RunJSUnitTests
 						{
 							// log this but continue anyway (but without debugging working probably
 							ServoyLog.logWarning("Debugger start timeout while running jsunit tests.", null);
+							System.err.println("[DIAG-WAITJOB] Debugger not connected (continuing anyway)");
 						}
 
 						monitor.setTaskName("testing...");
+						System.err.println("[DIAG-WAITJOB] testApp=" + testApp + " testTarget=" + testTarget);
+						System.err.println("[DIAG-WAITJOB] testApp.getSolution()=" +
+							(testApp.getSolution() != null ? testApp.getSolution().getName() : "null"));
 						TestClientTestSuite.setTestTarget(testApp, testTarget);
+						System.err.println("[DIAG-WAITJOB] calling runJUnitClass(port=" + port + ", TestClientTestSuite.class)");
 						runJUnitClass(port, TestClientTestSuite.class);
+						System.err.println("[DIAG-WAITJOB] runJUnitClass completed");
 						writeCoverageIfAvailable();
+					}
+					catch (Exception e)
+					{
+						System.err.println("[DIAG-WAITJOB] EXCEPTION: " + e);
+						e.printStackTrace(System.err);
 					}
 					finally
 					{
