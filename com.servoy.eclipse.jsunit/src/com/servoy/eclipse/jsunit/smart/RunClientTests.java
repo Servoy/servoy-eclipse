@@ -127,11 +127,13 @@ public class RunClientTests extends RunJSUnitTests
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor)
 				{
+					System.err.println("[DIAG-RUNCLIENT] startSmartClientJob RUNNING on UI thread");
 					try
 					{
 						cancelCleanupShutDown = false; // because of the rule, last run session should have already finished by now, so no more danger in old cleanup shutting down newly open client
 						StartJsUnitClientActionDelegate startJsUnitClientAction = new StartJsUnitClientActionDelegate();
 						startJsUnitClientAction.init(window);
+						System.err.println("[DIAG-RUNCLIENT] window=" + window);
 						((SwitchableEclipseUserManager)ApplicationServerRegistry.get().getUserManager()).switchTo(testUserManager); // use testUserManager in app. server code as well
 						try
 						{
@@ -139,9 +141,11 @@ public class RunClientTests extends RunJSUnitTests
 						}
 						catch (ExecutionException e)
 						{
+							System.err.println("[DIAG-RUNCLIENT] ExecutionException: " + e.getMessage());
 							ServoyLog.logError(e);
 						}
 
+						System.err.println("[DIAG-RUNCLIENT] clientStartSucceeded=" + startJsUnitClientAction.clientStartSucceeded());
 						if (startJsUnitClientAction.clientStartSucceeded())
 						{
 							waitForSolutionToLoad.schedule(); // second job - will be canceled if first fails
@@ -155,6 +159,7 @@ public class RunClientTests extends RunJSUnitTests
 					}
 					catch (RuntimeException e)
 					{
+						System.err.println("[DIAG-RUNCLIENT] RuntimeException: " + e.getMessage());
 						ServoyLog.logError(e);
 						cleanUpAfterPrepare();
 						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot start unit test SmartClient", e);

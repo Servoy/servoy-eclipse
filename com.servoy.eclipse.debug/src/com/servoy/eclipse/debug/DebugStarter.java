@@ -76,6 +76,7 @@ public class DebugStarter implements IDebuggerStarter
 	{
 		DLTKDebugUIPlugin.getDefault();
 		int port = RemoteDebugScriptEngine.startupDebugger();
+		System.err.println("[DIAG-DEBUGSTARTER] startupDebugger port: " + port);
 		if (port == -1)
 		{
 			Display.getDefault().asyncExec(new Runnable()
@@ -85,25 +86,33 @@ public class DebugStarter implements IDebuggerStarter
 					MessageDialog.openError(UIUtils.getActiveShell(), "Error starting debugger", "Please check your logs");
 				}
 			});
+			System.err.println("[DIAG-DEBUGSTARTER] RETURNING FALSE: port == -1");
 			return false;
 		}
 		DLTKDebugPlugin.getDefault().getPluginPreferences().setValue(DLTKDebugPreferenceConstants.PREF_DBGP_REMOTE_PORT, port);
 
+		System.err.println("[DIAG-DEBUGSTARTER] isConnected=" + RemoteDebugScriptEngine.isConnected()
+			+ " isScriptDebugTargetLaunched=" + isScriptDebugTargetLaunched());
 		if (!RemoteDebugScriptEngine.isConnected() || !isScriptDebugTargetLaunched())
 		{
 			if (lastTimeStarted != 0 && (System.currentTimeMillis() - lastTimeStarted) < 2000)
 			{
+				System.err.println("[DIAG-DEBUGSTARTER] RETURNING FALSE: rate limiter (lastTimeStarted=" + lastTimeStarted + ")");
 				return false;
 			}
 			lastTimeStarted = System.currentTimeMillis();
 			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+			System.err.println("[DIAG-DEBUGSTARTER] activeProject=" + (activeProject != null ? activeProject.getProject().getName() : "null"));
 			if (activeProject != null && activeProject.getProject() != null)
 			{
 				IFile script = getJavascriptFile(activeProject);
+				System.err.println("[DIAG-DEBUGSTARTER] script=" + (script != null ? script.getFullPath() : "null")
+					+ " exists=" + (script != null && script.exists()));
 				if (script == null)
 				{
 					// shouldn't happen
 					ServoyLog.logError("Couldn't start the debugger because there was no javascript file found", null);
+					System.err.println("[DIAG-DEBUGSTARTER] RETURNING FALSE: no javascript file");
 					return false;
 				}
 				ILaunchConfigurationType configType = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(
@@ -113,6 +122,7 @@ public class DebugStarter implements IDebuggerStarter
 				{
 					if (listener != null) listener.aboutToStartDebugClient();
 					final ILaunchConfiguration config = findLaunchConfiguration(script, configType);
+					System.err.println("[DIAG-DEBUGSTARTER] launchConfig=" + (config != null ? config.getName() : "null"));
 					if (config != null)
 					{
 						Display.getDefault().syncExec(new Runnable()
@@ -126,16 +136,19 @@ public class DebugStarter implements IDebuggerStarter
 					else
 					{
 						ServoyLog.logError("Couldn't start the debugger because there was no launch config", null);
+						System.err.println("[DIAG-DEBUGSTARTER] RETURNING FALSE: no launch config");
 						return false;
 					}
 				}
 				catch (Exception ex)
 				{
 					ServoyLog.logError(ex);
+					System.err.println("[DIAG-DEBUGSTARTER] RETURNING FALSE: exception " + ex);
 					return false;
 				}
 			}
 		}
+		System.err.println("[DIAG-DEBUGSTARTER] RETURNING TRUE");
 		return true;
 
 	}
