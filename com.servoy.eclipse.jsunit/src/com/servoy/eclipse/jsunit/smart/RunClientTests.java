@@ -84,7 +84,6 @@ public class RunClientTests extends RunJSUnitTests
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
 				{
-					System.err.println("[DIAG-WAITJOB] waitForSolutionToLoad RUNNING, port=" + port);
 					try
 					{
 						monitor.beginTask("waiting for debugger to start...", IProgressMonitor.UNKNOWN);
@@ -106,23 +105,12 @@ public class RunClientTests extends RunJSUnitTests
 						{
 							// log this but continue anyway (but without debugging working probably
 							ServoyLog.logWarning("Debugger start timeout while running jsunit tests.", null);
-							System.err.println("[DIAG-WAITJOB] Debugger not connected (continuing anyway)");
 						}
 
 						monitor.setTaskName("testing...");
-						System.err.println("[DIAG-WAITJOB] testApp=" + testApp + " testTarget=" + testTarget);
-						System.err.println("[DIAG-WAITJOB] testApp.getSolution()=" +
-							(testApp.getSolution() != null ? testApp.getSolution().getName() : "null"));
 						TestClientTestSuite.setTestTarget(testApp, testTarget);
-						System.err.println("[DIAG-WAITJOB] calling runJUnitClass(port=" + port + ", TestClientTestSuite.class)");
 						runJUnitClass(port, TestClientTestSuite.class);
-						System.err.println("[DIAG-WAITJOB] runJUnitClass completed");
 						writeCoverageIfAvailable();
-					}
-					catch (Exception e)
-					{
-						System.err.println("[DIAG-WAITJOB] EXCEPTION: " + e);
-						e.printStackTrace(System.err);
 					}
 					finally
 					{
@@ -139,13 +127,11 @@ public class RunClientTests extends RunJSUnitTests
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor)
 				{
-					System.err.println("[DIAG-RUNCLIENT] startSmartClientJob RUNNING on UI thread");
 					try
 					{
 						cancelCleanupShutDown = false; // because of the rule, last run session should have already finished by now, so no more danger in old cleanup shutting down newly open client
 						StartJsUnitClientActionDelegate startJsUnitClientAction = new StartJsUnitClientActionDelegate();
 						startJsUnitClientAction.init(window);
-						System.err.println("[DIAG-RUNCLIENT] window=" + window);
 						((SwitchableEclipseUserManager)ApplicationServerRegistry.get().getUserManager()).switchTo(testUserManager); // use testUserManager in app. server code as well
 						try
 						{
@@ -153,11 +139,9 @@ public class RunClientTests extends RunJSUnitTests
 						}
 						catch (ExecutionException e)
 						{
-							System.err.println("[DIAG-RUNCLIENT] ExecutionException: " + e.getMessage());
 							ServoyLog.logError(e);
 						}
 
-						System.err.println("[DIAG-RUNCLIENT] clientStartSucceeded=" + startJsUnitClientAction.clientStartSucceeded());
 						if (startJsUnitClientAction.clientStartSucceeded())
 						{
 							waitForSolutionToLoad.schedule(); // second job - will be canceled if first fails
@@ -171,7 +155,6 @@ public class RunClientTests extends RunJSUnitTests
 					}
 					catch (RuntimeException e)
 					{
-						System.err.println("[DIAG-RUNCLIENT] RuntimeException: " + e.getMessage());
 						ServoyLog.logError(e);
 						cleanUpAfterPrepare();
 						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot start unit test SmartClient", e);

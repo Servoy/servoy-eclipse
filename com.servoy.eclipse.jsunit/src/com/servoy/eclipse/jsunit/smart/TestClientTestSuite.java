@@ -49,13 +49,9 @@ public class TestClientTestSuite extends ApplicationJSTestSuite
 	@Override
 	public void run(TestResult result)
 	{
-		System.err.println("[DIAG-SUITE-RUN] TestClientTestSuite.run testList.size=" + (testList == null ? "null" : testList.size()) +
-			" countTestCases=" + countTestCases() + " target.launch=" + (target == null ? "null" : target.launch));
 		ScriptUnitTestRunNotifier scriptUnitNotifier = new ScriptUnitTestRunNotifier(testList, result, target);
 		result.addListener(scriptUnitNotifier);
 		super.run(result);
-		System.err.println("[DIAG-SUITE-RUN] super.run completed; result.runCount=" + result.runCount() +
-			" failures=" + result.failureCount() + " errors=" + result.errorCount());
 	}
 
 	public static void setTestTarget(IApplication app, TestTarget target)

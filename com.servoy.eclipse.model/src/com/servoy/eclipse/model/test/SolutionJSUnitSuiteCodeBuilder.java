@@ -92,27 +92,9 @@ public class SolutionJSUnitSuiteCodeBuilder
 	{
 		if (solution == null || flattenedSolution == null)
 		{
-			System.out.println("[DIAG-SUITE] solution=" + solution + " flattenedSolution=" + flattenedSolution);
 			initializeWithError("No solution loaded in test client.");
 			return;
 		}
-		// DIAG: log what the discovery sees
-		System.out.println("[DIAG-SUITE] solution=" + solution.getName() + " target=" + target);
-		int scopeCount = 0;
-		int totalMethods = 0;
-		for (String scopeName : solution.getScopeNames())
-		{
-			scopeCount++;
-			int methodCount = 0;
-			Iterator<ScriptMethod> smIt = solution.getScriptMethods(scopeName, true);
-			while (smIt.hasNext()) { smIt.next(); methodCount++; }
-			totalMethods += methodCount;
-			System.out.println("[DIAG-SUITE]   scope=" + scopeName + " methods=" + methodCount);
-		}
-		int formCount = 0;
-		Iterator<Form> fIt = solution.getForms(null, true);
-		while (fIt.hasNext()) { fIt.next(); formCount++; }
-		System.out.println("[DIAG-SUITE] scopeCount=" + scopeCount + " totalMethods=" + totalMethods + " formCount=" + formCount);
 		// build solution test suite code; the structure will look like this:
 		//
 		// Solution suite

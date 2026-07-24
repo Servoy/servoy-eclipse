@@ -55,8 +55,6 @@ public class ScriptUnitTestRunNotifier implements TestListener
 		this.nrOfTests = testList.get(0).countTestCases();
 		this.testingClient = getScriptTestRunnerClient(target);
 		this.testResult = testResult;
-		System.err.println("[DIAG-NOTIFIER] created: nrOfTests=" + nrOfTests + " testingClient=" + testingClient +
-			" (null means DLTK session not found for launch=" + (target == null ? "null" : target.launch) + ")");
 	}
 
 	private void sendStartRun()
@@ -172,8 +170,6 @@ public class ScriptUnitTestRunNotifier implements TestListener
 	private ITestingClient getScriptTestRunnerClient(TestTarget target)
 	{
 		ITestRunSession testRunSession = org.eclipse.dltk.testing.DLTKTestingPlugin.getModel().getTestRunSession((ILaunch)target.launch);
-		System.err.println("[DIAG-NOTIFIER] getScriptTestRunnerClient: launch=" + (target == null ? "null" : target.launch) +
-			" testRunSession=" + testRunSession + " client=" + (testRunSession == null ? "null" : testRunSession.getTestRunnerClient()));
 		if (testRunSession != null)
 		{
 			return testRunSession.getTestRunnerClient();
