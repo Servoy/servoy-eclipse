@@ -154,6 +154,7 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 - **SVY-21118 doc generator parsing:** `com.servoy.eclipse.docgenerator.tests` (in `docgenerator-ui` repo) → `DocumentedParameterDataTest` [Plugin JUnit, requires m2e in target] — tests that `{Object<String>}` in `@param` descriptions is extracted as jsType
 - **SVY-21257 WebComponent clone UUID:** `j2db_test` → `WebComponentCloneTest` [JUnit] — tests that `WebComponent.cloneObj()` regenerates UUIDs for custom type children (AG Grid columns)
 - **SVY-21121 Console/AI view in perspective:** `com.servoy.eclipse.ui.tests` → `DesignPerspectiveTest` [Plugin JUnit] — tests that Console and Servoy AI views are added as visible views (not placeholders) in the bottom folder of the Servoy Design perspective
+- **SVY-21272 ClassCastException in hasChildren:** `com.servoy.eclipse.ui.tests` → `SolutionExplorerTreeContentProviderHasChildrenTest` [JUnit] — tests that `hasChildren()` does not throw ClassCastException when parent is a plain SimpleUserNode (e.g., RETURNTYPEPLACEHOLDER), and correctly returns false for UserNode with TABLE/INMEMORY_DATASOURCE/VIEW_FOUNDSET types
 
 ## Dependencies
 
