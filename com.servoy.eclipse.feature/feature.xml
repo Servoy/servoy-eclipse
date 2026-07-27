@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="2026.6.0.qualifier"
+      version="2026.9.0.qualifier"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -11,12 +11,11 @@
    </description>
 
    <copyright url="http://download.servoy.com/developer/copyright.html">
-      Copyright © 1997-2026 Servoy BV. All rights reserved.
+      Copyright (c) 1997-2026 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
-This computer program is protected by copyright law and international
-treaties.
-Unauthorized reproduction or distribution of this program, or
-any
+
+This computer program is protected by copyright law and international treaties.
+Unauthorized reproduction or distribution of this program, or any
 portion of it, may result in severe civil and criminal penalties,
 and will be prosecuted to the maximum extent possible under law.
    </copyright>
@@ -68,7 +67,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.css.core"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <includes
          id="org.eclipse.dltk.core.servoy"
@@ -111,107 +110,107 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.core"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
-         version="1.9.1.s1"/>
+         version="1.9.1.s3"/>
 
    <plugin
          id="j2db_documentation"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="j2db_log4j"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="j2db_server"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="servoy_debug"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="servoy_headless_client"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="servoy_shared"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="servoy_smart_client"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.model"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="servoy_base"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="org.apache.tomcat"
-         version="11.0.11"/>
+         version="11.0.22"/>
 
    <plugin
          id="sablo"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="servoy_ngclient"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="org.maven.ide.eclipse.grouplayout"
@@ -231,27 +230,27 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="org.apache.logging.log4j.api"
-         version="2.25.4"/>
+         version="2.26.1"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
-         version="2.25.4"/>
+         version="2.26.1"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j2.impl"
-         version="2.25.4"/>
+         version="2.26.1"/>
 
    <plugin
          id="javax.transaction"
@@ -267,7 +266,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.hibernate.orm.core"
-         version="5.6.15.Servoy3"/> <!--RAGTEST -->
+         version="5.6.15.Servoy3"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
@@ -275,7 +274,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.ngclient.ui"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
@@ -300,29 +299,29 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.exporter.ngdesktop"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.ngclient"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="com.servoy.eclipse.jre.linux.x86_64"
          os="linux"
          arch="x86_64"
-         version="25.0.1"/>
+         version="25.0.3"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
          os="win32"
          arch="x86_64"
-         version="25.0.1"/>
+         version="25.0.3"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
          os="macosx"
          arch="x86_64"
-         version="25.0.1"/>
+         version="25.0.3"/>
 
    <plugin
          id="jakarta.persistence-api"
@@ -336,7 +335,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.jre.macosx.aarch64"
          os="macosx"
          arch="aarch64"
-         version="25.0.1"/>
+         version="25.0.3"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
@@ -347,11 +346,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="slf4j.api"
-         version="2.0.17"/>
+         version="2.0.18"/>
 
    <plugin
          id="com.servoy.eclipse.cloud"
-         version="2026.6.0.qualifier"/>
+         version="2026.9.0.qualifier"/>
 
    <plugin
          id="org.hibernate.common.hibernate-commons-annotations"
@@ -359,13 +358,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.commons.commons-codec"
-         version="1.21.0"/>
+         version="1.22.0"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.aarch64"
          os="win32"
          arch="aarch64"
-         version="21.0.8"/>
+         version="25.0.3"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.win32.win32.aarch64"
@@ -376,46 +375,50 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.logging.log4j.jakarta.web"
-         version="2.25.4"/>
+         version="2.26.1"/>
 
    <plugin
          id="com.equo.chromium"
-         version="138.0.13"/>
+         version="144.0.9"/>
 
    <plugin
          id="com.equo.chromium.cef.cocoa.macosx.aarch64"
          os="macosx"
          arch="aarch64"
-         version="138.0.11"/>
+         version="144.0.9"/>
 
    <plugin
          id="com.equo.chromium.cef.cocoa.macosx.x86_64"
          os="macosx"
          arch="x86_64"
-         version="138.0.11"/>
+         version="144.0.9"/>
 
    <plugin
          id="com.equo.chromium.cef.gtk.linux.aarch64"
          os="linux"
          arch="aarch64"
-         version="138.0.11"/>
+         version="144.0.9"/>
 
    <plugin
          id="com.equo.chromium.cef.gtk.linux.x86_64"
          os="linux"
          arch="x86_64"
-         version="138.0.11"/>
+         version="144.0.9"/>
 
    <plugin
          id="com.equo.chromium.cef.win32.win32.aarch64"
          os="win32"
          arch="aarch64"
-         version="138.0.11"/>
+         version="144.0.9"/>
 
    <plugin
          id="com.equo.chromium.cef.win32.win32.x86_64"
          os="win32"
          arch="x86_64"
-         version="138.0.11"/>
+         version="144.0.9"/>
+
+   <plugin
+         id="org.eclipse.jface"
+         version="3.39.0.v20260122-1511"/>
 
 </feature>

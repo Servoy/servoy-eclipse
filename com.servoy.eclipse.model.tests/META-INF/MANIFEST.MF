@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for com.servoy.eclipse.model
+Bundle-SymbolicName: com.servoy.eclipse.model.tests
+Bundle-Version: 2026.9.0.qualifier
+Bundle-Vendor: Servoy
+Fragment-Host: com.servoy.eclipse.model
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Import-Package: org.junit.jupiter.api;version="[5.0.0,6.0.0)",
+ org.junit.jupiter.api.extension;version="[5.0.0,6.0.0)",
+ org.junit.jupiter.api.function;version="[5.0.0,6.0.0)",
+ org.junit.jupiter.params;version="[5.0.0,6.0.0)",
+ org.junit.jupiter.params.provider;version="[5.0.0,6.0.0)",
+ org.mockito,
+ org.mockito.junit.jupiter,
+ org.mockito.stubbing
+Automatic-Module-Name: com.servoy.eclipse.model.tests

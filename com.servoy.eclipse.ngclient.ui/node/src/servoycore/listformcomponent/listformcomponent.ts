@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import {
   Component, TemplateRef, ElementRef, AfterViewInit, Renderer2,
-  HostListener, ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
+  ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
   DOCUMENT,
   input,
   viewChild, signal
@@ -33,12 +33,13 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     selector: 'servoycore-listformcomponent',
     styleUrls: ['./listformcomponent.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { '(keydown)': 'handleKeyDown($event)' },
     template: `
-    <div class="svy-listformcomponent" [ngClass]='styleClass()' #element>
+    <div class="svy-listformcomponent" [class]='styleClass()' #element>
       @if (useScrolling) {
         <ag-grid-angular #aggrid
           [gridOptions]="agGridOptions"
-          [ngStyle]="getAGGridStyle()"
+          [style]="getAGGridStyle()"
           [sabloTabseq]="tabSeq()"
           [sabloTabseqConfig]="{container: true, reservedGap: 1000}">
         </ag-grid-angular>
@@ -48,7 +49,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
         @if (cache&&containedForm()&&containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track row; let i = $index) {
-              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'height.px': getRowHeight(), 'width' : getRowWidth()}" style="display:inline-block; position: relative">
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{height: getRowHeight() !== null ? getRowHeight() + 'px' : null, width: getRowWidth()}" style="display:inline-block; position: relative">
                 @for (item of cache.items; track item) {
                   <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                     <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i }"></ng-template>  <!-- component  -->
@@ -61,7 +62,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
         @if (cache&&containedForm()&&!containedForm().absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track trackByFn(i, row); let i = $index) {
-              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [ngStyle]="{'width' : getRowWidth()}" style="display:inline-block">
+              <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{'width' : getRowWidth()}" style="display:inline-block">
                 @for (item of cache.items; track item) {
                   <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state: getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
                   }  <!-- component or responsive div  -->
@@ -71,10 +72,13 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
           }
           <div class='svyPagination'><div #firstelement style='text-align:center;cursor:pointer;display:inline;visibility:hidden;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='firstPage()' ><i class='fa fa-backward' aria-hidden="true"></i></div><div  #leftelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveLeft()' ><i class='fa fa-chevron-left' aria-hidden="true"></i></div><div #rightelement style='text-align:center;cursor:pointer;visibility:hidden;display:inline;padding:3px;white-space:nowrap;vertical-align:middle;background-color:rgb(255, 255, 255, 0.6);' (click)='moveRight()'><i class='fa fa-chevron-right' aria-hidden="true"></i></div></div>
         }
+        @if (servoyApi.isInDesigner() && (!cache || !containedForm())) {
+          <div class="svy-listformcomponent-designer-placeholder"></div>
+        }
       </div>
     
       <ng-template  #svyResponsiveDiv  let-state="state" let-row="row" let-i="i">
-        <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
+        <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [class]="getDesignNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
           @for (item of state.items; track item) {
             <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>
           }
@@ -83,7 +87,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
       <ng-template  #formComponentAbsoluteDiv  let-state="state" let-row="row" let-i="i">
         <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
           @for (item of state.items; track item) {
-            <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [style]="item.model.visible === false ? {'display': 'none'} : null" style="position:absolute"> <!-- wrapper div -->
               <ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}"></ng-template>  <!-- component  -->
             </div>
           }
@@ -154,6 +158,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     resizeObserver: ResizeObserver;
     resizeTimeout: any;
     previousWidth = 0;
+    private rowHeightMeasured = false;
 
     // used for paging
     page = 0;
@@ -193,7 +198,6 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         this.log = logFactory.getLogger('ListFormComponent');
     }
 
-    @HostListener('keydown', ['$event'])
     handleKeyDown(event: any) {
         const foundset = this._foundset();
         if (!foundset.multiSelect && event.key === 'ArrowUp' || event.key === 'ArrowDown') {
@@ -315,7 +319,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     }
                 },
                 columnDefs: [
-                    { cellRenderer: 'row-renderer', autoHeight: true }
+                    { cellRenderer: 'row-renderer', autoHeight: !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0 ? false : true }
                 ],
                 rowModelType: 'serverSide',
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
@@ -526,23 +530,26 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 this.resizeObserver = new ResizeObserver((entries) => {
                     const newWidth = entries[0].contentRect.width;
                     if(newWidth !== this.previousWidth) {
-                        if(this.resizeTimeout) {
-                            clearTimeout(this.resizeTimeout);
-                        }
-                        this.resizeTimeout = setTimeout(() => {
-                            const agGrid = this.agGrid();
-                            if(!agGrid.api.isDestroyed()) {
-                                this.numberOfColumns = this.calculateNumberOfColumns();
-                                this.resizeTimeout = null;
-                                agGrid.api.refreshServerSide({ purge: true });
-                                const foundset = this._foundset();
-                                agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
-                                setTimeout(() => {
-                                    this.scrollToSelection();
-                                }, 200);
-                            }
-                        }, 200);
                         this.previousWidth = newWidth;
+                        const newNumberOfColumns = this.calculateNumberOfColumns();
+                        if(newNumberOfColumns !== this.numberOfColumns) {
+                            if(this.resizeTimeout) {
+                                clearTimeout(this.resizeTimeout);
+                            }
+                            this.resizeTimeout = setTimeout(() => {
+                                const agGrid = this.agGrid();
+                                if(!agGrid.api.isDestroyed()) {
+                                    this.numberOfColumns = this.calculateNumberOfColumns();
+                                    this.resizeTimeout = null;
+                                    agGrid.api.refreshServerSide({ purge: true });
+                                    const foundset = this._foundset();
+                                    agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
+                                    setTimeout(() => {
+                                        this.scrollToSelection();
+                                    }, 200);
+                                }
+                            }, 200);
+                        }
                     }
                 });
                 this.resizeObserver.observe(this.element().nativeElement);
@@ -609,13 +616,30 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             rowStyle['margin-top'] = containedFormMargin.paddingTop;
             rowStyle['margin-bottom'] = containedFormMargin.paddingBottom;
         }
-        if(includeHeight) rowStyle['height.px'] = this.getRowHeight();
+        if(includeHeight && this.getRowHeight() !== null) rowStyle['height'] = this.getRowHeight() + 'px';
         return rowStyle;
     }
 
     getRowHeight(): number {
         const containedForm = this.containedForm();
         return containedForm.formHeight ? containedForm.formHeight : null;
+    }
+
+    onRowRendererAfterViewInit(elementRef: ElementRef): void {
+        if (!this.rowHeightMeasured && !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0) {
+            this.rowHeightMeasured = true;
+            requestAnimationFrame(() => {
+                const contentEl = elementRef.nativeElement.querySelector(':first-child');
+                const measuredHeight = contentEl ? contentEl.scrollHeight : elementRef.nativeElement.scrollHeight;
+                if (measuredHeight > 0) {
+                    const agGrid = this.agGrid();
+                    if (agGrid && !agGrid.api.isDestroyed()) {
+                        agGrid.api.setGridOption('rowHeight', measuredHeight);
+                        agGrid.api.resetRowHeights();
+                    }
+                }
+            });
+        }
     }
 
     getRowWidth(): string {
@@ -989,7 +1013,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight() < 1) {
             aggridStyle['height'] = '100%';
         } else {
-            aggridStyle['height.px'] = this.responsiveHeight();
+            aggridStyle['height'] = this.responsiveHeight() + 'px';
         }
         return aggridStyle;
     }

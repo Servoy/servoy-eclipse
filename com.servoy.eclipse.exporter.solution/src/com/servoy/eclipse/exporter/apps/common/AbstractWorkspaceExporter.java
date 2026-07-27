@@ -438,7 +438,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						boolean existed = p.exists();
 						if (!existed)
 						{
-							if (useLinks)
+							if (useLinks || !p.getName().equals(f.getName())) // so if real project dir is not in the workspace root, or if it's .project says it should have a different name then it's dir name, then it's a "link"
 							{
 								// create a new project in this workspace linking to the real project location
 								IProjectDescription projectDescription = workspaceRoot.getWorkspace().newProjectDescription(p.getName());

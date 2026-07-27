@@ -1,6 +1,6 @@
 <div [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}">
   <div id="tabStart" [sabloTabseq]="1" (focus)="firstElementFocused($event)"></div>
-  <div id='formpopup' [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" [ngStyle]="getStyle()">
+  <div id='formpopup' [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" [style]="getStyle()">
     <svy-form [name]="getForm()"></svy-form>
   </div>
   <div id="tabStop" [sabloTabseq]="3" (focus)="lastElementFocused($event)"></div>

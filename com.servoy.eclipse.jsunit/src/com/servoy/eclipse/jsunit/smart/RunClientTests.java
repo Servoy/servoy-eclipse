@@ -21,6 +21,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
@@ -28,6 +29,7 @@ import org.eclipse.ui.progress.WorkbenchJob;
 
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.jsunit.Activator;
+import com.servoy.eclipse.jsunit.runner.JSUnitCoverageWriter;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.SerialRule;
@@ -108,6 +110,7 @@ public class RunClientTests extends RunJSUnitTests
 						monitor.setTaskName("testing...");
 						TestClientTestSuite.setTestTarget(testApp, testTarget);
 						runJUnitClass(port, TestClientTestSuite.class);
+						writeCoverageIfAvailable();
 					}
 					finally
 					{
@@ -172,6 +175,32 @@ public class RunClientTests extends RunJSUnitTests
 			}
 		}
 	}
+
+	/**
+	 * Writes the JSUnit coverage JSON file after a test run completes.
+	 * Reads coverage data from the last run suite and writes it to the workspace root.
+	 */
+	private void writeCoverageIfAvailable()
+	{
+		try
+		{
+			TestClientTestSuite suite = TestClientTestSuite.getLastRunSuite();
+			if (suite == null) return;
+			if (suite.getLineNumbers() == null || suite.getLineNumbers().isEmpty()) return;
+
+			String solutionName = testTarget != null && testTarget.getActiveSolution() != null
+				? testTarget.getActiveSolution().getName() : "unknown";
+			String outputPath = Platform.getLocation().toOSString() +
+				java.io.File.separator + "jsunit-coverage.json";
+
+			JSUnitCoverageWriter.write(suite.getLineNumbers(), suite.getReachableLines(), solutionName, outputPath);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Error writing JSUnit coverage report", e);
+		}
+	}
+
 
 	@Override
 	protected void cleanUpAfterPrepare()

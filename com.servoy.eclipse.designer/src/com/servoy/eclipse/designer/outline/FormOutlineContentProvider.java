@@ -137,7 +137,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
 			List<IPersist> allObjectsAsList = new ArrayList<>(getPersistChildrenAsList(((AbstractBase)((PersistContext)parentElement).getPersist()), false));
-			Collections.sort(allObjectsAsList, new WrappingComparator<IPersist, IPersist>(PositionComparator.XY_PERSIST_COMPARATOR)
+			Collections.sort(allObjectsAsList, new WrappingComparator<IPersist, IPersist>(PositionComparator.RESPONSIVE_PERSIST_COMPARATOR)
 			{
 				@Override
 				protected IPersist convertToWrappedComparatorValue(IPersist value)
@@ -394,7 +394,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		{
 			if (!(o1 instanceof PersistContext) || !(o2 instanceof PersistContext)) return 0;
 
-			return PositionComparator.XY_PERSIST_COMPARATOR.compare(((PersistContext)o1).getPersist(), ((PersistContext)o2).getPersist());
+			return PositionComparator.RESPONSIVE_PERSIST_COMPARATOR.compare(((PersistContext)o1).getPersist(), ((PersistContext)o2).getPersist());
 		}
 	}
 

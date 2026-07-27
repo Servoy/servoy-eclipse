@@ -288,7 +288,10 @@ public class FormContentProvider implements ITreeContentProvider
 	{
 		if (element instanceof String elementUUID)
 		{
-			// a form
+			if (workingSetForms.containsKey(elementUUID))
+			{
+				return null;
+			}
 			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 			Form form = flattenedSolution.getForm(elementUUID);
 			if (activeProject != null && form != null)

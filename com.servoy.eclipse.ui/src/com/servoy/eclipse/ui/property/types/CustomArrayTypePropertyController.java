@@ -345,7 +345,19 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 		protected Object getDefaultElementProperty(Object id)
 		{
-			return getArrayElementPD().getDefaultValue();
+			Object defaultValue = getArrayElementPD().getDefaultValue();
+			if (defaultValue == null && webComponentPropertyDescription.getType() instanceof ICustomType< ? > &&
+				id instanceof ArrayPropertyChildId arrayPropertyChildId)
+			{
+				IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
+				String parentKey = String.valueOf(arrayPropertyChildId.arrayPropId);
+				int indexInArray = arrayPropertyChildId.idx;
+				PropertyDescription elementPD = getArrayElementPD();
+				WebCustomType newInstance = WebCustomType.createNewInstance(parent, elementPD, parentKey, indexInArray);
+				newInstance.setTypeName(getTypeName());
+				return newInstance;
+			}
+			return defaultValue;
 		}
 	}
 

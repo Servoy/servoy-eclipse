@@ -23,6 +23,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.model.util.ModelUtils;
+
 /**
  * @author jcomp
  *
@@ -131,6 +133,10 @@ public class ServoyMessageDialog extends MessageDialog
 
 	public static boolean open(int kind, Shell parent, String title, String message, int style)
 	{
+		if (ModelUtils.isTestRunning())
+		{
+			return kind == QUESTION || kind == CONFIRM;
+		}
 		ServoyMessageDialog dialog = new ServoyMessageDialog(parent, title, null, message, kind, 0, getButtonLabels(kind));
 		style &= SWT.SHEET;
 		dialog.setShellStyle(dialog.getShellStyle() | style);

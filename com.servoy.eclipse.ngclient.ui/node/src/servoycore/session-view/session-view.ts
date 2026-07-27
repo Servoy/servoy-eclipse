@@ -32,12 +32,17 @@ export class SessionView implements OnInit {
                 .replace('ng-href', 'href');
 
             // Extract <script src>
-            const externalScriptRegex = /<script\b[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi;
+            const externalScriptRegex = /<script\b[^>]*src=["']([^"']+)["'][^>]*>\s*<\/script\s*>/gi;
 
             let safeHtml = processedHtml;
 
-            // Remove external scripts from HTML string
-            safeHtml = safeHtml.replace(externalScriptRegex, '');
+            // Remove external scripts from HTML string; repeat until stable to avoid
+            // incomplete multi-character sanitization where new matches can appear.
+            let previousHtml: string;
+            do {
+                previousHtml = safeHtml;
+                safeHtml = safeHtml.replace(externalScriptRegex, '');
+            } while (safeHtml !== previousHtml);
 
             // Bind safe markup
             this.htmlString = this.sanitizer.bypassSecurityTrustHtml(safeHtml);

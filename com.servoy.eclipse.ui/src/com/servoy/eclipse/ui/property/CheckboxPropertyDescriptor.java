@@ -25,8 +25,11 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 
 import com.servoy.eclipse.ui.Activator;
 
@@ -54,6 +57,17 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 			@Override
 			public void activate()
 			{
+				Control control = getControl();
+				if (control != null && !control.isDisposed() && control.getParent() instanceof Tree)
+				{
+					Tree tree = (Tree)control.getParent();
+					Point cursorLoc = tree.toControl(tree.getDisplay().getCursorLocation());
+					TreeColumn[] columns = tree.getColumns();
+					if (columns.length > 0 && cursorLoc.x <= columns[0].getWidth())
+					{
+						return; // click is in the name/expand column, don't toggle
+					}
+				}
 				markDirty();
 				super.activate();
 			}

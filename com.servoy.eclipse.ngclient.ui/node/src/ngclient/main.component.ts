@@ -11,9 +11,9 @@ import { I18NListener, MainViewRefService } from '@servoy/public';
 import { WindowRefService } from '@servoy/public';
 
 @Component({
-    selector: 'svy-main',
-    templateUrl: './main.component.html',
-    standalone: false
+  selector: 'svy-main',
+  templateUrl: './main.component.html',
+  standalone: false
 })
 
 export class MainComponent implements OnInit, OnDestroy {

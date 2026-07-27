@@ -1495,7 +1495,7 @@ public class TypeCreator extends TypeCache
 					"Returns the style classes of the styleclass named property</br></br>elements.myelem.getStyleClasses();" +
 						"</br></br><b>@return</b> {String[]} array of style classes")));
 			}
-			if (fullTypeName.endsWith(_ABS_POSTFIX))
+			if (fullTypeName.contains(_ABS_POSTFIX))
 			{
 				members.add(fillParameter(createMethod("setLocation",
 					"Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen. Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.</br>NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX();</br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location</br> forms.company.elements.faxBtn.setLocation(x+10,y+10);" +
@@ -2079,7 +2079,23 @@ public class TypeCreator extends TypeCache
 										}
 										else if (paramType != null)
 										{
-											parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+											String paramTypeStr = param.getType();
+											if (paramTypeStr != null && paramTypeStr.contains("<"))
+											{
+												JSDocTypeParser parse = new JSDocTypeParser();
+												try
+												{
+													parameter.setType(parse.parse(paramTypeStr));
+												}
+												catch (ParseException e)
+												{
+													parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+												}
+											}
+											else
+											{
+												parameter.setType(getMemberTypeName(context, name, paramType, typeName));
+											}
 										}
 										else
 										{
@@ -3445,6 +3461,7 @@ public class TypeCreator extends TypeCache
 		private Type createBaseType(String context, String fullTypeName, Class< ? > foundsetClass)
 		{
 			Type type = TypeCreator.this.createType(context, fullTypeName, foundsetClass);
+			type.setSuperType(getType(context, FoundSet.JS_FOUNDSET));
 			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
 
 			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -5426,7 +5443,7 @@ public class TypeCreator extends TypeCache
 			// test for form component
 			if ((smallerThenIndex = wcTypeName.indexOf('<')) != -1) wcTypeName = wcTypeName.substring(0, smallerThenIndex);
 			// test for absolute forms
-			if (wcTypeName.endsWith(_ABS_POSTFIX)) wcTypeName = wcTypeName.substring(0, wcTypeName.length() - _ABS_POSTFIX.length());
+			if (wcTypeName.contains(_ABS_POSTFIX)) wcTypeName = wcTypeName.substring(0, wcTypeName.length() - _ABS_POSTFIX.length());
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(wcTypeName);
 			if (spec != null)

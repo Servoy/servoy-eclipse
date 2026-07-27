@@ -36,7 +36,7 @@ public class MoveScopeAction extends Action implements ISelectionChangedListener
 
 		setText("Move scope");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadDefaultImageDescriptorFromBundle("move_form.png"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("move_form.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -78,7 +78,7 @@ public class MoveScopeAction extends Action implements ISelectionChangedListener
 			Solution oldSolution = (((ServoyProject)project.getRealObject()).getSolution());
 			Solution newSolution = solution.getSolution();
 
-			WorkspaceFileAccess wsfa = new WorkspaceFileAccess(((IProjectNature)solution).getProject().getWorkspace());
+			WorkspaceFileAccess wsfa = new WorkspaceFileAccess(solution.getProject().getWorkspace());
 			String oldScriptPath = SolutionSerializer.getRelativePath(oldSolution, false) + fileName + SolutionSerializer.JS_FILE_EXTENSION;
 			String newScriptPath = SolutionSerializer.getRelativePath(newSolution, false) + fileName + SolutionSerializer.JS_FILE_EXTENSION;
 			if (!wsfa.exists(newScriptPath))

@@ -243,7 +243,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		String password = null;
 		if (CryptUtils.checkEncryption(file))
 		{
-			password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected", "Please enter protection password:", "", null);
+			password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected? (or corrupt file check if it is valid zip)",
+				"Please enter protection password:", "", null);
 		}
 		else return file;
 

@@ -133,8 +133,10 @@ public class NewOAuthApiPage extends WizardPage
 		}
 		if (setter != null)
 		{
-			field.addModifyListener(e -> setter.accept(field.getText()));
-			getWizard().getContainer().updateButtons();
+			field.addModifyListener(e -> {
+				setter.accept(field.getText());
+				getWizard().getContainer().updateButtons();
+			});
 		}
 		return field;
 	}

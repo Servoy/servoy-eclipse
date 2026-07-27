@@ -1,0 +1,8 @@
+paths-ignore:
+  - "com.servoy.eclipse.designer.rfb/src/rfb/angular/js"
+  - "com.servoy.eclipse.designer.rib"
+  - "com.servoy.eclipse.firststeps"
+  - "**/*.min.js"
+  - "com.servoy.eclipse.ngclient.ui/component-templates"
+  - "com.servoy.eclipse.ngclient.ui/packagetemplate"
+  - "com.servoy.eclipse.model.exporter.mobile/src/com/servoy/eclipse/model/mobile/exporter/resources/solution.js"

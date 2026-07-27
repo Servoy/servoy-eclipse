@@ -28,6 +28,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 
 /**
@@ -55,10 +56,15 @@ public class ConfigureLessThemeAction extends Action implements ISelectionChange
 			state = (node.getType() == UserNodeType.SOLUTION && node.getRealObject() != null);
 			if (state && node.getRealObject() instanceof ServoyProject sp)
 			{
-				Media media = sp.getSolution().getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-				if (media == null)
+				Media media = null;
+				Solution solution = sp.getSolution();
+				if (solution != null)
 				{
-					media = sp.getSolution().getMedia(ThemeResourceLoader.SOLUTION_PROPERTIES_LESS);
+					media = solution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
+					if (media == null)
+					{
+						media = solution.getMedia(ThemeResourceLoader.SOLUTION_PROPERTIES_LESS);
+					}
 				}
 				state = media != null;
 			}

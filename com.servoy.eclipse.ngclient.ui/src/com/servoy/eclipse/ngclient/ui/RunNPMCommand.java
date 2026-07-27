@@ -40,7 +40,7 @@ import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
  * @author jcompagner
  *
  */
-public class RunNPMCommand extends WorkspaceJob
+public class RunNPMCommand extends WorkspaceJob implements IRunNPMCommand
 {
 
 	/** this is the value returned by {@link #getExitCode()} in case the job was cancelled... */
@@ -59,6 +59,19 @@ public class RunNPMCommand extends WorkspaceJob
 	private int exitCode = -1;
 
 	private final ReentrantLock processLock = new ReentrantLock();
+
+	private Map<String, String> extraEnvironment = Map.of();
+
+	/**
+	 * Extra environment variables to inject into the child process environment
+	 * before the command is started. Must be called before {@link #runCommand}.
+	 *
+	 * @param extra the variables to inject; a defensive copy is taken
+	 */
+	public void setExtraEnvironment(Map<String, String> extra)
+	{
+		this.extraEnvironment = Map.copyOf(extra);
+	}
 
 	public RunNPMCommand(String familyJob, File nodePath, File npmPath, File projectFolder, List<String> commands)
 	{
@@ -140,6 +153,10 @@ public class RunNPMCommand extends WorkspaceJob
 			environment.put(pathkey, path);
 			environment.put("NODE_OPTIONS", "--max-old-space-size=4096");
 			environment.put("NG_PERSISTENT_BUILD_CACHE", "1");
+			if (!extraEnvironment.isEmpty())
+			{
+				environment.putAll(extraEnvironment);
+			}
 			builder.directory(projectFolder);
 			builder.redirectErrorStream(true);
 			if (commandArguments == NGClientConstants.NG_BUILD_COMMAND) // the command that runs the NG build
@@ -152,7 +169,7 @@ public class RunNPMCommand extends WorkspaceJob
 			allCmdLineArgs.add(nodePath.getCanonicalPath());
 			allCmdLineArgs.add(npmPath.getCanonicalPath());
 			allCmdLineArgs.addAll(commandArguments);
-//			allCmdLineArgs.add("--scripts-prepend-node-path");
+			//			allCmdLineArgs.add("--scripts-prepend-node-path");
 			writeConsole(console, "\n---- Running npm command:\n" + commandArgsToString(allCmdLineArgs));
 			writeConsole(console, "In dir: " + projectFolder);
 			builder.command(allCmdLineArgs);
@@ -174,8 +191,8 @@ public class RunNPMCommand extends WorkspaceJob
 				String str = null;
 				while ((str = br.readLine()) != null)
 				{
-//						str = str.replaceAll(".*?m", "");
-//						str = str.replaceAll("\b", "");
+					//						str = str.replaceAll(".*?m", "");
+					//						str = str.replaceAll("\b", "");
 					writeConsole(console, str.trim());
 					// The date, hash and time represents the last output line of the NG build process.
 					// The NG build is finished when this conditions is met.
@@ -220,11 +237,25 @@ public class RunNPMCommand extends WorkspaceJob
 	}
 
 	/**
-	 * @return -1 if the command has not yet finished running; EXIT_CODE_CANCELLED if it was cancelled by the user; otherwise the EXIT_CODE of the command that has been run by this job.
+	 * @return -1 if the command has not yet finished running; EXIT_CODE_CANCELLED if it was cancelled by the user;
+	 *         otherwise the EXIT_CODE of the command that has been run by this job.
 	 */
 	public int getExitCode()
 	{
 		return exitCode;
+	}
+
+	/**
+	 * Returns the underlying OS {@link Process}, or {@code null} if the process has not started yet or has already
+	 * been cleaned up by {@link #canceling()}.
+	 * <p>
+	 * Callers may use this to kill the process tree directly (e.g. during Eclipse shutdown) without going through
+	 * the normal {@link #canceling()} path.
+	 * </p>
+	 */
+	public Process getProcess()
+	{
+		return process;
 	}
 
 	private void writeConsole(StringOutputStream console, String message)
@@ -254,7 +285,7 @@ public class RunNPMCommand extends WorkspaceJob
 				StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 
 				writeConsole(console, "Cancel requested by user... Trying to stop process...");
-//			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status
+				//			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status
 				process.destroy();
 				exitCode = EXIT_CODE_CANCELLED;
 

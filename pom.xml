@@ -8,14 +8,15 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2026.6.0-SNAPSHOT</version>
+	<version>2026.9.0-SNAPSHOT</version>
 	<properties>
-		<tycho.version>4.0.12</tycho.version>
-		<rhino.version>1.9.1.s1</rhino.version>
-        <osgi.version>[2026.6.0,2026.6.1)</osgi.version>
+		<tycho.version>5.0.3</tycho.version>
+		<rhino.version>1.9.1.s3</rhino.version>
+        <osgi.version>[2026.9.0,2026.9.1)</osgi.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
+		<servoy.ai.repo.url>https://build.servoy.com/latest/servoy_ai/</servoy.ai.repo.url>
 <!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
         <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
 -->
@@ -38,7 +39,7 @@
     <repositories>
        <repository>
           <id>servoy-ai-repo</id>
-          <url>https://build.servoy.com/latest/servoy_ai/</url>
+          <url>${servoy.ai.repo.url}</url>
           <layout>p2</layout>
        </repository>
     </repositories>
@@ -244,10 +245,10 @@
 								</goals>
 								<configuration>
 									<target>
-										<delete>
+										<delete quiet="true">
 											<fileset
 												dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
-												includes="TEST*.xml" />
+												includes="TEST*.xml" erroronmissingdir="false"/>
 										</delete>
 									</target>
 								</configuration>
@@ -583,10 +584,10 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <delete>
+                                        <delete quiet="true">
                                             <fileset
                                                 dir="${project.basedir}/com.servoy.eclipse.ngclient.ui/target/"
-                                                includes="TEST*.xml" />
+                                                includes="TEST*.xml" erroronmissingdir="false"/>
                                         </delete>
                                     </target>
                                 </configuration>
@@ -627,6 +628,12 @@
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
+				<module>com.servoy.eclipse.feature</module>
+				<module>com.servoy.eclipse.model.tests</module>
+				<module>com.servoy.eclipse.ui.tests</module>
+				<module>com.servoy.eclipse.designer.tests</module>
+				<module>j2db_documentation.tests</module>
+				<module>com.servoy.eclipse.ngclient.ui.tests</module>
 			</modules>
 			<build>
 			 <plugins>

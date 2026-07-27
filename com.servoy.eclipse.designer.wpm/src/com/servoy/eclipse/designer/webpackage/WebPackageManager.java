@@ -77,7 +77,7 @@ public class WebPackageManager extends EditorPart
 		Display.getDefault().asyncExec(() -> {
 			try
 			{
-				browser.setUrl(finalUrl, null, new String[] { "Cache-Control: no-cache" });
+				browser.setUrl(finalUrl);
 			}
 			catch (Exception ex)
 			{

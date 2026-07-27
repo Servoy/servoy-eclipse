@@ -18,9 +18,8 @@ package com.servoy.eclipse.core.util;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.splash.BasicSplashHandler;
 
@@ -55,25 +54,26 @@ public class SplashHandler extends BasicSplashHandler
 	{
 		if (splash.isDisposed()) return;
 
-		Image background = splash.getBackgroundImage();
-		if (background != null)
+		String osName = System.getProperty("os.name").toLowerCase();
+		if (font == null)
 		{
-			GC gc = new GC(background);
-			// size is very different on the three os
-			String osName = System.getProperty("os.name").toLowerCase();
-
-			if (font != null) gc.setFont(font);
-			else if (osName.contains("windows")) gc.setFont(font = new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
-			else if (osName.contains("mac")) gc.setFont(font = new Font(splash.getDisplay(), "SansSerif", 9, SWT.NORMAL));
-			else if (osName.contains("linux")) gc.setFont(font = new Font(splash.getDisplay(), "SansSerif", 8, SWT.NORMAL));
-
-			StringBuffer text = getSplashText();
-			gc.drawText(text.toString(), 10, 540, true);
-			gc.getFont().dispose();
-			gc.dispose();
-
-
+			int size = osName.contains("mac") ? 9 : 8;
+			font = new Font(splash.getDisplay(), "SansSerif", size, SWT.NORMAL);
 		}
+
+		// The content composite from BasicSplashHandler fills the whole shell and repaints
+		// on every progress update, overwriting anything drawn on the shell GC.
+		// Attaching a paint listener to the composite itself fires AFTER the composite draws
+		// its own background, so the text is always rendered on top.
+		final Font textFont = font;
+		final String text = getSplashText().toString();
+		Composite content = getContent();
+		content.addListener(SWT.Paint, event -> {
+			event.gc.setFont(textFont);
+			event.gc.setForeground(event.display.getSystemColor(SWT.COLOR_BLACK));
+			event.gc.drawText(text, 10, 540, true);
+		});
+		content.redraw();
 	}
 
 	private StringBuffer getSplashText()

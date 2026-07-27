@@ -213,7 +213,7 @@ export class PopupMenuService {
 		this.menu.style.visibility = 'hidden';
 		if (popup.cssClass) this.menu.classList.add(popup.cssClass);
 
-		this.generateMenuItems(popup.items, this.menu, false, 'svypopupmenu',true);
+		this.generateMenuItems(popup.items, this.menu, false, 'svypopupmenu',true, popup.cssClass);
 
 		this.menu.style.left = 0 + 'px';
 		this.menu.style.top = 0 + 'px';
@@ -283,12 +283,13 @@ export class PopupMenuService {
 		});
 	}
 
-	private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean, parentId: string,enabled: boolean): void {
+	private generateMenuItems(items: Array<MenuItem>, parent: HTMLElement, generateList: boolean, parentId: string,enabled: boolean, cssClass?: string): void {
 		if (generateList) {
 			const subMenu = this.doc.createElement('div');
 			subMenu.classList.add('dropdown-menu');
 			subMenu.classList.add('svy-popup-menu');
 			subMenu.classList.add('dropdown-nested-menu');
+			if (cssClass) subMenu.classList.add(cssClass);
 			this.doc.body.appendChild(subMenu);
 			this.menuItemTosubMenuMap.set(parent, subMenu);
 			this.subMenuToPopperMap.set(subMenu, createPopper(parent, subMenu, {
@@ -373,7 +374,7 @@ export class PopupMenuService {
 				}
 				if (item.items) {
 					menuItem.classList.add('dropdown-submenu');
-					this.generateMenuItems(item.items, menuItem, true, menuItemId,item.enabled);
+					this.generateMenuItems(item.items, menuItem, true, menuItemId,item.enabled, cssClass);
 				}
 			} else {
 				const hr = this.doc.createElement('hr');

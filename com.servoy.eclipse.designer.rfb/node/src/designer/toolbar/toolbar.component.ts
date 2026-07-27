@@ -93,6 +93,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     btnMoveDown: ToolbarItem;
 
     btnReload: ToolbarItem;
+    btnOpenInBrowser: ToolbarItem;
     btnToggleI18NValues: ToolbarItem;
 
     btnShowErrors: ToolbarItem;
@@ -931,6 +932,17 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnShowErrors.state = false;
 
         this.add(this.btnShowErrors, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
+		
+		this.btnOpenInBrowser = new ToolbarItem(
+		           'Open form in external browser',
+		           'toolbar/icons/designsize/desktop_preview.png',
+		           true,
+		           () => {
+		               this.editorSession.executeAction('openInBrowser');
+		           }
+		       );
+
+		this.add(this.btnOpenInBrowser, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
     }
 
     add(item: ToolbarItem, category: TOOLBAR_CATEGORIES) {

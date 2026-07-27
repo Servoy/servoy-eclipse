@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Debug Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.debug;singleton:=true
-Bundle-Version: 2026.6.0.qualifier
+Bundle-Version: 2026.9.0.qualifier
 Bundle-Activator: com.servoy.eclipse.debug.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
@@ -40,16 +40,18 @@ Require-Bundle: org.eclipse.core.runtime,
  com.google.guava
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Export-Package: com.servoy.eclipse.debug;version="2026.6.0",
- com.servoy.eclipse.debug.actions;version="2026.6.0",
- com.servoy.eclipse.debug.handlers;version="2026.6.0",
- com.servoy.eclipse.debug.script;version="2026.6.0"
+Export-Package: com.servoy.eclipse.debug;version="2026.9.0",
+ com.servoy.eclipse.debug.actions;version="2026.9.0",
+ com.servoy.eclipse.debug.handlers;version="2026.9.0",
+ com.servoy.eclipse.debug.script;version="2026.9.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.ngclient.ui.utils,
  org.apache.commons.compress.archivers.tar;version="1.25.0",
  org.apache.commons.compress.compressors.gzip;version="1.25.0",
  org.apache.commons.compress.utils;version="1.25.0",
+ org.apache.commons.io;version="[2.22.0,3.0.0)",
+ org.apache.commons.io.build;version="[2.22.0,3.0.0)",
  org.apache.commons.text,
  org.eclipse.ui.internal.browser
 Automatic-Module-Name: com.servoy.eclipse.debug

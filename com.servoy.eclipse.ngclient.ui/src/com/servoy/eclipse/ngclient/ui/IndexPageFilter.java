@@ -71,6 +71,28 @@ public class IndexPageFilter implements Filter
 		request.getSession();
 		String requestURI = request.getRequestURI();
 
+		// FormPreview: bypass all authentication and serve index page directly
+		if (request.getParameter("formpreview") != null && requestURI.toLowerCase().contains("/solution/") &&
+			requestURI.toLowerCase().endsWith("/index.html"))
+		{
+
+			File projectFolder = Activator.getInstance().getSolutionProjectFolder();
+			if (projectFolder != null)
+			{
+				File distFolder = new File(projectFolder, "dist/app/browser");
+				File indexFile = new File(distFolder, "index.html");
+				if (indexFile.exists())
+				{
+					String solutionName = getSolutionNameFromURI(Paths.get(requestURI.replace(':', '_')).normalize());
+					String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");
+					ContentSecurityPolicyConfig contentSecurityPolicyConfig = addcontentSecurityPolicyHeader(request, response, false);
+					AngularIndexPageWriter.writeIndexPage(indexHtml, request, response, solutionName,
+						contentSecurityPolicyConfig == null ? null : contentSecurityPolicyConfig.getNonce());
+					return;
+				}
+			}
+		}
+
 		if (AngularIndexPageWriter.handleShortSolutionRequest(request, response))
 		{
 			return;
@@ -104,7 +126,11 @@ public class IndexPageFilter implements Filter
 				requestURI.contains("/svy_oauth/"))
 			{
 				Pair<Boolean, String> showLogin = null;
-				if (OAuthHandler.isOAuthRequest(request))
+				if (request.getParameter("formpreview") != null)
+				{
+					showLogin = new Pair<>(Boolean.FALSE, null);
+				}
+				else if (OAuthHandler.isOAuthRequest(request))
 				{
 					showLogin = OAuthHandler.handleOauth(request, response);
 					if (Boolean.FALSE.equals(showLogin.getLeft()))
@@ -112,7 +138,16 @@ public class IndexPageFilter implements Filter
 						if (showLogin.getRight() == null) return; // oauth was successful but the cloud returned html
 						request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
 						String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
-						response.sendRedirect(request.getRequestURI().replace("/svy_oauth", "") + (queryString != null ? "?" + queryString : ""));
+						String redirectBasePath = request.getRequestURI().replace("/svy_oauth", "");
+						if (!redirectBasePath.startsWith("/") || redirectBasePath.startsWith("//"))
+						{
+							redirectBasePath = "/";
+						}
+
+						boolean hasSafeQuery = queryString != null && queryString.indexOf('\r') == -1 && queryString.indexOf('\n') == -1 &&
+							!queryString.startsWith("//") && !queryString.contains("://");
+						String redirectTarget = hasSafeQuery ? (redirectBasePath + "?" + queryString) : redirectBasePath;
+						response.sendRedirect(redirectTarget);
 						return;
 					}
 				}
@@ -156,7 +191,13 @@ public class IndexPageFilter implements Filter
 			else
 			{
 				String normalize = Paths.get(requestURI.replace(':', '_')).normalize().toString();
-				File file = new File(distFolder, normalize);
+				File canonicalDistFolder = distFolder.getCanonicalFile();
+				File file = new File(distFolder, normalize).getCanonicalFile();
+				if (!file.toPath().startsWith(canonicalDistFolder.toPath()))
+				{
+					chain.doFilter(servletRequest, servletResponse);
+					return;
+				}
 				String localeId = request.getParameter("localeid");
 				if (requestURI.startsWith("/locales/") && localeId != null && !file.exists())
 				{
@@ -164,8 +205,12 @@ public class IndexPageFilter implements Filter
 					String[] locales = NGLocalesFilter.generateLocaleIds(localeId);
 					for (String locale : locales)
 					{
-						file = new File(distFolder, normalize.replace(localeId, locale));
-						if (file.exists()) break;
+						File candidate = new File(distFolder, normalize.replace(localeId, locale)).getCanonicalFile();
+						if (candidate.toPath().startsWith(canonicalDistFolder.toPath()) && candidate.exists())
+						{
+							file = candidate;
+							break;
+						}
 					}
 				}
 				if (file.exists() && !file.isDirectory() && !file.getName().equals("favicon.ico"))

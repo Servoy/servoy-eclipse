@@ -399,7 +399,6 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		// these core components are always required
 		componentsNeededUnderTheHood.add("servoycore-defaultLoadingIndicator");
 		componentsNeededUnderTheHood.add("servoycore-errorbean");
-		componentsNeededUnderTheHood.add("servoycore-portal");
 		componentsNeededUnderTheHood.add("servoycore-formcomponent");
 		componentsNeededUnderTheHood.add("servoycore-formcontainer");
 		componentsNeededUnderTheHood.add("servoycore-listformcomponent");

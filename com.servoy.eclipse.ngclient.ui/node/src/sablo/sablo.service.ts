@@ -41,28 +41,52 @@ export class SabloService {
         const oldWarn = this.windowRefService.nativeWindow.window.console.warn
         const oldDebug = this.windowRefService.nativeWindow.window.console.debug;
         const oldError = this.windowRefService.nativeWindow.window.console.error;
-        // always use warn for all levels except error so that the stacktrace is shown in the browser.
-        this.windowRefService.nativeWindow.window.console.log = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
-        this.windowRefService.nativeWindow.window.console.warn = new Proxy(oldWarn, this.getProxyHandler("warn", oldError));
-        this.windowRefService.nativeWindow.window.console.info = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
-        this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler("debug", oldError));
-        this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler("error", oldError));
 
-        this.windowRefService.nativeWindow.window.addEventListener("error", (err: ErrorEvent) => {
-            const msg = err.message + '\n' + err.filename + ':' + err.lineno + ':' + err.colno + '\n' + err.error;
-            oldError.apply(this.windowRefService.nativeWindow.window.console, [msg]);
-            if (this.wsSession) this.callService('consoleLogger', 'error', { message: msg }, true);
-            return false; // false allows it to keep default behavior as well theoretically - log to browser console (but it seems to have no effect, probably angular/zone also mess with this handler)
-        });
-        
-        this.windowRefService.nativeWindow['toggleSabloLogWrapping'] = () => {
+        const urlParams = new URLSearchParams(this.windowRefService.nativeWindow.window.location.search);
+        const wrapLogging = urlParams.get('wraplogging') !== 'false';
+
+        const enableWrapping = () => {
+            this.windowRefService.nativeWindow.window.console.log = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
+            this.windowRefService.nativeWindow.window.console.warn = new Proxy(oldWarn, this.getProxyHandler("warn", oldError));
+            this.windowRefService.nativeWindow.window.console.info = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
+            this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler("debug", oldError));
+            this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler("error", oldError));
+        };
+
+        const disableWrapping = () => {
             this.windowRefService.nativeWindow.window.console.log = oldLog;
             this.windowRefService.nativeWindow.window.console.info = oldInfo;
             this.windowRefService.nativeWindow.window.console.warn = oldWarn;
             this.windowRefService.nativeWindow.window.console.error = oldError;
             this.windowRefService.nativeWindow.window.console.debug = oldDebug;
+        };
+
+        if (wrapLogging) {
+            enableWrapping();
         }
-        oldInfo("turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser");
+
+        this.windowRefService.nativeWindow.window.addEventListener("error", (err: ErrorEvent) => {
+            const msg = err.message + '\n' + err.filename + ':' + err.lineno + ':' + err.colno + '\n' + err.error;
+            oldError.apply(this.windowRefService.nativeWindow.window.console, [msg]);
+            if (this.wsSession) this.callService('consoleLogger', 'error', { message: msg }, true);
+            return false;
+        });
+
+        this.windowRefService.nativeWindow['toggleSabloLogWrapping'] = (enable?: boolean) => {
+            const shouldEnable = enable !== undefined ? enable : this.windowRefService.nativeWindow.window.console.log === oldLog;
+            if (shouldEnable) {
+                enableWrapping();
+                oldInfo("log wrapping enabled");
+            } else {
+                disableWrapping();
+                oldInfo("log wrapping disabled");
+            }
+        };
+        if (wrapLogging) {
+            oldInfo("turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser, or add ?wraplogging=false to the URL");
+        } else {
+            oldInfo("log wrapping disabled via URL parameter. Enable by executing: toggleSabloLogWrapping(true) in the console of your browser");
+        }
     }
     
     private getProxyHandler(name: string, oldError: any): ProxyHandler<any> {

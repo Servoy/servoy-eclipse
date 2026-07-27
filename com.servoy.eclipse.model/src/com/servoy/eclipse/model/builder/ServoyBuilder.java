@@ -1667,6 +1667,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(key) ||
 					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(key) ||
 					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(key) ||
+					StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(key) ||
 					IChildWebObject.UUID_KEY.equals(key))
 				{
 					continue;

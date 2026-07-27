@@ -353,6 +353,12 @@ export class FormService {
 	public getFormCache(form: IFormComponent): FormCache {
 		return this.formsCache.get(form.name);
 	}
+
+	public getFormComponentInstance(formName: string): IFormComponent | null {
+		const fc = this.formComponentCache.get(formName);
+		if (fc && !(fc instanceof Deferred)) return fc as IFormComponent;
+		return null;
+	}
     
     public isFormAngularComponentPresent(formName: string) {
         return this.formComponentCache.has(formName);
@@ -826,7 +832,7 @@ export class FormService {
 				// prepare to remember any dynamically-set-from-server client side types
 				const componentSpec: IWebObjectSpecification = this.typesRegistry.getComponentSpecification(elem.specName);
 
-				if (elem.formComponent) {
+				if (elem.formComponent && elem.formComponent.length > 0) {
 					// component that also has servoy-form-component properties
 					const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : [];
 					const layout: { [property: string]: string } = {};

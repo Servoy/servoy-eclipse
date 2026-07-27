@@ -97,7 +97,7 @@ public class Activator extends Plugin
 		if (nodeReady.getCount() > 0)
 		{
 			nodeReady.countDown();
-			if (nodeReady.getCount() == 0 && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
+			if (nodeReady.getCount() == 0 && nodePath != null && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
 			{
 				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
 			}
@@ -153,6 +153,10 @@ public class Activator extends Plugin
 						node = extractPath(cf[0], "nodePath", true);
 						node.setExecutable(true);
 						npm = extractPath(cf[0], "npmPath", false);
+					}
+					else
+					{
+						ServoyLog.logWarning("No Node.js plugin found, npm commands will be unavailable", null);
 					}
 					nodePath = node;
 					npmPath = npm;
@@ -249,9 +253,13 @@ public class Activator extends Plugin
 		return file;
 	}
 
-	public RunNPMCommand createNPMCommand(File folder, List<String> commandArguments)
+	public IRunNPMCommand createNPMCommand(File folder, List<String> commandArguments)
 	{
 		waitForNodeExtraction();
+		if (nodePath == null)
+		{
+			return new NoOpNPMCommand(commandArguments);
+		}
 		return new RunNPMCommand(nodePath, npmPath, folder, commandArguments);
 	}
 

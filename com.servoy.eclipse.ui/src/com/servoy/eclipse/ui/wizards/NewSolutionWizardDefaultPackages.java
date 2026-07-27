@@ -99,6 +99,13 @@ public class NewSolutionWizardDefaultPackages
 	// map with <name, version> of downloaded packages
 	private final HashMap<String, String> downloadedPackages = new HashMap<String, String>();
 
+
+	private static boolean isSafeFileComponent(String value)
+	{
+		return value != null && value.length() > 0 && !value.contains("..") && value.indexOf('/') == -1 && value.indexOf('\\') == -1 &&
+			value.matches("[A-Za-z0-9._-]+");
+	}
+
 	public void setup(List<JSONObject> packages) throws IOException
 	{
 		File packagesFolder = new File(Activator.getDefault().getStateLocation().toFile(), "wizardpackages");
@@ -124,7 +131,7 @@ public class NewSolutionWizardDefaultPackages
 		for (JSONObject p : packages)
 		{
 			String name = p.optString("name");
-			if (name != null)
+			if (isSafeFileComponent(name))
 			{
 				if (allPackages.indexOf(name) != -1)
 				{
@@ -136,7 +143,7 @@ public class NewSolutionWizardDefaultPackages
 						{
 							String version = latestRelease.optString("version");
 
-							if (version != null && (!downloadedPackages.containsKey(name) ||
+							if (version != null && isSafeFileComponent(version) && (!downloadedPackages.containsKey(name) ||
 								(downloadedPackages.containsKey(name) && !version.equals(downloadedPackages.get(name)))))
 							{
 								String url = latestRelease.optString("url");
@@ -155,8 +162,12 @@ public class NewSolutionWizardDefaultPackages
 										Utils.streamCopy(in, out);
 										String oldVersion = downloadedPackages.put(name, version);
 
-										File oldPackageFile = new File(packagesFolder, name + "_" + oldVersion);
-										oldPackageFile.delete();
+
+										if (isSafeFileComponent(oldVersion))
+										{
+											File oldPackageFile = new File(packagesFolder, name + "_" + oldVersion);
+											oldPackageFile.delete();
+										}
 									}
 									catch (Exception ex)
 									{
@@ -181,9 +192,21 @@ public class NewSolutionWizardDefaultPackages
 	 * @param name the name of the package
 	 * @return a pair containing the version and the package input stream
 	 */
+	private boolean isValidPackageOrSolutionName(String name)
+	{
+		if (name == null || name.length() == 0) return false;
+		if (name.contains("..") || name.indexOf('/') != -1 || name.indexOf('\\') != -1) return false;
+		return name.matches("[A-Za-z0-9._-]+");
+	}
+
 	//public Pair<String, InputStream> getPackage(String name)
 	public Pair<String, File> getPackage(String name)
 	{
+		if (!isValidPackageOrSolutionName(name))
+		{
+			ServoyLog.logError(new IllegalArgumentException("Invalid package/solution name: " + name));
+			return null;
+		}
 		try
 		{
 			if (downloadedPackages.containsKey(name))
@@ -236,7 +259,7 @@ public class NewSolutionWizardDefaultPackages
 		{
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
 			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
 			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__eclipse-ide__*",
+      "mcp__eclipse-coder__*",
+      "mcp__eclipse-git__*",
+      "mcp__eclipse-runner__*",
+      "mcp__eclipse-context__*",
+      "mcp__eclipse-pde__*",
+      "mcp__memory__*",
+      "mcp__time__*"
+    ]
+  }
+}

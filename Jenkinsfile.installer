@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+    
+    options {
+        quietPeriod(160)
+        // Strikte log-rotatie van de product-build (max 3 builds bewaren)
+        buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '3'))
+        
+        withFolderProperties()
+    }
+    
+    parameters {
+        string(name: 'goals', defaultValue: 'clean install -Ponly_product -Dservoy.ai.repo.url=file:///data/www/latest/servoy_ai/', trim: false)
+    }
+    
+    environment {
+        TEAMS_WEBHOOK = credentials('servoy-teams-webhook')
+        MAVEN_GPG_PASSPHRASE = credentials('servoy-gpg-passphrase')
+    }
+    
+    tools {
+        jdk 'Java 21'
+        maven 'Maven 3.9.16'
+    }
+    
+
+    stages {
+        stage('Build Product Update Site') {
+            steps {
+                configFileProvider([
+                    configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
+                    configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
+                ]) {
+                    sh 'export MAVEN_OPTS="-Dmaven.test.failure.ignore=true" && mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" $goals'
+                }
+            }
+        }
+        stage('Deploy Update Site') {
+            steps {
+                sh '''
+                rm -rf /data/www/latest/servoy_${BRANCH}/update_site
+                mkdir -p /data/www/latest/servoy_${BRANCH}/update_site/
+                for d in com.servoy.eclipse.product/target/repository/; do 
+                    [ -d "$d" ] && cp -r "$d/." "/data/www/latest/servoy_${BRANCH}/update_site/"
+                    break
+                done
+                '''
+            }
+        }
+    }
+    
+    post {
+        failure {
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Failed'
+        }
+        
+        unstable {
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Unstable'
+        }
+        
+        fixed {
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Back to Normal'
+        }
+    }
+}

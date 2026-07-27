@@ -660,7 +660,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					int fromSourceIndex = location.indexOf("file:/");
 					if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists() || sourceChanged)
 					{
-						RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
+						IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
 							Arrays.asList("run", "build_lib_debug_nowatch"));
 						try
 						{
@@ -687,7 +687,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					packageToInstall.forEach(packageName -> command.add(packageName));
 					command.add("./dist-public/"); // also add the public api
 					command.add("--legacy-peer-deps");
-					RunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
+					IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
 					try
 					{
 						npmCommand.runCommand(monitor);
@@ -820,6 +820,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					writeConsole(console,
 						"Node NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) +
 							" s.");
+
+					if (copyAngularLocales(this.projectFolder))
+					{
+						writeConsole(console, "- copying Angular locale files to locales/angular");
+					}
+					else
+					{
+						writeConsole(console, "- WARNING: Angular locale files not found or copy failed, skipping");
+					}
 
 					if (SOURCE_DEBUG)
 					{
@@ -1484,6 +1493,30 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		{
 			throw new RuntimeException("Error generating NGClient2 production resources", e);
 		}
+	}
+
+	static boolean copyAngularLocales(File projectFolder)
+	{
+		File localesDest = new File(projectFolder, "locales/angular");
+		File localesSource = new File(projectFolder.getParentFile(), "node_modules/@angular/common/locales");
+		if (!localesSource.isDirectory())
+		{
+			localesSource = new File(projectFolder, "node_modules/@angular/common/locales");
+		}
+		if (localesSource.isDirectory())
+		{
+			localesDest.mkdirs();
+			try
+			{
+				FileUtils.copyDirectory(localesSource, localesDest, (File f) -> f.isDirectory() || f.getName().endsWith(".js"));
+			}
+			catch (IOException e)
+			{
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private interface LayoutTemplates

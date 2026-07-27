@@ -234,6 +234,31 @@ public class ModelUtils
 				css = cssClasses.toArray(css);
 				cachedCssClasses.put(mediaStyleSheets, new Pair<Long, String[]>(Long.valueOf(lastModifiedTime), css));
 			}
+			if (spec != null)
+			{
+				PropertyDescription pd = spec.getProperty(styleClassProperty);
+				if (pd != null)
+				{
+					List<Object> values = pd.getValues();
+					if (values != null && !values.isEmpty())
+					{
+						Set<String> merged = new TreeSet<>(StringComparator.INSTANCE);
+						for (String c : css)
+						{
+							merged.add(c);
+						}
+						for (Object val : values)
+						{
+							merged.add(val.toString());
+						}
+						css = merged.toArray(new String[0]);
+					}
+					if (pd.hasDefault() && pd.getDefaultValue() != null)
+					{
+						defaultValue = NGStyleClassPropertyType.NG_INSTANCE.fromDesignValue(pd.getDefaultValue().toString(), pd, persist);
+					}
+				}
+			}
 		}
 		else
 		{
@@ -570,8 +595,20 @@ public class ModelUtils
 		throw new RuntimeException("Expected to find exactly one compatible '" + IUnexpectedSituationHandler.EXTENSION_ID + "' extension. Found:\n" + handlers);
 	}
 
+	public static boolean isTestRunning()
+	{
+		boolean pdeTest = Platform.getBundle("org.eclipse.pde.junit.runtime") != null;
+		boolean tychoTest = Platform.getBundle("org.eclipse.tycho.surefire.osgibooter") != null;
+		if (pdeTest || tychoTest)
+		{
+			ServoyLog.logInfo("Test mode detected (pde=" + pdeTest + ", tycho=" + tychoTest + ")");
+			return true;
+		}
+		return false;
+	}
+
 	@SuppressWarnings("unchecked")
-	public static <T> T getAdapter(Object object, Class< ? extends T> adapter)
+	public static <T> T getAdapter(Object object, Class<T> adapter)
 	{
 		if (object == null)
 		{
