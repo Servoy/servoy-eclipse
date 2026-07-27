@@ -5,9 +5,12 @@ pipeline {
         // Quiet period en log-rotatie volledig in code gevangen
         quietPeriod(120)
         buildDiscarder(logRotator(daysToKeepStr: '40', numToKeepStr: '70'))
+        
+        // Annuleer een eventueel al LOPENDE build als er een nieuwe start
+        disableConcurrentBuilds(abortPrevious: true)
     }
     
-   triggers {
+    triggers {
         GenericTrigger(
             genericVariables: [
                 [key: 'ref', value: '$.ref']
@@ -33,6 +36,23 @@ pipeline {
     }
     
     stages {
+        stage('Clear Queued Builds') {
+            steps {
+                script {
+                    // Annuleer builds die in de queue wachten op de quietPeriod timer voor EXPANCT dit specifieke pad (bijv. "lts_2026/servoy-eclipse")
+                    def currentJob = env.JOB_NAME
+                    def queue = jenkins.model.Jenkins.get().queue
+                    
+                    queue.items.each { item ->
+                        if (item.task.fullName == currentJob) {
+                            echo "Removing pending queued build for ${currentJob} (Queue ID #${item.id})..."
+                            queue.cancel(item)
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Build with Tycho 5') {
             steps {
                 wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
@@ -64,7 +84,7 @@ pipeline {
             ])
         }
         
-       failure {
+        failure {
             office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Failed'
         }
         
