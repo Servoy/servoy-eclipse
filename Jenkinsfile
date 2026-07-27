@@ -1,13 +1,3 @@
-@NonCPS
-def clearQueueForJob(String jobName) {
-    def queue = jenkins.model.Jenkins.get().queue
-    queue.items.each { item ->
-        if (item.task.fullName == jobName) {
-            queue.cancel(item)
-        }
-    }
-}
-
 pipeline {
     agent any
     
@@ -48,7 +38,18 @@ pipeline {
     stages {
         stage('Clear Queued Builds') {
             steps {
-                clearQueueForJob(env.JOB_NAME)
+                script {
+                    // Annuleer builds die in de queue wachten op de quietPeriod timer voor EXPANCT dit specifieke pad (bijv. "lts_2026/servoy-eclipse")
+                    def currentJob = env.JOB_NAME
+                    def queue = jenkins.model.Jenkins.get().queue
+                    
+                    queue.items.each { item ->
+                        if (item.task.fullName == currentJob) {
+                            echo "Removing pending queued build for ${currentJob} (Queue ID #${item.id})..."
+                            queue.cancel(item)
+                        }
+                    }
+                }
             }
         }
 
