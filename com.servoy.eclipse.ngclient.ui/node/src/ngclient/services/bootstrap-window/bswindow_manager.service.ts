@@ -25,7 +25,7 @@ export class BSWindowManager {
         this.renderer = rendererFactory.createRenderer(null, null);
     }
 
-    findWindowByID(id) {
+    findWindowByID(id: any): BSWindow | null {
         let returnValue = null;
         this.windows.forEach( (window) => {
             if (window.id === id) {
@@ -95,10 +95,10 @@ export class BSWindowManager {
         this.setFocused(this.windows[this.windows.length-1]);
    }
 
-   initialize(options) {
+   initialize(options: any) {
        this.options = options;
        if (this.options.container) {
-           Array.from(this.doc.querySelectorAll(this.options.container)).forEach((element => {
+            Array.from(this.doc.querySelectorAll(this.options.container)).forEach(((element: Element) => {
                this.renderer.addClass(element, 'window-pane');
            }));
        }
@@ -109,7 +109,7 @@ export class BSWindowManager {
        }
    }
 
-   setNextFocused = function() {
+   setNextFocused = function(this: BSWindowManager) {
        this.setFocused(this.windows[this.windows.length-1]);
    };
 

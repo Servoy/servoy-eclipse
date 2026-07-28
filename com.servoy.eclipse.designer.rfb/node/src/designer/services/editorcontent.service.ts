@@ -122,7 +122,7 @@ export class EditorContentService {
         return Array.from(this.document.querySelectorAll(selector));
     }
 
-    sendMessageToIframe(message) {
+    sendMessageToIframe(message: any) {
         this.initIFrame();
         this.frameElement.contentWindow.postMessage(message, '*');
     }

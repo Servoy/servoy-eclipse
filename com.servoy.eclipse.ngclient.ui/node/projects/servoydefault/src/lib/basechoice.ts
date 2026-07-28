@@ -46,7 +46,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
         super.svyOnChanges(changes);
     }
 
-    baseItemClicked(event, changed, dp) {
+    baseItemClicked(event: any, changed: any, dp: any) {
         if (event.target.localName === 'label' || event.target.localName === 'span') {
             event.preventDefault();
         }
@@ -61,7 +61,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
         // just ignore this.
     }
 
-    attachEventHandlers(element, index) {
+    attachEventHandlers(element: any, index: any) {
         if (!element)
             element = this.getNativeElement();
         if (this.onFocusGainedMethodID) {
@@ -86,7 +86,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
         }
     }
 
-    isValueListNull = (item) => (item.realValue == null || item.realValue === '') && item.displayValue === '';
+    isValueListNull = (item: any) => (item.realValue == null || item.realValue === '') && item.displayValue === '';
 
     /**
      * Gets the selected values (real values from valuelist) as array. The form element should have a dataProviderID assigned in order for this to work.

@@ -16,7 +16,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
     private currentPosition = 0;
     private widthLimit = 5;
     private widthOffset = 0;
-    private draggingEvent = null;
+    private draggingEvent: any = null;
     private ghostContainers: HTMLElement[];
     private editorContent: HTMLElement;
     private contentArea: HTMLElement;
@@ -91,7 +91,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
             if (this.currentPosition < this.widthLimit) {
                 this.currentPosition = this.widthLimit;
             }
-            const changes = {};
+            const changes: Record<string, any> = {};
             const id = document.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
             changes[id] = {
                 'width': this.currentPosition

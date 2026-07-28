@@ -10,8 +10,8 @@ export class ClientFunctionService {
 
 	private renderer: Renderer2;
 
-	private script: HTMLScriptElement;
-	private deferred: IDeferred<void>;
+	private script!: HTMLScriptElement;
+	private deferred!: IDeferred<void>;
 	private doc: Document;
 
 	constructor(private sabloService: SabloService, rendererFactory: RendererFactory2, @Inject(DOCUMENT) _doc: any) {

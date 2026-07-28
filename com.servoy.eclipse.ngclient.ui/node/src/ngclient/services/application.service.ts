@@ -20,7 +20,7 @@ import numbro from 'numbro';
 
 @Injectable()
 export class ApplicationService {
-    private userProperties: { [property: string]: any };
+    private userProperties!: { [property: string]: any };
     private log: LoggerService;
     private minElectronVersion = '24.4.0';
 
@@ -168,7 +168,7 @@ export class ApplicationService {
                 }
             } else {
                 if (target == '_self' && this.isNgdesktopWithTargetSupport(this.windowRefService.nativeWindow.navigator.userAgent)) {
-                    const r = this.windowRefService.nativeWindow['require'];
+                    const r = (this.windowRefService.nativeWindow as any)['require'];
                     const ipcRenderer = r('electron').ipcRenderer;
                     ipcRenderer.send('open-url-with-target', this.getAbsoluteUrl(url));
                 } else if (target === '_blank' && !targetOptions && url.indexOf(this.windowRefService.nativeWindow.location.hostname) >= 0) {

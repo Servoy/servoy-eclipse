@@ -96,14 +96,14 @@ export class ValuelistType implements IType<Valuelist> {
 }
 
 class ValuelistState extends ChangeAwareState implements IDeferedState {
-    public realToDisplayCache = new Map<string, Observable<any>>();
-    public valuelistid: number;
-    public filterStringReq: { filter: string; id: number };
-    public diplayValueReq: { getDisplayValue: string; id: number };
-    public hasRealValues: boolean;
+    public realToDisplayCache: any = new Map<string, any>();
+    public valuelistid!: number;
+    public filterStringReq!: { filter: string; id: number };
+    public diplayValueReq!: { getDisplayValue: string; id: number };
+    public hasRealValues!: boolean;
 
-    deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
-    timeoutRejectLogPrefix: string;
+    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
+    timeoutRejectLogPrefix!: string;
 
     init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } }, timeoutRejectLogPrefix: string) {
         this.deferred = deferred;

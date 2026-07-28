@@ -53,21 +53,21 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
     addHandlersToInputAndSpinnerButtons() {
         const spinnerButtons = this.getNativeElement().getElementsByTagName('button');
 
-        this.renderer.listen(this.getNativeChild(), 'scroll', e => this.scrollCallback(e));
-        this.renderer.listen(this.getNativeChild(), 'keydown keypress', e => this.keydownKeypressCallback(e));
+        this.renderer.listen(this.getNativeChild(), 'scroll', (e: any) => this.scrollCallback(e));
+        this.renderer.listen(this.getNativeChild(), 'keydown keypress', (e: any) => this.keydownKeypressCallback(e));
 
-        this.renderer.listen(spinnerButtons[0], 'click', e => this.increment());
-        this.renderer.listen(spinnerButtons[1], 'click', e => this.decrement());
+        this.renderer.listen(spinnerButtons[0], 'click', (e: any) => this.increment());
+        this.renderer.listen(spinnerButtons[1], 'click', (e: any) => this.decrement());
 
         for (const i of Object.keys(spinnerButtons)) {
             if (this.onActionMethodID)
-                this.renderer.listen(spinnerButtons[i], 'click', e => this.onActionMethodID(e));
+                this.renderer.listen((spinnerButtons as any)[i], 'click', (e: any) => this.onActionMethodID(e));
 
             if (this.onFocusLostMethodID)
-                this.renderer.listen(spinnerButtons[i], 'blur', e => this.onFocusLostMethodID(e));
+                this.renderer.listen((spinnerButtons as any)[i], 'blur', (e: any) => this.onFocusLostMethodID(e));
 
             if (this.onFocusGainedMethodID)
-                this.renderer.listen(spinnerButtons[i], 'focus', ( e ) => {
+                this.renderer.listen((spinnerButtons as any)[i], 'focus', ( e: any ) => {
                     if(this.mustExecuteOnFocus !== false) {
                         this.onFocusGainedMethodID(e);
                     }
@@ -77,7 +77,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
     }
 
     // copied from angularui timepicker
-    isScrollingUp(e): boolean {
+    isScrollingUp(e: any): boolean {
         if (e.originalEvent) {
             e = e.originalEvent;
         }
@@ -86,7 +86,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
         return (e.detail || delta > 0);
     }
 
-    scrollCallback(e) {
+    scrollCallback(e: any) {
         if (!this.isDisabled()) {
             if (this.isScrollingUp(e))this.increment();
             else this.decrement();
@@ -94,7 +94,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
         e.preventDefault();
     }
 
-    keydownKeypressCallback(e) {
+    keydownKeypressCallback(e: any) {
         if (!this.isDisabled()) {
             if (e.which === 40)
                 this.decrement();

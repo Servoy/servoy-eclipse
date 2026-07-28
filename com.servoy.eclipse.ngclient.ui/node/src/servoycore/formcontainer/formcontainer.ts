@@ -87,16 +87,16 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 
 	readonly templateRef = contentChild(TemplateRef);
 
-	form1_state: string;
-	form2_state: string;
+	form1_state!: string;
+	form2_state!: string;
 
-	form1_visible: boolean;
-	form2_visible: boolean;
+	form1_visible = false;
+	form2_visible = false;
 
 	private realContainedForm: any;
 
-	private form1: string;
-	private form2: string;
+	private form1!: string;
+	private form2!: string;
 
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
 		super(renderer, cdRef);
@@ -183,7 +183,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 	}
 
 	getContainerStyle(name: string) {
-		const styl = {};
+		const styl: Record<string, any> = {};
 		let minHeight: string | number;
 		const height = this.height();
   if (height && height !== '0') {

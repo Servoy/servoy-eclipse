@@ -58,7 +58,7 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
 
 export class ChildComponentPropertyValue extends ComponentCache implements IChangeAwareValue, IChildComponentPropertyValue, IUIDestroyAwareValue {
 
-    name: string;
+    name!: string;
 
     ///** this is the shared part of the model; you might want to use modelViewport (which uses this as prototype) instead if the child component has foundset-linked properties */
     //model: any; // already declared in parent class
@@ -77,7 +77,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     headerIndex?: number;
 
     /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
-    modelViewport: { [property: string]: any }[];
+    modelViewport!: { [property: string]: any }[];
 
     /**
      * This function has to be set/provided by the ng2 component that uses this child "component" typed property, because
@@ -85,7 +85,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
      * foundset linked components like in list form component for example). Then when there are changes comming from server, the 'component'
      * property type will call this function as needed.
      */
-    triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate: (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[], relativeRowIndex: number) => void;
+    triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate!: (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[], relativeRowIndex: number) => void;
 
     /**
      * This gives a way to trigger handlers.
@@ -452,7 +452,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
             }
             ModelInSpecificRow.prototype = this.componentValue.model;
 
-            return new Proxy(new ModelInSpecificRow(), {
+            return new Proxy(new (ModelInSpecificRow as any)(), {
                 set: (row: any, prop: any, v: any, receiver: any) => {
                     if (!this.isFoundsetLinkedProperty(prop)) {
                         delete row[prop]; // should always be undefined as it's not record linked but do make sure

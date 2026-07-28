@@ -893,7 +893,7 @@ export class ContextMenuComponent implements OnInit {
 
 	private setAnchoring(anchor: number, opposite: number) {
 		if (this.selection && this.selection.length == 1) {
-			const obj = {};
+			const obj: Record<string, any> = {};
 			const nodeid = this.selection[0];
 			const node = this.editorContentService.getContentElement(this.selection[0]);
 			if (node && node.hasAttribute('svy-anchors')) {
@@ -944,7 +944,7 @@ export class ContextMenuComponent implements OnInit {
 					const categories = packages[i].categories;
 					if (categories) {
 						for (const property in categories) {
-							displayName = this.findComponentDisplayName(categories[property], packageAndComponent[1]);
+							displayName = this.findComponentDisplayName((categories as any)[property], packageAndComponent[1]);
 							if (displayName) return displayName;
 						}
 					}

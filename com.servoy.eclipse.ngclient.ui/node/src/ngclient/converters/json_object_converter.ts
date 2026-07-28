@@ -70,12 +70,14 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
 /** implementers of this interface are generated via initCustomObjectValue */
 class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDestroyAwareValue {
 
+    [key: string]: any;
+
     // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
     // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)
     // so to avoid this double object creation + copy, this class is used via Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
     // that means unfortunately that fields don't work properly, especially new ECMA private class fields so we can't use #internalState to
     // avoid iteration/enumeration/public access to/on it
-    __internalState: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
+    __internalState!: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
 
     initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: { [propName: string]: IPropertyDescription }) {
         Object.defineProperty(this, ChangeAwareState.INTERNAL_STATE_MEMBER_NAME, {
@@ -124,7 +126,7 @@ class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDes
 /** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use externally otherwise. */
 export class CustomObjectType implements IType<CustomObjectValue> {
 
-    private propertyDescriptions: { [propName: string]: IPropertyDescription };
+    private propertyDescriptions!: { [propName: string]: IPropertyDescription };
     
     private static customObjectValuePrototypeWithDeprecated: any;
     static {
@@ -319,7 +321,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                         if (propertyContext?.isInsideModel) internalState.contentVersion = 1; // start fresh;
                         
                         // send all
-                        const toBeSentObj = fullChange.v = {};
+                        const toBeSentObj: Record<string, any> = fullChange.v = {};
                         for (const key of Object.keys(newClientDataInited)) {
                             const val = newClientDataInited[key];
 
@@ -579,10 +581,10 @@ export interface BCOSBackup extends CASBackup {
 export abstract class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState
     implements IParentAccessForSubpropertyChanges<KeyT> {
 
-    public contentVersion: number;
+    public contentVersion!: number;
 
-    public calculatedPushToServerOfWholeProp: PushToServerEnum;
-    public dynamicPropertyTypesHolder: Record<string, any>;
+    public calculatedPushToServerOfWholeProp!: PushToServerEnum;
+    public dynamicPropertyTypesHolder!: Record<string, any>;
     public ignoreChanges = false;
 
     public changedKeys = new Map<KeyT, any>(); // changed key/index -> oldValue of that subprop

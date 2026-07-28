@@ -19,14 +19,14 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
     @Input() fontType: string;
     @Input() foreground: string;
     @Input() format: Format;
-    @Input() horizontalAlignment;
-    @Input() margin;
+    @Input() horizontalAlignment: any;
+    @Input() margin: any;
     @Input() styleClass: string;
     @Input() tabSeq: number;
     @Input() text: string;
     @Input() toolTipText: string;
     @Input() transparent: boolean;
-    @Input() scrollbars;
+    @Input() scrollbars: any;
 
     timeoutID: number;
 

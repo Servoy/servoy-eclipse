@@ -9,7 +9,7 @@ import { PersistIdentifier } from './persistidentifier';
 
 @Injectable()
 export class EditorContentService {
-    designFormCallback: IDesignFormComponent;
+    designFormCallback!: IDesignFormComponent;
 
     private logger: LoggerService;
 
@@ -70,7 +70,7 @@ export class EditorContentService {
         }
 
         if (data.ng2containers) { // this can contain layout containers only directly from the root form; not nested inside form component components
-            data.ng2containers.forEach((elem) => {
+            data.ng2containers.forEach((elem: any) => {
                 let container = formCache.getLayoutContainer(elem.attributes['svy-id']);
                 if (container) {
                     redrawDecorators = true;
@@ -150,14 +150,14 @@ export class EditorContentService {
             // have been added correctly or until there is nothing more to add in a valid parent - in which case we have an error (it should not happen)
             let numberOfParentsNotFound = data.ng2components.length;
             let previousNumberOfParentsNotFound = numberOfParentsNotFound; // check that each iteration we did succesfully treat at least 1 more ng2components array item
-            let handledArrayIndexes = [];
+            let handledArrayIndexes: boolean[] = [];
             handledArrayIndexes.length = data.ng2components.length;
             handledArrayIndexes.fill(false, 0, data.ng2components.length);
             
             do {
                 previousNumberOfParentsNotFound = numberOfParentsNotFound;
                 numberOfParentsNotFound = 0;
-                data.ng2components.forEach((elem, indexInArray) => {
+                data.ng2components.forEach((elem: any, indexInArray: number) => {
                     if (!handledArrayIndexes[indexInArray]) {
                         let handled = true;
 
@@ -231,7 +231,7 @@ export class EditorContentService {
                                         formCache.partComponentsCache.push(fcc);
                                     }
                                     const containers = data?.formComponentContainers?.[elem.name];
-                                    containers?.forEach((elem) => {
+                                    containers?.forEach((elem: any) => {
                                         // I hope these layout containers are ordered correctly - so they can all be recreated with the correct parent; so always all parent layouts before all child layouts
                                         const container = new DesignStructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.cssPositionContainer, elem.position);
                                         formCache.addLayoutContainer(container);
@@ -286,7 +286,7 @@ export class EditorContentService {
                 ('A number of ' + numberOfParentsNotFound
                     + ' components, layout containers or form component components could not find their parents when updates were received in the editor.')));
 
-            data.ng2components.forEach((elem) => {
+            data.ng2components.forEach((elem: any) => {
                 // FORM COMPONENTS
                 const formComponentCache = formCache.getFormComponent(elem.name); // elem.name is actually the design id; see PersistIdentifier java class
                 if (formComponentCache) {
@@ -298,7 +298,7 @@ export class EditorContentService {
                         if ((data.updatedFormComponentsDesignId.indexOf(elem.name)) !== -1) {
                             refresh = true;
                             if (formComponentCache.responsive) {
-                                formComponentCache.items.slice().forEach((item) => {
+                                formComponentCache.items.slice().forEach((item: any) => {
                                     const id = item['id'] || item['hiddenId'] || item['attributes']?.['svy-id-hidden'];
                                     if (id !== undefined && data.childParentMap[id] === undefined) {
                                         formCache.removeLayoutContainer(id);
@@ -355,7 +355,7 @@ export class EditorContentService {
         }
         
         if (data.deleted) {
-            data.deleted.forEach((elem) => {
+            data.deleted.forEach((elem: any) => {
                 const comp = formCache.getComponent(elem);
                 if (comp) {
                     formCache.removeComponent(elem);
@@ -372,7 +372,7 @@ export class EditorContentService {
         }
 
         if (data.deletedContainers) {
-            data.deletedContainers.forEach((elem) => {
+            data.deletedContainers.forEach((elem: any) => {
                 const container = formCache.getLayoutContainer(elem);
                 if (container) {
                     formCache.removeLayoutContainer(elem);
@@ -538,7 +538,7 @@ export class EditorContentService {
 
     private sortChildren(items: Array<StructureCache | ComponentCache | FormComponentCache>) {
         if (items) {
-            items.sort((comp1, comp2): number => {
+            items.sort((comp1: any, comp2: any): number => {
                 const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes['svy-priority'], 10) : parseInt(comp1.model.servoyAttributes['svy-priority'], 10);
                 const priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes['svy-priority'], 10) : parseInt(comp2.model.servoyAttributes['svy-priority'], 10);
 

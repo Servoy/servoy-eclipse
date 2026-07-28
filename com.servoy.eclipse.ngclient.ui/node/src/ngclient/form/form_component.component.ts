@@ -31,8 +31,8 @@ import { fromEvent, debounceTime, Subscription } from 'rxjs';
  */
 export abstract class AbstractFormComponent {
 
-    _containers: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } };
-    _cssstyles: { [container: string]: { [classname: string]: string } };
+    _containers!: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } };
+    _cssstyles!: { [container: string]: { [classname: string]: string } };
     protected componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
 
     constructor(protected renderer: Renderer2) {
@@ -109,7 +109,7 @@ export abstract class AbstractFormComponent {
     triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]): void {
         const comp = this.componentCache[componentName];
         if (comp) {
-            const changes = {};
+            const changes: Record<string, any> = {};
             propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
                 changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
             });
@@ -221,6 +221,7 @@ export abstract class AbstractFormComponent {
  * This is the definition of a angular component that represents servoy forms.
  */
 export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, IFormComponent {
+    [key: string]: any;
     readonly svyResponsiveDiv = viewChild<TemplateRef<any>>('svyResponsiveDiv');
     readonly cssPositionContainer = viewChild<TemplateRef<any>>('cssPositionContainer');
     // structure viewchild template generate start
@@ -236,16 +237,16 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     // component viewchild template generate end
 
-    @Input() name: string;
+    @Input() name!: string;
 
     //** "injectedComponentRefs" is used for being able to inject some test component templates inside Karma/Jasmine unit tests */
     readonly injectedComponentRefs = input<Record<string, TemplateRef<any>>>(undefined);
 
     formClasses = signal<string[]>(undefined);
 
-    formCache: FormCache;
+    formCache!: FormCache;
 
-    absolutFormPosition = {};
+    absolutFormPosition: Record<string, any> = {};
     detectingChanges = false;
 
     private handlerCache: { [property: string]: { [property: string]: (event: Event) => void } } = {};
@@ -407,7 +408,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         this.absolutFormPosition['position'] = 'absolute';
 
         if (formData.model.borderType) {
-            const borderStyle = formData.model.borderType;
+            const borderStyle: Record<string, any> = formData.model.borderType;
             for (const key of Object.keys(borderStyle)) {
                 this.absolutFormPosition[key] = borderStyle[key];
             }
@@ -447,7 +448,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         if (func == null && item.handlers && item.handlers.indexOf(handler) >= 0) {
             const me = this;
             // eslint-disable-next-line
-            func = function(event) {
+            func = function(event: any) {
                 if (event && event.preventDefault instanceof Function) event.preventDefault();
                 return me.formservice.executeEvent(me.name, item.name, handler, arguments);
             };

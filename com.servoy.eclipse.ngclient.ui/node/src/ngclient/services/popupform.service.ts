@@ -11,11 +11,11 @@ import { isEqual } from 'lodash-es';
 @Injectable()
 export class PopupFormService {
 
-    formPopupComponent: ComponentRef<ServoyFormPopupComponent>;
-    clickedComponentId: string;
-    x: number;
-    y: number;
-    sequencePopup: boolean; 
+    formPopupComponent!: ComponentRef<ServoyFormPopupComponent>;
+    clickedComponentId!: string;
+    x!: number;
+    y!: number;
+    sequencePopup = false;
 
     constructor(private mainViewRefService: MainViewRefService,
         private formService: FormService,

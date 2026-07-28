@@ -45,13 +45,13 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     afterViewInit() {
         const nativeElement = this.hostComponent.getNativeElement();
         const renderer = this.hostComponent.getRenderer();
-        renderer.listen(nativeElement, 'mouseenter', (e) => {
+        renderer.listen(nativeElement, 'mouseenter', (e: any) => {
             if (this.rollOverImgStyle) {
                 this.setCSSStyle(this.rollOverImgStyle);
             }
         });
 
-        renderer.listen(nativeElement, 'mouseleave', (e) => {
+        renderer.listen(nativeElement, 'mouseleave', (e: any) => {
             if (this.rollOverImgStyle) {
                 if (this.imgStyle) {
                     this.setCSSStyle(this.imgStyle);
@@ -93,7 +93,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         }
     }
 
-    private parseImageOptions(image, mediaOptions: number, componentSize): Map<string, any> {
+    private parseImageOptions(image: any, mediaOptions: number, componentSize: any): Map<string, any> {
         const bgstyle = new Map();
         bgstyle.set('background-image', 'url(\'' + image + '\')');
         bgstyle.set('background-repeat', 'no-repeat');
@@ -108,9 +108,9 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         let imgHeight = 16;
 
         if (image.indexOf('imageWidth=') > 0 && image.indexOf('imageHeight=') > 0) {
-            const vars = {};
+            const vars: Record<string, any> = {};
             image.replace(/[?&]+([^=&]+)=([^&]*)/gi,
-                (m, key, value) => {
+                (m: any, key: any, value: any) => {
                     vars[key] = value;
                 });
             imgWidth = vars['imageWidth'];

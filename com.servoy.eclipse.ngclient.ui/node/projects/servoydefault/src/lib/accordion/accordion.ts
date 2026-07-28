@@ -38,7 +38,7 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
             wrapper = this.elementRef.nativeElement.closest('.svy-wrapper');
         }
         if (wrapper) {
-            totalHeight = wrapper.offsetHeight;
+            totalHeight = (wrapper as HTMLElement).offsetHeight;
         }
         if (this.tabs) {
             totalHeight = totalHeight - 40 * this.tabs.length;
@@ -62,7 +62,7 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
         return id;
     }
 
-    tabClicked(tab: Tab,tabIndexClicked: number, event){
+    tabClicked(tab: Tab,tabIndexClicked: number, event: any){
         this.select( this.tabs[tabIndexClicked] );
     }
 }

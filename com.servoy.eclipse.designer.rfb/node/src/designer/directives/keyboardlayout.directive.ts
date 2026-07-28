@@ -145,7 +145,7 @@ export class KeyboardLayoutDirective {
 
     @HostListener('document:keyup', ['$event'])
     onKeyup(event: KeyboardEvent) {
-        const changes = {};
+        const changes: Record<string, any> = {};
         if (this.boundsUpdating) {
             this.boundsUpdating = false;
             const selection = this.editorSession.getSelection();

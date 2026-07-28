@@ -16,7 +16,7 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
     
-    containerStyle = { position: 'relative', overflow: 'auto' };
+    containerStyle: Record<string, any> = { position: 'relative', overflow: 'auto' };
     height: any = '100%';
     
     private visibleTabIndex: number;
@@ -139,7 +139,7 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
                 mutations.forEach((mutation) => {
                     if (mutation.attributeName === 'class') {
                         const oldValueA = mutation.oldValue ? mutation.oldValue.split(' ') : [];
-                        if (oldValueA.indexOf('active') === -1 && mutation.target['classList'].contains('active')) {
+                        if (oldValueA.indexOf('active') === -1 && (mutation.target as any)['classList'].contains('active')) {
                             this.visibleTab.emit(this.tab);
                         }
                     }

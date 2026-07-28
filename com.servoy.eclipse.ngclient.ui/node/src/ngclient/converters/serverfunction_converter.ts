@@ -2,7 +2,7 @@ import { IType } from '../../sablo/types_registry';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
 
-export class ServerFunctionType implements IType<(...args) => unknown> {
+export class ServerFunctionType implements IType<(...args: any[]) => unknown> {
 
     public static readonly TYPE_NAME = 'function';
     
@@ -12,10 +12,10 @@ export class ServerFunctionType implements IType<(...args) => unknown> {
     constructor( private servoyService: ServoyService, private utils: SvyUtilsService) {
     }
 
-    fromServerToClient(serverSentData: {formname: string, script: string, functionhash:string}): (...args) => unknown {
+    fromServerToClient(serverSentData: {formname: string, script: string, functionhash:string}): (...args: any[]) => unknown {
         if (serverSentData) {
             if (serverSentData.script) {
-                const func = (...args) => {
+                const func = (...args: any[]) => {
                     let newargs;
                     if (args){
                         newargs = args.map((element) => {
@@ -31,7 +31,7 @@ export class ServerFunctionType implements IType<(...args) => unknown> {
                 func.script = serverSentData.script;
                 return func;
             } else if (serverSentData.functionhash) {
-                const func = (...args) => {
+                const func = (...args: any[]) => {
                     let newargs;
                     if (args){
                         newargs = args.map((element) => {

@@ -196,13 +196,9 @@ export class WindowService {
 
             // test if it is modal dialog, then the request blocks on the server and we should hide the loading.
             if (instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG && this.sabloLoadingIndicatorService.isShowing()) {
-                instance['loadingIndicatorIsHidden'] = 0;
-                // as long as the indicator says it is still showing call hide loading to
-                // get the loading counter really to 0
-                // this happens a second modal dialog is showing in the hide of another...
-                // then the stack on the server can't rewind, because it is still in the stack of the first dialog
+                instance.loadingIndicatorIsHidden = 0;
                 while (this.sabloLoadingIndicatorService.isShowing()) {
-                    instance['loadingIndicatorIsHidden']++;
+                    instance.loadingIndicatorIsHidden++;
                     this.sabloLoadingIndicatorService.hideLoading();
                 }
             }
@@ -229,14 +225,14 @@ export class WindowService {
                 window.addEventListener('keyup', instance.keyUpListener, true);
             }
             
-            instance.bsWindowInstance.element.addEventListener('bswin.resize', resizeListener);
-            instance.bsWindowInstance.element.addEventListener('bswin.move', moveListener);
-            instance.bsWindowInstance.element.addEventListener('bswin.active', activeListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.resize', resizeListener as EventListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.move', moveListener as EventListener);
+            instance.bsWindowInstance.element.addEventListener('bswin.active', activeListener as EventListener);
             
             instance.bsWindowInstance.onClose = () => {
-               instance.bsWindowInstance.element.removeEventListener('bswin.resize', resizeListener);
-               instance.bsWindowInstance.element.removeEventListener('bswin.move', moveListener);
-               instance.bsWindowInstance.element.removeEventListener('bswin.active', activeListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.resize', resizeListener as EventListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.move', moveListener as EventListener);
+               instance.bsWindowInstance.element.removeEventListener('bswin.active', activeListener as EventListener);
             };
             (this.doc.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
             instance.bsWindowInstance.setActive(true);
@@ -295,9 +291,9 @@ export class WindowService {
                 instance.keyUpListener = null;
             }
             
-            if (instance['loadingIndicatorIsHidden']) {
-                let counter = instance['loadingIndicatorIsHidden'];
-                delete instance['loadingIndicatorIsHidden'];
+            if (instance.loadingIndicatorIsHidden) {
+                let counter = instance.loadingIndicatorIsHidden;
+                delete instance.loadingIndicatorIsHidden;
                 while (counter-- > 0) {
                     this.sabloLoadingIndicatorService.showLoading();
                 }
@@ -479,7 +475,7 @@ export class WindowService {
                 this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
                 if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false && !isLoginForm) {
                     // this navigationId is angular router maybe in the future we need to have a look to just use that to set the navigation states to the forms.
-                    const state = this.platformLocation.getState();
+                    const state = this.platformLocation.getState() as Record<string, any>;
                     if (state && state['navigationId'])
                         this.platformLocation.replaceState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
                     else  this.platformLocation.pushState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
@@ -500,7 +496,7 @@ export class WindowService {
         this.servoyService.loaded().then(() => {
             const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
             if (sessionProblem && sessionProblem.viewUrl) {
-                sessionProblem.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce']?.value;
+                sessionProblem.nonce = (this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes as any)['ngCspNonce']?.value;
                 const name = sessionProblem.viewUrl.includes('/') ? sessionProblem.viewUrl.split('/')[1].split('.')[0] : sessionProblem.viewUrl.split('.')[0];
                 this.platformLocation.pushState(name, null, this.platformLocation.pathname + this.platformLocation.search + '#' + name);
             }
@@ -596,13 +592,14 @@ export class SvyWindow {
     resizable = false;
     transparent = false;
     storeBounds = false;
+    loadingIndicatorIsHidden?: number;
     renderer2: Renderer2;
     
-    keyUpListener: (event: KeyboardEvent) => void;
+    keyUpListener!: (event: KeyboardEvent) => void;
 
     bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
     windowService: WindowService;
-    componentRef: ComponentRef<DialogWindowComponent>;
+    componentRef!: ComponentRef<DialogWindowComponent>;
 
     constructor(name: string, type: number, windowService: WindowService, renderer2: Renderer2) {
         this.name = name;

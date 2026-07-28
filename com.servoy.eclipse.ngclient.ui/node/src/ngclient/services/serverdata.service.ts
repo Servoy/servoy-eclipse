@@ -14,7 +14,7 @@ export class  ServerDataService {
                 sabloService: SabloService,
                 servoyService: ServoyService,
                 i18NProvider: I18NProvider) {
-        this.data = windowRefService.nativeWindow['svyData'];
+        this.data = (windowRefService.nativeWindow as any)['svyData'];
         if (this.data.querystring) websocketService.setQueryString(this.data.querystring);
         if (this.data.pathName) websocketService.setPathname(this.data.pathName);
 

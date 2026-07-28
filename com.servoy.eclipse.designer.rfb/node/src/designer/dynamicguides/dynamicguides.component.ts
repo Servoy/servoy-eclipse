@@ -24,7 +24,7 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
   constructor(private el: ElementRef, protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
     private urlParser: URLParserService, private editorContentService: EditorContentService, private guidesService: DynamicGuidesService) {
       this.editorContentService.executeOnlyAfterInit(() => {
-        this.editorSession.getSnapThreshold().then((thresholds: { alignment: number, distance: number }) => {
+        this.editorSession.getSnapThreshold().then((thresholds: any) => {
             if (thresholds.alignment > 0 || thresholds.distance > 0) {
                 const contentArea = this.editorContentService.getContentArea();
                 contentArea.addEventListener('mouseup', () => this.onMouseUp());

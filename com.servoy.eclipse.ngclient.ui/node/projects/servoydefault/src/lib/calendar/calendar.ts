@@ -162,7 +162,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         super.pushUpdate();
     }
 
-    public modelChange(event) {
+    public modelChange(event: any) {
         if (this.findmode) {
             this.dataProviderID = event;
             super.pushUpdate();

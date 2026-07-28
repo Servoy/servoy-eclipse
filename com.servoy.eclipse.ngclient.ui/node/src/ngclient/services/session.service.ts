@@ -52,7 +52,7 @@ export class SessionService {
     public setInternalServerError(internalServerError: SessionProblem){
         const error = {viewUrl:'templates/serverInternalErrorView.html'};
         if(internalServerError.viewUrl)  error.viewUrl = internalServerError.viewUrl;
-        if(internalServerError.stack) error['stack'] = internalServerError.stack;
+        if(internalServerError.stack) (error as any)['stack'] = internalServerError.stack;
 
         this.servoyService.getSolutionSettings().sessionProblem = error;
         this.windowService.switchToSessionProblemPage();

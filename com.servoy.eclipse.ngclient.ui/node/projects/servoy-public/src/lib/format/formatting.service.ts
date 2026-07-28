@@ -78,7 +78,7 @@ export class FormattingService {
     /**
      * utility function to test if only numbers ar pressed.
      */
-    public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
+    public testForNumbersOnly(e: any, keyChar: any, vElement: any, vFindMode: any, vCheckNumbers: any, vSvyFormat: any, skipMaxLength: any) {
         if (!vFindMode && vCheckNumbers) {
             if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
                 // enter key is pressed
@@ -303,11 +303,11 @@ export class FormattingService {
         return ret;
     }
 
-    private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength, vSvyFormat) {
-        let key;
+    private numbersonly(e: any, decimal: any, decimalChar: any, groupingChar: any, currencyChar: any, percentChar: any, vElement: any, mlength: any, vSvyFormat: any) {
+        let key: any;
 
         if (window.event) {
-            key = window.event['keyCode'];
+            key = (window.event as any)['keyCode'];
         } else if (e) {
             key = e.which;
         } else {
@@ -340,7 +340,7 @@ export class FormattingService {
         }
     }
 
-    private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
+    private numbersonlyForChar(keychar: any, decimal: any, decimalChar: any, groupingChar: any, currencyChar: any, percentChar: any, vElement: any, mlength: any) {
         const value = vElement.value;
         if (mlength > 0 && value) {
             let counter = 0;
@@ -373,7 +373,7 @@ export class FormattingService {
         return false;
     }
 
-    private getSelectedText(textarea) {
+    private getSelectedText(textarea: any) {
         let sel = null;
         if (textarea) {
             const start = textarea['selectionStart'];
@@ -566,7 +566,7 @@ export class FormattingService {
         return prefix + ret + sufix;
     }
 
-    private formatText(data, servoyFormat: string): string {
+    private formatText(data: any, servoyFormat: string): string {
         if (!servoyFormat) return data;
         const error = 'input string not corresponding to format : ' + data + ' , ' + servoyFormat;
         let ret = '';
@@ -625,7 +625,7 @@ export class FormattingService {
         return ret;
     }
 
-    private formatDate(data, dateFormat: string): string {
+    private formatDate(data: any, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
         // single quote escape workaround until https://github.com/moment/luxon/issues/649 is fixed
         dateFormat = this.convertFormat(dateFormat).replace("''", "'svy_quote'");

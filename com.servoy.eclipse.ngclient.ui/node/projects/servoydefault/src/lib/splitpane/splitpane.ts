@@ -12,30 +12,30 @@ import { Tab } from '../tabpanel/basetabpanel';
 } )
 export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> {
 
-    @Input() onChangeMethodID;
+    @Input() onChangeMethodID: any;
 
-    @Input() background;
-    @Input() borderType;
-    @Input() enabled;
-    @Input() fontType;
-    @Input() foreground;
-    @Input() horizontalAlignment;
-    @Input() location;
-    @Input() readOnly;
-    @Input() selectedTabColor;
-    @Input() size;
-    @Input() styleClass;
-    @Input() tabOrientation;
-    @Input() tabSeq;
+    @Input() background: any;
+    @Input() borderType: any;
+    @Input() enabled: any;
+    @Input() fontType: any;
+    @Input() foreground: any;
+    @Input() horizontalAlignment: any;
+    @Input() location: any;
+    @Input() readOnly: any;
+    @Input() selectedTabColor: any;
+    @Input() size: any;
+    @Input() styleClass: any;
+    @Input() tabOrientation: any;
+    @Input() tabSeq: any;
     @Input() tabs: Array<Tab>;
-    @Input() transparent;
+    @Input() transparent: any;
 
-    @Input() divLocation;
+    @Input() divLocation: any;
     @Output() divLocationChange = new EventEmitter();
-    @Input() divSize;
-    @Input() pane1MinSize;
-    @Input() pane2MinSize;
-    @Input() resizeWeight;
+    @Input() divSize: any;
+    @Input() pane1MinSize: any;
+    @Input() pane2MinSize: any;
+    @Input() resizeWeight: any;
 
 
     @ContentChild( TemplateRef, {static: true} )
@@ -85,7 +85,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
         }
     }
 
-    onChange( location ) {
+    onChange( location: any ) {
         this.divLocation = location;
         this.divLocationChange.emit(this.divLocation);
         if (this.onChangeMethodID) this.onChangeMethodID(-1, new Event('change'));

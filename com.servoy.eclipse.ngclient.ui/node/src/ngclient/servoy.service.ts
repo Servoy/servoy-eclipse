@@ -30,7 +30,7 @@ import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 import { ServerFunctionType } from './converters/serverfunction_converter';
 
 class UIProperties {
-    private uiProperties: { [property: string]: any};
+    private uiProperties!: { [property: string]: any};
 
     constructor(private sessionStorageService: SessionStorageService) {
     }
@@ -63,13 +63,13 @@ class UIProperties {
 }
 
 class SolutionSettings {
-    public solutionName: string;
-    public windowName: string;
+    public solutionName = '';
+    public windowName = '';
     public enableAnchoring = true;
     public ltrOrientation = true;
-    public mainForm: FormSettings;
-    public navigatorForm: FormSettings;
-    public sessionProblem: SessionProblem;
+    public mainForm!: FormSettings;
+    public navigatorForm!: FormSettings;
+    public sessionProblem!: SessionProblem;
 }
 
 @Injectable({
@@ -81,8 +81,8 @@ export class ServoyService {
     private uiBlockerService: UIBlockerService;
 
     private findModeShortCutCallback: any = null;
-    private resizeObservable$: Observable<Event>;
-    private resizeSubscription$: Subscription;
+    private resizeObservable$!: Observable<Event>;
+    private resizeSubscription$!: Subscription;
 
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
@@ -226,7 +226,7 @@ export class ServoyService {
 }
 
 export class SessionProblem {
-    public viewUrl: string;
+    public viewUrl = '';
     public redirectUrl?: string;
     public redirectTimeout?: number;
     public stack?: string;

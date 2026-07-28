@@ -15,10 +15,10 @@ import { I18NProvider } from './services/i18n_provider.service';
 })
 export class LocaleService {
     private locale = 'en';
-    private loadedLocale: Deferred<any>;
+    private loadedLocale!: Deferred<any>;
 
-    private readonly localeMap = { en: 'en-US' };
-    private agGridLocale: { [key: string]: string; };
+    private readonly localeMap: Record<string, string> = { en: 'en-US' };
+    private agGridLocale!: { [key: string]: string; };
     private readonly log: LoggerService;
 
     constructor(private sabloService: SabloService,
@@ -71,7 +71,8 @@ export class LocaleService {
     	    const localeConstName = `AG_GRID_LOCALE_${localeKey}`;
             allPromises.push(import('@ag-grid-community/locale'));
 
-            Promise.all(allPromises).then(([numbroResp, localeModule]) => {
+            Promise.all(allPromises).then((results: any[]) => {
+                const [numbroResp, localeModule] = results;
                 this.agGridLocale = localeModule[localeConstName];
                 if(!this.agGridLocale) this.agGridLocale = localeModule[`AG_GRID_LOCALE_EN`];
                 this.loadedLocale.resolve(localeId)

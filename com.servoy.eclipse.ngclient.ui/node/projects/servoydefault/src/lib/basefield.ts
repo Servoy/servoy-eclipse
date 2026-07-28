@@ -56,7 +56,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
         this.getFocusElement().focus();
     }
 
-    onDataChangeCallback(event, returnval) {
+    onDataChangeCallback(event: any, returnval: any) {
         const stringValue = (typeof returnval === 'string' || returnval instanceof String);
         if (returnval === false || stringValue) {
             this.renderer.removeClass(this.elementRef.nativeElement, 'ng-valid');

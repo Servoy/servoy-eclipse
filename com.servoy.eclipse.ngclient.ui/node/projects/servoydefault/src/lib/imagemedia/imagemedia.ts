@@ -51,11 +51,11 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
         const imageHeight = element.clientHeight;
         const imageWidth = element.clientWidth;
         // vertical align cennter
-        const height = element.parentNode['clientHeight'];
+        const height = (element.parentNode as any)['clientHeight'];
         if (height > imageHeight)
             alignStyle.top = (height - imageHeight) / 2 + 'px';
         // horizontal align (default left)
-        const width = element.parentNode['clientWidth'];
+        const width = (element.parentNode as any)['clientWidth'];
         if (width > imageWidth) {
             if (this.horizontalAlignment === 0 /*SwingConstants.CENTER*/)
                 alignStyle.left = (width - imageWidth) / 2 + 'px';

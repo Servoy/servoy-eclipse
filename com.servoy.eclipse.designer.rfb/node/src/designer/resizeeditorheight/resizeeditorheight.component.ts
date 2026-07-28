@@ -15,7 +15,7 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
 
     
     private lowestPart: Element | null = null;
-    private dragingEvent = null;
+    private dragingEvent: any = null;
     private ghostContainers: HTMLElement[];
     private editorContent: HTMLElement;
     private contentArea: HTMLElement;
@@ -108,13 +108,13 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
                 this.currentPosition = this.heightLimit;
             }
             if (this.lowestPart) {
-                const changes = {};
+                const changes: Record<string, any> = {};
                 const id = this.lowestPart.getAttribute('svy-id');
                 changes[id] = { 'y': this.currentPosition};
                 this.editorSession.sendChanges(changes); 
             } 
 
-            const changes = {};
+            const changes: Record<string, any> = {};
             const id = this.editorContentService.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
             changes[id] = { 'height': this.currentPosition};
             this.editorSession.sendChanges(changes);

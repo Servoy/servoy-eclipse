@@ -50,7 +50,7 @@ export class FileUploadWindowComponent {
     progress = 0;
     errorText = '';
     isUploading = false;
-    onCloseCallback: () => void;
+    onCloseCallback!: () => void;
 
     constructor(private http: HttpClient, i18nProvider: I18NProvider) {
         i18nProvider.listenForI18NMessages(
@@ -116,7 +116,7 @@ export class FileUploadWindowComponent {
         const fileList: FileList = target.files;
         
         for (const key of Object.keys(fileList)) {
-            const file = fileList[key];
+            const file = fileList[key as any];
             const fileSizeKB = file.size / (1024); // bytes to kilobytes
             
             // Check if file exceeds max size (if a max size is set)
@@ -201,7 +201,7 @@ export class FileUploadWindowComponent {
         if (!this.isUploading && this.onCloseCallback) this.onCloseCallback();
     }
 
-    public setOnCloseCallback(callback) {
+    public setOnCloseCallback(callback: () => void) {
         this.onCloseCallback = callback;
     }
 }

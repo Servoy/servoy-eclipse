@@ -616,7 +616,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_LEFT) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
+                    const obj: Record<string, any> = {};
                     let left: number = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
@@ -652,8 +652,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_RIGHT) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let right = null;
+                    const obj: Record<string, any> = {};
+                    let right: number = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
@@ -688,7 +688,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_TOP) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
+                    const obj: Record<string, any> = {};
                     let top: number = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
@@ -724,8 +724,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_BOTTOM) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let bottom = null;
+                    const obj: Record<string, any> = {};
+                    let bottom: number = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
@@ -760,7 +760,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
              if (action == TOOLBAR_CONSTANTS.ALIGN_CENTER) {
                   const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
+                    const obj: Record<string, any> = {};
                     let centerElementModel: DOMRect = null;
                     const sortedSelection: Array<DOMRect> = [];
                     for (let i = 0; i < selection.length; i++) {
@@ -805,7 +805,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_MIDDLE) {
                  const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
+                    const obj: Record<string, any> = {};
                     let centerElementModel: DOMRect = null;
                     const sortedSelection: Array<DOMRect> = [];
                     for (let i = 0; i < selection.length; i++) {
@@ -993,7 +993,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         });
     }
 
-    setShowSolutionCss(state) {
+    setShowSolutionCss(state: any) {
         this.editorContentService.querySelectorAllInContent('link[svy-stylesheet]').forEach(link  => {
             const htmlLink = link as HTMLLinkElement;
             htmlLink.disabled = !state;

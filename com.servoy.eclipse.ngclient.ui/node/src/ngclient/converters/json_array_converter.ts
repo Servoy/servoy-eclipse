@@ -293,7 +293,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
                         if (propertyContext?.isInsideModel) internalState.contentVersion = 1; // start fresh;
                         
                         // send all
-                        const toBeSentArray = fullChange.v = [];
+                        const toBeSentArray: any[] = fullChange.v = [];
                         for (let idx = 0; idx < newClientDataInited.length; idx++) {
                             const val = newClientDataInited[idx];
                             
@@ -491,7 +491,7 @@ class CustomArrayValue<T> extends Array<T> implements ICustomArrayValue<T>, ICha
     // so to avoid this double array creation + copy, this class is used via Object.setPrototypeOf(arrayToInitialize, CustomArrayValue.prototype);
     // that means unfortunately that fields don't work properly, especially new ECMA private class fields so we can't use #internalState to
     // avoid iteration/enumeration/public access to/on it
-    private __internalState: ArrayState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
+    private __internalState!: ArrayState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
 
     initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, pushToServerForElements: PushToServerEnum) {
         Object.defineProperty(this, ChangeAwareState.INTERNAL_STATE_MEMBER_NAME, {

@@ -128,7 +128,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                     const oldRows = currentClientValue.viewPort.rows.slice(); // create shallow copy of old rows as ref. will be the same otherwise
                     currentClientValue.viewPort.rows =
                         this.viewportService.updateWholeViewport(currentClientValue.viewPort.rows, internalState, viewPortUpdate.rows,
-                                                        viewPortUpdate[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY], undefined, internalState.propertyContextCreator,
+                                                        (viewPortUpdate as any)[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY], undefined, internalState.propertyContextCreator,
                                                         false, () => new RowValue(newValue));
 
                     if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = {
@@ -243,6 +243,8 @@ export class FoundsetType implements IType<FoundsetValue> {
 
 export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAwareValue {
 
+    [key: string]: any;
+
     /**
      * An identifier that allows you to use this foundset via the 'foundsetRef' and
      * 'record' types.
@@ -256,31 +258,31 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
      * this identifier on client (so you can use it to find the actual foundset
      * property in the model, if server side script put it in the model as well).
      */
-    public foundsetId: number;
+    public foundsetId!: number;
 
     /**
      * the size of the foundset on server (so not necessarily the total record count
      * in case of large DB tables)
      */
-    public serverSize: number;
+    public serverSize!: number;
 
     /**
      * this is the data you need to have loaded on client (just request what you need via provided
      * loadRecordsAsync loadExtraRecordsAsync, etc)
      */
-    public viewPort: Viewport;
+    public viewPort!: Viewport;
 
     /**
      * array of selected records in foundset; indexes can be out of current
      * viewPort as well
      */
-    public selectedRowIndexes: number[];
+    public selectedRowIndexes: number[] = [];
 
     /**
      * sort string of the foundset, the same as the one used in scripting for
      * foundset.sort and foundset.getCurrentSort. Example: 'orderid asc'.
      */
-    public sortColumns: string;
+    public sortColumns: string = '';
 
     /**
      * the multiselect mode of the server's foundset; if this is false,
@@ -300,7 +302,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
      * viewport to load records at index serverSize-1 or greater will load more
      * records in the foundset)
      */
-    public hasMoreRows: boolean;
+    public hasMoreRows: boolean = false;
 
     /**
      * columnFormats is only present if you specify
@@ -331,7 +333,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadRecordsAsync requested with (' + startIndex + ', ' + size + ')')));
         if (isNaN(startIndex) || isNaN(size)) throw new Error('loadRecordsAsync: start or size are not numbers (' + startIndex + ',' + size + ')');
 
-        const req = {newViewPort: {startIndex, size}};
+        const req: Record<string, any> = {newViewPort: {startIndex, size}};
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -344,7 +346,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadExtraRecordsAsync requested with (' + negativeOrPositiveCount + ', ' + dontNotifyYet + ')')));
         if (isNaN(negativeOrPositiveCount)) throw new Error('loadExtraRecordsAsync: extrarecords is not a number (' + negativeOrPositiveCount + ')');
 
-        const req = { loadExtraRecords: negativeOrPositiveCount };
+        const req: Record<string, any> = { loadExtraRecords: negativeOrPositiveCount };
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -357,7 +359,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadLessRecordsAsync requested with (' + negativeOrPositiveCount + ', ' + dontNotifyYet + ')')));
         if (isNaN(negativeOrPositiveCount)) throw new Error('loadLessRecordsAsync: lessrecords is not a number (' + negativeOrPositiveCount + ')');
 
-        const req = { loadLessRecords: negativeOrPositiveCount };
+        const req: Record<string, any> = { loadLessRecords: negativeOrPositiveCount };
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -373,7 +375,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
 
     public sort(columns: any): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * sort requested with ' + JSON.stringify(columns))));
-        const req = { sort: columns };
+        const req: Record<string, any> = { sort: columns };
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -402,7 +404,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         const msgId = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         this.__internalState.selectionUpdateDefer = this.__internalState.deferred[msgId].defer;
 
-        const req = {newClientSelectionRequest: tmpSelectedRowIdxs, selectionRequestID: msgId};
+        const req: Record<string, any> = {newClientSelectionRequest: tmpSelectedRowIdxs, selectionRequestID: msgId};
         req[ViewportService.ID_KEY] = msgId;
         this.__internalState.requests.push(req);
         this.__internalState.notifyChangeListener();
@@ -488,7 +490,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
                             + debugLocator + '\n[\n';
                         possibleWarnMessage += '  {';
                         let sep = '';
-                        row._cache.forEach((v, k) => {
+                        row._cache.forEach((v: any, k: any) => {
                             possibleWarnMessage += sep + k + ": " + ((typeof(v == 'object') ? v.constructor?.name : v))
                             sep = ', ';
                         });
@@ -504,12 +506,12 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
 
 class FoundsetTypeInternalState extends FoundsetViewportState implements IDeferedState {
 
-    deferred: { [key: string]: { defer: Deferred<any>; timeoutId: number } };
-    timeoutRejectLogPrefix: string;
-    selectionUpdateDefer: Deferred<any>;
-    propertyContextCreator: IPropertyContextCreatorForRow;
+    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: number } };
+    timeoutRejectLogPrefix!: string;
+    selectionUpdateDefer!: Deferred<any>;
+    propertyContextCreator!: IPropertyContextCreatorForRow;
 
-    unwatchSelection: () => void;
+    unwatchSelection!: () => void;
 
     constructor(propertyContext: IPropertyContext, log: LoggerService, public readonly sabloDeferHelper: SabloDeferHelper, public readonly viewportService: ViewportService,
         protected sabloService: SabloService) {
@@ -553,8 +555,8 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
 export class RowValue {
 
    [columnName: string]: any;
-   _svyRowId: string;
-   private readonly _foundset: FoundsetValue;
+   _svyRowId!: string;
+   private readonly _foundset!: FoundsetValue;
 
     constructor(foundset: FoundsetValue) {
         // make foundset private member non-iterable in JS world
@@ -582,6 +584,7 @@ export class RowValue {
 }
 
 interface Viewport {
+    [key: string]: any;
     startIndex: number;
     size: number;
     rows: RowValue[];
@@ -614,6 +617,8 @@ class FoundsetFieldsOnly implements IFoundsetFieldsOnly {
 }
 
 interface ServerSentJSONForFoundset {
+
+    [key: string]: any;
 
     serverSize?: number;
     foundsetId?: number;

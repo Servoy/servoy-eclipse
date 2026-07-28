@@ -50,7 +50,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         if (this.onActionMethodID) this.onActionMethodID(new MouseEvent(event.type, event));
     }
 
-    contextMenu(event) {
+    contextMenu(event: any) {
         if (this.onRightClickMethodID) {
             this.onRightClickMethodID(new CustomEvent('contextmenu'));
             event.event.preventDefault();

@@ -2,19 +2,19 @@ import { IComponentCache, IFormCache } from '@servoy/public';
 import { IType, TypesRegistry } from '../sablo/types_registry';
 
 export class FormSettings {
-    public name: string;
-    public size: { width: number; height: number };
+    public name!: string;
+    public size!: { width: number; height: number };
 }
 
 /** Cache for a Servoy form (data/model instances, no UI). Also keeps the component caches, Servoy form component caches etc. */
 export class FormCache implements IFormCache {
-    public navigatorForm: FormSettings;
+    public navigatorForm!: FormSettings;
     public partComponentsCache: Array<ComponentCache | StructureCache | FormComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
     public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
     public componentCache: Map<string, ComponentCache>;
 
-    private _mainStructure: StructureCache;
+    private _mainStructure!: StructureCache;
     private _parts: Array<PartCache>;
 
     constructor(readonly formname: string, 
@@ -61,7 +61,7 @@ export class FormCache implements IFormCache {
     }
 
     public addLayoutContainer(container: StructureCache) {
-        const id = container.id || container['hiddenId'] || container.attributes['svy-id-hidden'];
+        const id = container.id || (container as any)['hiddenId'] || container.attributes['svy-id-hidden'];
         if (id) {
            this.layoutContainersCache.set(id, container);
         }
@@ -216,7 +216,7 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 
     public readonly rId = repeaterIdCounter++;
 
-    public parent: StructureCache;
+    public parent!: StructureCache;
 
     constructor(public readonly name: string,
         public readonly specName: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
@@ -274,7 +274,7 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 }
 
 export class StructureCache implements IRepeaterIDProvider{
-    public parent: StructureCache;
+    public parent!: StructureCache;
     public model:  { [property: string]: unknown } = {};
     public readonly rId = repeaterIdCounter++;
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
@@ -401,8 +401,8 @@ export class FormComponentProperties {
 
 
 export class Dimension {
-    public width: number;
-    public height: number;
+    public width = 0;
+    public height = 0;
 }
 
 export interface Position {

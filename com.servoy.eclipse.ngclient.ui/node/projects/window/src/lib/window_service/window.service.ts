@@ -136,12 +136,12 @@ export class WindowPluginService {
     private showPopupMenu() {
         if (this._popupmenus && this._popupMenuShowCommand) {
             for (const i of Object.keys(this._popupmenus)) {
-                if (this._popupMenuShowCommand.popupName === this._popupmenus[i].name) {
+                if (this._popupMenuShowCommand.popupName === this._popupmenus[i as any].name) {
                     this.popupMenuService.initClosePopupHandler(() => {
                         this._popupMenuShowCommand = null;
                         this.servoyService.sendServiceChanges('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
                     });
-                    this.popupMenuService.initMenu(this._popupmenus[i]);
+                    this.popupMenuService.initMenu(this._popupmenus[i as any]);
                     if (this._popupMenuShowCommand?.elementId) {
                         const element = this.doc.querySelector("[id^="+this._popupMenuShowCommand.elementId+"]") as HTMLElement;
                         if (element && this._popupMenuShowCommand.x && this._popupMenuShowCommand.y) {

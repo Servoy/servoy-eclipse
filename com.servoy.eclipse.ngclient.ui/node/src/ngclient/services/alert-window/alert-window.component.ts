@@ -11,7 +11,7 @@ import { I18NProvider } from '../i18n_provider.service';
 export class AlertWindowComponent {
     readonly title = signal<string>(undefined);
     readonly message = signal<string>(undefined);
-    onCloseCallback: () => void;
+    onCloseCallback!: () => void;
     constructor() {
     }
 
@@ -19,7 +19,7 @@ export class AlertWindowComponent {
       this.onCloseCallback();
     }
 
-    public setOnCloseCallback(callback) {
+    public setOnCloseCallback(callback: any) {
       this.onCloseCallback = callback;
     }
 

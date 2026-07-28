@@ -169,7 +169,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
     onMouseUp(event: MouseEvent) {
         if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging && this.canDrop.dropAllowed) {
-            const components = [];
+            const components: any[] = [];
             
             if (!this.canDrop.beforeChild && !this.canDrop.append) {
                 this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.dragNode);
@@ -181,7 +181,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             
             const uuids = this.editorSession.getSelection();
             uuids.forEach(uuid => {
-                const obj = {}
+                const obj: Record<string, any> = {}
                 if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
                     obj['uuid'] = uuid;
                     if (this.canDrop.dropTarget) {

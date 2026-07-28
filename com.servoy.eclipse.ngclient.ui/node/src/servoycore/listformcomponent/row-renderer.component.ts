@@ -13,9 +13,9 @@ import { ListFormComponent } from './listformcomponent';
 })
 export class RowRenderer implements AgRendererComponent, AfterViewInit {
 
-    lfc: ListFormComponent;
-    foundsetRows: any[];
-    startIndex: number;
+    lfc!: ListFormComponent;
+    foundsetRows!: any[];
+    startIndex!: number;
 
     constructor(private elementRef: ElementRef) {}
 

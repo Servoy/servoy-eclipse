@@ -16,8 +16,8 @@ export class LoadingIndicatorService {
     customLoadingIndicator: ICustomLoadingIndicator;
     log: LoggerService;
     private showCounter = 0;
-    private timeoutShow = null;
-    private timeoutHide = null;
+    private timeoutShow: ReturnType<typeof setTimeout> | null = null;
+    private timeoutHide: ReturnType<typeof setTimeout> | null = null;
 
     constructor(logFactory: LoggerFactory ) {
        this.customLoadingIndicator = null;

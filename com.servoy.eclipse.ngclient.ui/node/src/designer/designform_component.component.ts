@@ -133,28 +133,28 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     readonly servoycoreFormcontainer = viewChild<TemplateRef<any>>('servoycoreFormcontainer');
     // component viewchild template generate end
 
-    @Input() name: string;
+    @Input() name!: string;
 
-    formClasses: string[];
-    formCache: FormCache;
+    formClasses!: string[];
+    formCache!: FormCache;
 
-    absolutFormPosition = {};
+    absolutFormPosition: Record<string, any> = {};
     showWireframe = false;
-    draggedElementItem: ComponentCache | StructureCache;
-    insertedCloneParent: StructureCache;
-    insertedClone: ComponentCache | StructureCache;
-    dragItem: Element;
+    draggedElementItem!: ComponentCache | StructureCache;
+    insertedCloneParent!: StructureCache;
+    insertedClone!: ComponentCache | StructureCache;
+    dragItem!: Element;
     isVariantForm: boolean;
-    variantsContainer: StructureCache;
-    insertedVariants: Array<StructureCache>;
+    variantsContainer!: StructureCache;
+    insertedVariants!: Array<StructureCache>;
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
-    private designMode: boolean;
+    private designMode = false;
     private maxLevel = 3;
     private dropHighlight: string = null;
     private dropHighlightIgnoredIds: Array<string> = null;
-    private allowedChildren: unknown;
+    private allowedChildren: Record<string, any>;
     private variantContainerMargin = 2;
     private variantItemMargin = 10;
     private variantsLoaded = false;
@@ -176,7 +176,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
-                const model = { width: elWidth + 'px', height: elHeight + 'px' };
+                const model: Record<string, string> = { width: elWidth + 'px', height: elHeight + 'px' };
                 model['top'] = '-200px';
                 model['left'] = '-200px';
                 const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
@@ -185,7 +185,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null ,null, false, model_inserted);
                     this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone', false, model_inserted);
                     if (event.data.children) {
-                        event.data.children.forEach(child => {
+                        event.data.children.forEach((child: any) => {
                             (this.draggedElementItem as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
                             (this.insertedClone as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
                         });
@@ -204,7 +204,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'createVariants') {
                 this.variantsLoaded = false;
 
-                const attributes = {};
+                const attributes: Record<string, string> = {};
                 attributes['designclass'] =  'variant_item';
                 attributes['svy-title'] = 'flex-item';
 
@@ -319,7 +319,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 if (this.insertedCloneParent) {
                     this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
                     if (event.data.uuids) {
-                        event.data.uuids.forEach(uuid => {
+                        event.data.uuids.forEach((uuid: any) => {
                             let insertedClone: ComponentCache | StructureCache = this.formCache.getLayoutContainer(uuid); 
                             if (!insertedClone) {
                                 insertedClone = this.formCache.getComponent(uuid);
@@ -353,7 +353,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = event.data.value;
                 this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts', formname : this.name }, '*');
                 if (changed){
-                    Array.from( this.formCache.formComponents.values()).forEach(formComponent => {
+                    Array.from( this.formCache.formComponents.values()).forEach((formComponent: any) => {
                        if (formComponent.hasFoundset && formComponent.model.containedForm && !formComponent.model.containedForm.absoluteLayout){
                            // just trigger the change detection
                           formComponent.model.editable = ! formComponent.model.editable;
@@ -473,16 +473,16 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
+            return item.tagname ? (this as any)[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
         } else if (item instanceof FormComponentCache) {
             if (item.hasFoundset) return this.servoycoreListformcomponent();
             return item.responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
         } else {
             if (item.type === 'menu') return;
-            if (this[item.type] === undefined && item.type !== undefined) {
+            if ((this as any)[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
-            return this[item.type]();
+            return (this as any)[item.type]();
         }
     }
 
@@ -495,7 +495,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
             compDirectiveName = compDirectiveName.replace('-', '');
-            return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)]();
+            return (this as any)[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)]();
         }
     }
 
@@ -515,7 +515,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.absolutFormPosition['overflow'] = 'hidden';
 
         if (formData.model.borderType) {
-            const borderStyle = formData.model.borderType;
+            const borderStyle: Record<string, any> = formData.model.borderType;
             for (const key of Object.keys(borderStyle)) {
                 this.absolutFormPosition[key] = borderStyle[key];
             }
@@ -542,7 +542,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         // no operation needed for this dataprovider change event
     }
 
-    getHandler(_item: ComponentCache, _handler: string) {
+    getHandler(_item: ComponentCache, _handler: string): any {
         return null;
     }
 
@@ -564,7 +564,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     getNGClass(item: StructureCache): { [klass: string]: any } {
-        const ngclass = {};
+        const ngclass: Record<string, any> = {};
         if (!item.cssPositionContainer || item.getDepth() != 0) {
         	ngclass[item.attributes.designclass] = this.showWireframe;
         }

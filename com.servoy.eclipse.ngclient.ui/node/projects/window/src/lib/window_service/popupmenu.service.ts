@@ -270,7 +270,7 @@ export class PopupMenuService {
 				{
 					name: 'offset',
 					options: {
-						offset: ({ placement, reference, popper }) => {
+						offset: ({ placement, reference, popper }: { placement: any, reference: any, popper: any }) => {
 							if (reference.x + popper.width / 2 < this.doc.documentElement.clientWidth) {
 								return [popper.width / 2, 0];
 							} else {

@@ -12,7 +12,7 @@ import { ServoyDefaultBaseField } from '../basefield';
     standalone: false
 } )
 export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectElement> {
-    @Input() multiselectListbox;
+    @Input() multiselectListbox: any;
 
     selectedValues: any[];
 
@@ -51,7 +51,7 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectEleme
             if (this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0])) this.allowNullinc = 1;
     }
     
-    isValueListNull = (item) => (item.realValue == null || item.realValue === '') && item.displayValue === '';
+    isValueListNull = (item: any) => (item.realValue == null || item.realValue === '') && item.displayValue === '';
 
     
     attachHandlers() {

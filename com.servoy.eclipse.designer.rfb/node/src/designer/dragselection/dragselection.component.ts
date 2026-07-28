@@ -137,7 +137,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
     private sendChanges(elementInfos: Map<string, ElementInfo>, event: MouseEvent) {
         if (elementInfos && elementInfos.size) {
-            const changes = (event.ctrlKey || event.metaKey) ? [] : {};
+            const changes: Record<string, any> = (event.ctrlKey || event.metaKey) ? [] : {};
             let i = 0;
             for (const nodeId of elementInfos.keys()) {
                 const elementInfo = elementInfos.get(nodeId);

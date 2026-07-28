@@ -250,7 +250,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 if (this.snapData.height) {
                     component.h = Math.round(this.snapData.height);
                 }
-                component.cssPos = this.snapData.cssPosition;
+                component.cssPos = this.snapData.cssPosition as any;
                 this.snapData = null;
             }
             else {
@@ -319,7 +319,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 component.dropTargetUUID = found.getAttribute('svy-id');
             }
             if (this.dragItem.propertyName) {
-                component[this.dragItem.propertyName] = this.dragItem.propertyValue;
+                (component as any)[this.dragItem.propertyName] = this.dragItem.propertyValue;
             }
 
             if (component.x >= 0 && component.y >= 0) {
@@ -449,7 +449,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         else
             layoutType = 'Responsive-Layout';
         this.activeIds = [];
-        this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: Array<Package>) => {
+        this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: any) => {
             let packages: Array<Package>
             let propertyValues: Array<PaletteComp>;
             if (got[got.length - 1] && got[got.length - 1].propertyValues) {
@@ -627,7 +627,7 @@ export class SearchTextDeepPipe implements PipeTransform {
                 if (catKeys.length > 0) {
                     for (const prop of catKeys) {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        const catProp: Array<PaletteComp> = item.categories[prop];
+                        const catProp: Array<PaletteComp> = (item.categories as any)[prop];
                         catBool = catProp.filter(component => {
                             return text.toLowerCase().split(' ').find(searchText => component.displayName.toLowerCase().indexOf(searchText) >= 0) != undefined;
                         }).length > 0;

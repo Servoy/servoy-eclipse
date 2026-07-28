@@ -23,18 +23,18 @@ export abstract class ServoyApi {
     /**
       * Call to notify the server when this property is gone in edit mode (focus in a field). This can also be configured by using the {@link StartEditDirective}
       */
-    public abstract startEdit(propertyName: string);
+    public abstract startEdit(propertyName: string): void;
 
     /**
       * This apply is only needed for nested dataproviders, so a dataprovider property of custom type, this will push and apply the data to the data model.
       * Normal main spec model dataprovider should be pushed using an Change Emitter. 
       */
-    public abstract apply(propertyName: string, value: unknown);
+    public abstract apply(propertyName: string, value: unknown): void;
 
     /**
       * Call this components serverside api with the given arguments
       */ 
-    public abstract callServerSideApi(methodName: string, args: Array<unknown>);
+    public abstract callServerSideApi(methodName: string, args: Array<unknown>): void;
 
     /**
       * Returns true if the component is currently rendered in the designer (so it can render with some sample data if needed)
@@ -65,12 +65,12 @@ export abstract class ServoyApi {
     /**
       * Internal api, used by {@link ServoyBaseComponent} to register itself to implementors of this ServoyApi object (like form containers)
       */
-    public abstract registerComponent(component: ServoyBaseComponent<HTMLElement>);
+    public abstract registerComponent(component: ServoyBaseComponent<HTMLElement>): void;
 
     /**
      * Internal api, used by {@link ServoyBaseComponent} to unregister itself to implementors of this ServoyApi object (like form containers)
       */
-    public abstract unRegisterComponent(component: ServoyBaseComponent<HTMLElement>);
+    public abstract unRegisterComponent(component: ServoyBaseComponent<HTMLElement>): void;
 
     /**
       * Returns the value for the given client property key that was set at the server side on this component.

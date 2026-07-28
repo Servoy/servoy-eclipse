@@ -122,7 +122,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
 
     public getTemplateForFormComponentChild(formName: string, item: IComponentCache): TemplateRef<any> {
-        const formComponent = this.formService.getFormComponentInstance(formName);
+        const formComponent: any = this.formService.getFormComponentInstance(formName);
         if (formComponent && formComponent['getTemplateForLFC']) {
             return formComponent['getTemplateForLFC'](item);
         }

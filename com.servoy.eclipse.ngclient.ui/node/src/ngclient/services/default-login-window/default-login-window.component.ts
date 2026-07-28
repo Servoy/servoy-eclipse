@@ -10,11 +10,11 @@ import { SabloService } from '../../../sablo/sablo.service';
 })
 export class DefaultLoginWindowComponent {
 
-    username: string;
-    password: string;
+    username!: string;
+    password!: string;
     remember = true;
-    message: string;
-    onLoginCallback : () => void;
+    message!: string;
+    onLoginCallback!: () => void;
     
     constructor(
         private sabloService: SabloService,
@@ -35,7 +35,7 @@ export class DefaultLoginWindowComponent {
         });
     }
     
-    public setOnLoginCallback(callback){
+    public setOnLoginCallback(callback: any){
         this.onLoginCallback = callback;
     }
 }

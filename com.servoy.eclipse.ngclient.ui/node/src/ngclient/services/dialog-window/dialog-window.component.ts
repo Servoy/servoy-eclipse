@@ -13,7 +13,7 @@ import { FormService } from '../../form.service';
 })
   export class DialogWindowComponent {
 
-    window: SvyWindow;
+    window!: SvyWindow;
     firstTimeFocus = true;
 
     constructor(private sabloService: SabloService, private formservice: FormService, @Inject(DOCUMENT) private doc: Document) {
@@ -109,7 +109,7 @@ import { FormService } from '../../form.service';
       }
     }
 
-    isElementVisibleAndNotDisabled(element): boolean {
+    isElementVisibleAndNotDisabled(element: any): boolean {
       return (element.offsetWidth > 0 || element.offsetHeight > 0) && !element.disabled;
     }
   }

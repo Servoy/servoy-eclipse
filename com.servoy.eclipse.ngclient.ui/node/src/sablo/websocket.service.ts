@@ -16,12 +16,12 @@ import { MobileBridge } from './io/mobilebridge';
 export class WebsocketService {
     public reconnectingEmitter = new Subject<boolean>();
 
-    private pathname: string;
-    private queryString: string;
-    private wsSession: WebsocketSession;
-    private wsSessionDeferred: Deferred<WebsocketSession>;
-    private connectionArguments = {};
-    private lastServerMessageNumber = null;
+    private pathname!: string;
+    private queryString!: string;
+    private wsSession!: WebsocketSession;
+    private wsSessionDeferred!: Deferred<WebsocketSession>;
+    private connectionArguments: Record<string, any> = {};
+    private lastServerMessageNumber: number | null = null;
 
     constructor(private windowRef: WindowRefService,
         private converterService: ConverterService<unknown>,
@@ -53,7 +53,7 @@ export class WebsocketService {
     }
 
     // update query arguments for next reconnect-call
-    public setConnectionQueryArgument(arg, value) {
+    public setConnectionQueryArgument(arg: any, value: any) {
         if (value !== undefined) {
             if (!this.connectionArguments['queryArgs']) this.connectionArguments['queryArgs'] = {};
             this.connectionArguments['queryArgs'][arg] = value;
@@ -62,7 +62,7 @@ export class WebsocketService {
         }
     }
 
-    public setConnectionPathArguments(args) {
+    public setConnectionPathArguments(args: any) {
         this.connectionArguments['args'] = args;
     }
 
@@ -123,7 +123,7 @@ export class WebsocketService {
         return this.wsSession.getCurrentRequestInfo();
     }
 
-    private generateURL(context, args, queryArgs?, websocketUri?, reconnectAttempt? : boolean) {
+    private generateURL(context: any, args: any, queryArgs?: any, websocketUri?: any, reconnectAttempt? : boolean) {
         let new_uri: string;
         if (this.windowRef.nativeWindow.location.protocol === 'https:') {
             new_uri = 'wss:';
@@ -192,26 +192,26 @@ export interface ServicesHandler {
 
 export class WebsocketSession {
     private connected = 'INITIAL';
-    private heartbeatMonitor: Subscription = null;
-    private lastHeartbeat: number;
+    private heartbeatMonitor: Subscription | null = null;
+    private lastHeartbeat!: number;
     private onOpenHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
     private onErrorHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
     private onCloseHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
     private onMessageObjectHandlers: Array<MessageObjectHandler> = new Array();
-    private servicesHandler: ServicesHandler = undefined;
+    private servicesHandler: ServicesHandler | undefined = undefined;
 
-    private functionsToExecuteAfterIncommingMessageWasHandled: Array<() => void> = undefined;
+    private functionsToExecuteAfterIncommingMessageWasHandled: Array<() => void> | undefined = undefined;
 
     private deferredEvents: Array<Deferred<any>> = new Array();
 
-    private pendingMessages = undefined;
+    private pendingMessages: string[] | undefined = undefined;
 
-    private currentEventLevelForServer;
+    private currentEventLevelForServer: any;
 
     private nextMessageId = 1;
     private log: LoggerService;
 
-    private currentRequestInfo = undefined;
+    private currentRequestInfo: any = undefined;
 
     constructor(private websocket: IWebSocket,
         private websocketService: WebsocketService,
@@ -225,14 +225,14 @@ export class WebsocketSession {
             this.setConnected();
             this.startHeartbeat();
             for (const handler of Object.keys( this.onOpenHandlers)) {
-                this.onOpenHandlers[handler](evt);
+                (this.onOpenHandlers as any)[handler](evt);
             }
             this.ngZone.run( () => this.websocketService.reconnectingEmitter.next(false) );
         };
         this.websocket.onerror = (evt) => {
             this.stopHeartbeat();
             for (const handler of Object.keys( this.onErrorHandlers)) {
-                this.onErrorHandlers[handler](evt);
+                (this.onErrorHandlers as any)[handler](evt);
             }
         };
         this.websocket.onclose = (evt) => {
@@ -243,7 +243,7 @@ export class WebsocketSession {
                 this.log.spam(this.log.buildMessage(() => ('sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (' + new Date().getTime() + ')')));
             }
             for (const handler of Object.keys(this.onCloseHandlers)) {
-                this.onCloseHandlers[handler](evt);
+                (this.onCloseHandlers as any)[handler](evt);
             }
         };
         this.websocket.onconnecting = (evt) => {
@@ -291,7 +291,7 @@ export class WebsocketSession {
      * return it back to the user (component/service code).   
      */
     public callService<T>(serviceName: string, methodName: string, argsObject?: unknown, async?: boolean): RequestInfoPromise<T> {
-        const cmd = {
+        const cmd: Record<string, any> = {
             service: serviceName,
             methodname: methodName,
             args: argsObject
@@ -307,7 +307,7 @@ export class WebsocketSession {
         }
     }
 
-    public sendMessageObject(obj) {
+    public sendMessageObject(obj: any) {
 
         if (this.getCurrentEventLevelForServer()) {
             obj.prio = this.getCurrentEventLevelForServer();
@@ -324,13 +324,13 @@ export class WebsocketSession {
 
     }
 
-    public onopen(handler) {
+    public onopen(handler: any) {
         this.onOpenHandlers.push(handler);
     }
-    public onerror(handler) {
+    public onerror(handler: any) {
         this.onErrorHandlers.push(handler);
     }
-    public onclose(handler) {
+    public onclose(handler: any) {
         this.onCloseHandlers.push(handler);
     }
     public onMessageObject(handler: MessageObjectHandler) {
@@ -358,7 +358,7 @@ export class WebsocketSession {
     }
 
     // eventLevelValue can be undefined for DEFAULT
-    public setCurrentEventLevelForServer(eventLevelValue) {
+    public setCurrentEventLevelForServer(eventLevelValue: any) {
         this.currentEventLevelForServer = eventLevelValue;
     }
 
@@ -382,8 +382,8 @@ export class WebsocketSession {
 
         if (this.pendingMessages) {
             for (const i of Object.keys(this.pendingMessages)) {
-                this.log.spam(this.log.buildMessage(() => ('sbl * Connected; sending pending message to server: ' + this.pendingMessages[i])));
-                this.websocket.send(this.pendingMessages[i]);
+                this.log.spam(this.log.buildMessage(() => ('sbl * Connected; sending pending message to server: ' + (this.pendingMessages as any)[i])));
+                this.websocket.send((this.pendingMessages as any)[i]);
             }
             this.pendingMessages = undefined;
         }
@@ -414,7 +414,7 @@ export class WebsocketSession {
         if (this.heartbeatMonitor != null) {
             this.log.spam(this.log.buildMessage(() => ('sbl * Stopping heartbeat... (' + new Date().getTime() + ')')));
             this.heartbeatMonitor.unsubscribe();
-            this.heartbeatMonitor = undefined;
+            this.heartbeatMonitor = null;
         }
     }
 
@@ -422,7 +422,7 @@ export class WebsocketSession {
         return this.nextMessageId++;
     }
 
-    private handleHeartbeat(message) {
+    private handleHeartbeat(message: any) {
         this.log.spam(this.log.buildMessage(() => ('sbl * Received heartbeat... (' + new Date().getTime() + ')')));
         this.lastHeartbeat = new Date().getTime(); // something is received, the server connection is up
         if (this.isReconnecting()) {
@@ -435,7 +435,7 @@ export class WebsocketSession {
         return message.data === 'p' || message.data === 'P'; // pong or ping
     }
 
-    private handleMessage(message) {
+    private handleMessage(message: any) {
         let obj: any; // TODO should we type everything that can come from server?
         let responseValue: any;
 
@@ -462,7 +462,7 @@ export class WebsocketSession {
             this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message data: ' + JSON.stringify(obj, null, 2))));
 
             if (obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
-                				this.currentRequestInfo = this.deferredEvents[obj.cmsgid].promise['requestInfo'];
+                this.currentRequestInfo = (this.deferredEvents[obj.cmsgid].promise as any)['requestInfo'];
             			}
 
             if (obj.serviceApis) {
@@ -479,7 +479,7 @@ export class WebsocketSession {
             // message
             if (obj.msg) {
                 for (const handler of Object.keys(this.onMessageObjectHandlers)) {
-                    const ret = this.onMessageObjectHandlers[handler](obj.msg);
+                    const ret = (this.onMessageObjectHandlers as any)[handler](obj.msg);
                     if (ret) responseValue = ret;
                 }
             }
@@ -509,7 +509,7 @@ export class WebsocketSession {
                 // server wants a response; responseValue may be a promise
                 Promise.resolve(responseValue).then((ret) => {
                     // success
-                    const response = {
+                    const response: Record<string, any> = {
                         smsgid: obj.smsgid
                     };
                     if (ret !== undefined) {
@@ -581,9 +581,9 @@ export class WebsocketSession {
 
             for (const i of Object.keys(toExecuteAfterIncommingMessageWasHandled)) {
                 try {
-                    toExecuteAfterIncommingMessageWasHandled[i]();
+                    (toExecuteAfterIncommingMessageWasHandled as any)[i]();
                 } catch (e) {
-                    this.log.error(this.log.buildMessage(() => ('Error (follows below) in executing PostIncommingMessageHandlingTask: ' + toExecuteAfterIncommingMessageWasHandled[i])));
+                    this.log.error(this.log.buildMessage(() => ('Error (follows below) in executing PostIncommingMessageHandlingTask: ' + (toExecuteAfterIncommingMessageWasHandled as any)[i])));
                     this.log.error(e);
                     err = e;
                 }
@@ -645,7 +645,7 @@ export class SabloUtils {
      * Makes a clone of "obj" (new object + iterates on properties and copies them over (so shallow clone)) that will have it's [[Prototype]] set to "newPrototype".
      * It is not aware of property descriptors. It uses plain property assignment when cloning.
      */
-    public static cloneWithDifferentPrototype(obj, newPrototype) {
+    public static cloneWithDifferentPrototype(obj: any, newPrototype: any) {
         // instead of using this impl., we could use Object.setPrototypeOf(), but that is slower in the long run due to missing JS engine optimizations for accessing props.
         // accorging to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf
         const clone = Object.create(newPrototype);

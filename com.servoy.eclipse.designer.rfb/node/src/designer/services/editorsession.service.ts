@@ -24,7 +24,7 @@ export class EditorSessionService implements ServiceProvider {
     public registerCallback = new BehaviorSubject<CallbackFunction>(null);
     private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: { [key: string]: string[] } = {};
-    private developerMenus: { [key: string]: string[] } = {};
+    private developerMenus: Record<string, any> = {};
 
     private bIsDirty = false;
     private lockAutoscrollId = '';
@@ -56,17 +56,17 @@ export class EditorSessionService implements ServiceProvider {
         // do we need the promise
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
-            this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: string) => {
+            this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: any) => {
                 this.allowedChildren = JSON.parse(result) as { [key: string]: string[] } ;
                 this.editorContentService.executeOnlyAfterInit(() => {
                     this.editorContentService.sendMessageToIframe({ id: 'allowedChildren', value: this.allowedChildren });
                 });
             }).catch(e => console.log(e));
         }
-        this.wsSession.callService('formeditor', 'getWizardProperties').then((result: { [key: string]: string[] }) => {
+        this.wsSession.callService('formeditor', 'getWizardProperties').then((result: any) => {
             this.wizardProperties = result;
         }).catch(e => console.log(e));
-        this.wsSession.callService('formeditor', 'getDeveloperMenus').then((result: { [key: string]: string[] }) => {
+        this.wsSession.callService('formeditor', 'getDeveloperMenus').then((result: Record<string, any>) => {
             this.developerMenus = result;
         }).catch(e => console.log(e));        
     }
@@ -89,15 +89,15 @@ export class EditorSessionService implements ServiceProvider {
         }, true)
     }
 
-    sendChanges(properties) {
+    sendChanges(properties: any) {
         void this.wsSession.callService('formeditor', 'setProperties', properties, true)
     }
 
-    moveResponsiveComponent(properties) {
+    moveResponsiveComponent(properties: any) {
         void this.wsSession.callService('formeditor', 'moveComponent', properties, true)
     }
 
-    createComponent(component) {
+    createComponent(component: any) {
         void this.wsSession.callService('formeditor', 'createComponent', component, true)
     }
 
@@ -221,11 +221,11 @@ export class EditorSessionService implements ServiceProvider {
         }, false);
     }
 
-    createComponents(components) {
+    createComponents(components: any) {
         void this.wsSession.callService('formeditor', 'createComponents', components, true)
     }
     
-    updateFavoritesComponents(component) {
+    updateFavoritesComponents(component: any) {
         void this.wsSession.callService('formeditor', 'updateFavoritesComponents', component, true)
     }
 
@@ -241,7 +241,7 @@ export class EditorSessionService implements ServiceProvider {
         }, true)
     }
 
-    executeAction(action: string, params?) {
+    executeAction(action: string, params?: any) {
         void this.wsSession.callService('formeditor', action, params, true);
     }
 
@@ -351,7 +351,7 @@ export class EditorSessionService implements ServiceProvider {
         }, false)
     }
 
-    updatePaletteOrder(paletteOrder) {
+    updatePaletteOrder(paletteOrder: any) {
         return this.wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, false);
     }
 

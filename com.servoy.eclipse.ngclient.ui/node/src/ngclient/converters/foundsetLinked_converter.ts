@@ -250,10 +250,10 @@ class FSLinkedInternalState extends FoundsetViewportState {
 
 class SingleValueState implements IUIDestroyAwareValue {
 
-    private viewPortSize: number;
-    private singleValue: any;
-    private conversionInfo: ConversionInfoFromServerForViewport;
-    private viewportSizeChangedListener: () => void;
+    private viewPortSize!: number;
+    private singleValue!: any;
+    private conversionInfo!: ConversionInfoFromServerForViewport;
+    private viewportSizeChangedListener!: () => void;
 
     constructor(sabloService: SabloService, private iS: FSLinkedInternalState) {
         // add a listener for foundset prop. size to regenerate the viewport when that changes - fill it up again fully with single values

@@ -50,7 +50,7 @@ export class InlineEditComponent implements AfterViewInit {
                     if (eventNode.getAttribute("svy-id") === node) {
                         const directEditProperty = eventNode.getAttribute("directEditPropertyName");
                         if (directEditProperty) {
-                            this.editorSession.getComponentPropertyWithTags(node, directEditProperty).then((propertyValue: string) => {
+                            this.editorSession.getComponentPropertyWithTags(node, directEditProperty).then((propertyValue: any) => {
                                 if (eventNode.clientHeight === 0 && eventNode.clientWidth === 0 && eventNode.firstElementChild instanceof HTMLElement) {
                                     eventNode = eventNode.firstElementChild;
                                 }
@@ -76,12 +76,12 @@ export class InlineEditComponent implements AfterViewInit {
     }
     
     applyValue(node: string, directEditProperty: string, propertyValue: string) {
-        const changes = {};
+        const changes: Record<string, any> = {};
         const newValue = this.elementRef.nativeElement.textContent;
         const oldValue = propertyValue;
        let sameValue = false;
         if (oldValue != newValue && !(oldValue === null && newValue === "")) {
-            const value = {};
+            const value: Record<string, any> = {};
             value[directEditProperty] = newValue;
             changes[node] = value;
             

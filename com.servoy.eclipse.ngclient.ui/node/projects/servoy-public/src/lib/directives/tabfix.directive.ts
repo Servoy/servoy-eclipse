@@ -13,7 +13,7 @@ export class TabFixDirective {
     constructor() { }
 
     @HostListener('focus', ['$event'])
-    onFocus(target) {
+    onFocus(target: any) {
        this.startedTyping = false;
     }
 

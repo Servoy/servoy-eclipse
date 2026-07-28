@@ -11,7 +11,7 @@ import { PopupFormService } from '../popupform.service';
 })
 export class ServoyFormPopupComponent {
 
-    public popup: PopupForm;
+    public popup!: PopupForm;
     _left = 0;
     _top = 0;
     _width = 0;

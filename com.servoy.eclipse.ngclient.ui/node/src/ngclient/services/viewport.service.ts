@@ -267,8 +267,8 @@ export class ViewportService {
         let clientSideType: IType<any>;
         if (idx >= 0) {
             const clientSideTypes = internalState.viewportTypes ? internalState.viewportTypes[idx] : undefined;
-            if (clientSideTypes && (!columnName || clientSideTypes[columnName]))
-                clientSideType = (columnName ? clientSideTypes[columnName] : clientSideTypes) as IType<any>;
+            if (clientSideTypes && (!columnName || (clientSideTypes as Record<string, any>)[columnName]))
+                clientSideType = (columnName ? (clientSideTypes as Record<string, any>)[columnName] : clientSideTypes) as IType<any>;
         }
         return clientSideType;
     }
@@ -387,7 +387,7 @@ export class ViewportService {
                     if (cellUpdatedFromServerListener) cellUpdatedFromServerListener(startIdxInViewportForRowsToBeConverted + index, undefined, oldCellVal, rowsToBeConverted[index]);
                 } else {
                     // with columns; so a foundset prop's rows or a component type prop's rows
-                    let rowConversions = (fullRowUpdates || !internalState.viewportTypes ? undefined : internalState.viewportTypes[startIdxInViewportForRowsToBeConverted + index]);
+                    let rowConversions: Record<string, any> = (fullRowUpdates || !internalState.viewportTypes ? undefined : internalState.viewportTypes[startIdxInViewportForRowsToBeConverted + index]) as Record<string, any>;
                     const newRowData = rowCreator ? (rowCreator()) : rowData;
 
                     Object.keys(rowData).forEach(columnName => {
@@ -438,15 +438,15 @@ export class ViewportService {
         let cellConversion: ITypeFromServer;
         if (columnTypes) {
             // foundset/component viewport (multi col) or foundset linked viewport (single col) data
-            const colType = (columnName ? (columnTypes as MultipleColumnsConversionInfoFromServer)[columnName] : (columnTypes as SingleColumnConversionInfoFromServer));
+            const colType: any = (columnName ? (columnTypes as MultipleColumnsConversionInfoFromServer)[columnName] : (columnTypes as SingleColumnConversionInfoFromServer));
             if (colType) {
-                let processed = colType[PROCESSED_CELL_TYPES];
+                let processed: Record<string | number, any> = colType[PROCESSED_CELL_TYPES];
                 if (!processed) {
                     processed = colType[PROCESSED_CELL_TYPES] = {};
                     if (colType.eT /* cell types */)
                         colType.eT.forEach(
-                            value => value.i.forEach(
-                                ri => processed[ri] = value._T));
+                            (value: any) => value.i.forEach(
+                                (ri: any) => processed[ri] = value._T));
                 }
 
                 cellConversion = processed[rowIndex]; // look at cell type; null is a valid type in what server can send so we check with === undefined
@@ -522,12 +522,12 @@ export class ViewportService {
             // convert new data if necessary
             const clientSideTypesForRow = internalState.viewportTypes?.[idx];
     
-            const convResult = this.converterService.convertFromClientToServer(r.value, columnName ? clientSideTypesForRow?.[columnName] : clientSideTypesForRow, oldValue, propertyContext);
+            const convResult = this.converterService.convertFromClientToServer(r.value, columnName ? (clientSideTypesForRow as Record<string, any>)?.[columnName] : clientSideTypesForRow, oldValue, propertyContext);
             r.value = convResult[0];
             if (columnName !== undefined) viewPort[idx][columnName] = convResult[1];
             else viewPort[idx] = convResult[1];
     
-            const req = { viewportDataChanged: r };
+            const req: Record<string, any> = { viewportDataChanged: r };
             if (deferredState) {
                 const requestID = this.sabloDeferHelper.getNewDeferId(deferredState);
                 req[ViewportService.ID_KEY] = requestID;
@@ -708,8 +708,8 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
 
     changeListeners: ViewportChangeListener[] = [];
 
-    viewportTypes: ExpandedViewportTypes;
-    unwatchData: { [idx: number]: Array<() => void> };
+    viewportTypes!: ExpandedViewportTypes;
+    unwatchData!: { [idx: number]: Array<() => void> };
 
     requests: Array<any> = [];
 
@@ -718,7 +718,7 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
     viewportLevelProxyRevokerFunc?: () => void; // this can be just a boolean I think; we never call it, we just check if it's there or not
     rowLevelProxyStates?: Array<RowProxyState>;
     /** just a value that is cached here for foundset type viewports - so we don't need to search for it each time it's needed */
-    needsRowProxies: boolean;
+    needsRowProxies!: boolean;
 
     constructor(public readonly forFoundset: () => IFoundset, public readonly log: LoggerService, protected sabloService: SabloService) {
         super();

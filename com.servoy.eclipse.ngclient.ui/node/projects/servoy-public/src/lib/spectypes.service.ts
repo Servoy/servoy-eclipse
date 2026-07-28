@@ -366,7 +366,7 @@ export interface IJSMenu{
     name: string;
     styleClass: string;
     pushDataProviderValue(category: string, propertyName: string, itemIndex: number, dataproviderValue: any): void;
-    setSelectedItem(itemID: string);
+    setSelectedItem(itemID: string): void;
 }
 
 export interface IJSMenuItem{
@@ -382,7 +382,7 @@ export interface IJSMenuItem{
 }
 
 export interface IPopupSupportComponent {
-    closePopup();
+    closePopup(): void;
 }
 
 export interface IFoundsetFieldsOnly {

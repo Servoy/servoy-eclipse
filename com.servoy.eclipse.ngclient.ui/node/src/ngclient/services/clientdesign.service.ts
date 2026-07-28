@@ -6,7 +6,7 @@ import { SvyUtilsService } from '../utils.service';
 @Injectable()
 export class ClientDesignService {
 
-    currentForms: { property?: DragResize } = {};
+    currentForms: { [key: string]: DragResize | undefined } = {};
 
     constructor(private sabloService: SabloService, private utils: SvyUtilsService, @Inject(DOCUMENT) private document: Document) {
     }
@@ -22,7 +22,7 @@ export class ClientDesignService {
         dragresize = new DragResize('dragresize');
         this.currentForms[formname] = dragresize;
         //if(designChangeListener) designChangeListener(formname, true);
-        const selectElement = (elm) => {
+        const selectElement = (elm: any) => {
             if (elm.classList.contains('svy-wrapper'))
             {
                 elm = elm.firstChild;
@@ -38,7 +38,7 @@ export class ClientDesignService {
         dragresize.isHandle = selectElement;
         dragresize.ondragfocus = (e) => {
             var jsevent = this.utils.createJSEvent(e, "ondrag");
-            this.sabloService.callService("clientdesign", "onselect", { element: jsevent.elementName, formname: formname, event: jsevent }).then((result) => {
+            this.sabloService.callService("clientdesign", "onselect", { element: jsevent.elementName, formname: formname, event: jsevent }).then((result: any) => {
                 if (!result) dragresize.deselect(true);
                 else if (dragresize.resizeHandleSet) dragresize.resizeHandleSet(dragresize.element, true);
             });
@@ -114,11 +114,11 @@ class DragResize {
     enabled = true;                   // Global toggle of drag/resize.
     handles = ['tl', 'tm', 'tr',
         'ml', 'mr', 'bl', 'bm', 'br']; // Array of drag handles: top/mid/bot/right.
-    isElement: (el: HTMLElement) => boolean;                 // Function ref to test for an element.
-    isHandle: (el: HTMLElement) => boolean;                  // Function ref to test for move handle.
-    element: HTMLElement;                   // The currently selected element.
-    node: Element;
-    handle: Element;                  // Active handle reference of the element.
+    isElement!: (el: HTMLElement) => boolean;                 // Function ref to test for an element.
+    isHandle!: (el: HTMLElement) => boolean;                  // Function ref to test for move handle.
+    element!: HTMLElement;                   // The currently selected element.
+    node!: Element;
+    handle!: Element;                  // Active handle reference of the element.
     minWidth = 10; minHeight = 10;     // Minimum pixel size of elements.
     minLeft = 0; maxLeft = 9999;       // Bounding box area, in pixels.
     minTop = 0; maxTop = 9999;
@@ -129,28 +129,28 @@ class DragResize {
     elmX = 0; elmY = 0;                // Element position.
     elmW = 0; elmH = 0;                // Element size.
     allowBlur = true;                 // Whether to allow automatic blur onclick.
-    ondragfocus: (e: MouseEvent) => void;               // Event handler functions.
-    ondragstart: (e: MouseEvent) => void;
-    ondragmove: (isResize: boolean) => void;
-    ondragend: (isResize: boolean, e: MouseEvent) => void;
-    ondragblur: () => void;
-    ondoubleclick: (e: MouseEvent) => void;
-    onrightclick: (e: MouseEvent) => void;
+    ondragfocus!: (e: MouseEvent) => void;               // Event handler functions.
+    ondragstart!: (e: MouseEvent) => void;
+    ondragmove!: (isResize: boolean) => void;
+    ondragend!: (isResize: boolean, e: MouseEvent) => void;
+    ondragblur!: () => void;
+    ondoubleclick!: (e: MouseEvent) => void;
+    onrightclick!: (e: MouseEvent) => void;
 
-    mouseDownHandler: (e: MouseEvent) => void;
-    mouseMoveHandler: (e: MouseEvent) => void;
-    mouseUpHandler: (e: MouseEvent) => void;
-    doubleClickHandler: (e: MouseEvent) => void;
-    rightClickHandler: (e: MouseEvent) => void;
+    mouseDownHandler!: (e: MouseEvent) => void;
+    mouseMoveHandler!: (e: MouseEvent) => void;
+    mouseUpHandler!: (e: MouseEvent) => void;
+    doubleClickHandler!: (e: MouseEvent) => void;
+    rightClickHandler!: (e: MouseEvent) => void;
 
-    startDragging: boolean;
+    startDragging = false;
     _i : number = 1;
      // *** DRAG/RESIZE CODE ***
     constructor(myName: string) {
         this.myName = myName;
     }
 
-    addEvent(o, t, f, l) {
+    addEvent(o: any, t: string, f: any, l: any) {
         const d = 'addEventListener', n = 'on' + t, rO = o, rT = t, rF = f, rL = l;
         if (o[d] && !l) return o[d](t, f, false);
         if (!o._evts) o._evts = {};
@@ -168,14 +168,14 @@ class DragResize {
         o._evts[t][f._i] = f;
     };
 
-    removeEvent(o, t, f, l) {
+    removeEvent(o: any, t: string, f: any, l: any) {
         const d = 'removeEventListener';
         if (o[d] && !l) return o[d](t, f, false);
         if (o._evts && o._evts[t] && f._i) delete o._evts[t][f._i];
     }
 
 
-    cancelEvent(e, c) {
+    cancelEvent(e: any, c: any) {
         e.returnValue = false;
         if (e.preventDefault) e.preventDefault();
         if (c) {
@@ -211,7 +211,7 @@ class DragResize {
     };
 
 
-    select(newElement: HTMLElement, newHandle, e) {
+    select(newElement: HTMLElement, newHandle: any, e: MouseEvent) {
         // Selects an element for dragging.
 
         if (!document.getElementById || !this.enabled) return;
@@ -336,7 +336,7 @@ class DragResize {
         this.element.style.height = this.elmH + 'px';
 
         // Evil, dirty, hackish Opera select-as-you-drag fix.
-        if (window['opera'] && document.documentElement) {
+        if ((window as any)['opera'] && document.documentElement) {
             var oDF = document.getElementById('op-drag-fix');
             if (!oDF) {
                 oDF = document.createElement('input');
@@ -376,7 +376,7 @@ class DragResize {
 
     /* Resize Code -- can be deleted if you're not using it. */
 
-    resizeHandleSet(elm: HTMLElement, show: boolean) {
+    resizeHandleSet(elm: HTMLElement & Record<string, any>, show: boolean) {
         // Either creates, shows or hides the resize handles within an element.
 
         // If we're showing them, and no handles have been created, create 4 new ones.

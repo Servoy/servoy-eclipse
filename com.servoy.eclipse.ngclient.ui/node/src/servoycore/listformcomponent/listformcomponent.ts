@@ -152,10 +152,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     useScrolling = false;
 
     // used for scrolling with AGGGrid
-    parent: AbstractFormComponent;
-    agGridOptions: GridOptions;
+    parent!: AbstractFormComponent;
+    agGridOptions!: GridOptions;
     numberOfColumns = 1;
-    resizeObserver: ResizeObserver;
+    resizeObserver!: ResizeObserver;
     resizeTimeout: any;
     previousWidth = 0;
     private rowHeightMeasured = false;
@@ -165,11 +165,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     numberOfCells = 0;
     selectionChangedByKey = false;
 
-    cache: FormComponentCache;
-    removeListenerFunction: () => void;
+    cache!: FormComponentCache;
+    removeListenerFunction!: () => void;
     private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
-    private rowItems: Array<IChildComponentPropertyValue | FormComponentCache>;
+    private rowItems!: Array<IChildComponentPropertyValue | FormComponentCache>;
 
     private designerViewportRows = [{} as ViewPortRow];
 
@@ -606,7 +606,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getRowStyle(includeHeight: boolean): any {
-        const rowStyle = {
+        const rowStyle: Record<string, any> = {
             'width': this.getRowWidth()
         };
         const containedFormMargin = this.containedFormMargin();
@@ -674,7 +674,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname]() : this.svyResponsiveDiv();
+            return item.tagname ? (this as any)[item.tagname]() : this.svyResponsiveDiv();
         }
         if (item instanceof FormComponentCache) {
             return (item as FormComponentCache).responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
@@ -687,8 +687,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             if (elem['name'] === item.name) {
                 return (elem as unknown) as IChildComponentPropertyValue;
             }
-            if (elem['items']) {
-                const found = this.findElement(elem['items'], item);
+            if ((elem as any)['items']) {
+                const found = this.findElement((elem as any)['items'], item);
                 if (found) {
                     return found;
                 }
@@ -726,7 +726,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({ [property: string]: ServoyBaseComponent<any> }), componentModel: any) => {
                     const ui = rowObject[cm.name];
                     if (ui) {
-                        const changes = {};
+                        const changes: Record<string, any> = {};
                         propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
                             const newValue = componentModel && (componentModel[propertyChangedButNotByRef.propertyName] !== undefined) ? componentModel[propertyChangedButNotByRef.propertyName] : propertyChangedButNotByRef.newPropertyValue;
                             changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(newValue, newValue, false);
@@ -783,7 +783,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         // TODO: 'enabledDataProvider' and 'visibleDataProvider' should not be in the model - on the server side
         // they should be evaluated for each row and added to the model as regular 'enabled' and 'visible' properties
         let elementEnabled = rowItem.model.enabled;
-        let getterForEnabled = function get() {
+        let getterForEnabled = function get(this: any) {
             const rowEnableDataprovider = thisLFC.rowEnableDataprovider();
             if (rowEnableDataprovider && rowEnableDataprovider.length > idx) {
                 return thisLFC.rowEditableDataprovider()[idx]
@@ -803,7 +803,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         });
         
         let elementVisible = rowItem.model.visible;
-        let getterForVisible = function get() {
+        let getterForVisible = function get(this: any) {
             if(this.visibleDataProvider !== undefined) {
                 return this.visibleDataProvider;
             }
@@ -1005,7 +1005,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getAGGridStyle(): any {
-        const aggridStyle = {
+        const aggridStyle: Record<string, any> = {
             '--ag-row-height': 42,
             '--ag-header-height': 48,
             '--ag-list-item-height': 24
@@ -1021,7 +1021,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
 class Cell {
 
-    api: ServoyApi;
+    api!: ServoyApi;
     name: string;
     /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
     readonly model: any;

@@ -484,7 +484,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     insertACopyAction(event: MouseEvent, node: SelectionNode, before: boolean) {
         event.stopPropagation();
-        const component = {}
+        const component: Record<string, any> = {}
         const htmlNode = this.editorContentService.getContentElement(node.svyid);
 
         const layoutPackage = htmlNode.getAttribute('svy-layoutname').split('.');

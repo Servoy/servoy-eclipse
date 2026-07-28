@@ -85,15 +85,15 @@ export class FoundsetTreeType implements IType<FoundsetTree> {
 }
 
 class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
-    public getChildrenReq: { getChildren: string; id: number; level: number };
-    public updateSelectionReq: {updateSelection: Array<string>};
-    public updateCheckboxValueReq: {updateCheckboxValue: string; value: boolean};
-    public updateExpandedNodesReq: { updateExpandedNodes: Array<string> };
-    public newChildren: {key: any};
-    public newCheckedValues: {key: boolean};
+    public getChildrenReq!: { getChildren: string; id: number; level: number };
+    public updateSelectionReq!: {updateSelection: Array<string>};
+    public updateCheckboxValueReq!: {updateCheckboxValue: string; value: boolean};
+    public updateExpandedNodesReq!: { updateExpandedNodes: Array<string> };
+    public newChildren!: {key: any};
+    public newCheckedValues!: {key: boolean};
 
-    deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
-    timeoutRejectLogPrefix: string;
+    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
+    timeoutRejectLogPrefix!: string;
 
     init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } }, timeoutRejectLogPrefix: string) {
         this.deferred = deferred;

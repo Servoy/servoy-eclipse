@@ -9,11 +9,11 @@ import { ServoyDefaultBaseComponent } from './basecomponent';
 export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
     @Input() hideText: boolean;
-    @Input() imageMediaID;
-    @Input() mediaOptions;
+    @Input() imageMediaID: any;
+    @Input() mediaOptions: any;
     @Input() mnemonic: string;
     @Input() rolloverCursor: number;
-    @Input() rolloverImageMediaID;
+    @Input() rolloverImageMediaID: any;
     @Input() showFocus: boolean;
     @Input() textRotation: number;
     @Input() verticalAlignment: number;

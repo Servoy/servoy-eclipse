@@ -22,14 +22,14 @@ export class ReconnectingWebSocket implements IWebSocket {
     private timeoutInterval = 2000;
 
     /** The maximum number of reconnection attempts to make. Unlimited if null. */
-    private maxReconnectAttempts = null;
+    private maxReconnectAttempts: number | null = null;
 
     /** The number of attempted reconnects since starting, or the last successful connection. Read only. */
     private reconnectAttempts = 0;
 
     private url: string | UrlFunction;
 
-    private ws: WebSocket;
+    private ws!: WebSocket;
     private forcedClose = false;
     private timedOut = false;
 
@@ -71,7 +71,7 @@ export class ReconnectingWebSocket implements IWebSocket {
             timeoutInterval: 2000,
 
             /** The maximum number of reconnection attempts to make. Unlimited if null. */
-            maxReconnectAttempts: null
+            maxReconnectAttempts: null as number | null
         };
         if (!options) {
             options = {};
@@ -79,20 +79,20 @@ export class ReconnectingWebSocket implements IWebSocket {
         // Overwrite and define settings with options if they exist.
         for (const key in settings) {
             if (typeof options[key] !== 'undefined') {
-                this[key] = options[key];
+                (this as any)[key] = options[key];
             } else {
-                this[key] = settings[key];
+                (this as any)[key] = (settings as Record<string, any>)[key];
             }
         }
         this.url = url;
 
         // Wire up "on*" properties as event handlers
 
-        this.eventTarget.addEventListener('open', (event: WebsocketCustomEvent) => this.onopen(event));
-        this.eventTarget.addEventListener('close', (event: WebsocketCustomEvent) => this.onclose(event));
-        this.eventTarget.addEventListener('connecting', (event: WebsocketCustomEvent) => this.onconnecting(event));
-        this.eventTarget.addEventListener('message', (event: WebsocketCustomEvent) => this.onmessage(event));
-        this.eventTarget.addEventListener('error', (event: WebsocketCustomEvent) => this.onerror(event));
+        this.eventTarget.addEventListener('open', (event) => this.onopen(event as WebsocketCustomEvent));
+        this.eventTarget.addEventListener('close', (event) => this.onclose(event as WebsocketCustomEvent));
+        this.eventTarget.addEventListener('connecting', (event) => this.onconnecting(event as WebsocketCustomEvent));
+        this.eventTarget.addEventListener('message', (event) => this.onmessage(event as WebsocketCustomEvent));
+        this.eventTarget.addEventListener('error', (event) => this.onerror(event as WebsocketCustomEvent));
 
         // Whether or not to create a websocket upon instantiation
         if (this.automaticOpen === true) {
@@ -130,7 +130,7 @@ export class ReconnectingWebSocket implements IWebSocket {
      *
      * @param data a text string, ArrayBuffer or Blob to send to the server.
      */
-    public send(data) {
+    public send(data: any) {
         if (this.ws) {
             if (this.log.logLevel === LogLevel.DEBUG) {
                 this.log.debug('ReconnectingWebSocket', 'send', this.getUrl(), data);
@@ -142,7 +142,7 @@ export class ReconnectingWebSocket implements IWebSocket {
     };
 
 
-    public open(reconnectAttempt) {
+    public open(reconnectAttempt: boolean) {
 
         if (reconnectAttempt) {
             if (this.maxReconnectAttempts && this.reconnectAttempts > this.maxReconnectAttempts) {

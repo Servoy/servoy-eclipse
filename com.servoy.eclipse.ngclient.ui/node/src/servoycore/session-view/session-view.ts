@@ -15,7 +15,7 @@ export class SessionView implements OnInit {
     constructor(public http: HttpClient, public servoyService: ServoyService, private sanitizer: DomSanitizer, protected cdRef: ChangeDetectorRef) {
     }
 
-    htmlString: SafeHtml;
+    htmlString!: SafeHtml;
 
     ngOnInit() {
         const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;

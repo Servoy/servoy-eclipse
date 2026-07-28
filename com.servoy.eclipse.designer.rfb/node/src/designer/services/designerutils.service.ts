@@ -342,7 +342,7 @@ export class DesignerUtilsService {
             if (packages[i].categories) {
                 const keys = Object.keys(packages[i].categories);
                 for (let j = 0; j < keys.length; j++) {
-                    const category = packages[i].categories[keys[j]];
+                    const category = (packages[i].categories as any)[keys[j]];
                     if (category[0] && category[0].componentType === 'layout') {
                         for (let k = 0; k < category.length; k++) {
                             if (category[k].topContainer && packages[i].packageName + '.' + category[k].layoutName === layoutName) {
@@ -382,7 +382,7 @@ export class DesignerUtilsService {
         return autoscrollElementClientBounds;
     }
     
-     getNextElementSibling(element) : Element{
+     getNextElementSibling(element: any) : Element{
         // find the correct sibbling (the one which has the svy-id)
         const originalElement = element;
         while ( element.parentElement && !element.parentElement.getAttribute('svy-id')){

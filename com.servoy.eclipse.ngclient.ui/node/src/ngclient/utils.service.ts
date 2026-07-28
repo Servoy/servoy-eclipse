@@ -9,7 +9,7 @@ import { FormService } from './form.service';
 export class SvyUtilsService {
     private log: LoggerService;
     private doc: Document;
-    private formService: FormService;
+    private formService!: FormService;
 
     constructor(@Inject(DOCUMENT) _doc: any, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SvyUtilsService');
@@ -43,8 +43,8 @@ export class SvyUtilsService {
 
             if ( parent.getAttribute( 'name' ) )
                 targetElNameChain.push( parent.getAttribute( 'name' ) );
-            else if ( parent['svyHostComponent'] && parent['svyHostComponent']['name'] ) {
-                targetElNameChain.push( parent['svyHostComponent']['name'] );
+            else if ( (parent as any)['svyHostComponent'] && (parent as any)['svyHostComponent']['name'] ) {
+                targetElNameChain.push( (parent as any)['svyHostComponent']['name'] );
             }
             parent = parent.parentElement;
         }
@@ -89,7 +89,7 @@ export class SvyUtilsService {
      */
     public deepExtend(args: any[]) {
         // Variables
-        const extended = {};
+        const extended: Record<string, any> = {};
         let deep = false;
         let i = 0;
         const length = args.length;

@@ -39,7 +39,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
         this.editorSession.addDynamicGuidesChangedListener(this);
         this.snapDataListener = new BehaviorSubject(null);
         this.editorContentService.executeOnlyAfterInit(() => {
-            this.editorSession.getSnapThreshold().then((thresholds: { alignment: number, distance: number, size: number }) => {
+            this.editorSession.getSnapThreshold().then((thresholds: any) => {
                 this.snapThreshold = thresholds.alignment;
                 this.equalDistanceThreshold = thresholds.distance;
 				this.equalSizeThreshold = thresholds.size;
@@ -98,7 +98,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				}
             }
 
-            const sortfn = (a, b) => a[1] - b[1];
+            const sortfn = (a: any, b: any) => a[1] - b[1];
             this.leftPos = new Map([...this.leftPos].sort(sortfn));
             this.rightPos = new Map([...this.rightPos].sort(sortfn));
             this.topPos = new Map([...this.topPos].sort(sortfn));
@@ -180,7 +180,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		this.properties = null;
     }
     
-    private isSnapInterval(uuid, coordinate, posMap) {
+    private isSnapInterval(uuid: any, coordinate: any, posMap: any) {
 		const parent = this.parents.get(uuid);
         for (let [key, value] of posMap) {
             if (key === uuid) continue;
@@ -191,7 +191,7 @@ this.snapToEndEnabled = !event.shiftKey;
 					continue;
 				}
                 //return the first component id that matches the coordinate
-                return {uuid: key, container: this.parents.get(key)};
+                return {uuid: key, container: this.parents.get(key)} as Record<string, any>;
             }
         }
         return null;        
@@ -287,7 +287,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		else if (value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
 			//use the size hints but make sure is not smaller than the initial size
-			result = this.initialRectangle[property] < value;
+			result = (this.initialRectangle as any)[property] < value;
 		}
 		if (result) {
 			this.editorSession.setStatusBarText('Press SHIFT to disable snap to end size.');
@@ -355,7 +355,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			//equal distance guides
 			let rectangles = this.rectangles;
 			if (this.initialRectangle) {
-				const eq = (a: DOMRect, b: DOMRect) => ['top', 'left', 'width', 'height'].every(key => a[key] === b[key]);
+				const eq = (a: DOMRect, b: DOMRect) => ['top', 'left', 'width', 'height'].every(key => (a as any)[key] === (b as any)[key]);
 				rectangles = rectangles.filter(r => !eq(r, this.initialRectangle));
 			}
 			const overlapsX = rectangles.filter(r => this.isOverlap(rect, r, 'x'));
@@ -700,9 +700,9 @@ this.snapToEndEnabled = !event.shiftKey;
 		  axis === 'x' && (properties.left < this.formBounds.left || properties.left + (properties.width ? properties.width : rect.width) > this.formBounds.right)) {
 			for (const key in properties) {
 				if (previousProperties.hasOwnProperty(key)) {
-					properties[key] = previousProperties[key];
+					(properties as any)[key] = (previousProperties as any)[key];
 				} else {
-					delete properties[key];
+					delete (properties as any)[key];
 				}
 			}
 			return true;
@@ -863,7 +863,7 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 
 	private setDimension(dimension: number, property: 'width'|'height', properties: SnapData) {
-		if (!this.initialRectangle || this.initialRectangle[property] < dimension) {
+		if (!this.initialRectangle || (this.initialRectangle as any)[property] < dimension) {
 			properties[property] = dimension;
 		}
 	}
@@ -930,9 +930,9 @@ export class SnapData {
     width?: number;
     height?: number;
     guides?: Guide[];
-    cssPosition: { property: string };
+    cssPosition: Record<string, any>;
 	checkModelMinSize: boolean = false;
-    constructor (event: MouseEvent,top: number, left: number, cssPosition?, guides?: Guide[], width?: number, height?:number) {
+    constructor (event: MouseEvent,top: number, left: number, cssPosition?: any, guides?: Guide[], width?: number, height?:number) {
 		this.event = event;
         this.top = top;
         this.left = left;

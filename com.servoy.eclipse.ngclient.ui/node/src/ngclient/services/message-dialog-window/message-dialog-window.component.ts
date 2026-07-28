@@ -22,8 +22,8 @@ export class MessageDialogWindowComponent {
   readonly buttons = viewChild<ElementRef>("buttons");
   readonly svyMessageDialog = viewChild<ElementRef>("svyMessageDialog");
 
-  retValue: string;
-  onCloseCallback: (r: string) => void;
+  retValue!: string;
+  onCloseCallback!: (r: string) => void;
 
   handleKeyboardEvent(event: KeyboardEvent) {
     const key = event.key;

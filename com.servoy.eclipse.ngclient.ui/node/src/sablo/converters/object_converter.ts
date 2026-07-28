@@ -53,7 +53,7 @@ export class ObjectType implements IType<any> {
 			if (dateType) {
 				// as this is an object type write also the type of date being sent; this works in 'object' type similarly to how dynamic client
 				// side types are received from server but the other way around
-				retVal = {};
+				retVal = {} as Record<string, any>;
 				retVal[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] = 'date'; // this is the server side name for DatePropertyType
 				retVal[ConverterService.VALUE_KEY] = this.converterService.convertFromClientToServer(newClientData,
 				        		 dateType , oldClientData, propertyContext)[0];
@@ -67,7 +67,7 @@ export class ObjectType implements IType<any> {
                 alreadyProcessedNestingValues.add(newClientData);
                 
     			let isChanged = false;
-    			let newRetVal = {};
+    			let newRetVal: Record<string, any> = {};
     			for (const i in newClientData) { // works for both arrays (indexes) and objects (keys) in JS
     				const oldEl = newClientData[i];
     				const newEl = this.fromClientToServerInternal(oldEl, oldClientData ? oldClientData[i] : undefined, propertyContext, alreadyProcessedNestingValues, cyclicDepError);

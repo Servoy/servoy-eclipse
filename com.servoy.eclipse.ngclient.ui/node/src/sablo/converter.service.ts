@@ -30,8 +30,8 @@ export class ConverterService<T> {
     public static CONVERSION_CL_SIDE_TYPE_KEY = '_T';
     public static VALUE_KEY = '_V';
 
-    private log: LoggerService;
-    private lookedUpObjectType: IType<any>;
+    private log!: LoggerService;
+    private lookedUpObjectType!: IType<any>;
 
     constructor(logFactory: LoggerFactory, private typesRegistry: TypesRegistry) {
         this.log = logFactory.getLogger('ConverterService');
@@ -43,7 +43,7 @@ export class ConverterService<T> {
     }
 
     public static getCombinedPropertyNames(now: any, prev: any) {
-        const fulllist = {};
+        const fulllist: Record<string, any> = {};
         if (prev) {
             const prevNames = Object.getOwnPropertyNames(prev);
             for (const prevPropName of prevNames) {
@@ -73,23 +73,23 @@ export class ConverterService<T> {
 
             // if no dynamic type, remove any previously stored dynamic type for this value
             if (dynamicPropertyTypesHolder && keyForDynamicTypes) delete dynamicPropertyTypesHolder[keyForDynamicTypes];
-        } else if (serverSentData instanceof Object && serverSentData[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] !== undefined) {
+        } else if (serverSentData instanceof Object && (serverSentData as Record<string, any>)[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] !== undefined) {
             // NOTE: default server conversions will end up here with 'object' type if they need any Date conversions (value or sub-property/sub-elements)
 
             // so a conversion is required client side but the type is not known beforehand on client (can be a result of
             // JSONUtils.java # defaultToJSONValue(...) or could be a dataprovider type in a record view - foundset based
             // impl. should handle these varying simple types nicer already inside special property types such as foundset/component/foundsetLinked)
 
-            const lookedUpType = this.typesRegistry.getAlreadyRegisteredType(serverSentData[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY]);
+            const lookedUpType = this.typesRegistry.getAlreadyRegisteredType((serverSentData as Record<string, any>)[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY]);
             if (lookedUpType) {
                 // if caller is interested in storing dynamic types do that; (remember dynamic conversion info for when it will be sent back to server - it might need special conversion as well)
                 if (dynamicPropertyTypesHolder && keyForDynamicTypes) dynamicPropertyTypesHolder[keyForDynamicTypes] = lookedUpType;
 
-                convertedData = lookedUpType.fromServerToClient(serverSentData[ConverterService.VALUE_KEY], currentClientData, propertyContext);
+                convertedData = lookedUpType.fromServerToClient((serverSentData as Record<string, any>)[ConverterService.VALUE_KEY], currentClientData, propertyContext);
 
             } else { // needed type not found - will not convert
                 this.log.error('no such type was registered (s->c varying or default type conversion) for: '
-                    + JSON.stringify(serverSentData[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY], null, 2) + '.');
+                    + JSON.stringify((serverSentData as Record<string, any>)[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY], null, 2) + '.');
             }
         } else if (dynamicPropertyTypesHolder && keyForDynamicTypes)
             delete dynamicPropertyTypesHolder[keyForDynamicTypes]; // no dynamic type; so remove any previously stored dynamic type for this value
@@ -177,9 +177,9 @@ export class ConverterService<T> {
             // TODO these two ifs could be moved to a "JSEvent" client side type implementation (and if spec is correct it will work through the normal types system)
             if (arg instanceof MouseEvent || arg instanceof KeyboardEvent
                     // this second part of the condition is a workaround for when running under cypress e2e tests in an iframe and clicking in developer tools in chrome; then it's a bug in cypress that generates the events using parent window constructors instead of client window constructors
-                    || (arg?.constructor ? window[arg?.constructor?.name]?.['prototype'] instanceof MouseEvent : false) || (arg?.constructor ? window[arg?.constructor?.name]?.['prototype'] instanceof KeyboardEvent : false)) {
+                    || (arg?.constructor ? (window as Record<string, any>)[arg?.constructor?.name]?.['prototype'] instanceof MouseEvent : false) || (arg?.constructor ? (window as Record<string, any>)[arg?.constructor?.name]?.['prototype'] instanceof KeyboardEvent : false)) {
                 const $event = arg;
-                const eventObj = {};
+                const eventObj: Record<string, any> = {};
                 let modifiers = 0;
                 if ($event.shiftKey) modifiers = modifiers || SwingModifiers.SHIFT_MASK;
                 if ($event.metaKey) modifiers = modifiers || SwingModifiers.META_MASK;
@@ -196,12 +196,12 @@ export class ConverterService<T> {
                 arg = eventObj;
             } else if (arg instanceof Event
                 // this second part of the condition is a workaround for when running under cypress e2e tests in an iframe and clicking in developer tools in chrome; then it's a bug in cypress that generates the events using parent window constructors instead of client window constructors
-                    || (arg?.constructor ? window[arg?.constructor?.name]?.['prototype'] instanceof Event : false)) {
-                const eventObj = {};
+                    || (arg?.constructor ? (window as Record<string, any>)[arg?.constructor?.name]?.['prototype'] instanceof Event : false)) {
+                const eventObj: Record<string, any> = {};
                 eventObj['type'] = 'event';
                 eventObj['eventName'] = eventName;
                 eventObj['timestamp'] = new Date().getTime();
-                eventObj['data'] = arg['data'];
+                eventObj['data'] = (arg as Record<string, any>)['data'];
                 arg = eventObj;
             } else arg = this.convertFromClientToServer(arg, handlerSpecification?.getArgumentType(i), undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
 
@@ -332,7 +332,7 @@ export class ChangeAwareState {
 
     private allChanged = false;
 
-    private changeListener: ChangeListenerFunction;
+    private changeListener!: ChangeListenerFunction;
 //    private inNotify = false;
 
     /**

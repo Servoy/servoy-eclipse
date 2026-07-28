@@ -104,9 +104,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     hideShowGhosts(visibility: string) {
         if (this.elementRef) {
             const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
-            Array.from(ghostsContainer).slice(1).forEach((item: HTMLElement) => {
+            Array.from(ghostsContainer).slice(1).forEach((item: any) => {
                 item.style.visibility = visibility;
-                item.querySelectorAll('.ghost').forEach((ghost: HTMLElement) => ghost.style.visibility = visibility);
+                item.querySelectorAll('.ghost').forEach((ghost: any) => ghost.style.visibility = visibility);
             });
         }
     }
@@ -131,10 +131,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (!ghostContainer.style) ghostContainer.style = {} as CSSStyleDeclaration;
                 if (ghostContainer.containerPositionInComp != undefined) {
                     const odd = (ghostContainer.containerPositionInComp % 2);
-                    ghostContainer.style['background-color'] = odd ? 'rgba(150, 150, 150, 0.05)' : 'rgba(0, 100, 80, 0.05)';
-                    ghostContainer.style['color'] = odd ? 'rgb(150, 150, 150)' : 'rgb(0, 100, 80)';
+                    (ghostContainer.style as any)['background-color'] = odd ? 'rgba(150, 150, 150, 0.05)' : 'rgba(0, 100, 80, 0.05)';
+                    (ghostContainer.style as any)['color'] = odd ? 'rgb(150, 150, 150)' : 'rgb(0, 100, 80)';
                     if (odd) {
-                        ghostContainer.style['border-top'] = ghostContainer.style['border-bottom'] = 'dashed 1px';
+                        (ghostContainer.style as any)['border-top'] = (ghostContainer.style as any)['border-bottom'] = 'dashed 1px';
                     }
                 }
                 if (!this.urlParser.isAbsoluteFormLayout()) {
@@ -173,7 +173,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                         // groups are deprecated in new designer
                         continue;
                     }
-                    let style = {};
+                    let style: Record<string, any> = {};
                     ghost.hrstyle = { display: 'none' } as CSSStyleDeclaration;
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_PART) { // parts
                         style = {
@@ -331,7 +331,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         if (this.draggingGhost) {
             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-                    const obj = {};
+                    const obj: Record<string, any> = {};
                     for (const ghost of this.draggingInGhostContainer.ghosts) {
                         obj[ghost.uuid] = { 'x': ghost.location.x, 'y': ghost.location.y };
                     }
@@ -341,7 +341,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     this.renderGhostsInternal(this.ghostContainers);
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
-                    const changes = {};
+                    const changes: Record<string, any> = {};
                     if (this.partTopPosition < this.topLimit) {
                         this.partTopPosition = this.topLimit;
                     }

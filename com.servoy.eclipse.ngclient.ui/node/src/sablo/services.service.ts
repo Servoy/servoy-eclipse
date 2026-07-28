@@ -14,7 +14,7 @@ export class ServicesService {
 
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
     private log: LoggerService;
-    private serviceDynamicClientSideTypes = {}; // it stores property types that are dynamic (can change at runtime)
+    private serviceDynamicClientSideTypes: Record<string, Record<string, any>> = {}; // it stores property types that are dynamic (can change at runtime)
 
     constructor(private converterService: ConverterService<unknown>,
         private readonly typesRegistry: TypesRegistry,
@@ -164,7 +164,7 @@ export class ServicesService {
     public sendServiceChangesWithValue(serviceName: string, propertyName: string, propertyValue: any, oldPropertValue: any) {
         const service = this.serviceProvider.getService(serviceName);
 
-        const changes = {};
+        const changes: Record<string, any> = {};
         let propertyType: IType<any>;
         const serviceSpec = this.typesRegistry.getServiceSpecification(serviceName);
         propertyType = serviceSpec?.getPropertyType(propertyName); // first check if it has a static type
@@ -235,14 +235,14 @@ export class ServicesService {
 
 }
 
-interface ApiCallFromServer { name: string; call: string; args: any[] }
+interface ApiCallFromServer { name: string; call: string; args: any[]; pre_data_service_call?: boolean }
 
 export interface ServiceProvider {
     getService(name: string): any;
 }
 
 class VoidServiceProvider implements ServiceProvider {
-    getService(_name: string) {
+    getService(_name: string): any {
         return null;
     }
 }

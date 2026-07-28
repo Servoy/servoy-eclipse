@@ -26,6 +26,7 @@ import { TypesRegistry } from '../sablo/types_registry';
  */
 @Injectable()
 export class AllServiceService implements ServiceProvider {
+    [key: string]: any;
     constructor( private services: ServicesService,
         private $applicationService: ApplicationService,
         private clientdesign: ClientDesignService,

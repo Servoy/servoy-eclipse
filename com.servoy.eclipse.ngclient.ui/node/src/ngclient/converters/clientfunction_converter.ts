@@ -11,7 +11,7 @@ export class ClientFunctionType implements IType<() => any> {
     fromServerToClient(serverSentData: string, _currentClientValue?: () => any, _propertyContext?: IPropertyContext): () => any {
         if (serverSentData) {
             return (...args: any[]) => {
-                const func = this.windowRef.nativeWindow['svyClientSideFunctions'][serverSentData] as (...argss: any[]) => any;
+                const func = (this.windowRef.nativeWindow as any)['svyClientSideFunctions'][serverSentData] as (...argss: any[]) => any;
                 if (func) return func(...args);
             };
         }

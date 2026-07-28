@@ -19,12 +19,12 @@ import { environment } from '../environments/environment';
 export class FormService {
 
 	private formsCache: Map<string, FormCache>; // keeps form state (not actual angular components that are forms)
-	private formsCachePendingRunnables: Map<string, ((FormCache) => void)[]>; // in case code wants to execute to update formCache content before form cache is sent from server;
+	private formsCachePendingRunnables: Map<string, ((formCache: FormCache) => void)[]>; // in case code wants to execute to update formCache content before form cache is sent from server;
 	// this should normally not happen (use of 'formCachePendingRunnables') since SVY-19635 and we do print a warning message when it does...
 
 	private log: LoggerService;
 	private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy "form components"
-	private ngUtilsFormStyleclasses: { property: string };
+	private ngUtilsFormStyleclasses!: Record<string, any>;
 
 	private isInDesigner = false;
     
@@ -40,10 +40,7 @@ export class FormService {
 		this.formComponentCache = new Map();
 		this.utils.setFormService(this);
 		websocketService.getSession().then((session) => {
-			session.onMessageObject((msg: {
-				forms: { [property: string]: { [property: string]: { [property: string]: unknown } } },
-				call: { form: string, bean: string, api: string, args: Array<unknown>, propertyPath: Array<string>, delayUntilFormLoads: boolean, async: boolean, asyncNow: boolean }
-			}) => {
+			session.onMessageObject((msg: any) => {
 				if (msg.forms) {
 					for (const formname in msg.forms) {
 						this.clientFunctionService.waitForLoading().finally(() => {
@@ -383,7 +380,7 @@ export class FormService {
 		return null;
 	}
 
-	public setFormStyleClasses(styleclasses: { property: string }) {
+	public setFormStyleClasses(styleclasses: Record<string, any>) {
 		if (this.ngUtilsFormStyleclasses) {
 			for (const formname of Object.keys(this.ngUtilsFormStyleclasses)) {
 				if (this.formComponentCache.has(formname) && !(this.formComponentCache.get(formname) instanceof Deferred)) {
@@ -624,7 +621,7 @@ export class FormService {
 	public pushEditingStarted(formName: string, componentName: string, propertyName: string) {
 		FormService.pushEditingStarted(this.formsCache.get(formName).getComponent(componentName).model, propertyName,
 			(foundsetLinkedRowId: string, propertyNameToSend: string) => {
-				const messageForServer = { formname: formName, beanname: componentName, property: propertyNameToSend };
+				const messageForServer: Record<string, any> = { formname: formName, beanname: componentName, property: propertyNameToSend };
 				if (foundsetLinkedRowId) messageForServer['fslRowID'] = foundsetLinkedRowId; // if it was a foundset linked DP we give the row identifier as well
 
 				this.sabloService.callService('formService', 'startEdit', messageForServer, true);
@@ -668,7 +665,7 @@ export class FormService {
 
 			if (!styleElement) {
 				styleElement = this.windowRefService.nativeWindow.document.createElement('style');
-				styleElement.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce']?.value;
+				styleElement.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce' as any]?.value;
 				styleElement.id = styleElementId;
 				this.windowRefService.nativeWindow.document.head.appendChild(styleElement);
 			}
@@ -714,7 +711,7 @@ export class FormService {
 			isInsideModel: true
 		};
 
-		const changes = {};
+		const changes: Record<string, any> = {};
 		if (!propertyName) throw new Error('propertyName should not be null here!');
 
 		const converted = this.converterService.convertFromClientToServer(newValue, propertyType, oldValue, propertyContext);
@@ -732,7 +729,7 @@ export class FormService {
 			// correct, the same object reference being used (we are not on angular1 here with deep watches that create deep copies of JSON for comparison...)
 
 			// if this is a simple property change without any special client side type - then push the old value as well
-			const oldValues = {};
+			const oldValues: Record<string, any> = {};
 			oldValues[propertyName] = this.converterService.convertFromClientToServer(oldValue, undefined, undefined, propertyContext)[0]; // just for any default conversions
 			this.sabloService.callService('formService', 'dataPush', { formname: formName, beanname: componentName, changes, oldvalues: oldValues }, true);
 		}
@@ -747,9 +744,9 @@ export class FormService {
 		FormService.pushApplyDataprovider(formState.getComponent(componentName).model, propertyName, typeOfData,
 			newValue, formState.getComponentSpecification(componentName), this.converterService, oldValue,
 			(foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => {
-				const changes = {};
+				const changes: Record<string, any> = {};
 				changes[propertyNameToSend] = valueToSend;
-				const dpChange = { formname: formName, beanname: componentName, property: propertyNameToSend, changes };
+				const dpChange: Record<string, any> = { formname: formName, beanname: componentName, property: propertyNameToSend, changes };
 				if (foundsetLinkedRowId) {
 					dpChange['fslRowID'] = foundsetLinkedRowId;
 				}
@@ -774,7 +771,7 @@ export class FormService {
 			// currently what server side sends for the form itself doesn't need client side conversions
 			for (const p of Object.keys(newFormProperties)) {
 				comp.model[p] = newFormProperties[p];
-				if (formComponent) formComponent[p] = newFormProperties[p];
+				if (formComponent) (formComponent as any)[p] = newFormProperties[p];
 			}
 		}
 
@@ -876,7 +873,7 @@ export class FormService {
 					this.handleComponentModelConversionsAndChangeListeners(elem, fcc, componentSpec, formCache);
 
 					elem.formComponent.forEach((child: string) => {
-						this.walkOverChildren(elem[child] as ServerElement[], formCache, fcc);
+						this.walkOverChildren((elem as any)[child] as ServerElement[], formCache, fcc);
 					});
 					formCache.add(fcc, parent);
 				} else {

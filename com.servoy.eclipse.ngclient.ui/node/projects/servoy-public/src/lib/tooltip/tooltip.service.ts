@@ -26,9 +26,9 @@ export class TooltipService {
         let e = event;
         if (!e) e = this.windowRefService.nativeWindow.event as MouseEvent;
 
-        let targ;
+        let targ: any;
         if (e.target) targ = e.target;
-        else if (e.srcElement) targ = e.srcElement;
+        else if ((e as any).srcElement) targ = (e as any).srcElement;
         if (targ.nodeType === 3) // defeat Safari bug
             targ = targ.parentNode;
 

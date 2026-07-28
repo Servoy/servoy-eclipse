@@ -88,7 +88,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      */
     ngOnDestroy() {
         this.servoyApi.unRegisterComponent(this);
-        if (this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = null;
+        if (this.getNativeElement()) (this.getNativeElement() as any)['svyHostComponent'] = null;
     }
 
     /**
@@ -100,7 +100,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         this.addAttributes();
         this.componentContributor.componentCreated(this);
         this.viewStateListeners.forEach(listener => listener.afterViewInit());
-        if (this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = this;
+        if (this.getNativeElement()) (this.getNativeElement() as any)['svyHostComponent'] = this;
     }
 
     /**

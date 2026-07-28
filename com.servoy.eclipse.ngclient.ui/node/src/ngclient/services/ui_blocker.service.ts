@@ -1,7 +1,7 @@
 import { ServoyService } from '../servoy.service';
 
 export class UIBlockerService {
-	executingEvents = [];
+	executingEvents: any[] = [];
 
     constructor(private servoyService: ServoyService) {
 	}

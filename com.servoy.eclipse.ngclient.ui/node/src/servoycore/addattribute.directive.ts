@@ -31,11 +31,11 @@ export class AddAttributeDirective implements OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.svyContainerClasses) {
             if (changes.svyContainerClasses.previousValue) {
-                changes.svyContainerClasses.previousValue.forEach(cls => this.renderer.removeClass(this.el.nativeElement, cls));
+                changes.svyContainerClasses.previousValue.forEach((cls: any) => this.renderer.removeClass(this.el.nativeElement, cls));
             }
             const svyContainerClasses = this.svyContainerClasses();
             if (svyContainerClasses) {
-                svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
+                svyContainerClasses.forEach((cls: any) => this.renderer.addClass(this.el.nativeElement, cls));
             }
         }
 

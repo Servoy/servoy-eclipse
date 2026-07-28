@@ -12,8 +12,8 @@ import { BGPane } from './bg_pane.component';
 export class BGSplitter implements AfterContentInit , OnChanges {
 
     @Input() orientation = 'vertical';
-    @Input() divSize;
-    @Input() divLocation;
+    @Input() divSize: any;
+    @Input() divLocation: any;
 
     @Output() onDividerChange = new EventEmitter();
 
@@ -30,7 +30,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
         this.handler = this.renderer.createElement( 'div' );
         this.renderer.addClass( this.handler, 'split-handler' );
 
-        this.handler.addEventListener( 'mousedown', ( ev ) => {
+        this.handler.addEventListener( 'mousedown', ( ev: any ) => {
             ev.preventDefault();
             this.drag = true;
         } );
@@ -63,7 +63,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     }
 
     @HostListener( 'document:mouseup', ['$event'] )
-    mouseup( event ) {
+    mouseup( event: any ) {
         if ( this.drag ) {
             let dividerLocation;
             if(this.orientation === 'vertical' ) {
@@ -77,12 +77,12 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     }
 
     @HostListener( 'mousemove', ['$event'] )
-    mousemove( event ) {
+    mousemove( event: any ) {
         if ( !this.drag ) return;
         this.adjustLocation(event);
     }
 
-    private adjustLocation(event?,wantedPosition?) {
+    private adjustLocation(event?: any, wantedPosition?: any) {
         if (!this.panes || this.panes.length != 2) return;
         const bounds = this.elementRef.nativeElement.getBoundingClientRect();
         const pos = this.getPosition(bounds, event, wantedPosition);

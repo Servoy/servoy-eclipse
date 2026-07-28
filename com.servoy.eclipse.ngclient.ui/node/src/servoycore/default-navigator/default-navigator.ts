@@ -12,8 +12,8 @@ import { ComponentCache } from '../../ngclient/types';
 export class DefaultNavigator {
 
   readonly name = input<string>(undefined);
-  navigatorComponentCache: ComponentCache;
-  sliderValue: number;
+  navigatorComponentCache!: ComponentCache;
+  sliderValue!: number;
 
   constructor( private formservice: FormService ) {
   }

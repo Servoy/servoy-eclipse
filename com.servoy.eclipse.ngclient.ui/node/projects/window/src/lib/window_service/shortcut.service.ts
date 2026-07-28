@@ -167,7 +167,7 @@ export class ShortcutService {
 
             for (const key of Object.keys(keys)) {
                 //Modifiers
-                const k = keys[key];
+                const k = keys[key as any];
                 if (k === 'CTRL' || k === 'CONTROL') {
                     kp++;
                     modifiers.ctrl.wanted = true;
@@ -183,16 +183,16 @@ export class ShortcutService {
                     kp++;
                     modifiers.meta.wanted = true;
                 } else if (k.length > 1) { //If it is a special key
-                    if (special_keys[k.toLowerCase()] === code) kp++;
+                    if ((special_keys as any)[k.toLowerCase()] === code) kp++;
 
                 } else if (opt['keycode']) {
-                    if (opt['keycode'] === code) kp++;
+                    if ((opt['keycode'] as any) === code) kp++;
 
                 } else { //The special keys did not match
                     if (character === k) kp++;
                     else {
-                        if (shift_nums[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
-                            character = shift_nums[character];
+                        if ((shift_nums as any)[character] && e.shiftKey) { //Stupid Shift key bug created by using lowercase
+                            character = (shift_nums as any)[character];
                             if (character === k) kp++;
                         }
                     }
@@ -246,6 +246,7 @@ export class ShortcutService {
 }
 
 export class Shortcut extends BaseCustomObject{
+    [key: string]: any;
     public type?: string;
     public propagate?: boolean;
     public disable_in_input?: boolean;

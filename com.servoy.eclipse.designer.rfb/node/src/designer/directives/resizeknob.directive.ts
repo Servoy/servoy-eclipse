@@ -245,7 +245,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
     private sendChanges(elementInfos: Map<string, ElementInfo>) {
         if(elementInfos) {
-            const changes = {};
+            const changes: Record<string, any> = {};
             for(const nodeId of elementInfos.keys()) {
                 const elementInfo = elementInfos.get(nodeId);
                 if (this.snapData && elementInfos.size == 1) {

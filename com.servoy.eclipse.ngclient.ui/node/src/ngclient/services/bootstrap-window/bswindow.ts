@@ -13,7 +13,7 @@ const resizeConstants = { NORTH, SOUTH, EAST, WEST };
 
 export class BSWindow {
 
-    resizeAnchorClasses = {
+    resizeAnchorClasses: {[key: number]: string} = {
         1: 'ns-resize', // NORTH
         2: 'ns-resize', // SOUTH
         4: 'ew-resize', // EAST
@@ -25,25 +25,25 @@ export class BSWindow {
         0: ''
     };
 
-    options: BSWindowOptions;
-    element: HTMLElement;
+    options!: BSWindowOptions;
+    element!: HTMLElement;
     id: any;
     windowTab: any;
 
-    resizing: boolean;
-    moving: boolean;
+    resizing = false;
+    moving = false;
     offset: any;
     window_info: any;
 
-    onClose: () => void;
+    onClose!: () => void;
     
-    private mouseDownListenerElement: () => void;
-    private mouseDownListenerHandle: () => void;
-    private mouseUpBody: () => void;
-    private mouseUpListenerHandle: () => void;
-    private mouseMoveBody: () => void;
-    private mouseLeaveBody: () => void;
-    private mouseMoveElement: () => void;
+    private mouseDownListenerElement!: () => void;
+    private mouseDownListenerHandle!: () => void;
+    private mouseUpBody!: () => void;
+    private mouseUpListenerHandle!: () => void;
+    private mouseMoveBody!: () => void;
+    private mouseLeaveBody!: () => void;
+    private mouseMoveElement!: () => void;
 
     private renderer: Renderer2;
     private listenersToBeUnregisteredOnClose: (() => void)[] = [];
@@ -65,10 +65,10 @@ export class BSWindow {
                 footer: '.window-footer'
             },
             elements: {
-                handle: null,
-                title: null,
-                body: null,
-                footer: null
+                handle: null as any,
+                title: null as any,
+                body: null as any,
+                footer: null as any
             },
             references: {
                 body: this.utilsService.getMainBody() // Is there a better way?
@@ -236,7 +236,7 @@ export class BSWindow {
         this.renderer.setStyle(this.element, 'zIndex', index);
     }
 
-    setWindowTab(windowTab) {
+    setWindowTab(windowTab: any) {
         this.windowTab = windowTab;
     }
 
@@ -288,7 +288,7 @@ export class BSWindow {
             this.mouseDownListenerElement();
             this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseDownListenerElement), 1);
         }
-        this.mouseDownListenerElement = this.renderer.listen(this.element, 'mousedown', (event) => {
+        this.mouseDownListenerElement = this.renderer.listen(this.element, 'mousedown', (event: any) => {
             const focusedEvent = new Event('focused');
             if (this.options.blocker) {
                 this.options.blocker.getElement().dispatchEvent(focusedEvent);
@@ -368,7 +368,7 @@ export class BSWindow {
             this.mouseDownListenerHandle();
             this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseDownListenerHandle), 1)
         }
-        this.mouseDownListenerHandle = this.renderer.listen(this.options.elements.handle, 'mousedown', (event) => {
+        this.mouseDownListenerHandle = this.renderer.listen(this.options.elements.handle, 'mousedown', (event: any) => {
             const handleHeight = this.options.elements.handle.offsetHeight;
             const handleWidth = this.options.elements.handle.offsetWidth;
             let offX = event.offsetX;
@@ -462,7 +462,7 @@ export class BSWindow {
             this.mouseMoveElement();
             this.listenersToBeUnregisteredOnClose.splice(this.listenersToBeUnregisteredOnClose.indexOf(this.mouseMoveElement), 1)
         }
-        this.mouseMoveElement = this.renderer.listen(this.element, 'mousemove', (event) => {
+        this.mouseMoveElement = this.renderer.listen(this.element, 'mousemove', (event: any) => {
             if (this.options.blocker) {
                 return;
             }
@@ -505,7 +505,7 @@ export class BSWindow {
         this.listenersToBeUnregisteredOnClose.push(this.mouseMoveElement);
     }
 
-    resize(options) {
+    resize(options: any) {
         options = options || {};
         if (options.top) {
             this.renderer.setStyle(this.element, 'top', options.top);
@@ -567,7 +567,7 @@ export class BSWindow {
     }
 
     private addClassToBodyChildren(cls: string) {
-        const childNodesBody = this.utilsService.getMainBody().childNodes;
+        const childNodesBody: any = this.utilsService.getMainBody().childNodes;
         for (const key of Object.keys(childNodesBody)) {
             if (childNodesBody[key] instanceof Element) {
                 const node = childNodesBody[key] as Element;
@@ -586,7 +586,7 @@ export class BSWindow {
     }
 
     private removeClassToBodyChildren(cls: string) {
-        const childNodesBody = this.utilsService.getMainBody().childNodes;
+        const childNodesBody: any = this.utilsService.getMainBody().childNodes;
         for (const key of Object.keys(childNodesBody)) {
             if (childNodesBody[key] instanceof Element) {
                 const node = childNodesBody[key] as Element;
