@@ -301,6 +301,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             }
 
             if (this.dragItem.ghost) {
+                if (event.pageX < this.editorContentService.getLeftPositionIframe() ||
+                    event.pageY < this.editorContentService.getTopPositionIframe()) {
+                    this.editorSession.unregisterAutoscroll(this);
+                    return;
+                }
                 const elements = this.editorContentService.getAllContentElements();
                 const found = Array.from(elements).find((node) => {
                     const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
