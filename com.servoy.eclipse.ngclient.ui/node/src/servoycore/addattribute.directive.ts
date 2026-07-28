@@ -9,11 +9,11 @@ import { StructureCache } from '../ngclient/types';
 })
 export class AddAttributeDirective implements OnChanges {
     readonly svyContainerStyle = input<any>(undefined);
-    readonly svyContainerLayout = input(undefined);
-    readonly svyContainerClasses = input<Array<string>>(undefined);
+    readonly svyContainerLayout = input<{ [property: string]: string } | undefined>(undefined);
+    readonly svyContainerClasses = input<Array<string>>(undefined!);
     readonly svyContainerAttributes = input(undefined);
 
-    parent: AbstractFormComponent;
+    parent!: AbstractFormComponent;
 
     constructor(private el: ElementRef, private renderer: Renderer2, private _injector: Injector) {
         try {
@@ -61,7 +61,7 @@ export class AddAttributeDirective implements OnChanges {
         const svyContainerStyle = this.svyContainerStyle();
         if (changes.svyContainerStyle && svyContainerStyle && svyContainerStyle.cssPositionContainer) {
             this.renderer.setStyle(this.el.nativeElement, 'position', 'relative');
-            this.renderer.setStyle(this.el.nativeElement, 'height', svyContainerAttributes.size.height + 'px');
+            this.renderer.setStyle(this.el.nativeElement, 'height', (svyContainerAttributes as any)!.size.height + 'px');
         }
     }
 

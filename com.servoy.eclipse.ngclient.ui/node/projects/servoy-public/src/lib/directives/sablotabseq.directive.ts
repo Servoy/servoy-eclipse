@@ -8,8 +8,8 @@ import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, SimpleCh
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
-    @Input('sabloTabseq') designTabSeq: number;
-    @Input('sabloTabseqConfig') config: SabloTabseqConfig;
+    @Input('sabloTabseq') designTabSeq: number | undefined;
+    @Input('sabloTabseqConfig') config!: SabloTabseqConfig;
     
     designChildIndexToArrayPosition: { [designChildTabSeq: number]: number } = {};
     designChildTabSeq: Array<number> = []; // contains ordered numbers that will be keys in 'runtimeChildIndexes'; can have duplicates
@@ -17,11 +17,11 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     // map designChildIndex[i] -> runtimeIndex for child or designChildIndex[i] -> [runtimeIndex1, runtimeIndex2] in case there are multiple equal design time indexes
     runtimeChildIndexes: { [designChildIndex: number]: RuntimeIndex | Array<RuntimeIndex> } = {};
     
-    runtimeIndex: RuntimeIndex;
-    initializing: boolean;
-    isEnabled: boolean;
+    runtimeIndex!: RuntimeIndex;
+    initializing!: boolean;
+    isEnabled!: boolean;
     
-    private parentSTS: SabloTabseq; // we keep a hard ref. to parent tab seq. container now for unregistering child from parent
+    private parentSTS!: SabloTabseq; // we keep a hard ref. to parent tab seq. container now for unregistering child from parent
     // because at the moment a child SabloTabseq directive receives ngOnDestroy it is possible that the chain of DOM parents was already
     // broken; for example when a dialog that contains a form gets closed, it's UI is hidden via DOM operations, then ngOnDestroy
     // happens in child (we used to make child trigger a CustomEvent for a parent's @HostListener to tell the parent, but in the case
@@ -238,7 +238,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
             }
         }
 
-        if (this.initializing) this.initializing = undefined; // it's now considered initialized as first runtime index caluculation is done
+        if (this.initializing) this.initializing = false; // it's now considered initialized as first runtime index caluculation is done
 
         let parentRecalculateNeeded: boolean;
         if (this.runtimeIndex.startIndex !== 0 && this.runtimeIndex.startIndex !== -1) {
@@ -252,7 +252,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
         }
 
         // if this container now needs more tab indexes than it was reserved; a recalculate on parent needs to be triggered in this case
-        if (parentRecalculateNeeded && !triggeredByParent) this.triggerRecalculatePSTSInParent(this.designTabSeq);
+        if (parentRecalculateNeeded && !triggeredByParent) this.triggerRecalculatePSTSInParent(this.designTabSeq!);
     }
 
     hasOwnTabIndex(): boolean {
@@ -270,7 +270,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     }
 
     setDOMTabIndex(tabindex: number | undefined): void {
-        if (this.config && this.config.tabSeqSetter) this.config.tabSeqSetter.setTabIndex(tabindex);
+        if (this.config && this.config.tabSeqSetter) this.config.tabSeqSetter.setTabIndex(tabindex!);
         else this._elemRef.nativeElement.setAttribute('tabindex', `${tabindex}`);
     }
 
@@ -285,12 +285,12 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     triggerUnregisterCSTSInParent(designChildIndex: number, runtimeChildIndex: RuntimeIndex) {
         if (this.parentSTS) {
             this.parentSTS.unregisterChildSTS(designChildIndex, runtimeChildIndex);
-            delete this.parentSTS;
+            this.parentSTS = undefined!;
         }
     }
 
     triggerInParent(eventName: string, arg: unknown): void {
-        this._elemRef.nativeElement.parentNode.dispatchEvent(new CustomEvent(eventName, {
+        this._elemRef.nativeElement.parentNode!.dispatchEvent(new CustomEvent(eventName, {
             bubbles: true,
             detail: arg
         }));
@@ -298,7 +298,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     ngOnDestroy(): void {
         // unregister current tabSeq from parent tabSeq container
-        this.triggerUnregisterCSTSInParent(this.designTabSeq, this.runtimeIndex);
+        this.triggerUnregisterCSTSInParent(this.designTabSeq!, this.runtimeIndex);
     }
 }
 

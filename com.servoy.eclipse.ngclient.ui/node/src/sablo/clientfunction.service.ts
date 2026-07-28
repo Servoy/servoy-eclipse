@@ -24,7 +24,7 @@ export class ClientFunctionService {
 			this.script.remove();
 		}
 		let context = this.doc.getElementsByTagName('base')[0].getAttribute('href');
-		if (!context.endsWith('/')) context += '/';
+		if (!context!.endsWith('/')) context += '/';
 		this.script = this.doc.createElement('script');
 		this.script.type = 'text/javascript';
 		this.script.src = context + 'clientfunctions.js?clientnr=' + this.sabloService.getClientnr() + '&stamp=' + new Date().getTime();
@@ -36,7 +36,7 @@ export class ClientFunctionService {
 			if (this.deferred) {
 				this.deferred.resolve();
 			}
-			this.deferred = null;
+			this.deferred = null!;
 		};
 		this.renderer.appendChild(this.doc.body, this.script);
 	}

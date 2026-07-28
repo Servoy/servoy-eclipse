@@ -28,7 +28,7 @@ export class RecordRefType implements IType<any> {
         if(newClientData) {
             if (instanceOfServerSentRecordRef(newClientData) || instanceOfRecordRefForServer(newClientData)) return [newClientData, newClientData];
             else return [RecordRefType.generateRecordRef(newClientData.getId(), newClientData.getFoundset().getId()), newClientData];
-        } else return null;
+        } else return null!;
 	}
 
 }

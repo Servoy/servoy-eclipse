@@ -7,7 +7,7 @@ import {IPopupSupportComponent} from '../spectypes.service';
 })
 export class TabFixDirective {
     // this directive needs to be in a module because of listener priority, so i put it here
-    @Input('svyTabFix') typeahead: IPopupSupportComponent;
+    @Input('svyTabFix') typeahead!: IPopupSupportComponent;
     startedTyping = false;
 
     constructor() { }

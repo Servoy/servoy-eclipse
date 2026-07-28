@@ -23,13 +23,13 @@ export class ObjectType implements IType<any> {
 			if (serverJSONValue[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] !== undefined) {
 				// it's already another type; for example a Date; convert it directly
 				serverJSONValue = this.converterService.convertFromServerToClient(serverJSONValue, undefined,
-						currentClientValue, undefined, undefined, propertyContext);
+						currentClientValue, undefined!, undefined!, propertyContext);
 			} else {
 				// see which nested sub-property/sub-element
 				for (const i in serverJSONValue) // works for both arrays (indexes) and objects (keys) in JS
 					if (serverJSONValue[i] instanceof Object && serverJSONValue[i][ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] !== undefined)
-						serverJSONValue[i] = this.converterService.convertFromServerToClient(serverJSONValue[i], undefined,
-								                currentClientValue ? currentClientValue[i] : undefined, undefined, undefined, propertyContext);
+					serverJSONValue[i] = this.converterService.convertFromServerToClient(serverJSONValue[i], undefined,
+							                currentClientValue ? currentClientValue[i] : undefined, undefined!, undefined!, propertyContext);
 			}
 		}
 

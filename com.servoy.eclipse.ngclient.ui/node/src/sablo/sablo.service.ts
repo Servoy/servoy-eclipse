@@ -8,7 +8,7 @@ import { ConverterService } from './converter.service';
 })
 export class SabloService {
 
-    private locale: Locale = null;
+    private locale: Locale | null = null;
     private wsSession!: WebsocketSession;
     private currentServiceCallCallbacks: Array<() => void> = [];
     private currentServiceCallDone!: boolean;
@@ -116,7 +116,7 @@ export class SabloService {
             queryArgs,
             websocketUri
         };
-        this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
+        this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr()!, this.getWindowName()!, this.getWindownr()!], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
 
         this.wsSession.onMessageObject((msg: any) => {
             // data got back from the server
@@ -156,7 +156,7 @@ export class SabloService {
             this.noOfFormsThatAreGoingToShow--;
             if (this.noOfFormsThatAreGoingToShow == 0) {
                 this.expectFormToShowOnClientDeferr.resolve();
-                delete this.expectFormToShowOnClientDeferr;
+                this.expectFormToShowOnClientDeferr = undefined!;
             }
         }
         // normally this.noOfFormsThatAreGoingToShow is either 0 or 1; it's 1 when server knows it will 'touch' a form that was/will be made visible;
@@ -247,7 +247,7 @@ export class SabloService {
      * return it back to the user (component/service code).   
      */
     public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
-        if (!this.wsSession) return; // in designer, designform_component.component.ts can for example call resolve form component - and that can end up in a service call (formLoaded); but that one doesn't have a wsSession; so avoid the error
+        if (!this.wsSession) return undefined!; // in designer, designform_component.component.ts can for example call resolve form component - and that can end up in a service call (formLoaded); but that one doesn't have a wsSession; so avoid the error
 
         const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
         return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
@@ -342,7 +342,7 @@ export class SabloService {
             error = new Error();
             arr.push(...msg);
         }
-        let message = error.stack;
+        let message = error.stack!;
         if (message.startsWith('Error')) {
             message = message.substring(5);
         }

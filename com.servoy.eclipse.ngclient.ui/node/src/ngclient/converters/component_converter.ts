@@ -36,7 +36,7 @@ export class ComponentType implements IType<ChildComponentPropertyValue> {
             if (serverSentData) {
                 newValue = new ChildComponentPropertyValue(serverSentData, currentClientValue, propertyContext,
                     this.converterService, this.sabloService, this.viewportService, this.typesRegistry, this.uiBlockerService, this.log);
-            } else newValue = null;
+            } else newValue = null!;
         }
 
         return newValue;
@@ -100,13 +100,13 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     constructor(serverSentData: IServerSentData, oldClientValue: ChildComponentPropertyValue, propertyContext: IPropertyContext, converterService: ConverterService<unknown>,
         sabloService: SabloService, viewportService: ViewportService, typesRegistry: TypesRegistry, uiBlockerService: UIBlockerService, log: LoggerService) {
 
-        super(serverSentData.name, serverSentData.componentDirectiveName, serverSentData.elType, serverSentData.handlers, serverSentData.position, typesRegistry);
+        super(serverSentData.name!, serverSentData.componentDirectiveName!, serverSentData.elType!, serverSentData.handlers!, serverSentData.position!, typesRegistry);
 
         const forFoundsetPropertyName = serverSentData.forFoundset;
 
         const componentSpecification = typesRegistry.getComponentSpecification(this.specName);
         this.__internalState = new ComponentTypeInternalState(this, oldClientValue?.__internalState, componentSpecification, converterService,
-            viewportService, sabloService, uiBlockerService, log, this.typesRegistry, () => propertyContext.getProperty(forFoundsetPropertyName));
+            viewportService, sabloService, uiBlockerService, log, this.typesRegistry, forFoundsetPropertyName ? () => propertyContext.getProperty(forFoundsetPropertyName) : undefined);
 
         this.__internalState.initializeFullValueFromServer(serverSentData);
     }
@@ -186,7 +186,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
     // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
     beanLayout: any = {}; // not really useful right now; just to be able to reuse existing form code
 
-    modelUnwatch: (() => void)[] = null;
+    modelUnwatch: (() => void)[] | null = null;
 
     public readonly propertyContextCreatorForRow: IPropertyContextCreatorForRow;
 
@@ -203,7 +203,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         private readonly typesRegistry: TypesRegistry,
         forFoundset?: () => IFoundset) {
 
-        super(forFoundset, log, sabloService);
+        super(forFoundset!, log, sabloService);
 
         this.propertyContextCreatorForRow = {
             withRowValueAndPushToServerFor: (rowValue: any, propertyName: string) => ({
@@ -256,7 +256,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         this.applyUpdatesAndHandleCellChangesThatAreNotByRef((cellUpdatedFromServerListener: (relativeRrowIndex: number, columnName: string, oldValue: any, newValue: any) => void) => {
             if (wholeViewportUpdateFromServer) {
                 this.componentValue.modelViewport = this.viewportService.updateWholeViewport(this.componentValue.modelViewport,
-                    this, wholeViewportUpdateFromServer, serverSentData._T,
+                    this, wholeViewportUpdateFromServer, serverSentData._T!,
                     this.componentSpecification, this.propertyContextCreatorForRow, false, this.getRowModelCreator(),
                     cellUpdatedFromServerListener);
             }
@@ -276,7 +276,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
         const hasListeners = this.changeListeners.length > 0;
-        const notificationParamForListeners: ViewportChangeEvent = hasListeners ? {} : undefined;
+        const notificationParamForListeners: ViewportChangeEvent | undefined = hasListeners ? {} : undefined;
 
         const nonFSLinkedModelUpdates = granularUpdateFromServer.model;
         const wholeViewportUpdate = granularUpdateFromServer.model_vp;
@@ -301,18 +301,18 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                 const oldRows = this.componentValue.modelViewport.slice(); // create shallow copy of old rows as ref. will be the same otherwise
 
                 this.componentValue.modelViewport = this.viewportService.updateWholeViewport(this.componentValue.modelViewport,
-                    this, wholeViewportUpdate, granularUpdateFromServer._T,
+                    this, wholeViewportUpdate, granularUpdateFromServer._T!,
                     this.componentSpecification,
                     this.propertyContextCreatorForRow, false, this.getRowModelCreator(),
                     cellUpdatedFromServerListener);
-                if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: this.componentValue.modelViewport };
+                if (hasListeners) notificationParamForListeners!.viewportRowsCompletelyChanged = { oldValue: oldRows, newValue: this.componentValue.modelViewport };
                 done = true;
             } else if (viewportUpdate) {
                 this.viewportService.updateViewportGranularly(this.componentValue.modelViewport, this, viewportUpdate,
                     this.componentSpecification, this.propertyContextCreatorForRow,
                     false, this.getRowModelCreator(), cellUpdatedFromServerListener);
                 if (hasListeners) {
-                    notificationParamForListeners.viewportRowsUpdated = viewportUpdate; // viewPortUpdate was already prepared for listeners by $viewportModule.updateViewportGranularly
+                    notificationParamForListeners!.viewportRowsUpdated = viewportUpdate; // viewPortUpdate was already prepared for listeners by $viewportModule.updateViewportGranularly
                 }
                 done = true;
             }
@@ -352,10 +352,10 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
     sendChanges(propertyName: string, newValue: any, oldValue: any, rowId?: string, isDataprovider?: boolean) {
         /** rowId is only needed if the component is linked to a foundset */
         const clientSideType = this.getClientSideType(propertyName, rowId);
-        const rowComponentModelValue = this.getActualComponentModel(rowId);
+        const rowComponentModelValue = this.getActualComponentModel(rowId!);
 
         if (isDataprovider) {
-            let req: IOutgoingDataproviderApply;
+            let req!: IOutgoingDataproviderApply;
             FormService.pushApplyDataprovider(rowComponentModelValue, propertyName, clientSideType,
                 newValue, this.componentSpecification, this.converterService, oldValue,
                 (foundsetLinkedDPRowId: string, propertyNameToSend: string, valueToSend: any) => {
@@ -391,7 +391,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
             }
         } else {
             // component code 'manually' requested a send change for some value in the modelViewport; handle that just as viewport does
-            this.viewportService.sendCellChangeToServerBasedOnRowId(this.componentValue.modelViewport, this, undefined, rowId, propertyName,
+            this.viewportService.sendCellChangeToServerBasedOnRowId(this.componentValue.modelViewport, this, undefined!, rowId!, propertyName,
                 this.propertyContextCreatorForRow, newValue, oldValue);
         }
     }
@@ -412,7 +412,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
                 return Promise.resolve(null);
             }
             const deferred = this.sabloService.createDeferredWSEvent();
-            const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec);
+            const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec!);
             this.requests.push({
                 handlerExec: {
                     eventType: handlerName,
@@ -425,8 +425,8 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
             deferred.deferred.promise.finally(() => {
                 this.uiBlockerService.eventExecuted(componentValue.name, componentValue.model, handlerName, rowId);
             });
-            return deferred.deferred.promise.then((retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
-                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
+            return deferred.deferred.promise.then((retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType!,
+                undefined!, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
         };
         const eventHandler = (args: any, rowId: any) => executeHandler(args, rowId);
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -474,7 +474,7 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
     private getClientSideTypeOfModelProp(propertyName: string): IType<any> {
         let clientSideType: IType<any> = this.componentValue.dynamicClientSideTypes[propertyName]; // try dynamic types for non-viewport props.
         if (!clientSideType) { // try static types for props.
-            if (this.componentSpecification) clientSideType = this.componentSpecification.getPropertyType(propertyName);
+            if (this.componentSpecification) clientSideType = this.componentSpecification.getPropertyType(propertyName)!;
         }
 
         return clientSideType;

@@ -25,7 +25,7 @@ export class MainComponent implements OnInit, OnDestroy {
   
   incudeAutoFillHack = !this.isSafariBrowser();
 
-  private  listener: I18NListener = null;
+  private  listener: I18NListener | null = null;
 
   constructor(private servoyService: ServoyService,
           private i18nProvider: I18NProvider,
@@ -65,7 +65,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
-    this.listener.destroy();
+    this.listener!.destroy();
     }
 
   public ngOnInit() {
@@ -77,7 +77,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
   hasDefaultNavigator(): boolean {
     const cache = this.mainForm? this.formservice.getFormCacheByName(this.mainForm.toString()): null;
-    return cache && cache.getComponent('svy_default_navigator') != null;
+    return cache != null && cache.getComponent('svy_default_navigator') != null;
   }
 
   public getNavigatorStyle() {

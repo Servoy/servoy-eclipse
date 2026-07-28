@@ -1,6 +1,7 @@
 import { IType } from '../../sablo/types_registry';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
+import { EventLike } from '@servoy/public';
 
 export class ServerFunctionType implements IType<(...args: any[]) => unknown> {
 
@@ -16,39 +17,39 @@ export class ServerFunctionType implements IType<(...args: any[]) => unknown> {
         if (serverSentData) {
             if (serverSentData.script) {
                 const func = (...args: any[]) => {
-                    let newargs;
+                    let newargs: any[] | undefined;
                     if (args){
                         newargs = args.map((element) => {
                             if (element instanceof Event){
-                                return this.utils.createJSEvent(element, element.type);
+                                return this.utils.createJSEvent(element as unknown as EventLike, element.type);
                             }
                             return element;
                         });
                     }
-                    return this.servoyService.executeInlineScript(serverSentData.formname, serverSentData.script, newargs);
+                    return this.servoyService.executeInlineScript(serverSentData.formname, serverSentData.script, newargs!);
                 };
                 func.formname = serverSentData.formname;
                 func.script = serverSentData.script;
                 return func;
             } else if (serverSentData.functionhash) {
                 const func = (...args: any[]) => {
-                    let newargs;
+                    let newargs: any[] | undefined;
                     if (args){
                         newargs = args.map((element) => {
                             if (element instanceof Event){
-                                return this.utils.createJSEvent(element, element.type);
+                                return this.utils.createJSEvent(element as unknown as EventLike, element.type);
                             }
                             return element;
                         });
                     }
-                    return this.servoyService.executeInlineScript(serverSentData.formname, 'hash:' + serverSentData.functionhash, newargs);
+                    return this.servoyService.executeInlineScript(serverSentData.formname, 'hash:' + serverSentData.functionhash, newargs!);
                 };
                 func.functionhash = serverSentData.functionhash;
                 func.formname = serverSentData.formname;
                 return func;
             }
         }
-        return null;
+        return null!;
     }
 
     fromClientToServer(_newClientData: {formname:string,script:string,functionhash:string} & (() => any) ): 

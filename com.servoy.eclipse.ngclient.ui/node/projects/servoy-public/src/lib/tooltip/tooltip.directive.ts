@@ -9,7 +9,7 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 })
 export class TooltipDirective extends HTMLTooltipDirective {
 
-    @Input('svyTooltip') tooltipText: string;
+    @Input('svyTooltip') override tooltipText: string | undefined;
 
         constructor(tooltipService: TooltipService, private servoyService: ServoyPublicService) {
         super(tooltipService);

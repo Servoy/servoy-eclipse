@@ -11,7 +11,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
     }
 
     fromServerToClient(serverSentData: any, currentClientData: FormComponentValue, propertyContext: IPropertyContext): FormComponentValue {
-        if (!serverSentData) return null;
+        if (!serverSentData) return null!;
 
         let formComponentPropertyValue = currentClientData;
         if (!formComponentPropertyValue) formComponentPropertyValue = new FormComponentValue(serverSentData.absoluteLayout,
@@ -31,7 +31,7 @@ export class FormcomponentType implements IType<FormComponentValue> {
                 formComponentPropertyValue.childElements[idx] = childCompElem = this.converterService.convertFromServerToClient(serverSentData.childElements[idx],
                         this.typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
                         currentClientData && currentClientData.childElements ? currentClientData.childElements[idx] : undefined,
-                        undefined, undefined, propertyContext) as ChildComponentPropertyValue;
+                        undefined!, undefined!, propertyContext) as ChildComponentPropertyValue;
 
                 if (instanceOfChangeAwareValue(childCompElem)) {
                     childCompElem.getInternalState().setChangeListener((doNotPush?: boolean) => {

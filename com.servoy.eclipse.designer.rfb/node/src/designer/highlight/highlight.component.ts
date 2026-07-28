@@ -11,9 +11,9 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     standalone: false
 })
 export class HighlightComponent implements IShowHighlightChangedListener, OnInit, IContentMessageListener, OnDestroy {
-    highlightedComponent: Node;
+    highlightedComponent!: Node | undefined;
     showPermanentHighlight = false;
-    onMoveTimer: ReturnType<typeof setTimeout>;
+    onMoveTimer!: ReturnType<typeof setTimeout>;
 
     constructor(protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2, private urlParser: URLParserService, private editorContentService: EditorContentService) {
         this.editorSession.addHighlightChangedListener(this);
@@ -68,13 +68,13 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
             }
         }
         if (found && !this.urlParser.isAbsoluteFormLayout()) {
-            let parent = found;
+            let parent: HTMLElement | null = found;
             while (parent) {
                 const id = parent.getAttribute('svy-id');
                 if (id) {
                     let type = parent.getAttribute('svy-layoutname');
                     if (!type) type = parent.getAttribute('svy-formelement-type');
-                    if (!type) type = parent.children[0].nodeName;
+                    if (!type) type = parent.children[0]?.nodeName;
                     if (type && type.indexOf('.') >= 0) type = type.substring(type.indexOf('.') + 1);
                     const name = parent.getAttribute('svy-name');
                     if (name) type += ' [ ' + name + ' ] ';
@@ -93,12 +93,12 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
         this.editorContentService.executeOnlyAfterInit(() => {
             const elements = this.editorContentService.getAllContentElements();
             Array.from(elements).forEach((node) => {
-                if (node.parentElement.classList.contains('svy-wrapper')) {
-                    node = node.parentElement;
-                } else if (node.parentElement.parentElement.classList.contains('svy-wrapper')) {
-                    node = node.parentElement.parentElement;
-                } else if (node.parentElement.parentElement.parentElement.classList.contains('svy-wrapper')) {
-                    node = node.parentElement.parentElement.parentElement;
+                if (node.parentElement!.classList.contains('svy-wrapper')) {
+                    node = node.parentElement!;
+                } else if (node.parentElement!.parentElement!.classList.contains('svy-wrapper')) {
+                    node = node.parentElement!.parentElement!;
+                } else if (node.parentElement!.parentElement!.parentElement!.classList.contains('svy-wrapper')) {
+                    node = node.parentElement!.parentElement!.parentElement!;
                 }
                 if (showHighlight) {
                     this.renderer.addClass(node, 'highlight_element');

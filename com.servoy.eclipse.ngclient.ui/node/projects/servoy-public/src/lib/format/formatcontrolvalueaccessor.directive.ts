@@ -21,7 +21,7 @@ class NumberParser {
         this._group = new RegExp(`[${parts.find((d: any) => d.type === 'group').value}]`, 'g');
         this._decimal = new RegExp(`[${parts.find((d: any) => d.type === 'decimal').value}]`);
         this._numeral = new RegExp(`[${numerals.join('')}]`, 'g');
-        this._index = d => index.get(d).toString();
+        this._index = d => index.get(d)!.toString();
     }
     parse(str: string) {
         return (str.trim().replace(this._group, '').replace(this._decimal, '.').replace(this._numeral, this._index)) ? +str : NaN;
@@ -53,8 +53,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private static TIMEFORMAT: Format = { display: 'HH:mm', type: 'DATETIME' } as Format;
     private static BROWSERNUMBERFORMAT = new NumberParser();
 
-    @Input('svyFormat') format: Format;
-    @Input() findmode: boolean;
+    @Input('svyFormat') format!: Format;
+    @Input() findmode!: boolean;
 
     private hasFocus = false;
     private realValue: any = null;
@@ -62,17 +62,17 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private isKeyPressEventFired = false;
     private oldInputValue: any = null;
     private listeners: any[] = [];
-    private maskFormat: MaskFormat;
+    private maskFormat: MaskFormat | null = null;
     private readonly log: LoggerService;
-    private focusText: string;
+    private focusText!: string;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
         @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('formatdirective');
     }
 
-    @HostListener('blur', ['$event.target']) touched(target: EventTarget) {
-        if ("value" in target) {
+    @HostListener('blur', ['$event.target']) touched(target: EventTarget | null) {
+        if (target && "value" in target) {
             this.onTouchedCallback();
             this.hasFocus = false;
             this.dateInputChange((target as any).value);
@@ -103,8 +103,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         }
     }
 
-    @HostListener('change', ['$event.target']) input(target: EventTarget) {
-        if ("value" in target) {
+    @HostListener('change', ['$event.target']) input(target: EventTarget | null) {
+        if (target && "value" in target) {
             let data: any = (target as any).value;
             const inputType = this.getType();
             if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {

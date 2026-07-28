@@ -28,7 +28,7 @@ export class SessionView implements OnInit {
         }).subscribe(res => {
             // Replace placeholders but keep scripts intact
             const processedHtml = res
-                .replace('{{redirectUrl}}', sessionProblem.redirectUrl)
+                .replace('{{redirectUrl}}', sessionProblem.redirectUrl!)
                 .replace('ng-href', 'href');
 
             // Extract <script src>
@@ -53,17 +53,17 @@ export class SessionView implements OnInit {
             while ((match = externalScriptRegex.exec(processedHtml)) !== null) {
                 const src = match[1];
                 const script = document.createElement('script');
-                script.setAttribute('nonce', sessionProblem.nonce);
+                script.setAttribute('nonce', sessionProblem.nonce!);
                 script.src = src;
                 if (/defer/i.test(match[0])) script.defer = true;
                 document.body.appendChild(script);
             }
         });
 
-        if (sessionProblem.redirectTimeout >= 0) {
+        if (sessionProblem.redirectTimeout! >= 0) {
             window.setTimeout(function() {
-                window.location.href = sessionProblem.redirectUrl;
-            }, sessionProblem.redirectTimeout * 1000);
+                window.location.href = sessionProblem.redirectUrl!;
+            }, sessionProblem.redirectTimeout! * 1000);
         }
 
     }

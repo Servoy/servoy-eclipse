@@ -184,7 +184,7 @@ export class LocaleService {
         // angular locales are either <language lowercase> or <language lowercase> - <country uppercase>
         const localeId = country !== undefined && country.length > 0 ?
             language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
-        let context: string;
+        let context = '';
         if (env.mobile) {
             const index = this.doc.baseURI.indexOf('index.html');
             context = index > 0 ? this.doc.baseURI.substring(0,index) : '/';

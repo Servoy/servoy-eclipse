@@ -81,7 +81,7 @@ export class ServicesService {
 
             if (serviceCall.args) for (let argNo = 0; argNo < serviceCall.args.length; argNo++) {
                 serviceCall.args[argNo] = this.converterService.convertFromServerToClient(serviceCall.args[argNo], serviceCallSpec?.getArgumentType(argNo),
-                    undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
+                    undefined, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
             }
             
             if (serviceCallSpec?.shouldReturnValue || serviceCallSpec === undefined) {
@@ -167,7 +167,7 @@ export class ServicesService {
         const changes: Record<string, any> = {};
         let propertyType: IType<any>;
         const serviceSpec = this.typesRegistry.getServiceSpecification(serviceName);
-        propertyType = serviceSpec?.getPropertyType(propertyName); // first check if it has a static type
+        propertyType = serviceSpec?.getPropertyType(propertyName)!; // first check if it has a static type
 
         if (!propertyType) { // try to see if this prop. had a dynamic type then
             propertyType = this.getServiceDynamicClientSideTypes(serviceName)?.[propertyName];
@@ -203,7 +203,7 @@ export class ServicesService {
         const promise = this.sabloService.callService('applicationServerService', 'callServerSideApi', { service: serviceName, methodName, args });
 
         return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
-            undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
+            undefined, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
         // in case of a reject/errorCallback we just let it propagate to caller;
     }
 

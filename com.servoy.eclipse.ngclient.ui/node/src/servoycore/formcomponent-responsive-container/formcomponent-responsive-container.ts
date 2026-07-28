@@ -8,6 +8,6 @@ import { AbstractFormComponent } from '../../ngclient/form/form_component.compon
     standalone: false
 })
 export class ServoyCoreFormcomponentResponsiveCotainer {
-    readonly items = input<any[]>(undefined);
-    readonly formComponent = input<AbstractFormComponent>(undefined);
+    readonly items = input<any[]>(undefined!);
+    readonly formComponent = input<AbstractFormComponent>(undefined!);
 }

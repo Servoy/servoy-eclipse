@@ -41,7 +41,7 @@ export class WebsocketService {
 
         this.ngZone.runOutsideAngular(() => {
             // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
-            const websocket = env.mobile? new MobileBridge(this.windowRef): new ReconnectingWebSocket((reconnectAttempt:boolean) => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
+            const websocket = env.mobile? new MobileBridge(this.windowRef): new ReconnectingWebSocket((reconnectAttempt?:boolean) => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'], reconnectAttempt), this.logFactory);
             this.wsSession = new WebsocketSession(websocket, this, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.logFactory );
         });
@@ -77,7 +77,7 @@ export class WebsocketService {
         return this.wsSessionDeferred.promise;
     }
 
-    public getURLParameter(name: string): string {
+    public getURLParameter(name: string): string | null {
         return decodeURIComponent((new RegExp('[&]?\\b' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(this.getQueryString()) || [, ''])[1].replace(/\+/g, '%20')) || null;
     }
 
@@ -298,6 +298,7 @@ export class WebsocketSession {
         };
         if (async) {
             this.sendMessageObject(cmd);
+            return undefined!;
         } else {
             const deferred = this.createDeferredEvent<T>();
             this.loadingIndicatorService.showLoading();
@@ -461,12 +462,12 @@ export class WebsocketSession {
             obj = JSON.parse(message_data);
             this.log.spam(this.log.buildMessage(() => ('sbl * Received message from server with message data: ' + JSON.stringify(obj, null, 2))));
 
-            if (obj.cmsgid && this.deferredEvents[obj.cmsgid] && this.deferredEvents[obj.cmsgid].promise) {
+            if (obj.cmsgid && this.deferredEvents[obj.cmsgid] && (this.deferredEvents[obj.cmsgid] as any).promise) {
                 this.currentRequestInfo = (this.deferredEvents[obj.cmsgid].promise as any)['requestInfo'];
             			}
 
             if (obj.serviceApis) {
-                responseValue = this.servicesHandler.handleServiceApisWithApplyFirst(obj.serviceApis, responseValue);
+                responseValue = this.servicesHandler!.handleServiceApisWithApplyFirst(obj.serviceApis, responseValue);
             }
 
             // if the indicator is showing and this object wants a return message then hide the indicator until we send the response
@@ -485,12 +486,12 @@ export class WebsocketSession {
             }
 
             if (obj.msg && obj.msg.services) {
-                this.servicesHandler.handlerServiceUpdatesFromServer(obj.msg.services);
+                this.servicesHandler!.handlerServiceUpdatesFromServer(obj.msg.services);
             }
 
             if (obj.serviceApis) {
                 // normal services call
-                responseValue = this.servicesHandler.handleNormalServiceApis(obj.serviceApis, responseValue);
+                responseValue = this.servicesHandler!.handleNormalServiceApis(obj.serviceApis, responseValue);
             }
 
             // component api calls
@@ -539,7 +540,7 @@ export class WebsocketSession {
                     if (obj.exception) {
                         // something went wrong
                         // do a default conversion although I doubt it will do anything (don't think server will send client side type for exceptions)
-                        obj.exception = this.converterService.convertFromServerToClient(obj.exception, undefined, undefined, undefined, undefined, undefined);
+                        obj.exception = this.converterService.convertFromServerToClient(obj.exception, undefined!, undefined, undefined!, undefined!, undefined!);
                         deferredEvent.reject(obj.exception);
                     } else {
                         // if it's a handler/server side api call that expects a return value, any type conversions should be done in code triggered by this resolve (in calling code)
@@ -566,7 +567,7 @@ export class WebsocketSession {
             if (obj && obj.cmsgid) {
                 const deferredEvent = this.deferredEvents[obj.cmsgid];
                 if (deferredEvent) {
-                    deferredEvent.reject(this.converterService.convertFromServerToClient(e, undefined, undefined, undefined, undefined, undefined));
+                    deferredEvent.reject(this.converterService.convertFromServerToClient(e, undefined!, undefined, undefined!, undefined!, undefined!));
                 }
                 delete this.deferredEvents[obj.cmsgid];
                 this.loadingIndicatorService.hideLoading();

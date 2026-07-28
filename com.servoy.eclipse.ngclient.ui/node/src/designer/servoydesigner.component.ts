@@ -54,7 +54,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         this.wsSession = this.websocketService.connect('', [clientnr, formName, '1'], { solution: this.solutionName });
         if (this.variantsRequested) {
             const formState = JSON.parse(this.variantsFormTemplate)[formName];
-            this.formService.createFormCache(formName, formState, null);
+            this.formService.createFormCache(formName, formState, null!);
             this.mainForm = formName;
         } else {
             this.wsSession.callService("$editor", "getData", {
@@ -63,7 +63,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
                 ng2: true
             }, false).then((data: any) => {
                 const formState = JSON.parse(data)[formName];
-                this.formService.createFormCache(formName, formState, null);
+                this.formService.createFormCache(formName, formState, null!);
                 this.mainForm = formName;
             });
         }
@@ -139,7 +139,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         }, false).then((data: any) => {
             const formState = JSON.parse(data)[this.mainForm];
             this.formService.destroyFormCache(this.mainForm);
-            this.formService.createFormCache(this.mainForm, formState, null);
+            this.formService.createFormCache(this.mainForm, formState, null!);
             this.designFormComponent.formCacheRefresh();
         });
     }

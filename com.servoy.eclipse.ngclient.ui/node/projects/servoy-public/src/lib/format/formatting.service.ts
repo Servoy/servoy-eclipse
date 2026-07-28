@@ -11,14 +11,14 @@ const SVY_FORMAT_DECIMAL_CHAR = '.';
   * Class reflecting a Format object coming from the server (format spec property)
   */
 export class Format {
-    display: string = null;
+    display: string = null!;
     uppercase = false;
     lowercase = false;
-    type: string = null;
+    type: string = null!;
     isMask = false;
     isRaw = false;
     isNumberValidator = false;
-    edit: string = null;
+    edit: string = null!;
     placeHolder = '';
     percent = '';
     allowedCharacters = '';
@@ -66,7 +66,7 @@ export class FormattingService {
      * utility function to test if a certain key is pressed
      */
     public testKeyPressed(event: KeyboardEvent, keyCode: number) {
-        let code: number;
+        let code!: number;
 
         if (!event) event = window.event as KeyboardEvent;
         if (!event) return false;
@@ -161,12 +161,12 @@ export class FormattingService {
 	
 	private findClosestDate(dateMap: Map<string,Date>, servoyFormat: string): Date {
         // if there is just one return that.
-		if (dateMap.size === 1) return dateMap.values().next().value
+		if (dateMap.size === 1) return dateMap.values().next().value!
         // else find the one closest to the current format (starts with the same letters)
         const strippedFormat = servoyFormat.replace(/[^a-zA-Z]/g, '');
         for (const key of dateMap.keys()) {
             if (strippedFormat.startsWith(key) || servoyFormat.startsWith(key)) {
-                return dateMap.get(key);
+                return dateMap.get(key)!;
             }
         }
         // fallback to closest date
@@ -322,7 +322,7 @@ export class FormattingService {
         const keychar = String.fromCharCode(key);
         if (this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) && vSvyFormat !== null) {
             const value = vElement.value;
-            if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
+            if (value.includes(decimalChar) && window.getSelection()!.toString() !== value) {
                 const allowToConcat = value.indexOf(decimalChar);
                 if (e.target.selectionStart <= allowToConcat) {
                     return true;
@@ -468,7 +468,7 @@ export class FormattingService {
         }
         // scientific notation case
         if (servoyFormat.indexOf('E') > -1) {
-            const frmt = /([0#.,]+)E0+.*/.exec(patchedFormat)[1];
+            const frmt = /([0#.,]+)E0+.*/.exec(patchedFormat)![1];
             let integerDigits = 0;
             let fractionalDigits = 0;
             let countIntegerState = true;

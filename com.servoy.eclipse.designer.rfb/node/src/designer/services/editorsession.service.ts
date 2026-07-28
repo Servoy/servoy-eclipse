@@ -12,8 +12,8 @@ interface CallbackFunction {
 @Injectable()
 export class EditorSessionService implements ServiceProvider {
 
-    private wsSession: WebsocketSession;
-    private inlineEdit: boolean;
+    private wsSession!: WebsocketSession;
+    private inlineEdit!: boolean;
     private state = new State();
     private selection = new Array<string>();
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
@@ -21,7 +21,7 @@ export class EditorSessionService implements ServiceProvider {
     private dynamicGuidesChangedListeners = new Array<IShowDynamicGuidesChangedListener>();
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
-    public registerCallback = new BehaviorSubject<CallbackFunction>(null);
+    public registerCallback = new BehaviorSubject<CallbackFunction>(null!);
     private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: { [key: string]: string[] } = {};
     private developerMenus: Record<string, any> = {};
@@ -32,13 +32,13 @@ export class EditorSessionService implements ServiceProvider {
     variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
     variantsScroll = new EventEmitter<{scrollPos: number}>();
     variantsPopup = new EventEmitter<{status: string}>();
-    paletteRefresher : ISupportRefreshPalette;
+    paletteRefresher!: ISupportRefreshPalette;
 
     constructor(private websocketService: WebsocketService, private services: ServicesService,
         private urlParser: URLParserService, private editorContentService: EditorContentService, private typesRegistry: TypesRegistry) {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
-        this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null);
+        this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null!);
         this.editorContentService.executeOnlyAfterInit(() => {
             this.initialized();
         });
@@ -54,7 +54,7 @@ export class EditorSessionService implements ServiceProvider {
     }
     connect() {
         // do we need the promise
-        this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')]);
+        this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')!]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: any) => {
                 this.allowedChildren = JSON.parse(result) as { [key: string]: string[] } ;
@@ -66,8 +66,8 @@ export class EditorSessionService implements ServiceProvider {
         this.wsSession.callService('formeditor', 'getWizardProperties').then((result: any) => {
             this.wizardProperties = result;
         }).catch(e => console.log(e));
-        this.wsSession.callService('formeditor', 'getDeveloperMenus').then((result: Record<string, any>) => {
-            this.developerMenus = result;
+        this.wsSession.callService('formeditor', 'getDeveloperMenus').then((result: unknown) => {
+            this.developerMenus = result as Record<string, any>;
         }).catch(e => console.log(e));        
     }
 
@@ -363,14 +363,14 @@ export class EditorSessionService implements ServiceProvider {
         if (this.allowedChildren) {
             return this.allowedChildren[container ? container : 'topContainer'];
         }
-        return null;
+        return null!;
     }
 
     getWizardProperties(spec: string): string[] {
         if (this.wizardProperties) {
             return this.wizardProperties[spec];
         }
-        return null;
+        return null!;
     }
     
     getDeveloperMenus(isForm: boolean, formElementType: string): string[] {
@@ -388,7 +388,7 @@ export class EditorSessionService implements ServiceProvider {
                 }
             }
         }
-        return devMenus && devMenus.length > 0 ? devMenus : null;
+        return devMenus && devMenus.length > 0 ? devMenus : null!;
     }
 
     getSuperForms() {
@@ -453,7 +453,7 @@ export class EditorSessionService implements ServiceProvider {
         const selection = this.getSelection();
         if (selection && selection.length > 1) {
             const obj: { [key: string]: { width: number; height: number }; } = {};
-            let firstSize: { width: number; height: number } = null;
+            let firstSize: { width: number; height: number } = null!;
             for (let i = 0; i < selection.length; i++) {
                 const nodeid = selection[i];
                 const element = this.editorContentService.getContentElement(nodeid);
@@ -511,7 +511,7 @@ export class EditorSessionService implements ServiceProvider {
     unregisterAutoscroll(scrollComponent: ISupportAutoscroll) {
         if (this.lockAutoscrollId && this.lockAutoscrollId === scrollComponent.getAutoscrollLockId()) {
             this.lockAutoscrollId = '';
-            this.autoscrollBehavior.next(null);
+            this.autoscrollBehavior.next(null!);
         }
     }
 
@@ -556,40 +556,40 @@ export interface IShowDynamicGuidesChangedListener {
 }
 
 class State {
-    showWireframe: boolean;
-    showSolutionSpecificLayoutContainerClasses: boolean;
-    showSolutionCss: boolean;
-    sameSizeIndicator: boolean;
-    anchoringIndicator: boolean;
-    statusText: string;
-    maxLevel: number;
+    showWireframe!: boolean;
+    showSolutionSpecificLayoutContainerClasses!: boolean;
+    showSolutionCss!: boolean;
+    sameSizeIndicator!: boolean;
+    anchoringIndicator!: boolean;
+    statusText!: string;
+    maxLevel!: number;
     dragging = false;
     resizing = false;
     ghosthandle = false;
     pointerEvents = 'none';
-    packages: Array<Package>;
-    drop_highlight: string;
+    packages!: Array<Package>;
+    drop_highlight!: string;
 }
 
 export class PaletteComp {
-    name: string;
-    description: string;
-    displayName: string;
-    packageName: string;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    text: string;
-    type: string;
-    ghostPropertyName: string;
-    styleVariantCategory: string;
-    lastChosenVariant: string;
+    name!: string;
+    description!: string;
+    displayName!: string;
+    packageName!: string;
+    x!: number;
+    y!: number;
+    w!: number;
+    h!: number;
+    text!: string;
+    type!: string;
+    ghostPropertyName!: string;
+    styleVariantCategory!: string;
+    lastChosenVariant!: string;
     dropTargetUUID?: string;
-    isOpen: boolean;
-    propertyName: string; // ghost
-    components: Array<PaletteComp>;
-    properties: Array<string>;
+    isOpen!: boolean;
+    propertyName!: string; // ghost
+    components!: Array<PaletteComp>;
+    properties!: Array<string>;
     isAbsoluteCSSPositionMix?: boolean; // formcomponent property
     icon?: string;
     model?: { property: any };
@@ -597,7 +597,7 @@ export class PaletteComp {
     multiple?: boolean; //ghost property
     propertyValue?: { property: string }; // formcomponents
     componentType?: string;
-    topContainer: boolean;
+    topContainer!: boolean;
     layoutName?: string;
     attributes?: { [property: string]: string };
     children?: [{ [property: string]: string }];
@@ -608,10 +608,10 @@ export class PaletteComp {
 }
 
 export class Package {
-    id: string;
-    packageName: string;
-    packageDisplayname: string;
-    components: Array<PaletteComp>;
+    id!: string;
+    packageName!: string;
+    packageDisplayname!: string;
+    components!: Array<PaletteComp>;
     propertyValues?: Array<PaletteComp>;
     categories?: { property: Array<PaletteComp> };
 }
@@ -628,8 +628,8 @@ export interface ISupportRefreshPalette{
 }
 
 export class Variant {
-    name: string;
-    category: string;
-    displayName: string;
-    classes: Array<string>;
+    name!: string;
+    category!: string;
+    displayName!: string;
+    classes!: Array<string>;
 }

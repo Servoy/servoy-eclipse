@@ -46,7 +46,7 @@ export class FormService {
 						this.clientFunctionService.waitForLoading().finally(() => {
 							// if form is loaded
 							if (this.formsCache.has(formname)) {
-								this.formMessageHandler(this.formsCache.get(formname), formname, msg, servoyService);
+								this.formMessageHandler(this.formsCache.get(formname)!, formname, msg, servoyService);
 							} else {
 								this.log.warn('Updates to a form state/cache/model came before it was initialized; this is no longer expected; form: ' + formname);
 								// do treat this situation anyway, even if it's no loner expected
@@ -250,7 +250,7 @@ export class FormService {
 		// detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server and trim down the last array index which identifies the row on client
 		// TODO this is a big hack - see comment in pushApplyDataprovider below
 		const foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(propertyName, componentModel);
-		let foundsetLinkedRowId: string;
+		let foundsetLinkedRowId!: string;
 		let propertyNameToSend = propertyName;
 		if (foundsetLinkedDPInfo) {
 			if (foundsetLinkedDPInfo.rowId) foundsetLinkedRowId = foundsetLinkedDPInfo.rowId;
@@ -302,21 +302,21 @@ export class FormService {
 			// the old value could be just null and the type system doesn't know this is a Date type (if it is a 'date' DataproviderType on server)
 			// have special support for it by checking the instanceof so we always map on the DateType for javascript Dates;
 			// Dataprovider type on server will know to expect date based on DP type
-			if (newValue instanceof Date) propertyType = typesRegistry.getAlreadyRegisteredType(DateType.TYPE_NAME_SVY);
+			if (newValue instanceof Date) propertyType = typesRegistry.getAlreadyRegisteredType(DateType.TYPE_NAME_SVY)!;
 
 			// apply default or date conversion if needed as we don't search for/generate client side type, property context etc. for props nested with . and [
 			// see TODO above if the lack of type/property context causes problems
-			converted = converterService.convertFromClientToServer(newValue, propertyType, undefined, undefined);
+			converted = converterService.convertFromClientToServer(newValue, propertyType, undefined, undefined!);
 
 			valueToSendToServer = converted[0];
 			set(componentModel, propertyName, converted[1]);
 		}
 
-		sendApplyDataproviderFunc(fslRowID, propertyNameForServer, valueToSendToServer);
+		sendApplyDataproviderFunc(fslRowID!, propertyNameForServer, valueToSendToServer);
 	}
 
 	private static getFoundsetLinkedDPInfo(propertyName: string, componentModel: { [property: string]: any }): { propertyNameForServer: string; rowId?: string } {
-		let propertyNameForServerAndRowID: { propertyNameForServer: string; rowId?: string };
+		let propertyNameForServerAndRowID!: { propertyNameForServer: string; rowId?: string };
 
 		if ((propertyName.indexOf('.') > 0 || propertyName.indexOf('[') > 0) && propertyName.endsWith(']')) {
 			// TODO this is a big hack - see comment in applyDataprovider
@@ -344,11 +344,11 @@ export class FormService {
 	}
 
 	public getFormCacheByName(formName: string): FormCache {
-		return this.formsCache.get(formName);
+		return this.formsCache.get(formName)!;
 	}
 
 	public getFormCache(form: IFormComponent): FormCache {
-		return this.formsCache.get(form.name);
+		return this.formsCache.get(form.name)!;
 	}
 
 	public getFormComponentInstance(formName: string): IFormComponent | null {
@@ -420,14 +420,14 @@ export class FormService {
 			form.componentCache.forEach((comp) => {
 				Object.keys(comp.model).forEach((propertyName) => {
 					this.callOnDestroy(comp.model[propertyName],
-                         afterNgOnDestroyOfChildrenPotentialRunner,
+                         afterNgOnDestroyOfChildrenPotentialRunner!,
                          debugLocatorStart ? debugLocatorStart + (comp.name ? comp.name : "-form_prop-") + "." + propertyName : undefined);
 				});
 			});
             form.formComponents.forEach((fcc) => {
                 Object.keys(fcc.model).forEach((propertyName) => {
                     this.callOnDestroy(fcc.model[propertyName],
-                        afterNgOnDestroyOfChildrenPotentialRunner,
+                        afterNgOnDestroyOfChildrenPotentialRunner!,
                         debugLocatorStart ? debugLocatorStart + fcc.name + "." + propertyName : undefined);
                 });
             });
@@ -532,7 +532,7 @@ export class FormService {
 	public getLoadedFormState() {
 		const loadedState: { [s: string]: { url: string; attached: boolean } } = {};
 		for (const formName of Object.keys(this.formsCache)) {
-			loadedState[formName] = { url: this.formsCache.get(formName).url, attached: instanceOfFormComponent(this.formComponentCache.get(formName)) };
+			loadedState[formName] = { url: this.formsCache.get(formName)!.url, attached: instanceOfFormComponent(this.formComponentCache.get(formName)) };
 		}
 		return loadedState;
 	}
@@ -542,7 +542,7 @@ export class FormService {
 
 		const handlerSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getHandler(handlerName);
 
-		const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec); // this will do the needed handler arg conversions from client to server
+		const newargs = this.converterService.getEventArgs(args, handlerName, handlerSpec!); // this will do the needed handler arg conversions from client to server
 		const cmd = { formname: formName, beanname: componentName, event: handlerName, args: newargs, changes: {} };
 
 		const form = this.formsCache.get(formName);
@@ -560,8 +560,8 @@ export class FormService {
 				let promise = this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false);
 				promise = wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then(
 					// convert return value from server to client
-					(retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
-						undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)
+					(retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType!,
+						undefined, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)
 				));
 
 				promise.finally(() => {
@@ -574,8 +574,8 @@ export class FormService {
 		// call handler
 		return this.sabloService.callService('formService', 'executeEvent', cmd, async !== undefined ? async : false).then(
 			// convert return value from server to client
-			(retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType,
-				undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)
+			(retVal) => this.converterService.convertFromServerToClient(retVal, handlerSpec?.returnType!,
+				undefined, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)
 		);
 	}
 
@@ -619,7 +619,7 @@ export class FormService {
 	}
 
 	public pushEditingStarted(formName: string, componentName: string, propertyName: string) {
-		FormService.pushEditingStarted(this.formsCache.get(formName).getComponent(componentName).model, propertyName,
+		FormService.pushEditingStarted(this.formsCache.get(formName)!.getComponent(componentName)!.model, propertyName,
 			(foundsetLinkedRowId: string, propertyNameToSend: string) => {
 				const messageForServer: Record<string, any> = { formname: formName, beanname: componentName, property: propertyNameToSend };
 				if (foundsetLinkedRowId) messageForServer['fslRowID'] = foundsetLinkedRowId; // if it was a foundset linked DP we give the row identifier as well
@@ -637,13 +637,13 @@ export class FormService {
 		const apiSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getApiFunction(methodName);
 
 		if (args && args.length) for (let i = 0; i < args.length; i++) {
-			args[i] = this.converterService.convertFromClientToServer(args[i], apiSpec?.getArgumentType(i), undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
+			args[i] = this.converterService.convertFromClientToServer(args[i], apiSpec?.getArgumentType(i)!, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
 		}
 
 		const promise = this.sabloService.callService('formService', 'callServerSideApi', { formname: formName, beanname: componentName, methodName, args });
 
-		return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType,
-			undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
+		return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((serviceCallResult) => this.converterService.convertFromServerToClient(serviceCallResult, apiSpec?.returnType!,
+			undefined, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
 	}
 
 	public sendChanges(formname: string, beanname: string, property: string, value: any, oldvalue: any, dataprovider?: boolean) {
@@ -701,9 +701,9 @@ export class FormService {
 			return;
 		}
 
-		const formState = this.formsCache.get(formName);
+		const formState = this.formsCache.get(formName)!;
 		const propertyType = formState.getClientSideType(componentName, propertyName);
-		const componentModel = formState.getComponent(componentName).model;
+		const componentModel = formState.getComponent(componentName)!.model;
 		const componentSpec = formState.getComponentSpecification(componentName);
 		const propertyContext = {
 			getProperty: (otherPropertyName: string) => componentModel[otherPropertyName],
@@ -730,7 +730,7 @@ export class FormService {
 
 			// if this is a simple property change without any special client side type - then push the old value as well
 			const oldValues: Record<string, any> = {};
-			oldValues[propertyName] = this.converterService.convertFromClientToServer(oldValue, undefined, undefined, propertyContext)[0]; // just for any default conversions
+			oldValues[propertyName] = this.converterService.convertFromClientToServer(oldValue, undefined!, undefined, propertyContext)[0]; // just for any default conversions
 			this.sabloService.callService('formService', 'dataPush', { formname: formName, beanname: componentName, changes, oldvalues: oldValues }, true);
 		}
 	}
@@ -738,11 +738,11 @@ export class FormService {
 	private applyDataprovider(formName: string, componentName: string, propertyName: string, newValue: any, oldValue: any) {
 		if (this.isInDesigner) return; // form designer doesn't send stuff back to server (doesn't even have access to wsSession in SabloService to do that)
 
-		const formState = this.formsCache.get(formName);
+		const formState = this.formsCache.get(formName)!;
 		let typeOfData = formState.getClientSideType(componentName, propertyName);
 
-		FormService.pushApplyDataprovider(formState.getComponent(componentName).model, propertyName, typeOfData,
-			newValue, formState.getComponentSpecification(componentName), this.converterService, oldValue,
+		FormService.pushApplyDataprovider(formState.getComponent(componentName)!.model, propertyName, typeOfData!,
+			newValue, formState.getComponentSpecification(componentName)!, this.converterService, oldValue,
 			(foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => {
 				const changes: Record<string, any> = {};
 				changes[propertyNameToSend] = valueToSend;
@@ -758,13 +758,13 @@ export class FormService {
 	private formMessageHandler(formCache: FormCache, formName: string, msg: { forms: { [property: string]: { [property: string]: { [property: string]: unknown } } } }, servoyService: ServoyService) {
 		// if the form angular component is already created, update it's properties and use it as well; if not, just update models so form/component 'caches'
 		const fc = this.formComponentCache.get(formName);
-		let formComponent: IFormComponent;
+		let formComponent: IFormComponent | undefined;
 		if (fc && !(fc instanceof Deferred)) formComponent = fc as IFormComponent;
 
 		const newFormData = msg.forms[formName];
 		const newFormProperties = newFormData['']; // properties of the form itself
 
-		const comp: ComponentCache = formCache.getComponent('');
+		const comp: ComponentCache = formCache.getComponent('')!;
 
 		if (newFormProperties) {
 			// properties of the form itself were received
@@ -780,9 +780,9 @@ export class FormService {
 				servoyService.setFindMode(formName, !!newFormData['']['findmode']);
 				continue; // skip other form properties; they were already handled/updated above
 			}
-			let comp: ComponentCache = formCache.getComponent(componentName);
+			let comp: ComponentCache = formCache.getComponent(componentName)!;
 			if (!comp) { // is it a form component?
-				comp = formCache.getFormComponent(componentName);
+				comp = formCache.getFormComponent(componentName)!;
 			}
 			if (!comp) {
 				this.log.debug(this.log.buildMessage(() => ('got message for ' + componentName + ' of form ' + formName + ' but that component is not in the cache')));
@@ -790,7 +790,7 @@ export class FormService {
 			}
 
 			// get static client side types for this component - if it has any
-			const componentSpec: IWebObjectSpecification = formCache.getComponentSpecification(componentName);
+			const componentSpec: IWebObjectSpecification = formCache.getComponentSpecification(componentName)!;
 
 			// apply any client side type conversions and update the properties received from server
 			const newComponentProperties = newFormData[componentName];
@@ -805,10 +805,10 @@ export class FormService {
 	private walkOverChildren(children: ServerElement[], formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache) {
 		children.forEach((elem) => {
 			if (elem.layout === true) {
-				const structure = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
-				this.walkOverChildren(elem.children, formCache, structure);
+				const structure = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null!, elem.cssPositionContainer, elem.position);
+				this.walkOverChildren(elem.children!, formCache, structure);
 				if (parent == null) {
-					parent = new StructureCache(null, null);
+					parent = new StructureCache(null!, null!);
 					formCache.mainStructure = parent;
 				}
 				if (parent instanceof StructureCache || parent instanceof FormComponentCache) {
@@ -822,7 +822,7 @@ export class FormService {
 				formCache.addLayoutContainer(structure);
 			} else if (elem.part === true) {
 				const part = new PartCache(elem.name, elem.classes, elem.layout as { [property: string]: string });
-				this.walkOverChildren(elem.children, formCache, part);
+				this.walkOverChildren(elem.children!, formCache, part);
 				formCache.addPart(part);
 			} else {
 				// either a simple component or a component that has servoy-form-component properties in it

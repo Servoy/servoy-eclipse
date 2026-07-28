@@ -9,14 +9,14 @@ import { WindowRefService } from '../services/windowref.service';
 })
 export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnDestroy {
 
-    @Input('svyImageMediaId') media: any;
-    @Input() hostComponent: ServoyBaseComponent<HTMLElement>;
+    @Input('svyImageMediaId') media!: any;
+    @Input() hostComponent!: ServoyBaseComponent<HTMLElement>;
 
-    private imgStyle: Map<string, any>;
-    private rollOverImgStyle: Map<string, any>;
+    private imgStyle: Map<string, any> | null = null;
+    private rollOverImgStyle: Map<string, any> | null = null;
     private clearStyle: Map<string, any>;
 
-    private resizeObserver: ResizeObserver;
+    private resizeObserver!: ResizeObserver;
 
     public constructor(private _elemRef: ElementRef<HTMLElement>, private _renderer: Renderer2, 
         private windowRefService: WindowRefService) {
@@ -70,8 +70,8 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     private setImageStyle(): void {
         if (this.media && (this.media.img || this.media.rollOverImg) || this.rollOverImgStyle || this.imgStyle) {
             const componentSize = {
-                width: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientWidth,
-                height: (this._elemRef.nativeElement.parentNode.parentNode as HTMLElement).clientHeight
+                width: (this._elemRef.nativeElement.parentNode!.parentNode as HTMLElement).clientWidth,
+                height: (this._elemRef.nativeElement.parentNode!.parentNode as HTMLElement).clientHeight
             };
             if (componentSize.height === 0 || componentSize.width === 0)
                 setTimeout(() => this.setImageStyle(), 100);

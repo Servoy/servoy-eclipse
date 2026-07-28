@@ -65,9 +65,9 @@ export class BSWindowManager {
     }
 
     setFocused(focused_window: BSWindow) {
-        let focusedWindowIndex: number;
+        let focusedWindowIndex!: number;
         while (focused_window.getBlocker()) {
-            focused_window = focused_window.getBlocker();
+            focused_window = focused_window.getBlocker()!;
         }
          this.windows.forEach((windowHandle, index ) => {
             windowHandle.setActive(false);
@@ -147,7 +147,7 @@ export class BSWindowManager {
         return window_object;
     }
 
-    createWindow(window_options: BSWindowOptions) {
+    createWindow(window_options: Partial<BSWindowOptions>) {
         let final_options = Object.create(window_options) as BSWindowOptions;
         if (this.options.windowTemplate && !final_options.template) {
             final_options.template = this.options.windowTemplate;
@@ -168,7 +168,7 @@ export class BSWindowManager {
                 clearTimeout(this.modalBackdropRemoverTimeout);
                 this.modalBackdropRemoverTimeout = null;
             }
-            this.utils.getMainBody().appendChild(windowObj.options.modalBackdrop);
+            this.utils.getMainBody()!.appendChild(windowObj.options.modalBackdrop!);
             setTimeout(() => {
                 const backdrop = this.doc.getElementsByClassName('modal-backdrop');
                 Array.from(backdrop).forEach((el, index) => {

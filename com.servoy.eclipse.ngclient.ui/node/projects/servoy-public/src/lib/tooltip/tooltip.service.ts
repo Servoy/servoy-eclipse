@@ -8,10 +8,10 @@ export class TooltipService {
     isTooltipActive: Subject<boolean>;
     tipInitialTimeout: any;
     tipTimeout: any;
-    private tooltipDiv: HTMLDivElement;
+    private tooltipDiv!: HTMLDivElement;
     private tipmousemouveEventX: any;
     private tipmousemouveEventY: any;
-    private tipmousemouveEventIsPage: boolean;
+    private tipmousemouveEventIsPage!: boolean;
     private doc: Document;
     constructor(@Inject(DOCUMENT) _doc: any, private windowRefService: WindowRefService) {
         this.isTooltipActive = new Subject<boolean>();

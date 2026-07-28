@@ -9,7 +9,7 @@ import { ToolbarItemComponent } from './toolbaritem.component';
 })
 export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnInit, OnChanges {
 
-  @Input() value: number;
+  @Input() value!: number;
 
   ngOnInit() {
     if(this.item.initialValue !== undefined) {
@@ -28,11 +28,11 @@ export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnI
 
   dec() {
     this.value--;
-    this.item.onclick(''+this.value);
+    this.item.onclick!(''+this.value);
   }
   inc() {
     this.value++;
-    this.item.onclick(''+this.value);
+    this.item.onclick!(''+this.value);
   }
   checkInput() {
     if (this.value === undefined) {
@@ -47,6 +47,6 @@ export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnI
   }
   
   onSet() {
-      if (this.value)  this.item.onclick(''+this.value);
+      if (this.value)  this.item.onclick!(''+this.value);
   }
 }

@@ -9,8 +9,8 @@ import { I18NProvider } from '../i18n_provider.service';
     standalone: false
 })
 export class AlertWindowComponent {
-    readonly title = signal<string>(undefined);
-    readonly message = signal<string>(undefined);
+    readonly title = signal<string>(undefined!);
+    readonly message = signal<string>(undefined!);
     onCloseCallback!: () => void;
     constructor() {
     }

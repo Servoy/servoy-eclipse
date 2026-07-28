@@ -8,8 +8,8 @@ import { ServoyBaseComponent } from '../basecomponent';
 })
 export class StartEditDirective {
 
-  @Input('svyStartEdit') dataProviderID: string;
-  @Input() hostComponent: ServoyBaseComponent<HTMLElement>;
+  @Input('svyStartEdit') dataProviderID!: string;
+  @Input() hostComponent!: ServoyBaseComponent<HTMLElement>;
 
   private log: LoggerService;
 

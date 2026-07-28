@@ -20,7 +20,7 @@ export class LoadingIndicatorService {
     private timeoutHide: ReturnType<typeof setTimeout> | null = null;
 
     constructor(logFactory: LoggerFactory ) {
-       this.customLoadingIndicator = null;
+            this.customLoadingIndicator = null!;
        this.log = logFactory.getLogger('LoadingIndicatorService');
     }
 
@@ -68,7 +68,7 @@ export class LoadingIndicatorService {
         // eslint-disable-next-line eqeqeq
         if (customLoadingIndicator.hideLoading == undefined || customLoadingIndicator.showLoading == undefined) {
             this.log.warn(this.log.buildMessage(() => ('a custom loading indicator is defined but does not have the 2 functions: showLoading or hideLoading')));
-            this.customLoadingIndicator = null;
+       this.customLoadingIndicator = null!;
         } else {
             this.customLoadingIndicator = customLoadingIndicator;
         }

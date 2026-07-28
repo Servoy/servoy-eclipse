@@ -13,31 +13,31 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private bottomPos : Map<string, number> = new Map();
     private middleV: Map<string, number> = new Map();
     private middleH : Map<string, number> = new Map();
-    private rectangles : DOMRect[];
-	private uuids: string[];
+    private rectangles!: DOMRect[];
+	private uuids!: string[];
 	private types: Map<string, string> = new Map();
 	private parents: Map<string, string> = new Map();
-    private element: Element;
-    private uuid: string;
+    private element!: Element;
+    private uuid!: string;
     
-    public snapDataListener: BehaviorSubject<SnapData>;
+    public snapDataListener: BehaviorSubject<SnapData | null>;
     private snapThreshold: number = 0;
     private equalDistanceThreshold: number = 0;
 	private equalSizeThreshold: number = 0;
-    guidesEnabled: boolean;
+    guidesEnabled!: boolean;
     topAdjust: any;
-    leftAdjust: number;
-    properties: SnapData;
+    leftAdjust!: number;
+    properties!: SnapData;
 	equalSize: boolean = false;
-	initialPoint: { x: number; y: number; };
-	initialRectangle: DOMRect;
-	formBounds: DOMRect;
+	initialPoint!: { x: number; y: number; };
+	initialRectangle!: DOMRect;
+	formBounds!: DOMRect;
 	snapToEndEnabled: boolean = true;
-	parentContainer: Element;
+	parentContainer!: Element;
 
     constructor(private editorContentService: EditorContentService, protected readonly editorSession: EditorSessionService) {
         this.editorSession.addDynamicGuidesChangedListener(this);
-        this.snapDataListener = new BehaviorSubject(null);
+        this.snapDataListener = new BehaviorSubject<SnapData | null>(null);
         this.editorContentService.executeOnlyAfterInit(() => {
             this.editorSession.getSnapThreshold().then((thresholds: any) => {
                 this.snapThreshold = thresholds.alignment;
@@ -63,26 +63,26 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 			const contentElements = this.editorContentService.getContentElementsFromPoint(point);
 			if (this.editorSession.getSelection().length == 1) {
 				this.element = this.editorContentService.getContentElementById(this.editorSession.getSelection()[0]);
-				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
+				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'))!;
 			}
-			let parent = contentElements.find(e => this.isParentContainer(e));
-            this.uuid = this.element?.getAttribute('svy-id');
+			let parent = contentElements.find(e => this.isParentContainer(e))!;
+            this.uuid = this.element?.getAttribute('svy-id')!;
 			const persistId = this.uuid ? PersistIdentifier.fromJSONString(this.uuid) : null;
 			const parentSvyName = parent?.getAttribute('svy-id');
 			const parentPersistId = parentSvyName ? PersistIdentifier.fromJSONString(parentSvyName) : null;
 			if (persistId && parentPersistId && persistId.isDirectlyNestedInside(parentPersistId)) {
 				this.parentContainer = parent;
 			}
-			this.formBounds = this.editorContentService.getContentForm().getBoundingClientRect();
+			this.formBounds = this.editorContentService.getContentForm()!.getBoundingClientRect();
             for (let comp of this.editorContentService.getAllContentElements()) {
 				const compParent = this.getParent(comp);
-				if (this.isParentContainer(compParent)) {
+				if (this.isParentContainer(compParent!)) {
 					//ignore components within FC
 					continue;
 				}
 				const componentType = comp.getAttribute('svy-formelement-type');
 				if (componentType == null) continue;
-                const id = comp.getAttribute('svy-id');
+                const id = comp.getAttribute('svy-id')!;
                 const bounds = comp.getBoundingClientRect();
                 this.leftPos.set(id, bounds.left);
                 this.rightPos.set(id, bounds.right);
@@ -91,7 +91,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
 				this.types.set(id, componentType);
-				this.parents.set(id, compParent?.getAttribute('svy-id'));
+				this.parents.set(id, compParent?.getAttribute('svy-id')!);
                 if (id !== this.uuid){
 					this.rectangles.push(bounds);
 					this.uuids.push(id);
@@ -175,9 +175,9 @@ this.snapToEndEnabled = !event.shiftKey;
         this.middleH = new Map();
         this.rectangles = [];
 		this.uuids = [];
-		this.initialPoint = null;
-		this.initialRectangle = null;
-		this.properties = null;
+		this.initialPoint = null!;
+		this.initialRectangle = null!;
+		this.properties = null!;
     }
     
     private isSnapInterval(uuid: any, coordinate: any, posMap: any) {
@@ -197,7 +197,7 @@ this.snapToEndEnabled = !event.shiftKey;
         return null;        
     }
     
-    private getDraggedElementRect(point: {x: number, y:number}, resizing: string): DOMRect {
+    private getDraggedElementRect(point: {x: number, y:number}, resizing: string): DOMRect | undefined {
         let item: HTMLElement;
          if (!this.element?.getAttribute('svy-id') && (item = this.editorContentService.getContentElementById('svy_draggedelement'))) {
 			let r = item.getBoundingClientRect();
@@ -239,7 +239,7 @@ this.snapToEndEnabled = !event.shiftKey;
         return this.element?.getBoundingClientRect();
     }
 
-	private getDraggedElementCategorySet(componentType: string): String[] {
+	private getDraggedElementCategorySet(componentType: string): String[] | null {
 		if (componentType) {
 			const _package = this.findComponentPackage(componentType);
 			const componentsInSamePackage: String[] = _package ?
@@ -250,14 +250,14 @@ this.snapToEndEnabled = !event.shiftKey;
 		return null;
 	}
 
-	private getDraggedComponentType(): string {
+	private getDraggedComponentType(): string | undefined {
 		let item: HTMLElement;
-		let componentType;
+		let componentType: string | undefined;
 		if (this.element?.getAttribute('svy-id')) {
-			componentType = this.element.getAttribute('svy-formelement-type');
+			componentType = this.element.getAttribute('svy-formelement-type')!;
 		}
 		else if (item = this.editorContentService.getContentElementById('svy_draggedelement')) {
-			componentType = item.getAttribute('svy-formelement-type');
+			componentType = item.getAttribute('svy-formelement-type')!;
 			if (!componentType) componentType = item.childNodes[0].nodeName.toLowerCase();
 		}
 		return componentType;
@@ -269,25 +269,23 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 
 	shouldSnapToSize(uuid: string, resizing?: string, value?: number, property?: string): boolean {
-		if (!uuid || !this.snapToEndEnabled) return false; //no snap target or snap to end disabled
+		if (!uuid || !this.snapToEndEnabled) return false;
 		if (resizing) return true;
 		const targetRect = this.rectangles[this.uuids.indexOf(uuid)];
 		if (value && (property === 'width' && value > targetRect.width || property === 'height' && value > targetRect.height)) {
-			//the dragged component should not be larger than the target
 			return false;
 		}
 		const targetType = this.types.get(uuid);
 		const componentType = this.getDraggedComponentType();
 		let result = false;
-		if (targetType === componentType || this.getDraggedElementCategorySet(componentType)?.indexOf(targetType) >= 0) {
-			//the dragged component should not become too small unless the target is also very small
-			result = property === 'width' && (value >= 80 || targetRect.width < 80) ||
-			property === 'height' && (value >= 30 || targetRect.height < 30);
+		if (targetType === componentType || this.getDraggedElementCategorySet(componentType!)?.indexOf(targetType!) as number >= 0) {
+			result = property === 'width' && (value! >= 80 || targetRect.width < 80) ||
+			property === 'height' && (value! >= 30 || targetRect.height < 30);
 		}
 		else if (value && this.initialRectangle) {
 			//if the dragged component is not in the same category, 
 			//use the size hints but make sure is not smaller than the initial size
-			result = (this.initialRectangle as any)[property] < value;
+			result = (this.initialRectangle as any)[property!] < value;
 		}
 		if (result) {
 			this.editorSession.setStatusBarText('Press SHIFT to disable snap to end size.');
@@ -302,10 +300,10 @@ this.snapToEndEnabled = !event.shiftKey;
 			return;
 		}
 		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
-        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'));
+        let elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'))!;
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
 		if (!draggedItem && !resizing) {
-            this.element = elem;
+            this.element = elem!;
 		}
 		if (resizing && elem) {
 			//in resize mode, we need the current element to determine the edge(resize knob) we are dragging
@@ -314,8 +312,8 @@ this.snapToEndEnabled = !event.shiftKey;
 			this.element = elem;
 		}
 
-		const uuid = this.element?.getAttribute('svy-id');
-        let rect = this.getDraggedElementRect(point, resizing);
+		const uuid = this.element?.getAttribute('svy-id')!;
+        let rect = this.getDraggedElementRect(point, resizing!);
 		if (!rect) {
 			this.snapDataListener.next(null);
 			return;
@@ -328,7 +326,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		}
 		
 		if (resizing && this.equalSizeThreshold > 0) { 
-			let verticalDist: Guide[], horizontalDist: Guide[];
+			let verticalDist: Guide[] | null = null, horizontalDist: Guide[] | null = null;
 			if (resizing.indexOf('s') >= 0 || resizing.indexOf('n') >= 0) {
 				verticalDist = this.addEqualHeightGuides(point, rect, properties, uuid);
 			}
@@ -349,8 +347,8 @@ this.snapToEndEnabled = !event.shiftKey;
 			}
 		}
 		
-		const horizontalSnap = this.handleHorizontalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
-		const verticalSnap = this.handleVerticalSnap(resizing, !!resizing || !!draggedItem, point, uuid, rect, properties);
+		const horizontalSnap = this.handleHorizontalSnap(resizing, !!resizing || !!draggedItem, point, uuid!, rect, properties);
+		const verticalSnap = this.handleVerticalSnap(resizing, !!resizing || !!draggedItem, point, uuid!, rect, properties);
 		if (!resizing) { 
 			//equal distance guides
 			let rectangles = this.rectangles;
@@ -358,8 +356,8 @@ this.snapToEndEnabled = !event.shiftKey;
 				const eq = (a: DOMRect, b: DOMRect) => ['top', 'left', 'width', 'height'].every(key => (a as any)[key] === (b as any)[key]);
 				rectangles = rectangles.filter(r => !eq(r, this.initialRectangle));
 			}
-			const overlapsX = rectangles.filter(r => this.isOverlap(rect, r, 'x'));
-			const overlapsY = rectangles.filter(r => this.isOverlap(rect, r, 'y'));
+			const overlapsX = rectangles.filter(r => this.isOverlap(rect!, r, 'x'));
+			const overlapsY = rectangles.filter(r => this.isOverlap(rect!, r, 'y'));
 			if (draggedItem && this.snapToEndEnabled) {
 				this.checkSnapToSize(properties, rect, overlapsX, overlapsY);
 				rect = new DOMRect(properties.left, properties.top, properties.width? properties.width : rect.width, properties.height ? properties.height: rect.height);
@@ -367,28 +365,28 @@ this.snapToEndEnabled = !event.shiftKey;
 
 			const verticalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceVerticalGuides(rect, properties, overlapsX, !!draggedItem) : null;
 			if (verticalDist && verticalSnap) {
-				properties.guides.splice(properties.guides.indexOf(verticalSnap), 1);
+				properties.guides!.splice(properties.guides!.indexOf(verticalSnap), 1);
 				delete properties.cssPosition['bottom'];
 			}
 			const horizontalDist = this.equalDistanceThreshold > 0 ? this.addEqualDistanceHorizontalGuides(rect, properties, overlapsY, !!draggedItem) : null;
 			if (horizontalDist && horizontalSnap) {
-				properties.guides.splice(properties.guides.indexOf(horizontalSnap), 1);
+				properties.guides!.splice(properties.guides!.indexOf(horizontalSnap), 1);
 				delete properties.cssPosition['right'];
 			}
 		}
 
         this.properties = properties;
-		if (!resizing && properties.guides.length > 0 && !this.initialPoint) {
+		if (!resizing && properties.guides!.length > 0 && !this.initialPoint) {
 			this.initialPoint = point;
 			this.initialRectangle = rect;
 		}
-		this.snapDataListener.next(properties.guides.length == 0 ? null : properties);
+		this.snapDataListener.next(properties.guides!.length == 0 ? null : properties);
 	}
 
 	private checkSnapToSize(properties: SnapData, rect: DOMRect, overlapsX: DOMRect[], overlapsY: DOMRect[]) {
 		//no guides or left/top
-		if (properties.guides.length == 0 || properties.cssPosition['left'] || properties.cssPosition['top']) {
-			const closestYRect = overlapsX.reduce((closest, r) => {
+		if (properties.guides!.length == 0 || properties.cssPosition['left'] || properties.cssPosition['top']) {
+			const closestYRect = overlapsX.reduce<DOMRect | null>((closest, r) => {
 				const distanceTop = Math.abs(r.top - rect.top);
 				const distanceBottom = Math.abs(r.bottom - rect.bottom);
 				if (!closest || distanceTop < Math.abs(closest.top - rect.top) || distanceBottom < Math.abs(closest.bottom - rect.bottom)) {
@@ -398,7 +396,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				}
 			}, null);
 
-			const closestXRect = overlapsY.reduce((closest, r) => {
+			const closestXRect = overlapsY.reduce<DOMRect | null>((closest, r) => {
 				const distanceLeft = Math.abs(r.left - rect.left);
 				const distanceRight = Math.abs(r.right - rect.right);
 				if (!closest || distanceLeft < Math.abs(closest.left - rect.left) || distanceRight < Math.abs(closest.right - rect.right)) {
@@ -432,7 +430,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		}
 	}
 
-	private addEqualWidthGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData, uuid: string): Guide[] {
+	private addEqualWidthGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData, uuid: string): Guide[] | null {
 		const currentRectangleIndex = this.uuids.indexOf(uuid);
 		const filteredRectangles = this.rectangles.filter(r => this.rectangles.indexOf(r) != currentRectangleIndex).filter(r =>
 			Math.abs(r.width - rect.width) <= this.equalSizeThreshold
@@ -461,13 +459,13 @@ this.snapToEndEnabled = !event.shiftKey;
 				guides.push(new Guide(r.right, r.bottom + 3, 1, 15, 'dist'));
 				guides.push(new Guide(r.left, r.bottom + 10, size, 1, 'dist'));
 			});
-			properties.guides.push(...guides);
+			properties.guides!.push(...guides);
 			return guides;
 		}
 		return null;
 	}
 
-	private addEqualHeightGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData, uuid: string): Guide[] {
+	private addEqualHeightGuides(point: { x: number, y: number }, rect: DOMRect, properties: SnapData, uuid: string): Guide[] | null {
 		const currentRectangleIndex = this.uuids.indexOf(uuid);
 		const filteredRectangles = this.rectangles.filter(r => this.rectangles.indexOf(r) != currentRectangleIndex).filter(r => 
 			Math.abs(r.height - rect.height) <= this.equalSizeThreshold
@@ -496,13 +494,13 @@ this.snapToEndEnabled = !event.shiftKey;
 				guides.push(new Guide(r.right + 3, r.bottom, 15, 1, 'dist'));
 				guides.push(new Guide(r.right + 10, r.top, 1, size, 'dist'));
 			});
-			properties.guides.push(...guides);
+			properties.guides!.push(...guides);
 			return guides;
 		}
 		return null;
 	}
 
-	private handleHorizontalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
+	private handleHorizontalSnap(resizing: string | null, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide | null {
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
 		const resizesLeft = !!resizing && resizing.indexOf('w') >= 0;
@@ -513,9 +511,9 @@ this.snapToEndEnabled = !event.shiftKey;
 			if (!resizing || resizesLeft) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.leftPos);
 				if (snapX?.uuid) {
-					properties.left = this.leftPos.get(snapX.uuid);
-					const width = this.rightPos.get(snapX.uuid) - properties.left;
-					if (adjustSize && this.shouldSnapToSize(snapX.uuid, resizing, width, 'width'))
+					properties.left = this.leftPos.get(snapX.uuid)!;
+					const width = this.rightPos.get(snapX.uuid)! - properties.left;
+					if (adjustSize && this.shouldSnapToSize(snapX.uuid, resizing!, width, 'width'))
 					{
 						properties['width'] = width;
 					}
@@ -523,7 +521,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				else {
 					snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.left, this.rightPos);
 					if (snapX?.uuid) {
-						properties.left = this.rightPos.get(snapX.uuid);
+						properties.left = this.rightPos.get(snapX.uuid)!;
 						snapX.prop = 'right'; 
 					}
 				}
@@ -542,17 +540,17 @@ this.snapToEndEnabled = !event.shiftKey;
 			//if not found, check the right edge as well
 			if (!snapX && (!resizing || resizesRight)) {
 				snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.rightPos);
-				guideX = this.rightPos.get(snapX?.uuid);
+				guideX = this.rightPos.get(snapX?.uuid)!;
 				if (!resizing && snapX) {
-					properties.left = this.rightPos.get(snapX.uuid);
+					properties.left = this.rightPos.get(snapX.uuid)!;
 				}
 				if (!snapX) {
 					snapX = this.isSnapInterval(uuid, resizing ? point.x : rect.right, this.leftPos);
 					if (snapX?.uuid) {
 						if (!resizing) {
-							properties.left = this.leftPos.get(snapX.uuid);
+							properties.left = this.leftPos.get(snapX.uuid)!;
 						}
-						guideX = this.leftPos.get(snapX.uuid);
+						guideX = this.leftPos.get(snapX.uuid)!;
 						snapX.prop = 'left';
 					}
 				}
@@ -566,7 +564,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				// e-resize: left edge is unchanged, so width is anchored to rect.left.
 				// non-resize: left has just been adjusted above, so use the (mutated) properties.left.
 				const widthAnchor = resizing ? rect.left : properties.left;
-				if (adjustSize && this.shouldSnapToSize(snapX?.uuid, resizing, guideX - widthAnchor, 'width'))
+				if (adjustSize && this.shouldSnapToSize(snapX?.uuid!, resizing!, guideX - widthAnchor, 'width'))
 				{
 					properties['width'] = guideX - widthAnchor;
 				}
@@ -576,8 +574,8 @@ this.snapToEndEnabled = !event.shiftKey;
 				snapX = this.isSnapInterval(uuid, (rect.left + rect.right) / 2, this.middleH);
 				if (snapX) {
 					properties.cssPosition['middleH'] = snapX;
-					properties.left = this.middleH.get(snapX.uuid) - rect.width / 2;
-					guideX = this.middleH.get(snapX.uuid);
+					properties.left = this.middleH.get(snapX.uuid)! - rect.width / 2;
+					guideX = this.middleH.get(snapX.uuid)!;
 				}
 			}
 
@@ -586,20 +584,20 @@ this.snapToEndEnabled = !event.shiftKey;
 					return null;
 				}
 				let guide : Guide;
-				if (this.topPos.get(snapX.uuid) < rect.top) {
-					guide = new Guide(guideX, this.topPos.get(snapX.uuid), 1, rect.bottom - this.topPos.get(snapX.uuid), 'snap');
+				if (this.topPos.get(snapX.uuid)! < rect.top) {
+					guide = new Guide(guideX!, this.topPos.get(snapX.uuid)!, 1, rect.bottom - this.topPos.get(snapX.uuid)!, 'snap');
 				}
 				else {
-					guide = new Guide(guideX, rect.top, 1, this.topPos.get(snapX.uuid) - rect.top, 'snap');
+					guide = new Guide(guideX!, rect.top, 1, this.topPos.get(snapX.uuid)! - rect.top, 'snap');
 				}
-				properties.guides.push(guide);
+				properties.guides!.push(guide);
 				return guide;
 			}
 		}
 		return null;
 	}
 
-	private handleVerticalSnap(resizing: string, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide {
+	private handleVerticalSnap(resizing: string | null, adjustSize: boolean, point: { x: number, y: number }, uuid: string, rect: DOMRect, properties: any) : Guide | null {
 		if (this.snapThreshold <= 0) return null;
 		const previousProperties = { ...properties };
 		const resizesTop = !!resizing && resizing.indexOf('n') >= 0;
@@ -610,9 +608,9 @@ this.snapToEndEnabled = !event.shiftKey;
 			if (!resizing || resizesTop) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.topPos);
 				if (snapY?.uuid) {
-					properties.top = this.topPos.get(snapY.uuid);
-					const height = this.bottomPos.get(snapY.uuid) - properties.top;
-					if (adjustSize && this.shouldSnapToSize(snapY.uuid, resizing, height, 'height'))
+					properties.top = this.topPos.get(snapY.uuid)!;
+					const height = this.bottomPos.get(snapY.uuid)! - properties.top;
+					if (adjustSize && this.shouldSnapToSize(snapY.uuid, resizing!, height, 'height'))
 					{
 						properties['height'] = height;
 					}
@@ -620,7 +618,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				else {
 					snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.top, this.bottomPos);
 					if (snapY?.uuid) {
-						properties.top = this.bottomPos.get(snapY.uuid);
+						properties.top = this.bottomPos.get(snapY.uuid)!;
 						snapY.prop = 'bottom';
 					}
 				}
@@ -639,18 +637,18 @@ this.snapToEndEnabled = !event.shiftKey;
 			if (!snapY && (!resizing || resizesBottom)) {
 				snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.bottomPos);
 				if (snapY?.uuid) {
-					guideY = this.bottomPos.get(snapY.uuid);
+					guideY = this.bottomPos.get(snapY.uuid)!;
 					if (!resizing) {
-						properties.top = this.bottomPos.get(snapY.uuid);
+						properties.top = this.bottomPos.get(snapY.uuid)!;
 					}
 				}
 				if (!snapY) {
 					snapY = this.isSnapInterval(uuid, resizing ? point.y : rect.bottom, this.topPos);
 					if (snapY?.uuid) {
 						if (!resizing) {
-							properties.top = this.topPos.get(snapY.uuid);
+							properties.top = this.topPos.get(snapY.uuid)!;
 						}
-						guideY = this.topPos.get(snapY.uuid);
+						guideY = this.topPos.get(snapY.uuid)!;
 						snapY.prop = 'top';
 					}
 				}
@@ -663,7 +661,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				// s-resize: top edge is unchanged, so height is anchored to rect.top.
 				// non-resize: top has just been adjusted above, so use the (mutated) properties.top.
 				const heightAnchor = resizing ? rect.top : properties.top;
-				if (adjustSize && this.shouldSnapToSize(snapY?.uuid, resizing, guideY - heightAnchor, 'height'))
+				if (adjustSize && this.shouldSnapToSize(snapY?.uuid!, resizing!, guideY - heightAnchor, 'height'))
 				{
 					properties['height'] = guideY - heightAnchor;
 				}
@@ -672,8 +670,8 @@ this.snapToEndEnabled = !event.shiftKey;
 				snapY = this.isSnapInterval(uuid, (rect.top + rect.bottom) / 2, this.middleV);
 				if (snapY?.uuid) {
 					properties.cssPosition['middleV'] = snapY;
-					properties.top = this.middleV.get(snapY.uuid) - rect.height / 2;
-					guideY = this.middleV.get(snapY.uuid);
+					properties.top = this.middleV.get(snapY.uuid)! - rect.height / 2;
+					guideY = this.middleV.get(snapY.uuid)!;
 				}
 			}
 
@@ -682,13 +680,13 @@ this.snapToEndEnabled = !event.shiftKey;
 					return null;
 				}
 				let guide : Guide;
-				if (this.leftPos.get(snapY.uuid) < rect.left) {
-					guide = new Guide(this.leftPos.get(snapY.uuid), guideY, rect.right - this.leftPos.get(snapY.uuid), 1, 'snap');
+				if (this.leftPos.get(snapY.uuid)! < rect.left) {
+					guide = new Guide(this.leftPos.get(snapY.uuid)!, guideY!, rect.right - this.leftPos.get(snapY.uuid)!, 1, 'snap');
 				}
 				else {
-					guide = new Guide(rect.left, guideY, this.leftPos.get(snapY.uuid) - rect.left, 1, 'snap');
+					guide = new Guide(rect.left, guideY!, this.leftPos.get(snapY.uuid)! - rect.left, 1, 'snap');
 				}
-				properties.guides.push(guide);
+				properties.guides!.push(guide);
 				return guide;
 			}
 		}
@@ -719,7 +717,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		return distanceToStart < distanceToEnd;
 	}
     
-    private addEqualDistanceVerticalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] {
+    private addEqualDistanceVerticalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] | null {
 		const overlappingX = this.getOverlappingRectangles(overlaps, 'top');
         for (let pair of overlappingX){
 			const e1 = pair[0];
@@ -777,7 +775,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		return null;
 	}
 	
-	private addEqualDistanceHorizontalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] {
+	private addEqualDistanceHorizontalGuides(rect: DOMRect, properties: any, overlaps: DOMRect[], adjustSize: boolean): Guide[] | null {
 		const overlappingY = this.getOverlappingRectangles(overlaps, 'left');
         for (let pair of overlappingY){
 			const e1 = pair[0];
@@ -869,9 +867,9 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 	
 	private getDOMRect(uuid: string) : DOMRect {
-		return new DOMRect(this.leftPos.get(uuid), this.topPos.get(uuid), 
-                	this.rightPos.get(uuid) - this.leftPos.get(uuid),
-                	this.bottomPos.get(uuid) - this.topPos.get(uuid));
+		return new DOMRect(this.leftPos.get(uuid)!, this.topPos.get(uuid)!, 
+                	this.rightPos.get(uuid)! - this.leftPos.get(uuid)!,
+                	this.bottomPos.get(uuid)! - this.topPos.get(uuid)!);
 	}
 	
 	private addVerticalGuides(e1: DOMRect, e2: DOMRect, r: DOMRect, dist: number, properties: any): Guide[] {
@@ -884,7 +882,7 @@ this.snapToEndEnabled = !event.shiftKey;
 	    guides.push(new Guide(e2.right, e2.bottom, len, 1, 'dist'));
 	    guides.push(new Guide(right + 10, e2.bottom, 1, dist, 'dist'));
 	    guides.push(new Guide(r.right, r.top, this.getGuideLength(right, r.right), 1, 'dist'));
-	    properties.guides.push(...guides);
+	    properties.guides!.push(...guides);
 	    return guides;
 	}
 	
@@ -898,7 +896,7 @@ this.snapToEndEnabled = !event.shiftKey;
 	    guides.push(new Guide(e2.right, e2.bottom, 1, len, 'dist'));
 	    guides.push(new Guide(e2.right, bottom + 10, dist, 1, 'dist'));
 	    guides.push(new Guide(r.left, r.bottom, 1, this.getGuideLength(bottom, r.bottom), 'dist'));
-	    properties.guides.push(...guides);
+	    properties.guides!.push(...guides);
 	    return guides;
 	}
 	

@@ -12,11 +12,11 @@ export class DeveloperService {
         if (!environment.production) {
             doc.addEventListener('keydown',(event) => {
                 if (event.ctrlKey && event.key === 'l') {
-                    const jsevent = svyUtilsService.createJSEvent(event, 'keydown');
-                    let formname = jsevent.formName;
+                    const jsevent = svyUtilsService.createJSEvent(event as any, 'keydown');
+                    let formname = jsevent!.formName;
                     if (!formname) {
                       const mainForm = doc.querySelector('svy-form');
-                      if (mainForm) formname = mainForm.getAttribute('name');
+                      if (mainForm) formname = mainForm.getAttribute('name') ?? undefined;
                     }
                     if (formname) sabloService.callService('developerService', 'openFormInDesigner', {formname},true);
                     event.cancelBubble = true;

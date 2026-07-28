@@ -11,7 +11,7 @@ import { EditorSessionService } from '../services/editorsession.service';
 })
 export class StatusBarComponent implements AfterViewInit, OnDestroy {
     statusText = '';
-    editorStateSubscription: Subscription;
+    editorStateSubscription!: Subscription;
 
     constructor(protected readonly editorSession: EditorSessionService) {
     }

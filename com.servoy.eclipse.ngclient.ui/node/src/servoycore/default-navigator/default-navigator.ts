@@ -11,16 +11,16 @@ import { ComponentCache } from '../../ngclient/types';
 })
 export class DefaultNavigator {
 
-  readonly name = input<string>(undefined);
-  navigatorComponentCache!: ComponentCache;
+  readonly name = input<string | null | undefined>(undefined);
+  navigatorComponentCache!: any;
   sliderValue!: number;
 
   constructor( private formservice: FormService ) {
   }
 
   ngOnInit() {
-    this.navigatorComponentCache = this.formservice.getFormCacheByName( this.name() ).getComponent('svy_default_navigator');
-    this.sliderValue = -this.navigatorComponentCache.model.currentIndex;
+    this.navigatorComponentCache = this.formservice.getFormCacheByName( this.name()! ).getComponent('svy_default_navigator')! as ComponentCache;
+    this.sliderValue = -(this.navigatorComponentCache.model as any).currentIndex;
   }
 
   setIndex(newIndex: any) {
@@ -30,6 +30,6 @@ export class DefaultNavigator {
     }
     this.navigatorComponentCache.model.currentIndex = i;
     this.sliderValue = -i;
-    this.formservice.executeEvent(this.name(), this.navigatorComponentCache.name, 'setSelectedIndex', [i]);
+    this.formservice.executeEvent(this.name()!, this.navigatorComponentCache.name, 'setSelectedIndex', [i]);
   }
 }

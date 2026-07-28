@@ -30,13 +30,13 @@ return c.toUpperCase();
 export class MaskFormat {
     private ignore: boolean;
     private firstNonMaskPos = -1;
-    private settings: Record<string, any>;
+    private settings!: Record<string, any>;
     private buffer: string[] = [];
-    private tests: RegExp[] = [];
+    private tests: (RegExp | null)[] = [];
     private converters: any[] = [];
-    private mask: string;
-    private focusText: string;
-    private filteredMask: string;
+    private mask!: string;
+    private focusText!: string;
+    private filteredMask!: string;
     
     private listeners: any[] = [];
     
@@ -106,7 +106,7 @@ export class MaskFormat {
         }));
         this.listeners.push(this._renderer.listen(this.element, 'focus', () => this.onFocus()));
         this.listeners.push(this._renderer.listen(this.element, 'blur', () => this.onBlur()));
-        this.listeners.push(this._renderer.listen(this.element, 'keypress', (event) => this.onKeypress(event)));
+        this.listeners.push(this._renderer.listen(this.element, 'keypress', (event) => this.onKeypress(event) as any));
         this.listeners.push(this._renderer.listen(this.element, 'keydown', (event) => this.onKeydown(event)));
     }
 
@@ -121,7 +121,7 @@ export class MaskFormat {
         if (pos !== this.filteredMask.length) {
             this.setCaret(pos);
         } else {
-            this.setCaret(this.element.selectionStart);
+            this.setCaret(this.element.selectionStart!);
         }
     }
 
@@ -145,8 +145,8 @@ export class MaskFormat {
         }
         // TODO needed? e = e || window.event;
         const k = e.charCode || e.keyCode || e.which;
-        const posBegin = this.element.selectionStart;
-        const posEnd = this.element.selectionEnd;
+        const posBegin = this.element.selectionStart!;
+        const posEnd = this.element.selectionEnd!;
 
         if (e.ctrlKey || e.altKey || e.metaKey) {// Ignore
             return true;
@@ -157,7 +157,7 @@ export class MaskFormat {
                 if (this.converters[p]) {
                     c = this.converters[p](c);
                 }
-                if (this.tests[p].test(c)) {
+                if (this.tests[p]!.test(c)) {
 //                    shiftR(p);
                     this.buffer[p] = c;
                     this.writeBuffer();
@@ -173,8 +173,8 @@ export class MaskFormat {
 
     private onKeydown(e: KeyboardEvent) {
         const iPhone = ((window as any).orientation !== undefined);
-        let posBegin = this.element.selectionStart;
-        let posEnd = this.element.selectionEnd;
+        let posBegin = this.element.selectionStart!;
+        let posEnd = this.element.selectionEnd!;
         const k = e.keyCode;
         this.ignore = (k < 16 || (k > 16 && k < 32) || (k > 32 && k < 41));
         if (k === 37) {
@@ -227,14 +227,14 @@ export class MaskFormat {
                           const range = (this.element as any)['createTextRange']();
                           range.move('character', begin);
                           range.select();
-                      } else if (this.element.selectionStart >= 0) {
+                      } else if (this.element.selectionStart! >= 0) {
                         this.element.setSelectionRange(begin, end);
                       }
                 }
         } else {
-            if (this.element['setSelectionRange']) {
-                begin = this.element.selectionStart;
-                end = this.element.selectionEnd;
+             if (this.element['setSelectionRange']) {
+                begin = this.element.selectionStart!;
+                end = this.element.selectionEnd!;
             } else if (this.doc.getSelection() && (this.doc.getSelection() as any)['createRange']) {
                 const range = (this.doc.getSelection() as any)['createRange']();
                 begin = 0 - range.duplicate().moveStart('character', -100000);
@@ -302,7 +302,7 @@ export class MaskFormat {
                        if (firstError === -1) firstError = i;
                        break;
                     }
-                    if (this.tests[i].test(c)) {
+                    if (this.tests[i]!.test(c)) {
                         this.buffer[i] = c;
                         lastMatch = i;
                         break;

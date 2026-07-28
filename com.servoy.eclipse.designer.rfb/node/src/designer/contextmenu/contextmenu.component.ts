@@ -30,11 +30,11 @@ export enum SHORTCUT_IDS {
 })
 export class ContextMenuComponent implements OnInit {
 
-	@ViewChild('element') element: ElementRef<HTMLElement>;
+	@ViewChild('element') element!: ElementRef<HTMLElement>;
 
-	menuItems: ContextmenuItem[];
+	menuItems!: ContextmenuItem[];
 
-	selection: string[];
+	selection!: string[];
 	selectionAnchor = 0;
 
 	constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService,
@@ -56,12 +56,12 @@ export class ContextMenuComponent implements OnInit {
 		this.createItems(shortcuts, superForms);
 		const contentArea = this.editorContentService.getContentArea();
 		contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
-			let node: HTMLElement;
+			let node: HTMLElement = null!;
 			let isFormNode = false;
 			const selectionChanged = this.selection !== this.editorSession.getSelection();
 			this.selection = this.editorSession.getSelection();
 			if (this.selection && this.selection.length > 0) {
-				node = contentArea.querySelector("[svy-id='" + this.selection[0] + "']")
+				node = contentArea.querySelector("[svy-id='" + this.selection[0] + "']")!
 				if (node && node.hasAttribute('svy-ghosttype') && node.getAttribute('svy-ghosttype') === GHOST_TYPES.GHOST_TYPE_PART) {
 					event.preventDefault();
 					event.stopPropagation();
@@ -69,7 +69,7 @@ export class ContextMenuComponent implements OnInit {
 				}
 				node = this.editorContentService.getContentElement(this.selection[0]);
 				if (node && node.hasAttribute('svy-anchors')) {
-					this.selectionAnchor = parseInt(node.getAttribute('svy-anchors'));
+					this.selectionAnchor = parseInt(node.getAttribute('svy-anchors')!);
 				}
 
 				let isValidSelect = true;
@@ -85,7 +85,7 @@ export class ContextMenuComponent implements OnInit {
 						}
 					}
 				}
-				if (!isValidSelect) node = null;
+				if (!isValidSelect) node = null!;
 			}
 			if (!node) {
 				node = this.editorContentService.getContentForm();
@@ -94,7 +94,7 @@ export class ContextMenuComponent implements OnInit {
 			if (node) {
 				for (let i = 0; i < this.menuItems.length; i++) {
 					if (this.menuItems[i].text === 'Add') {
-						const allowedChildren = node.getAttribute('svy-types') != null ? [] : this.editorSession.getAllowedChildrenForContainer(node.getAttribute('svy-layoutname'));
+						const allowedChildren = node.getAttribute('svy-types') != null ? [] : this.editorSession.getAllowedChildrenForContainer(node.getAttribute('svy-layoutname')!);
 						const types = node.getAttribute('svy-types');
 						if (allowedChildren || types) {
 							this.menuItems[i].getItemClass = () => { return 'dropdown-submenu' };
@@ -102,7 +102,7 @@ export class ContextMenuComponent implements OnInit {
 							const typesArray: Array<{ type: string; property: string }> = [];
 							if (types) {
 								const typesA = types.trim().split(',');
-								const propertiesA = node.getAttribute('svy-types-properties').trim().split(',');
+								const propertiesA = node.getAttribute('svy-types-properties')!.trim().split(',');
 								for (let x = 0; x < typesA.length; x++) {
 									typesArray.push({ type: typesA[x], property: propertiesA[x] });
 								}
@@ -113,7 +113,7 @@ export class ContextMenuComponent implements OnInit {
 										() => {
 											this.hide();
 											let component: PaletteComp = {} as PaletteComp;
-											if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id');
+											if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id')!;
 
 											if (child.indexOf('.') > 0) {
 												const nameAndPackage = child.split('.');
@@ -121,7 +121,7 @@ export class ContextMenuComponent implements OnInit {
 												component.packageName = nameAndPackage[0];
 											} else {
 												component.name = child;
-												component.packageName = undefined;
+												component.packageName = undefined!;
 											}
 											component = this.convertToContentPoint(component) as PaletteComp;
 											this.editorSession.createComponent(component);
@@ -134,7 +134,7 @@ export class ContextMenuComponent implements OnInit {
 									() => {
 										this.hide();
 										let component: PaletteComp = {} as PaletteComp;
-										if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id');
+										if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id')!;
 
 										component.type = type.type;
 										component.ghostPropertyName = type.property;
@@ -154,7 +154,7 @@ export class ContextMenuComponent implements OnInit {
 				if (selectionChanged) {
 					const existingItem = this.menuItems.findIndex(item => item.text.startsWith("Configure"));
 					if (existingItem >= 0) this.menuItems.splice(existingItem, 1);
-					const wizardProperties = this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type'));
+					const wizardProperties = this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')!);
 					if (wizardProperties) {
 						const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
 						if (wizardProperties.length == 1) {
@@ -167,7 +167,7 @@ export class ContextMenuComponent implements OnInit {
 							));
 						}
 						else if (wizardProperties.length > 1) {
-							let menuItem = new ContextmenuItem("Configure", null);
+							let menuItem = new ContextmenuItem("Configure", null!);
 							menuItem.subMenu = [];
 							wizardProperties.forEach((value) => {
 								menuItem.subMenu.push(new ContextmenuItem("Configure " + value,
@@ -184,7 +184,7 @@ export class ContextMenuComponent implements OnInit {
 					this.menuItems = this.menuItems.filter(
 						item => !item.isDevMenu
 					);
-					const developerMenus = this.editorSession.getDeveloperMenus(isFormNode, node.getAttribute('svy-formelement-type'));
+					const developerMenus = this.editorSession.getDeveloperMenus(isFormNode, node.getAttribute('svy-formelement-type')!);
 					if (developerMenus) {
 						const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
 						const devMenus = developerMenus.map(value => {
@@ -312,8 +312,8 @@ export class ContextMenuComponent implements OnInit {
 		else {
 			const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
 			if (submenu) {
-				const menu: HTMLElement = submenu.querySelector('.dropdown-menu');
-				const ctxmenu: HTMLElement = submenu.closest('#contextMenu');
+				const menu: HTMLElement = submenu.querySelector('.dropdown-menu')!;
+				const ctxmenu: HTMLElement = submenu.closest('#contextMenu')!;
 				if (menu.clientHeight > 200 && (window.innerHeight - ctxmenu.getBoundingClientRect().top - menu.clientHeight) <= 100) {
 					if (ctxmenu.getBoundingClientRect().top > menu.clientHeight) {
 						menu.style.top = (-ctxmenu.getBoundingClientRect().top + menu.clientHeight - submenu.clientHeight) + 'px';
@@ -337,7 +337,7 @@ export class ContextMenuComponent implements OnInit {
 
 	private getElementOffset(nativeElement: HTMLElement): { top: number; left: number; right?: number; bottom?: number } {
 		const rect = nativeElement.getBoundingClientRect();
-		const win = nativeElement.ownerDocument.defaultView;
+		const win = nativeElement.ownerDocument.defaultView!;
 		return {
 			top: rect.top + win.pageYOffset,
 			left: rect.left + win.pageXOffset
@@ -393,9 +393,9 @@ export class ContextMenuComponent implements OnInit {
 				node = this.editorContentService.querySelector("[svy-id='" + this.selection[0] + "']");
 			}
 			if (node) {
-				if (node.parentElement.closest('.svy-listformcomponent')) return 'disabled';
-				if (node.parentElement.closest('.svy-formcomponent')) return 'disabled';
-				if (node.parentElement.closest('.inherited_element')) return 'disabled';
+				if (node.parentElement!.closest('.svy-listformcomponent')) return 'disabled';
+				if (node.parentElement!.closest('.svy-formcomponent')) return 'disabled';
+				if (node.parentElement!.closest('.inherited_element')) return 'disabled';
 				if (node.classList.contains('svy-layoutcontainer') || node.classList.contains('ghost')) return 'disabled';
 			}
 			return ''
@@ -404,7 +404,7 @@ export class ContextMenuComponent implements OnInit {
 
 		entry = new ContextmenuItem(
 			'Add',
-			null
+			null!
 		);
 		this.menuItems.push(entry);
 
@@ -446,7 +446,7 @@ export class ContextMenuComponent implements OnInit {
 
 			entry = new ContextmenuItem(
 				'Sizing',
-				null
+				null!
 			);
 			entry.getItemClass = () => {
 				return 'dropdown-submenu';
@@ -578,21 +578,21 @@ export class ContextMenuComponent implements OnInit {
 					'Other...',
 					() => {
 						if (this.selection && this.selection.length > 0) {
-							this.editorSession.setCssAnchoring(this.selection, null);
-						}
+					this.editorSession.setCssAnchoring(this.selection, null!);
 					}
-				);
-				entry.getIconStyle = () => {
-					return { 'background-image': 'url(designer/assets/images/anchor-bottom-right.png)' };
-				};
-				anchoringActions.push(entry);
-			}
+				}
+			);
+			entry.getIconStyle = () => {
+				return { 'background-image': 'url(designer/assets/images/anchor-bottom-right.png)' };
+			};
+			anchoringActions.push(entry);
+		}
 
-			entry = new ContextmenuItem(
-				'Anchoring',
-				() => {
-					if (this.selection && this.selection.length > 0) {
-						this.editorSession.setCssAnchoring(this.selection, null);
+		entry = new ContextmenuItem(
+			'Anchoring',
+			() => {
+				if (this.selection && this.selection.length > 0) {
+					this.editorSession.setCssAnchoring(this.selection, null!);
 					}
 				}
 			);
@@ -672,7 +672,7 @@ export class ContextMenuComponent implements OnInit {
 
 			entry = new ContextmenuItem(
 				'Arrange',
-				null
+				null!
 			);
 			entry.getItemClass = () => {
 				if (this.isInResponsiveContainer()) return 'disabled';
@@ -742,7 +742,7 @@ export class ContextMenuComponent implements OnInit {
 
 		entry = new ContextmenuItem(
 			'',
-			null
+			null!
 		);
 		entry.getItemClass = () => {
 			return 'dropdown-divider';
@@ -791,7 +791,7 @@ export class ContextMenuComponent implements OnInit {
 				subformEntry.getIconStyle = () => {
 					return { 'background-image': 'url(designer/assets/images/js.png)' };
 				};
-				subformEntry.shortcut = i == 0 ? shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID] : undefined;
+				subformEntry.shortcut = i == 0 ? shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID] : undefined!;
 				superFormsActions.push(subformEntry);
 			}
 			entry.subMenu = superFormsActions;
@@ -857,9 +857,9 @@ export class ContextMenuComponent implements OnInit {
 		if (this.selection && this.selection.length > 0) {
 			for (const selection of this.selection) {
 				const node = this.editorContentService.getContentElement(selection);
-				if (node && node.parentElement.closest('.svy-responsivecontainer')) {
-					return true;
-				}
+			if (node && node.parentElement!.closest('.svy-responsivecontainer')) {
+				return true;
+			}
 			}
 		}
 		return false;
@@ -870,9 +870,9 @@ export class ContextMenuComponent implements OnInit {
 			for (const selection of this.selection) {
 				const node = this.editorContentService.getContentElement(selection);
 				if (node) {
-					if (node.parentElement.closest('.svy-listformcomponent')) return false;
-					if (node.parentElement.closest('.svy-formcomponent')) return false;
-					if (node.parentElement.closest('.inherited_element')) return false;
+					if (node.parentElement!.closest('.svy-listformcomponent')) return false;
+					if (node.parentElement!.closest('.svy-formcomponent')) return false;
+					if (node.parentElement!.closest('.inherited_element')) return false;
 				}
 			}
 		}
@@ -897,7 +897,7 @@ export class ContextMenuComponent implements OnInit {
 			const nodeid = this.selection[0];
 			const node = this.editorContentService.getContentElement(this.selection[0]);
 			if (node && node.hasAttribute('svy-anchors')) {
-				let beanAnchor = parseInt(node.getAttribute('svy-anchors'));
+				let beanAnchor = parseInt(node.getAttribute('svy-anchors')!);
 				if (beanAnchor == 0)
 					beanAnchor = 1 + 8; // top left
 				if ((beanAnchor & anchor) == anchor) {
@@ -971,10 +971,10 @@ export class ContextMenuComponent implements OnInit {
 
 export class ContextmenuItem {
 
-	getIconStyle: () => object;
-	shortcut: string;
-	getItemClass: () => string;
-	subMenu: ContextmenuItem[];
+	getIconStyle!: () => object | null | undefined;
+	shortcut!: string;
+	getItemClass!: () => string | undefined;
+	subMenu!: ContextmenuItem[];
 
 	constructor(
 		public text: string,

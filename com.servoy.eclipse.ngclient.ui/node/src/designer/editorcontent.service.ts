@@ -33,7 +33,7 @@ export class EditorContentService {
         let renderGhosts = false;
         let redrawDecorators = false;
         let refresh = false;
-        let reorderPartComponents: boolean;
+        let reorderPartComponents = false;
 
         if (data.updatedFormComponentsDesignId) {
             for (const index of Object.keys(data.updatedFormComponentsDesignId)) {
@@ -44,8 +44,8 @@ export class EditorContentService {
                         if (item instanceof ComponentCache)
                             formCache.removeComponent(item.name);
                         else if (item instanceof StructureCache) {
-                            const id = item.id || (item as DesignStructureCache).hiddenId || item.attributes['svy-id-hidden'];
-                            formCache.removeLayoutContainer(id);
+                            const id = item.id || (item as DesignStructureCache).hiddenId || item.attributes?.['svy-id-hidden'];
+                            formCache.removeLayoutContainer(id!);
                             this.removeChildrenRecursively(item, formCache);
                         }
                     });
@@ -77,9 +77,9 @@ export class EditorContentService {
                     container.classes = elem.styleclass;
                     container.attributes = elem.attributes;
                     container.layout = elem.position;
-                    const parentUUID = data.childParentMap[container.id].uuid;
+                    const parentUUID = data.childParentMap[container.id!].uuid;
                     if (container.parent) {
-                        let newParent = container.parent;
+                        let newParent: StructureCache | undefined = container.parent;
                         if (parentUUID) {
                             newParent = formCache.getLayoutContainer(parentUUID);
                         } else {
@@ -88,20 +88,20 @@ export class EditorContentService {
                         if (container?.parent?.id !== newParent?.id) {
                             // we moved it to another parent
                             container.parent.removeChild(container);
-                            newParent.addChild(container);
-                        } else if (newParent?.items.indexOf(container) < 0) {
-                            newParent.addChild(container);
+                            newParent!.addChild(container);
+                        } else if (newParent?.items.indexOf(container)! < 0) {
+                            newParent!.addChild(container);
                         }
-                        if (reorderLayoutContainers.indexOf(newParent) < 0) {
+                        if (reorderLayoutContainers.indexOf(newParent!) < 0) {
                             // existing layout container in parent layout container; make sure is inserted in correct position
-                            reorderLayoutContainers.push(newParent);
+                            reorderLayoutContainers.push(newParent!);
                         }
                     }
                 } else {
-                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : null, elem.cssPositionContainer, elem.position);
+                    container = new StructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.attributes ? elem.attributes['svy-id'] : undefined, elem.cssPositionContainer, elem.position);
                     formCache.addLayoutContainer(container);
                     redrawDecorators = true;
-                    const parentUUID = data.childParentMap[container.id].uuid;
+                    const parentUUID = data.childParentMap[container.id!].uuid;
                     if (parentUUID) {
                         const parent = formCache.getLayoutContainer(parentUUID);
                         if (parent) {
@@ -124,7 +124,7 @@ export class EditorContentService {
                     } else {
                         // dropped directly on form
                         if (formCache.mainStructure == null) {
-                            formCache.mainStructure = new StructureCache(null, null);
+                            formCache.mainStructure = new StructureCache(null!, null!);
                         }
                         formCache.mainStructure.addChild(container);
                         if (reorderLayoutContainers.indexOf(formCache.mainStructure) < 0) {
@@ -169,7 +169,7 @@ export class EditorContentService {
                                 const currentParent = data.childParentMap[component.name];
                                 if (currentParent && component.parent.id !== currentParent.uuid) {
                                     component.parent.removeChild(component);
-                                    formCache.getLayoutContainer(currentParent.uuid).addChild(component);
+                                    formCache.getLayoutContainer(currentParent.uuid)!.addChild(component);
                                 }
                                 redrawDecorators = true;
                                 if (reorderLayoutContainers.indexOf(component.parent) < 0) {
@@ -186,7 +186,7 @@ export class EditorContentService {
                             }
                         } else if (formCache.getFormComponent(elem.name) == null) {
                             const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
-                            let parent: StructureCache;
+                            let parent: StructureCache | undefined;
                             if (parentUUID) {
                                 parent = this.findStructureCacheFromRoot(formCache, parentUUID);
                                 if (!parent) {
@@ -217,15 +217,15 @@ export class EditorContentService {
                                     const layout: { [property: string]: string } = {};
                                     this.fillLayout(elem, formCache, layout);
                                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
-                                    const fcc = new FormComponentCache(elem.name, elem.specName, undefined, elem.handlers, elem.responsive, elem.position?elem.position:elem.model.cssPosition,
+                                    const fcc = new FormComponentCache(elem.name, elem.specName, undefined!, elem.handlers, elem.responsive, elem.position?elem.position:elem.model.cssPosition,
                                         formComponentProperties, elem.model.foundset, this.typesRegistry).initForDesigner(elem.model);
                                     formCache.addFormComponent(fcc);
                                     if (parentUUID) {
                                         // parent will be non-null here because of the if (handled) above
-                                        parent.addChild(fcc);
-                                        if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                        parent!.addChild(fcc);
+                                        if (reorderLayoutContainers.indexOf(parent!) < 0) {
                                             // new component in layout container , make sure is inserted in correct position
-                                            reorderLayoutContainers.push(parent);
+                                            reorderLayoutContainers.push(parent!);
                                         }
                                     } else if (formCache.absolute && !fcc.name.includes('containedForm')) {
                                         formCache.partComponentsCache.push(fcc);
@@ -259,15 +259,15 @@ export class EditorContentService {
                                     const comp = new ComponentCache(elem.name, elem.specName, elem.elType, elem.handlers, elem.position?elem.position:elem.model.cssPosition, this.typesRegistry).initForDesigner(elem.model);
                                     formCache.add(comp);
                                     if (parentUUID) {
-                                        const { id: parentId, items = [] } = parent;
+                                        const { id: parentId, items = [] } = parent!;
                                         const isEmpty = items.length === 0;
                                         const isCompatible = !parentId && items.length > 0 && this.isElementCompatibleWithParent(items[0], elem.name);
                                         if (parentId || isEmpty || isCompatible) {
                                             // parent will be non-null here because of the if (handled) above
-                                            parent.addChild(comp);
-                                            if (reorderLayoutContainers.indexOf(parent) < 0) {
+                                            parent!.addChild(comp);
+                                            if (reorderLayoutContainers.indexOf(parent!) < 0) {
                                                 // new component in layout container , make sure is inserted in correct position
-                                                reorderLayoutContainers.push(parent);
+                                                reorderLayoutContainers.push(parent!);
                                             }
                                         }
                                     } else if (!data.formComponentsComponents || data.formComponentsComponents.indexOf(elem.name) === -1) {
@@ -310,7 +310,7 @@ export class EditorContentService {
                             const formComponentComponentIdentifier = PersistIdentifier.fromJSONString(elem.name);
                             data.formComponentsComponents?.forEach((child: string) => {  // so "child" is actually a design id here; see PersistIdentifier java class
                                 if (PersistIdentifier.fromJSONString(child).isDirectlyNestedInside(formComponentComponentIdentifier)) {
-                                    const formComponentComponent = formCache.getComponent(child);
+                                    const formComponentComponent = formCache.getComponent(child)! as ComponentCache;
                                     const container = this.findStructureCache(formComponentCache.items, data.childParentMap[child].uuid); 
                                     if ((formComponentCache.responsive && container) || container) {
                                         formComponentCache.removeChild(formComponentComponent);
@@ -348,7 +348,7 @@ export class EditorContentService {
                     partCache.layout = JSON.parse(style);
                     refresh = true;
                 } else {
-                    const part = new PartCache(name, null, JSON.parse(style));
+                    const part = new PartCache(name, null!, JSON.parse(style));
                     formCache.addPart(part);
                 }
             }
@@ -356,7 +356,7 @@ export class EditorContentService {
         
         if (data.deleted) {
             data.deleted.forEach((elem: any) => {
-                const comp = formCache.getComponent(elem);
+                const comp = formCache.getComponent(elem) as ComponentCache | undefined;
                 if (comp) {
                     formCache.removeComponent(elem);
                     formCache.removeFormComponent(elem);
@@ -391,7 +391,7 @@ export class EditorContentService {
         }
 
         for (const container of orphanLayoutContainers) { // I think these are only from the main form, not nested inside other form component components
-            const parentUUID = data.childParentMap[container.id].uuid;
+            const parentUUID = data.childParentMap[container.id!].uuid;
             if (parentUUID) {
                 const parent = formCache.getLayoutContainer(parentUUID);
                 if (parent) {
@@ -486,11 +486,11 @@ export class EditorContentService {
       return parentItemUUID === newItemUUID;
     }
 
-    private findStructureCacheFromRoot(formCache: FormCache, id: string): StructureCache {
+    private findStructureCacheFromRoot(formCache: FormCache, id: string): StructureCache | undefined {
         return this.findStructureCache([...formCache.layoutContainersCache.values()], id);
     }
     
-    private findStructureCache(items: Array<StructureCache | ComponentCache | FormComponentCache>, id: string): StructureCache {
+    private findStructureCache(items: Array<StructureCache | ComponentCache | FormComponentCache>, id: string): StructureCache | undefined {
         for(const item of items) {
             if (item instanceof StructureCache) {
                 if (item.id == id || (item instanceof DesignStructureCache && item.hiddenId == id)) {
@@ -504,7 +504,7 @@ export class EditorContentService {
                 if (foundSC) return foundSC;
             }
         }
-        return null;
+        return undefined;
     }
 
     private removeChildFromParentRecursively(child: ComponentCache | StructureCache | FormComponentCache, parent: StructureCache | FormComponentCache) {
@@ -523,8 +523,8 @@ export class EditorContentService {
         if (parent.items) {
             parent.items.forEach((elem) => {
                 if (elem instanceof StructureCache) {
-                    const id = elem.id || (elem as DesignStructureCache).hiddenId || elem.attributes['svy-id-hidden'];
-                    formCache.removeLayoutContainer(id);
+                    const id = elem.id || (elem as DesignStructureCache).hiddenId || elem.attributes?.['svy-id-hidden'];
+                    formCache.removeLayoutContainer(id!);
                     this.removeChildrenRecursively(elem, formCache);
                 } else if (elem instanceof FormComponentCache) {
                     formCache.removeFormComponent(elem.name);
@@ -539,8 +539,8 @@ export class EditorContentService {
     private sortChildren(items: Array<StructureCache | ComponentCache | FormComponentCache>) {
         if (items) {
             items.sort((comp1: any, comp2: any): number => {
-                const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes['svy-priority'], 10) : parseInt(comp1.model.servoyAttributes['svy-priority'], 10);
-                const priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes['svy-priority'], 10) : parseInt(comp2.model.servoyAttributes['svy-priority'], 10);
+                const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes!['svy-priority'], 10) : parseInt(comp1.model.servoyAttributes['svy-priority'], 10);
+                const priocomp2 = comp2 instanceof StructureCache ? parseInt(comp2.attributes!['svy-priority'], 10) : parseInt(comp2.model.servoyAttributes['svy-priority'], 10);
 
                 // priority is location in responsive form and formindex in absolute form
                 if (priocomp2 > priocomp1) {
@@ -593,8 +593,8 @@ class DesignStructureCache extends StructureCache {
         items?: Array<StructureCache | ComponentCache | FormComponentCache>,
         cssPositionContainer?: boolean, layout?: { [property: string]: string }) {
 
-        super(tagname, classes, attributes, items, attributes ? attributes['svy-id'] : null, cssPositionContainer, layout);
-        this.hiddenId = attributes['svy-id-hidden'];
+        super(tagname, classes, attributes, items, attributes ? attributes['svy-id'] : null!, cssPositionContainer, layout);
+        this.hiddenId = attributes?.['svy-id-hidden'];
     }
 
 }

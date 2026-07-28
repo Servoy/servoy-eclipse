@@ -12,16 +12,16 @@ import { EditorSessionService } from '../services/editorsession.service';
 })
 export class InlineEditComponent implements AfterViewInit {
 
-    @ViewChild('inlineedit', { static: true }) elementRef: ElementRef<HTMLElement>;
+    @ViewChild('inlineedit', { static: true }) elementRef!: ElementRef<HTMLElement>;
     showDirectEdit = false;
-    node: string;
-    directEditProperty: string;
-    propertyValue: string;
+    node!: string;
+    directEditProperty!: string;
+    propertyValue!: string;
     
-    keyupListener: () => void;
-    keydownListener: () => void;
-    blurListener: () => void;
-    lastTimestamp: number;
+    keyupListener!: () => void;
+    keydownListener!: () => void;
+    blurListener!: () => void;
+    lastTimestamp!: number;
 
     lastValue = {node: '', directEditProperty: '', propertyValue: ''}
     
@@ -122,7 +122,7 @@ export class InlineEditComponent implements AfterViewInit {
                 }
                 if (event.key === 'a' && event.ctrlKey) {
                     // TODO: find an alternative for execCommand
-                    this.doc.execCommand('selectAll', false, null);
+                    this.doc.execCommand('selectAll', false, undefined);
                 }
                 if (event.key === 'Enter') {
                     this.applyValue(this.node, this.directEditProperty, this.propertyValue);
@@ -131,13 +131,13 @@ export class InlineEditComponent implements AfterViewInit {
                     //this code is executing only on mac (event.metaKey)
                     const selectedObj = this.doc.getSelection();
                     if (selectedObj != null) {
-                        const nodeText = selectedObj.anchorNode.nodeValue;
+                        const nodeText = selectedObj.anchorNode!.nodeValue!;
                         //in this context anchorNode and focusNode are the same
                         const startRange = Math.min(selectedObj.anchorOffset, selectedObj.focusOffset);
                         const endRange = Math.max(selectedObj.anchorOffset, selectedObj.focusOffset);
                         if (startRange != endRange) { //something is selected; 
                             this.doc.execCommand('copy'); //deprecated but navigator.clipboard.writeText is not working
-                            this.doc.activeElement.textContent = nodeText.replace(nodeText.substring(startRange, endRange), '');
+                            this.doc.activeElement!.textContent = nodeText.replace(nodeText.substring(startRange, endRange), '');
                         }
                     }
                     return false; //do not dispatch the event further

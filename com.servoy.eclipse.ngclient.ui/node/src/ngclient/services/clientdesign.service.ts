@@ -1,6 +1,7 @@
 import { Injectable, Inject, DOCUMENT } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { SvyUtilsService } from '../utils.service';
+import { EventLike } from '@servoy/public';
 
 
 @Injectable()
@@ -37,15 +38,15 @@ export class ClientDesignService {
         dragresize.isElement = selectElement;
         dragresize.isHandle = selectElement;
         dragresize.ondragfocus = (e) => {
-            var jsevent = this.utils.createJSEvent(e, "ondrag");
+            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondrag")!;
             this.sabloService.callService("clientdesign", "onselect", { element: jsevent.elementName, formname: formname, event: jsevent }).then((result: any) => {
                 if (!result) dragresize.deselect(true);
-                else if (dragresize.resizeHandleSet) dragresize.resizeHandleSet(dragresize.element, true);
+                else if (dragresize.resizeHandleSet) dragresize.resizeHandleSet(dragresize.element!, true);
             });
         };
         dragresize.ondragend = (isResize, e) => {
-            var jsevent = this.utils.createJSEvent(e, "ondrop");
-            const domRect = dragresize.element.getBoundingClientRect();
+            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondrop")!;
+            const domRect = dragresize.element!.getBoundingClientRect();
             if (isResize) this.sabloService.callService("clientdesign", "onresize", {
                 element: jsevent.elementName,
                 location: { x: domRect.left, y: domRect.top },
@@ -62,15 +63,15 @@ export class ClientDesignService {
             })
         };
         dragresize.ondragstart = (e) => {
-            var jsevent = this.utils.createJSEvent(e, "ondrag");
+            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondrag")!;
             this.sabloService.callService("clientdesign", "ondrag", { element: jsevent.elementName, formname: formname, event: jsevent })
         };
         dragresize.ondoubleclick = (e) => {
-            var jsevent = this.utils.createJSEvent(e, "ondoubleclick");
+            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondoubleclick")!;
             this.sabloService.callService("clientdesign", "ondoubleclick", { element: jsevent.elementName, formname: formname, event: jsevent })
         };
         dragresize.onrightclick = (e) => {
-            var jsevent = this.utils.createJSEvent(e, "onrightclick");
+            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "onrightclick")!;
             this.sabloService.callService("clientdesign", "onrightclick", { element: jsevent.elementName, formname: formname, event: jsevent })
         };
 
@@ -81,7 +82,7 @@ export class ClientDesignService {
     removeFormDesign(formname: string) {
         const dragresize = this.currentForms[formname];
         if (dragresize) {
-            this.currentForms[formname].destroy();
+            dragresize.destroy();
             delete this.currentForms[formname];
             //if(designChangeListener) designChangeListener(formname, false);
             return true;
@@ -100,7 +101,7 @@ export class ClientDesignService {
     recreateUI(formname: string, names: Array<string>) {
         const dragresize = this.currentForms[formname];
         if (dragresize) {
-            this.currentForms[formname].destroy();
+            dragresize.destroy();
             delete this.currentForms[formname];
             // recreate ui of the actual form must be waited on.
             setTimeout(() =>
@@ -116,9 +117,9 @@ class DragResize {
         'ml', 'mr', 'bl', 'bm', 'br']; // Array of drag handles: top/mid/bot/right.
     isElement!: (el: HTMLElement) => boolean;                 // Function ref to test for an element.
     isHandle!: (el: HTMLElement) => boolean;                  // Function ref to test for move handle.
-    element!: HTMLElement;                   // The currently selected element.
+    element: HTMLElement | null = null;                   // The currently selected element.
     node!: Element;
-    handle!: Element;                  // Active handle reference of the element.
+    handle: Element | null = null;                  // Active handle reference of the element.
     minWidth = 10; minHeight = 10;     // Minimum pixel size of elements.
     minLeft = 0; maxLeft = 9999;       // Bounding box area, in pixels.
     minTop = 0; maxTop = 9999;
@@ -330,10 +331,10 @@ class DragResize {
         }
 
         // Assign new info back to the element, with minimum dimensions.
-        this.element.style.left = this.elmX + 'px';
-        this.element.style.width = this.elmW + 'px';
-        this.element.style.top = this.elmY + 'px';
-        this.element.style.height = this.elmH + 'px';
+        this.element!.style.left = this.elmX + 'px';
+        this.element!.style.width = this.elmW + 'px';
+        this.element!.style.top = this.elmY + 'px';
+        this.element!.style.height = this.elmH + 'px';
 
         // Evil, dirty, hackish Opera select-as-you-drag fix.
         if ((window as any)['opera'] && document.documentElement) {

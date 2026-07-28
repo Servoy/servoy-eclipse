@@ -18,6 +18,6 @@ export class ClientUtilsService {
                 return { x: rect.left + this.windowRef.nativeWindow.scrollX, y: rect.top + this.windowRef.nativeWindow.scrollY, width: rect.width, height: rect.height };
             }
         }
-        return null;
+        return null!;
     }
 }

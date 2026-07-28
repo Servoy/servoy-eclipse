@@ -11,17 +11,17 @@ import { Point } from './../mouseselection/mouseselection.component';
     standalone: false
 })
 export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
-    @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
+    @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
 
     private currentPosition = 0;
     private widthLimit = 5;
     private widthOffset = 0;
     private draggingEvent: any = null;
-    private ghostContainers: HTMLElement[];
-    private editorContent: HTMLElement;
-    private contentArea: HTMLElement;
-    private mousePoint: Point;
-    private glasspane: HTMLElement;
+    private ghostContainers!: HTMLElement[];
+    private editorContent!: HTMLElement;
+    private contentArea!: HTMLElement;
+    private mousePoint!: Point;
+    private glasspane!: HTMLElement;
     private ghostsRight = 0;
 
     constructor(protected readonly renderer: Renderer2, protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
@@ -44,7 +44,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
 
             const ghostsList = this.contentArea.getElementsByClassName('ghost label');
             for (let index=0; index < ghostsList.length; index++) {
-                const ghost = ghostsList.item(0);
+                const ghost = ghostsList.item(0)!;
                 const ghostType = ghost.getAttribute('svy-ghosttype');
                 if (ghostType == 'comp') {
                     this.ghostsRight = Math.max(this. ghostsRight, (ghost as HTMLElement).offsetLeft + (ghost as HTMLElement).offsetWidth);
@@ -92,7 +92,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
                 this.currentPosition = this.widthLimit;
             }
             const changes: Record<string, any> = {};
-            const id = document.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
+            const id = document.querySelector('.ghost[svy-ghosttype="form"]')!.getAttribute('svy-id')!;
             changes[id] = {
                 'width': this.currentPosition
             };

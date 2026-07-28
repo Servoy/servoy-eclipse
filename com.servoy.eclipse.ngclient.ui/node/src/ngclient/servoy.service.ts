@@ -126,10 +126,10 @@ export class ServoyService {
     public connect() {
         // maybe do this with defer ($q)
         const solName = this.websocketService.getURLParameter('s');
-        if (!solName) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec(this.websocketService.getPathname())[1];
+        if (!solName) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec(this.websocketService.getPathname())![1];
         else this.solutionSettings.solutionName = solName;
         this.solutionSettings.windowName = this.sabloService.getWindownr();
-        let socketPrefix: string;
+        let socketPrefix: string | undefined;
         const recording = this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1;
         if (recording) {
             socketPrefix = '/recording/websocket';
@@ -202,7 +202,7 @@ export class ServoyService {
             
         return wrapPromiseToPropagateCustomRequestInfoInternal(promise,
                     promise.then((serviceCallResult) =>
-                        this.converterService.convertFromServerToClient(serviceCallResult, undefined, undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
+                        this.converterService.convertFromServerToClient(serviceCallResult, undefined!, undefined, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
     }
 
     public loaded(): Promise<any> {

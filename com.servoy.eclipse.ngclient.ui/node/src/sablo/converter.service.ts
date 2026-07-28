@@ -60,7 +60,7 @@ export class ConverterService<T> {
     }
 
     public convertFromServerToClient(serverSentData: unknown,
-            typeOfData: IType<unknown>,
+            typeOfData: IType<unknown> | undefined,
             currentClientData: unknown,
             /* some types decide at runtime the type needed on client - for example dataprovider type could send date, and we will store that info here: */
             dynamicPropertyTypesHolder: { [nameOrIndex: string]: IType<unknown> },
@@ -104,16 +104,16 @@ export class ConverterService<T> {
      * so the caller needs to update the property values in it's parent. Most types will just return [someJSONToBeSentToServer, newClientData].
      */
     public convertFromClientToServer(newClientData: any,
-            typeOfData: IType<any>,
+            typeOfData: IType<any> | undefined,
             oldClientData: any,
             propertyContext: IPropertyContext): [any, any] {
 
-        let ret: [any, any] | null;
+        let ret: [any, any] | null = null;
         if (typeOfData) ret = typeOfData.fromClientToServer(newClientData, oldClientData, propertyContext);
         else {
             // this should rarely or never happen... but do our best to not fail sending (for example due to Date
             // instances that can't be stringified via standard JSON)
-            if (! this.lookedUpObjectType) this.lookedUpObjectType = this.typesRegistry.getAlreadyRegisteredType(ObjectType.TYPE_NAME);
+            if (! this.lookedUpObjectType) this.lookedUpObjectType = this.typesRegistry.getAlreadyRegisteredType(ObjectType.TYPE_NAME)!;
 
             if (this.lookedUpObjectType) ret = this.lookedUpObjectType.fromClientToServer(newClientData, oldClientData, propertyContext);
             else { // 'object' type not found?! it should always be there - no default conversion can be done...
@@ -203,7 +203,7 @@ export class ConverterService<T> {
                 eventObj['timestamp'] = new Date().getTime();
                 eventObj['data'] = (arg as Record<string, any>)['data'];
                 arg = eventObj;
-            } else arg = this.convertFromClientToServer(arg, handlerSpecification?.getArgumentType(i), undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
+            } else arg = this.convertFromClientToServer(arg, handlerSpecification?.getArgumentType(i)!, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0];
 
             newargs.push(arg);
         }
@@ -418,7 +418,7 @@ export class SubpropertyChangeByReferenceHandler {
         this.markIfChanged(propertyName, value, oldValue, doNotPushNow);
 
         // unregister as listener to old value if needed
-        this.setChangeListenerToSubValueIfNeeded(oldValue, undefined);
+        this.setChangeListenerToSubValueIfNeeded(oldValue, undefined!);
 
         // register as listener to new value if needed
         this.setChangeListenerToSubValueIfNeeded(parentValue[propertyName] /* markIfChanged call above might have upated it again due to clientToServer conversion for array/custom

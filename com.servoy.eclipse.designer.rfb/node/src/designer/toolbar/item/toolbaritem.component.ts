@@ -3,7 +3,7 @@ import { ToolbarItem } from '../toolbar.component';
 
 @Directive()
 export class ToolbarItemComponent {
-    @Input() item: ToolbarItem;
+    @Input() item!: ToolbarItem;
 
     onselection(selection: string) {
         const text = this.item.onselection(selection);

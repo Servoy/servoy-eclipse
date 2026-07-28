@@ -9,11 +9,11 @@ import { ServoyBaseComponent } from '@servoy/public';
     standalone: false
 } )
 export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
-    readonly onChangeMethodID = input(undefined);
-    readonly onCreateMethodID = input(undefined);
-    readonly onSlideMethodID = input(undefined);
-    readonly onStartMethodID = input(undefined);
-    readonly onStopMethodID = input(undefined);
+    readonly onChangeMethodID = input<any>(undefined);
+    readonly onCreateMethodID = input<any>(undefined);
+    readonly onSlideMethodID = input<any>(undefined);
+    readonly onStartMethodID = input<any>(undefined);
+    readonly onStopMethodID = input<any>(undefined);
 
     readonly min = input(undefined);
     readonly max = input(undefined);
@@ -44,7 +44,7 @@ export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
 
     protected attachHandlers(){
         if ( this.onChangeMethodID() ) {
-            this.renderer.listen( this.getNativeElement(), 'change', e => this.onChangeMethodID()( e ));
+            this.renderer.listen( this.getNativeElement(), 'change', e => this.onChangeMethodID()!( e ));
         }
     }
 }

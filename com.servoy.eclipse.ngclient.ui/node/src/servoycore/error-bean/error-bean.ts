@@ -11,7 +11,7 @@ import { ServoyBaseComponent } from '@servoy/public';
 export class ErrorBean extends ServoyBaseComponent<HTMLDivElement> {
 
     readonly error = input(undefined);
-    readonly toolTipText = input<string>(undefined);
+    readonly toolTipText = input<string>(undefined!);
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);

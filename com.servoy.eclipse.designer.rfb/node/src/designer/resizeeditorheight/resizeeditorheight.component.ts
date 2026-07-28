@@ -11,16 +11,16 @@ import { Point } from './../mouseselection/mouseselection.component';
     standalone: false
 })
 export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
-    @ViewChild('resizer', { static: true }) resizerRef: ElementRef<HTMLElement>;
+    @ViewChild('resizer', { static: true }) resizerRef!: ElementRef<HTMLElement>;
 
     
     private lowestPart: Element | null = null;
     private dragingEvent: any = null;
-    private ghostContainers: HTMLElement[];
-    private editorContent: HTMLElement;
-    private contentArea: HTMLElement;
-    private glasspane: HTMLElement;
-    private mousePoint: Point
+    private ghostContainers!: HTMLElement[];
+    private editorContent!: HTMLElement;
+    private contentArea!: HTMLElement;
+    private glasspane!: HTMLElement;
+    private mousePoint!: Point
 
     private heightOffset = 0; //relative to glasspane
     private currentPosition = 0; //relative to content / container
@@ -49,7 +49,7 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
             let partHeight = 0;
             const ghostsList = this.editorContentService.getContentArea().getElementsByClassName('ghost label');
             for (let index=0; index < ghostsList.length; index++) {
-                const ghost = ghostsList.item(index);
+                const ghost = ghostsList.item(index)!;
                 const ghostType = ghost.getAttribute('svy-ghosttype');
                 if (ghostType == 'part') {
                     if (!this.lowestPart) {
@@ -110,12 +110,12 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
             if (this.lowestPart) {
                 const changes: Record<string, any> = {};
                 const id = this.lowestPart.getAttribute('svy-id');
-                changes[id] = { 'y': this.currentPosition};
+                changes[id!] = { 'y': this.currentPosition};
                 this.editorSession.sendChanges(changes); 
             } 
 
             const changes: Record<string, any> = {};
-            const id = this.editorContentService.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
+            const id = this.editorContentService.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id')!;
             changes[id] = { 'height': this.currentPosition};
             this.editorSession.sendChanges(changes);
 

@@ -109,7 +109,7 @@ export class WindowService {
                 const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                 });
-                this.doc.getElementById('mainForm').dispatchEvent(customEvent);
+                this.doc.getElementById('mainForm')!.dispatchEvent(customEvent);
             } else {
                 const disableEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
@@ -183,7 +183,7 @@ export class WindowService {
             dialogWindowComponent.instance.setWindow(instance);
             instance.componentRef = dialogWindowComponent;
 
-            const opt: BSWindowOptions = {
+            const opt: Partial<BSWindowOptions> = {
                 id: instance.name,
                 fromElement: dialogWindowComponent.location.nativeElement.childNodes[0],
                 title: instance.title,
@@ -217,7 +217,7 @@ export class WindowService {
                 const customEvent = new CustomEvent(event.detail ? 'enableTabseq' : 'disableTabseq', {
                     bubbles: true
                 });
-                event.target.dispatchEvent(customEvent);
+                event.target!.dispatchEvent(customEvent);
             };
 
             if (instance.closeOnEscape) {
@@ -225,25 +225,25 @@ export class WindowService {
                 window.addEventListener('keyup', instance.keyUpListener, true);
             }
             
-            instance.bsWindowInstance.element.addEventListener('bswin.resize', resizeListener as EventListener);
-            instance.bsWindowInstance.element.addEventListener('bswin.move', moveListener as EventListener);
-            instance.bsWindowInstance.element.addEventListener('bswin.active', activeListener as EventListener);
+            instance.bsWindowInstance!.element.addEventListener('bswin.resize', resizeListener as EventListener);
+            instance.bsWindowInstance!.element.addEventListener('bswin.move', moveListener as EventListener);
+            instance.bsWindowInstance!.element.addEventListener('bswin.active', activeListener as EventListener);
             
-            instance.bsWindowInstance.onClose = () => {
-               instance.bsWindowInstance.element.removeEventListener('bswin.resize', resizeListener as EventListener);
-               instance.bsWindowInstance.element.removeEventListener('bswin.move', moveListener as EventListener);
-               instance.bsWindowInstance.element.removeEventListener('bswin.active', activeListener as EventListener);
+            instance.bsWindowInstance!.onClose = () => {
+               instance.bsWindowInstance!.element.removeEventListener('bswin.resize', resizeListener as EventListener);
+               instance.bsWindowInstance!.element.removeEventListener('bswin.move', moveListener as EventListener);
+               instance.bsWindowInstance!.element.removeEventListener('bswin.active', activeListener as EventListener);
             };
-            (this.doc.getElementsByClassName('window-header').item(0) as HTMLElement).focus();
-            instance.bsWindowInstance.setActive(true);
+            (this.doc.getElementsByClassName('window-header').item(0) as HTMLElement)!.focus();
+            instance.bsWindowInstance!.setActive(true);
             // init the size of the dialog
-            const width = instance.bsWindowInstance.element.getBoundingClientRect().width;
-            const height = instance.bsWindowInstance.element.getBoundingClientRect().height;
+            const width = instance.bsWindowInstance!.element.getBoundingClientRect().width;
+            const height = instance.bsWindowInstance!.element.getBoundingClientRect().height;
             if (width > 0 && height > 0) {
                 const dialogSize = size || { width, height };
                 const isUndecorated = instance.undecorated;
-                const headerHeight = instance.bsWindowInstance.options.elements.handle.getBoundingClientRect().height;
-                const footerHeight = instance.bsWindowInstance.options.elements.footer.getBoundingClientRect().height;
+                const headerHeight = instance.bsWindowInstance!.options.elements.handle.getBoundingClientRect().height;
+                const footerHeight = instance.bsWindowInstance!.options.elements.footer.getBoundingClientRect().height;
                 if (centerLocation) {
                     if (isUndecorated) {
                         if (size) {
@@ -257,11 +257,11 @@ export class WindowService {
                         if (isUndecorated && newLocation.y > 0) {
                             newLocation.y += (headerHeight / 2);
                         }
-                        this.setLocation(instance.bsWindowInstance.id, newLocation);
+                        this.setLocation(instance.bsWindowInstance!.id, newLocation);
                     }
                 } else if (windowHeight - loc.top < dialogSize.height) {
                     dialogSize.height = windowHeight - (isUndecorated ? 0 : headerHeight) - (isUndecorated ? 0 : footerHeight) - loc.top;
-                    this.setSize(instance.bsWindowInstance.id, dialogSize);
+                    this.setSize(instance.bsWindowInstance!.id, dialogSize);
                 }  
                 this.sabloService.callService('$windowService', 'resize', { name: instance.name, size: dialogSize }, true);
             }
@@ -287,7 +287,7 @@ export class WindowService {
         const instance = this.instances[name];
         if (instance) {
             if (instance.closeOnEscape) {
-                window.removeEventListener('keyup', instance.keyUpListener, true);
+                window.removeEventListener('keyup', instance.keyUpListener!, true);
                 instance.keyUpListener = null;
             }
             
@@ -304,7 +304,7 @@ export class WindowService {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
-                this.doc.getElementById('mainForm').dispatchEvent(customEvent);
+                this.doc.getElementById('mainForm')!.dispatchEvent(customEvent);
             } else if (remainingDialogs.length > 0) {
                 const enableEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
@@ -423,13 +423,13 @@ export class WindowService {
 
     public toFront(name: string) {
         if (this.instances[name]) {
-            this.bsWindowManager.setFocused(this.instances[name].bsWindowInstance);
+            this.bsWindowManager.setFocused(this.instances[name].bsWindowInstance!);
         }
     }
 
     public toBack(name: string) {
         if (this.instances[name]) {
-            this.bsWindowManager.sendToBack(this.instances[name].bsWindowInstance);
+            this.bsWindowManager.sendToBack(this.instances[name].bsWindowInstance!);
         }
     }
 
@@ -477,8 +477,8 @@ export class WindowService {
                     // this navigationId is angular router maybe in the future we need to have a look to just use that to set the navigation states to the forms.
                     const state = this.platformLocation.getState() as Record<string, any>;
                     if (state && state['navigationId'])
-                        this.platformLocation.replaceState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
-                    else  this.platformLocation.pushState(form.name,null, this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
+                        this.platformLocation.replaceState(form.name, '', this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
+                    else  this.platformLocation.pushState(form.name, '', this.platformLocation.pathname + this.platformLocation.search + '#' + form.name);
                 }
             }
             const formCache = this.formService.getFormCacheByName(form.name);
@@ -498,7 +498,7 @@ export class WindowService {
             if (sessionProblem && sessionProblem.viewUrl) {
                 sessionProblem.nonce = (this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes as any)['ngCspNonce']?.value;
                 const name = sessionProblem.viewUrl.includes('/') ? sessionProblem.viewUrl.split('/')[1].split('.')[0] : sessionProblem.viewUrl.split('.')[0];
-                this.platformLocation.pushState(name, null, this.platformLocation.pathname + this.platformLocation.search + '#' + name);
+                this.platformLocation.pushState(name, '', this.platformLocation.pathname + this.platformLocation.search + '#' + name);
             }
         });
     }
@@ -582,10 +582,10 @@ export class SvyWindow {
     title = '';
     opacity = 1;
     undecorated = false;
-    cssClassName: string = null;
+    cssClassName: string | null = null;
     closeOnEscape = false;
-    size: { width: number; height: number } = null;
-    location: {x: number; y: number} = null;
+    size: { width: number; height: number } | null = null;
+    location: {x: number; y: number} | null = null;
     navigatorForm: any = null;
     form: any = null;
     initialBounds: any = null;
@@ -595,9 +595,9 @@ export class SvyWindow {
     loadingIndicatorIsHidden?: number;
     renderer2: Renderer2;
     
-    keyUpListener!: (event: KeyboardEvent) => void;
+    keyUpListener: ((event: KeyboardEvent) => void) | null = null;
 
-    bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
+    bsWindowInstance: BSWindow | null = null;  // bootstrap-window instance , available only after creation
     windowService: WindowService;
     componentRef!: ComponentRef<DialogWindowComponent>;
 
@@ -612,13 +612,13 @@ export class SvyWindow {
         if (this.bsWindowInstance) this.bsWindowInstance.close();
         if (this.componentRef) {
             this.componentRef.destroy();
-            delete this.componentRef;
+            this.componentRef = undefined!;
         }
         if (!this.storeBounds) {
-            delete this.location;
-            delete this.size;
+            this.location = null;
+            this.size = null;
         }
-        delete this.bsWindowInstance;
+        this.bsWindowInstance = null;
     }
 
     setLocation(location: {x: number; y: number}) {

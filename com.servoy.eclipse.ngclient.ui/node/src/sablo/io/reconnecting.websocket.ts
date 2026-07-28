@@ -29,7 +29,7 @@ export class ReconnectingWebSocket implements IWebSocket {
 
     private url: string | UrlFunction;
 
-    private ws!: WebSocket;
+    private ws: WebSocket | null = null;
     private forcedClose = false;
     private timedOut = false;
 

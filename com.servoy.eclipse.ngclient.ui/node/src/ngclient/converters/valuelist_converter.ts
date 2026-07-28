@@ -21,7 +21,7 @@ export class ValuelistType implements IType<Valuelist> {
         // any server-to-client conversion on values, not even for dates - because they are already strings... changing it so that it works properly with
         // Date conversions to generate actual Date values for entries might break existing components / formatters? though because they now expect strings instead of dates
 
-        let newValue: Valuelist = currentClientValue;
+        let newValue: Valuelist | null = currentClientValue;
         let deferredValue: any;
 
         if (serverJSONValue) {
@@ -30,7 +30,7 @@ export class ValuelistType implements IType<Valuelist> {
             // it is possible that foundsetLinked.js generates the whole viewport of the foundset using the same value comming from the server => this conversion will be called multiple times
             // with the same serverJSONValue so serverJSONValue.values might already be initialized... so skip it then
             if (serverJSONValue.values) {
-                newValue = serverJSONValue.vl; // this .vl is assigned below - for the situation described in long comment above
+            newValue = serverJSONValue.vl ?? null; // this .vl is assigned below - for the situation described in long comment above
                 if (!newValue) {
                     // initialize
                     const internalState = new ValuelistState();
@@ -43,15 +43,15 @@ export class ValuelistType implements IType<Valuelist> {
                     // caching this value means for this specific valuelist instance that the display value will not be updated if that would be changed on the server end..
                     internalState.realToDisplayCache = (currentClientValue && currentClientValue.getInternalState()) ?
                         currentClientValue.getInternalState().realToDisplayCache : internalState.realToDisplayCache;
-                    internalState.valuelistid = serverJSONValue.valuelistid;
-                    internalState.hasRealValues = serverJSONValue.hasRealValues;
+                    internalState.valuelistid = serverJSONValue.valuelistid!;
+                    internalState.hasRealValues = serverJSONValue.hasRealValues!;
                     if (serverJSONValue.realValueType === 'Date' || serverJSONValue.displayValueType === 'Date') {
                         serverJSONValue.values.forEach(element => {
                             if (serverJSONValue.realValueType === 'Date' && element.realValue) element.realValue = new Date(element.realValue);
                             if (serverJSONValue.displayValueType === 'Date' && element.displayValue) element.displayValue = new Date(element.displayValue);
                         });
                     }
-                    newValue = new Valuelist(this.sabloDeferHelper, serverJSONValue.realValueType, internalState, serverJSONValue.values);
+                    newValue = new Valuelist(this.sabloDeferHelper, serverJSONValue.realValueType!, internalState, serverJSONValue.values);
                     serverJSONValue.vl = newValue;
                     deferredValue = newValue;
                 }
@@ -64,11 +64,11 @@ export class ValuelistType implements IType<Valuelist> {
             // if we have a deferred filter request, notify that the new value has arrived
             if (serverJSONValue.handledID) {
                 const handledIDAndState = serverJSONValue.handledID; // { id: ...int..., value: ...boolean... } which says if a req. was handled successfully by server or not
-                this.sabloDeferHelper.resolveDeferedEvent(handledIDAndState.id, newValue.getInternalState(), handledIDAndState.value ?
+                this.sabloDeferHelper.resolveDeferedEvent(handledIDAndState.id, newValue!.getInternalState(), handledIDAndState.value ?
                     deferredValue : 'No value for ' + handledIDAndState.id, handledIDAndState.value);
             }
         } else {
-            newValue = null;
+            newValue = null!;
             const oldInternalState = currentClientValue ? currentClientValue.getInternalState() : undefined; // internal state / $sabloConverters interface
             if (oldInternalState)
                 this.sabloDeferHelper.cancelAll(oldInternalState);
@@ -98,8 +98,8 @@ export class ValuelistType implements IType<Valuelist> {
 class ValuelistState extends ChangeAwareState implements IDeferedState {
     public realToDisplayCache: any = new Map<string, any>();
     public valuelistid!: number;
-    public filterStringReq!: { filter: string; id: number };
-    public diplayValueReq!: { getDisplayValue: string; id: number };
+    public filterStringReq: { filter: string; id: number } | undefined;
+    public diplayValueReq: { getDisplayValue: string; id: number } | undefined;
     public hasRealValues!: boolean;
 
     deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: any } };

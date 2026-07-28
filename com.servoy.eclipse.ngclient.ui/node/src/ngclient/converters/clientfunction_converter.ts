@@ -15,7 +15,7 @@ export class ClientFunctionType implements IType<() => any> {
                 if (func) return func(...args);
             };
         }
-        return null;
+        return null!;
     }
 
     fromClientToServer(_newClientData: () => any, _oldClientData?: () => any, _propertyContext?: IPropertyContext): [any, () => any] | null {

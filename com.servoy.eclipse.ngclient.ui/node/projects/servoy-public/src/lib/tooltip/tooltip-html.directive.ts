@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
 })
 export class HTMLTooltipDirective implements OnDestroy {
 
-    @Input('htmlTooltip') tooltipText: string;
+    @Input('htmlTooltip') tooltipText: string | undefined;
     @Input('tooltipInitialDelay') tooltipInitialDelay?: number;
     @Input('tooltipDismissDelay') tooltipDismissDelay?: number;
     isActive = false;
@@ -38,11 +38,11 @@ export class HTMLTooltipDirective implements OnDestroy {
     }
     
     protected getInitialDelay(): number {
-        return this.tooltipInitialDelay; 
+        return this.tooltipInitialDelay!; 
     }
 
     protected getDismissDelay(): number {
-        return this.tooltipDismissDelay; 
+        return this.tooltipDismissDelay!; 
     }
 
     @HostListener('pointerleave')

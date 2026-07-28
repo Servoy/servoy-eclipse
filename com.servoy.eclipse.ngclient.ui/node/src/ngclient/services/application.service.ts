@@ -116,7 +116,7 @@ export class ApplicationService {
         const origin: string = this.windowRefService.nativeWindow.location.origin;
         alertWindowComponent.instance.title.set(origin.substring(origin.indexOf('://') + 3));
 
-        const opt: BSWindowOptions = {
+        const opt: Partial<BSWindowOptions> = {
             id: 'svyalert',
             fromElement: alertWindowComponent.location.nativeElement.childNodes[0],
             title: '',
@@ -249,7 +249,7 @@ export class ApplicationService {
     public getClientBrowserInformation() {
         const locale = this.sabloService.getLocale();
         const userAgent = this.getUserAgentAndPlatform();
-        let timeZone: string;
+        let timeZone: string | undefined;
         try {
             timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
         } catch (e) {
@@ -281,13 +281,13 @@ export class ApplicationService {
         infoPanel.style.height = h + 'px';
         infoPanel.style.width = w + 'px';
         this.doc.body.appendChild(infoPanel);
-        this.doc.getElementById('closePanelButton').addEventListener('click', (event: MouseEvent) => {
-            this.doc.getElementById('infoPanel').style.display = 'none';
+        this.doc.getElementById('closePanelButton')!.addEventListener('click', (event: MouseEvent) => {
+            this.doc.getElementById('infoPanel')!.style.display = 'none';
             event.preventDefault();
             event.stopPropagation();
             return false;
         });
-        setTimeout(() => this.doc.getElementById('infoPanel').style.display = 'none', t);
+        setTimeout(() => this.doc.getElementById('infoPanel')!.style.display = 'none', t);
     }
 
     public showDefaultLogin() {
@@ -319,7 +319,7 @@ export class ApplicationService {
 
     public showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string) {
         if (!url) {
-            url = this.generateUploadUrl(null, null, null);
+            url = this.generateUploadUrl(null!, null!, null!);
         }
         const fileUploadWindowComponent = this.mainViewRefService.mainContainer.createComponent(FileUploadWindowComponent);
 
@@ -328,7 +328,7 @@ export class ApplicationService {
         fileUploadWindowComponent.instance.multiselect.set(multiselect);
         fileUploadWindowComponent.instance.filter.set(acceptFilter);
 
-        const opt: BSWindowOptions = {
+        const opt: Partial<BSWindowOptions> = {
             id: 'svyfileupload',
             fromElement: fileUploadWindowComponent.location.nativeElement.childNodes[0],
             title: '',
@@ -354,7 +354,7 @@ export class ApplicationService {
             messageDialogWindowComponent.instance.buttonsText.set(buttonsText);
             messageDialogWindowComponent.instance.inputType.set(inputType);
             messageDialogWindowComponent.instance.defaultButtonIndex.set(defaultButtonIndex);
-            messageDialogWindowComponent.instance.okButtonText.set(okButtonText);
+            messageDialogWindowComponent.instance.okButtonText.set(okButtonText!);
 
             const dialogWindowComponentEl = messageDialogWindowComponent.location.nativeElement.childNodes[0];
             const windowWidth = this.doc.documentElement.clientWidth;
@@ -365,7 +365,7 @@ export class ApplicationService {
             if (left < 0) left = 0;
             //if (top < 0) top = 0;
 
-            const opt: BSWindowOptions = {
+            const opt: Partial<BSWindowOptions> = {
                 id: 'svymessagedialog',
                 fromElement: dialogWindowComponentEl,
                 title: dialogTitle,
@@ -378,10 +378,10 @@ export class ApplicationService {
             };
 
             const bsWindowInstance = this.bsWindowManager.createWindow(opt);
-            messageDialogWindowComponent.instance.onCloseCallback = (r: string) => {
+            messageDialogWindowComponent.instance.onCloseCallback = (r: string | null) => {
                 bsWindowInstance.close();
                 messageDialogWindowComponent.destroy();
-                resolve(r);
+                resolve(r!);
             };
             bsWindowInstance.setActive(true);
         });

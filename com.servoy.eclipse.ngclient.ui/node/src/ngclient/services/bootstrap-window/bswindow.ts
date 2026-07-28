@@ -99,10 +99,10 @@ export class BSWindow {
             throw new Error('No template specified for window.');
         }
 
-        options.elements.handle = this.element.querySelector(options.selectors.handle);
-        options.elements.title = this.element.querySelector(options.selectors.title);
-        options.elements.body = this.element.querySelector(options.selectors.body);
-        options.elements.footer = this.element.querySelector(options.selectors.footer);
+        options.elements.handle = this.element.querySelector(options.selectors.handle) as HTMLElement;
+        options.elements.title = this.element.querySelector(options.selectors.title) as HTMLElement;
+        options.elements.body = this.element.querySelector(options.selectors.body) as HTMLElement;
+        options.elements.footer = this.element.querySelector(options.selectors.footer) as HTMLElement;
         if (options.title) options.elements.title.innerHTML = options.title;
 //        if (options.fromElement && _this.element.querySelectorAll('[data-dismiss=window]').length <= 0) {
 //            options.elements.title.innerHTML += '<button class="close" data-dismiss="window">x</button>';
@@ -110,7 +110,7 @@ export class BSWindow {
         if (options.bodyContent) options.elements.body.innerHTML = options.bodyContent;
         if (options.footerContent) options.elements.footer.innerHTML = options.footerContent;
         this.undock();
-        this.setSticky(options.sticky);
+        this.setSticky(options.sticky!);
     }
 
     undock() {
@@ -159,7 +159,7 @@ export class BSWindow {
         const handleHeight = isUndecorated ? 0 : this.options.elements.handle ? this.options.elements.handle.getBoundingClientRect().height : 0;
         const footerHeight = isUndecorated ? 0 : this.options.elements.footer ? this.options.elements.footer.getBoundingClientRect().height : 0;
         const docHeight = this.doc.documentElement.clientHeight;
-        const winBody = this.element.querySelector(this.options.selectors.body);
+                const winBody = this.element.querySelector(this.options.selectors.body)!;
         if (docHeight <= (size.height + handleHeight + footerHeight)) {
             size.height = docHeight - handleHeight - footerHeight;
         }
@@ -188,7 +188,7 @@ export class BSWindow {
         if (this.options.window_manager && this.options.window_manager.modalStack.length === 1 && this.options.isModal) {
             const backdropModals = this.doc.getElementsByClassName('modal-backdrop');
             while (backdropModals[0]) {
-                backdropModals[0].parentNode.removeChild(backdropModals[0]);
+                backdropModals[0].parentNode!.removeChild(backdropModals[0]);
             }
         }
         const closeEvent = new Event('close');
@@ -321,8 +321,8 @@ export class BSWindow {
 
                 const rectTarget = event.target.getBoundingClientRect();
                 const rectElement = this.element.getBoundingClientRect();
-                const windowOffsetX = (rectTarget.left + this.utilsService.getMainBody().scrollLeft) - (rectElement.left + this.utilsService.getMainBody().scrollLeft);
-                const windowOffsetY = (rectTarget.top + this.utilsService.getMainBody().scrollTop) - (rectElement.top + this.utilsService.getMainBody().scrollTop);
+                const windowOffsetX = (rectTarget.left + this.utilsService.getMainBody()!.scrollLeft) - (rectElement.left + this.utilsService.getMainBody()!.scrollLeft);
+                const windowOffsetY = (rectTarget.top + this.utilsService.getMainBody()!.scrollTop) - (rectElement.top + this.utilsService.getMainBody()!.scrollTop);
 
                 if (offY + windowOffsetY < 5) {
                     this.renderer.addClass(this.element, 'north');
@@ -353,8 +353,8 @@ export class BSWindow {
             this.renderer.removeClass(this.element, 'east');
             this.renderer.removeClass(this.element, 'north');
             this.renderer.removeClass(this.element, 'south');
-            const width = this.element.querySelector(this.options.selectors.body).getBoundingClientRect().width;
-            const height = this.element.querySelector(this.options.selectors.body).getBoundingClientRect().height;
+            const width = this.element.querySelector(this.options.selectors.body)!.getBoundingClientRect().width;
+            const height = this.element.querySelector(this.options.selectors.body)!.getBoundingClientRect().height;
 
             const size = { width, height };
             // before: this.element.trigger('bswin.resize',size);
@@ -417,7 +417,7 @@ export class BSWindow {
                 this.renderer.setStyle(this.element, 'left', (event.pageX - this.offset.x) + 'px');
             }
             if (this.options.resizable && this.resizing) {
-                const winBody = this.element.querySelector(this.options.selectors.body);
+        const winBody = this.element.querySelector(this.options.selectors.body)!;
                 let winHeadFootHeight = 0;
                 const head = this.element.querySelector(this.options.selectors.handle) as HTMLElement;
                 if (head) {
@@ -471,8 +471,8 @@ export class BSWindow {
                 //target can be the header or footer, and event.offsetX/Y will be relative to the header/footer .Adjust to '.window';
                 const rectTarget = event.target.getBoundingClientRect();
                 const rectElement = this.element.getBoundingClientRect();
-                const windowOffsetX = (rectTarget.left + this.utilsService.getMainBody().scrollLeft) - (rectElement.left + this.utilsService.getMainBody().scrollLeft);
-                const windowOffsetY = (rectTarget.top + this.utilsService.getMainBody().scrollTop) - (rectElement.top + this.utilsService.getMainBody().scrollTop);
+                const windowOffsetX = (rectTarget.left + this.utilsService.getMainBody()!.scrollLeft) - (rectElement.left + this.utilsService.getMainBody()!.scrollLeft);
+                const windowOffsetY = (rectTarget.top + this.utilsService.getMainBody()!.scrollTop) - (rectElement.top + this.utilsService.getMainBody()!.scrollTop);
 
                 let offX = event.offsetX;
                 let offY = event.offsetY;
@@ -518,12 +518,12 @@ export class BSWindow {
 
     setBlocker(window_handle: BSWindow) {
         this.options.blocker = window_handle;
-        this.element.querySelector('.disable-shade').remove();
+        this.element.querySelector('.disable-shade')?.remove();
         const shade = '<div class="disable-shade"></div>';
         this.options.elements.body.append(shade);
         this.renderer.addClass(this.options.elements.body, 'disable-scroll');
         this.options.elements.footer.append(shade);
-        this.renderer.addClass(this.element.querySelector('.disable-shade'), 'show');
+        this.renderer.addClass(this.element.querySelector('.disable-shade')!, 'show');
         if (!this.options.blocker.getParent()) {
             this.options.blocker.setParent(this);
         }
@@ -536,7 +536,7 @@ export class BSWindow {
 
     clearBlocker() {
         this.renderer.removeClass(this.options.elements.body, 'disable-scroll');
-        this.renderer.addClass(this.element.querySelector('.disable-shade'), 'hide');
+        this.renderer.addClass(this.element.querySelector('.disable-shade')!, 'hide');
         delete this.options.blocker;
     }
 
@@ -547,7 +547,7 @@ export class BSWindow {
         }
     }
 
-    getParent(): BSWindow {
+    getParent(): BSWindow | undefined {
         return this.options.parent;
     }
 
@@ -567,7 +567,7 @@ export class BSWindow {
     }
 
     private addClassToBodyChildren(cls: string) {
-        const childNodesBody: any = this.utilsService.getMainBody().childNodes;
+        const childNodesBody: any = this.utilsService.getMainBody()!.childNodes;
         for (const key of Object.keys(childNodesBody)) {
             if (childNodesBody[key] instanceof Element) {
                 const node = childNodesBody[key] as Element;
@@ -586,7 +586,7 @@ export class BSWindow {
     }
 
     private removeClassToBodyChildren(cls: string) {
-        const childNodesBody: any = this.utilsService.getMainBody().childNodes;
+        const childNodesBody: any = this.utilsService.getMainBody()!.childNodes;
         for (const key of Object.keys(childNodesBody)) {
             if (childNodesBody[key] instanceof Element) {
                 const node = childNodesBody[key] as Element;
@@ -604,11 +604,11 @@ export interface BSWindowOptions {
     template?: HTMLElement;
     bodyContent?: string;
     footerContent?: string;
-    selectors?: {handle: string; title: string; body: string; footer: string};
-    elements?: {handle: HTMLElement; title: HTMLElement; body: HTMLElement; footer: HTMLElement};
+    selectors: {handle: string; title: string; body: string; footer: string};
+    elements: {handle: HTMLElement; title: HTMLElement; body: HTMLElement; footer: HTMLElement};
     title?: string;
     sticky?: boolean;
-    references?: {body: HTMLElement; window: Window };
+    references: {body: HTMLElement; window: Window };
     parent?: BSWindow;
     blocker?: BSWindow;
     resizable?: boolean;
