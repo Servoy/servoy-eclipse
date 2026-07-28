@@ -67,7 +67,9 @@ import { TypesRegistry} from '../sablo/types_registry';
         <ng-template  #svyResponsiveDiv  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" [ngClass]="getNGClass(state)" class="svy-layoutcontainer">
             @for (item of state.items; track item) {
-              <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+              <div class="svy-responsive-wrapper" [ngClass]="{'invisible_element': item.model?.svyVisible === false}">
+                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
+              </div>
             }
           </div>
         </ng-template>
