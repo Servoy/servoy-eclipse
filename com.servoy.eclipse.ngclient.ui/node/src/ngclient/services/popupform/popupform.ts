@@ -1,4 +1,4 @@
-import { Component, Inject, DOCUMENT } from '@angular/core';
+import { Component, Inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 
 import { ServoyPublicService, PopupForm } from '@servoy/public';
 import { PopupFormService } from '../popupform.service';
@@ -6,6 +6,7 @@ import { PopupFormService } from '../popupform.service';
 @Component({
     selector: 'svy-popupform',
     templateUrl: './popupform.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ServoyFormPopupComponent {

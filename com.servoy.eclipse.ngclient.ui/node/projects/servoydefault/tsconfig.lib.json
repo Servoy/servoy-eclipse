@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./",
     "outDir": "../../out-tsc/lib",
     "declaration": true,
     "declarationMap": true,
@@ -10,6 +9,12 @@
   },
   "angularCompilerOptions": {
     "skipTemplateCodegen": true,
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    },
     "strictMetadataEmit": true,
     "enableResourceInlining": true
   },

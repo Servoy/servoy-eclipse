@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -10,6 +10,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-editorcontent',
     templateUrl: './editorcontent.component.html',
     styleUrls: ['./editorcontent.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {

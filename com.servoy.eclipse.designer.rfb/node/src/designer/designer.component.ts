@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, HostListener } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService } from './services/editorsession.service';
 import { URLParserService } from 'src/designer/services/urlparser.service';
 
@@ -6,6 +6,7 @@ import { URLParserService } from 'src/designer/services/urlparser.service';
     selector: 'app-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DesignerComponent implements OnInit {

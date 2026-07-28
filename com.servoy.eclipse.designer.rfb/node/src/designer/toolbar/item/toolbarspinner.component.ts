@@ -1,9 +1,10 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ToolbarItemComponent } from './toolbaritem.component';
 
 @Component({
     selector: 'designer-toolbar-spinner',
     templateUrl: './toolbarspinner.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnInit, OnChanges {

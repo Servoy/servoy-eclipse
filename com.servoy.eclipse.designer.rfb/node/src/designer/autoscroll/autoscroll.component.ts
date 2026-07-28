@@ -1,5 +1,5 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
@@ -7,6 +7,7 @@ import { EditorContentService } from '../services/editorcontent.service';
     selector: 'designer-autoscroll',
     templateUrl: './autoscroll.component.html',
     styleUrls: ['./autoscroll.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 

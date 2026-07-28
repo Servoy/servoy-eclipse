@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, Input } from '@angular/core';
+import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, Input, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
     selector: 'dynamic-guides',
     templateUrl: './dynamicguides.component.html',
     styleUrls: ['./dynamicguides.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {

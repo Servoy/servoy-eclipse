@@ -1,5 +1,5 @@
 
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, ChangeDetectorRef, Renderer2, ViewChild, DOCUMENT } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, ChangeDetectorRef, Renderer2, ViewChild, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -7,6 +7,7 @@ import { EditorSessionService } from '../services/editorsession.service';
     selector: 'designer-inline-edit',
     templateUrl: './inlineedit.component.html',
     styleUrls: ['./inlineedit.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class InlineEditComponent implements AfterViewInit {

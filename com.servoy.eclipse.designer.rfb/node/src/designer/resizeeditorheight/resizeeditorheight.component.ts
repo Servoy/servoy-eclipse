@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { Point } from './../mouseselection/mouseselection.component';
@@ -7,6 +7,7 @@ import { Point } from './../mouseselection/mouseselection.component';
     selector: 'designer-resizeeditorheight',
     templateUrl: './resizeeditorheight.component.html',
     styleUrls: ['./resizeeditorheight.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.service';
@@ -7,13 +7,14 @@ import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.s
     selector: 'app-packages',
     templateUrl: './packages.component.html',
     styleUrls: ['./packages.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PackagesComponent implements OnChanges {
 
-    @Input() packages: Package[];
-    selectedPackage: Package;
-    descriptionExpanded: boolean;
+    @Input() packages!: Package[];
+    selectedPackage!: Package;
+    descriptionExpanded = false;
 
     constructor(public wpmService: WpmService, public dialog: MatDialog) {
     }
@@ -51,7 +52,7 @@ export class PackagesComponent implements OnChanges {
     }
 
     canBeRemoved(p: Package): boolean {
-        return p.installed && p.installedIsWPA && (p.packageType != PACKAGE_TYPE_MODULE) && (p.packageType != PACKAGE_TYPE_SOLUTION);
+        return !!p.installed && p.installedIsWPA && (p.packageType != PACKAGE_TYPE_MODULE) && (p.packageType != PACKAGE_TYPE_SOLUTION);
     }
 
     isLatestRelease(p: Package): boolean {
@@ -146,6 +147,6 @@ export class PackagesComponent implements OnChanges {
     }
     
     invertIcon(p: Package): boolean {
-        return this.wpmService.isDarkTheme() && p.invertIcon;
+        return this.wpmService.isDarkTheme() && !!p.invertIcon;
     }
 }

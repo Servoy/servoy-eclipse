@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -25,6 +25,7 @@ export enum SHORTCUT_IDS {
 	selector: 'designer-contextmenu',
 	templateUrl: './contextmenu.component.html',
 	styleUrls: ['./contextmenu.component.css'],
+	changeDetection: ChangeDetectionStrategy.Eager,
 	standalone: false
 })
 export class ContextMenuComponent implements OnInit {

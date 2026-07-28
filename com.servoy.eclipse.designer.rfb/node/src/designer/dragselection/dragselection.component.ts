@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from '../directives/resizeknob.directive';
@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'dragselection',
     templateUrl: './dragselection.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {

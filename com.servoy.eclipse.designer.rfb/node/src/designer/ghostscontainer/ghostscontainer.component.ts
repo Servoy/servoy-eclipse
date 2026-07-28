@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { Point } from '../mouseselection/mouseselection.component';
@@ -8,6 +8,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {

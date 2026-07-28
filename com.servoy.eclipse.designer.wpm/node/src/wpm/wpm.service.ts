@@ -28,12 +28,12 @@ export class WpmService {
   messageSender: Observer<Message>;
 
   packagesObservable: Observable<PackagesInfo>;
-  packagesObserver: Observer<PackagesInfo>;
+  packagesObserver!: Observer<PackagesInfo>;
 
-  solutions: string[];
+  solutions: string[] = [];
 
   repositoriesObservable: Observable<Repository[]>;
-  repositoriesObserver: Observer<Repository[]>;
+  repositoriesObserver!: Observer<Repository[]>;
 
   packageLists: BehaviorSubject<PackageList[]>;
   packageToBeRemoved: BehaviorSubject<Package>;
@@ -63,7 +63,7 @@ export class WpmService {
     this.messageSender = webSocketConnection.messageSender;
     this.messages.subscribe(m => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      this[m.method](m.data);
+      (this as unknown as Record<string, (data: unknown) => void>)[m.method](m.data);
     });
     
     this.packagesObservable = new Observable((obs: Observer<PackagesInfo>) => {
@@ -191,7 +191,7 @@ export class WpmService {
       if(!typeOfPackages.has(packagesArray[i].packageType)) {
         typeOfPackages.set(packagesArray[i].packageType, []);
       }
-      const packages: Package[] = typeOfPackages.get(packagesArray[i].packageType);
+      const packages: Package[] = typeOfPackages.get(packagesArray[i].packageType)!;
       packages.push(packagesArray[i]);
     }
 

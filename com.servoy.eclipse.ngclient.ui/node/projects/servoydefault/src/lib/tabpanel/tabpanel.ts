@@ -114,6 +114,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
 @Component({
     selector: 'default-tabpanel-active-tab-visibility-listener',
     template: '<div #element></div>',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit, OnDestroy {

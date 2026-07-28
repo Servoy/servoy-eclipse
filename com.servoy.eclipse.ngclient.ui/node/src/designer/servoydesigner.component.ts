@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
@@ -13,6 +13,7 @@ import { Inject } from '@angular/core';
 @Component({
     selector: 'servoy-designer',
     templateUrl: './servoydesigner.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy, IDesignFormComponent {

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -7,6 +7,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-samesize-indicator',
     templateUrl: './samesizeindicator.component.html',
     styleUrls: ['./samesizeindicator.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener  {

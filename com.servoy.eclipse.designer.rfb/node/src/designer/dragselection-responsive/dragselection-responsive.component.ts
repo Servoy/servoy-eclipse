@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy } from '@angular/core';
 import { DragItem } from '../palette/palette.component';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
@@ -8,6 +8,7 @@ import { URLParserService } from '../services/urlparser.service';
 @Component({
     selector: 'dragselection-responsive',
     templateUrl: './dragselection-responsive.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll { // ISupportAutoscroll

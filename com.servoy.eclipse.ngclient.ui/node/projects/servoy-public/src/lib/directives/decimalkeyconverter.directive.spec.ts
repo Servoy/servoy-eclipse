@@ -1,5 +1,5 @@
 import { TestBed, ComponentFixture, fakeAsync, tick, waitForAsync, inject } from '@angular/core/testing';
-import { Component, Input, ViewChild, ElementRef, DebugElement } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, DebugElement, ChangeDetectionStrategy } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { ServoyPublicServiceTestingImpl, ServoyPublicTestingModule } from '../testing/publictesting.module';
@@ -7,6 +7,7 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Component({
     template: '<input type="text" [svyDecimalKeyConverter]="format" #element>',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 class TestDecimalKeyConverterComponent {

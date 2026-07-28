@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -9,6 +9,7 @@ import { URLParserService } from '../services/urlparser.service';
     selector: 'designer-anchoring-indicator',
     templateUrl: './anchoringindicator.component.html',
     styleUrls: ['./anchoringindicator.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener {

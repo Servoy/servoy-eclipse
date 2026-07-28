@@ -22,7 +22,7 @@ import {URLParserService} from './services/urlparser.service';
 import { WindowRefService, ServoyPublicModule } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { ToolbarButtonComponent } from './toolbar/item/toolbarbutton.component';
@@ -76,5 +76,5 @@ import { DynamicGuidesService } from './services/dynamicguides.service';
         FormsModule,
         CommonModule,
         NgbModule,
-        DragDropModule], providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService, DynamicGuidesService, provideHttpClient(withInterceptorsFromDi())] })
+        DragDropModule], providers: [EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService, DynamicGuidesService, provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 export class DesignerModule { }

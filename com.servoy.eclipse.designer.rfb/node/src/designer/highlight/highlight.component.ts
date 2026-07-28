@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, Renderer2, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -7,6 +7,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-highlight',
     templateUrl: './highlight.component.html',
     styleUrls: ['./highlight.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class HighlightComponent implements IShowHighlightChangedListener, OnInit, IContentMessageListener, OnDestroy {
