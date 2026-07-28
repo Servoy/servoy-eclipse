@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -61,6 +61,7 @@ export enum TOOLBAR_CATEGORIES {
 @Component({
     selector: 'designer-toolbar',
     templateUrl: './toolbar.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ToolbarComponent implements OnInit, ISelectionChangedListener {

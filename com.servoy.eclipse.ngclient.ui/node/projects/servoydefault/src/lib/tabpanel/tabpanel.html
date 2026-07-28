@@ -10,7 +10,7 @@
             <img ng-src='tab.imageMediaID' />
           }
           <span [style.backgroundColor]='background' [style.color]='tab.foreground == null ? foreground : tab.foreground'
-          [innerHTML]='tab?.text| htmlFilter| trustAsHtml:servoyApi.trustAsHtml()'></span>
+          [innerHTML]='$safeNavigationMigration(tab?.text)| htmlFilter| trustAsHtml:servoyApi.trustAsHtml()'></span>
         </a>
         <ng-template ngbNavContent>
           <default-tabpanel-active-tab-visibility-listener [tab]="tab" (visibleTab)="onVisibleTab(tab)"></default-tabpanel-active-tab-visibility-listener>

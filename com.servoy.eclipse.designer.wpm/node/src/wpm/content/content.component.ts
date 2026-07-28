@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Package } from '../websocket.service';
 import {WpmService, PACKAGE_TYPE_TO_TITLE_MAP, ALL_PACKAGE_TYPES} from '../wpm.service'
 
@@ -13,6 +13,7 @@ export interface PackageList {
     selector: 'app-content',
     templateUrl: './content.component.html',
     styleUrls: ['./content.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ContentComponent implements OnInit {

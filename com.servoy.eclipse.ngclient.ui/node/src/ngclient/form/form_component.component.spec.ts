@@ -59,6 +59,7 @@ import { By } from '@angular/platform-browser';
         </testcomponents-custom-component>
       }
     </ng-template>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 class TestHostComponent {

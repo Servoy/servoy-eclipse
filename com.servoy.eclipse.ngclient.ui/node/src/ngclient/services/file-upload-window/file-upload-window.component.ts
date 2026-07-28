@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { I18NProvider } from '../i18n_provider.service';
 
@@ -6,6 +6,7 @@ import { I18NProvider } from '../i18n_provider.service';
     selector: 'servoycore-file-upload-window',
     templateUrl: './file-upload-window.component.html',
     styleUrls: ['./file-upload-window.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class FileUploadWindowComponent {

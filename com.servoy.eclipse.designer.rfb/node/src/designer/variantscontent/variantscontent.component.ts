@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Renderer2, Input } from '@angular/core';
+import { Component, OnInit, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -8,6 +8,7 @@ import { EditorContentService } from '../services/editorcontent.service';
     selector: 'designer-variantscontent',
     templateUrl: './variantscontent.component.html',
     styleUrls: ['./variantscontent.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class VariantsContentComponent implements OnInit {

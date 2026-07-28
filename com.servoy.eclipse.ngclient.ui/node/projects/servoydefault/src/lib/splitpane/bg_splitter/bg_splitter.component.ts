@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnChanges,SimpleChanges, EventEmitter, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, OnChanges, SimpleChanges, EventEmitter, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { BGPane } from './bg_pane.component';
 @Component( {
@@ -6,6 +6,7 @@ import { BGPane } from './bg_pane.component';
     template: '<div class="split-panes" #element><ng-content></ng-content></div>',
     styleUrls: ['./bg_splitter.css'],
     encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 } )
 export class BGSplitter implements AfterContentInit , OnChanges {

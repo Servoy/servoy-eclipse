@@ -1,7 +1,7 @@
 import {TestBed, ComponentFixture, tick, fakeAsync} from '@angular/core/testing';
 import {TooltipDirective} from './tooltip.directive';
 import {TooltipService} from './tooltip.service';
-import {Component, DebugElement} from '@angular/core';
+import {Component, DebugElement, ChangeDetectionStrategy} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import { WindowRefService } from '../services/windowref.service';
 import { ServoyPublicServiceTestingImpl } from '../testing/publictesting.module';
@@ -10,6 +10,7 @@ const mouseEnter: Event = new Event('pointerenter');
 
 @Component({
     template: '<input  type="text" [svyTooltip]="textTooltip">',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 class TestTooltipWrapperComponent {

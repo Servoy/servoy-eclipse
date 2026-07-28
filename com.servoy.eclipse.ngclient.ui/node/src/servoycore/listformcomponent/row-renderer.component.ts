@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { AgRendererComponent } from 'ag-grid-angular';
 import { ICellRendererParams, IAfterGuiAttachedParams } from 'ag-grid-community';
@@ -8,6 +8,7 @@ import { ListFormComponent } from './listformcomponent';
     selector: 'svy-row-renderer-component',
     templateUrl: './row-renderer.component.html',
     host: { '(registerCSTS)': 'registerCSTS($event)' },
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class RowRenderer implements AgRendererComponent, AfterViewInit {

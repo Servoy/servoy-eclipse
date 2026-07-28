@@ -1,4 +1,4 @@
-import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {

@@ -23,6 +23,7 @@ import { fromEvent, debounceTime, Subscription } from 'rxjs';
 
 @Component({
     template: '',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 /**

@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, AfterViewInit, Input, ViewEncapsulation, ElementRef } from '@angular/core';
+import { Component, Renderer2, ViewChild, AfterViewInit, Input, ViewEncapsulation, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -12,6 +12,7 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
     templateUrl: './variantspreview.component.html',
     styleUrls: ['./variantspreview.component.css'],
     encapsulation: ViewEncapsulation.Emulated,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class VariantsPreviewComponent implements AfterViewInit {

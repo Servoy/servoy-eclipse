@@ -3,7 +3,7 @@
     <div ngbAccordionItem [disabled]="tab.disabled || !tab.containsFormId" [id]="tab._id" [collapsed]="getSelectedTabId() !== tab._id">
       <div ngbAccordionHeader>
         <button ngbAccordionButton class="accordion-button" (click)="tabClicked(tab, i , $event)">
-          <span [innerHTML]='tab?.text'></span>
+          <span [innerHTML]='$safeNavigationMigration(tab?.text)'></span>
         </button>
       </div>
       <div ngbAccordionCollapse>

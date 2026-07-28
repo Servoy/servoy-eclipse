@@ -1,4 +1,4 @@
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NgModule, provideZoneChangeDetection } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
@@ -13,5 +13,5 @@ import { AppComponent } from './app.component';
     bootstrap: [AppComponent], imports: [BrowserModule,
         BrowserAnimationsModule,
         FormsModule,
-        AppRoutingModule], providers: [provideHttpClient(withInterceptorsFromDi()),provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true })] })
+        AppRoutingModule], providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()),provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true })] })
 export class AppModule { }

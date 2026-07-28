@@ -38,6 +38,7 @@ export interface Package {
   releases: Release[];
   removing: boolean;
   selected: string;
+  sampleUrl: string;
   sourceUrl: string;
   top: boolean;
   wikiUrl: string;
@@ -63,7 +64,7 @@ export interface PackagesAndRepositories {
 @Injectable()
 export class WebsocketService {
 
-  private connection: WebSocketConnection;
+  private connection!: WebSocketConnection;
 
   public connect(url: string): WebSocketConnection {
     if (!this.connection) {

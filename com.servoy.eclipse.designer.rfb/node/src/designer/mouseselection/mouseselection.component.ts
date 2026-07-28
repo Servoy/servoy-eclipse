@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, Input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, Input, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -9,6 +9,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'selection-decorators',
     templateUrl: './mouseselection.component.html',
     styleUrls: ['./mouseselection.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
