@@ -505,6 +505,17 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png"));
 			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.search/icons/full/obj16/line_match.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward_nav.png"));
+
+			// lsp4e SVG icons that cause SWTException (SVGâPNG fallback in getReplacementFromURL picks these up)
+			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.lsp4e/icons/full/elcl16/link_to_editor.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/link_to_editor.png"));
+			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.lsp4e/icons/full/elcl16/alphab_sort_co.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/sort.png"));
+			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.lsp4e/icons/full/elcl16/fields_co.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/hide_variables.png"));
+			// m2e SVG icon that causes SWTException
+			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.m2e.core.ui/icons/update_dependencies.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/refresh.png"));
 			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methpub_obj.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/method_public.png"));
 			urlReplacements.put(URI.create("platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methpro_obj.gif"),
