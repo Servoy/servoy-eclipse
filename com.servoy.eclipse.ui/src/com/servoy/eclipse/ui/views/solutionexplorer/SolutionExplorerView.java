@@ -689,7 +689,7 @@ public class SolutionExplorerView extends ViewPart
 			{
 				retval = ((SimpleUserNode)obj).getIcon();
 			}
-			if (retval == null)
+			if (retval == null || retval.isDisposed())
 			{
 				retval = null_image;
 			}
@@ -4523,7 +4523,7 @@ public class SolutionExplorerView extends ViewPart
 				{
 					LabelDecorator ld2 = (LabelDecorator)defaultSystemDecorator;
 					Image decorated = ld2.decorateImage(resultImage != null ? resultImage : image, element, DecorationContext.DEFAULT_CONTEXT);
-					if (decorated != null)
+					if (decorated != null && !decorated.isDisposed())
 					{
 						return decorated;
 					}
@@ -4531,13 +4531,13 @@ public class SolutionExplorerView extends ViewPart
 				else
 				{
 					Image decorated = defaultSystemDecorator.decorateImage(resultImage != null ? resultImage : image, element);
-					if (decorated != null)
+					if (decorated != null && !decorated.isDisposed())
 					{
 						return decorated;
 					}
 				}
 			}
-			return resultImage;
+			return (resultImage != null && !resultImage.isDisposed()) ? resultImage : null;
 		}
 
 		private int getProblemType(SimpleUserNode element)
