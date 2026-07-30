@@ -92,7 +92,7 @@ export class EditorContentService {
                         } else if (newParent?.items.indexOf(container) < 0) {
                             newParent.addChild(container);
                         }
-                        if (reorderLayoutContainers.indexOf(newParent) < 0) {
+                        if (newParent && reorderLayoutContainers.indexOf(newParent) < 0) {
                             // existing layout container in parent layout container; make sure is inserted in correct position
                             reorderLayoutContainers.push(newParent);
                         }
@@ -407,7 +407,7 @@ export class EditorContentService {
 
         for (const container of reorderLayoutContainers) {
             // make sure the order of components in responsive layout containers is correct, based on location
-            this.sortChildren(container.items);
+            if (container) this.sortChildren(container.items);
         }
         if (data.renderGhosts || renderGhosts) {
             this.designFormCallback.renderGhosts();
