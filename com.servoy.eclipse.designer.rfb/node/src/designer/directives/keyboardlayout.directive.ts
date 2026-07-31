@@ -82,21 +82,21 @@ export class KeyboardLayoutDirective {
 					const node = selection[i];
                     let element = this.editorContentService.getContentElement(node);
                     while(element && !element.classList.contains('svy-wrapper')) {
-                        element = element.parentElement;
+                        element = element.parentElement!;
                     }
-                    const elementInfo = new ElementInfo(element);
+                    const elementInfo = new ElementInfo(element!);
 					if (elementInfo) {
 						if (isResize) {
 							if (elementInfo.width + changeW > 0) elementInfo.width = elementInfo.width + changeW;
 							if (elementInfo.height + changeH > 0) elementInfo.height = elementInfo.height + changeH;
-							element.style.width = elementInfo.width + 'px';
-							element.style.height = elementInfo.height + 'px';
+							element!.style.width = elementInfo.width + 'px';
+							element!.style.height = elementInfo.height + 'px';
 						} else {
 							const computedStyle = window.getComputedStyle(elementInfo.element)
 							if (elementInfo.y + changeY > -1) elementInfo.y = elementInfo.y + changeY;
 							if (elementInfo.x + changeX > -1) elementInfo.x = elementInfo.x + changeX;
 							if (elementInfo.element.style.left.length) {
-								element.style.left = (parseFloat(computedStyle.left.replace('px', '')) || 0)  + changeX + 'px';
+								element!.style.left = (parseFloat(computedStyle.left.replace('px', '')) || 0)  + changeX + 'px';
 								if (parseFloat(elementInfo.element.style.left.replace('px', '')) < 0) {
 									elementInfo.element.style.left = '0px';
 								}
@@ -145,7 +145,7 @@ export class KeyboardLayoutDirective {
 
     @HostListener('document:keyup', ['$event'])
     onKeyup(event: KeyboardEvent) {
-        const changes = {};
+        const changes: Record<string, any> = {};
         if (this.boundsUpdating) {
             this.boundsUpdating = false;
             const selection = this.editorSession.getSelection();
@@ -157,9 +157,9 @@ export class KeyboardLayoutDirective {
                 const node = selection[i];
                 let element = this.editorContentService.getContentElement(node);
                 while(element && !element.classList.contains('svy-wrapper')) {
-                    element = element.parentElement;
+                    element = element.parentElement!;
                 }
-                const elementInfo = new ElementInfo(element);
+                const elementInfo = new ElementInfo(element!);
                 if (elementInfo) {
                     changes[node] = {
                         x : elementInfo.x,

@@ -13,16 +13,16 @@ import { URLParserService } from '../services/urlparser.service';
 })
 export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll { // ISupportAutoscroll
     allowedChildren: any;
-    dragNode: HTMLElement;
-    dragStartEvent: MouseEvent;
-    initialParent: Element;
-    dragging: boolean;
-    highlightEl: HTMLElement;
-    dropHighlight: string;
-    canDrop: { dropAllowed: boolean; dropTarget?: Element; beforeChild?: Element; append?: boolean; };
+    dragNode!: HTMLElement;
+    dragStartEvent!: MouseEvent;
+    initialParent!: Element;
+    dragging!: boolean;
+    highlightEl!: HTMLElement;
+    dropHighlight!: string;
+    canDrop!: { dropAllowed: boolean; dropTarget?: Element; beforeChild?: Element; append?: boolean; };
     dragItem: DragItem = {};
-    dragCopy: boolean;
-    currentPoint: {x: number, y: number};
+    dragCopy!: boolean;
+    currentPoint!: {x: number, y: number};
 
     constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, private readonly designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService, protected urlParser: URLParserService) { }
 
@@ -46,9 +46,9 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
     onMouseDown(event: MouseEvent) {
         if (this.editorSession.getState().dragging || event.buttons !== 1) return; //prevent dnd when dragging from palette
-        this.dragNode = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
+        this.dragNode = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC()!;
       	if (this.dragNode === null) {
-			  this.dragNode = this.designerUtilsService.getNode(event);
+			  this.dragNode = this.designerUtilsService.getNode(event)!;
 		}
         if (!this.dragNode) return;
 
@@ -56,9 +56,9 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 		if (this.dragNode && this.findAncestor(this.dragNode, '.svy-csspositioncontainer') !== null)
 			return;
 
-		if (this.urlParser.isAbsoluteFormLayout() && !this.dragNode.parentElement.closest('.svy-responsivecontainer')) {
+		if (this.urlParser.isAbsoluteFormLayout() && !this.dragNode.parentElement!.closest('.svy-responsivecontainer')) {
 			// only use this for responsive container
-			this.dragNode = null;
+			this.dragNode = null!;
 			return;
 		}
 
@@ -72,10 +72,10 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 		// skip dragging if it is an child element of a form reference
 		if (event.button == 0 && this.dragNode) {
 			this.dragStartEvent = event;
-			this.initialParent = null;
+			this.initialParent = null!;
 
 			if (this.dragNode.classList.contains("formComponentChild")) {//do not grab if this is a form component element
-				this.dragStartEvent = null;
+				this.dragStartEvent = null!;
 			}
             this.initialParent = this.designerUtilsService.getParent(this.dragNode, this.dragNode.getAttribute("svy-layoutname") ? "layout" : "component");
 
@@ -85,15 +85,15 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                     this.highlightEl = this.dragNode.firstElementChild.cloneNode(true) as HTMLElement;
                 }
                 else if (!this.dragNode.getAttribute("svy-layoutname")) {
-                    this.highlightEl = this.dragNode.parentElement.cloneNode(true) as HTMLElement; //component
+                    this.highlightEl = this.dragNode.parentElement!.cloneNode(true) as HTMLElement; //component
                 }
             }
 
             this.renderer.addClass(this.highlightEl, 'highlight_element');
             this.renderer.removeAttribute(this.highlightEl, 'svy-id');
 
-            this.dragItem.topContainer = this.designerUtilsService.isTopContainer(this.dragNode.getAttribute("svy-layoutname"));
-            this.dragItem.layoutName = this.dragNode.getAttribute("svy-layoutname");
+            this.dragItem.topContainer = this.designerUtilsService.isTopContainer(this.dragNode.getAttribute("svy-layoutname")!);
+            this.dragItem.layoutName = this.dragNode.getAttribute("svy-layoutname")!;
             this.dragItem.componentType = this.dragItem.layoutName ? "layout" : "component";
         }
 
@@ -116,9 +116,9 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                     this.editorContentService.executeOnlyAfterInit(() => {
                         this.editorContentService.sendMessageToIframe({ id: 'dropHighlight', value: { dropHighlight: this.dragItem.layoutName, dropHighlightIgnoredIds: dropHighlightIgnoredIds } });
                     });
-                    this.dropHighlight = this.dragItem.layoutName;
+                    this.dropHighlight = this.dragItem.layoutName!;
                 }
-                this.editorSession.getState().drop_highlight = this.dragItem.componentType;
+                this.editorSession.getState().drop_highlight = this.dragItem.componentType!;
             } else return;
         }
 
@@ -136,7 +136,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'transition', 'opacity .5s ease-in-out 0');
         }
 
-        this.canDrop = this.getDropNode(this.dragItem.componentType, this.dragItem.topContainer, this.dragNode.getAttribute("svy-layoutname"), event, this.dragNode.getAttribute("svy-id"));
+        this.canDrop = this.getDropNode(this.dragItem.componentType!, this.dragItem.topContainer!, this.dragNode.getAttribute("svy-layoutname")!, event, this.dragNode.getAttribute("svy-id")!);
         if (!this.canDrop.dropAllowed) {
             this.editorContentService.getGlassPane().style.cursor = "not-allowed";
         } else this.editorContentService.getGlassPane().style.cursor = "pointer";
@@ -169,7 +169,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
     onMouseUp(event: MouseEvent) {
         if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging && this.canDrop.dropAllowed) {
-            const components = [];
+            const components: any[] = [];
             
             if (!this.canDrop.beforeChild && !this.canDrop.append) {
                 this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.dragNode);
@@ -181,7 +181,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             
             const uuids = this.editorSession.getSelection();
             uuids.forEach(uuid => {
-                const obj = {}
+                const obj: Record<string, any> = {}
                 if ((event.ctrlKey || event.metaKey) && this.dragCopy) {
                     obj['uuid'] = uuid;
                     if (this.canDrop.dropTarget) {
@@ -220,11 +220,11 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             }
         }
 
-        this.dragStartEvent = null;
+        this.dragStartEvent = null!;
         this.editorSession.setDragging( false );
         this.editorContentService.getGlassPane().style.cursor = "default";
-        this.dragNode = null;
-        this.dropHighlight = null;
+        this.dragNode = null!;
+        this.dropHighlight = null!;
         if (this.dragItem && this.dragItem.contentItemBeingDragged) {
             this.editorContentService.sendMessageToIframe({ id: 'destroyElement', existingElement: !this.dragCopy });
         }
@@ -238,13 +238,13 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         this.editorSession.unregisterAutoscroll(this);
     }
 
-    private findAncestor(el: HTMLElement, cls: string): HTMLElement {
-        while ((el = el.parentElement) && !el.classList.contains(cls));
+    private findAncestor(el: HTMLElement, cls: string): HTMLElement | null {
+        while ((el = el.parentElement!) && !el.classList.contains(cls));
         return el !== undefined && el !== null && el.classList.contains(cls) ? el : null;
     }
 
     private adjustPoint(x: number, y: number): { x: number, y: number } {
-        const style = window.getComputedStyle(this.editorContentService.getGlassPane().parentElement);
+        const style = window.getComputedStyle(this.editorContentService.getGlassPane().parentElement!);
         const rectangle = this.editorContentService.getGlassPane().getBoundingClientRect();
         return { x: x - parseInt(style.paddingLeft) - rectangle.left, y: y - parseInt(style.paddingLeft) - rectangle.top };
     }
@@ -252,7 +252,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     private getDropNode(type: string, topContainer: boolean, layoutName: string, event: MouseEvent, svyId: string) {
         const canDrop = this.designerUtilsService.getDropNode(false, type, topContainer, layoutName, event, undefined, svyId, this.dragNode);
         canDrop.dropAllowed = canDrop.dropAllowed && this.dragNode.classList.contains("inheritedElement")
-            && this.initialParent !== null && this.initialParent.getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
+            && this.initialParent !== null && this.initialParent.getAttribute("svy-id") !== canDrop.dropTarget!.getAttribute("svy-id") ? false : canDrop.dropAllowed;
         return canDrop;
     }
 

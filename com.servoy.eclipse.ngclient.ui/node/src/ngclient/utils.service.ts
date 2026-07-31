@@ -9,22 +9,22 @@ import { FormService } from './form.service';
 export class SvyUtilsService {
     private log: LoggerService;
     private doc: Document;
-    private formService: FormService;
+    private formService!: FormService;
 
     constructor(@Inject(DOCUMENT) _doc: any, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('SvyUtilsService');
         this.doc = _doc;
     }
 
-    public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
+    public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent | null {
         if (!event) {
             if (contextFilter || contextFilterElement) return null;
             this.log.error('event is undefined, returning default event');
             return { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() };
         }
         const targetEl = event.target as Element;
-        let form: string;
-        let parent = targetEl;
+        let form: string | null | undefined;
+        let parent: Element | null = targetEl;
         const targetElNameChain = new Array();
         let contextMatch = false;
         while (parent) {
@@ -43,8 +43,8 @@ export class SvyUtilsService {
 
             if ( parent.getAttribute( 'name' ) )
                 targetElNameChain.push( parent.getAttribute( 'name' ) );
-            else if ( parent['svyHostComponent'] && parent['svyHostComponent']['name'] ) {
-                targetElNameChain.push( parent['svyHostComponent']['name'] );
+            else if ( (parent as any)['svyHostComponent'] && (parent as any)['svyHostComponent']['name'] ) {
+                targetElNameChain.push( (parent as any)['svyHostComponent']['name'] );
             }
             parent = parent.parentElement;
         }
@@ -66,12 +66,12 @@ export class SvyUtilsService {
         jsEvent.modifiers = modifiers;
         jsEvent.x = event['pageX'];//TODO check
         jsEvent.y = event['pageY'];
-        jsEvent.formName = form;
+        jsEvent.formName = form ?? undefined;
 		if (event.detail) {
 			jsEvent.data = event.detail;
 		}
         for (const chain of targetElNameChain) {
-            if (!this.formService || this.formService.getFormCacheByName(form).getComponent(chain)) {
+            if (!this.formService || this.formService.getFormCacheByName(form!).getComponent(chain)) {
                 jsEvent['elementName'] = chain;
                 break;
             }
@@ -89,7 +89,7 @@ export class SvyUtilsService {
      */
     public deepExtend(args: any[]) {
         // Variables
-        const extended = {};
+        const extended: Record<string, any> = {};
         let deep = false;
         let i = 0;
         const length = args.length;

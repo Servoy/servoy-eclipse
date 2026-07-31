@@ -28,7 +28,7 @@ export class RecordRefType implements IType<any> {
         if(newClientData) {
             if (instanceOfServerSentRecordRef(newClientData) || instanceOfRecordRefForServer(newClientData)) return [newClientData, newClientData];
             else return [RecordRefType.generateRecordRef(newClientData.getId(), newClientData.getFoundset().getId()), newClientData];
-        } else return null;
+        } else return null!;
 	}
 
 }
@@ -40,10 +40,10 @@ const instanceOfRecordRefForServer = (obj: any): obj is RecordRefForServer =>
     obj != null && ((obj as RecordRefForServer).foundsetId !== undefined && (obj as RecordRefForServer)._svyRowId !== undefined);
 
 export class RecordRefForServer {
-    foundsetId: number;
-     _svyRowId: string;
+    foundsetId!: number;
+     _svyRowId!: string;
 }
 
 class ServerSentRecordRef extends RecordRefForServer {
-    recordhash: string;
+    recordhash!: string;
 }

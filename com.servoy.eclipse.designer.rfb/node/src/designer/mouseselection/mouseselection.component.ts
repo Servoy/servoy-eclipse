@@ -15,23 +15,23 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy, IContentMessageListener {
 
-    @ViewChild('lasso', { static: false }) lassoRef: ElementRef<HTMLElement>;
-    @ViewChildren('selected') selectedRef: QueryList<ElementRef<HTMLElement>>;
+    @ViewChild('lasso', { static: false }) lassoRef!: ElementRef<HTMLElement>;
+    @ViewChildren('selected') selectedRef!: QueryList<ElementRef<HTMLElement>>;
 
     nodes: Array<SelectionNode> = new Array<SelectionNode>();
     contentInit = false;
-    topAdjust: number;
-    leftAdjust: number;
+    topAdjust!: number;
+    leftAdjust!: number;
     lassostarted = false;
-    lastTimestamp: number;
+    lastTimestamp!: number;
     moveFCorLFC = false;
-    mouseDownEvent: MouseEvent = null;
+    mouseDownEvent: MouseEvent | null = null;
 
-    mousedownpoint: Point;
-    fieldLocation: Point;
-    selectedRefSubscription: Subscription;
-    editorStateSubscription: Subscription;
-    removeSelectionChangedListener: () => void;
+    mousedownpoint!: Point;
+    fieldLocation!: Point;
+    selectedRefSubscription!: Subscription;
+    editorStateSubscription!: Subscription;
+    removeSelectionChangedListener!: () => void;
 
     constructor(public readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, protected designerUtilsService: DesignerUtilsService,
@@ -125,7 +125,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 const newNodes = new Array<SelectionNode>();
                 const elements = this.editorContentService.getAllContentElements();
                 Array.from(elements).forEach(node => {
-                    if (selection.indexOf(node.getAttribute('svy-id')) >= 0) {
+                    if (selection.indexOf(node.getAttribute('svy-id')!) >= 0) {
                         const position =  this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                         const style = {
                             height: position.height + 'px',
@@ -137,12 +137,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         const layoutName = node.getAttribute('svy-layoutname');
                         newNodes.push({
                             style: style,
-                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                            svyid: node.getAttribute('svy-id'),
+                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            svyid: node.getAttribute('svy-id')!,
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                            containerName: layoutName,
-                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                            containerName: layoutName!,
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')!),
                             isFCorLFC: this.isSelectionFCorLFC()
                         })
                     }
@@ -174,17 +174,16 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 			found = this.designerUtilsService.getNode(event);
 		}
         if (found) {
-            if (this.editorSession.getSelection().indexOf(found.getAttribute('svy-id')) !== -1) {
+            if (this.editorSession.getSelection().indexOf(found.getAttribute('svy-id')!) !== -1) {
                 return;  //already selected
             }
             else if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
-                //check for hidden
                 let wrapper = found.parentElement;
                 while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
                     wrapper = wrapper.parentElement;
                 }
                 if (!wrapper || wrapper.style.visibility !== 'hidden') {
-                    this.editorSession.setSelection([found.getAttribute('svy-id')], this);
+                    this.editorSession.setSelection([found.getAttribute('svy-id')!], this);
                 }
             }
         }
@@ -214,12 +213,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
             this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust });
         }
-        this.fieldLocation = null;
+        this.fieldLocation = null!;
         if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
         if (event.button == 2 && this.editorSession.getSelection().length > 1) {
             //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
             const node = this.designerUtilsService.getNode(event);
-            if (node && this.editorSession.getSelection().indexOf(node.getAttribute('svy-id')) !== -1) {
+            if (node && this.editorSession.getSelection().indexOf(node.getAttribute('svy-id')!) !== -1) {
                 return;
             }
         }
@@ -248,16 +247,16 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                 left: position.left + this.leftAdjust + 'px',
                                 display: 'block'
                             } as CSSStyleDeclaration,
-                            svyid: node.getAttribute('svy-id'),
-                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            svyid: node.getAttribute('svy-id')!,
+                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                            containerName: layoutName,
-                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                            containerName: layoutName!,
+                            autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')!),
                             isFCorLFC: this.isSelectionFCorLFC()
                         };
                         newNodes.push(newNode);
-                        newSelection.push(node.getAttribute('svy-id'))
+                        newSelection.push(node.getAttribute('svy-id')!)
                     }
                 }
             });
@@ -293,7 +292,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     }
                 }
                 if (addToSelection) {
-                    const id = node.getAttribute('svy-id');
+                    const id = node.getAttribute('svy-id')!;
                     let selection = this.editorSession.getSelection();
                     if (selection && selection.length > 0 && event.shiftKey) return node;
                     const layoutName = node.getAttribute('svy-layoutname');
@@ -305,12 +304,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             left: position.left + this.leftAdjust + 'px',
                             display: 'block'
                         } as CSSStyleDeclaration,
-                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                        svyid: node.getAttribute('svy-id'),
+                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                        svyid: node.getAttribute('svy-id')!,
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                        containerName: layoutName,
-                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                        containerName: layoutName!,
+                        autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')!),
                         isFCorLFC: this.isSelectionFCorLFC()
                     };
                     if (event.ctrlKey || event.metaKey) {
@@ -348,7 +347,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         Array.from(elements).forEach((node) => {
                             const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                             if (this.rectanglesIntersect(rect1, position, false)) {
-                                const id = node.getAttribute('svy-id');
+                                const id = node.getAttribute('svy-id')!;
                                 const layoutName = node.getAttribute('svy-layoutname');
                                 const newNode = {
                                     style: {
@@ -358,12 +357,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                         left: position.left + this.leftAdjust + 'px',
                                         display: 'block'
                                     } as CSSStyleDeclaration,
-                                    isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
-                                    svyid: node.getAttribute('svy-id'),
+                                    isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                                    svyid: node.getAttribute('svy-id')!,
                                     isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                                     maxLevelDesign: node.classList.contains('maxLevelDesign'),
-                                    containerName: layoutName,
-                                    autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')),
+                                    containerName: layoutName!,
+                                    autowizardProperties: this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')!),
                                     isFCorLFC: this.isSelectionFCorLFC()
                                 };
                                 if (!selection.includes(id)) {
@@ -400,12 +399,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     applyWireframeForNode(selectedNode: ElementRef<HTMLElement>) {
-        const node = this.editorContentService.getContentElement(selectedNode.nativeElement.getAttribute('id'));
+        const node = this.editorContentService.getContentElement(selectedNode.nativeElement.getAttribute('id')!);
         if (node === undefined) return;
         const position = node.getBoundingClientRect();
-        // TODO is && node.getAttribute('svy-layoutname') needed??
         if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer') && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
-            this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title'));
+            this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title')!);
             if (this.editorSession.getState().showWireframe) {
                 this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
             }
@@ -484,10 +482,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     insertACopyAction(event: MouseEvent, node: SelectionNode, before: boolean) {
         event.stopPropagation();
-        const component = {}
+        const component: Record<string, any> = {}
         const htmlNode = this.editorContentService.getContentElement(node.svyid);
 
-        const layoutPackage = htmlNode.getAttribute('svy-layoutname').split('.');
+        const layoutPackage = htmlNode.getAttribute('svy-layoutname')!.split('.');
         component['packageName'] = layoutPackage[0];
         component['name'] = layoutPackage[1];
         const droptarget = (htmlNode.parentNode as HTMLElement).getAttribute('svy-id');
@@ -534,7 +532,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     standalone: false
 })
 export class PositionMenuDirective implements OnInit {
-    @Input('positionMenu') selectionNode: SelectionNode;
+    @Input('positionMenu') selectionNode!: SelectionNode;
 
     constructor(private editorContentService: EditorContentService, private elementRef: ElementRef<HTMLElement>) {
 
@@ -552,22 +550,22 @@ export class PositionMenuDirective implements OnInit {
 }
 
 export class SelectionNode {
-    svyid: string;
-    style: CSSStyleDeclaration;
+    svyid!: string;
+    style!: CSSStyleDeclaration;
     isResizable?: ResizeDefinition;
-    isContainer: boolean;
-    maxLevelDesign: boolean;
-    containerName: string;
+    isContainer!: boolean;
+    maxLevelDesign!: boolean;
+    containerName!: string;
     autowizardProperties?: string[];
-    isFCorLFC: boolean;
+    isFCorLFC!: boolean;
 }
 export class Point {
-    x: number;
-    y: number;
+    x!: number;
+    y!: number;
 }
 class ResizeDefinition {
-    t: boolean;
-    l: boolean;
-    b: boolean;
-    r: boolean;
+    t!: boolean;
+    l!: boolean;
+    b!: boolean;
+    r!: boolean;
 }

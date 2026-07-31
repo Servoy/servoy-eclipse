@@ -2,19 +2,19 @@ import { IComponentCache, IFormCache } from '@servoy/public';
 import { IType, TypesRegistry } from '../sablo/types_registry';
 
 export class FormSettings {
-    public name: string;
-    public size: { width: number; height: number };
+    public name!: string;
+    public size!: { width: number; height: number };
 }
 
 /** Cache for a Servoy form (data/model instances, no UI). Also keeps the component caches, Servoy form component caches etc. */
 export class FormCache implements IFormCache {
-    public navigatorForm: FormSettings;
+    public navigatorForm!: FormSettings;
     public partComponentsCache: Array<ComponentCache | StructureCache | FormComponentCache>;
     public layoutContainersCache: Map<string, StructureCache>;
     public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
     public componentCache: Map<string, ComponentCache>;
 
-    private _mainStructure: StructureCache;
+    private _mainStructure!: StructureCache;
     private _parts: Array<PartCache>;
 
     constructor(readonly formname: string, 
@@ -61,7 +61,7 @@ export class FormCache implements IFormCache {
     }
 
     public addLayoutContainer(container: StructureCache) {
-        const id = container.id || container['hiddenId'] || container.attributes['svy-id-hidden'];
+        const id = container.id || (container as any)['hiddenId'] || container.attributes?.['svy-id-hidden'];
         if (id) {
            this.layoutContainersCache.set(id, container);
         }
@@ -71,7 +71,7 @@ export class FormCache implements IFormCache {
         this._parts.push(part);
     }
 
-    public getPart(name: string): PartCache{
+    public getPart(name: string): PartCache | undefined{
          return this._parts.find(elem => elem.name == name);
     }
     
@@ -79,20 +79,20 @@ export class FormCache implements IFormCache {
         this.formComponents.set(formComponent.name, formComponent);
     }
     
-    public getFormComponent(name: string): FormComponentCache {
+    public getFormComponent(name: string): FormComponentCache | undefined {
         return this.formComponents.get(name);
     }
 
-    public getComponent(name: string): ComponentCache {
+    public getComponent(name: string): ComponentCache | undefined {
         const cc = this.componentCache.get(name);
         return cc ? cc : this.getFormComponent(name);
     }
 
-    public getLayoutContainer(id: string): StructureCache {
+    public getLayoutContainer(id: string): StructureCache | undefined {
         return this.layoutContainersCache.get(id);
     }
     
-    public getLayoutContainerByFCName(name: string): StructureCache {
+    public getLayoutContainerByFCName(name: string): StructureCache | undefined {
 		const arrHelp = Array.from(this.layoutContainersCache).filter(cont => {
 			if (cont[1].items.length) {
 				return cont[1].items.map(item => {
@@ -108,22 +108,22 @@ export class FormCache implements IFormCache {
     }
 
     public removeComponent(name: string) {
-        this.removeComponentFromCache(this.componentCache.get(name));
+        this.removeComponentFromCache(this.componentCache.get(name)!);
         this.componentCache.delete(name);
     }
 
     public removeLayoutContainer(id: string) {
-        this.removeComponentFromCache(this.layoutContainersCache.get(id));
+        this.removeComponentFromCache(this.layoutContainersCache.get(id)!);
         this.layoutContainersCache.delete(id);
     }
 
     public removeFormComponent(name: string) {
-        this.removeComponentFromCache(this.formComponents.get(name));
+        this.removeComponentFromCache(this.formComponents.get(name)!);
         this.formComponents.delete(name);
     }
 
     public getComponentSpecification(componentName: string) {
-        let componentCache: ComponentCache = this.componentCache.get(componentName);
+        let componentCache: ComponentCache | undefined = this.componentCache.get(componentName);
         if (!componentCache) componentCache = this.getFormComponent(componentName);
         return componentCache ? this.typesRegistry.getComponentSpecification(componentCache.specName) : undefined;
     }
@@ -216,7 +216,7 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 
     public readonly rId = repeaterIdCounter++;
 
-    public parent: StructureCache;
+    public parent!: StructureCache;
 
     constructor(public readonly name: string,
         public readonly specName: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
@@ -274,16 +274,15 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 }
 
 export class StructureCache implements IRepeaterIDProvider{
-    public parent: StructureCache;
+    public parent!: StructureCache;
     public model:  { [property: string]: unknown } = {};
     public readonly rId = repeaterIdCounter++;
     constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
-        public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache>,
+        public readonly items: Array<StructureCache | ComponentCache | FormComponentCache> = [],
         public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
-        if (!this.items) this.items = [];
     }
 
-    addChild(child: StructureCache | ComponentCache | FormComponentCache, insertBefore?: StructureCache | ComponentCache): StructureCache {
+    addChild(child: StructureCache | ComponentCache | FormComponentCache, insertBefore?: StructureCache | ComponentCache): StructureCache | null {
         if (insertBefore) {
             const idx =  this.items.indexOf(insertBefore);
            this.items.splice( idx, 0, child);
@@ -307,8 +306,9 @@ export class StructureCache implements IRepeaterIDProvider{
             return true;
         }
         if (child instanceof StructureCache) {
-            child.parent = undefined;
+            child.parent = undefined!;
         }
+        return false;
     }
 
     getDepth(): number {
@@ -338,8 +338,7 @@ export class PartCache implements IRepeaterIDProvider {
     constructor(public readonly name: string,
         public readonly classes: Array<string>,
         public layout: { [property: string]: string },
-        public readonly items?: Array<ComponentCache | FormComponentCache | StructureCache>) {
-        if (!this.items) this.items = [];
+        public readonly items: Array<ComponentCache | FormComponentCache | StructureCache> = []) {
     }
 
     addChild(child: ComponentCache | FormComponentCache | StructureCache) {
@@ -381,8 +380,9 @@ export class FormComponentCache extends ComponentCache {
             return true;
         }
         if (child instanceof StructureCache) {
-            child.parent = undefined;
+            child.parent = undefined!;
         }
+        return false;
     }
 
     initForDesigner(initialModelProperties: { [property: string]: unknown }): FormComponentCache {
@@ -401,8 +401,8 @@ export class FormComponentProperties {
 
 
 export class Dimension {
-    public width: number;
-    public height: number;
+    public width = 0;
+    public height = 0;
 }
 
 export interface Position {

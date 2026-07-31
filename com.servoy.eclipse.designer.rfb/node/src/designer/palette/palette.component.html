@@ -36,7 +36,7 @@
             <ng-template>
               <ul>
                 @for (component of package.components | searchTextFilter : searchText; track component) {
-                  <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)" [htmlTooltip]="component.description" [tooltipInitialDelay]="2000" [tooltipDismissDelay]="10000">
+                  <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model!, null!, undefined, undefined, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)" [htmlTooltip]="component.description" [tooltipInitialDelay]="2000" [tooltipDismissDelay]="10000">
                     <span>
                       @if (component.properties) {
                         <img id="chevron" draggable="false" [src]="component.isOpen ? '/rfb/angular/templates/images/chevron_down.png' : '/rfb/angular/templates/images/chevron_right.png'" style="margin-left:-16px;margin-right:0px;">
@@ -60,7 +60,7 @@
                       }
                       <ul>
                         @for (ghost of component.types; track ghost) {
-                          <li (mousedown)="onMouseDown($event, ghost.name, null, null, ghost)">
+                          <li (mousedown)="onMouseDown($event, ghost.name, null!, null!, ghost)">
                             <span>
                               @if (component.icon) {
                                 <img draggable="false" [src]="'/'+component.icon" alt=""/>
@@ -72,7 +72,7 @@
                         @for (propertyName of component.properties; track propertyName) {
                           <ul [ngbCollapse]="!component.isOpen">
                             @for (comp of component.components; track comp) {
-                              <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, propertyName, comp.propertyValue, component.componentType)"><span>@if (component.icon) {
+                              <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model!, null!, propertyName, comp.propertyValue, component.componentType)"><span>@if (component.icon) {
                                 <img draggable="false" [src]="'/'+component.icon" alt=""/>
                               } {{propertyName + ': ' + comp.displayName}}</span></li>
                             }
@@ -88,7 +88,7 @@
                           <div>{{categoryObject.key}}</div>
                           <ul>
                             @for (component of categoryObject.value | searchTextFilter : searchText; track component) {
-                              <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model, null, null, null, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)">
+                              <li (mousedown)="onMouseDown($event, component.name, component.packageName ? component.packageName : package.packageName, component.model!, null!, undefined, undefined, component.componentType, component.topContainer, component.layoutName, component.attributes, component.children)" (click)="onClick(component)">
                                 <span>@if (component.icon) {
                                   <img draggable="false" [src]="'/'+component.icon" alt=""/>
                                 }{{component.displayName}}</span>

@@ -12,7 +12,7 @@ import { ServoyDefaultBaseChoice } from '../basechoice';
 })
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 
-    @Output() mainTabIndex;
+    @Output() mainTabIndex: any;
 
     constructor(renderer: Renderer2, formattingService: FormattingService, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) doc: Document) {
         super(renderer, cdRef, formattingService, doc);
@@ -32,7 +32,7 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
                 ret = allowMultiselect ? ret + this.valuelistID[index + this.allowNullinc].realValue + '\n' :
                     this.valuelistID[index + this.allowNullinc].realValue + '';
         });
-        if (allowMultiselect) ret = ret.replace(/\n$/, ''); // remove the last \n
+        if (allowMultiselect) ret = ret!.replace(/\n$/, ''); // remove the last \n
         if (ret === '') ret = null;
         return ret;
     }
@@ -71,7 +71,7 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
         super.baseItemClicked(event, changed, this.getDataproviderFromSelection());
     }
 
-    attachEventHandlers(element, index) {
+    attachEventHandlers(element: any, index: any) {
         this.renderer.listen(element, 'click', (event) => {
             if (!this.readOnly && this.enabled) {
                 this.itemClicked(event, index);

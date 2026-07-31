@@ -8,16 +8,16 @@ import { ConverterService } from './converter.service';
 })
 export class SabloService {
 
-    private locale: Locale = null;
-    private wsSession: WebsocketSession;
-    private currentServiceCallCallbacks = [];
-    private currentServiceCallDone: boolean;
+    private locale: Locale | null = null;
+    private wsSession!: WebsocketSession;
+    private currentServiceCallCallbacks: Array<() => void> = [];
+    private currentServiceCallDone!: boolean;
     private currentServiceCallWaiting = 0;
-    private currentServiceCallTimeouts;
+    private currentServiceCallTimeouts!: any;
     private log: LoggerService;
     private inLogCall = false;
 
-    private expectFormToShowOnClientDeferr: Deferred<void>; // see comment from expectFormToShowOnClient()
+    private expectFormToShowOnClientDeferr!: Deferred<void>; // see comment from expectFormToShowOnClient()
     private noOfFormsThatAreGoingToShow: number = 0;
 
     constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private windowRefService: WindowRefService, logFactory: LoggerFactory) {
@@ -72,7 +72,7 @@ export class SabloService {
             return false;
         });
 
-        this.windowRefService.nativeWindow['toggleSabloLogWrapping'] = (enable?: boolean) => {
+        (this.windowRefService.nativeWindow as any)['toggleSabloLogWrapping'] = (enable?: boolean) => {
             const shouldEnable = enable !== undefined ? enable : this.windowRefService.nativeWindow.window.console.log === oldLog;
             if (shouldEnable) {
                 enableWrapping();
@@ -110,15 +110,15 @@ export class SabloService {
         }
     }
     
-    public connect(context, queryArgs, websocketUri): WebsocketSession {
+    public connect(context: any, queryArgs: any, websocketUri: any): WebsocketSession {
         const wsSessionArgs = {
             context,
             queryArgs,
             websocketUri
         };
-        this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
+        this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr()!, this.getWindowName()!, this.getWindownr()!], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
 
-        this.wsSession.onMessageObject((msg) => {
+        this.wsSession.onMessageObject((msg: any) => {
             // data got back from the server
             if (msg.clientnr) {
                 this.sessionStorage.set('clientnr', msg.clientnr);
@@ -156,7 +156,7 @@ export class SabloService {
             this.noOfFormsThatAreGoingToShow--;
             if (this.noOfFormsThatAreGoingToShow == 0) {
                 this.expectFormToShowOnClientDeferr.resolve();
-                delete this.expectFormToShowOnClientDeferr;
+                this.expectFormToShowOnClientDeferr = undefined!;
             }
         }
         // normally this.noOfFormsThatAreGoingToShow is either 0 or 1; it's 1 when server knows it will 'touch' a form that was/will be made visible;
@@ -216,7 +216,7 @@ export class SabloService {
                 langAndCountry = browserLanguages[1];
             }
         } else {
-            langAndCountry = (this.windowRefService.nativeWindow.navigator.language || this.windowRefService.nativeWindow.navigator['userLanguage']) as string;
+            langAndCountry = (this.windowRefService.nativeWindow.navigator.language || (this.windowRefService.nativeWindow.navigator as any)['userLanguage']) as string;
         }
         // in some weird scenario in firefox is not set, default it to en
         if (!langAndCountry) langAndCountry = 'en';
@@ -246,8 +246,8 @@ export class SabloService {
      * that is where getCurrentRequestInfo() gets it from. And that is where special code - like foundset listeners also get the current request info from to
      * return it back to the user (component/service code).   
      */
-    public callService<T>(serviceName: string, methodName: string, argsObject, async?: boolean): RequestInfoPromise<T> {
-        if (!this.wsSession) return; // in designer, designform_component.component.ts can for example call resolve form component - and that can end up in a service call (formLoaded); but that one doesn't have a wsSession; so avoid the error
+    public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
+        if (!this.wsSession) return undefined!; // in designer, designform_component.component.ts can for example call resolve form component - and that can end up in a service call (formLoaded); but that one doesn't have a wsSession; so avoid the error
 
         const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
         return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
@@ -283,7 +283,7 @@ export class SabloService {
     private callServiceCallbacksWhenDone() {
         if (this.currentServiceCallDone || --this.currentServiceCallWaiting === 0) {
             this.currentServiceCallWaiting = 0;
-            this.currentServiceCallTimeouts.map((id) => clearTimeout(id));
+            this.currentServiceCallTimeouts.map((id: any) => clearTimeout(id));
             const tmp = this.currentServiceCallCallbacks;
             this.currentServiceCallCallbacks = [];
             tmp.map((func: () => void) => {
@@ -342,7 +342,7 @@ export class SabloService {
             error = new Error();
             arr.push(...msg);
         }
-        let message = error.stack;
+        let message = error.stack!;
         if (message.startsWith('Error')) {
             message = message.substring(5);
         }

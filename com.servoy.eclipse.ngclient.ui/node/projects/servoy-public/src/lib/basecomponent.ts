@@ -16,16 +16,16 @@ import { ServoyApi } from './servoy_api';
 @Directive()
 // eslint-disable-next-line
 export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
-    @Input() name: string;
-    @Input() servoyApi: ServoyApi;
-    @Input() servoyAttributes: { [property: string]: string };
+    @Input() name!: string;
+    @Input() servoyApi!: ServoyApi;
+    @Input() servoyAttributes!: { [property: string]: string };
 
-    @ViewChild('element', { static: false, read: ElementRef }) elementRef: ElementRef<T>;
+    @ViewChild('element', { static: false, read: ElementRef }) elementRef!: ElementRef<T>;
 
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor: ComponentContributor;
-    private initialized: boolean;
-    private changes: SimpleChanges;
+    private initialized = false;
+    private changes: SimpleChanges | null = null;
 
     constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
         this.componentContributor = new ComponentContributor();
@@ -88,7 +88,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      */
     ngOnDestroy() {
         this.servoyApi.unRegisterComponent(this);
-        if (this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = null;
+        if (this.getNativeElement()) (this.getNativeElement() as any)['svyHostComponent'] = null;
     }
 
     /**
@@ -100,7 +100,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
         this.addAttributes();
         this.componentContributor.componentCreated(this);
         this.viewStateListeners.forEach(listener => listener.afterViewInit());
-        if (this.getNativeElement()) this.getNativeElement()['svyHostComponent'] = this;
+        if (this.getNativeElement()) (this.getNativeElement() as any)['svyHostComponent'] = this;
     }
 
     /**
@@ -133,7 +133,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * this should return the main native element (like the first div) which is marked as #element in the main div.
      */
     public getNativeElement(): T {
-        return this.elementRef ? this.elementRef.nativeElement : null;
+        return this.elementRef ? this.elementRef.nativeElement : null!;
     }
 
     /**
@@ -154,28 +154,28 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * returns the Renderer2 object which must be used to access/change the dom elements for this component
      */
     public getWidth(): number {
-        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetWidth;
+        return (this.getNativeElement().parentNode!.parentNode as HTMLElement).offsetWidth;
     }
 
     /**
      * returns the Renderer2 object which must be used to access/change the dom elements for this component
      */
     public getHeight(): number {
-        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetHeight;
+        return (this.getNativeElement().parentNode!.parentNode as HTMLElement).offsetHeight;
     }
 
     /**
      * returns the Renderer2 object which must be used to access/change the dom elements for this component
      */
     public getLocationX(): number {
-        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetLeft;
+        return (this.getNativeElement().parentNode!.parentNode as HTMLElement).offsetLeft;
     }
 
     /**
      * returns the Renderer2 object which must be used to access/change the dom elements for this component
      */
     public getLocationY(): number {
-        return (this.getNativeElement().parentNode.parentNode as HTMLElement).offsetTop;
+        return (this.getNativeElement().parentNode!.parentNode as HTMLElement).offsetTop;
     }
 
     /**

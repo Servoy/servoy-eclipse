@@ -7,10 +7,10 @@ import {ServoyDefaultBaseComponent} from '../basecomponent';
     standalone: false
 })
 export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
-    @Input() lineSize: number;
-    @Input() roundedRadius: number;
-    @Input() shapeType: number;
-    @Input() size: {width: number; height: number};
+    @Input() lineSize!: number;
+    @Input() roundedRadius!: number;
+    @Input() shapeType!: number;
+    @Input() size!: {width: number; height: number};
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);

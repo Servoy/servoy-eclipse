@@ -31,8 +31,8 @@ import { fromEvent, debounceTime, Subscription } from 'rxjs';
  */
 export abstract class AbstractFormComponent {
 
-    _containers: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } };
-    _cssstyles: { [container: string]: { [classname: string]: string } };
+    _containers!: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } };
+    _cssstyles!: { [container: string]: { [classname: string]: string } };
     protected componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
 
     constructor(protected renderer: Renderer2) {
@@ -109,7 +109,7 @@ export abstract class AbstractFormComponent {
     triggerNgOnChangeWithSameRefDueToSmartPropUpdate(componentName: string, propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[]): void {
         const comp = this.componentCache[componentName];
         if (comp) {
-            const changes = {};
+            const changes: Record<string, any> = {};
             propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
                 changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(propertyChangedButNotByRef.newPropertyValue, propertyChangedButNotByRef.newPropertyValue, false);
             });
@@ -140,7 +140,7 @@ export abstract class AbstractFormComponent {
           @for (part of formCache.parts; track part.rId) {
             <div [svyContainerStyle]="part" [svyContainerLayout]="part.layout" [svyContainerClasses]="part.classes"> <!-- part div -->
               @for (item of part.items; track item.rId) {
-                <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false ? {'display': 'none'} : null" style="position:absolute"> <!-- wrapper div -->
                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component or formcomponent -->
                 </div>
               }
@@ -167,7 +167,7 @@ export abstract class AbstractFormComponent {
         <ng-template  #cssPositionContainer  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
             @for (item of state.items; track item.rId) {
-              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false ? {'display': 'none'} : null" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
               </div>
             }
@@ -180,7 +180,7 @@ export abstract class AbstractFormComponent {
           @if (state.model.visible) {
             <div [svyContainerStyle]="state.formComponentProperties" [svyContainerLayout]="state.formComponentProperties.layout" [svyContainerClasses]="state.formComponentProperties.classes" [svyContainerAttributes]="state.formComponentProperties.attributes" style="position:relative" class="svy-formcomponent">
               @for (item of state.items; track item.rId) {
-                <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+                <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false ? {'display': 'none'} : null" style="position:absolute"> <!-- wrapper div -->
                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this }"></ng-template>  <!-- component  -->
                 </div>
               }
@@ -221,6 +221,7 @@ export abstract class AbstractFormComponent {
  * This is the definition of a angular component that represents servoy forms.
  */
 export class FormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, IFormComponent {
+    [key: string]: any;
     readonly svyResponsiveDiv = viewChild<TemplateRef<any>>('svyResponsiveDiv');
     readonly cssPositionContainer = viewChild<TemplateRef<any>>('cssPositionContainer');
     // structure viewchild template generate start
@@ -236,16 +237,16 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     // component viewchild template generate end
 
-    @Input() name: string;
+    @Input() name!: string;
 
     //** "injectedComponentRefs" is used for being able to inject some test component templates inside Karma/Jasmine unit tests */
-    readonly injectedComponentRefs = input<Record<string, TemplateRef<any>>>(undefined);
+    readonly injectedComponentRefs = input<Record<string, TemplateRef<any>> | undefined>(undefined);
 
-    formClasses = signal<string[]>(undefined);
+    formClasses = signal<string[] | null>(undefined!);
 
-    formCache: FormCache;
+    formCache!: FormCache;
 
-    absolutFormPosition = {};
+    absolutFormPosition: Record<string, any> = {};
     detectingChanges = false;
 
     private handlerCache: { [property: string]: { [property: string]: (event: Event) => void } } = {};
@@ -276,23 +277,23 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         // api args do not keep dynamic types, have no previous value and should not be relative to a property context in their impl
         (args as any[])?.forEach((val: any, i: number) =>
             args[i] = converterService.convertFromServerToClient(val, callSpec?.getArgumentType(i),
-                undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
+                undefined!, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES));
 
         if (comp) {
             const proto = Object.getPrototypeOf(comp);
             if (proto[apiName]) {
                 // also convert the return value
                 return Promise.resolve(proto[apiName].apply(comp, args)).then((ret) =>
-                    converterService.convertFromClientToServer(ret, callSpec?.returnType, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
+                    converterService.convertFromClientToServer(ret, callSpec?.returnType!, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
                 ); // I think we don't need to define an error callback as well as there is nothing to convert then
             } else {
                 log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
-                return null;
+                return null!;
             }
         }
         else {
             log.error(log.buildMessage(() => ('Trying to call api ' + apiName + ' while its component ' + compName + ' was not found,make sure component is present and visible.')));
-            return null;
+            return null!;
         }
 
     }
@@ -329,13 +330,13 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             if (changes.name.previousValue) this.formservice.destroy(changes.name.previousValue, false); // TODO should we do something so that ngOnDestroy of child components still gets called before the uiDestroyed() or model properties? see what formservice.destroy does
             // really make sure all form state is reverted to default for this new name
             this.formCache = this.formservice.getFormCache(this);
-            const styleClasses: string = this.formCache.getComponent('').model.styleClass as string;
+            const styleClasses: string = this.formCache.getComponent('')!.model.styleClass as string;
             if (styleClasses)
                 this.formClasses.set(styleClasses.split(' '));
             else
                 this.formClasses.set(null);
-            this._containers = this.formCache.getComponent('').model.containers;
-            this._cssstyles = this.formCache.getComponent('').model.cssstyles;
+            this._containers = this.formCache.getComponent('')!.model.containers!;
+            this._cssstyles = this.formCache.getComponent('')!.model.cssstyles!;
             this.handlerCache = {};
             this.servoyApiCache = {};
             this.componentCache = {};
@@ -361,10 +362,10 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
+            return item.tagname ? this[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer()! : this.svyResponsiveDiv()!);
         } else if (item instanceof FormComponentCache) {
-            if (item.hasFoundset) return this.servoycoreListformcomponent();
-            return item.responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
+            if (item.hasFoundset) return this.servoycoreListformcomponent()!;
+            return item.responsive ? this.formComponentResponsiveDiv()! : this.formComponentAbsoluteDiv()!;
         } else {
             let componentRef = this[item.type];
 
@@ -381,7 +382,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
-            return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv() : this.formComponentResponsiveDiv();
+            return state.model.containedForm!.absoluteLayout ? this.formComponentAbsoluteDiv()! : this.formComponentResponsiveDiv()!;
         } else {
             // TODO: this has to be replaced with a type property on the state object
             // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore
@@ -393,7 +394,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     public getAbsoluteFormStyle() {
-        const formData = this.formCache.getComponent('');
+        const formData = this.formCache.getComponent('')!;
 
         for (const key in this.absolutFormPosition) {
             if (this.absolutFormPosition.hasOwnProperty(key)) {
@@ -407,7 +408,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         this.absolutFormPosition['position'] = 'absolute';
 
         if (formData.model.borderType) {
-            const borderStyle = formData.model.borderType;
+            const borderStyle: Record<string, any> = formData.model.borderType;
             for (const key of Object.keys(borderStyle)) {
                 this.absolutFormPosition[key] = borderStyle[key];
             }
@@ -431,7 +432,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     }
 
     datachange(component: ComponentCache, property: string, value: any, dataprovider: boolean) {
-        const model = this.formCache.getComponent(component.name).model;
+        const model = this.formCache.getComponent(component.name)!.model;
         const oldValue = model[property];
         model[property] = value;
         this.formservice.sendChanges(this.name, component.name, property, value, oldValue, dataprovider);
@@ -447,7 +448,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         if (func == null && item.handlers && item.handlers.indexOf(handler) >= 0) {
             const me = this;
             // eslint-disable-next-line
-            func = function(event) {
+            func = function(event: any) {
                 if (event && event.preventDefault instanceof Function) event.preventDefault();
                 return me.formservice.executeEvent(me.name, item.name, handler, arguments);
             };
@@ -485,23 +486,23 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
             }
             return null;
         } else {
-            return FormComponent.doCallApiOnComponent(this.componentCache[componentName], this.formCache.getComponentSpecification(componentName),
+            return FormComponent.doCallApiOnComponent(this.componentCache[componentName], this.formCache.getComponentSpecification(componentName)!,
                 apiName, args, this.converterService, this.log, componentName);
         }
     }
 
     getContainerByName(containername: string): Element {
-        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
+        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]')!;
     }
 
     public updateFormStyleClasses(ngutilsstyleclasses: string): void {
-        const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+        const styleClasses: string | undefined = this.formCache.getComponent('')!.model.styleClass;
         if (styleClasses)
             this.formClasses.set(styleClasses.split(' '));
         else
             this.formClasses.set([]);
         if (ngutilsstyleclasses) {
-            this.formClasses.set(this.formClasses().concat(ngutilsstyleclasses.split(' ')));
+            this.formClasses.set(this.formClasses()!.concat(ngutilsstyleclasses.split(' ')));
         }
     }
 
@@ -510,8 +511,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         if (formElement) {
             const formSize = formElement.getBoundingClientRect();
             const value = { width: formSize.width, height: formSize.height }
-            const oldValue = this.formCache.getComponent('').model['size'];
-            if (oldValue.width != value.width || oldValue.height != value.height) {
+            const oldValue = this.formCache.getComponent('')!.model['size'] as any;
+            if (oldValue?.width != value.width || oldValue?.height != value.height) {
 				if (this.formservice.getFormCache(this)){
 					this.formservice.sendChanges(this.name, '', 'size', value, oldValue, false);
 				}else{

@@ -20,7 +20,7 @@ export class PersistIdentifier {
      * Writes it as a String in JSON format - that will probably be used client side in svy-id attributes,
      */
     public static fromJSONString(jsonContent: string): PersistIdentifier {
-        if (jsonContent == null) return null;
+        if (jsonContent == null) return null!;
 
         const firstChar = jsonContent.charAt(0);
 
@@ -38,8 +38,8 @@ export class PersistIdentifier {
             // if componentLocator is not a String, it can only be a JSONArray of Strings
             return new PersistIdentifier(componentLocator, ghostIdentifierInsideComp);
         } else if (firstChar == '[') {
-            return new PersistIdentifier(JSON.parse(jsonContent) as Array<string>, undefined);
-        } else return new PersistIdentifier([ jsonContent ], undefined);
+            return new PersistIdentifier(JSON.parse(jsonContent) as Array<string>, undefined!);
+        } else return new PersistIdentifier([ jsonContent ], undefined!);
     }
     
     /**

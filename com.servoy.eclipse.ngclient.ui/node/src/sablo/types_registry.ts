@@ -38,17 +38,17 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         } else this.types[typeName] = theType;
     }
 
-    getAlreadyRegisteredType(typeFromServer: ITypeFromServer): IType<any> {
+    getAlreadyRegisteredType(typeFromServer: ITypeFromServer): IType<any> | undefined {
         let t: IType<any>;
         if (typeof typeFromServer == 'string') {
             t = this.types[typeFromServer];
             if (!t) this.logger.error('[TypeRegistry] getAlreadyRegisteredType: cannot find simple client side type \''
                         + typeFromServer + '\'; no such type was registered in client side code; ignoring...');
         }
-        return t;
+        return t!;
     }
 
-    processTypeFromServer(typeFromServer: ITypeFromServer, webObjectSpecName: string): IType<any> {
+    processTypeFromServer(typeFromServer: ITypeFromServer, webObjectSpecName: string): IType<any> | undefined {
         if (typeof typeFromServer == 'string') {
             const t = this.types[typeFromServer];
             if (!t) this.logger.error('[TypeRegistry] processTypeFromServer: cannot find simple client side type \''
@@ -56,25 +56,22 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
             return t;
         } else {
             const factoryTypeFromServer = typeFromServer as [string, Record<string, unknown>] ;
-            // it's a factory created type; get the actual specific type name from the factory
             const typeFactory = this.typeFactoryRegistry.getTypeFactory(factoryTypeFromServer[0]);
             if (!typeFactory) {
                 this.logger.error('[TypeRegistry] trying to process factory type into actual specific type for a factory type with name \''
                         + factoryTypeFromServer[0] + '\' but no such factory is registered...');
-                return null;
+                return undefined;
             } else {
                 return typeFactory.getOrCreateSpecificType(factoryTypeFromServer[1], webObjectSpecName);
             }
         }
     }
 
-    processPropertyDescriptionFromServer(propertyDescriptionFromServer: IPropertyDescriptionFromServer, webObjectSpecName: string): IPropertyDescription {
+    processPropertyDescriptionFromServer(propertyDescriptionFromServer: IPropertyDescriptionFromServer, webObjectSpecName: string): IPropertyDescription | undefined {
         if (propertyDescriptionFromServer instanceof Array || typeof propertyDescriptionFromServer == 'string') {
-            // it's just a type, no pushToServer value
             const t = this.processTypeFromServer(propertyDescriptionFromServer as ITypeFromServer, webObjectSpecName);
             return t ? new PropertyDescription(t) : undefined;
         } else {
-            // it's a PD, type && pushToServer
             const propertyDescriptionWithMultipleEntries = propertyDescriptionFromServer as IPropertyDescriptionFromServerWithMultipleEntries;
             return new PropertyDescription(
                     propertyDescriptionWithMultipleEntries.t ? this.processTypeFromServer(propertyDescriptionWithMultipleEntries.t, webObjectSpecName) : undefined,
@@ -120,15 +117,15 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         // first create the custom object types defined in this spec ('ftd' stands for factory type details)
         if (webObjectSpecificationFromServer.ftd) this.processFactoryTypeDetails(webObjectSpecificationFromServer.ftd, webObjectSpecName);
 
-        let properties: ObjectOfIPropertyDescription;
-        let handlers: ObjectOfIEventHandlerFunctions;
-        let apiFunctions: ObjectOfIWebObjectFunctions;
+        let properties: ObjectOfIPropertyDescription | undefined;
+        let handlers: ObjectOfIEventHandlerFunctions | undefined;
+        let apiFunctions: ObjectOfIWebObjectFunctions | undefined;
 
         // properties
         if (webObjectSpecificationFromServer.p) {
             properties = {};
             for (const propertyName of Object.keys(webObjectSpecificationFromServer.p)) {
-                properties[propertyName] = this.processPropertyDescriptionFromServer(webObjectSpecificationFromServer.p[propertyName], webObjectSpecName);
+                properties[propertyName] = this.processPropertyDescriptionFromServer(webObjectSpecificationFromServer.p[propertyName], webObjectSpecName)!;
             }
         }
 
@@ -170,15 +167,15 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
         return new WebObjectApiFunction(...this.processFunction(functionFromServer, webObjectSpecName), functionFromServer.srv);
     }
 
-    private processFunction(functionFromServer: IWebObjectFunctionFromServer, webObjectSpecName: string): [IType<any>, ObjectOfITypeWithNumberKeys] {
-        let returnType: IType<any>;
-        let argumentTypes: ObjectOfITypeWithNumberKeys;
+    private processFunction(functionFromServer: IWebObjectFunctionFromServer, webObjectSpecName: string): [IType<any> | undefined, ObjectOfITypeWithNumberKeys | undefined] {
+        let returnType: IType<any> | undefined;
+        let argumentTypes: ObjectOfITypeWithNumberKeys | undefined;
 
         if (functionFromServer.r) returnType = this.processTypeFromServer(functionFromServer.r, webObjectSpecName);
         for (const argIdx in functionFromServer) {
             if (argIdx !== 'r' && argIdx !== 'iBDE' && argIdx !== 'srv') {
                 if (!argumentTypes) argumentTypes = {};
-                argumentTypes[argIdx] = this.processTypeFromServer(functionFromServer[argIdx], webObjectSpecName);
+                argumentTypes[argIdx] = this.processTypeFromServer(functionFromServer[argIdx], webObjectSpecName)!;
             }
         }
         return [returnType, argumentTypes];
@@ -285,7 +282,7 @@ export class PushToServerUtils {
         return pushToServerRawValue;
     }
 
-    public static combineWithChildStatic(parentComputedPushToServer: PushToServerEnum, childDeclaredPushToServer: PushToServerEnum) {
+    public static combineWithChildStatic(parentComputedPushToServer: PushToServerEnum, childDeclaredPushToServer: PushToServerEnum | undefined | null) {
         let computed: PushToServerEnum;
         if (typeof parentComputedPushToServer == 'undefined') parentComputedPushToServer = PushToServerEnum.REJECT; // so parent can never be undefined; it would be reject then
 
@@ -338,11 +335,11 @@ class PropertyDescription implements IPropertyDescription {
             private readonly pushToServer?: PushToServerEnum,
         ) {}
 
-    getPropertyType(): IType<any> {
+    getPropertyType(): IType<any> | undefined {
         return this.propertyType;
     }
 
-    getPropertyDeclaredPushToServer(): PushToServerEnum {
+    getPropertyDeclaredPushToServer(): PushToServerEnum | undefined {
         return this.pushToServer;
     }
 
@@ -361,15 +358,15 @@ class WebObjectSpecification implements IWebObjectSpecification {
         private readonly apiFunctions?: ObjectOfIWebObjectFunctions
     ) {}
 
-    getPropertyDescription(propertyName: string): IPropertyDescription {
+    getPropertyDescription(propertyName: string): IPropertyDescription | undefined {
         return this.propertyDescriptions ? this.propertyDescriptions[propertyName] : undefined;
     }
 
-    getPropertyType(propertyName: string): IType<any> {
+    getPropertyType(propertyName: string): IType<any> | undefined {
         return this.propertyDescriptions ? this.propertyDescriptions[propertyName]?.getPropertyType() : undefined;
     }
 
-    getPropertyDeclaredPushToServer(propertyName: string): PushToServerEnum {
+    getPropertyDeclaredPushToServer(propertyName: string): PushToServerEnum | undefined {
         return this.propertyDescriptions ? this.propertyDescriptions[propertyName]?.getPropertyDeclaredPushToServer() : undefined;
     }
 
@@ -379,15 +376,15 @@ class WebObjectSpecification implements IWebObjectSpecification {
     }
 
         /** this can return null if no property descriptions needed to be sent to client (no special client side type nor pushToServer) */
-    getPropertyDescriptions(): ObjectOfIPropertyDescription {
+    getPropertyDescriptions(): ObjectOfIPropertyDescription | undefined {
         return this.propertyDescriptions;
     }
 
-    getHandler(handlerName: string): IWebObjectFunction {
+    getHandler(handlerName: string): IWebObjectFunction | undefined {
         return this.handlers ? this.handlers[handlerName] : undefined;
     }
 
-    getApiFunction(apiFunctionName: string): IWebObjectFunction {
+    getApiFunction(apiFunctionName: string): IWebObjectFunction | undefined {
         return this.apiFunctions ? this.apiFunctions[apiFunctionName] : undefined;
     }
 
@@ -402,7 +399,7 @@ class WebObjectFunction implements IWebObjectFunction {
             private readonly argumentTypes?: ObjectOfITypeWithNumberKeys,
         ) {}
 
-    getArgumentType(argumentIdx: number): IType<any> {
+    getArgumentType(argumentIdx: number): IType<any> | undefined {
         return this.argumentTypes ? this.argumentTypes[argumentIdx] : undefined;
     }
 
@@ -518,7 +515,7 @@ export interface ITypesRegistryForTypeFactories extends ITypesRegistry {
      * @param typeFromServer the type as it was received from server.
      * @param webObjectSpecName the name of the component/service that it was received for.
      */
-    processTypeFromServer(typeFromServer: ITypeFromServer, webObjectSpecName: string): IType<any>;
+    processTypeFromServer(typeFromServer: ITypeFromServer, webObjectSpecName: string): IType<any> | undefined;
 
     /**
      * Similar to #processTypeFromServer(...) but it processes a property description not just a type; PDs can have both type and pushToServer values for a property.
@@ -526,7 +523,7 @@ export interface ITypesRegistryForTypeFactories extends ITypesRegistry {
      * @param propertyDescriptionFromServer what we received from server for a property description
      * @param webObjectSpecName the name of the component/service that it was received for.
      */
-    processPropertyDescriptionFromServer(propertyDescriptionFromServer: IPropertyDescriptionFromServer, webObjectSpecName: string): IPropertyDescription;
+    processPropertyDescriptionFromServer(propertyDescriptionFromServer: IPropertyDescriptionFromServer, webObjectSpecName: string): IPropertyDescription | undefined;
 
 }
 
@@ -539,7 +536,7 @@ export interface ITypesRegistryForSabloConverters extends ITypesRegistry {
      *
      * @param typeFromServer the type as it was received from server.
      */
-    getAlreadyRegisteredType(typeFromServer: ITypeFromServer): IType<any>;
+    getAlreadyRegisteredType(typeFromServer: ITypeFromServer): IType<any> | undefined;
 
 }
 
@@ -625,12 +622,12 @@ export interface IPropertyContextCreator {
 /** The type definition with client side conversion types for a component or service.  */
 export interface IWebObjectSpecification {
 
-    getPropertyDescription(propertyName: string): IPropertyDescription;
-    getPropertyType(propertyName: string): IType<any>;
+    getPropertyDescription(propertyName: string): IPropertyDescription | undefined;
+    getPropertyType(propertyName: string): IType<any> | undefined;
     /** This is the value of pushToServer as declared in the spec file... it can be undefined;
      * this value should be calculated from the parent properties using PushToServerUtil#combineWithChild, and root properties that do not
      * have it defined must be considered by default as PushToServerEnum.REJECT or call #getPropertyPushToServer(...) instead. */
-    getPropertyDeclaredPushToServer(propertyName: string): PushToServerEnum;
+    getPropertyDeclaredPushToServer(propertyName: string): PushToServerEnum | undefined;
     /**
      * Same as #getPropertyDeclaredPushToServer(...) but if spec file does not declare a push to server value it will default to PushToServerEnum.REJECT
      * instead of returning undefined. Use this for root component/service properties.
@@ -638,20 +635,20 @@ export interface IWebObjectSpecification {
     getPropertyPushToServer(propertyName: string): PushToServerEnum;
 
     /** this can return null if no property descriptions needed to be sent to client (no special client side type nor pushToServer) */
-    getPropertyDescriptions(): { [propertyName: string]: IPropertyDescription };
-    getHandler(handlerName: string): IEventHandler;
-    getApiFunction(apiFunctionName: string): IApiFunction;
+    getPropertyDescriptions(): { [propertyName: string]: IPropertyDescription } | undefined;
+    getHandler(handlerName: string): IEventHandler | undefined;
+    getApiFunction(apiFunctionName: string): IApiFunction | undefined;
 
 }
 
 export interface IPropertyDescription {
 
-    getPropertyType(): IType<any>;
+    getPropertyType(): IType<any> | undefined;
 
     /** This is the value of pushToServer as declared in the spec file... it can be undefined;
      * this value should be calculated from the parent properties using PushToServerUtil#combineWithChild, and root properties that do not
      * have it defined must be considered by default as PushToServerEnum.REJECT or call #getPropertyPushToServer() instead. */
-    getPropertyDeclaredPushToServer(): PushToServerEnum;
+    getPropertyDeclaredPushToServer(): PushToServerEnum | undefined;
 
     /**
      * Same as #getPropertyDeclaredPushToServer() but if spec file does not declare a push to server value it will default to PushToServerEnum.REJECT
@@ -679,7 +676,7 @@ interface IEventHandler extends IWebObjectFunction {
 export interface IWebObjectFunction {
 
     readonly returnType?: IType<any>;
-    getArgumentType(argumentIdx: number): IType<any>;
+    getArgumentType(argumentIdx: number): IType<any> | undefined;
 
 }
 

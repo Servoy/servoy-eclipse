@@ -7,36 +7,36 @@ import { LoggerService, LoggerFactory } from '@servoy/public';
 @Directive()
 export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
-    @Input() onChangeMethodID;
+    @Input() onChangeMethodID: any;
 
-    @Input() background;
-    @Input() borderType;
-    @Input() enabled;
-    @Input() fontType;
-    @Input() foreground;
-    @Input() horizontalAlignment;
-    @Input() location;
-    @Input() readOnly;
-    @Input() selectedTabColor;
-    @Input() size;
-    @Input() styleClass;
-    @Input() tabOrientation;
-    @Input() tabSeq;
-    @Input() tabs: Array<Tab>;
-    @Input() transparent;
+    @Input() background: any;
+    @Input() borderType: any;
+    @Input() enabled: any;
+    @Input() fontType: any;
+    @Input() foreground: any;
+    @Input() horizontalAlignment: any;
+    @Input() location: any;
+    @Input() readOnly: any;
+    @Input() selectedTabColor: any;
+    @Input() size: any;
+    @Input() styleClass: any;
+    @Input() tabOrientation: any;
+    @Input() tabSeq: any;
+    @Input() tabs!: Array<Tab>;
+    @Input() transparent: any;
 
-    @Input() tabIndex;
+    @Input() tabIndex: any;
     @Output() tabIndexChange = new EventEmitter();
 
     @ContentChild(TemplateRef, { static: true })
-    templateRef: TemplateRef<any>;
+    templateRef!: TemplateRef<any>;
 
-    public selectedTabID: string;
+    public selectedTabID!: string;
 
-    protected selectedTab: Tab;
+    protected selectedTab!: Tab;
 
-    private waitingForServerVisibility = {};
-    private lastSelectedTab: Tab;
+    private waitingForServerVisibility: Record<string, any> = {};
+    private lastSelectedTab!: Tab;
 
     protected log: LoggerService;
 
@@ -108,7 +108,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                     this.waitingForServerVisibility[formInWait] = true;
                     const currentSelectedTab = this.selectedTab;
                     this.lastSelectedTab = tab;
-                    const promise = this.servoyApi.hideForm(this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1);
+                    const promise = this.servoyApi.hideForm(this.selectedTab.containsFormId, undefined, undefined, tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1);
                     this.log.debug(this.log.buildMessage(() => ('svy * Will hide previously selected form (tab): ' + this.selectedTab.containsFormId)));
                     promise.then((ok) => {
                         this.log.debug(this.log.buildMessage(() => ('svy * Previously selected form (tab) hide completed with \'' + ok + '\': ' + this.selectedTab.containsFormId)));
@@ -146,7 +146,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         return null;
     }
     
-    protected setFormVisible(tab: Tab, event, callShow: boolean) {
+    protected setFormVisible(tab: Tab, event: any, callShow: boolean) {
         if (callShow && tab.containsFormId)
             this.servoyApi.formWillShow(tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1).finally(() => this.cdRef.markForCheck());
         this.log.debug(this.log.buildMessage(() => ('svy * selectedTab = \'' + tab.containsFormId + '\' -- ' + new Date().getTime())));
@@ -211,14 +211,14 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 }
 
 export class Tab extends BaseCustomObject {
-    _id: string;
-    name: string;
-    containsFormId: string;
-    text: string;
-    relationName: string;
-    foreground: string;
-    disabled: boolean;
-    imageMediaID: string;
-    mnemonic: string;
-    toolTipText: string;
+    _id!: string;
+    name!: string;
+    containsFormId!: string;
+    text!: string;
+    relationName!: string;
+    foreground!: string;
+    disabled!: boolean;
+    imageMediaID!: string;
+    mnemonic!: string;
+    toolTipText!: string;
 }

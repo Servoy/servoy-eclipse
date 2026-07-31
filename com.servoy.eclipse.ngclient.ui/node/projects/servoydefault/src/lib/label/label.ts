@@ -10,7 +10,7 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
 } )
 export class ServoyDefaultLabel extends ServoyDefaultBaseLabel<HTMLDivElement> {
 
-    @Input() labelFor;
+    @Input() labelFor: any;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super(renderer, cdRef);

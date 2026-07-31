@@ -12,7 +12,7 @@ import { LoggerFactory } from '@servoy/public';
 })
 export class ServoyDefaultAccordion extends BaseTabpanel {
 
-    panelHeight: number;
+    panelHeight!: number;
 
     constructor(windowRefService: WindowRefService , logFactory: LoggerFactory, renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
         super( windowRefService, logFactory, renderer, cdRef);
@@ -32,13 +32,13 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
 
     private updateContentHeight() {
         
-        let totalHeight : number;
+        let totalHeight = 0;
         let wrapper = null;
         if (this.elementRef) {
             wrapper = this.elementRef.nativeElement.closest('.svy-wrapper');
         }
         if (wrapper) {
-            totalHeight = wrapper.offsetHeight;
+            totalHeight = (wrapper as HTMLElement).offsetHeight;
         }
         if (this.tabs) {
             totalHeight = totalHeight - 40 * this.tabs.length;
@@ -62,7 +62,7 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
         return id;
     }
 
-    tabClicked(tab: Tab,tabIndexClicked: number, event){
+    tabClicked(tab: Tab,tabIndexClicked: number, event: any){
         this.select( this.tabs[tabIndexClicked] );
     }
 }

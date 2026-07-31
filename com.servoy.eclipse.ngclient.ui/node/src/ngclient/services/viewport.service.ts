@@ -158,7 +158,7 @@ export class ViewportService {
                         viewPort[viewportIndex] = newRowValue;
 
                         if (worksWithRowLevelProxies) {
-                            if (internalState.rowLevelProxyStates[viewportIndex]) internalState.rowLevelProxyStates[viewportIndex].softProxyRevoker.getRevokeFunction()();
+                            if (internalState.rowLevelProxyStates![viewportIndex]) internalState.rowLevelProxyStates![viewportIndex].softProxyRevoker.getRevokeFunction()();
                             viewPort[viewportIndex] = this.addRowProxyTo(viewPort, viewportIndex, propertyContextCreator, internalState);
                         }
                     } else {
@@ -184,17 +184,17 @@ export class ViewportService {
                             delete internalState.viewportTypes[j];
                         }
                         if (internalState.rowLevelProxyStates) {
-                            if (internalState.rowLevelProxyStates[j]) {
-                                internalState.rowLevelProxyStates[j].rowIndex += rowUpdate.rows.length;
-                                internalState.rowLevelProxyStates[j + rowUpdate.rows.length] = internalState.rowLevelProxyStates[j];
-                            } else if (internalState.rowLevelProxyStates[j + rowUpdate.rows.length]) delete internalState.rowLevelProxyStates[j + rowUpdate.rows.length]; // this else will never happen I think (either all rows are proxied or none)
+                            if (internalState.rowLevelProxyStates![j]) {
+                                internalState.rowLevelProxyStates![j].rowIndex += rowUpdate.rows.length;
+                                internalState.rowLevelProxyStates![j + rowUpdate.rows.length] = internalState.rowLevelProxyStates![j];
+                            } else if (internalState.rowLevelProxyStates![j + rowUpdate.rows.length]) delete internalState.rowLevelProxyStates![j + rowUpdate.rows.length]; // this else will never happen I think (either all rows are proxied or none)
     
-                            delete internalState.rowLevelProxyStates[j];
+                            delete internalState.rowLevelProxyStates![j];
                         }
                     }
                 }
                 const convertedRowChangeData = this.expandTypeInfoAndApplyConversions(rowUpdate._T, defaultColumnTypes,
-                    rowUpdate.rows, rowUpdate.startIndex, null, internalState, propertyContextCreator,
+                    rowUpdate.rows, rowUpdate.startIndex, null!, internalState, propertyContextCreator,
                     simpleRowValue, true, rowCreator, cellUpdatedFromServerListener);
 
                 viewPort.splice(rowUpdate.startIndex, 0, ...convertedRowChangeData);
@@ -230,27 +230,27 @@ export class ViewportService {
                 // remove any change notifiers for the rows that were deleted
                 for (let j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
                     if (worksWithRowLevelProxies)
-                        internalState.rowLevelProxyStates[j].softProxyRevoker.getRevokeFunction()(); // disable proxy notifications for deleted row
+                        internalState.rowLevelProxyStates![j].softProxyRevoker.getRevokeFunction()(); // disable proxy notifications for deleted row
 
                     this.updateChangeAwareNotifiersForRow(j, viewPort, internalState, simpleRowValue, propertyContextCreator, true);
                 }
 
                 if (worksWithRowLevelProxies)
-                    internalState.rowLevelProxyStates.splice(rowUpdate.startIndex, numberOfDeletedRows);
+                    internalState.rowLevelProxyStates!.splice(rowUpdate.startIndex, numberOfDeletedRows);
 
                 viewPort.splice(rowUpdate.startIndex, numberOfDeletedRows);
 
                 // update any change notifiers for the rows that were shifted left after delete and update any proxies
                 for (let j = rowUpdate.startIndex; j < viewPort.length; j++) {
                     if (worksWithRowLevelProxies)
-                        internalState.rowLevelProxyStates[j].rowIndex = j;
+                        internalState.rowLevelProxyStates![j].rowIndex = j;
 
                     this.updateChangeAwareNotifiersForRow(j, viewPort, internalState, simpleRowValue, propertyContextCreator, false);
                 }
             }
 
-            delete rowUpdate._T;
-            delete rowUpdate.rows; // prepare rowUpdate for listener notifications
+            delete (rowUpdate as any)._T;
+            delete (rowUpdate as any).rows; // prepare rowUpdate for listener notifications
         }
     }
 
@@ -261,16 +261,16 @@ export class ViewportService {
             idx = internalState.forFoundset().viewPort.rows.findIndex((val: any) => val[ViewportService.ROW_ID_COL_KEY] === rowId);
         } else {
             // if it doesn't have internalState.forFoundset then it's probably the foundset property's viewport directly which has those in the viewport
-            idx = viewPortRowsInCaseCallerIsActualFoundsetProp.findIndex((val: any) => val[ViewportService.ROW_ID_COL_KEY] === rowId);
+            idx = viewPortRowsInCaseCallerIsActualFoundsetProp!.findIndex((val: any) => val[ViewportService.ROW_ID_COL_KEY] === rowId);
         }
 
-        let clientSideType: IType<any>;
+        let clientSideType: IType<any> | undefined;
         if (idx >= 0) {
             const clientSideTypes = internalState.viewportTypes ? internalState.viewportTypes[idx] : undefined;
-            if (clientSideTypes && (!columnName || clientSideTypes[columnName]))
-                clientSideType = (columnName ? clientSideTypes[columnName] : clientSideTypes) as IType<any>;
+            if (clientSideTypes && (!columnName || (clientSideTypes as Record<string, any>)[columnName]))
+                clientSideType = (columnName ? (clientSideTypes as Record<string, any>)[columnName] : clientSideTypes) as IType<any>;
         }
-        return clientSideType;
+        return clientSideType!;
     }
 
     /**
@@ -282,7 +282,7 @@ export class ViewportService {
      *                    it will return a promise otherwise - if the update was sent to server.
      */
     public sendCellChangeToServerBasedOnRowId(viewPort: any[], internalState: FoundsetViewportState, deferredState: IDeferedState, rowID: string, columnName: string,
-        propertyContextCreator: IPropertyContextCreatorForRow, newValue: any, oldValue?: any): Promise<any> {
+        propertyContextCreator: IPropertyContextCreatorForRow, newValue: any, oldValue?: any): Promise<any> | undefined {
 
         if (this.getCellPropertyContextFor(propertyContextCreator, undefined, columnName).getPushToServerCalculatedValue() < PushToServerEnum.ALLOW) {
             internalState.log.spam(internalState.log.buildMessage(() => ('svy viewport * sendCellChangeToServerBasedOnRowId denied because pushToServer < ALLOW in .spec ('
@@ -379,19 +379,19 @@ export class ViewportService {
                     const oldCellVal = oldViewportRows ? oldViewportRows[startIdxInViewportForRowsToBeConverted + index] : undefined;
 
                     rowsToBeConverted[index] = this.converterService.convertFromServerToClient(rowsToBeConverted[index],
-                        cellConversion, oldCellVal,
-                        undefined /*dynamic types are already handled via serverConversionInfo here*/, undefined,
-                        this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined));
-                    this.updateRowTypes(startIdxInViewportForRowsToBeConverted + index, internalState, cellConversion);
+                        cellConversion!, oldCellVal,
+                        undefined!, undefined!,
+                        this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined!));
+                    this.updateRowTypes(startIdxInViewportForRowsToBeConverted + index, internalState, cellConversion!);
 
-                    if (cellUpdatedFromServerListener) cellUpdatedFromServerListener(startIdxInViewportForRowsToBeConverted + index, undefined, oldCellVal, rowsToBeConverted[index]);
+                    if (cellUpdatedFromServerListener) cellUpdatedFromServerListener(startIdxInViewportForRowsToBeConverted + index, undefined!, oldCellVal, rowsToBeConverted[index]);
                 } else {
                     // with columns; so a foundset prop's rows or a component type prop's rows
-                    let rowConversions = (fullRowUpdates || !internalState.viewportTypes ? undefined : internalState.viewportTypes[startIdxInViewportForRowsToBeConverted + index]);
+                    let rowConversions: Record<string, any> = (fullRowUpdates || !internalState.viewportTypes ? undefined : internalState.viewportTypes[startIdxInViewportForRowsToBeConverted + index]) as Record<string, any>;
                     const newRowData = rowCreator ? (rowCreator()) : rowData;
 
                     Object.keys(rowData).forEach(columnName => {
-                        let cellConversion: IType<any> = serverConversionInfo ? this.getCellTypeFromServer(serverConversionInfo, index, columnName) : undefined;
+                        let cellConversion: IType<any> | undefined = serverConversionInfo ? this.getCellTypeFromServer(serverConversionInfo, index, columnName) : undefined;
                         if (!cellConversion && defaultColumnTypes) cellConversion = defaultColumnTypes.getPropertyType(columnName);
 
                         // ignore null or undefined type of cell; otherwise remember it in expanded
@@ -406,9 +406,9 @@ export class ViewportService {
                             : undefined;
 
                         newRowData[columnName] = this.converterService.convertFromServerToClient(rowData[columnName],
-                            cellConversion,
+                            cellConversion!,
                             oldCellVal,
-                            undefined /*dynamic types are already handled via serverConversionInfo here*/, undefined,
+                            undefined! /*dynamic types are already handled via serverConversionInfo here*/, undefined!,
                             this.getCellPropertyContextFor(propertyContextCreator, newRowData, columnName));
 
                         if (cellUpdatedFromServerListener) cellUpdatedFromServerListener(startIdxInViewportForRowsToBeConverted + index, columnName, oldCellVal, rowData[columnName]);
@@ -421,7 +421,7 @@ export class ViewportService {
 
                     rowsToBeConverted[index] = newRowData;
 
-                    if (rowConversions && Object.keys(rowConversions).length === 0) rowConversions = undefined; // in case all conversion infos from one row were deleted due to the update
+                    if (rowConversions && Object.keys(rowConversions).length === 0) rowConversions = undefined!; // in case all conversion infos from one row were deleted due to the update
                     this.updateRowTypes(startIdxInViewportForRowsToBeConverted + index, internalState, rowConversions);
                 }
             });
@@ -430,30 +430,30 @@ export class ViewportService {
         return rowsToBeConverted;
     }
 
-    private getCellTypeFromServer(serverConversionInfo: ConversionInfoFromServerForViewport, rowIndex: number, columnName?: string): IType<any> {
+    private getCellTypeFromServer(serverConversionInfo: ConversionInfoFromServerForViewport, rowIndex: number, columnName?: string): IType<any> | undefined {
         const PROCESSED_CELL_TYPES = 'pct'; // just to turn stuff like [{ "_T": "zyx", "i": [2,3] }, {"_T": "xyz", "i": [9] }] into an easier to use { 2: "zyx", 3: "zyx", 9: "xyz" }
         const mainType = serverConversionInfo.mT; // main fallback type
         const columnTypes = serverConversionInfo.cT; // column & cell types
 
-        let cellConversion: ITypeFromServer;
+        let cellConversion: ITypeFromServer | undefined;
         if (columnTypes) {
             // foundset/component viewport (multi col) or foundset linked viewport (single col) data
-            const colType = (columnName ? (columnTypes as MultipleColumnsConversionInfoFromServer)[columnName] : (columnTypes as SingleColumnConversionInfoFromServer));
+            const colType: any = (columnName ? (columnTypes as MultipleColumnsConversionInfoFromServer)[columnName] : (columnTypes as SingleColumnConversionInfoFromServer));
             if (colType) {
-                let processed = colType[PROCESSED_CELL_TYPES];
+                let processed: Record<string | number, any> = colType[PROCESSED_CELL_TYPES];
                 if (!processed) {
                     processed = colType[PROCESSED_CELL_TYPES] = {};
                     if (colType.eT /* cell types */)
                         colType.eT.forEach(
-                            value => value.i.forEach(
-                                ri => processed[ri] = value._T));
+                            (value: any) => value.i.forEach(
+                                (ri: any) => processed[ri] = value._T));
                 }
 
                 cellConversion = processed[rowIndex]; // look at cell type; null is a valid type in what server can send so we check with === undefined
                 if (cellConversion === undefined) cellConversion = colType._T; // fallback to column type
-                if (cellConversion === undefined) cellConversion = mainType; // fallback to main type
-            } else cellConversion = mainType;
-        } else cellConversion = mainType;
+                if (cellConversion === undefined) cellConversion = mainType!; // fallback to main type
+            } else cellConversion = mainType!;
+        } else cellConversion = mainType!;
 
         if (cellConversion) return this.typesRegistry.getAlreadyRegisteredType(cellConversion);
 
@@ -474,8 +474,8 @@ export class ViewportService {
     private updateChangeAwareNotifiersForRow(rowIdx: number, viewPort: any[], internalState: FoundsetViewportState,
         simpleRowValue: boolean, propertyContextCreator: IPropertyContextCreatorForRow, clearNotifier: boolean) {
         if (simpleRowValue) {
-            this.updateChangeAwareNotifiersForCell(viewPort[rowIdx], viewPort, internalState, rowIdx, undefined,
-                this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined), clearNotifier);
+            this.updateChangeAwareNotifiersForCell(viewPort[rowIdx], viewPort, internalState, rowIdx, undefined!,
+                this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined!), clearNotifier);
         } else {
             for (const columnName of Object.getOwnPropertyNames(viewPort[rowIdx])) { // (in case of a child component viewport) we only want to iterate on properties from the viewport, not from the model that is not record dependent (that is a prototype of the row here)
                 if (columnName !== ViewportService.ROW_ID_COL_KEY && viewPort[rowIdx].propertyIsEnumerable(columnName))
@@ -491,8 +491,8 @@ export class ViewportService {
         rowIdx: number, columnName: string, propertyContext: IPropertyContext, clearNotifier: boolean) {
         if (instanceOfChangeAwareValue(cellValue)) {
             // child is able to handle it's own change mechanism
-            cellValue.getInternalState().setChangeListener(clearNotifier ? undefined : (_doNotPush?: boolean) => {
-                this.reallyQueueChange(viewPort, internalState, undefined, rowIdx, columnName, propertyContext, cellValue, cellValue);
+            cellValue.getInternalState().setChangeListener(clearNotifier ? undefined! : (_doNotPush?: boolean) => {
+                this.reallyQueueChange(viewPort, internalState, undefined!, rowIdx, columnName, propertyContext, cellValue, cellValue);
             });
         }
     }
@@ -506,7 +506,7 @@ export class ViewportService {
      */
     private reallyQueueChange(viewPort: any[], internalState: FoundsetViewportState, deferredState: IDeferedState, idx: number, columnName: string,
         propertyContext: IPropertyContext, newValue: any, oldValue?: any, doNotPush?: boolean): Promise<any> {
-        let promise: Promise<any>;
+        let promise!: Promise<any>;
 
         const previousIgnoreChanges = internalState.ignoreChanges;
         internalState.ignoreChanges = true; // we want to disable the viewport and viewport row proxies here, as below we do assign the new conversion result back into the viewport - and that should not result in a stack overflow
@@ -522,12 +522,12 @@ export class ViewportService {
             // convert new data if necessary
             const clientSideTypesForRow = internalState.viewportTypes?.[idx];
     
-            const convResult = this.converterService.convertFromClientToServer(r.value, columnName ? clientSideTypesForRow?.[columnName] : clientSideTypesForRow, oldValue, propertyContext);
+            const convResult = this.converterService.convertFromClientToServer(r.value, columnName ? (clientSideTypesForRow as Record<string, any>)?.[columnName] : clientSideTypesForRow, oldValue, propertyContext);
             r.value = convResult[0];
             if (columnName !== undefined) viewPort[idx][columnName] = convResult[1];
             else viewPort[idx] = convResult[1];
     
-            const req = { viewportDataChanged: r };
+            const req: Record<string, any> = { viewportDataChanged: r };
             if (deferredState) {
                 const requestID = this.sabloDeferHelper.getNewDeferId(deferredState);
                 req[ViewportService.ID_KEY] = requestID;
@@ -551,7 +551,7 @@ export class ViewportService {
         if (simpleRowValue) {
             // foundset linked probably - where the viewport is just an array of values; if the values have PushToServer SHALLOW OR DEEP (same as shallow in ng2)
             // so in that case we need a proxy on the viewport itself to detect cell (which is the same as row) value changes
-            const cellPropertyContext = this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined);
+            const cellPropertyContext = this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined!);
             if (cellPropertyContext.getPushToServerCalculatedValue() > PushToServerEnum.ALLOW && !internalState.viewportLevelProxyRevokerFunc) {
                 // add the actual viewport proxy for listening to cell change-by-ref
                 resultingViewport = new Proxy(viewPort, this.getViewportLevelProxyHandler(viewPort, cellPropertyContext, internalState));
@@ -588,7 +588,7 @@ export class ViewportService {
 
         // it can be a foundset type viewport; it then only has 1 property context for all columns currently - so just check it
         // or component type for which we should return false anyway (and .getCellPropertyContextFor() with undefined column name in component_converter.ts will give REJECT); see comment below
-        internalState.needsRowProxies = (this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined)
+        internalState.needsRowProxies = (this.getCellPropertyContextFor(propertyContextCreator, undefined, undefined!)
             .getPushToServerCalculatedValue() >= PushToServerEnum.SHALLOW);
 
         // if this is the viewport for a child "component" property type value, we don't really need to proxy it then; components in ng2 are responsible
@@ -618,7 +618,7 @@ export class ViewportService {
             shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => internalState.ignoreChanges,
 
             changeNeedsToBePushedToServer: (viewportIndex: number, oldValue: any, doNotPushNow?: boolean) => {
-                this.reallyQueueChange(viewPort, internalState, undefined, viewportIndex, undefined, cellPropertyContext,
+                this.reallyQueueChange(viewPort, internalState, undefined!, viewportIndex, undefined!, cellPropertyContext,
                     viewPort[viewportIndex], oldValue, doNotPushNow);
             }
 
@@ -660,14 +660,14 @@ export class ViewportService {
      * This implements the shallow PushToServer behavior for multiple cells on one row (foundset viewport/component viewport).
      */
     private getRowLevelProxyHandler(viewPort: any[], initialRowIndex: number, propertyContextCreator: IPropertyContextCreatorForRow, internalState: FoundsetViewportState) {
-        const proxyState = internalState.rowLevelProxyStates[initialRowIndex] = new RowProxyState(new SoftProxyRevoker(internalState.log), initialRowIndex);
+        const proxyState = internalState.rowLevelProxyStates![initialRowIndex] = new RowProxyState(new SoftProxyRevoker(internalState.log), initialRowIndex);
 
         const changeHandlerForRowProxy: SubpropertyChangeByReferenceHandler = new SubpropertyChangeByReferenceHandler({
 
             shouldIgnoreChangesBecauseFromOrToServerIsInProgress: () => internalState.ignoreChanges,
 
             changeNeedsToBePushedToServer: (prop: string, oldValue: any, doNotPushNow?: boolean) => {
-                this.reallyQueueChange(viewPort, internalState, undefined, proxyState.rowIndex, prop,
+                this.reallyQueueChange(viewPort, internalState, undefined!, proxyState.rowIndex, prop,
                     this.getCellPropertyContextFor(propertyContextCreator, viewPort[proxyState.rowIndex], prop), viewPort[proxyState.rowIndex][prop], oldValue, doNotPushNow);
             }
 
@@ -708,8 +708,8 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
 
     changeListeners: ViewportChangeListener[] = [];
 
-    viewportTypes: ExpandedViewportTypes;
-    unwatchData: { [idx: number]: Array<() => void> };
+    viewportTypes!: ExpandedViewportTypes;
+    unwatchData!: { [idx: number]: Array<() => void> };
 
     requests: Array<any> = [];
 
@@ -718,7 +718,7 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
     viewportLevelProxyRevokerFunc?: () => void; // this can be just a boolean I think; we never call it, we just check if it's there or not
     rowLevelProxyStates?: Array<RowProxyState>;
     /** just a value that is cached here for foundset type viewports - so we don't need to search for it each time it's needed */
-    needsRowProxies: boolean;
+    needsRowProxies!: boolean;
 
     constructor(public readonly forFoundset: () => IFoundset, public readonly log: LoggerService, protected sabloService: SabloService) {
         super();
@@ -764,7 +764,7 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
             // their UI is destroyed...
 
             // in the future we could also clear these automatically - in case only the UI of forms adds such listeners/caches to the model
-            afterNgOnDestroyOfChildrenPotentialRunner(() => {
+            afterNgOnDestroyOfChildrenPotentialRunner!(() => {
                 if (this.changeListeners?.length) {
                     let possibleLeaksFound = false;
                     for (let chL of this.changeListeners) {

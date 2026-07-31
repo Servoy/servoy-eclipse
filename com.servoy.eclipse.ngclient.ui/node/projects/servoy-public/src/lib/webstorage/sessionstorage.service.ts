@@ -7,7 +7,7 @@ import { WebStorage } from './webstorage.interface';
 })
 export class SessionStorageService implements WebStorage {
 
-    hasSessionStorage: boolean;
+    hasSessionStorage!: boolean;
     prefix = '';
     private log: LoggerService;
 
@@ -96,11 +96,11 @@ export class SessionStorageService implements WebStorage {
 		return true;
     }
 
-    key(index: number) {
+    key(index: number): string {
         if (this.hasSessionStorage) {
-			return localStorage.key(index);
+			return localStorage.key(index)!;
 		}
-		return null;
+		return null!;
     }
 
     length(): number {

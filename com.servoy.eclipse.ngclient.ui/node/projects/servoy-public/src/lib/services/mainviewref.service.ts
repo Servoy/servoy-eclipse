@@ -4,7 +4,7 @@ import { Injectable, ViewContainerRef } from '@angular/core';
     providedIn: 'root'
 })
 export class MainViewRefService {
-    private _mainRef: ViewContainerRef;
+    private _mainRef!: ViewContainerRef;
 
     get mainContainer(): ViewContainerRef {
         return this._mainRef;

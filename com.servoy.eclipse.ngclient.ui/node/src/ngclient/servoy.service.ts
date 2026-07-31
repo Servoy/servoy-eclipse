@@ -30,7 +30,7 @@ import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 import { ServerFunctionType } from './converters/serverfunction_converter';
 
 class UIProperties {
-    private uiProperties: { [property: string]: any};
+    private uiProperties!: { [property: string]: any};
 
     constructor(private sessionStorageService: SessionStorageService) {
     }
@@ -63,13 +63,13 @@ class UIProperties {
 }
 
 class SolutionSettings {
-    public solutionName: string;
-    public windowName: string;
+    public solutionName = '';
+    public windowName = '';
     public enableAnchoring = true;
     public ltrOrientation = true;
-    public mainForm: FormSettings;
-    public navigatorForm: FormSettings;
-    public sessionProblem: SessionProblem;
+    public mainForm!: FormSettings;
+    public navigatorForm!: FormSettings;
+    public sessionProblem!: SessionProblem;
 }
 
 @Injectable({
@@ -81,8 +81,8 @@ export class ServoyService {
     private uiBlockerService: UIBlockerService;
 
     private findModeShortCutCallback: any = null;
-    private resizeObservable$: Observable<Event>;
-    private resizeSubscription$: Subscription;
+    private resizeObservable$!: Observable<Event>;
+    private resizeSubscription$!: Subscription;
 
     constructor(private websocketService: WebsocketService,
         private sabloService: SabloService,
@@ -126,10 +126,10 @@ export class ServoyService {
     public connect() {
         // maybe do this with defer ($q)
         const solName = this.websocketService.getURLParameter('s');
-        if (!solName) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec(this.websocketService.getPathname())[1];
+        if (!solName) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec(this.websocketService.getPathname())![1];
         else this.solutionSettings.solutionName = solName;
         this.solutionSettings.windowName = this.sabloService.getWindownr();
-        let socketPrefix: string;
+        let socketPrefix: string | undefined;
         const recording = this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1;
         if (recording) {
             socketPrefix = '/recording/websocket';
@@ -202,7 +202,7 @@ export class ServoyService {
             
         return wrapPromiseToPropagateCustomRequestInfoInternal(promise,
                     promise.then((serviceCallResult) =>
-                        this.converterService.convertFromServerToClient(serviceCallResult, undefined, undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
+                        this.converterService.convertFromServerToClient(serviceCallResult, undefined!, undefined, undefined!, undefined!, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES)));
     }
 
     public loaded(): Promise<any> {
@@ -226,7 +226,7 @@ export class ServoyService {
 }
 
 export class SessionProblem {
-    public viewUrl: string;
+    public viewUrl = '';
     public redirectUrl?: string;
     public redirectTimeout?: number;
     public stack?: string;

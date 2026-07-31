@@ -13,9 +13,9 @@ import { ListFormComponent } from './listformcomponent';
 })
 export class RowRenderer implements AgRendererComponent, AfterViewInit {
 
-    lfc: ListFormComponent;
-    foundsetRows: any[];
-    startIndex: number;
+    lfc!: ListFormComponent;
+    foundsetRows!: any[];
+    startIndex!: number;
 
     constructor(private elementRef: ElementRef) {}
 
@@ -26,7 +26,7 @@ export class RowRenderer implements AgRendererComponent, AfterViewInit {
             bubbles: true,
             detail: customEvent.detail
         });
-        this.lfc.element().nativeElement.children[0].dispatchEvent(newEvent);
+        this.lfc.element()!.nativeElement.children[0].dispatchEvent(newEvent);
     }
 
     refresh(params: ICellRendererParams): boolean {
@@ -37,7 +37,7 @@ export class RowRenderer implements AgRendererComponent, AfterViewInit {
     agInit(params: ICellRendererParams): void {
         this.lfc = params.context['componentParent'];
         this.foundsetRows = params.data;
-        this.startIndex =(params.node.rowIndex - this.lfc._foundset().viewPort.startIndex) * this.lfc.numberOfColumns;
+        this.startIndex =(params.node.rowIndex! - this.lfc._foundset()!.viewPort.startIndex) * this.lfc.numberOfColumns;
 
     }
 

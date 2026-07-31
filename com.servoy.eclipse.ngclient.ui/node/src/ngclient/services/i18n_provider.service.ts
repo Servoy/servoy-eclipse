@@ -8,10 +8,10 @@ import { Deferred, I18NListener, RequestInfoPromise } from '@servoy/public';
   providedIn: 'root'
 })
 export class  I18NProvider {
-    private cachedMessages = {};
+    private cachedMessages: Record<string, any> = {};
 
     private cachedPromises: { [s: string]: { promise?: Promise<any>; value?: any } } = {};
-    private defaultTranslations = {};
+    private defaultTranslations: Record<string, string> = {};
 
     private readonly listeners: Set<Listener> = new Set();
 
@@ -33,8 +33,8 @@ export class  I18NProvider {
      * @deprecated use listenForI18NMessages(...keys: string[]):I18NListener
      */
     public getI18NMessages(...keys: string[]): RequestInfoPromise<any> {
-        const retValue = {};
-        const serverKeys = {};
+        const retValue: Record<string, any> = {};
+        const serverKeys: Record<number, string> = {};
         let serverKeysCounter = 0;
         keys.forEach(key => {
             if (this.cachedMessages[key] != null) {
@@ -45,13 +45,13 @@ export class  I18NProvider {
         });
         if (serverKeysCounter > 0) {
             const promiseA = this.sabloService.callService('i18nService', 'getI18NMessages', serverKeys, false);
-            return wrapPromiseToPropagateCustomRequestInfoInternal(promiseA, promiseA.then((result) => {
+            return wrapPromiseToPropagateCustomRequestInfoInternal(promiseA, promiseA.then((result: any) => {
                 for (const key of Object.keys(result)) {
                     this.cachedMessages[key] = result[key];
                     retValue[key] = result[key];
                 }
                 return retValue;
-            }, (error) => Promise.reject(error)));
+            }, (error: any) => Promise.reject(error)));
         } else {
             const defered = new Deferred<any>();
             defered.resolve(retValue);
@@ -63,7 +63,7 @@ export class  I18NProvider {
         this.cachedMessages = {};
         for (const key in this.cachedPromises) {
             if (this.cachedPromises.hasOwnProperty(key) && this.cachedPromises[key].promise) {
-                this.cachedPromises[key].promise['reject'] = true;
+                (this.cachedPromises[key].promise as any)['reject'] = true;
             }
         }
         this.cachedPromises = {};
@@ -72,7 +72,7 @@ export class  I18NProvider {
 }
 
 class Listener implements I18NListener {
-    private callback:  (messages: Map<string,string>) => void;
+    private callback!:  (messages: Map<string,string>) => void;
 
     constructor(private keys: string[], private service: I18NProvider, private listeners: Set<Listener>) {
         this.listeners.add(this);
@@ -80,14 +80,14 @@ class Listener implements I18NListener {
     }
 
     getMessages() {
-        this.service.getI18NMessages(...this.keys).then( (value) => {
+        this.service.getI18NMessages(...this.keys).then( (value: any) => {
             const map = new Map<string, string>();
             for (const key of Object.keys(value)) {
                  map.set(key, value[key]);
             }
             this.postMessages(map);
         }
-        ).catch((value)=> console.log(value));
+        ).catch((value: any)=> console.log(value));
     }
 
     destroy(): void {

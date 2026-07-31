@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 
-let fixedFirstDayOfWeek: number = null;
+let fixedFirstDayOfWeek: number | null = null;
 
 /**
  * Returns a zero-based index for first day of the week, as used by the specified locale
@@ -107,7 +107,7 @@ export  const getFirstDayOfWeek = (locale: string): number  => {
  * @returns
  */
 export const floorToWeek = (date: DateTime): DateTime => {
-    const fd = getFirstDayOfWeek(date.locale);
+    const fd = getFirstDayOfWeek(date.locale!);
     const day = date.weekday % 7;   // convert to 0=sunday .. 6=saturday
     const dayAdjust =  day >= fd ? -day + fd : -day + fd - 7;
     return date.plus({days: dayAdjust});

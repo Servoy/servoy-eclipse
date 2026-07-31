@@ -28,7 +28,6 @@
       ]
     },
     "useDefineForClassFields": false,
-    "strict": false,
     "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {

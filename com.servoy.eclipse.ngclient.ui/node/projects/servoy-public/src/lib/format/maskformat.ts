@@ -15,13 +15,13 @@ const MASK_CONST = {
         H: '[A-F0-9]'
     },
     converters: {
-        U(c) {
+        U(c: string) {
 return c.toUpperCase();
 },
-        L(c) {
+        L(c: string) {
 return c.toLowerCase();
 },
-        H(c) {
+        H(c: string) {
 return c.toUpperCase();
 }
     }
@@ -30,15 +30,15 @@ return c.toUpperCase();
 export class MaskFormat {
     private ignore: boolean;
     private firstNonMaskPos = -1;
-    private settings: Object;
+    private settings!: Record<string, any>;
     private buffer: string[] = [];
-    private tests: RegExp[] = [];
+    private tests: (RegExp | null)[] = [];
     private converters: any[] = [];
-    private mask: string;
-    private focusText: string;
-    private filteredMask: string;
+    private mask!: string;
+    private focusText!: string;
+    private filteredMask!: string;
     
-    private listeners = [];
+    private listeners: any[] = [];
     
     constructor(private format: Format, private _renderer: Renderer2, private element: HTMLInputElement,
                         private formatService: FormattingService, @Inject(DOCUMENT) private doc: Document) {
@@ -61,8 +61,8 @@ export class MaskFormat {
 
         let skipNextMask = false;
         this.filteredMask = '';
-        const defs = MASK_CONST.definitions;
-        const converts = MASK_CONST.converters;
+        const defs = MASK_CONST.definitions as Record<string, any>;
+        const converts = MASK_CONST.converters as Record<string, any>;
         this.converters = [];
         let partialPosition = this.mask.length;
         let len = this.mask.length;
@@ -97,16 +97,16 @@ export class MaskFormat {
         }
 
 
-        this.buffer = this.filteredMask.split('').map(function(c, i, array) {
+        this.buffer = this.filteredMask.split('').map((c: any, i: any, array: any) => {
             return this.tests[i] ? this.getPlaceHolder(i) : c;
-        }, this);
+        });
 
         this.listeners.push(this._renderer.listen(this.element, 'input', () => {
             this.setCaret(this.checkVal(true));
         }));
         this.listeners.push(this._renderer.listen(this.element, 'focus', () => this.onFocus()));
         this.listeners.push(this._renderer.listen(this.element, 'blur', () => this.onBlur()));
-        this.listeners.push(this._renderer.listen(this.element, 'keypress', (event) => this.onKeypress(event)));
+        this.listeners.push(this._renderer.listen(this.element, 'keypress', (event) => this.onKeypress(event) as any));
         this.listeners.push(this._renderer.listen(this.element, 'keydown', (event) => this.onKeydown(event)));
     }
 
@@ -117,11 +117,11 @@ export class MaskFormat {
         setTimeout( () => this.setCaretOnFocus(pos), 0);
     }
 
-    private setCaretOnFocus(pos) {
+    private setCaretOnFocus(pos: any) {
         if (pos !== this.filteredMask.length) {
             this.setCaret(pos);
         } else {
-            this.setCaret(this.element.selectionStart);
+            this.setCaret(this.element.selectionStart!);
         }
     }
 
@@ -132,7 +132,7 @@ export class MaskFormat {
         }
     }
 
-    private onKeypress(e) {
+    private onKeypress(e: any) {
         if (this.formatService.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
             //do not looses focus, just apply the format and push value
             this.element.dispatchEvent(new CustomEvent('change', { bubbles: true}));
@@ -145,8 +145,8 @@ export class MaskFormat {
         }
         // TODO needed? e = e || window.event;
         const k = e.charCode || e.keyCode || e.which;
-        const posBegin = this.element.selectionStart;
-        const posEnd = this.element.selectionEnd;
+        const posBegin = this.element.selectionStart!;
+        const posEnd = this.element.selectionEnd!;
 
         if (e.ctrlKey || e.altKey || e.metaKey) {// Ignore
             return true;
@@ -157,7 +157,7 @@ export class MaskFormat {
                 if (this.converters[p]) {
                     c = this.converters[p](c);
                 }
-                if (this.tests[p].test(c)) {
+                if (this.tests[p]!.test(c)) {
 //                    shiftR(p);
                     this.buffer[p] = c;
                     this.writeBuffer();
@@ -172,9 +172,9 @@ export class MaskFormat {
     }
 
     private onKeydown(e: KeyboardEvent) {
-        const iPhone = (window.orientation !== undefined);
-        let posBegin = this.element.selectionStart;
-        let posEnd = this.element.selectionEnd;
+        const iPhone = ((window as any).orientation !== undefined);
+        let posBegin = this.element.selectionStart!;
+        let posEnd = this.element.selectionEnd!;
         const k = e.keyCode;
         this.ignore = (k < 16 || (k > 16 && k < 32) || (k > 32 && k < 41));
         if (k === 37) {
@@ -223,20 +223,20 @@ export class MaskFormat {
         if (typeof begin === 'number') {
             end = (typeof end === 'number') ? end : begin;
                 if (this.element != null) {
-                      if (this.element['createTextRange']) {
-                          const range = this.element['createTextRange']();
+                      if ((this.element as any)['createTextRange']) {
+                          const range = (this.element as any)['createTextRange']();
                           range.move('character', begin);
                           range.select();
-                      } else if (this.element.selectionStart >= 0) {
+                      } else if (this.element.selectionStart! >= 0) {
                         this.element.setSelectionRange(begin, end);
                       }
                 }
         } else {
-            if (this.element['setSelectionRange']) {
-                begin = this.element.selectionStart;
-                end = this.element.selectionEnd;
-            } else if (this.doc.getSelection() && this.doc.getSelection()['createRange']) {
-                const range = this.doc.getSelection()['createRange']();
+             if (this.element['setSelectionRange']) {
+                begin = this.element.selectionStart!;
+                end = this.element.selectionEnd!;
+            } else if (this.doc.getSelection() && (this.doc.getSelection() as any)['createRange']) {
+                const range = (this.doc.getSelection() as any)['createRange']();
                 begin = 0 - range.duplicate().moveStart('character', -100000);
                 end = begin + range.text.length;
             }
@@ -254,7 +254,7 @@ export class MaskFormat {
         return pos;
     }
 
-    private clear(pos, caretAddition) {
+    private clear(pos: any, caretAddition: any) {
         while (!this.tests[pos] && --pos >= 0);
         if (this.tests[pos]) {
             this.buffer[pos] = this.getPlaceHolder(pos);
@@ -302,7 +302,7 @@ export class MaskFormat {
                        if (firstError === -1) firstError = i;
                        break;
                     }
-                    if (this.tests[i].test(c)) {
+                    if (this.tests[i]!.test(c)) {
                         this.buffer[i] = c;
                         lastMatch = i;
                         break;

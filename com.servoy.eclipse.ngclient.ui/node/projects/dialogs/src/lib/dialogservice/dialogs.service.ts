@@ -13,8 +13,8 @@ export class DialogService {
     public init(): void {
         try {
             this.servoyService.listenForI18NMessages('servoy.button.cancel', 'servoy.button.ok').messages((val) => {
-                this.i18nOK = val.get('servoy.button.ok');
-                this.i18nCancel = val.get('servoy.button.cancel');
+                this.i18nOK = val.get('servoy.button.ok') ?? '';
+                this.i18nCancel = val.get('servoy.button.cancel') ?? '';
             });
         } catch (e) {
             console.error(e);
@@ -22,30 +22,30 @@ export class DialogService {
     }
 
     public async showErrorDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
-        return await this.showDialog(dialogTitle, dialogMessage, 'type-error', null, buttonsText, null);
+        return await this.showDialog(dialogTitle, dialogMessage, 'type-error', [], buttonsText, '');
     }
 
     public async showInfoDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
-        return await this.showDialog(dialogTitle, dialogMessage, 'type-info', null, buttonsText, null);
+        return await this.showDialog(dialogTitle, dialogMessage, 'type-info', [], buttonsText, '');
     }
 
     public async showQuestionDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
-        return await this.showDialog(dialogTitle, dialogMessage, 'type-question', null, buttonsText, null);
+        return await this.showDialog(dialogTitle, dialogMessage, 'type-question', [], buttonsText, '');
     }
 
     public async showInputDialog(dialogTitle: string, dialogMessage: string, initValue: string, inputType: string): Promise<any> {
         if (!dialogTitle) {
             dialogTitle = 'Enter value';
         }
-        return await this.showDialog(dialogTitle, dialogMessage, 'type-input', initValue !==null && initValue !== undefined ? [initValue] : null, [this.i18nCancel, this.i18nOK], inputType);
+        return await this.showDialog(dialogTitle, dialogMessage, 'type-input', initValue !==null && initValue !== undefined ? [initValue] : [], [this.i18nCancel, this.i18nOK], inputType);
     }
 
     public async showSelectDialog(dialogTitle: string, dialogMessage: string, options: string[]): Promise<any> {
-        return await this.showDialog(dialogTitle, dialogMessage, 'type-select', options, [this.i18nCancel, this.i18nOK], null);
+        return await this.showDialog(dialogTitle, dialogMessage, 'type-select', options, [this.i18nCancel, this.i18nOK], '');
     }
 
     public async showWarningDialog(dialogTitle: string, dialogMessage: string, buttonsText: string[]): Promise<any> {
-        return await this.showDialog(dialogTitle, dialogMessage, 'type-warning', null, buttonsText, null);
+        return await this.showDialog(dialogTitle, dialogMessage, 'type-warning', [], buttonsText, '');
     }
 
     private async showDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string): Promise<any> {

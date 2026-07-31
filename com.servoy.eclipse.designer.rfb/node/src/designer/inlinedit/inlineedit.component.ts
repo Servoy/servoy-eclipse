@@ -12,16 +12,16 @@ import { EditorSessionService } from '../services/editorsession.service';
 })
 export class InlineEditComponent implements AfterViewInit {
 
-    @ViewChild('inlineedit', { static: true }) elementRef: ElementRef<HTMLElement>;
+    @ViewChild('inlineedit', { static: true }) elementRef!: ElementRef<HTMLElement>;
     showDirectEdit = false;
-    node: string;
-    directEditProperty: string;
-    propertyValue: string;
+    node!: string;
+    directEditProperty!: string;
+    propertyValue!: string;
     
-    keyupListener: () => void;
-    keydownListener: () => void;
-    blurListener: () => void;
-    lastTimestamp: number;
+    keyupListener!: () => void;
+    keydownListener!: () => void;
+    blurListener!: () => void;
+    lastTimestamp!: number;
 
     lastValue = {node: '', directEditProperty: '', propertyValue: ''}
     
@@ -50,7 +50,7 @@ export class InlineEditComponent implements AfterViewInit {
                     if (eventNode.getAttribute("svy-id") === node) {
                         const directEditProperty = eventNode.getAttribute("directEditPropertyName");
                         if (directEditProperty) {
-                            this.editorSession.getComponentPropertyWithTags(node, directEditProperty).then((propertyValue: string) => {
+                            this.editorSession.getComponentPropertyWithTags(node, directEditProperty).then((propertyValue: any) => {
                                 if (eventNode.clientHeight === 0 && eventNode.clientWidth === 0 && eventNode.firstElementChild instanceof HTMLElement) {
                                     eventNode = eventNode.firstElementChild;
                                 }
@@ -76,12 +76,12 @@ export class InlineEditComponent implements AfterViewInit {
     }
     
     applyValue(node: string, directEditProperty: string, propertyValue: string) {
-        const changes = {};
+        const changes: Record<string, any> = {};
         const newValue = this.elementRef.nativeElement.textContent;
         const oldValue = propertyValue;
        let sameValue = false;
         if (oldValue != newValue && !(oldValue === null && newValue === "")) {
-            const value = {};
+            const value: Record<string, any> = {};
             value[directEditProperty] = newValue;
             changes[node] = value;
             
@@ -122,7 +122,7 @@ export class InlineEditComponent implements AfterViewInit {
                 }
                 if (event.key === 'a' && event.ctrlKey) {
                     // TODO: find an alternative for execCommand
-                    this.doc.execCommand('selectAll', false, null);
+                    this.doc.execCommand('selectAll', false, undefined);
                 }
                 if (event.key === 'Enter') {
                     this.applyValue(this.node, this.directEditProperty, this.propertyValue);
@@ -131,13 +131,13 @@ export class InlineEditComponent implements AfterViewInit {
                     //this code is executing only on mac (event.metaKey)
                     const selectedObj = this.doc.getSelection();
                     if (selectedObj != null) {
-                        const nodeText = selectedObj.anchorNode.nodeValue;
+                        const nodeText = selectedObj.anchorNode!.nodeValue!;
                         //in this context anchorNode and focusNode are the same
                         const startRange = Math.min(selectedObj.anchorOffset, selectedObj.focusOffset);
                         const endRange = Math.max(selectedObj.anchorOffset, selectedObj.focusOffset);
                         if (startRange != endRange) { //something is selected; 
                             this.doc.execCommand('copy'); //deprecated but navigator.clipboard.writeText is not working
-                            this.doc.activeElement.textContent = nodeText.replace(nodeText.substring(startRange, endRange), '');
+                            this.doc.activeElement!.textContent = nodeText.replace(nodeText.substring(startRange, endRange), '');
                         }
                     }
                     return false; //do not dispatch the event further

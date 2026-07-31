@@ -17,14 +17,14 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
   @Input() guides: Guide[] = [];
 
   topAdjust: any;
-  leftAdjust: number;
-  snapData: { top: number, left: number, guideX?: number, guideY?: number, guides?: Guide[] };
-  subscription: Subscription;
+  leftAdjust!: number;
+  snapData!: { top: number, left: number, guideX?: number, guideY?: number, guides?: Guide[] } | null;
+  subscription!: Subscription;
 
   constructor(private el: ElementRef, protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
     private urlParser: URLParserService, private editorContentService: EditorContentService, private guidesService: DynamicGuidesService) {
       this.editorContentService.executeOnlyAfterInit(() => {
-        this.editorSession.getSnapThreshold().then((thresholds: { alignment: number, distance: number }) => {
+        this.editorSession.getSnapThreshold().then((thresholds: any) => {
             if (thresholds.alignment > 0 || thresholds.distance > 0) {
                 const contentArea = this.editorContentService.getContentArea();
                 contentArea.addEventListener('mouseup', () => this.onMouseUp());
@@ -34,8 +34,8 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
-      this.setGuides(value);
+    this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
+      if (value) this.setGuides(value);
     })
   }
 
@@ -45,7 +45,7 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
       this.topAdjust = parseInt(computedStyle.getPropertyValue('padding-left').replace('px', ''));
       this.leftAdjust = parseInt(computedStyle.getPropertyValue('padding-top').replace('px', ''))
     }
-    this.snapData.guides.forEach(guide => {
+    this.snapData!.guides!.forEach(guide => {
       const guideElement = this.renderer.createElement('div');
       this.renderer.setStyle(guideElement, 'position', 'absolute');
       this.renderer.setStyle(guideElement, 'left', `${guide.x + this.leftAdjust}px`);

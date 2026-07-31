@@ -43,7 +43,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
 
     getClientnr(): string {
-        return this.sabloService.getClientnr();
+        return this.sabloService.getClientnr()!;
     }
 
     callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
@@ -63,7 +63,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
 
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
-        return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement);
+        return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement)!;
     }
 
     showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
@@ -91,7 +91,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
 
     getFormCacheByName(containedForm: string): IFormCache {
-        return this.formService.getFormCacheByName(containedForm);
+        return this.formService.getFormCacheByName(containedForm) as unknown as IFormCache;
     }
 
     /** 
@@ -122,10 +122,10 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
     }
 
     public getTemplateForFormComponentChild(formName: string, item: IComponentCache): TemplateRef<any> {
-        const formComponent = this.formService.getFormComponentInstance(formName);
+        const formComponent: any = this.formService.getFormComponentInstance(formName);
         if (formComponent && formComponent['getTemplateForLFC']) {
             return formComponent['getTemplateForLFC'](item);
         }
-        return null;
+        return null!;
     }
 }

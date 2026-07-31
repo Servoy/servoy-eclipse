@@ -50,7 +50,7 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
         }
     }
 
-    itemClicked(event, index) {
+    itemClicked(event: any, index: any) {
         const newValue = event.target.value ? event.target.value : event.target.innerText;
         const changed = !(newValue === this.value);
         this.value = newValue;
@@ -58,7 +58,7 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
         super.baseItemClicked(event, changed, newValue);
     }
 
-    attachEventHandlers(element, index) {
+    attachEventHandlers(element: any, index: any) {
         this.renderer.listen(element, 'click', (e) => {
             if (!this.readOnly && this.enabled) {
                 this.itemClicked(e, index);

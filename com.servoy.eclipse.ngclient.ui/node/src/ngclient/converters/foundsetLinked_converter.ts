@@ -19,7 +19,7 @@ export class FoundsetLinkedType implements IType<FoundsetLinkedValue> {
     public fromServerToClient(serverSentData: IServerSentData, currentClientValue: FoundsetLinkedValue, propertyContext: IPropertyContext): FoundsetLinkedValue {
         if (serverSentData === null) {
             if (currentClientValue) currentClientValue.getInternalState().dispose();
-            return null;
+            return null!;
         }
 
         // foundset linked properties always have a value both on client and on server (if wrapped value is null, foundset linked prop. will be an
@@ -31,7 +31,7 @@ export class FoundsetLinkedType implements IType<FoundsetLinkedValue> {
         else {
             const forFoundsetPropertyName = serverSentData.forFoundset;
             didSomethingWithServerSentData = true;
-            newValue = new FoundsetLinkedValue(this.viewportService, this.sabloService, propertyContext, () => propertyContext.getProperty(forFoundsetPropertyName), this.log);
+            newValue = new FoundsetLinkedValue(this.viewportService, this.sabloService, propertyContext, () => propertyContext.getProperty(forFoundsetPropertyName!), this.log);
         }
 
         newValue = newValue.getInternalState().applyIncommingServerData(didSomethingWithServerSentData, serverSentData);
@@ -95,15 +95,15 @@ export class FoundsetLinkedValue extends Array<any> implements IChangeAwareValue
     }
     
     public dataChanged(index: number, newValue: any, oldValue?: any) {
-        const propertyContext = this.__internalState.getPropertyContextCreatorForRow().withRowValueAndPushToServerFor(undefined, undefined);
+        const propertyContext = this.__internalState.getPropertyContextCreatorForRow().withRowValueAndPushToServerFor(undefined!, undefined!);
         if (!propertyContext || propertyContext.getPushToServerCalculatedValue() < PushToServerEnum.ALLOW) return; // we ignore all changes if server will block them anyway
 
         if (newValue === undefined) newValue = null;
         // we don't really need to update the whole viewport; if changes are queued to be sent to server, that will cause data to be changed
         // in the foundset viewport, those will anyway be sent from server causing an update of the viewport here
 
-        this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this, this.__internalState, undefined,
-                this.__internalState.forFoundset().viewPort.rows[index]._svyRowId, undefined,
+        this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this, this.__internalState, undefined!,
+                this.__internalState.forFoundset().viewPort.rows[index]._svyRowId, undefined!,
                 this.__internalState.getPropertyContextCreatorForRow(), newValue, oldValue);
     }
     
@@ -118,7 +118,7 @@ class FSLinkedInternalState extends FoundsetViewportState {
 
     recordLinked = false;
     private propertyContextCreatorForRow: IPropertyContextCreatorForRow;
-    private singleValueState: SingleValueState = undefined;
+    private singleValueState: SingleValueState | undefined = undefined;
 
     constructor(private foundsetLinkedValue: FoundsetLinkedValue, propertyContext: IPropertyContext, forFoundset: () => IFoundset, log: LoggerService,
                     public viewportService: ViewportService, protected sabloService: SabloService) {
@@ -146,7 +146,7 @@ class FSLinkedInternalState extends FoundsetViewportState {
                 this.recordLinked = true;
 
                 this.viewportService.updateViewportGranularly(this.foundsetLinkedValue, this, serverSentData.vpu,
-                        undefined, this.propertyContextCreatorForRow, true);
+                        undefined!, this.propertyContextCreatorForRow, true);
 
                 // restore smart watches and proxy notifiers; server side send changes are now applied
                 this.ignoreChanges = false;
@@ -155,9 +155,9 @@ class FSLinkedInternalState extends FoundsetViewportState {
                 if (this.changeListeners.length > 0) this.fireChanges({ viewportRowsUpdated: serverSentData.vpu });
             } else {
                 // the rest will always be treated as a full viewport update (single values are actually going to generate a full viewport of 'the one' new value)
-                let conversionInfoFromServerForViewport: ConversionInfoFromServerForViewport;
+                let conversionInfoFromServerForViewport: ConversionInfoFromServerForViewport | undefined;
 
-                let wholeViewport: any[];
+                let wholeViewport: any[] | undefined;
                 if (serverSentData.sv !== undefined || serverSentData.svu !== undefined) { // SINGLE_VALUE or SINGLE_VALUE_UPDATE
                     // just update single value from server and make copies of it to duplicate
                     const singleValue = serverSentData.sv !== undefined ? serverSentData.sv : serverSentData.svu;
@@ -177,7 +177,7 @@ class FSLinkedInternalState extends FoundsetViewportState {
                     conversionInfoFromServerForViewport = serverSentData._T as ConversionInfoFromServerForViewport;
                 }
 
-                if (wholeViewport !== undefined) this.updateWholeViewport(wholeViewport, conversionInfoFromServerForViewport);
+                if (wholeViewport !== undefined) this.updateWholeViewport(wholeViewport, conversionInfoFromServerForViewport!);
                 else if (!didSomethingWithServerSentData && !serverSentData.forFoundset)
                     // it is possible in form designer (not real client) that serverSentData.forFoundset is the only thing that is received
                     // multiple times, due to multiple calls to toTemplateJSON on server; so allow that without logging an error
@@ -207,7 +207,7 @@ class FSLinkedInternalState extends FoundsetViewportState {
         return this.foundsetLinkedValue;
     }
 
-    public updateWholeViewport(wholeViewport: any[], conversionInfo: ConversionInfoFromServerForViewport) {
+    public updateWholeViewport(wholeViewport: any[], conversionInfo: ConversionInfoFromServerForViewport | undefined) {
         // disable smart watches and proxy notifiers; server side send changes are going to be applied
         this.ignoreChanges = true;
         const oldVal = this.foundsetLinkedValue.slice(); // create shallow copy of old rows as ref. will be the same otherwise
@@ -215,7 +215,7 @@ class FSLinkedInternalState extends FoundsetViewportState {
         // normally foundsetLinkedValue will remain the same reference below except for when it is the first initialization from
         // server and only if we have SHALLOW/DEEP watches in spec for this prop., in which case a proxy of the initial value will be returned by viewport code
         this.foundsetLinkedValue = this.viewportService.updateWholeViewport(this.foundsetLinkedValue, this, wholeViewport,
-                                        conversionInfo, undefined, this.propertyContextCreatorForRow, true);
+                                        conversionInfo!, undefined!, this.propertyContextCreatorForRow, true);
 
         // restore smart watches and proxy notifiers; server side send changes are now applied
         this.ignoreChanges = false;
@@ -250,10 +250,10 @@ class FSLinkedInternalState extends FoundsetViewportState {
 
 class SingleValueState implements IUIDestroyAwareValue {
 
-    private viewPortSize: number;
-    private singleValue: any;
-    private conversionInfo: ConversionInfoFromServerForViewport;
-    private viewportSizeChangedListener: () => void;
+    private viewPortSize!: number;
+    private singleValue!: any;
+    private conversionInfo: ConversionInfoFromServerForViewport | undefined;
+    private viewportSizeChangedListener: (() => void) | undefined;
 
     constructor(sabloService: SabloService, private iS: FSLinkedInternalState) {
         // add a listener for foundset prop. size to regenerate the viewport when that changes - fill it up again fully with single values

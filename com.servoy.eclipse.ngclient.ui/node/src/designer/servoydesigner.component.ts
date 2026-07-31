@@ -18,20 +18,20 @@ import { Inject } from '@angular/core';
 })
 export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy, IDesignFormComponent {
 
-    @ViewChild(DesignFormComponent) designFormComponent: DesignFormComponent;
+    @ViewChild(DesignFormComponent) designFormComponent!: DesignFormComponent;
     @ViewChild('element', { static: false }) set elementRef(elementRef: ElementRef) {
         if (elementRef) {
             this.elementRefInit = elementRef;
             this.resizeObserver.observe(this.elementRefInit.nativeElement);
         }
     }
-    elementRefInit: ElementRef;
+    elementRefInit!: ElementRef;
 
-    private resizeObserver: ResizeObserver;
-    mainForm: string;
-    solutionName: string;
-    private wsSession: WebsocketSession;
-    variantsRequested: boolean;
+    private resizeObserver!: ResizeObserver;
+    mainForm!: string;
+    solutionName!: string;
+    private wsSession!: WebsocketSession;
+    variantsRequested!: boolean;
     variantsFormTemplate = '{"VariantsForm":{"responsive":true,"size":{"width": 640,"height":0},"children":[{"name":"","model":{"designSize":{"width":640,"height":0},"size":{"width":400,"height":0},"addMinSize":true,"useCssPosition":{},"absoluteLayout":{"":false},"hasExtraParts":false,"styleClass":" svy-overflowx-auto svy-overflowy-auto"}},{"layout":true,"cssPositionContainer":false,"styleclass":["flex"],"attributes":{"data-justify-content":"stretch","svy-id":"variants-responsive-grid","data-align-items":"stretch","svy-layoutname":"12grid.flexcontainer","svy-priority":"1","svy-title":"flex","data-direction":"column","designclass":"variants_container"},"children":[]}]}}';
     constructor(private windowRef: WindowRefService,
         private websocketService: WebsocketService,
@@ -54,16 +54,16 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         this.wsSession = this.websocketService.connect('', [clientnr, formName, '1'], { solution: this.solutionName });
         if (this.variantsRequested) {
             const formState = JSON.parse(this.variantsFormTemplate)[formName];
-            this.formService.createFormCache(formName, formState, null);
+            this.formService.createFormCache(formName, formState, null!);
             this.mainForm = formName;
         } else {
             this.wsSession.callService("$editor", "getData", {
                 form: formName,
                 solution: this.solutionName,
                 ng2: true
-            }, false).then((data: string) => {
+            }, false).then((data: any) => {
                 const formState = JSON.parse(data)[formName];
-                this.formService.createFormCache(formName, formState, null);
+                this.formService.createFormCache(formName, formState, null!);
                 this.mainForm = formName;
             });
         }
@@ -71,7 +71,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
             form: formName,
             solution: this.solutionName,
             ng2: true
-        }).then((paths: string[]) => {
+        }).then((paths: any) => {
             if (paths) {
                 for (const path of paths) {
                     const link: HTMLLinkElement = this.doc.createElement('link');
@@ -136,10 +136,10 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
             form: this.mainForm,
             solution: this.solutionName,
             ng2: true
-        }, false).then((data: string) => {
+        }, false).then((data: any) => {
             const formState = JSON.parse(data)[this.mainForm];
             this.formService.destroyFormCache(this.mainForm);
-            this.formService.createFormCache(this.mainForm, formState, null);
+            this.formService.createFormCache(this.mainForm, formState, null!);
             this.designFormComponent.formCacheRefresh();
         });
     }

@@ -7,10 +7,10 @@ import { ServoyPublicModule } from '../servoy_public.module';
 
 @Injectable()
 export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
-    private locale: Locale;
+    private locale!: Locale;
     private messages: { [key: string]: string } = {};
     private forms: { [key: string]: IFormCache } = {};
-    private localeNumberSymbol: string = null;
+    private localeNumberSymbol: string | null = null;
 
     public addForm(name: string, formCache: IFormCache) {
         this.forms[name] = formCache;
@@ -45,7 +45,7 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     }
 
     public generateMediaDownloadUrl(media: string): string {
-        return null;
+        return null!;
     }
     public getUIProperty(key: string): any {
         return null;
@@ -85,7 +85,7 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
         return this.locale? this.locale: {language:'en', country: 'US', full: 'en-US'};
     }
     public getAGGridLocale(): { [key: string]: string; } {
-        return null;
+        return null!;
     }
     public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
         const ev = new JSEvent();
@@ -130,7 +130,7 @@ export class ServoyPublicServiceTestingImpl extends ServoyPublicService {
     }
 
     public getTemplateForFormComponentChild(_formName: string, _item: IComponentCache): TemplateRef<any> {
-        return null;
+        return null!;
     }
 }
 @NgModule({

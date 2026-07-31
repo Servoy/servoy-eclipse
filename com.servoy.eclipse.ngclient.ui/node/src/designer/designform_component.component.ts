@@ -76,7 +76,7 @@ import { TypesRegistry} from '../sablo/types_registry';
         <ng-template  #cssPositionContainer  let-state="state" >
           <div [svyContainerStyle]="state" [svyContainerClasses]="state.classes" [ngClass]="getNGClass(state)" [svyContainerAttributes]="state.attributes" class="svy-layoutcontainer">
             @for (item of state.items; track item) {
-              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false && {'display': 'none'}" style="position:absolute"> <!-- wrapper div -->
+              <div [svyContainerStyle]="item" [svyContainerLayout]="item.layout" class="svy-wrapper" [ngStyle]="item.model.visible === false ? {'display': 'none'} : null" style="position:absolute"> <!-- wrapper div -->
                 <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item, callback:this}"></ng-template>
               </div>
             }
@@ -135,28 +135,28 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     readonly servoycoreFormcontainer = viewChild<TemplateRef<any>>('servoycoreFormcontainer');
     // component viewchild template generate end
 
-    @Input() name: string;
+    @Input() name!: string;
 
-    formClasses: string[];
-    formCache: FormCache;
+    formClasses: string[] | null = null;
+    formCache!: FormCache;
 
-    absolutFormPosition = {};
+    absolutFormPosition: Record<string, any> = {};
     showWireframe = false;
-    draggedElementItem: ComponentCache | StructureCache;
-    insertedCloneParent: StructureCache;
-    insertedClone: ComponentCache | StructureCache;
-    dragItem: Element;
-    isVariantForm: boolean;
-    variantsContainer: StructureCache;
-    insertedVariants: Array<StructureCache>;
+    draggedElementItem: ComponentCache | StructureCache | null = null;
+    insertedCloneParent: StructureCache | null = null;
+    insertedClone: ComponentCache | StructureCache | null = null;
+    dragItem!: Element;
+    isVariantForm!: boolean;
+    variantsContainer!: StructureCache;
+    insertedVariants: Array<StructureCache> | null = null;
 
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
-    private designMode: boolean;
+    private designMode = false;
     private maxLevel = 3;
-    private dropHighlight: string = null;
-    private dropHighlightIgnoredIds: Array<string> = null;
-    private allowedChildren: unknown;
+    private dropHighlight: string | null = null;
+    private dropHighlightIgnoredIds: Array<string> | null = null;
+    private allowedChildren!: Record<string, any>;
     private variantContainerMargin = 2;
     private variantItemMargin = 10;
     private variantsLoaded = false;
@@ -178,23 +178,23 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'createElement') {
                 const elWidth = event.data.model.size ? event.data.model.size.width : 200;
                 const elHeight = event.data.model.size ? event.data.model.size.height : 100;
-                const model = { width: elWidth + 'px', height: elHeight + 'px' };
+                const model: Record<string, string> = { width: elWidth + 'px', height: elHeight + 'px' };
                 model['top'] = '-200px';
                 model['left'] = '-200px';
                 const model_inserted = { width: elWidth + 'px', height: elHeight + 'px' };
                 if (event.data.type === 'layout') {
                     //we are in responsive layout
-                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null ,null, false, model_inserted);
-                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, null, 'insertedClone', false, model_inserted);
+                    this.draggedElementItem = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, undefined, undefined, false, model_inserted);
+                    this.insertedClone = new StructureCache(event.data.model.tagname, event.data.model.classes, event.data.attributes, undefined, 'insertedClone', false, model_inserted);
                     if (event.data.children) {
-                        event.data.children.forEach(child => {
+                        event.data.children.forEach((child: any) => {
                             (this.draggedElementItem as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
                             (this.insertedClone as StructureCache).addChild(new StructureCache(child.model.tagName, child.model.classes, child.attributes));
                         });
                     }
                 } else {
-                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, undefined, [], model, typesRegistry).initForDesigner(event.data.model);
-                    this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, undefined, [], model_inserted,
+                    this.draggedElementItem = new ComponentCache('dragged_element', event.data.name, undefined!, [], model, typesRegistry).initForDesigner(event.data.model);
+                    this.insertedClone = new ComponentCache(event.data.model.tagname, event.data.name, undefined!, [], model_inserted,
                                                 typesRegistry).initForDesigner(event.data.model); // TODO only in responsive
                 }
                 this.designMode = this.showWireframe;
@@ -206,12 +206,12 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             if (event.data.id === 'createVariants') {
                 this.variantsLoaded = false;
 
-                const attributes = {};
+                const attributes: Record<string, string> = {};
                 attributes['designclass'] =  'variant_item';
                 attributes['svy-title'] = 'flex-item';
 
                 if (!this.variantsContainer) {
-                    this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid');
+                    this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid')!;
                 }
 
                 this.insertedVariants = new Array<StructureCache>();
@@ -224,21 +224,21 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                     variantAttributes['svy-id'] = variantId;
                     const layout = { width: variant.width + 'px', height: variant.height + 'px' };
 
-                    const variantElement = new ComponentCache(null, event.data.name, undefined, [], layout, typesRegistry);
+                    const variantElement = new ComponentCache(null!, event.data.name, undefined!, [], layout, typesRegistry);
                     variantElement.initForDesignerIsVariant(JSON.parse(JSON.stringify(event.data.model).slice()), true);
 
                     const componentModel = variantElement.model;
                     componentModel.variant = variant.classes; // this is hardcoded property name "variant" should be changed to really get the variant property
                     componentModel._variantName = variant.name;
-                    componentModel.size.width = variant.width;
-                    componentModel.size.height = variant.height;
+                    componentModel.size!.width = variant.width;
+                    componentModel.size!.height = variant.height;
                     componentModel.text = variant.displayName;
                     componentModel.id = variant.name;
 
-                    this.insertedClone = new StructureCache(null, ['flex-item'], variantAttributes , null, variantId);
+                    this.insertedClone = new StructureCache(null!, ['flex-item'], variantAttributes , undefined, variantId);
                     this.insertedClone.addChild(variantElement);
-                    this.variantsContainer.addChild(this.insertedClone, null);
-                    this.insertedVariants.push(this.insertedClone);
+                    this.variantsContainer.addChild(this.insertedClone);
+                    this.insertedVariants!.push(this.insertedClone);
                 }
 
                 this.designMode = this.showWireframe;
@@ -249,7 +249,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
                 if (this.insertedVariants) {
                     if (!this.variantsContainer) {
-                        this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid');
+                        this.variantsContainer = this.formCache.getLayoutContainer('variants-responsive-grid')!;
                     }
                     if (this.insertedVariants) {
                         for (const insertedVariant of this.insertedVariants) {//need to remove previous existing variants
@@ -265,86 +265,86 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
             }
             if (event.data.id === 'createDraggedComponent') {
-                this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid);
+                this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid)!;
                 if (this.insertedClone) {
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
-                        this.insertedClone = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, this.insertedClone.attributes, this.insertedClone.items);
+                        this.insertedClone = new StructureCache((this.insertedClone as StructureCache).tagname, (this.insertedClone as StructureCache).classes, (this.insertedClone as StructureCache).attributes, (this.insertedClone as StructureCache).items);
                         parent.addChild(this.insertedClone);
                     }
-                    this.draggedElementItem = new StructureCache(this.insertedClone.tagname, this.insertedClone.classes, Object.assign({}, this.insertedClone.attributes), this.insertedClone.items);
-                    this.draggedElementItem.attributes['svy-id'] = 'clone';
+                    this.draggedElementItem = new StructureCache((this.insertedClone as StructureCache).tagname, (this.insertedClone as StructureCache).classes, Object.assign({}, (this.insertedClone as StructureCache).attributes), (this.insertedClone as StructureCache).items);
+                    this.draggedElementItem.attributes!['svy-id'] = 'clone';
 
                 } else {
                     //if it's not a layout it must be a component
-                    this.insertedClone = this.formCache.getComponent(event.data.uuid);
-                    if (!this.insertedClone.layout) {
-                        const elWidth = this.insertedClone.model.size ? this.insertedClone.model.size.width : 200;
-                        const elHeight = this.insertedClone.model.size ? this.insertedClone.model.size.height : 100;
-                        this.insertedClone.layout = { width: elWidth + 'px', height: elHeight + 'px' };
+                    this.insertedClone = this.formCache.getComponent(event.data.uuid)!;
+                    if (!(this.insertedClone as ComponentCache).layout) {
+                        const elWidth = (this.insertedClone as ComponentCache).model.size ? (this.insertedClone as ComponentCache).model.size!.width : 200;
+                        const elHeight = (this.insertedClone as ComponentCache).model.size ? (this.insertedClone as ComponentCache).model.size!.height : 100;
+                        (this.insertedClone as ComponentCache).layout = { width: elWidth + 'px', height: elHeight + 'px' };
                     }
-                    const oldModel = this.insertedClone.model;
+                    const oldModel = (this.insertedClone as ComponentCache).model;
                     if (event.data.dragCopy) {
                         const parent = this.insertedClone.parent;
-                        this.insertedClone = new ComponentCache(this.insertedClone.name + 'clone', this.insertedClone.specName, this.insertedClone.type, this.insertedClone.handlers,
-                            this.insertedClone.layout, this.typesRegistry).initForDesigner(oldModel);
+                        this.insertedClone = new ComponentCache((this.insertedClone as ComponentCache).name + 'clone', (this.insertedClone as ComponentCache).specName, (this.insertedClone as ComponentCache).type, (this.insertedClone as ComponentCache).handlers,
+                            (this.insertedClone as ComponentCache).layout, this.typesRegistry).initForDesigner(oldModel);
 
                         parent.addChild(this.insertedClone);
                     }
 
-                    this.draggedElementItem = new ComponentCache('dragged_element', this.insertedClone.specName, this.insertedClone.type, this.insertedClone.handlers, this.insertedClone.layout,
+                    this.draggedElementItem = new ComponentCache('dragged_element', (this.insertedClone as ComponentCache).specName, (this.insertedClone as ComponentCache).type, (this.insertedClone as ComponentCache).handlers, (this.insertedClone as ComponentCache).layout,
                                                     this.typesRegistry).initForDesigner(oldModel);
                 }
-                this.insertedCloneParent = this.insertedClone.parent;
+                this.insertedCloneParent = this.insertedClone!.parent;
                 this.designMode = this.showWireframe;
                 this.showWireframe = true;
             }
             if (event.data.id === 'insertDraggedComponent') {
-                if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
+                if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone!);
                 this.insertedCloneParent = null;
-                let beforeChild = null;
+                let beforeChild: ComponentCache | StructureCache | null = null;
                 if (event.data.insertBefore) {
-                    beforeChild = this.formCache.getComponent(event.data.insertBefore);
-                    if (beforeChild == null) beforeChild = this.formCache.getLayoutContainer(event.data.insertBefore);
+                    beforeChild = this.formCache.getComponent(event.data.insertBefore)!;
+                    if (beforeChild == null) beforeChild = this.formCache.getLayoutContainer(event.data.insertBefore)!;
                 }
 
                 if (event.data.dropTarget) {
-                    this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget);
+                    this.insertedCloneParent = this.formCache.getLayoutContainer(event.data.dropTarget)!;
                 } else if (!this.formCache.absolute) {
                     if (this.formCache.mainStructure == null) {
-                        this.formCache.mainStructure = new StructureCache(null, null);
+                        this.formCache.mainStructure = new StructureCache(null!, null!);
                     }
                     if (this.insertedCloneParent !== this.formCache.mainStructure) {
                         this.insertedCloneParent = this.formCache.mainStructure;
                     }
                 }
                 if (this.insertedCloneParent) {
-                    this.insertedCloneParent.addChild(this.insertedClone, beforeChild);
+                    this.insertedCloneParent.addChild(this.insertedClone!, beforeChild ?? undefined);
                     if (event.data.uuids) {
-                        event.data.uuids.forEach(uuid => {
-                            let insertedClone: ComponentCache | StructureCache = this.formCache.getLayoutContainer(uuid); 
+                        event.data.uuids.forEach((uuid: any) => {
+                            let insertedClone: ComponentCache | StructureCache = this.formCache.getLayoutContainer(uuid)!; 
                             if (!insertedClone) {
-                                insertedClone = this.formCache.getComponent(uuid);
+                                insertedClone = this.formCache.getComponent(uuid)!;
                             }
                             const insertedCloneParent = insertedClone.parent;
                             insertedCloneParent.removeChild(insertedClone);
-                            this.insertedCloneParent.addChild(insertedClone, beforeChild);
+                            this.insertedCloneParent!.addChild(insertedClone, beforeChild ?? undefined);
                         });
                     }
                 }
             }
             if (event.data.id === 'removeDragCopy') {
-                if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
-                this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid);
+                if (this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone!);
+                this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid)!;
                 if (!this.insertedClone) {
-                    this.insertedClone = this.formCache.getComponent(event.data.uuid);
+                    this.insertedClone = this.formCache.getComponent(event.data.uuid)!;
                 }
-                this.insertedCloneParent.addChild(this.insertedClone, event.data.insertBefore);
+                this.insertedCloneParent!.addChild(this.insertedClone, event.data.insertBefore);
             }
             if (event.data.id === 'destroyElement') {
                 if (this.draggedElementItem || this.insertedCloneParent || this.insertedClone) {
                     this.draggedElementItem = null;
-                    if (!event.data.existingElement && this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone);
+                    if (!event.data.existingElement && this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone!);
                     this.insertedCloneParent = null;
                     this.insertedClone = null;
                     this.showWireframe = this.designMode;
@@ -355,7 +355,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 this.showWireframe = event.data.value;
                 this.windowRefService.nativeWindow.parent.postMessage({ id: 'renderGhosts', formname : this.name }, '*');
                 if (changed){
-                    Array.from( this.formCache.formComponents.values()).forEach(formComponent => {
+                    Array.from( this.formCache.formComponents.values()).forEach((formComponent: any) => {
                        if (formComponent.hasFoundset && formComponent.model.containedForm && !formComponent.model.containedForm.absoluteLayout){
                            // just trigger the change detection
                           formComponent.model.editable = ! formComponent.model.editable;
@@ -382,11 +382,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         if (!this.variantsLoaded || variants.length === 0) {
             return;
         }
-        const container = this.document.getElementsByClassName('variants_container').item(0).parentElement;
+        const container = this.document.getElementsByClassName('variants_container').item(0)!.parentElement!;
         const formHeight = Math.ceil(container.getBoundingClientRect().height) + 2 * this.variantContainerMargin;
         let formWidth = 0;
         for (const variant of variants) {
-            const variantChild = variant.firstChild.firstChild as Element;
+            const variantChild = variant.firstChild!.firstChild as Element;
             formWidth = Math.max(formWidth, variantChild.clientLeft + Math.ceil(variantChild.getBoundingClientRect().width) + 2*this.variantItemMargin);
         }
         formWidth += 2 * this.variantContainerMargin;
@@ -403,27 +403,27 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     public onVariantsMouseDown(event: MouseEvent) {
         event.stopPropagation();
-        let targetElement = document.elementFromPoint(event.pageX, event.pageY);
-        if (targetElement.tagName === 'DIV' || targetElement.tagName === 'div') {
+        let targetElement: Element | null = document.elementFromPoint(event.pageX, event.pageY);
+        if (targetElement!.tagName === 'DIV' || targetElement!.tagName === 'div') {
             return; //click outside any element
         }
-        let variantId: string;
+        let variantId: string | undefined;
         while (targetElement) {
             if (targetElement.attributes.getNamedItem('svy-id')) {
-                variantId = targetElement.attributes.getNamedItem('svy-id').nodeValue;
+                variantId = targetElement.attributes.getNamedItem('svy-id')!.nodeValue!;
                 break;
             } else {
                 targetElement = targetElement.parentElement;
             }
         }
-        const targetHeight = Math.ceil(targetElement.getBoundingClientRect().height); //height of the flex item
-        targetElement = targetElement.firstElementChild;
+        const targetHeight = Math.ceil(targetElement!.getBoundingClientRect().height); //height of the flex item
+        targetElement = targetElement!.firstElementChild;
         //not adding 3 px then the text content is getting clipped after drop
-        const targetWidth = Math.ceil(targetElement.getBoundingClientRect().width) + 3;
+        const targetWidth = Math.ceil(targetElement!.getBoundingClientRect().width) + 3;
 
-        let selectedVariant: StructureCache;
+        let selectedVariant: StructureCache | undefined;
         if (variantId) {
-            for (const variant of this.insertedVariants) {
+            for (const variant of this.insertedVariants!) {
                 if (variantId === variant.id) {
                     selectedVariant = variant;
                     break;
@@ -431,10 +431,10 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
         }
         if (selectedVariant) {
-            const model = Object.assign({}, (selectedVariant.items[0] as ComponentCache).model);
-            model.size.width = targetWidth;
-            model.size.height = targetHeight;
-            this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: selectedVariant.items[0].model}, '*');
+            const model = Object.assign({}, (selectedVariant.items![0] as ComponentCache).model);
+            model.size!.width = targetWidth;
+            model.size!.height = targetHeight;
+            this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: selectedVariant.items![0].model}, '*');
         }
     }
 
@@ -475,34 +475,34 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer() : this.svyResponsiveDiv());
+            return item.tagname ? (this as any)[item.tagname]() : (item.cssPositionContainer ? this.cssPositionContainer()! : this.svyResponsiveDiv()!);
         } else if (item instanceof FormComponentCache) {
-            if (item.hasFoundset) return this.servoycoreListformcomponent();
-            return item.responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
+            if (item.hasFoundset) return this.servoycoreListformcomponent()!;
+            return item.responsive ? this.formComponentResponsiveDiv()! : this.formComponentAbsoluteDiv()!;
         } else {
-            if (item.type === 'menu') return;
-            if (this[item.type] === undefined && item.type !== undefined) {
+            if (item.type === 'menu') return undefined!;
+            if ((this as any)[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
-            return this[item.type]();
+            return (this as any)[item.type]();
         }
     }
 
     getTemplateForLFC(state: ComponentCache): TemplateRef<any> {
         if (state.type.includes('formcomponent')) {
-            return state.model.containedForm.absoluteLayout ? this.formComponentAbsoluteDiv() : this.formComponentResponsiveDiv();
+            return state.model.containedForm!.absoluteLayout ? this.formComponentAbsoluteDiv()! : this.formComponentResponsiveDiv()!;
         } else {
             // TODO: this has to be replaced with a type property on the state object
             // TODO - hmm type is already camel case here with dashes removed normally - so I don't think we need the indexOf, replace etc anymore
             let compDirectiveName = state.type;
             const index = compDirectiveName.indexOf('-');
             compDirectiveName = compDirectiveName.replace('-', '');
-            return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)]();
+            return (this as any)[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)]();
         }
     }
 
     public getAbsoluteFormStyle() {
-        const formData = this.formCache.getComponent('');
+        const formData = this.formCache.getComponent('')!;
 
         for (const key in this.absolutFormPosition) {
             if (this.absolutFormPosition.hasOwnProperty(key)) {
@@ -517,7 +517,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.absolutFormPosition['overflow'] = 'hidden';
 
         if (formData.model.borderType) {
-            const borderStyle = formData.model.borderType;
+            const borderStyle: Record<string, any> = formData.model.borderType as Record<string, any>;
             for (const key of Object.keys(borderStyle)) {
                 this.absolutFormPosition[key] = borderStyle[key];
             }
@@ -529,8 +529,8 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         if (formData.model.addMinSize) {
             if (formData.model.hasExtraParts || this.el.nativeElement.parentNode.closest('.svy-form') == null) {
                 // see svyFormstyle from ng1
-                this.absolutFormPosition['minWidth'] = formData.model.size.width + 'px';
-                this.absolutFormPosition['minHeight'] = formData.model.size.height + 'px';
+                this.absolutFormPosition['minWidth'] = formData.model.size!.width + 'px';
+                this.absolutFormPosition['minHeight'] = formData.model.size!.height + 'px';
             }
         }
         return this.absolutFormPosition;
@@ -544,7 +544,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         // no operation needed for this dataprovider change event
     }
 
-    getHandler(_item: ComponentCache, _handler: string) {
+    getHandler(_item: ComponentCache, _handler: string): any {
         return null;
     }
 
@@ -566,19 +566,19 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     getNGClass(item: StructureCache): { [klass: string]: any } {
-        const ngclass = {};
+        const ngclass: Record<string, any> = {};
         if (!item.cssPositionContainer || item.getDepth() != 0) {
-        	ngclass[item.attributes.designclass] = this.showWireframe;
+        	ngclass[item.attributes!.designclass] = this.showWireframe;
         }
         ngclass['maxLevelDesign'] = this.showWireframe && item.getDepth() === this.maxLevel;
-        const children = item.items.length;
+        const children = item.items!.length;
         if (children > 0 && children < 10) {
             ngclass['containerChildren' + children] = this.showWireframe && item.getDepth() === this.maxLevel;
         }
         if (children >= 10) {
             ngclass['containerChildren10'] = this.showWireframe && item.getDepth() === this.maxLevel;
         }
-        ngclass['drop_highlight'] = this.canContainDraggedElement(item.attributes['svy-layoutname'], item.attributes['svy-id']);
+        ngclass['drop_highlight'] = this.canContainDraggedElement(item.attributes!['svy-layoutname'], item.attributes!['svy-id']);
         return ngclass;
     }
 
@@ -587,7 +587,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     }
 
     getContainerByName(containername: string): Element {
-        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]');
+        return this.document.querySelector('[name="' + this.name + '.' + containername + '"]')!;
     }
 
     updateFormStyleClasses(_ngutilsstyleclasses: string): void {
@@ -599,13 +599,13 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         // Form Instances are reused for tabpanels that have a template reference to this.
         this.formCache = this.formservice.getFormCache(this);
         this.formservice.resolveComponentCache(this);
-        const styleClasses: string = this.formCache.getComponent('').model.styleClass;
+        const styleClasses: string = this.formCache.getComponent('')!.model.styleClass as string;
         if (styleClasses)
             this.formClasses = styleClasses.split(' ');
         else
             this.formClasses = null;
-        this._containers = this.formCache.getComponent('').model.containers;
-        this._cssstyles = this.formCache.getComponent('').model.cssstyles;
+        this._containers = this.formCache.getComponent('')!.model.containers!;
+        this._cssstyles = this.formCache.getComponent('')!.model.cssstyles!;
         this.servoyApiCache = {};
         this.componentCache = {};
     }

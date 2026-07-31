@@ -11,10 +11,10 @@ import { I18NProvider } from '../i18n_provider.service';
 })
 export class FileUploadWindowComponent {
 
-    readonly url = signal<string>(undefined);
-    readonly title = signal<string>(undefined);
-    readonly multiselect = signal<boolean>(undefined);
-    readonly filter = signal<string>(undefined);
+    readonly url = signal<string | undefined>(undefined);
+    readonly title = signal<string | undefined>(undefined);
+    readonly multiselect = signal<boolean | undefined>(undefined);
+    readonly filter = signal<string | undefined>(undefined);
 
     readonly parsedFilter = computed(() => {
         const filterValue = this.filter();
@@ -50,7 +50,7 @@ export class FileUploadWindowComponent {
     progress = 0;
     errorText = '';
     isUploading = false;
-    onCloseCallback: () => void;
+    onCloseCallback!: () => void;
 
     constructor(private http: HttpClient, i18nProvider: I18NProvider) {
         i18nProvider.listenForI18NMessages(
@@ -63,17 +63,17 @@ export class FileUploadWindowComponent {
             'servoy.filechooser.label.name',
             'servoy.button.cancel',
             'servoy.filechooser.error').messages((val) => {
-                this.i18n_upload = val.get('servoy.filechooser.button.upload');
+                this.i18n_upload = val.get('servoy.filechooser.button.upload')!;
                 if (this.isMultiselect())
-                    this.i18n_chooseFiles = val.get('servoy.filechooser.upload.addFiles');
+                    this.i18n_chooseFiles = val.get('servoy.filechooser.upload.addFiles')!;
                 else
-                    this.i18n_chooseFiles = val.get('servoy.filechooser.upload.addFile');
-                this.i18n_cancel = val.get('servoy.button.cancel');
-                this.i18n_selectedFiles = val.get('servoy.filechooser.selected.files');
-                this.i18n_nothingSelected = val.get('servoy.filechooser.nothing.selected');
-                this.i18n_remove = val.get('servoy.filechooser.button.remove');
-                this.i18n_name = val.get('servoy.filechooser.label.name');
-                this.genericError = val.get('servoy.filechooser.error');
+                    this.i18n_chooseFiles = val.get('servoy.filechooser.upload.addFile')!;
+                this.i18n_cancel = val.get('servoy.button.cancel')!;
+                this.i18n_selectedFiles = val.get('servoy.filechooser.selected.files')!;
+                this.i18n_nothingSelected = val.get('servoy.filechooser.nothing.selected')!;
+                this.i18n_remove = val.get('servoy.filechooser.button.remove')!;
+                this.i18n_name = val.get('servoy.filechooser.label.name')!;
+                this.genericError = val.get('servoy.filechooser.error')!;
                 if (!this.title()) this.title.set(this.i18n_chooseFiles);
             });
     }
@@ -113,10 +113,10 @@ export class FileUploadWindowComponent {
         }
         
         const target = $event.target as HTMLInputElement;
-        const fileList: FileList = target.files;
+        const fileList: FileList = target.files!;
         
         for (const key of Object.keys(fileList)) {
-            const file = fileList[key];
+            const file = fileList[key as any];
             const fileSizeKB = file.size / (1024); // bytes to kilobytes
             
             // Check if file exceeds max size (if a max size is set)
@@ -134,7 +134,7 @@ export class FileUploadWindowComponent {
         target.value = ''; 
     }
 
-    getAcceptFilter(): string {
+    getAcceptFilter(): string | undefined {
         return this.parsedFilter().acceptFilter;
     }
 
@@ -168,7 +168,7 @@ export class FileUploadWindowComponent {
             formData.append('uploads[]', file, file.name);
         }
 
-        this.http.post(this.url(), formData, { reportProgress: true, observe: 'events' })
+        this.http.post(this.url()!, formData, { reportProgress: true, observe: 'events' })
             .subscribe(
                 data => {
                     const r: any = data as any;
@@ -201,7 +201,7 @@ export class FileUploadWindowComponent {
         if (!this.isUploading && this.onCloseCallback) this.onCloseCallback();
     }
 
-    public setOnCloseCallback(callback) {
+    public setOnCloseCallback(callback: () => void) {
         this.onCloseCallback = callback;
     }
 }

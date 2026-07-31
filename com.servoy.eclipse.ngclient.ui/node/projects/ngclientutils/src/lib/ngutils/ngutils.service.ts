@@ -5,11 +5,11 @@ import { WindowRefService, ServoyPublicService } from '@servoy/public';
 
 @Injectable()
 export class NGUtilsService {
-    private _tags: Tag[];
-    private _tagscopy: Tag[];
-    private _styleclasses: { property: string };
+    private _tags!: Tag[];
+    private _tagscopy!: Tag[];
+    private _styleclasses!: { property: string };
     private _backActionCB: any;
-    private confirmMessage: string;
+    private confirmMessage!: string;
     private renderer: Renderer2;
 
     constructor(private windowRef: WindowRefService,
@@ -333,8 +333,8 @@ export class NGUtilsService {
         objFra.style.visibility = 'hidden';
         document.body.appendChild(objFra);
         objFra.onload = () => {
-                objFra.contentWindow.focus();
-                objFra.contentWindow.print();
+                objFra.contentWindow!.focus();
+                objFra.contentWindow!.print();
         };    
         objFra.src = url;                      
 	}
@@ -351,7 +351,7 @@ export class NGUtilsService {
             const rect = el.getBoundingClientRect();
             return { x: rect.left + this.windowRef.nativeWindow.scrollX, y: rect.top + this.windowRef.nativeWindow.scrollY };
         }
-        return null;
+        return null!;
     }
     
     /**
@@ -361,7 +361,7 @@ export class NGUtilsService {
 	*/
 	public setLangAttribute(lang: string)
 	{
-		document.querySelector('html').setAttribute('lang', lang);
+		document.querySelector('html')!.setAttribute('lang', lang);
 	}
 
     /**
@@ -489,11 +489,11 @@ export class NGUtilsService {
 }
 
 class Tag {
-    public tagName: string;
-    public attrs: Attribute[];
+    public tagName!: string;
+    public attrs!: Attribute[];
 }
 
 class Attribute {
-    public name: string;
-    public value: string;
+    public name!: string;
+    public value!: string;
 }

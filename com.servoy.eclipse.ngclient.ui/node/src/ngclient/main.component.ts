@@ -19,13 +19,13 @@ import { WindowRefService } from '@servoy/public';
 
 export class MainComponent implements OnInit, OnDestroy {
   title = 'Servoy NGClient';
-  i18n_reconnecting_feedback: string;
-  formStyle = { position: 'absolute', top: '0px', bottom: '0px' };
-  navigatorStyle = { position: 'absolute', top: '0px', bottom: '0px' };
+  i18n_reconnecting_feedback!: string;
+  formStyle: Record<string, string> = { position: 'absolute', top: '0px', bottom: '0px' };
+  navigatorStyle: Record<string, string> = { position: 'absolute', top: '0px', bottom: '0px' };
   
   incudeAutoFillHack = !this.isSafariBrowser();
 
-  private  listener: I18NListener = null;
+  private  listener: I18NListener | null = null;
 
   constructor(private servoyService: ServoyService,
           private i18nProvider: I18NProvider,
@@ -41,7 +41,7 @@ export class MainComponent implements OnInit, OnDestroy {
     mainViewRefService.mainContainer = viewContainerRef;
     allService.init();
     serverData.init();
-    this.windowRef.nativeWindow['executeInlineScript'] = (formname, script, params) => this.servoyService.executeInlineScript(formname,script,params);
+    (this.windowRef.nativeWindow as any)['executeInlineScript'] = (formname: any, script: any, params: any) => this.servoyService.executeInlineScript(formname,script,params);
   }
 
   public get mainForm() {
@@ -65,19 +65,19 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
-    this.listener.destroy();
+    this.listener!.destroy();
     }
 
   public ngOnInit() {
       this.listener = this.i18nProvider.listenForI18NMessages(
-              'servoy.ngclient.reconnecting').messages((val)=> {
+              'servoy.ngclient.reconnecting').messages((val: any)=> {
                 this.i18n_reconnecting_feedback = val.get('servoy.ngclient.reconnecting');
       });
   }
 
   hasDefaultNavigator(): boolean {
     const cache = this.mainForm? this.formservice.getFormCacheByName(this.mainForm.toString()): null;
-    return cache && cache.getComponent('svy_default_navigator') != null;
+    return cache != null && cache.getComponent('svy_default_navigator') != null;
   }
 
   public getNavigatorStyle() {

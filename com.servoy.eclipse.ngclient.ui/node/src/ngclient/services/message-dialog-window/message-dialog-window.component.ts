@@ -10,20 +10,20 @@ import { Component, ElementRef, viewChild, signal, ChangeDetectionStrategy } fro
 })
 export class MessageDialogWindowComponent {
 
-  readonly message = signal<string>(undefined);
-  readonly styleClass = signal<string>(undefined);
-  readonly values = signal<string[]>(undefined);
-  readonly buttonsText = signal<string[]>(undefined);
-  readonly inputType = signal<string>(undefined);
-  readonly defaultButtonIndex = signal<number>(undefined);
+  readonly message = signal<string | undefined>(undefined);
+  readonly styleClass = signal<string | undefined>(undefined);
+  readonly values = signal<string[] | undefined>(undefined);
+  readonly buttonsText = signal<string[] | undefined>(undefined);
+  readonly inputType = signal<string | undefined>(undefined);
+  readonly defaultButtonIndex = signal<number | undefined>(undefined);
   readonly okButtonText = signal<string>('OK');
 
   readonly inputfield = viewChild<ElementRef>("inputfield");
   readonly buttons = viewChild<ElementRef>("buttons");
   readonly svyMessageDialog = viewChild<ElementRef>("svyMessageDialog");
 
-  retValue: string;
-  onCloseCallback: (r: string) => void;
+  retValue: string | null = null;
+  onCloseCallback!: (r: string | null) => void;
 
   handleKeyboardEvent(event: KeyboardEvent) {
     const key = event.key;
@@ -40,7 +40,7 @@ export class MessageDialogWindowComponent {
     if (!okButtonText) this.okButtonText.set('OK');
     const buttonsText = this.buttonsText();
     if(!buttonsText || !buttonsText.length) {
-      this.buttonsText.set([okButtonText]);
+      this.buttonsText.set([okButtonText!]);
     }
     const styleClass = this.styleClass();
     const values = this.values();
@@ -52,15 +52,15 @@ export class MessageDialogWindowComponent {
   ngAfterViewInit() {
     const styleClass = this.styleClass();
     if (styleClass === 'type-input' || styleClass === 'type-select') {
-      this.inputfield().nativeElement.focus();
+      this.inputfield()!.nativeElement.focus();
     } else {
-      this.buttons().nativeElement.children[this.defaultButtonIndex()].focus();
+      this.buttons()!.nativeElement.children[this.defaultButtonIndex()!].focus();
     }
-    const headerHeight = this.svyMessageDialog().nativeElement.querySelector('.window-header').offsetHeight;
-    const footerHeight = this.buttons().nativeElement.offsetHeight;
+    const headerHeight = this.svyMessageDialog()!.nativeElement.querySelector('.window-header').offsetHeight;
+    const footerHeight = this.buttons()!.nativeElement.offsetHeight;
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
     document.documentElement.style.setProperty('--footer-height', `${footerHeight}px`);
-    this.svyMessageDialog().nativeElement.scrollTop = 0;
+    this.svyMessageDialog()!.nativeElement.scrollTop = 0;
   }
 
   getButtonClass(btnIndex: number): string {
@@ -77,7 +77,7 @@ export class MessageDialogWindowComponent {
     return '';
   }
 
-  dismiss(value: string): void {
+  dismiss(value: string | null): void {
     const styleClass = this.styleClass();
     if (styleClass === 'type-input' || styleClass === 'type-select') {
       if (value !==this.okButtonText()) {

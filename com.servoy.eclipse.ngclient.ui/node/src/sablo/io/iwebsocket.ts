@@ -15,9 +15,9 @@ export interface IWebSocket {
 
 
 export class WebsocketCustomEvent extends CustomEvent {
-    public isReconnect: boolean;
-    public code: number;
-    public reason: string;
-    public wasClean: boolean;
+    public isReconnect = false;
+    public code = 0;
+    public reason!: string;
+    public wasClean = false;
     public data: any;
 }

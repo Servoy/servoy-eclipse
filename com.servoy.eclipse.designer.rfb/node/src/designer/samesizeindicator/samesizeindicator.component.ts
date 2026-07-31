@@ -14,9 +14,9 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
     SAME_WIDTH_IMAGE = 'designer/assets/images/samewidthindicator.png';
     SAME_HEIGHT_IMAGE = 'designer/assets/images/sameheightindicator.png';
 
-    sameSizeIndicator: boolean;
-    editorStateSubscription: Subscription;
-    indicators: SameSizeIndicator[];
+    sameSizeIndicator!: boolean;
+    editorStateSubscription!: Subscription;
+    indicators!: SameSizeIndicator[];
     
     constructor(protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
         this.editorSession.addSelectionChangedListener(this);
@@ -31,7 +31,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             }
             if (id == 'dragging'){
                 if (this.editorSession.getState().dragging){
-                    this.indicators = null;
+                    this.indicators = null!;
                 }
                 else{
                     this.selectionChanged(this.editorSession.getSelection());
@@ -57,7 +57,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             const nodeid = selection[0];
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(nodeid);
-                if (!element || element.parentElement.closest('.svy-responsivecontainer')) return;
+                if (!element || element.parentElement!.closest('.svy-responsivecontainer')) return;
                 let addedSameWidth = false;
                 let addedSameHeight = false;
 
@@ -65,7 +65,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
 
                 const elements = this.removeHiddenElements(this.editorContentService.getAllContentElements());
                 Array.from(elements).forEach(node => {
-                    if (element != node && node.parentElement.closest('.svy-responsivecontainer') == null && !element.classList.contains('svy-formcomponent')) {
+                    if (element != node && node.parentElement!.closest('.svy-responsivecontainer') == null && !element.classList.contains('svy-formcomponent')) {
                         const position = node.getBoundingClientRect();
                         if (position.width >= 5 && position.width == elementRect.width) {
                             this.addSameSizeIndicator(newindicators, position, true);

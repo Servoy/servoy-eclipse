@@ -11,7 +11,7 @@ import { URLParserService } from 'src/designer/services/urlparser.service';
 })
 export class DesignerComponent implements OnInit {
 
-    @ViewChild('contentArea', { static: false }) contentArea: ElementRef<HTMLElement>;
+    @ViewChild('contentArea', { static: false }) contentArea!: ElementRef<HTMLElement>;
 
     constructor(public readonly editorSession: EditorSessionService, 
                 public urlParser: URLParserService, 
