@@ -12,7 +12,7 @@ import { FormattingService } from '@servoy/public';
 })
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('child', { static: false }) child: ElementRef<HTMLInputElement>;
+    @ViewChild('child', { static: false }) child!: ElementRef<HTMLInputElement>;
 
     selection: any;
     private counter = 0;

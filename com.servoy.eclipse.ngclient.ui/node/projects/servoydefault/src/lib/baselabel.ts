@@ -8,17 +8,17 @@ import { ServoyDefaultBaseComponent } from './basecomponent';
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
-    @Input() hideText: boolean;
+    @Input() hideText!: boolean;
     @Input() imageMediaID: any;
     @Input() mediaOptions: any;
-    @Input() mnemonic: string;
-    @Input() rolloverCursor: number;
+    @Input() mnemonic!: string;
+    @Input() rolloverCursor!: number;
     @Input() rolloverImageMediaID: any;
-    @Input() showFocus: boolean;
-    @Input() textRotation: number;
-    @Input() verticalAlignment: number;
+    @Input() showFocus!: boolean;
+    @Input() textRotation!: number;
+    @Input() verticalAlignment!: number;
 
-    @ViewChild('child') child: ElementRef;
+    @ViewChild('child') child!: ElementRef;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -49,7 +49,7 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
     protected attachHandlers() {
         super.attachHandlers();
         if (this.onActionMethodID) {
-            if (this.onDoubleClickMethodID) {
+            if (this.onDoubleClickMethodID != null) {
                 this.renderer.listen(this.getNativeElement(), 'click', (e: Event) => {
                     if (this.timeoutID) {
                         window.clearTimeout(this.timeoutID);

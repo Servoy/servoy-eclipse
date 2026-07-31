@@ -21,10 +21,10 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     private handler;
 
     @ContentChildren( BGPane )
-    private panes: QueryList<BGPane>;
+    private panes!: QueryList<BGPane>;
 
     @ViewChild( 'element' , {static: true})
-    private elementRef: ElementRef;
+    private elementRef!: ElementRef;
 
     constructor( private readonly renderer: Renderer2 ) {
         this.handler = this.renderer.createElement( 'div' );
@@ -91,8 +91,8 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos < this.panes.first.minSize ) return;
-                if ( height - pos < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize ) return;
+                if ( height - pos! < this.panes.last.minSize ) return;
             }
 
             this.renderer.setStyle( this.handler, 'top', pos + 'px' );
@@ -104,8 +104,8 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos < this.panes.first.minSize ) return;
-                if ( width - pos < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize ) return;
+                if ( width - pos! < this.panes.last.minSize ) return;
             }
 
             this.renderer.setStyle( this.handler, 'left', pos + 'px' );
@@ -117,23 +117,23 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     private getPosition(bounds: any, event?: any, wantedPosition?: number) {
         if ( this.orientation === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
-            if ((wantedPosition < 0 || wantedPosition === undefined) && !event) {
+            if ((wantedPosition! < 0 || wantedPosition === undefined) && !event) {
                 return height / 2;
             } else if (event) {
                 return event.clientY - bounds.top;
             }
-            if (wantedPosition >= 0 && wantedPosition <= 1) {
-                return Math.round(height * wantedPosition);
+            if (wantedPosition! >= 0 && wantedPosition! <= 1) {
+                return Math.round(height * wantedPosition!);
             }
         } else {//horizontal
             const width = bounds.right - bounds.left;
-            if ((wantedPosition < 0 || wantedPosition === undefined) && !event) {
+            if ((wantedPosition! < 0 || wantedPosition === undefined) && !event) {
                 return width / 2;
             } else if (event) {
                 return event.clientX - bounds.left;
             }
-            if (wantedPosition >= 0 && wantedPosition <= 1) {
-                return Math.round(width * wantedPosition);
+            if (wantedPosition! >= 0 && wantedPosition! <= 1) {
+                return Math.round(width * wantedPosition!);
             }
         }
         return wantedPosition;

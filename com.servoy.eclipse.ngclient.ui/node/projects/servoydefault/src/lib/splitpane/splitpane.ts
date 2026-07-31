@@ -27,7 +27,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
     @Input() styleClass: any;
     @Input() tabOrientation: any;
     @Input() tabSeq: any;
-    @Input() tabs: Array<Tab>;
+    @Input() tabs!: Array<Tab>;
     @Input() transparent: any;
 
     @Input() divLocation: any;
@@ -39,10 +39,10 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
 
 
     @ContentChild( TemplateRef, {static: true} )
-    templateRef: TemplateRef<any>;
+    templateRef!: TemplateRef<any>;
 
-    private leftTab: Tab;
-    private rightTab: Tab;
+    private leftTab!: Tab;
+    private rightTab!: Tab;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -58,8 +58,8 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
 
     svyOnChanges(changes: SimpleChanges) {
         if(changes['tabs']) {
-            this.leftTab = this.tabSwitch(this.leftTab, this.tabs?this.tabs[0]:null, 0);
-            this.rightTab = this.tabSwitch(this.rightTab, this.tabs?this.tabs[1]:null, 1);
+            this.leftTab = this.tabSwitch(this.leftTab, (this.tabs ? this.tabs[0] : null) as Tab, 0);
+            this.rightTab = this.tabSwitch(this.rightTab, (this.tabs ? this.tabs[1] : null) as Tab, 1);
         }
         super.svyOnChanges(changes);
         if (changes) {
@@ -101,7 +101,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
 
     private tabSwitch(oldTab: Tab,newTab: Tab, index : number): Tab {
         if (oldTab && oldTab.containsFormId && newTab && newTab.containsFormId) {
-            const promise = this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName,null,newTab.containsFormId,newTab.relationName, index);
+            const promise = this.servoyApi.hideForm(oldTab.containsFormId,oldTab.relationName,undefined,newTab.containsFormId,newTab.relationName, index);
             promise.then((ok) => {
                 if (!ok) {
                     // a splitpane can't block the hide so show should be called

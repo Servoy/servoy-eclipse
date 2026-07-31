@@ -22,21 +22,21 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     @Input() styleClass: any;
     @Input() tabOrientation: any;
     @Input() tabSeq: any;
-    @Input() tabs: Array<Tab>;
+    @Input() tabs!: Array<Tab>;
     @Input() transparent: any;
 
     @Input() tabIndex: any;
     @Output() tabIndexChange = new EventEmitter();
 
     @ContentChild(TemplateRef, { static: true })
-    templateRef: TemplateRef<any>;
+    templateRef!: TemplateRef<any>;
 
-    public selectedTabID: string;
+    public selectedTabID!: string;
 
-    protected selectedTab: Tab;
+    protected selectedTab!: Tab;
 
     private waitingForServerVisibility: Record<string, any> = {};
-    private lastSelectedTab: Tab;
+    private lastSelectedTab!: Tab;
 
     protected log: LoggerService;
 
@@ -108,7 +108,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                     this.waitingForServerVisibility[formInWait] = true;
                     const currentSelectedTab = this.selectedTab;
                     this.lastSelectedTab = tab;
-                    const promise = this.servoyApi.hideForm(this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1);
+                    const promise = this.servoyApi.hideForm(this.selectedTab.containsFormId, undefined, undefined, tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1);
                     this.log.debug(this.log.buildMessage(() => ('svy * Will hide previously selected form (tab): ' + this.selectedTab.containsFormId)));
                     promise.then((ok) => {
                         this.log.debug(this.log.buildMessage(() => ('svy * Previously selected form (tab) hide completed with \'' + ok + '\': ' + this.selectedTab.containsFormId)));
@@ -211,14 +211,14 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 }
 
 export class Tab extends BaseCustomObject {
-    _id: string;
-    name: string;
-    containsFormId: string;
-    text: string;
-    relationName: string;
-    foreground: string;
-    disabled: boolean;
-    imageMediaID: string;
-    mnemonic: string;
-    toolTipText: string;
+    _id!: string;
+    name!: string;
+    containsFormId!: string;
+    text!: string;
+    relationName!: string;
+    foreground!: string;
+    disabled!: boolean;
+    imageMediaID!: string;
+    mnemonic!: string;
+    toolTipText!: string;
 }

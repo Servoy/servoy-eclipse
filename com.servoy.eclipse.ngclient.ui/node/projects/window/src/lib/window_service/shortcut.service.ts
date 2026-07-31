@@ -34,7 +34,7 @@ export class ShortcutService {
             e = e || window.event as KeyboardEvent;
 
             if (opt['disable_in_input']) { //Don't enable shortcut keys in Input, Textarea fields
-                let element: Element;
+                let element: Element = null!;
                 if (e.target) element = e.target as Element;
                 else if (e.srcElement) element = e.srcElement as Element;
                 if (element.nodeType === 3) element = element.parentNode as Element;
@@ -46,7 +46,7 @@ export class ShortcutService {
             let code = null;
             if (e.keyCode) code = e.keyCode;
             else if (e.which) code = e.which;
-            let character = String.fromCharCode(code);
+            let character = String.fromCharCode(code!);
 
             if (code === 188) character = ','; //If the user presses , when the type is onkeydown
             else if (code === 190) character = '.'; //If the user presses , when the type is onkeydown

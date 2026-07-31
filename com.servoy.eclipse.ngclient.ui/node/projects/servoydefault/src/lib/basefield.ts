@@ -10,17 +10,17 @@ import { ServoyDefaultBaseComponent } from './basecomponent';
 // eslint-disable-next-line
 export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
-    @Input() onDataChangeMethodID: (e: Event, data?: any) => void;
-    @Input() onFocusGainedMethodID: (e: Event, data?: any) => void;
-    @Input() onFocusLostMethodID: (e: Event, data?: any) => void;
+    @Input() onDataChangeMethodID!: (e: Event, data?: any) => void;
+    @Input() onFocusGainedMethodID!: (e: Event, data?: any) => void;
+    @Input() onFocusLostMethodID!: (e: Event, data?: any) => void;
 
     @Output() dataProviderIDChange = new EventEmitter();
-    @Input() editable: boolean;
-    @Input() findmode: boolean;
-    @Input() placeholderText: string;
-    @Input() readOnly: boolean;
-    @Input() selectOnEnter: boolean;
-    @Input() valuelistID: IValuelist;
+    @Input() editable!: boolean;
+    @Input() findmode!: boolean;
+    @Input() placeholderText!: string;
+    @Input() readOnly!: boolean;
+    @Input() selectOnEnter!: boolean;
+    @Input() valuelistID!: IValuelist;
 
     storedTooltip: any;
 
@@ -110,10 +110,10 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
 
     public getSelectedText(): string {
         const selection = window.getSelection();
-        let node = selection.anchorNode;
+        let node = selection!.anchorNode;
         while (node) {
             if (node === this.getFocusElement() || node === this.getFocusElement().parentNode) {
-                return selection.toString();
+                return selection!.toString();
             }
             node = node.parentNode;
         }
@@ -122,8 +122,8 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
 
     public replaceSelectedText(text: string) {
         const elem = this.getFocusElement() as HTMLInputElement;
-        const startPos = elem.selectionStart;
-        const endPos = elem.selectionEnd;
+        const startPos = elem.selectionStart!;
+        const endPos = elem.selectionEnd!;
 
         const beginning = elem.value.substring(0, startPos);
         const end = elem.value.substring(endPos);

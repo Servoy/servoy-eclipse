@@ -14,7 +14,7 @@ import { ServoyDefaultBaseField } from '../basefield';
 export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectElement> {
     @Input() multiselectListbox: any;
 
-    selectedValues: any[];
+    selectedValues!: any[];
 
     selection: any[] = [];
     allowNullinc = 0;

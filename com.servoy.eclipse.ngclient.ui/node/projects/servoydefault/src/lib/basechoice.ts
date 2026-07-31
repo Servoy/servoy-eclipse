@@ -7,7 +7,7 @@ import { ServoyDefaultBaseField } from './basefield';
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
+    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
 
     selection: any[] = [];
     allowNullinc = 0;
@@ -26,7 +26,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     }
 
     getFocusElement(): HTMLElement {
-        return this.input != null?this.input.nativeElement:null;
+        return this.input != null ? this.input.nativeElement : null!;
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -112,8 +112,8 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
 })
 export class ChoiceElementDirective implements OnInit {
 
-    @Input() svyBaseChoiceElement: ServoyDefaultBaseChoice;
-    @Input() index: number;
+    @Input() svyBaseChoiceElement!: ServoyDefaultBaseChoice;
+    @Input() index!: number;
 
     constructor(private el: ElementRef) {
     }

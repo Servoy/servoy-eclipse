@@ -32,7 +32,7 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
                 ret = allowMultiselect ? ret + this.valuelistID[index + this.allowNullinc].realValue + '\n' :
                     this.valuelistID[index + this.allowNullinc].realValue + '';
         });
-        if (allowMultiselect) ret = ret.replace(/\n$/, ''); // remove the last \n
+        if (allowMultiselect) ret = ret!.replace(/\n$/, ''); // remove the last \n
         if (ret === '') ret = null;
         return ret;
     }

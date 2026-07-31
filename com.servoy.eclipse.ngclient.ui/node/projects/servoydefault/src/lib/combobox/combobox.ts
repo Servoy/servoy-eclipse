@@ -12,16 +12,16 @@ import { ServoyDefaultBaseField } from '../basefield';
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 
-    @ViewChildren(NgbDropdownItem) menuItems: QueryList<NgbDropdownItem>;
-    @ViewChild('input') input: ElementRef<HTMLButtonElement>;
-    @ViewChild(NgbDropdown) comboboxDropdown: NgbDropdown;
-    @ViewChild('tooltip') tooltip: NgbTooltip;
+    @ViewChildren(NgbDropdownItem) menuItems!: QueryList<NgbDropdownItem>;
+    @ViewChild('input') input!: ElementRef<HTMLButtonElement>;
+    @ViewChild(NgbDropdown) comboboxDropdown!: NgbDropdown;
+    @ViewChild('tooltip') tooltip!: NgbTooltip;
 
     formattedValue: any;
-    valueComparator: (value: { displayValue: any; realValue: any }) => boolean;
+    valueComparator!: (value: { displayValue: any; realValue: any }) => boolean;
     openState = false;
-    keyboardSelectValue: string = null;
-    lastSelectValue: string = null;
+    keyboardSelectValue: string | null = null;
+    lastSelectValue: string | null = null;
     firstItemFound = false;
     private skipFocus = false;
     private showPopupOnFocusGain = false;
@@ -153,7 +153,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             const nativeElementBtn = this.elementRef.nativeElement.firstElementChild;
             if (this.doc.activeElement !== nativeElementBtn) {
                 const event = new Event('blur');
-                nativeElementBtn.dispatchEvent(event);
+                nativeElementBtn!.dispatchEvent(event);
             }
             this.skipFocus = false;
         }
@@ -212,7 +212,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         let retValue = '';
         const valIndex = this.lastSelectValue ? value.toLowerCase().indexOf(this.lastSelectValue.toLowerCase()) : -1;
         if (this.openState && value && valIndex >= 0) {
-            retValue = value.substring(valIndex, (valIndex + this.lastSelectValue.length));
+            retValue = value.substring(valIndex, (valIndex + this.lastSelectValue!.length));
         }
         return retValue;
     }
@@ -221,7 +221,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         let retValue = value;
         const valIndex = this.lastSelectValue ? value.toLowerCase().indexOf(this.lastSelectValue.toLowerCase()) : -1;
         if (this.openState && value && valIndex >= 0) {
-            retValue = value.substring(valIndex + this.lastSelectValue.length);
+            retValue = value.substring(valIndex + this.lastSelectValue!.length);
         }
         return retValue;
     }

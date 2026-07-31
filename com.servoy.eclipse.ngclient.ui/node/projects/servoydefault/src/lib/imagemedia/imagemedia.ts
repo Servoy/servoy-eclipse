@@ -62,7 +62,7 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
             else if (this.horizontalAlignment === 4 /*SwingConstants.RIGHT*/)
                 alignStyle.left = (width - imageWidth) + 'px';
             else {
-                if ((element.parentNode.childNodes.length > 1) && (imageHeight + 34 < height))
+                if ((element.parentNode!.childNodes.length > 1) && (imageHeight + 34 < height))
                     alignStyle.left = '51px';
             }
         }

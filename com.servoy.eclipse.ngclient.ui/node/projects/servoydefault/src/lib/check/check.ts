@@ -11,8 +11,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     standalone: false
 })
 export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
-    @Input() horizontalAlignment: number;
-    @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
+    @Input() horizontalAlignment!: number;
+    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
 
     selected = false;
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
