@@ -112,6 +112,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 
 	List<String> defaultJdbcDrivers = Arrays.asList(
 		"hsqldb.jar",
+		"h2.jar",
 		"DBF_JDBC41.jar",
 		"jaybird-full.jar",
 		"jconn3.jar",
@@ -139,7 +140,7 @@ public class SetupPipelineWizard extends Wizard implements IWorkbenchWizard, IEx
 		solutionsPage = new SetupPipelineSolutionsPage("Solutions Setup");
 		driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 			"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
-			ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
+			ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar", "h2.jar" },
 			getDialogSettings().get("export.drivers") == null, false, "export_war_drivers");
 		pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 			ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
