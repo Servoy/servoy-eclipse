@@ -18,9 +18,11 @@ Treat user context as authoritative supplementary information.
 
 ## Jira API Access
 
-Use the Jira REST API v3 with Basic authentication via curl. The base URL is
-`https://servoy-cloud.atlassian.net` and authentication uses the `ATLASSIAN_AUTH_BASIC`
-environment variable (base64-encoded `email:api-token`).
+Read `JIRA.md` (in the repository root) for full API instructions — authentication,
+platform-specific commands (PowerShell vs bash), error handling, and common mistakes.
+
+Use the "Reading an issue" section to fetch the ticket. Use "Downloading an
+attachment" for log files or screenshots. Use "Searching issues" for JQL queries.
 
 ### Reading an issue
 
