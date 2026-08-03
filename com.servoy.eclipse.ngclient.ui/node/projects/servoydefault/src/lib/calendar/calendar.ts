@@ -32,7 +32,6 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         allowInputToggle: false,
         useCurrent: false,
         display: {
-            keyboardNavigation: true,
             components: {
 				calendar: true,
                 decades: true,
@@ -242,24 +241,43 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 this.log.info('Locale ' + locale + ' for calendar not found, default to english');
         }
         switch(language) {
+            // @ts-ignore
             case 'ar-sa': import('@eonasdan/tempus-dominus/dist/locales/ar-SA.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ar': import('@eonasdan/tempus-dominus/dist/locales/ar.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ca': import('@eonasdan/tempus-dominus/dist/locales/ca.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'cs': import('@eonasdan/tempus-dominus/dist/locales/cs.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'de': import('@eonasdan/tempus-dominus/dist/locales/de.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'es': import('@eonasdan/tempus-dominus/dist/locales/es.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'fi': import('@eonasdan/tempus-dominus/dist/locales/fi.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'fr': import('@eonasdan/tempus-dominus/dist/locales/fr.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'hr': import('@eonasdan/tempus-dominus/dist/locales/hr.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'hy': import('@eonasdan/tempus-dominus/dist/locales/hy.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'it': import('@eonasdan/tempus-dominus/dist/locales/it.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'nl': import('@eonasdan/tempus-dominus/dist/locales/nl.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'pl': import('@eonasdan/tempus-dominus/dist/locales/pl.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ro': import('@eonasdan/tempus-dominus/dist/locales/ro.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ru': import('@eonasdan/tempus-dominus/dist/locales/ru.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'sl': import('@eonasdan/tempus-dominus/dist/locales/sl.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'sr': import('@eonasdan/tempus-dominus/dist/locales/sr.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'sr-latn': import('@eonasdan/tempus-dominus/dist/locales/sr-Latn.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'tr': import('@eonasdan/tempus-dominus/dist/locales/tr.js').then(moduleLoader,errorHandler); break;
         }
     }

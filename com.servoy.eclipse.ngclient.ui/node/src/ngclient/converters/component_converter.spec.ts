@@ -65,7 +65,7 @@ describe('ComponentConverter', () => {
         changeNotified = false;
 
         fsProp = converterService.convertFromServerToClient(createDefaultFoundset(), typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME),
-                undefined, undefined, undefined, propertyContextWithReject);
+                undefined as any, undefined as any, undefined as any, propertyContextWithReject);
 
         propertyContextWithReject = {
             getProperty: (_propertyName) => _propertyName === "myfoundset" ? fsProp : undefined,
@@ -121,14 +121,14 @@ describe('ComponentConverter', () => {
 
     // as property types reuse parts of JSON that comes from server, return a new instance each time to avoid meddling between separate tests due to this
     const createDefaultFoundset = () => {
-        const json = {};
+        const json: any = {};
         json['foundsetId'] = 1;
         json['serverSize'] = 10;
         json['sortColumns'] = '';
         json['selectedRowIndexes'] = [0];
         json['multiSelect'] = false;
         json['hasMoreRows'] = true;
-        const viewport = {};
+        const viewport: any = {};
         viewport['startIndex'] = 0;
         viewport['size'] = 5;
         viewport['rows'] = [{ _svyRowId: '5.ALFKI;_0' },
@@ -161,7 +161,7 @@ describe('ComponentConverter', () => {
     });
 
     it('Should convert child component prop. from server to client', () => {
-        comp = converterService.convertFromServerToClient(initialChildComponentServerValue(), typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithAllow);
+        comp = converterService.convertFromServerToClient(initialChildComponentServerValue(), typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithAllow);
         expect(comp).toBeDefined();
         comp.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
@@ -177,7 +177,7 @@ describe('ComponentConverter', () => {
     });
 
     it('Should send property changes to server when asked to do so (api call on ChildComponentPropertyValue) for root properties by the component that uses the child component property', () => {
-        comp = converterService.convertFromServerToClient(initialChildComponentServerValue(), typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithAllow);
+        comp = converterService.convertFromServerToClient(initialChildComponentServerValue(), typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithAllow);
         comp.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -214,7 +214,7 @@ describe('ComponentConverter', () => {
 
     it('Should work when inserting one record above (it should not restore "original unproxied" value of record that slided down on top of the newly added record)', () => {
         comp = converterService.convertFromServerToClient(initialChildComponentServerValue(),
-                    typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithAllow);
+                    typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithAllow);
         comp.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -238,7 +238,7 @@ describe('ComponentConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fsProp, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fsProp, undefined as any, undefined as any, propertyContextWithReject);
 
         // insert same row at index 0 in component prop.
         comp = converterService.convertFromServerToClient({
@@ -253,7 +253,7 @@ describe('ComponentConverter', () => {
                     }
                 ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, undefined, undefined, propertyContextWithAllow);
+        }, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, undefined as any, undefined as any, propertyContextWithAllow);
 
         expect(comp.model.nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "model"');
         expect(comp.modelViewport.length).toBe(6, 'model viewport size should be 6');

@@ -4,7 +4,7 @@ import {LoggerService, LogLevel, LoggerFactory} from '@servoy/public';
 import {WindowRefService} from '@servoy/public';
 
 describe('LoggerService', () => {
-  let windowRef;
+  let windowRef: any;
 
   beforeEach(() => {
     windowRef = {nativeWindow:{console:{}}};

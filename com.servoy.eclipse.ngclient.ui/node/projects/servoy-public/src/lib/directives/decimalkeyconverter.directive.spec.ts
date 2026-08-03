@@ -11,8 +11,8 @@ import { ServoyPublicService } from '../services/servoy_public.service';
     standalone: false
 })
 class TestDecimalKeyConverterComponent {
-    @Input() format;
-    @ViewChild('element', { static: true }) elementRef: ElementRef;
+    @Input() format: any;
+    @ViewChild('element', { static: true }) elementRef!: ElementRef;
 }
 
 describe('Directive: DecimalKeyConverter', () => {
@@ -56,7 +56,7 @@ describe('Directive: DecimalKeyConverter', () => {
         fixture.detectChanges();
 
         expect(inputEl.nativeElement.value).toEqual('12,');
-        service.setLocaleNumberSymbol(null);
+        service.setLocaleNumberSymbol(null as any);
     }));
 
     it('should insert comma decimal (en == .)', fakeAsync(() => {
@@ -75,6 +75,6 @@ describe('Directive: DecimalKeyConverter', () => {
         fixture.detectChanges();
         tick();
         expect(inputEl.nativeElement.value).toEqual('12.');
-        service.setLocaleNumberSymbol(null);
+        service.setLocaleNumberSymbol(null as any);
     }));
 });

@@ -8,8 +8,8 @@ import {FormsModule} from '@angular/forms';
 describe('CheckComponent', () => {
   let component: ServoyDefaultCheck;
   let fixture: ComponentFixture<ServoyDefaultCheck>;
-  let servoyApi;
-  let input; let label; let span;
+  let servoyApi: any;
+  let input: any; let label: any; let span: any;
   beforeEach(waitForAsync(() => {
   servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
     TestBed.configureTestingModule({
@@ -92,7 +92,7 @@ describe('CheckComponent', () => {
 
 });
 
-async function clickOnElement(element, fixture: ComponentFixture<ServoyDefaultCheck>, checkInput, toTestFlag) {
+async function clickOnElement(element: any, fixture: ComponentFixture<ServoyDefaultCheck>, checkInput: any, toTestFlag: any) {
   element.click();
   fixture.detectChanges();
   tick();

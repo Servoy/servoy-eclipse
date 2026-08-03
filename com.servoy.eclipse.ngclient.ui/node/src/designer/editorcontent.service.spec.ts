@@ -39,7 +39,7 @@ describe('EditorContentService', () => {
 
             const formCacheMock = jasmine.createSpyObj('FormCache', ['getLayoutContainer', 'getFormComponent', 'addLayoutContainer', 'getComponent', 'removeComponent', 'removeFormComponent', 'getFormCacheByName', 'getPart']);
             formCacheMock.absolute = false;
-            formCacheMock.mainStructure = new StructureCache(null, null);
+            formCacheMock.mainStructure = new StructureCache(null as any, null as any);
             formCacheMock.layoutContainersCache = new Map();
             formCacheMock.partComponentsCache = [];
 
@@ -76,7 +76,7 @@ describe('EditorContentService', () => {
 
             const formCacheMock = jasmine.createSpyObj('FormCache', ['getLayoutContainer', 'getFormComponent', 'addLayoutContainer', 'getComponent', 'removeComponent', 'removeFormComponent', 'getPart']);
             formCacheMock.absolute = false;
-            formCacheMock.mainStructure = new StructureCache(null, null);
+            formCacheMock.mainStructure = new StructureCache(null as any, null as any);
             formCacheMock.layoutContainersCache = new Map();
             formCacheMock.partComponentsCache = [];
 
@@ -112,7 +112,7 @@ describe('EditorContentService', () => {
         it('should not throw TypeError when reorderLayoutContainers contains null entries', () => {
             const formCacheMock = jasmine.createSpyObj('FormCache', ['getLayoutContainer', 'getFormComponent', 'addLayoutContainer', 'getComponent', 'removeComponent', 'removeFormComponent', 'getPart']);
             formCacheMock.absolute = false;
-            formCacheMock.mainStructure = new StructureCache(null, null);
+            formCacheMock.mainStructure = new StructureCache(null as any, null as any);
             formCacheMock.layoutContainersCache = new Map();
             formCacheMock.partComponentsCache = [];
             formCacheMock.getLayoutContainer.and.returnValue(null);

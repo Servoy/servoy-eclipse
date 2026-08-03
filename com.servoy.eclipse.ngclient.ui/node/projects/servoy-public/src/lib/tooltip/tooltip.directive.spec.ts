@@ -42,7 +42,7 @@ describe('Directive: Tooltip', () => {
 
   afterEach(() => {
     fixture.destroy();
-    component = null;
+    component = null as any;
   });
 
   it('should not display when text is undefined', () => {

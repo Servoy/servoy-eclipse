@@ -25,7 +25,7 @@ const mockData = [
 describe('ServoyDefaultCheckGroup', () => {
   let component: ServoyDefaultCheckGroup;
   let fixture: ComponentFixture<ServoyDefaultCheckGroup>;
-  let servoyApi;
+  let servoyApi: any;
 
   beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
@@ -99,7 +99,7 @@ describe('ServoyDefaultCheckGroup', () => {
     const selectedElements = component.getDataproviderFromSelection();
     expect(selectedElements).toContain(component.dataProviderID[0]);
     expect(selectedElements).toContain(component.dataProviderID[2]);
-    expect(selectedElements.length).toBe(component.dataProviderID.length);
+    expect(selectedElements!.length).toBe(component.dataProviderID.length);
   }));
 
 

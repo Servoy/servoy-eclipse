@@ -160,7 +160,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'type should be created an array from server to client', () => {
         const val: Array<string> = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
-               stringArrayType , undefined, undefined, undefined, getParentPropertyContext(stringArrayPushToServer));
+               stringArrayType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
 
         expect( val ).toBeDefined();
         expect( val.length ).toBe( 3, 'array length should be 3' );
@@ -171,7 +171,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'updates from server to client', () => {
         let val: Array<string> = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
-               stringArrayType , undefined, undefined, undefined, getParentPropertyContext(stringArrayPushToServer));
+               stringArrayType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
 
         val = converterService.convertFromServerToClient({
                 g: [
@@ -181,7 +181,7 @@ describe( 'JSONArrayConverter', () => {
                     { op: [ 4, 4, ICATOpTypeEnum.INSERT ], d: [ 'testNew3' ] }
                 ],
                 vEr: 1
-            } as ICATGranularUpdatesFromServer, stringArrayType, val, undefined, undefined, getParentPropertyContext(stringArrayPushToServer));
+            } as ICATGranularUpdatesFromServer, stringArrayType, val, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
 
         expect( val ).toBeDefined();
         expect( val.length ).toBe( 5, 'array length should be 3' );
@@ -194,7 +194,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'simple change of 1 index', () => {
         const arr = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
-               stringArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer));
+               stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<String>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -217,7 +217,7 @@ describe( 'JSONArrayConverter', () => {
     it( 'remove of 1 index', () => {
         // TODO this could be improved by really only sending inserts/removes of indexes; so a javascript port of java class ArrayGranularChangeKeeper
         const arr = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
-               stringArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(PushToServerEnum.ALLOW));
+               stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(PushToServerEnum.ALLOW));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<String>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -239,7 +239,7 @@ describe( 'JSONArrayConverter', () => {
     it( 'add  of 1 index', () => {
         // TODO this could be improved by really only sending inserts/removes of indexes; so a javascript port of java class ArrayGranularChangeKeeper
         const arr = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
-               stringArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer));
+               stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<String>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -263,7 +263,7 @@ describe( 'JSONArrayConverter', () => {
 // THIS will currently no longer work - we need to be smarter if we want this; so a javascript port of java class ArrayGranularChangeKeeper
 //    it( 'remove of 1 index and add of one', () => {
 //        const val: Array<string> = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
-//               stringArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(PushToServerEnum.ALLOW));
+//               stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(PushToServerEnum.ALLOW));
 //        val.splice( 1, 1 );
 //        val[2] = 'test4';
 //        const changes: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val, getParentPropertyContext(PushToServerEnum.ALLOW))[0];
@@ -282,7 +282,7 @@ describe( 'JSONArrayConverter', () => {
 // THIS will currently no longer work - we need to be smarter if we want this; so a javascript port of java class ArrayGranularChangeKeeper
 //    it( 'remove change and add of one', () => {
 //        const val: Array<string> = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
-//               stringArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(PushToServerEnum.ALLOW));
+//               stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(PushToServerEnum.ALLOW));
 //        val.splice( 0, 1 );
 //        val[1] = 'test4';
 //        val[2] = 'test5';
@@ -303,7 +303,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'type should be created an array from server to client with custom json objects', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<Tab>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -321,14 +321,14 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'updates from server to client for custom object element', () => {
         let arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
 
         arr = converterService.convertFromServerToClient({
                 g: [
                     { op: [ 2, 2, ICATOpTypeEnum.CHANGED ], d: [ { u: [ { k: 'name', v: 'KM' } ], vEr: 1 } as ICOTGranularUpdatesFromServer ] },
                 ],
                 vEr: 1
-            } as ICATGranularUpdatesFromServer, tabArrayWithShallowOnElementsType , arr, undefined, undefined, getParentPropertyContext(stringArrayPushToServer));
+            } as ICATGranularUpdatesFromServer, tabArrayWithShallowOnElementsType , arr, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<Tab>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -344,7 +344,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'change of one tab value', () => {
         const val = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
 
         let changeNotified = false;
         let triggeredSendToServer = false;
@@ -393,7 +393,7 @@ describe( 'JSONArrayConverter', () => {
     it( 'delete 1 tab', () => {
         // TODO this could be improved by really only sending inserts/removes of indexes; so a javascript port of java class ArrayGranularChangeKeeper
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<Tab>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -421,7 +421,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'add 1 tab', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<Tab>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -450,7 +450,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'change of one tab value delete 1 other', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as Array<Tab>;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -479,7 +479,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'send array as arg to handler, change a tab by ref', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         let val = arr as Array<Tab>;
         let changeListenerWasCalled = false;
@@ -525,7 +525,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'send obj from model (with push to server reject) as arg to handler', () => {
         const val = converterService.convertFromServerToClient({ v: [ 'test1' ], vEr: 1 },
-               untypedObjectArrayWithREJECTOnElementsType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectArrayWithREJECTOnElementsPushToServer));
+               untypedObjectArrayWithREJECTOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(untypedObjectArrayWithREJECTOnElementsPushToServer));
 
         const valAsSeenInternally = val as IChangeAwareValue;
         let valCaT = val as ICustomArrayValue<any>;
@@ -556,7 +556,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'change array el. by ref but do not send to server (so it still has changes to send for the model property), then send array as arg to handler, change another tab by ref; both tabs changed by ref in the model should be then sent to server', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         let val = arr as Array<Tab>;
         let changeListenerWasCalled = false;
@@ -609,7 +609,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'send array as arg to handler, change a tab subprop', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         let val = arr as Array<Tab>;
         let changeListenerWasCalled = false;
@@ -657,7 +657,7 @@ describe( 'JSONArrayConverter', () => {
 // THIS will currently not work - we need to be smarter if we want this; so a javascript port of java class ArrayGranularChangeKeeper
 //    it( 'delete and add one', () => {
 //        const val: Array<Tab> = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-//               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(PushToServerEnum.ALLOW));
+//               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(PushToServerEnum.ALLOW));
 //
 //        val.splice( 1, 1 );
 //        const addedTab = new Tab();
@@ -688,7 +688,7 @@ describe( 'JSONArrayConverter', () => {
 // THIS will currently not work - we need to be smarter if we want this; so a javascript port of java class ArrayGranularChangeKeeper
 //    it( ' change of one tab value delete 1 other and add 1', () => {
 //        const val: Array<Tab> = converterService.convertFromServerToClient(createArrayWithJSONObject(),
-//               tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(PushToServerEnum.ALLOW));
+//               tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(PushToServerEnum.ALLOW));
 //
 //        val[0].myvalue = 'test4';
 //        val.splice( 1, 1 );
@@ -723,7 +723,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'create a tabholder with 3 tabs in its array', () => {
         const arr = converterService.convertFromServerToClient(createTabHolderJSONWithFilledArray( 'test' ),
-               tabHolderElementsType , undefined, undefined, undefined, getParentPropertyContext(tabHolderElementsPushToServer));
+               tabHolderElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabHolderElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as TabHolder;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -736,7 +736,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'update a tab in the tabs array of the TabHolder', () => {
         const arr = converterService.convertFromServerToClient(createTabHolderJSONWithFilledArray( 'test' ),
-               tabHolderElementsType , undefined, undefined, undefined, getParentPropertyContext(tabHolderElementsPushToServer));
+               tabHolderElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabHolderElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as TabHolder;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -765,7 +765,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'add script tabs array into a TabHolder', () => {
         const arr = converterService.convertFromServerToClient(createTabHolderJSONWithFilledArray( 'test' ),
-               tabHolderElementsType , undefined, undefined, undefined, getParentPropertyContext(tabHolderElementsPushToServer));
+               tabHolderElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabHolderElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as TabHolder;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -795,7 +795,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'test mark for change', () => {
         const arr = converterService.convertFromServerToClient(createTabHolderJSONWithFilledArray( 'test' ),
-               tabHolderElementsType , undefined, undefined, undefined, getParentPropertyContext(tabHolderElementsPushToServer));
+               tabHolderElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabHolderElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
         const val = arr as TabHolder;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
@@ -832,7 +832,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'test deep change in an "object[]" with ALLOW', () => {
         const val = converterService.convertFromServerToClient(createSimpleUntypedObjectArray(),
-               untypedObjectArrayWithALLOWOnElementsType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer));
+               untypedObjectArrayWithALLOWOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer));
 
         expect(val.length).toBe(6, 'length not received correctly');
         expect(val[0]).toBe('test1', 'el. 0 with no conversion not received correctly');
@@ -884,7 +884,7 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
         expect(changes2.n).toBe(true, 'should have no changes now');
 
-        valSeenExternally.markElementAsHavingDeepChanges(3);
+        valSeenExternally.markElementAsHavingDeepChanges!(3);
         checkNotifiedAndTriggeredAndClear(true, false); // DEEP change in element that was marked manually; but as it is ALLOW it does no send it right away to server
         changes = converterService.convertFromClientToServer(val, untypedObjectArrayWithALLOWOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
@@ -905,7 +905,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'test deep change in an "object[]" with SHALLOW', () => {
         const val = converterService.convertFromServerToClient(createSimpleUntypedObjectArray(),
-               untypedObjectArrayWithSHALLOWOnElementsType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer));
+               untypedObjectArrayWithSHALLOWOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer));
 
         const valSeenExternally = val as ICustomArrayValue<any>;
         const valSeenInternally = val as IChangeAwareValue;
@@ -943,7 +943,7 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer))[0];
         expect(changes2.n).toBe(true, 'should have no changes now');
 
-        valSeenExternally.markElementAsHavingDeepChanges(3);
+        valSeenExternally.markElementAsHavingDeepChanges!(3);
         checkNotifiedAndTriggeredAndClear(true, false); // DEEP change in element that was marked manually; but as it is SHALLOW it does no trigger a send right away to server
         changes = converterService.convertFromClientToServer(val, untypedObjectArrayWithSHALLOWOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer))[0];
@@ -964,7 +964,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'test deep change in an "object[]" with DEEP', () => {
         const val = converterService.convertFromServerToClient(createSimpleUntypedObjectArray(),
-               untypedObjectArrayWithDEEPOnElementsType , undefined, undefined, undefined, getParentPropertyContext(untypedObjectArrayWithDEEPOnElementsPushToServer));
+               untypedObjectArrayWithDEEPOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(untypedObjectArrayWithDEEPOnElementsPushToServer));
 
         const valSeenExternally = val as ICustomArrayValue<any>;
         const valSeenInternally = val as IChangeAwareValue;
@@ -1002,7 +1002,7 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
         expect(changes2.n).toBe(true, 'should have no changes now');
 
-        valSeenExternally.markElementAsHavingDeepChanges(3);
+        valSeenExternally.markElementAsHavingDeepChanges!(3);
         checkNotifiedAndTriggeredAndClear(true, true); // DEEP change in element that was marked manually; as it has DEEP pushToServer, it does trigger a send right away to server
         changes = converterService.convertFromClientToServer(val, untypedObjectArrayWithDEEPOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithDEEPOnElementsPushToServer))[0];
@@ -1023,7 +1023,7 @@ describe( 'JSONArrayConverter', () => {
 
     it( 'when an already smart value (received as return value from an server side api call for example) is assigned into the model into a new location and sent to server, it should still work - have a correct change listener etc.', () => {
         // in model
-        const val = converterService.convertFromServerToClient(createArrayWithJSONObject() as ICATFullValueFromServer, tabArrayWithShallowOnElementsType , undefined, undefined, undefined, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
+        const val = converterService.convertFromServerToClient(createArrayWithJSONObject() as ICATFullValueFromServer, tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         
         let tabArray = val as Tab[];
         let changeListenerWasCalled = false;
@@ -1033,7 +1033,7 @@ describe( 'JSONArrayConverter', () => {
 
         // received as return value from a server side api call
         const childTab = converterService.convertFromServerToClient(createTabJSON('iAmArg'),
-               tabJustForTypeType , undefined, undefined, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
+               tabJustForTypeType , undefined as any, undefined as any, undefined as any, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
         
         expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeFalse();
 
@@ -1083,11 +1083,11 @@ describe( 'JSONArrayConverter', () => {
 } );
 
 class Tab {
-    name: string;
-    myvalue: string;
+    name!: string;
+    myvalue!: string;
 }
 
 class TabHolder {
-    name: string;
-    tabs: Array<Tab>;
+    name!: string;
+    tabs!: Array<Tab>;
 }

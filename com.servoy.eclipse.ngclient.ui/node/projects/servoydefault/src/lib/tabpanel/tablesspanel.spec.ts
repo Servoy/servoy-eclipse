@@ -9,7 +9,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ServoyPublicTestingModule, LoggerFactory, WindowRefService, ServoyApi } from '@servoy/public';
 
 describe( 'ServoyDefaultTabpanel', () => {
-    let servoyApi;
+    let servoyApi: any;
     beforeEach( () => {
         servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm','registerComponent','unRegisterComponent'] );
         servoyApi.getMarkupId.and.returnValue( '1' );

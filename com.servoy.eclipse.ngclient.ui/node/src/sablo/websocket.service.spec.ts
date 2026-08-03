@@ -10,11 +10,11 @@ import { LoadingIndicatorService } from './util/loading-indicator/loading-indica
 
 
 describe('WebsocketService', () => {
-    let windowRef;
-    let normalWebSocket = null;
+    let windowRef: any;
+    let normalWebSocket: any = null;
   beforeEach(() => {
-      normalWebSocket =  window['WebSocket'];
-      window['Web' + 'Socket'] = WebSocketMock;
+      normalWebSocket =  (window as any)['WebSocket'];
+      (window as any)['Web' + 'Socket'] = WebSocketMock;
 
       windowRef =  {nativeWindow: {}};
       const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi', 'updateServiceScopes']);
@@ -30,7 +30,7 @@ describe('WebsocketService', () => {
   });
 
   afterEach(() => {
-      window['WebSocket'] = normalWebSocket;
+      (window as any)['WebSocket'] = normalWebSocket;
   });
 
   it('should be created', inject([WebsocketService], (service: WebsocketService) => {
@@ -38,7 +38,7 @@ describe('WebsocketService', () => {
   }));
   it('should be make a connection', inject([WebsocketService], fakeAsync((service: WebsocketService) => {
       windowRef.nativeWindow = { location: {protocol: 'http', host: 'localhost', pathname: '/'}};
-     const session = service.connect('', [], {}, null);
+     const session = service.connect('', [], {}, null as any);
     flush(2);
      expect( session.isConnected()).toBeTruthy();
      discardPeriodicTasks();
@@ -51,7 +51,7 @@ class WebSocketMock {
         this.url = url;
         WebSocketMock.instance = this;
         setTimeout(() => {
-            WebSocketMock.instance['onopen'](new CustomEvent('open'));
+            (WebSocketMock.instance as any)['onopen'](new CustomEvent('open'));
         }, 1);
     }
     public static instance: WebSocketMock;
@@ -61,10 +61,10 @@ class WebSocketMock {
 
     public close() {
         this.closed = true;
-        WebSocketMock.instance['onclose'](new CustomEvent('close'));
+        (WebSocketMock.instance as any)['onclose'](new CustomEvent('close'));
     }
 
-    public send(data) {
+    public send(data: any) {
         this.data = data;
     }
 }

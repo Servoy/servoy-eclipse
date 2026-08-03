@@ -11,7 +11,7 @@ import { runOnPushChangeDetection } from '../testingutils';
 describe('PasswordComponent', () => {
   let component: ServoyDefaultPassword;
   let fixture: ComponentFixture<ServoyDefaultPassword>;
-  let servoyApi;
+  let servoyApi: any;
   let inputEl: DebugElement;
   let directiveInstance: TooltipDirective;
 

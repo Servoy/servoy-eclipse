@@ -11,8 +11,8 @@ import { runOnPushChangeDetection } from '../testingutils';
 describe('ServoyDefaultTextField', () => {
   let component: ServoyDefaultTextField;
   let fixture: ComponentFixture<ServoyDefaultTextField>;
-  let textField;
-  let servoyPublicService;
+  let textField: any;
+  let servoyPublicService: any;
    
   beforeAll(() => {
        numbro.registerLanguage(languages['en-GB']);

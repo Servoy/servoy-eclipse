@@ -41,6 +41,7 @@ describe('ValuelistConverter', () => {
             });
             return promise;
         }
+        return undefined as any;
     };
     sabloService.connect({}, {}, '');
 
@@ -60,7 +61,7 @@ describe('ValuelistConverter', () => {
 
   it( 'should convert from server to client', () => {
       const val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(),
-               valuelistType , undefined, undefined, undefined, propertyContext);
+               valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);
 
       expect( val ).toBeDefined();
       expect( val.length ).toBe(3, 'valuelist length should be \'3\' ');
@@ -72,7 +73,7 @@ describe('ValuelistConverter', () => {
 
   it( 'should get display value', fakeAsync(() => {
       const val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(),
-               valuelistType , undefined, undefined, undefined, propertyContext);
+               valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);
       expect( val ).toBeDefined();
       expect( val.getDisplayValue).toBeDefined('should have \'getDisplayValue\' function');
 
@@ -89,7 +90,7 @@ describe('ValuelistConverter', () => {
           triggeredSendToServer = false;
       };
 
-      let displayValue: string;
+      let displayValue: any;
       val.getDisplayValue(4).subscribe((response) => {
           displayValue = response;
       });
@@ -101,13 +102,13 @@ describe('ValuelistConverter', () => {
       expect(displayValue).not.toBeDefined( 'display value should not be defined yet.' );
 
       converterService.convertFromServerToClient({ handledID : { id: clientChange.id, value: true }, getDisplayValue : 'd' } as IValuelistTValueFromServer ,
-            valuelistType , val, undefined, undefined, propertyContext);
+            valuelistType , val, undefined as any, undefined as any, propertyContext);
       flushMicrotasks();
 
       expect(displayValue).toBe( 'd', 'display value should be \'d\'' );
 
       // should be resolved right away
-      displayValue = null;
+      displayValue = null as any;
 
       val.getDisplayValue(4).subscribe((response) => {
           displayValue = response;
@@ -116,7 +117,7 @@ describe('ValuelistConverter', () => {
       expect(displayValue).toBe( 'd', 'display value should be \'d\'' );
 
       const realValue = 5;
-      let errorMessage: string;
+      let errorMessage: any;
       let display: any;
       val.getDisplayValue(realValue).subscribe((response) => {
           display = response;
@@ -130,7 +131,7 @@ describe('ValuelistConverter', () => {
       expect(errorMessage).not.toBeDefined( 'error message should not be defined yet.' );
 
       converterService.convertFromServerToClient({ handledID : { id: clientChange.id, value: true }, getDisplayValue: realValue } as IValuelistTValueFromServer,
-            valuelistType , val, undefined, undefined, propertyContext);
+            valuelistType , val, undefined as any, undefined as any, propertyContext);
       flushMicrotasks();
 
       expect(display).toBe(realValue, 'should just return the realvalue');
@@ -139,12 +140,12 @@ describe('ValuelistConverter', () => {
 
   it( 'should filter list', fakeAsync(() => {
       let val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(),
-               valuelistType , undefined, undefined, undefined, propertyContext);
+               valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);
       expect( val ).toBeDefined();
       expect( val.length ).toBe(3, 'valuelist length should be \'3\' ');
       expect( val.filterList).toBeDefined('should have \'filter\' function');
 
-      let isFiltered: boolean;
+      let isFiltered: any;
       val.filterList('abb').subscribe((_val) => {
           isFiltered = true;
       });
@@ -163,14 +164,14 @@ describe('ValuelistConverter', () => {
       // simulate answer from server
       val = converterService.convertFromServerToClient({ handledID: {id: 1, value: true},
                         values: [{displayValue: 'abbba', realValue: 1}, {displayValue: 'caaabbc', realValue: 3}] } as IValuelistTValueFromServer,
-                    valuelistType , val, undefined, undefined, propertyContext);
+                    valuelistType , val, undefined as any, undefined as any, propertyContext);
       tick(1); // a bit weird, but it seems we need to wait for the then function to be called..
       expect(isFiltered).toBe(true, 'filter promise should be resolved.');
       expect( val.length ).toBe(2, 'list is filtered, valuelist length should be \'2\' ');
       expect( val[0].displayValue).toBe( 'abbba', 'display value should be \'abbba\'' );
       expect( val[0].realValue).toBe( 1, 'real value should be \'1\'' );
 
-      isFiltered = undefined;
+      isFiltered = undefined as any;
       val.filterList('xyz').subscribe((_val) => {
           isFiltered = true;
       });
@@ -182,12 +183,12 @@ describe('ValuelistConverter', () => {
       expect(isFiltered).not.toBeDefined('filter promise should still not be resolved.');
 
       val = converterService.convertFromServerToClient({ handledID: {id: 2, value: true}, values: [] } as IValuelistTValueFromServer,
-                    valuelistType , val, undefined, undefined, propertyContext);
+                    valuelistType , val, undefined as any, undefined as any, propertyContext);
       tick(1);
       expect( isFiltered ).toBe(true, 'filter promise should be resolved.');
       expect( val.length ).toBe(0, 'list is filtered, valuelist length should be \'0\' ');
 
-      isFiltered = undefined;
+      isFiltered = undefined as any;
       val.filterList('x').subscribe((_val) => {
           isFiltered = true;
       }, (_val) => {
@@ -199,7 +200,7 @@ describe('ValuelistConverter', () => {
 
       // assume the server did not filter the valuelist
       val = converterService.convertFromServerToClient({ handledID: {id: 3, value: false} } as IValuelistTValueFromServer,
-                    valuelistType , val, undefined, undefined, propertyContext);
+                    valuelistType , val, undefined as any, undefined as any, propertyContext);
       tick(1);
       expect(isFiltered).toBe(false, 'filter promise should be rejected.');
   }) as any);
@@ -207,7 +208,7 @@ describe('ValuelistConverter', () => {
   it( 'should have real values', () => {
       const vl = createDefaultValuelist();
       vl.hasRealValues = true;
-      const val: IValuelist = converterService.convertFromServerToClient(vl, valuelistType , undefined, undefined, undefined, propertyContext);;
+      const val: IValuelist = converterService.convertFromServerToClient(vl, valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);;
 
       expect( val.hasRealValues() ).toBe(true, 'valuelist should have real values');
   });

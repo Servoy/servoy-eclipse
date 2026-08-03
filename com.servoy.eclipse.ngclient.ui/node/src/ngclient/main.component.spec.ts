@@ -54,7 +54,7 @@ describe('MainComponent', () => {
     standalone: false
 })
   class MockFormComponent{
-    public readonly name = input<string>(undefined);
+    public readonly name = input<string>(undefined as any);
   }
 
 @Directive({
@@ -62,7 +62,7 @@ describe('MainComponent', () => {
     standalone: false
 })
   class MockDefaultNavigator{
-    public readonly name = input<string>(undefined);
+    public readonly name = input<string>(undefined as any);
   }
 @Directive({
     selector: 'session-view',

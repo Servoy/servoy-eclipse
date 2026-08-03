@@ -9,7 +9,7 @@ import { runOnPushChangeDetection } from '../testingutils';
 describe( 'SvLabel', () => {
     let component: ServoyDefaultLabel;
     let fixture: ComponentFixture<ServoyDefaultLabel>;
-    let element;
+    let element: any;
     const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
 
     beforeEach( waitForAsync(() => {

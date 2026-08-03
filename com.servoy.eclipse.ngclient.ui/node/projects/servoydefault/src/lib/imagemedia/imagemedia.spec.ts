@@ -9,7 +9,7 @@ describe('ServoyDefaultImageMedia', () => {
   let component: ServoyDefaultImageMedia;
   let fixture: ComponentFixture<ServoyDefaultImageMedia>;
   let imgUpload: DebugElement[];
-  let servoyPublicService;
+  let servoyPublicService: any;
   let servoyApi: any;
 
   beforeEach(() => {
