@@ -24,29 +24,6 @@ platform-specific commands (PowerShell vs bash), error handling, and common mist
 Use the "Reading an issue" section to fetch the ticket. Use "Downloading an
 attachment" for log files or screenshots. Use "Searching issues" for JQL queries.
 
-### Reading an issue
-
-```bash
-curl -s -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}?fields=summary,description,comment,attachment,issuelinks,subtasks,status,priority,components,fixVersions,labels"
-```
-
-### Downloading an attachment
-
-```bash
-curl -s -L -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/attachment/content/{ATTACHMENT_ID}"
-```
-
-### PowerShell note
-
-In PowerShell, use `$env:ATLASSIAN_AUTH_BASIC` instead of `$ATLASSIAN_AUTH_BASIC`:
-
-```powershell
-$token = $env:ATLASSIAN_AUTH_BASIC
-curl -s -H "Authorization: Basic $token" "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/SVY-21080"
-```
-
 ## Steps
 
 ### 1. Read the issue thoroughly
