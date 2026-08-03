@@ -5,7 +5,25 @@ complete, developer-ready spec file under `docs/`.
 
 ## Input
 
-You receive a Jira issue key or URL (e.g. `SVY-21080`).
+You receive a Jira issue key or URL (e.g. `SVY-21080`), optionally a **user context**
+string, and — from the preceding Triage phase — a **triage report path** and an
+**approved approach**.
+
+Treat user context as authoritative supplementary information. It takes
+precedence over ambiguities in the ticket and should be woven into the spec if needed, 
+(especially Goal, Background, and Design sections).
+
+### Triage findings are authoritative
+
+A Triage agent has already investigated this issue and a human has approved a specific
+approach. This means:
+
+- **The approved approach bounds the spec's scope.** Write the spec for the *approved
+  approach*, not for whatever solution the raw ticket proposed. If the ticket proposed a
+  different solution than the approved approach, follow the approved approach.
+- **Reuse the triage's root-cause findings.** Read the triage report first. It already
+  contains the root-cause assessment and git-history analysis — use it rather than
+  repeating the deep investigation from scratch.
 
 ## Jira API Access
 
@@ -17,21 +35,21 @@ environment variable (base64-encoded `email:api-token`).
 
 ```bash
 curl -s -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://servoy-cloud.atlassian.net/rest/api/3/issue/{ISSUE_KEY}?fields=summary,description,comment,attachment,issuelinks,subtasks,status,priority,components,fixVersions,labels"
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}?fields=summary,description,comment,attachment,issuelinks,subtasks,status,priority,components,fixVersions,labels"
 ```
 
 ### Downloading an attachment
 
 ```bash
 curl -s -L -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://servoy-cloud.atlassian.net/rest/api/3/attachment/content/{ATTACHMENT_ID}"
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/attachment/content/{ATTACHMENT_ID}"
 ```
 
 ### Searching issues (JQL)
 
 ```bash
 curl -s -H "Authorization: Basic $ATLASSIAN_AUTH_BASIC" \
-  "https://servoy-cloud.atlassian.net/rest/api/3/search?jql={URL_ENCODED_JQL}&fields=summary,status"
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/search?jql={URL_ENCODED_JQL}&fields=summary,status"
 ```
 
 ### PowerShell note
@@ -40,7 +58,7 @@ In PowerShell, use `$env:ATLASSIAN_AUTH_BASIC` instead of `$ATLASSIAN_AUTH_BASIC
 
 ```powershell
 $token = $env:ATLASSIAN_AUTH_BASIC
-curl -s -H "Authorization: Basic $token" "https://servoy-cloud.atlassian.net/rest/api/3/issue/SVY-21080"
+curl -s -H "Authorization: Basic $token" "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/SVY-21080"
 ```
 
 ## Steps
@@ -89,28 +107,21 @@ relevant parts of the codebase:
 - Understand the module structure and where new code should live
 - Identify extension points, interfaces, and patterns to follow
 
-### 5. Git blame analysis (for bugs)
+### 5. Confirm git history (for bugs)
 
-If the issue is a **bug**, perform a `git blame` on the code you plan to change:
+The Triage phase already performed the deep git-blame investigation — its findings are
+in the triage report under "Git history findings". **Do not repeat the full dig.**
+
+Read those findings and, if needed, do a lightweight confirmation of the specific
+line(s) your approved approach will change:
 
 ```powershell
 cd "<project-dir>" && git blame -L <start>,<end> "<file-path>"
 ```
 
-Then fetch the commit that introduced the problematic code:
-
-```powershell
-git show <commit-hash> --stat
-git log -1 --format="%B" <commit-hash>
-```
-
-This tells you:
-- **Why** the code was written that way (what Jira case / feature it was for)
-- Whether your fix might **revert** or break a previous intentional change
-- Whether there is a **spec file** for that previous change (check `docs/` for the Jira key)
-
-Include the git blame findings in the spec under a "Git history" design section.
-If the previous change has a spec, read it to understand constraints.
+Carry the relevant git-history findings from the triage report into the spec under a
+"Git history" design section. If a prior change has a spec in `docs/`, read it to
+understand constraints.
 
 ### 6. Write the spec file
 
