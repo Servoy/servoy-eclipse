@@ -37,7 +37,7 @@ This project has Eclipse MCP servers configured in `opencode.json`. **Always pre
 ### Testing
 - **Use `eclipse-ide_runAllTests`**, `eclipse-ide_runClassTests`, or `eclipse-ide_runTestMethod` for running JUnit tests.
 - **Use `eclipse-pde_runJUnitPluginTests`** or `eclipse-pde_runJUnitPluginTestClass` for plugin integration tests.
-- Test project: `com.servoy.eclipse.tests`
+- Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`
 
 ### Other Tools
 - **Use `eclipse-ide_formatFile`** or `eclipse-coder_formatFile` to format Java files after editing.
@@ -144,8 +144,8 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 
 ## Testing
 
-- **Java plugin tests:** `com.servoy.eclipse.tests` (eclipse-test-plugin packaging)
-- **Debug type system tests:** `com.servoy.eclipse.debug.tests` â `ViewFoundSetTypeHierarchyIntegrationTest` [Plugin JUnit]
+- **Model tests:** `com.servoy.eclipse.model.tests` (eclipse-test-plugin packaging)
+- **NG Client UI tests:** `com.servoy.eclipse.ngclient.ui.tests` (eclipse-test-plugin packaging)
 - **Designer tests:** `com.servoy.eclipse.designer.tests` â `TestCssValues`, `TestSnapCSSPosition` [JUnit]
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
