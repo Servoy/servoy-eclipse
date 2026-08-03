@@ -88,13 +88,13 @@ export class EditorContentService {
                         if (container?.parent?.id !== newParent?.id) {
                             // we moved it to another parent
                             container.parent.removeChild(container);
-                            newParent!.addChild(container);
-                        } else if (newParent?.items.indexOf(container)! < 0) {
-                            newParent!.addChild(container);
+                            if (newParent) newParent.addChild(container);
+                        } else if (newParent && newParent.items.indexOf(container) < 0) {
+                            newParent.addChild(container);
                         }
                         if (newParent && reorderLayoutContainers.indexOf(newParent) < 0) {
                             // existing layout container in parent layout container; make sure is inserted in correct position
-                            reorderLayoutContainers.push(newParent!);
+                            reorderLayoutContainers.push(newParent);
                         }
                     }
                 } else {
