@@ -28,10 +28,11 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
     private hasFocus = false;
     private isBlur = false;
 
-    private readonly config: Options = {
+    private readonly config = {
         allowInputToggle: false,
         useCurrent: false,
         display: {
+            keyboardNavigation: true,
             components: {
 				calendar: true,
                 decades: true,
@@ -58,7 +59,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             locale: 'nl',
             hourCycle: 'h23'
         }
-    };
+    } as Options;
 
     constructor(renderer: Renderer2,
         cdRef: ChangeDetectorRef,
