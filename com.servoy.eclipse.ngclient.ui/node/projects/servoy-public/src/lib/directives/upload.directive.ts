@@ -1,4 +1,4 @@
-import { Directive , Input, OnInit, HostListener} from '@angular/core';
+import { Directive , Input, OnInit, HostListener, inject} from '@angular/core';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
@@ -11,8 +11,10 @@ export class UploadDirective implements OnInit {
 
     private url!: string;
     private propertyName = 'dataProviderID';
+    private servoyService: ServoyPublicService;
 
-    constructor(private servoyService: ServoyPublicService) {
+    constructor(servoyService?: ServoyPublicService) {
+        this.servoyService = servoyService ?? inject(ServoyPublicService);
     }
 
     @HostListener('click',['$event']) click(e: Event) {

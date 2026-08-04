@@ -1,4 +1,4 @@
-import { Directive, HostListener, Input, OnDestroy } from '@angular/core';
+import { Directive, HostListener, Input, OnDestroy, inject } from '@angular/core';
 import { TooltipService } from './tooltip.service';
 import { Subscription } from 'rxjs';
 
@@ -19,8 +19,10 @@ export class HTMLTooltipDirective implements OnDestroy {
     isActive = false;
     
     private unsubscribeIsTooltipActive: Subscription;
+    protected tooltipService: TooltipService;
 
-    constructor(private tooltipService: TooltipService) {
+    constructor(tooltipService?: TooltipService) {
+        this.tooltipService = tooltipService ?? inject(TooltipService);
         this.unsubscribeIsTooltipActive = this.tooltipService.isTooltipActive.subscribe(a => {
             this.isActive = a;
         });

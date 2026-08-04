@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, SimpleChanges, OnChanges } from '@angular/core';
+import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, SimpleChanges, OnChanges, inject } from '@angular/core';
 
 @Directive({
     // eslint-disable-next-line @angular-eslint/directive-selector
@@ -28,7 +28,10 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     // described above, the event would not reach the parent as parent DOM chain was already broken; that means parent would forever keep
     // references to detached UI via SabloTabseq child; so now we keep a direct ref.)
 
-    constructor(private _elemRef: ElementRef<Element>/*, private _cdRef: ChangeDetectorRef*/) {
+    private _elemRef: ElementRef<Element>;
+
+    constructor(elemRef?: ElementRef<Element>/*, private _cdRef: ChangeDetectorRef*/) {
+        this._elemRef = elemRef ?? inject(ElementRef);
     }
     
     private setParentSTS(parentSTS: SabloTabseq) {

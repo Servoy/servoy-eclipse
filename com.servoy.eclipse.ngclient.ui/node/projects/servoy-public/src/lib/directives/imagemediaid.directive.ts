@@ -1,4 +1,4 @@
-import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2, OnDestroy } from '@angular/core';
+import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2, OnDestroy, inject } from '@angular/core';
 import { ServoyBaseComponent } from '../basecomponent';
 import { IViewStateListener } from '../basecomponent';
 import { WindowRefService } from '../services/windowref.service';
@@ -15,11 +15,17 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     private imgStyle: Map<string, any> | null = null;
     private rollOverImgStyle: Map<string, any> | null = null;
     private clearStyle: Map<string, any>;
+    private _elemRef: ElementRef<HTMLElement>;
+    private _renderer: Renderer2;
+    private windowRefService: WindowRefService;
 
     private resizeObserver!: ResizeObserver;
 
-    public constructor(private _elemRef: ElementRef<HTMLElement>, private _renderer: Renderer2, 
-        private windowRefService: WindowRefService) {
+    public constructor(elemRef?: ElementRef<HTMLElement>, renderer?: Renderer2, 
+        windowRefService?: WindowRefService) {
+        this._elemRef = elemRef ?? inject(ElementRef);
+        this._renderer = renderer ?? inject(Renderer2);
+        this.windowRefService = windowRefService ?? inject(WindowRefService);
         this.clearStyle = new Map();
         this.clearStyle.set('width', '0px');
         this.clearStyle.set('height', '0px');

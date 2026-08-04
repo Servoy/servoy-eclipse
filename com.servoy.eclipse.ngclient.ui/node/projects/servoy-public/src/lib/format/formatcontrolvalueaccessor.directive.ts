@@ -1,5 +1,5 @@
 
-import { Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject, DOCUMENT } from '@angular/core';
+import { Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject, DOCUMENT, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
@@ -65,10 +65,18 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private maskFormat: MaskFormat | null = null;
     private readonly log: LoggerService;
     private focusText!: string;
+    private _renderer: Renderer2;
+    private _elementRef: ElementRef;
+    private formatService: FormattingService;
+    private doc: Document;
 
-    constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
-        @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
-        this.log = logFactory.getLogger('formatdirective');
+    constructor(renderer?: Renderer2, elementRef?: ElementRef, formatService?: FormattingService,
+        @Inject(DOCUMENT) doc?: any, logFactory?: LoggerFactory) {
+        this._renderer = renderer ?? inject(Renderer2);
+        this._elementRef = elementRef ?? inject(ElementRef);
+        this.formatService = formatService ?? inject(FormattingService);
+        this.doc = doc ?? inject(DOCUMENT);
+        this.log = (logFactory ?? inject(LoggerFactory)).getLogger('formatdirective');
     }
 
     @HostListener('blur', ['$event.target']) touched(target: EventTarget | null) {

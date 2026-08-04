@@ -1,4 +1,4 @@
-import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable } from '@angular/core';
+import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable, inject } from '@angular/core';
 import { ServoyApi } from './servoy_api';
 
 /**
@@ -22,12 +22,17 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
     @ViewChild('element', { static: false, read: ElementRef }) elementRef!: ElementRef<T>;
 
+    protected readonly renderer: Renderer2;
+    protected cdRef: ChangeDetectorRef;
+
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor: ComponentContributor;
     private initialized = false;
     private changes: SimpleChanges | null = null;
 
-    constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
+    constructor(renderer?: Renderer2, cdRef?: ChangeDetectorRef) {
+        this.renderer = renderer ?? inject(Renderer2);
+        this.cdRef = cdRef ?? inject(ChangeDetectorRef);
         this.componentContributor = new ComponentContributor();
     }
 

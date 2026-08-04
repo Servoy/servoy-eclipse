@@ -1,4 +1,4 @@
-import { Directive , Input , HostListener} from '@angular/core';
+import { Directive , Input , HostListener, inject} from '@angular/core';
 import {LoggerService, LoggerFactory} from '../logger.service';
 import { ServoyBaseComponent } from '../basecomponent';
 
@@ -13,8 +13,8 @@ export class StartEditDirective {
 
   private log: LoggerService;
 
-  public constructor(logFactory: LoggerFactory) {
-    this.log = logFactory.getLogger('StartEditDirective');
+  public constructor(logFactory?: LoggerFactory) {
+    this.log = (logFactory ?? inject(LoggerFactory)).getLogger('StartEditDirective');
   }
 
   @HostListener('focus', ['$event']) onFocus(e: FocusEvent) {

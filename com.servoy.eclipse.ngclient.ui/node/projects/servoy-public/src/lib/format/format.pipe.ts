@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform} from '@angular/core';
+import { inject, Pipe, PipeTransform} from '@angular/core';
 import { Format, FormattingService } from './formatting.service';
 import { LoggerFactory, LoggerService } from '../logger.service';
 
@@ -9,9 +9,11 @@ import { LoggerFactory, LoggerService } from '../logger.service';
 export class FormatFilterPipe implements PipeTransform {
 
     private readonly log: LoggerService;
+    private formatService: FormattingService;
     
-    public constructor(private formatService: FormattingService, logFactory: LoggerFactory) {
-        this.log = logFactory.getLogger('formatpipe'); 
+    public constructor(formatService?: FormattingService, logFactory?: LoggerFactory) {
+        this.formatService = formatService ?? inject(FormattingService);
+        this.log = (logFactory ?? inject(LoggerFactory)).getLogger('formatpipe'); 
     }
 
     transform( input: any, format: Format): any {

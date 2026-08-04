@@ -1,4 +1,4 @@
-import { Directive , Input , ElementRef, HostListener} from '@angular/core';
+import { Directive , Input , ElementRef, HostListener, inject} from '@angular/core';
 import { ServoyPublicService } from '../services/servoy_public.service';
 import { Format } from '../format/formatting.service';
 import { NumberSymbol } from '@angular/common';
@@ -11,9 +11,12 @@ export class DecimalkeyconverterDirective {
 
   @Input('svyDecimalKeyConverter') svyFormat!: Format;
   private element: HTMLInputElement;
+  private servoyService: ServoyPublicService;
 
-  public constructor(private el: ElementRef, private servoyService: ServoyPublicService) {
-      this.element = el.nativeElement;
+  public constructor(el?: ElementRef, servoyService?: ServoyPublicService) {
+      const elRef = el ?? inject(ElementRef);
+      this.element = elRef.nativeElement;
+      this.servoyService = servoyService ?? inject(ServoyPublicService);
   }
 
   @HostListener('keydown', ['$event']) onKeypress(e: KeyboardEvent) {

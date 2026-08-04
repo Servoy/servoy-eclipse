@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import numbro from 'numbro';
 import BigNumber from "bignumber.js";
 import { DateTime } from 'luxon';
@@ -33,7 +33,10 @@ export class Format {
 @Injectable()
 export class FormattingService {
 
-    constructor(private servoyService: ServoyPublicService) {
+    private servoyService: ServoyPublicService;
+
+    constructor(servoyService?: ServoyPublicService) {
+        this.servoyService = servoyService ?? inject(ServoyPublicService);
     }
 
     /**
