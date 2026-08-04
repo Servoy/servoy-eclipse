@@ -1,6 +1,4 @@
-import {BaseCustomObject} from '../spectypes.service';
-
-export class PopupForm extends BaseCustomObject {
+export class PopupForm {
     public component!: string;
     public form!: string;
     public x!: number;
