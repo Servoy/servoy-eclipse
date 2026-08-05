@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, Input, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 })
 export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
 
-  @Input() guides: Guide[] = [];
+  guides = input<Guide[]>([]);
 
   topAdjust: any;
   leftAdjust!: number;

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, Input, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -529,13 +529,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     standalone: false
 })
 export class PositionMenuDirective implements OnInit {
-    @Input('positionMenu') selectionNode!: SelectionNode;
+    selectionNode = input<SelectionNode>(undefined!, { alias: 'positionMenu' });
 
     private editorContentService = inject(EditorContentService);
     private elementRef = inject(ElementRef<HTMLElement>);
 
     ngOnInit(): void {
-        const htmlNode = this.editorContentService.getContentElement(this.selectionNode.svyid);
+        const htmlNode = this.editorContentService.getContentElement(this.selectionNode().svyid);
         if (parseInt(window.getComputedStyle(htmlNode, ':before').height) > 0) {
             const computedStyle = window.getComputedStyle(htmlNode, ':before');
             const left = parseInt(window.getComputedStyle(htmlNode, null).getPropertyValue('padding-left')) + parseInt(computedStyle.marginLeft);

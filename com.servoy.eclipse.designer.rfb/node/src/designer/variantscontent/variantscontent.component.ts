@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Renderer2, Input, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -13,7 +13,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 })
 export class VariantsContentComponent implements OnInit {
 
-    @Input() component!: PaletteComp;
+    component = input<PaletteComp>();
 
 	variantItemBeingDragged!: Node;
 	variantsIFrame!: HTMLIFrameElement;
@@ -30,7 +30,7 @@ export class VariantsContentComponent implements OnInit {
 
     constructor() {
 		this.editorSession.variantsTrigger.subscribe((value) => {
-			if (this.component == value.component) {
+			if (this.component() == value.component) {
                 this.activeVariant = true;
 				this.sendStylesToVariantsForm();
 			} else {
@@ -66,11 +66,11 @@ export class VariantsContentComponent implements OnInit {
     getVariantContentMargin() {
         //TODO: find a better way to do right alignment of variantscontent component
         //maybe using divs. For now adding this line due to time contraints
-        return this.component.name === 'bootstrapcomponents-button' ? '30px' : '37px';
+        return this.component()!.name === 'bootstrapcomponents-button' ? '30px' : '37px';
     }
 
 	sendStylesToVariantsForm() {
-		void this.editorSession.getVariantsForCategory<{variants: Variant[]}>(this.component.styleVariantCategory).then((result: unknown) => {			
+		void this.editorSession.getVariantsForCategory<{variants: Variant[]}>(this.component()!.styleVariantCategory).then((result: unknown) => {			
 			//specifying type like 'then((result: {variants: Array<Variant>)}' is leading to undefined variants ???
 			if (!this.variantsIFrame) {
 				this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
@@ -79,8 +79,8 @@ export class VariantsContentComponent implements OnInit {
 			const message = { 
 				id: 'createVariants', 
 				variants: result as Variant[],
-				model: this.component.model, 
-				name: this.convertToJSName(this.component.name), 
+				model: this.component()!.model, 
+				name: this.convertToJSName(this.component()!.name), 
 			};
 			this.variantsIFrame.contentWindow!.postMessage(message, '*');
 			if (this.variantsQueryHandler) {

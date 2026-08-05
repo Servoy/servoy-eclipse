@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, OnDestroy, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -27,8 +27,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     clientURL!: SafeResourceUrl;
     @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
     
-    @Input() styleVariantPreview!: boolean
-    @Output() previewReady = new EventEmitter<{previewReady: boolean}>();
+    styleVariantPreview = input<boolean>();
+    previewReady = output<{previewReady: boolean}>();
     
     private sanitizer = inject(DomSanitizer);
     private urlParser = inject(URLParserService);

@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { VariantsContentComponent } from './variantscontent.component';
 
 describe('VariantsContentComponent', () => {
@@ -14,7 +15,7 @@ describe('VariantsContentComponent', () => {
     (component as any).editorContentService = { getDocument: vi.fn().mockReturnValue({ getElementById: vi.fn() }) };
     (component as any).windowRef = { nativeWindow: { addEventListener: vi.fn() } };
     (component as any).renderer = {};
-    (component as any).component = { name: 'bootstrapcomponents-button', styleVariantCategory: 'btn' };
+    (component as any).component = signal({ name: 'bootstrapcomponents-button', styleVariantCategory: 'btn' });
     (component as any).activeVariant = false;
     (component as any).firstQuery = true;
     (component as any).variantsIFrame = null;
@@ -40,12 +41,12 @@ describe('VariantsContentComponent', () => {
 
   describe('getVariantContentMargin', () => {
     it('should return 30px for bootstrapcomponents-button', () => {
-      (component as any).component = { name: 'bootstrapcomponents-button' };
+      (component as any).component = signal({ name: 'bootstrapcomponents-button' });
       expect(component.getVariantContentMargin()).toBe('30px');
     });
 
     it('should return 37px for other components', () => {
-      (component as any).component = { name: 'other-component' };
+      (component as any).component = signal({ name: 'other-component' });
       expect(component.getVariantContentMargin()).toBe('37px');
     });
   });

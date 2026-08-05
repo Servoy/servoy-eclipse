@@ -1,5 +1,5 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
@@ -14,7 +14,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 export class AutoscrollComponent implements OnInit, AfterViewInit {
 
     @ViewChild('autoscroll', {static: false}) autoscrollElement!: ElementRef<HTMLElement>;
-    @Input() placement!: string;
+    placement = input<string>();
 
     private scrollTarget: ISupportAutoscroll | null | undefined;
     private handler!: ReturnType<typeof setInterval>;
@@ -38,7 +38,7 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
                 this.setPosition();
             }
         });
-        switch (this.placement) {
+        switch (this.placement()) {
             case 'top':
             case 'left':
                 this.direction = -1;
@@ -98,7 +98,7 @@ this.onMouseMove(event)
 
     onMouseMove(event: MouseEvent) {
         if (this.scrollTarget) {
-            switch (this.placement) {
+            switch (this.placement()) {
                 case 'top':
                 case 'bottom':
                     this.step = (this.mousePoint.y - event.pageY);
@@ -126,12 +126,12 @@ this.onMouseMove(event)
     }
 
     setPosition() {
-        if (this.placement == 'left') {
+        if (this.placement() == 'left') {
             const left =  this.editorContent.getDesignerElementById('palette').offsetWidth + 
                 this.editorContent.getDesignerElementById('palette').offsetLeft;
             this.renderer.setStyle(this.autoscrollElement.nativeElement, 'left', left + 'px');
         }
-        if (this.placement != 'top' && this.placement != 'bottom') {
+        if (this.placement() != 'top' && this.placement() != 'bottom') {
             const top = this.editorContent.getBodyElement().getElementsByClassName('top').item(0);
             const bottom = this.editorContent.getBodyElement().getElementsByClassName('bottom').item(0);
             const height = (bottom as HTMLElement).offsetTop - ((top as HTMLElement).offsetTop + (top as HTMLElement).offsetHeight) - 10;
@@ -142,7 +142,7 @@ this.onMouseMove(event)
     autoscroll() {
         if (this.scrollTarget) {
             if (this.speed < 15) this.speed++;
-            switch (this.placement) {
+            switch (this.placement()) {
                 case 'top':
                 case 'bottom':
                     this.scrollTarget.updateLocationCallback(0, this.speed * this.direction);

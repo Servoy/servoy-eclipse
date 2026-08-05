@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, AfterViewInit, Input, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Renderer2, ViewChild, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -17,7 +17,7 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 })
 export class VariantsPreviewComponent implements AfterViewInit {
 
-    @Input() component!: PaletteComp;
+    component = input<PaletteComp>();
     @ViewChild('popover') popover!: NgbPopover;
 	@ViewChild('variantGlasspane') glasspane!: ElementRef; 
 	@ViewChild('variantContent') content!: ElementRef;

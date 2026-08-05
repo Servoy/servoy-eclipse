@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { ResizeKnobDirective, ElementInfo } from './resizeknob.directive';
 
 describe('ResizeKnobDirective', () => {
@@ -27,7 +28,7 @@ describe('ResizeKnobDirective', () => {
     (directive as any).editorSession = editorSession;
     (directive as any).editorContentService = editorContentService;
     (directive as any).guidesService = { snapDataListener: { subscribe: vi.fn() } };
-    (directive as any).resizeInfo = { node: { style: {} }, direction: 'se', top: 0, left: 0, width: 1, height: 1 };
+      (directive as any).resizeInfo = signal({ node: { style: {} }, direction: 'se', top: 0, left: 0, width: 1, height: 1 });
     (directive as any).topContentAreaAdjust = 20;
     (directive as any).leftContentAreaAdjust = 20;
     (directive as any).initialElementInfo = null;
@@ -59,7 +60,7 @@ describe('ResizeKnobDirective', () => {
       const elementInfo = { x: 50, y: 50, element: el };
       (directive as any).currentElementInfo = new Map([['node1', elementInfo]]);
       (directive as any).initialElementInfo = new Map([['node1', elementInfo]]);
-      (directive as any).resizeInfo = { node: { style: {} }, direction: 'se', top: 0, left: 0, width: 1, height: 1 };
+    (directive as any).resizeInfo = signal({ node: { style: {} }, direction: 'se', top: 0, left: 0, width: 1, height: 1 });
       const data = { left: 30, top: 40, width: 200, height: 100 } as any;
       directive.snap(data);
       expect((directive as any).snapData).toBe(data);

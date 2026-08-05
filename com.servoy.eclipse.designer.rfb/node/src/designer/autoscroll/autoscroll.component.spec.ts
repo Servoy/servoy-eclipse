@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { signal } from '@angular/core';
 
 import { AutoscrollComponent } from './autoscroll.component';
 
@@ -22,6 +23,7 @@ describe('AutoscrollComponent', () => {
     (component as any).stopAutoscrollOffset = 3;
     (component as any).step = 0;
     (component as any).speed = 0;
+    (component as any).placement = signal<string | undefined>(undefined);
 
     scrollTarget = {
       updateLocationCallback: vi.fn(),
@@ -90,7 +92,7 @@ describe('AutoscrollComponent', () => {
   describe('autoscroll', () => {
     it('should increment speed and call updateLocationCallback for bottom placement', () => {
       (component as any).scrollTarget = scrollTarget;
-      (component as any).placement = 'bottom';
+      (component as any).placement = signal('bottom');
       (component as any).direction = 1;
       (component as any).speed = 2;
       component.autoscroll();
@@ -100,7 +102,7 @@ describe('AutoscrollComponent', () => {
 
     it('should cap speed at 15', () => {
       (component as any).scrollTarget = scrollTarget;
-      (component as any).placement = 'top';
+      (component as any).placement = signal('top');
       (component as any).direction = -1;
       (component as any).speed = 15;
       component.autoscroll();
@@ -110,7 +112,7 @@ describe('AutoscrollComponent', () => {
 
     it('should call updateLocationCallback with x for left/right placement', () => {
       (component as any).scrollTarget = scrollTarget;
-      (component as any).placement = 'right';
+      (component as any).placement = signal('right');
       (component as any).direction = 1;
       (component as any).speed = 5;
       component.autoscroll();
@@ -150,7 +152,7 @@ describe('AutoscrollComponent', () => {
     it('should start autoscroll when moving forward past threshold', () => {
       vi.useFakeTimers();
       (component as any).scrollTarget = scrollTarget;
-      (component as any).placement = 'bottom';
+      (component as any).placement = signal('bottom');
       (component as any).direction = 1;
       (component as any).mousePoint = { x: 100, y: 100 };
       component.onMouseMove({ pageX: 100, pageY: 110 } as MouseEvent);
@@ -163,7 +165,7 @@ describe('AutoscrollComponent', () => {
     it('should stop autoscroll when moving backward past stopAutoscrollOffset', () => {
       vi.useFakeTimers();
       (component as any).scrollTarget = scrollTarget;
-      (component as any).placement = 'bottom';
+      (component as any).placement = signal('bottom');
       (component as any).direction = 1;
       (component as any).mousePoint = { x: 100, y: 100 };
       (component as any).isAutoscrollActive = true;

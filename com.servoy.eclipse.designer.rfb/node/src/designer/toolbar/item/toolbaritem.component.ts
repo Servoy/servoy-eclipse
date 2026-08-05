@@ -1,17 +1,18 @@
-import { Directive, Input } from '@angular/core';
+import { Directive, input } from '@angular/core';
 import { ToolbarItem } from '../toolbar.component';
 
 @Directive()
 export class ToolbarItemComponent {
-    @Input() item!: ToolbarItem;
+    item = input<ToolbarItem>();
 
     onselection(selection: string) {
-        const text = this.item.onselection(selection);
-        if(text) this.item.text = text;
+        const text = this.item()!.onselection(selection);
+        if(text) this.item()!.text = text;
         return false;
     }
 
     isDisabled(): boolean {
-        return typeof(this.item.enabled) == 'function' ? !this.item.enabled() : !this.item.enabled;
+        const enabled = this.item()!.enabled;
+        return typeof(enabled) == 'function' ? !enabled() : !enabled;
     }
 }
