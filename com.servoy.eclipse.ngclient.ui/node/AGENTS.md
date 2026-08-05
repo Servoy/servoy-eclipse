@@ -86,49 +86,23 @@ The `@servoy/public` library must be built before the application because the ap
 
 ### Framework
 
-- **Jasmine** for test authoring (describe/it/expect)
-- **Karma** as test runner
+- **Vitest** 4.x as test runner (with jsdom environment)
 - **Angular TestBed** for component/service testing
+- **`@angular/build:unit-test`** builder (AOT-compiled tests)
 
 ### Running Tests
 
 | Task | Command |
 |------|---------|
-| All tests (CI, headless, single-run) | `run_tests.bat` or `npm run test_dev_all_nowatch` |
-| All tests (headless Chrome) | `npm run test_headless` |
+| All tests (CI, single-run) | `run_tests.bat` or `npm run test` |
+| `ngclient2` app (watch) | `npm run test:watch` |
+| `ngclient2` app (Vitest UI) | `npm run test:ui` |
 | `@servoy/public` library | `npm run test_public` |
 | `@servoy/servoydefault` library | `npm run test_default` |
 | `@servoy/dialogs` library | `npm run test_dialogs` |
-| `@servoy/window` library | `npm run test_dev_window` |
-| `@servoy/ngclientutils` library | `npm run test_dev_ngclientutils` |
-| Specific spec file | `npx ng test --include="**/my-component.spec.ts" --watch=false --browsers=ChromeHeadless` |
-
-### Browser Configuration
-
-Tests default to **Chrome**. If Chrome is installed, everything works out of the box.
-
-If Chrome is **not** available (common on some Windows machines), you have two options:
-
-**Option A — Use the Edge test scripts:**
-| Task | Command |
-|------|---------|
-| All tests (Edge, watch) | `npm run test_edge` |
-| All tests (Edge, single-run) | `npm run test_edge_nowatch` |
-| `@servoy/public` (Edge) | `npm run test_public_edge` |
-| `@servoy/servoydefault` (Edge) | `npm run test_default_edge` |
-
-**Option B — Set `CHROME_BIN` to an alternative Chromium-based browser:**
-```powershell
-# Windows (Edge)
-$env:CHROME_BIN = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-
-# macOS (Edge)
-export CHROME_BIN="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
-
-# Linux (Chromium)
-export CHROME_BIN=$(which chromium-browser)
-```
-After setting `CHROME_BIN`, the regular `test_headless` / `test_dev_all_nowatch` commands will use that browser.
+| `@servoy/window` library | `npm run test_window` |
+| `@servoy/ngclientutils` library | `npm run test_ngclientutils` |
+| Specific spec file | `npx ng test --include="**/my-component.spec.ts" --no-watch` |
 
 ### Test File Location
 
@@ -138,10 +112,16 @@ Tests live next to the source file they test:
 
 ### Test Conventions
 
+- Import test functions explicitly: `import { describe, it, expect, beforeEach, vi } from 'vitest';`
 - Use `describe` blocks to group tests by component/service
 - Use nested `describe` for specific scenarios
-- Use `beforeEach(waitForAsync(...))` for TestBed configuration
-- Mock dependencies with `jasmine.createSpyObj`
+- Mock dependencies with `vi.fn()` and manual mock objects (NOT `jasmine.createSpyObj`)
+- Use `vi.spyOn(obj, 'method')` to spy on methods
+- Use `vi.useFakeTimers()` / `vi.advanceTimersByTime(ms)` / `vi.useRealTimers()` for timer tests (NOT `fakeAsync`/`tick`)
+- Use `async`/`await` for async tests (NOT `waitForAsync`)
+- Each spec builds its own TestBed module with explicit `declarations` of all directives/pipes needed
+- Do NOT use `NO_ERRORS_SCHEMA` — always declare what the template needs
+- Do NOT import `ServoyPublicTestingModule` or `ServoyDefaultComponentsModule` — declare directives individually
 - Use `fixture.detectChanges()` to trigger Angular change detection
 - Verify no runtime errors (like NG0600) by asserting `detectChanges()` doesn't throw
 
