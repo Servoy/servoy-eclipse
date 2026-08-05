@@ -786,7 +786,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         let getterForEnabled = function get(this: any) {
             const rowEnableDataprovider = thisLFC.rowEnableDataprovider();
             if (rowEnableDataprovider && rowEnableDataprovider.length > idx) {
-                return thisLFC.rowEditableDataprovider()![idx]
+                return rowEnableDataprovider[idx];
             }
             if(this.enabledDataProvider !== undefined) {
                 return this.enabledDataProvider;
