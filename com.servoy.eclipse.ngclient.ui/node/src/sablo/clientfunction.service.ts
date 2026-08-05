@@ -1,5 +1,5 @@
 
-import { Inject, Injectable, Renderer2, RendererFactory2, DOCUMENT } from '@angular/core';
+import { inject, Injectable, Renderer2, RendererFactory2, DOCUMENT } from '@angular/core';
 import { SabloService } from './sablo.service';
 import { Deferred, IDeferred } from '@servoy/public';
 
@@ -8,15 +8,17 @@ import { Deferred, IDeferred } from '@servoy/public';
 })
 export class ClientFunctionService {
 
-	private renderer: Renderer2;
+	private readonly renderer: Renderer2;
 
 	private script!: HTMLScriptElement;
 	private deferred!: IDeferred<void>;
-	private doc: Document;
+	private readonly doc: Document;
+	private readonly sabloService = inject(SabloService);
 
-	constructor(private sabloService: SabloService, rendererFactory: RendererFactory2, @Inject(DOCUMENT) _doc: any) {
+	constructor() {
+		const rendererFactory = inject(RendererFactory2);
 		this.renderer = rendererFactory.createRenderer(null, null);
-		this.doc = _doc;
+		this.doc = inject(DOCUMENT) as Document;
 	}
 
 	public reloadClientFunctions() {

@@ -1,4 +1,4 @@
-import { Injectable, Renderer2, Inject, RendererFactory2, DOCUMENT } from '@angular/core';
+import { inject, Injectable, Renderer2, RendererFactory2, DOCUMENT } from '@angular/core';
 
 import { PlatformLocation } from '@angular/common';
 import { WindowRefService, ServoyPublicService } from '@servoy/public';
@@ -12,11 +12,13 @@ export class NGUtilsService {
     private confirmMessage!: string;
     private renderer: Renderer2;
 
-    constructor(private windowRef: WindowRefService,
-        private servoyService: ServoyPublicService,
-        private platformLocation: PlatformLocation,
-        rendererFactory: RendererFactory2,
-        @Inject(DOCUMENT) private document: Document) {
+    private readonly windowRef = inject(WindowRefService);
+    private readonly servoyService = inject(ServoyPublicService);
+    private readonly platformLocation = inject(PlatformLocation);
+    private readonly document = inject(DOCUMENT) as Document;
+
+    constructor() {
+        const rendererFactory = inject(RendererFactory2);
         this.windowRef.nativeWindow.location.hash = '';
         this.renderer = rendererFactory.createRenderer(null, null);
     }

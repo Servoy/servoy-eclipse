@@ -1,4 +1,4 @@
-import { Injectable, Inject, ComponentRef, DOCUMENT } from '@angular/core';
+import { inject, Injectable, ComponentRef, DOCUMENT } from '@angular/core';
 
 import { ServoyFormPopupComponent } from './popupform/popupform';
 import { FormService } from '../form.service';
@@ -17,12 +17,14 @@ export class PopupFormService {
     y!: number;
     sequencePopup = false;
 
-    constructor(private mainViewRefService: MainViewRefService,
-        private formService: FormService,
-        private servicesService: ServicesService,
-        private servoyService: ServoyService,
-        private utils: SvyUtilsService,
-        @Inject(DOCUMENT) private doc: Document) {
+    private readonly mainViewRefService = inject(MainViewRefService);
+    private readonly formService = inject(FormService);
+    private readonly servicesService = inject(ServicesService);
+    private readonly servoyService = inject(ServoyService);
+    private readonly utils = inject(SvyUtilsService);
+    private readonly doc = inject(DOCUMENT) as Document;
+
+    constructor() {
     }
 
     public showForm(popup: PopupForm) {

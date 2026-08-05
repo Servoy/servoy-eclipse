@@ -1,4 +1,4 @@
-import { Injectable, Inject, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { SvyUtilsService } from '../utils.service';
 import { EventLike } from '@servoy/public';
@@ -9,7 +9,11 @@ export class ClientDesignService {
 
     currentForms: { [key: string]: DragResize | undefined } = {};
 
-    constructor(private sabloService: SabloService, private utils: SvyUtilsService, @Inject(DOCUMENT) private document: Document) {
+    private readonly sabloService = inject(SabloService);
+    private readonly utils = inject(SvyUtilsService);
+    private readonly document = inject(DOCUMENT) as Document;
+
+    constructor() {
     }
 
     public setFormInDesign(formname: string, names: Array<string>) {

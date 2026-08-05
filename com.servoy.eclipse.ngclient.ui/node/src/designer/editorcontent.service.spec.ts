@@ -26,7 +26,15 @@ describe('EditorContentService', () => {
         designFormCallbackMock = { getFormName: vi.fn(), refresh: vi.fn(), renderGhosts: vi.fn(), updateForm: vi.fn(), redrawDecorators: vi.fn(), contentRefresh: vi.fn() } as any;
         designFormCallbackMock.getFormName.mockReturnValue('testForm');
 
-        service = new EditorContentService(formServiceMock, converterServiceMock, typesRegistryMock, loggerFactoryMock);
+        service = TestBed.configureTestingModule({
+            providers: [
+                EditorContentService,
+                { provide: FormService, useValue: formServiceMock },
+                { provide: ConverterService, useValue: converterServiceMock },
+                { provide: TypesRegistry, useValue: typesRegistryMock },
+                { provide: LoggerFactory, useValue: loggerFactoryMock },
+            ]
+        }).inject(EditorContentService);
         service.setDesignFormComponent(designFormCallbackMock);
     });
 

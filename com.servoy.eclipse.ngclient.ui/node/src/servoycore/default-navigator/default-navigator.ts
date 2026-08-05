@@ -1,4 +1,4 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormService } from '../../ngclient/form.service';
 import { ComponentCache } from '../../ngclient/types';
 
@@ -15,7 +15,9 @@ export class DefaultNavigator {
   navigatorComponentCache!: any;
   sliderValue!: number;
 
-  constructor( private formservice: FormService ) {
+  private readonly formservice = inject(FormService);
+
+  constructor() {
   }
 
   ngOnInit() {

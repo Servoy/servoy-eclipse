@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { LoggerService, LoggerFactory, LogLevel } from '@servoy/public';
 
 // types useful for when type information is received from server and processed; what is used from the rest
@@ -15,10 +15,11 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
     private componentSpecifications: ObjectOfWebObjectSpecification = {};
     private serviceSpecifications: ObjectOfWebObjectSpecification = {};
     private typeFactoryRegistry: ITypeFactoryRegistry = new TypeFactoryRegistry();
-    private types: ObjectOfIType = {}; // simple (don't need a factory to create more specific sub-types) global types that need client-side conversion
+    private types: ObjectOfIType = {};
     private readonly logger: LoggerService;
 
-    constructor(logFactory: LoggerFactory) {
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.logger = logFactory.getLogger('TypesRegistry');
     }
 

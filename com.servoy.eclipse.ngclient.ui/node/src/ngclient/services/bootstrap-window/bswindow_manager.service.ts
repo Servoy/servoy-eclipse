@@ -1,5 +1,5 @@
 import { BSWindow, BSWindowOptions } from './bswindow';
-import { Injectable, Inject, RendererFactory2, Renderer2, DOCUMENT } from '@angular/core';
+import { inject, Injectable, RendererFactory2, Renderer2, DOCUMENT } from '@angular/core';
 
 import { WindowRefService } from '@servoy/public';
 import { SvyUtilsService } from '../../utils.service';
@@ -15,14 +15,16 @@ export class BSWindowManager {
 
     private renderer: Renderer2;
 
-    constructor(@Inject(DOCUMENT) private doc: Document,
-            private rendererFactory: RendererFactory2,
-            private utils: SvyUtilsService,
-            private windowRefService: WindowRefService) {
+    private readonly doc = inject(DOCUMENT) as Document;
+    private readonly rendererFactory = inject(RendererFactory2);
+    private readonly utils = inject(SvyUtilsService);
+    private readonly windowRefService = inject(WindowRefService);
+
+    constructor() {
         this.windows = [];
         this.modalStack = [];
         this.initialize({});
-        this.renderer = rendererFactory.createRenderer(null, null);
+        this.renderer = this.rendererFactory.createRenderer(null, null);
     }
 
     findWindowByID(id: any): BSWindow | null {

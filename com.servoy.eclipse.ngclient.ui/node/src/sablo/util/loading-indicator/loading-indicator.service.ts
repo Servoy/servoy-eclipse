@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 
 export interface ICustomLoadingIndicator {
@@ -19,9 +19,10 @@ export class LoadingIndicatorService {
     private timeoutShow: ReturnType<typeof setTimeout> | null = null;
     private timeoutHide: ReturnType<typeof setTimeout> | null = null;
 
-    constructor(logFactory: LoggerFactory ) {
-            this.customLoadingIndicator = null!;
-       this.log = logFactory.getLogger('LoadingIndicatorService');
+    constructor() {
+        const logFactory = inject(LoggerFactory);
+        this.customLoadingIndicator = null!;
+        this.log = logFactory.getLogger('LoadingIndicatorService');
     }
 
     public showLoading() {

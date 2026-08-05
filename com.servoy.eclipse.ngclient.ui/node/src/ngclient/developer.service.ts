@@ -1,4 +1,4 @@
-import { Inject, Injectable, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 import { environment } from '../environments/environment';
 
 import { SabloService } from '../sablo/sablo.service';
@@ -8,7 +8,10 @@ import { SvyUtilsService } from './utils.service';
   providedIn: 'root'
 })
 export class DeveloperService {
-    constructor(@Inject(DOCUMENT)doc: Document, sabloService: SabloService, svyUtilsService: SvyUtilsService) {
+    constructor() {
+        const doc = inject(DOCUMENT) as Document;
+        const sabloService = inject(SabloService);
+        const svyUtilsService = inject(SvyUtilsService);
         if (!environment.production) {
             doc.addEventListener('keydown',(event) => {
                 if (event.ctrlKey && event.key === 'l') {

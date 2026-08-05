@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { LocalStorageService } from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
 
@@ -15,11 +15,11 @@ export class DefaultLoginWindowComponent {
     remember = true;
     message!: string;
     onLoginCallback!: () => void;
+
+    private readonly sabloService = inject(SabloService);
+    private readonly localStorageService = inject(LocalStorageService);
     
-    constructor(
-        private sabloService: SabloService,
-        private localStorageService: LocalStorageService
-    ) { }
+    constructor() { }
 
     doLogin() {
         const promise = this.sabloService.callService<{ username: string; password: string }>('applicationServerService', 'login',

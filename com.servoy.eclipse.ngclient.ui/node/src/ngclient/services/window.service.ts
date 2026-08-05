@@ -1,4 +1,4 @@
-import { Injectable, Inject, Renderer2, RendererFactory2, ComponentRef, DOCUMENT } from '@angular/core';
+import { inject, Injectable, Renderer2, RendererFactory2, ComponentRef, DOCUMENT } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
@@ -29,22 +29,24 @@ export class WindowService {
     private dialogShown = false;
     private renderer2: Renderer2;
 
-    constructor(private formService: FormService,
-        public servoyService: ServoyService,
-        private windowRefService: WindowRefService,
-        private mainViewRefService: MainViewRefService,
-        public localStorageService: LocalStorageService,
-        public sessionStorageService: SessionStorageService,
-        private titleService: Title,
-        public sabloService: SabloService,
-        private bsWindowManager: BSWindowManager,
-        private appService: ApplicationService,
-        private platformLocation: PlatformLocation,
-        private webSocketService: WebsocketService,
-        private sabloLoadingIndicatorService: LoadingIndicatorService,
-        rendererFactory: RendererFactory2,
-        private popupStateService: PopupStateService,
-        @Inject(DOCUMENT) private doc: Document) {
+    private readonly formService = inject(FormService);
+    readonly servoyService = inject(ServoyService);
+    private readonly windowRefService = inject(WindowRefService);
+    private readonly mainViewRefService = inject(MainViewRefService);
+    readonly localStorageService = inject(LocalStorageService);
+    readonly sessionStorageService = inject(SessionStorageService);
+    private readonly titleService = inject(Title);
+    readonly sabloService = inject(SabloService);
+    private readonly bsWindowManager = inject(BSWindowManager);
+    private readonly appService = inject(ApplicationService);
+    private readonly platformLocation = inject(PlatformLocation);
+    private readonly webSocketService = inject(WebsocketService);
+    private readonly sabloLoadingIndicatorService = inject(LoadingIndicatorService);
+    private readonly popupStateService = inject(PopupStateService);
+    private readonly doc = inject(DOCUMENT) as Document;
+
+    constructor() {
+        const rendererFactory = inject(RendererFactory2);
 
         this.platformLocation.onPopState(() => {
             const form = this.platformLocation.hash.replace('#', '');

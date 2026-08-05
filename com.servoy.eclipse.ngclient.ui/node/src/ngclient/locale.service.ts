@@ -1,4 +1,4 @@
-import { Injectable, Inject, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 import { SabloService } from '../sablo/sablo.service';
 import { Deferred, SessionStorageService, LoggerFactory, LoggerService, Locale } from '@servoy/public';
 import { registerLocaleData } from '@angular/common';
@@ -21,12 +21,14 @@ export class LocaleService {
     private agGridLocale!: { [key: string]: string; };
     private readonly log: LoggerService;
 
-    constructor(private sabloService: SabloService,
-        private i18nProvider: I18NProvider,
-        private sessionStorageService: SessionStorageService,
-        logFactory: LoggerFactory,
-        @Inject(DOCUMENT) private doc: Document) {
-            this.log = logFactory.getLogger('LocaleService');
+    private readonly sabloService = inject(SabloService);
+    private readonly i18nProvider = inject(I18NProvider);
+    private readonly sessionStorageService = inject(SessionStorageService);
+    private readonly doc = inject(DOCUMENT) as Document;
+
+    constructor() {
+        const logFactory = inject(LoggerFactory);
+        this.log = logFactory.getLogger('LocaleService');
     }
 
     public isLoaded(): Promise<any> {

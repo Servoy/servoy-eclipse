@@ -1,4 +1,4 @@
-import { Injectable, NgModule, NgZone } from '@angular/core';
+import { Injectable, inject, NgModule, NgZone } from '@angular/core';
 import { ConverterService } from '../sablo/converter.service';
 import { IDeferedState, SabloDeferHelper } from '../sablo/defer.service';
 import { ReconnectingWebSocket } from '../sablo/io/reconnecting.websocket';
@@ -37,13 +37,11 @@ class TestSabloDeferHelper extends SabloDeferHelper {
 
 @Injectable()
 export class TestWebsocketService extends WebsocketService {
-  constructor(private _windowRef: WindowRefService,
-        private _converterService: ConverterService<unknown>,
-        private _logFactory: LoggerFactory,
-        private _loadingIndicatorService: LoadingIndicatorService,
-        private _ngZone: NgZone) {
-     super(_windowRef, _converterService, _logFactory, _loadingIndicatorService, _ngZone);
-    }
+  private _windowRef = inject(WindowRefService);
+  private _converterService = inject(ConverterService);
+  private _logFactory = inject(LoggerFactory);
+  private _loadingIndicatorService = inject(LoadingIndicatorService);
+  private _ngZone = inject(NgZone);
 
   connect(): WebsocketSession {
       return new WebsocketSession({} as ReconnectingWebSocket, this,
@@ -55,9 +53,9 @@ export class TestWebsocketService extends WebsocketService {
 
 @Injectable()
 export class TestSabloService extends SabloService {
-        constructor(private wService: WebsocketService, sessionStorage: SessionStorageService,windowRefService: WindowRefService, logFactory: LoggerFactory) {
-            super(wService, sessionStorage,windowRefService, logFactory);
-             sessionStorage.remove('svy_session_lock');
+        constructor() {
+            super();
+            inject(SessionStorageService).remove('svy_session_lock');
         }
 }
 

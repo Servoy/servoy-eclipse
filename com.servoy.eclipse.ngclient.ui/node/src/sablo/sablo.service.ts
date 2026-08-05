@@ -1,4 +1,4 @@
-import { Injectable, } from '@angular/core';
+import { inject, Injectable, } from '@angular/core';
 import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale, RequestInfoPromise } from '@servoy/public';
 import { WebsocketService, WebsocketSession, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service';
@@ -14,27 +14,32 @@ export class SabloService {
     private currentServiceCallDone!: boolean;
     private currentServiceCallWaiting = 0;
     private currentServiceCallTimeouts!: any;
-    private log: LoggerService;
+    private readonly log: LoggerService;
     private inLogCall = false;
 
-    private expectFormToShowOnClientDeferr!: Deferred<void>; // see comment from expectFormToShowOnClient()
+    private expectFormToShowOnClientDeferr!: Deferred<void>;
     private noOfFormsThatAreGoingToShow: number = 0;
 
-    constructor(private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private windowRefService: WindowRefService, logFactory: LoggerFactory) {
+    private readonly websocketService = inject(WebsocketService);
+    private readonly sessionStorage = inject(SessionStorageService);
+    private readonly windowRefService = inject(WindowRefService);
+
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.log = logFactory.getLogger('SabloService');
         this.windowRefService.nativeWindow.window.addEventListener('beforeunload', () => {
-            sessionStorage.remove('svy_session_lock');
+            this.sessionStorage.remove('svy_session_lock');
         });
         this.windowRefService.nativeWindow.window.addEventListener('pagehide', () => {
-            sessionStorage.remove('svy_session_lock');
+            this.sessionStorage.remove('svy_session_lock');
         });
 
-        if (sessionStorage.has('svy_session_lock')) {
+        if (this.sessionStorage.has('svy_session_lock')) {
             this.clearSabloInfo();
             this.log.warn('Found a lock in session storage. The storage was cleared.');
         }
 
-        sessionStorage.set('svy_session_lock', '1');
+        this.sessionStorage.set('svy_session_lock', '1');
 
         const oldLog = this.windowRefService.nativeWindow.window.console.log;
         const oldInfo = this.windowRefService.nativeWindow.window.console.info;

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ServoyPublicService } from '@servoy/public';
 
 @Injectable()
@@ -7,7 +7,9 @@ export class DialogService {
     i18nOK = 'OK';
     i18nCancel = 'Cancel';
 
-    constructor(private servoyService: ServoyPublicService) {
+    private readonly servoyService = inject(ServoyPublicService);
+
+    constructor() {
     }
 
     public init(): void {

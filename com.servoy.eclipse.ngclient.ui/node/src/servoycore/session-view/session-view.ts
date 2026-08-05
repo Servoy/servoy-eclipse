@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -12,7 +12,12 @@ import { ServoyService } from '../../ngclient/servoy.service';
 })
 export class SessionView implements OnInit {
 
-    constructor(public http: HttpClient, public servoyService: ServoyService, private sanitizer: DomSanitizer, protected cdRef: ChangeDetectorRef) {
+    private readonly http = inject(HttpClient);
+    readonly servoyService = inject(ServoyService);
+    private readonly sanitizer = inject(DomSanitizer);
+    protected readonly cdRef = inject(ChangeDetectorRef);
+
+    constructor() {
     }
 
     htmlString!: SafeHtml;

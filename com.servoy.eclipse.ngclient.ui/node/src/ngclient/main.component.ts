@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewContainerRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
@@ -27,16 +27,18 @@ export class MainComponent implements OnInit, OnDestroy {
 
   private  listener: I18NListener | null = null;
 
-  constructor(private servoyService: ServoyService,
-          private i18nProvider: I18NProvider,
-          private formservice: FormService,
-          public websocketService: WebsocketService,
-          public loadingIndicatorService: LoadingIndicatorService,
-          allService: AllServiceService,
-          serverData: ServerDataService,
-          mainViewRefService: MainViewRefService,
-          viewContainerRef: ViewContainerRef,
-          private windowRef: WindowRefService) {
+  private readonly servoyService = inject(ServoyService);
+  private readonly i18nProvider = inject(I18NProvider);
+  private readonly formservice = inject(FormService);
+  readonly websocketService = inject(WebsocketService);
+  readonly loadingIndicatorService = inject(LoadingIndicatorService);
+  private readonly windowRef = inject(WindowRefService);
+
+  constructor() {
+    const allService = inject(AllServiceService);
+    const serverData = inject(ServerDataService);
+    const mainViewRefService = inject(MainViewRefService);
+    const viewContainerRef = inject(ViewContainerRef);
     this.servoyService.connect();
     mainViewRefService.mainContainer = viewContainerRef;
     allService.init();

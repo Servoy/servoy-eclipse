@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { ConverterService, instanceOfChangeAwareValue, ChangeListenerFunction } from './converter.service';
 import { LoggerService, LoggerFactory, RequestInfoPromise, Deferred } from '@servoy/public';
@@ -13,15 +13,17 @@ import { ClientFunctionService } from './clientfunction.service';
 export class ServicesService {
 
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
-    private log: LoggerService;
-    private serviceDynamicClientSideTypes: Record<string, Record<string, any>> = {}; // it stores property types that are dynamic (can change at runtime)
+    private readonly log: LoggerService;
+    private serviceDynamicClientSideTypes: Record<string, Record<string, any>> = {};
 
-    constructor(private converterService: ConverterService<unknown>,
-        private readonly typesRegistry: TypesRegistry,
-        websocketService: WebsocketService,
-        private sabloService: SabloService,
-        logFactory: LoggerFactory,
-        private clientFunctionService: ClientFunctionService) {
+    private readonly converterService = inject(ConverterService<unknown>);
+    private readonly typesRegistry = inject(TypesRegistry);
+    private readonly sabloService = inject(SabloService);
+    private readonly clientFunctionService = inject(ClientFunctionService);
+
+    constructor() {
+        const websocketService = inject(WebsocketService);
+        const logFactory = inject(LoggerFactory);
         this.log = logFactory.getLogger('ServicesService');
 
         websocketService.getSession().then((session) => session.setServicesHandler({

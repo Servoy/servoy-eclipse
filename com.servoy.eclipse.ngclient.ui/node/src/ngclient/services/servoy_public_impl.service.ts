@@ -1,4 +1,4 @@
-import { Injectable, TemplateRef } from '@angular/core';
+import { inject, Injectable, TemplateRef } from '@angular/core';
 import { EventLike, IComponentCache, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener, RequestInfoPromise } from '@servoy/public';
 import { SabloService } from '../../sablo/sablo.service';
 import { WebsocketService } from '../../sablo/websocket.service';
@@ -13,16 +13,18 @@ import { PopupFormService } from './popupform.service';
 
 @Injectable()
 export class ServoyPublicServiceImpl extends ServoyPublicService {
-    constructor(private sabloService: SabloService,
-        private i18nProvider: I18NProvider,
-        private utils: SvyUtilsService,
-        private localeService: LocaleService,
-        private applicationService: ApplicationService,
-        private servoyService: ServoyService,
-        private formService: FormService,
-        private servicesService: ServicesService,
-        private popupFormService: PopupFormService,
-        private websocketService: WebsocketService) {
+    private readonly sabloService = inject(SabloService);
+    private readonly i18nProvider = inject(I18NProvider);
+    private readonly utils = inject(SvyUtilsService);
+    private readonly localeService = inject(LocaleService);
+    private readonly applicationService = inject(ApplicationService);
+    private readonly servoyService = inject(ServoyService);
+    private readonly formService = inject(FormService);
+    private readonly servicesService = inject(ServicesService);
+    private readonly popupFormService = inject(PopupFormService);
+    private readonly websocketService = inject(WebsocketService);
+
+    constructor() {
         super();
     }
 

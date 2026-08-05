@@ -30,7 +30,7 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
 
     timeoutID: number | null = null;
 
-    constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
     }
 

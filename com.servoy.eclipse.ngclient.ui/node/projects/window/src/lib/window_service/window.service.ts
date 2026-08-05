@@ -1,4 +1,4 @@
-import { Injectable, Inject, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 
 
 import { ShortcutService, Shortcut as Shortcut2 } from './shortcut.service';
@@ -11,13 +11,15 @@ export class WindowPluginService {
     private _popupmenus!: Popup[];
     private _popupMenuShowCommand!: PopupMenuShowCommand | null;
     private _popupform!: PopupForm;
-    private log: LoggerService;
+    private readonly log: LoggerService;
 
-    constructor(private shortcutService: ShortcutService,
-        private popupMenuService: PopupMenuService,
-        private servoyService: ServoyPublicService,
-        @Inject(DOCUMENT) private doc: Document,
-        logFactory: LoggerFactory) {
+    private readonly shortcutService = inject(ShortcutService);
+    private readonly popupMenuService = inject(PopupMenuService);
+    private readonly servoyService = inject(ServoyPublicService);
+    private readonly doc = inject(DOCUMENT) as Document;
+
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.log = logFactory.getLogger('WindowService');
     }
 

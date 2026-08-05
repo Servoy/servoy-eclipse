@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { SabloService } from '../../sablo/sablo.service';
 import { wrapPromiseToPropagateCustomRequestInfoInternal } from '../../sablo/websocket.service';
@@ -15,7 +15,9 @@ export class  I18NProvider {
 
     private readonly listeners: Set<Listener> = new Set();
 
-    constructor(private sabloService: SabloService) {
+    private readonly sabloService = inject(SabloService);
+
+    constructor() {
     }
 
     public addDefaultTranslations(translations: {[key: string]: string}) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { FormService, ServerElement } from '../ngclient/form.service';
 import { IDesignFormComponent } from './servoydesigner.component';
 import { ComponentCache, StructureCache, FormComponentCache, FormComponentProperties, FormCache, CSSPosition, Position, PartCache } from '../ngclient/types';
@@ -11,11 +11,14 @@ import { PersistIdentifier } from './persistidentifier';
 export class EditorContentService {
     designFormCallback!: IDesignFormComponent;
 
-    private logger: LoggerService;
+    private readonly logger: LoggerService;
 
-    constructor(private formService: FormService, protected converterService: ConverterService<unknown>, private typesRegistry: TypesRegistry,
-        logFactory: LoggerFactory
-    ) {
+    private readonly formService = inject(FormService);
+    protected readonly converterService = inject(ConverterService<unknown>);
+    private readonly typesRegistry = inject(TypesRegistry);
+
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.logger = logFactory.getLogger('EditorContentService');
     }
 
