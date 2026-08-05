@@ -10,11 +10,11 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 |--------|-------|
 | Name | TiNG |
 | Version | 2026.9.0 |
-| Framework | Angular 21 |
-| Language | TypeScript 5.9 |
+| Framework | Angular 22 |
+| Language | TypeScript 6.0 |
 | Build tool | Angular CLI (`@angular/build:application`, esbuild-based) |
 | Test framework | Jasmine + Karma |
-| Linter | ESLint 9 (`@angular-eslint`) |
+| Linter | ESLint 10 (`@angular-eslint`) |
 | Package manager | npm (with `legacy-peer-deps=true`) |
 | License | GNU Affero General Public License |
 
@@ -53,7 +53,7 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 | `package.json` | Dependencies and scripts |
 | `angular.json` | Workspace and build configuration |
 | `tsconfig.json` | Root TypeScript config |
-| `.eslintrc.json` | Linting rules |
+| `eslint.config.js` | Linting rules (flat config) |
 | `karma.conf.js` | Base test runner config |
 | `karma.dev.conf.js` | Dev test config (all browsers) |
 | `karma.dev.once.conf.js` | Single-run test config (CI) |
@@ -66,7 +66,7 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 |------|---------|
 | Quick typecheck (no output) | `npx tsc --noEmit -p src/tsconfig.app.json` |
 | Typecheck library | `npx tsc --noEmit -p projects/servoy-public/tsconfig.lib.json` |
-| Lint | `npx ng lint` |
+| Lint | `npm run lint` |
 | Build library (required first) | `npm run build_lib` |
 | Build application (production) | `npm run build` |
 | Build application (debug/watch) | `npm run build_debug` |
@@ -150,15 +150,17 @@ Tests live next to the source file they test:
 ## 5. Linting
 
 ```bash
-npx ng lint
+npm run lint
 ```
 
-ESLint configuration (`.eslintrc.json`):
-- Single quotes, no trailing semicolons optional (check existing code)
-- Prefer arrow functions
+ESLint configuration (`eslint.config.js` — flat config, ESLint 10):
+- All errors are downgraded to warnings via `eslint-plugin-only-warn`
+- Single quotes, prefer arrow functions
 - Component selectors: `servoydefault-`, `servoycore-`, `svy-`, `testcomponents-` (kebab-case)
 - Directive selectors: same prefixes (camelCase)
 - Max line length: 200
+- Type-aware linting enabled (uses `project: './tsconfig.json'`)
+- Template accessibility rules enabled (`angular.configs.templateAccessibility`)
 
 ---
 
@@ -167,7 +169,7 @@ ESLint configuration (`.eslintrc.json`):
 ### Angular CLI MCP Tools
 
 Use these tools for Angular-specific guidance:
-- **`angular-cli_get_best_practices`** — official Angular coding standards for our version (Angular 21)
+- **`angular-cli_get_best_practices`** — official Angular coding standards for our version (Angular 22)
 - **`angular-cli_find_examples`** — find modern code examples (signals, control flow, deferrable views, etc.)
 - **`angular-cli_search_documentation`** — search angular.dev docs for API details
 - **`angular-cli_list_projects`** — get workspace project info (names, types, test framework)
