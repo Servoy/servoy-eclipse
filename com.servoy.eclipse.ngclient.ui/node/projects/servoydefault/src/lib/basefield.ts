@@ -1,4 +1,4 @@
-import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject, DOCUMENT, output } from '@angular/core';
+import { SimpleChanges, Renderer2, Directive, ChangeDetectorRef, Inject, DOCUMENT, output, input } from '@angular/core';
 
 import { PropertyUtils, FormattingService, IValuelist } from '@servoy/public';
 
@@ -10,17 +10,17 @@ import { ServoyDefaultBaseComponent } from './basecomponent';
 // eslint-disable-next-line
 export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
-    @Input() onDataChangeMethodID!: (e: Event, data?: any) => void;
-    @Input() onFocusGainedMethodID!: (e: Event, data?: any) => void;
-    @Input() onFocusLostMethodID!: (e: Event, data?: any) => void;
+    readonly onDataChangeMethodID = input<(e: Event, data?: any) => void>(undefined as any);
+    readonly onFocusGainedMethodID = input<(e: Event, data?: any) => void>(undefined as any);
+    readonly onFocusLostMethodID = input<(e: Event, data?: any) => void>(undefined as any);
 
     readonly dataProviderIDChange = output<any>();
-    @Input() editable!: boolean;
-    @Input() findmode!: boolean;
-    @Input() placeholderText!: string;
-    @Input() readOnly!: boolean;
-    @Input() selectOnEnter!: boolean;
-    @Input() valuelistID!: IValuelist;
+    readonly editable = input<boolean>(undefined as any);
+    readonly findmode = input<boolean>(undefined as any);
+    readonly placeholderText = input<string>(undefined as any);
+    readonly readOnly = input<boolean>(undefined as any);
+    readonly selectOnEnter = input<boolean>(undefined as any);
+    readonly valuelistID = input<IValuelist>(undefined as any);
 
     storedTooltip: any;
 
@@ -32,22 +32,22 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
 
     svyOnInit() {
         super.svyOnInit();
-        if (this.dataProviderID === undefined) {
-            this.dataProviderID = null;
+        if (this.dataProviderID() === undefined) {
+            this.dataProviderID.set(null);
         }
     }
 
     attachFocusListeners( nativeElement: any ) {
-        if ( this.onFocusGainedMethodID )
+        if ( this.onFocusGainedMethodID() )
             this.renderer.listen( nativeElement, 'focus', ( e ) => {
                 if ( this.mustExecuteOnFocus !== false ) {
-                    this.onFocusGainedMethodID( e );
+                    this.onFocusGainedMethodID()( e );
                 }
                 this.mustExecuteOnFocus = true;
             } );
-        if ( this.onFocusLostMethodID )
+        if ( this.onFocusLostMethodID() )
             this.renderer.listen( nativeElement, 'blur', ( e ) => {
-                this.onFocusLostMethodID( e );
+                this.onFocusLostMethodID()( e );
             } );
     }
 
@@ -63,14 +63,14 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
             this.renderer.addClass(this.elementRef.nativeElement, 'ng-invalid');
             if (stringValue) {
                 if (this.storedTooltip === false) {
-                    this.storedTooltip = this.toolTipText;
+                    this.storedTooltip = this.toolTipText();
                 }
-                this.toolTipText = '' + returnval.toString();
+                this.toolTipText.set('' + returnval.toString());
             }
         } else {
             this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');
             this.renderer.addClass(this.elementRef.nativeElement, 'ng-valid');
-            if (this.storedTooltip !== false) this.toolTipText = this.storedTooltip;
+            if (this.storedTooltip !== false) this.toolTipText.set(this.storedTooltip);
             this.storedTooltip = false;
         }
     }
@@ -90,7 +90,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
                 }
             }
             if (changes.editable || changes.readOnly || changes.findmode) {
-				if (this.findmode || (!this.readOnly && this.editable)) {
+				if (this.findmode() || (!this.readOnly() && this.editable())) {
 					this.renderer.removeAttribute(this.getFocusElement(), 'readonly');
 				} else {
 					this.renderer.setAttribute(this.getFocusElement(), 'readonly', 'readonly');
@@ -101,7 +101,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     }
 
     pushUpdate() {
-        this.dataProviderIDChange.emit(this.dataProviderID);
+        this.dataProviderIDChange.emit(this.dataProviderID());
     }
 
     public selectAll() {
@@ -137,20 +137,20 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     }
 
     public getAsPlainText(): string {
-        if (this.dataProviderID) {
-            return this.dataProviderID.replace(/<[^>]*>/g, '');
+        if (this.dataProviderID()) {
+            return this.dataProviderID().replace(/<[^>]*>/g, '');
         }
-        return this.dataProviderID;
+        return this.dataProviderID();
     }
 
 
     protected attachHandlers() {
         super.attachHandlers();
         this.attachFocusListeners(this.getFocusElement());
-        if (this.onActionMethodID) {
+        if (this.onActionMethodID()) {
             this.renderer.listen(this.getFocusElement(), 'keyup', (e) => {
                 if (this.formattingService.testKeyPressed(e, 13)) {
-                     setTimeout(() => this.onActionMethodID(e), 100);
+                     setTimeout(() => this.onActionMethodID()(e), 100);
                 }
             });
         }

@@ -31,8 +31,8 @@ describe('ServoyDefaultImageMedia', () => {
     
     component = fixture.componentInstance;
     component.servoyApi = servoyApi as ServoyApi;
-    component.enabled = true;
-    component.editable = true;
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
     fixture.detectChanges();
   });
 
@@ -49,7 +49,7 @@ describe('ServoyDefaultImageMedia', () => {
     imgUpload = fixture.debugElement.queryAll(By.css('.fa-times'));
     imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
     fixture.detectChanges();
-    expect(component.dataProviderID).toBeNull();
+    expect(component.dataProviderID()).toBeNull();
     expect(component.imageURL).toEqual(ServoyDefaultImageMedia.EMPTY);
   });
 

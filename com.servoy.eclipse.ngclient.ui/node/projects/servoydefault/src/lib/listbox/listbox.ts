@@ -1,5 +1,5 @@
 
-import { Component, Renderer2, Input, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT, input } from '@angular/core';
 
 import { FormattingService } from '@servoy/public';
 
@@ -12,7 +12,7 @@ import { ServoyDefaultBaseField } from '../basefield';
     standalone: false
 } )
 export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectElement> {
-    @Input() multiselectListbox: any;
+    readonly multiselectListbox = input<any>(undefined);
 
     selectedValues!: any[];
 
@@ -28,10 +28,10 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectEleme
             switch ( property ) {
             case 'dataProviderID':
                 this.selectedValues = [];
-                if (this.multiselectListbox && this.dataProviderID) {
-                    this.selectedValues = ('' + this.dataProviderID).split( '\n' );
-                } else if (!this.multiselectListbox && this.dataProviderID) {
-                    this.selectedValues = [this.dataProviderID];
+                if (this.multiselectListbox() && this.dataProviderID()) {
+                    this.selectedValues = ('' + this.dataProviderID()).split( '\n' );
+                } else if (!this.multiselectListbox() && this.dataProviderID()) {
+                    this.selectedValues = [this.dataProviderID()];
                 }
                 this.setSelectionFromDataprovider();
                 break;
@@ -47,15 +47,15 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectEleme
     }
     
     onValuelistChange() {
-        if (this.valuelistID)
-            if (this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0])) this.allowNullinc = 1;
+        if (this.valuelistID())
+            if (this.valuelistID().length > 0 && this.isValueListNull(this.valuelistID()[0])) this.allowNullinc = 1;
     }
     
     isValueListNull = (item: any) => (item.realValue == null || item.realValue === '') && item.displayValue === '';
 
     
     attachHandlers() {
-        if (this.onActionMethodID) this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
+        if (this.onActionMethodID()) this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID()( e ));
         super.attachHandlers();
       }
 
@@ -63,17 +63,17 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectEleme
         for ( let i = 0; i < this.selectedValues.length; i += 1 ) {
             this.selectedValues[i] = '' + this.selectedValues[i];
         }
-        this.dataProviderID = this.selectedValues.join( '\n' );
+        this.dataProviderID.set(this.selectedValues.join( '\n' ));
         this.pushUpdate();
     }
     
     setSelectionFromDataprovider() {
         this.selection = [];
-        if (this.dataProviderID === null || this.dataProviderID === undefined) return;
-        const arr = (typeof this.dataProviderID === 'string') ? this.dataProviderID.split('\n') : [this.dataProviderID];
-        arr.forEach((element, index, array) => {
-            for (let i = 0; i < this.valuelistID.length; i++) {
-                const item = this.valuelistID[i];
+        if (this.dataProviderID() === null || this.dataProviderID() === undefined) return;
+        const arr = (typeof this.dataProviderID() === 'string') ? this.dataProviderID().split('\n') : [this.dataProviderID()];
+        arr.forEach((element: any, index: any, array: any) => {
+            for (let i = 0; i < this.valuelistID().length; i++) {
+                const item = this.valuelistID()[i];
                 if (item.realValue + '' === element + '' && !this.isValueListNull(item)) this.selection[i - this.allowNullinc] = true;
             }
         });
@@ -82,7 +82,7 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectEleme
     getSelectedElements() {
         return this.selection
             .map((item, index) => {
-                if (item == true) return this.valuelistID[index + this.allowNullinc].realValue;
+                if (item == true) return this.valuelistID()[index + this.allowNullinc].realValue;
             })
             .filter(item => item !== null);
     }

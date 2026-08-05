@@ -48,9 +48,9 @@ describe('ServoyDefaultRadiogroup', () => {
     fixture = TestBed.createComponent(ServoyDefaultRadiogroup);
     component = fixture.componentInstance;
     component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
-    component.valuelistID = mockData;
-    component.enabled = true;
-    component.editable = true;
+    fixture.componentRef.setInput('valuelistID', mockData);
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
     fixture.detectChanges();
   });
 

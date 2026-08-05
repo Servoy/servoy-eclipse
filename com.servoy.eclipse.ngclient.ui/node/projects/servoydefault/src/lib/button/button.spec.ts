@@ -31,7 +31,7 @@ describe('SvyButton', () => {
     fixture = TestBed.createComponent(ServoyDefaultButton);
     component = fixture.componentInstance;
     component.servoyApi =  servoyApi;
-    component.toolTipText = 'Hi';
+    component.toolTipText.set('Hi');
     fixture.detectChanges();
   });
 
@@ -46,8 +46,8 @@ describe('SvyButton', () => {
 
   it( 'should render html', async () => {
     servoyApi.trustAsHtml.mockReturnValue( true );
-    component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
+    component.dataProviderID.set('<div class="myclass" onclick="javascript:test()">hallo</div>');
     runOnPushChangeDetection(fixture);
-    expect( component.child.nativeElement.children[1].innerHTML ).toBe(component.dataProviderID);
+    expect( component.child.nativeElement.children[1].innerHTML ).toBe(component.dataProviderID());
   });
 });

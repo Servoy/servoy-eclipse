@@ -26,16 +26,16 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
     }
 
     deleteMedia(): void {
-        this.dataProviderID = null;
+        this.dataProviderID.set(null);
         this.pushUpdate();
         this.imageURL = ServoyDefaultImageMedia.EMPTY;
     }
 
     downloadMedia(): void {
-        if (this.dataProviderID) {
+        if (this.dataProviderID()) {
             const x = window.screenTop + 100;
             const y = window.screenLeft + 100;
-            window.open(this.dataProviderID.url ? this.dataProviderID.url : this.dataProviderID, 'download', 'top=' + x + ',left=' + y + ',screenX=' + x
+            window.open(this.dataProviderID().url ? this.dataProviderID().url : this.dataProviderID(), 'download', 'top=' + x + ',left=' + y + ',screenX=' + x
                 + ',screenY=' + y + ',location=no,toolbar=no,menubar=no,width=310,height=140,resizable=yes');
         }
     }
@@ -57,9 +57,9 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
         // horizontal align (default left)
         const width = (element.parentNode as any)['clientWidth'];
         if (width > imageWidth) {
-            if (this.horizontalAlignment === 0 /*SwingConstants.CENTER*/)
+            if (this.horizontalAlignment() === 0 /*SwingConstants.CENTER*/)
                 alignStyle.left = (width - imageWidth) / 2 + 'px';
-            else if (this.horizontalAlignment === 4 /*SwingConstants.RIGHT*/)
+            else if (this.horizontalAlignment() === 4 /*SwingConstants.RIGHT*/)
                 alignStyle.left = (width - imageWidth) + 'px';
             else {
                 if ((element.parentNode!.childNodes.length > 1) && (imageHeight + 34 < height))
@@ -71,10 +71,10 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
     }
 
     private updateImageURL() {
-        if (this.dataProviderID) {
-            const contentType = this.dataProviderID.contentType;
+        if (this.dataProviderID()) {
+            const contentType = this.dataProviderID().contentType;
             if (contentType != null && contentType !== undefined && contentType.indexOf('image') === 0) {
-                this.imageURL = this.dataProviderID.url;
+                this.imageURL = this.dataProviderID().url;
             } else {
                 this.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
             }

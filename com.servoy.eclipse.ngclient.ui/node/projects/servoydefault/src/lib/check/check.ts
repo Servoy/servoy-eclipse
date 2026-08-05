@@ -1,5 +1,5 @@
 
-import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, Input, ViewChild, ElementRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, ViewChild, ElementRef, ChangeDetectionStrategy, Inject, DOCUMENT, input } from '@angular/core';
 import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -11,7 +11,7 @@ import { ServoyDefaultBaseField } from '../basefield';
     standalone: false
 })
 export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
-    @Input() horizontalAlignment!: number;
+    override readonly horizontalAlignment = input<number>(undefined as any);
     @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
 
     selected = false;
@@ -27,7 +27,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
                     this.setSelectionFromDataprovider();
                     break;
                 case'horizontalAlignment':
-                    this.setHorizontalAlignmentFlexbox(this.getNativeElement(), this.renderer, this.horizontalAlignment);
+                    this.setHorizontalAlignmentFlexbox(this.getNativeElement(), this.renderer, this.horizontalAlignment());
                     break;
             }
         }
@@ -51,7 +51,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
 
     attachHandlers() {
         this.renderer.listen( this.getFocusElement(), 'click', (e) => {
-            if ((!this.readOnly && this.enabled) || this.findmode) {
+            if ((!this.readOnly() && this.enabled()) || this.findmode()) {
                 this.itemClicked(e);
             }
         });
@@ -63,27 +63,27 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
             this.selected = !this.selected;
         }
 
-        if (this.valuelistID && this.valuelistID[0])
-            this.dataProviderID = this.dataProviderID === this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
-        else if (typeof this.dataProviderID === 'string')
-            this.dataProviderID = this.dataProviderID === '1' ? '0' : '1';
+        if (this.valuelistID() && this.valuelistID()[0])
+            this.dataProviderID.set(this.dataProviderID() === this.valuelistID()[0].realValue ? null : this.valuelistID()[0].realValue);
+        else if (typeof this.dataProviderID() === 'string')
+            this.dataProviderID.set(this.dataProviderID() === '1' ? '0' : '1');
         else
-            this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
+            this.dataProviderID.set(this.dataProviderID() > 0 ? 0 : 1);
         setTimeout(() => {
             this.pushUpdate();
-            if (this.onActionMethodID) this.onActionMethodID(event);
+            if (this.onActionMethodID()) this.onActionMethodID()(event);
         }, 0);
     }
 
     getSelectionFromDataprovider() {
-        if (!this.dataProviderID)
+        if (!this.dataProviderID())
             return false;
-        if (this.valuelistID && this.valuelistID[0]) {
-            return this.dataProviderID === this.valuelistID[0].realValue;
-        } else if (typeof this.dataProviderID === 'string') {
-            return this.dataProviderID === '1';
+        if (this.valuelistID() && this.valuelistID()[0]) {
+            return this.dataProviderID() === this.valuelistID()[0].realValue;
+        } else if (typeof this.dataProviderID() === 'string') {
+            return this.dataProviderID() === '1';
         } else {
-            return this.dataProviderID > 0;
+            return this.dataProviderID() > 0;
         }
     }
 

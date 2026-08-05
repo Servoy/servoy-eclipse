@@ -49,7 +49,7 @@ describe('ServoyDefaultTextArea', () => {
   });
 
   it('should have value test', async () => {
-    component.dataProviderID = 'test';
+    component.dataProviderID.set('test');
     runOnPushChangeDetection(fixture);
     fixture.whenStable().then(() =>
       expect(component.getNativeElement().value).toBe('test'));

@@ -40,9 +40,9 @@ describe('ServoyDefaultRectangle', () => {
   });
 
   it ('should check border styles from ngOnChanges (linesize)', () => {
-      component.lineSize = 5;
+      fixture.componentRef.setInput('lineSize', 5);
       component.ngOnChanges({
-          lineSize: new SimpleChange(null, component.lineSize, true)
+          lineSize: new SimpleChange(null, component.lineSize(), true)
       });
       fixture.detectChanges();
       expect(rectangle.nativeElement.style.borderWidth).toBe('5px');
@@ -50,29 +50,29 @@ describe('ServoyDefaultRectangle', () => {
   });
 
   it ('should check border styles from ngOnChanges (roundedRadius)', () => {
-      component.roundedRadius = 6;
+      fixture.componentRef.setInput('roundedRadius', 6);
       component.ngOnChanges({
-          roundedRadius: new SimpleChange(null, component.roundedRadius, false)
+          roundedRadius: new SimpleChange(null, component.roundedRadius(), false)
       });
       fixture.detectChanges();
       expect(rectangle.nativeElement.style.borderRadius).toBe('3px');
   });
 
   it ('should check border styles from ngOnChanges (foreground)', () => {
-      component.foreground = '#ffffff';
+      fixture.componentRef.setInput('foreground', '#ffffff');
       component.ngOnChanges({
-          foreground: new SimpleChange(null, component.foreground, false)
+          foreground: new SimpleChange(null, component.foreground(), false)
       });
       fixture.detectChanges();
       expect(rectangle.nativeElement.style.borderColor).toBe('rgb(255, 255, 255)');
   });
 
   it ('should check border styles from ngOnChanges (shapetype)', () => {
-      component.shapeType = 3;
-      component.size = {width: 4, height: 0};
+      fixture.componentRef.setInput('shapeType', 3);
+      fixture.componentRef.setInput('size', {width: 4, height: 0});
       component.ngOnChanges({
-          shapeType: new SimpleChange(null, component.shapeType, true),
-          size: new SimpleChange(null, component.size, true)
+          shapeType: new SimpleChange(null, component.shapeType(), true),
+          size: new SimpleChange(null, component.size(), true)
       });
       fixture.detectChanges();
       expect(rectangle.nativeElement.style.borderRadius).toBe('2px');

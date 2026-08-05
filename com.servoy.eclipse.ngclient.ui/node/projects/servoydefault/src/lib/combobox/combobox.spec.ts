@@ -52,11 +52,12 @@ describe('ComboboxComponent', () => {
     });
 
     component = fixture.componentInstance;
-    component.valuelistID = dummyValuelist;
+    fixture.componentRef.setInput('valuelistID', dummyValuelist);
     component.servoyApi = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), startEdit: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn(), getClientProperty: vi.fn() } as any;
-    component.dataProviderID = 3;
-    component.format = new Format();
-    component.format.type = 'TEXT';
+    component.dataProviderID.set(3);
+    const fmt = new Format();
+    fmt.type = 'TEXT';
+    fixture.componentRef.setInput('format', fmt);
     component.ngOnInit();
     component.ngOnChanges({
       dataProviderID: new SimpleChange(null, 3, true)
@@ -70,7 +71,7 @@ describe('ComboboxComponent', () => {
   });
 
   it('should have initial length = 3', () => {
-    expect(component.valuelistID.length).toBe(3);
+    expect(component.valuelistID().length).toBe(3);
   });
 
   it('should have called servoyApi.getMarkupId', () => {

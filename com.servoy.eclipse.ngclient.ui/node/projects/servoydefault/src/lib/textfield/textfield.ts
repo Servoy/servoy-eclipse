@@ -20,19 +20,19 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
     onModelChange(newValue: any) {
         if(newValue && typeof newValue.getTime === 'function' && isNaN(newValue.getTime())) {
             // invalid date, force dataprovider display with invalid date text
-            this.dataProviderID = null;
+            this.dataProviderID.set(null);
             this.cdRef.detectChanges();
-            this.dataProviderID = newValue;
+            this.dataProviderID.set(newValue);
             this.cdRef.detectChanges();
         }
         else {
-            this.dataProviderID = newValue;
+            this.dataProviderID.set(newValue);
         }
     }
     
     onClick(event: any){
-        if (this.editable == false && this.onActionMethodID) {
-            this.onActionMethodID(event)
+        if (this.editable() == false && this.onActionMethodID()) {
+            this.onActionMethodID()(event)
         }
     }
 }

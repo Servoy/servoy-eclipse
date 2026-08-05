@@ -49,10 +49,10 @@ describe('ServoyDefaultCheckGroup', () => {
     buttonDown = fixture.debugElement.queryAll(By.css('button'))[1];
 
     component = fixture.componentInstance;
-    component.valuelistID = mockData;
-    component.enabled = true;
-    component.editable = true;
-    component.dataProviderID = 1;
+    fixture.componentRef.setInput('valuelistID', mockData);
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
+    component.dataProviderID.set(1);
     fixture.detectChanges();
   });
 
@@ -67,7 +67,7 @@ describe('ServoyDefaultCheckGroup', () => {
 
 
   it('should got undefined dp if dp is not present in valuelist', () => {
-    component.dataProviderID = 'Salut';
+    component.dataProviderID.set('Salut');
     const selection = component.getSelectionFromDataprovider();
     fixture.detectChanges();
     expect(selection).toBeFalsy();

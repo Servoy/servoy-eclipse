@@ -43,9 +43,10 @@ describe('ServoyDefaultTextField', () => {
     textField = fixture.debugElement.query(By.css('input'));
     component = fixture.componentInstance;
     component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), startEdit: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
-    component.format = new Format();
-    component.format.type = 'NUMBER';
-    component.format.display = '#,###.00';
+    const fmt = new Format();
+    fmt.type = 'NUMBER';
+    fmt.display = '#,###.00';
+    fixture.componentRef.setInput('format', fmt);
     fixture.detectChanges();
   });
 
@@ -65,7 +66,7 @@ describe('ServoyDefaultTextField', () => {
   it('should have formatted value 1.000,00', () => {
       servoyPublicService.setLocale('nl', 'NL');
       numbro.setLanguage('nl-NL');
-      component.dataProviderID = 1000;
+      component.dataProviderID.set(1000);
       runOnPushChangeDetection(fixture);
       fixture.whenStable().then(() => {
          expect(component.getNativeElement().value).toBe('1.000,00');
@@ -80,12 +81,12 @@ describe('ServoyDefaultTextField', () => {
   });
 
   it('onfocusgained and lost needs to be called method', () => {
-      component.onFocusGainedMethodID = vi.fn();
-      component.onFocusLostMethodID = vi.fn();
+      fixture.componentRef.setInput('onFocusGainedMethodID', vi.fn());
+      fixture.componentRef.setInput('onFocusLostMethodID', vi.fn());
       component.attachFocusListeners(component.getFocusElement());
       textField.triggerEventHandler('focus', null);
-      expect(component.onFocusGainedMethodID).toHaveBeenCalled();
-      expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(0);
+      expect(component.onFocusGainedMethodID()).toHaveBeenCalled();
+      expect(component.onFocusLostMethodID()).toHaveBeenCalledTimes(0);
       // textField.triggerEventHandler('blur', null);
       // expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(1);
   });

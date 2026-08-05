@@ -30,9 +30,10 @@ describe('ServoyDefaultCalendar', () => {
         fixture = TestBed.createComponent(ServoyDefaultCalendar);
         component = fixture.componentInstance;
         component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), startEdit: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
-        component.format = new Format();
-        component.format.type = 'DATETIME';
-        component.format.display = 'dd-MM-yyyy';
+        const fmt = new Format();
+        fmt.type = 'DATETIME';
+        fmt.display = 'dd-MM-yyyy';
+        fixture.componentRef.setInput('format', fmt);
         fixture.detectChanges();
       });
 
@@ -45,7 +46,7 @@ describe('ServoyDefaultCalendar', () => {
     });
 
     it('should be showing a formatted a date', async () => {
-        component.dataProviderID = new Date(2020, 10, 10);
+        component.dataProviderID.set(new Date(2020, 10, 10));
         runOnPushChangeDetection(fixture);
         fixture.whenStable().then(() => {
             const input = fixture.debugElement.query(By.css('input'));

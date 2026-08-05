@@ -47,7 +47,7 @@ describe('ServoyDefaultHTMLView', () => {
   });
 
   it ('should test innerhtml', () => {
-      component.dataProviderID = '<p>some text herre</p>';
+      component.dataProviderID.set('<p>some text herre</p>');
        runOnPushChangeDetection(fixture);
       const spanEl = fixture.debugElement.query(By.css('span'));
       expect(spanEl.nativeElement.innerHTML).toBe('<p>some text herre</p>');

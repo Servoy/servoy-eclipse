@@ -25,12 +25,12 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
     }
 
     getDataproviderFromSelection() {
-        const allowMultiselect = !this.format || this.format.type === 'TEXT';
+        const allowMultiselect = !this.format() || this.format().type === 'TEXT';
         let ret = allowMultiselect ? '' : null;
         this.selection.forEach((element, index) => {
             if (element === true)
-                ret = allowMultiselect ? ret + this.valuelistID[index + this.allowNullinc].realValue + '\n' :
-                    this.valuelistID[index + this.allowNullinc].realValue + '';
+                ret = allowMultiselect ? ret + this.valuelistID()[index + this.allowNullinc].realValue + '\n' :
+                    this.valuelistID()[index + this.allowNullinc].realValue + '';
         });
         if (allowMultiselect) ret = ret!.replace(/\n$/, ''); // remove the last \n
         if (ret === '') ret = null;
@@ -39,23 +39,23 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 
     setSelectionFromDataprovider() {
         this.selection = [];
-        if (this.dataProviderID === null || this.dataProviderID === undefined) return;
-        const arr = (typeof this.dataProviderID === 'string') ? this.dataProviderID.split('\n') : [this.dataProviderID];
-        for (let i = 0; i < this.valuelistID.length; i++) {
-            const item = this.valuelistID[i];
+        if (this.dataProviderID() === null || this.dataProviderID() === undefined) return;
+        const arr = (typeof this.dataProviderID() === 'string') ? this.dataProviderID().split('\n') : [this.dataProviderID()];
+        for (let i = 0; i < this.valuelistID().length; i++) {
+            const item = this.valuelistID()[i];
             if (!this.isValueListNull(item)) {
-                this.selection[i - this.allowNullinc] = arr.find(value => item.realValue + '' === value + '') !== undefined;
+                this.selection[i - this.allowNullinc] = arr.find((value: any) => item.realValue + '' === value + '') !== undefined;
             }
         }
     }
 
     itemClicked(event: Event, index: number) {
-        const allowMultiselect = !this.format || this.format.type === 'TEXT';
+        const allowMultiselect = !this.format() || this.format().type === 'TEXT';
         const prevValue = this.selection[index];
         const element = event.target as HTMLInputElement;
-        if (allowMultiselect || this.findmode) {
+        if (allowMultiselect || this.findmode()) {
             this.selection[index] = element.checked;
-            if(!this.findmode && this.allowNullinc === 0 &&  this.selection.filter(a => a === true).length === 0) {
+            if(!this.findmode() && this.allowNullinc === 0 &&  this.selection.filter(a => a === true).length === 0) {
                 this.selection[index] = true;
                 element.checked = true;
             }
@@ -73,9 +73,9 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 
     attachEventHandlers(element: any, index: any) {
         this.renderer.listen(element, 'click', (event) => {
-            if (!this.readOnly && this.enabled) {
+            if (!this.readOnly() && this.enabled()) {
                 this.itemClicked(event, index);
-                if (this.onActionMethodID) this.onActionMethodID(event);
+                if (this.onActionMethodID()) this.onActionMethodID()(event);
             }
         });
         super.attachEventHandlers(element, index);

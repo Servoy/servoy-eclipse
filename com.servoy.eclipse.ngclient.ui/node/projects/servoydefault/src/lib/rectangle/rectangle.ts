@@ -1,4 +1,4 @@
-import {Component,Input, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
+import {Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, input} from '@angular/core';
 import {ServoyDefaultBaseComponent} from '../basecomponent';
 @Component({
     selector: 'servoydefault-rectangle',
@@ -7,10 +7,10 @@ import {ServoyDefaultBaseComponent} from '../basecomponent';
     standalone: false
 })
 export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
-    @Input() lineSize!: number;
-    @Input() roundedRadius!: number;
-    @Input() shapeType!: number;
-    @Input() size!: {width: number; height: number};
+    readonly lineSize = input<number>(undefined as any);
+    readonly roundedRadius = input<number>(undefined as any);
+    readonly shapeType = input<number>(undefined as any);
+    readonly size = input<{width: number; height: number}>(undefined as any);
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -36,8 +36,8 @@ export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivEl
                 this.renderer.setStyle(this.getNativeElement(), 'borderRadius', change.currentValue/2 + 'px');
                 break;
             case 'shapeType':
-                if (change.currentValue === 3 && this.size) {
-                    this.renderer.setStyle(this.getNativeElement(), 'borderRadius', this.size.width/2 + 'px');
+                if (change.currentValue === 3 && this.size()) {
+                    this.renderer.setStyle(this.getNativeElement(), 'borderRadius', this.size().width/2 + 'px');
                 }
                 break;
             }

@@ -47,13 +47,13 @@ describe( 'SvLabel', () => {
 
     it( 'should render html', () => {
         servoyApi.trustAsHtml.mockReturnValue( true );
-        component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
+        component.dataProviderID.set('<div class="myclass" onclick="javascript:test()">hallo</div>');
          runOnPushChangeDetection(fixture);
-        expect( component.child.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID );
+        expect( component.child.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID() );
     } );
     it( 'should not render html', () => {
         servoyApi.trustAsHtml.mockReturnValue( false );
-        component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
+        component.dataProviderID.set('<div class="myclass" onclick="javascript:test()">hallo</div>');
          runOnPushChangeDetection(fixture);
         expect( component.child.nativeElement.children[1].innerHTML ).toBe( '<div class="myclass">hallo</div>' );
     } );
@@ -65,19 +65,19 @@ describe( 'SvLabel', () => {
     } );
 
     it( 'should render mnemonic ', () => {
-        component.text = 'label';
-        component.mnemonic = 'l';
+        fixture.componentRef.setInput('text', 'label');
+        fixture.componentRef.setInput('mnemonic', 'l');
         component.ngOnChanges({
             mnemonic: new SimpleChange(null, 'l', false)
         });
          runOnPushChangeDetection(fixture);
 
         expect( component.child.nativeElement.children[1].innerHTML ).toBe('<u>l</u>abel');
-        expect(element.getAttribute('accesskey')).toBe(component.mnemonic);
+        expect(element.getAttribute('accesskey')).toBe(component.mnemonic());
     } );
 
     it( 'should switch to labelFor', () => {
-        component.labelFor = true;
+        fixture.componentRef.setInput('labelFor', true);
          runOnPushChangeDetection(fixture);
         const de = fixture.debugElement.query(By.css('label'));
         element = de.nativeElement;

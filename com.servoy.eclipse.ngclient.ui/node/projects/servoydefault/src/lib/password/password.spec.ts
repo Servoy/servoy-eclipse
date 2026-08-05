@@ -45,7 +45,7 @@ describe('PasswordComponent', () => {
   });
 
   it('should have value test', () => {
-    component.dataProviderID = 'test';
+    component.dataProviderID.set('test');
      runOnPushChangeDetection(fixture);
     fixture.whenStable().then(() =>
       expect(component.getNativeElement().value).toBe('test'));
@@ -59,11 +59,11 @@ describe('PasswordComponent', () => {
   });
 
   it('should have a placeholder', () => {
-      expect( component.placeholderText ).toBeUndefined();
-      expect( component.toolTipText).toBeUndefined();
+      expect( component.placeholderText() ).toBeUndefined();
+      expect( component.toolTipText()).toBeUndefined();
       inputEl = fixture.debugElement.query(By.css('input'));
       directiveInstance = inputEl.injector.get(TooltipDirective);
-      component.placeholderText = 'placeholder';
+      fixture.componentRef.setInput('placeholderText', 'placeholder');
        runOnPushChangeDetection(fixture);
       expect( inputEl.nativeElement.placeholder ).toEqual('placeholder');
   });
@@ -73,7 +73,7 @@ describe('PasswordComponent', () => {
       directiveInstance = inputEl.injector.get(TooltipDirective);
       inputEl.nativeElement.dispatchEvent(new Event('mouseenter'));
       expect(directiveInstance.isActive).toBe(false); // false because the text is undefined
-      component.toolTipText = 'Hi';
+      component.toolTipText.set('Hi');
       fixture.detectChanges();
       expect(directiveInstance.tooltipText()).toBe('Hi');
   });

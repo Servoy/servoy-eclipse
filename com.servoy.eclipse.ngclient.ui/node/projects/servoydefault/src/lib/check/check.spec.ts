@@ -28,9 +28,9 @@ describe('CheckComponent', () => {
     fixture = TestBed.createComponent(ServoyDefaultCheck);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
     component = fixture.componentInstance;
-    component.text = 'Check me';
-    component.enabled = true;
-    component.editable = true;
+    fixture.componentRef.setInput('text', 'Check me');
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
 
     input = fixture.debugElement.query(By.css('input')).nativeElement;
     label = fixture.debugElement.query(By.css('label')).nativeElement;
@@ -72,28 +72,28 @@ describe('CheckComponent', () => {
   });
 
   it('should getSelectionFromDP', () => {
-      component.dataProviderID = 1;
+      component.dataProviderID.set(1);
       expect(component.getSelectionFromDataprovider()).toBeTruthy();
 
-      component.dataProviderID = '1';
+      component.dataProviderID.set('1');
       expect(component.getSelectionFromDataprovider()).toBeTruthy();
 
-      component.dataProviderID = 0;
+      component.dataProviderID.set(0);
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = '0';
+      component.dataProviderID.set('0');
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = '';
+      component.dataProviderID.set('');
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = 'something';
+      component.dataProviderID.set('something');
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = null;
+      component.dataProviderID.set(null);
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = undefined;
+      component.dataProviderID.set(undefined);
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
   });
 

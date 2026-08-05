@@ -1,4 +1,4 @@
-import { Input, ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive, input } from '@angular/core';
+import { ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive, input } from '@angular/core';
 
 import { PropertyUtils } from '@servoy/public';
 
@@ -8,15 +8,15 @@ import { ServoyDefaultBaseComponent } from './basecomponent';
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefaultBaseComponent<T> {
 
-    @Input() hideText!: boolean;
-    @Input() imageMediaID: any;
-    @Input() mediaOptions: any;
-    @Input() mnemonic!: string;
-    @Input() rolloverCursor!: number;
-    @Input() rolloverImageMediaID: any;
-    @Input() showFocus!: boolean;
-    @Input() textRotation!: number;
-    @Input() verticalAlignment!: number;
+    readonly hideText = input<boolean>(undefined as any);
+    readonly imageMediaID = input<any>(undefined);
+    readonly mediaOptions = input<any>(undefined);
+    readonly mnemonic = input<string>(undefined as any);
+    readonly rolloverCursor = input<number>(undefined as any);
+    readonly rolloverImageMediaID = input<any>(undefined);
+    readonly showFocus = input<boolean>(undefined as any);
+    readonly textRotation = input<number>(undefined as any);
+    readonly verticalAlignment = input<number>(undefined as any);
 
     @ViewChild('child') child!: ElementRef;
 
@@ -48,8 +48,8 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
 
     protected attachHandlers() {
         super.attachHandlers();
-        if (this.onActionMethodID) {
-            if (this.onDoubleClickMethodID != null) {
+        if (this.onActionMethodID()) {
+            if (this.onDoubleClickMethodID() != null) {
                 this.renderer.listen(this.getNativeElement(), 'click', (e: Event) => {
                     if (this.timeoutID) {
                         window.clearTimeout(this.timeoutID);
@@ -58,25 +58,25 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
                     } else {
                         this.timeoutID = window.setTimeout(() => {
                             this.timeoutID = null;
-                            this.onActionMethodID(e);
+                            this.onActionMethodID()(e);
                         }, 250);
                     }
                 });
             } else {
-                this.renderer.listen(this.getNativeElement(), 'click', e => this.onActionMethodID(e));
+                this.renderer.listen(this.getNativeElement(), 'click', e => this.onActionMethodID()(e));
             }
         }
-        if (this.onDoubleClickMethodID) {
+        if (this.onDoubleClickMethodID()) {
             this.renderer.listen(this.elementRef.nativeElement, 'dblclick', (e) => {
-                this.onDoubleClickMethodID(e);
+                this.onDoubleClickMethodID()(e);
             });
         }
     }
 
     private setVerticalAlignment(): void {
-            if (this.verticalAlignment === 1) {
+            if (this.verticalAlignment() === 1) {
                 this.renderer.setStyle(this.child.nativeElement, 'top', '0px');
-            } else if (this.verticalAlignment === 3) {
+            } else if (this.verticalAlignment() === 3) {
                 this.renderer.setStyle(this.child.nativeElement, 'top', '100%');
                 this.renderer.setStyle(this.child.nativeElement, 'transform', 'translateY(-100%)');
             } else {

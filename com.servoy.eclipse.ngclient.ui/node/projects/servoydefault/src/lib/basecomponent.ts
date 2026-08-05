@@ -1,4 +1,4 @@
-import { Input, SimpleChanges, Renderer2, ChangeDetectorRef, Directive, input } from '@angular/core';
+import { SimpleChanges, Renderer2, ChangeDetectorRef, Directive, input, model } from '@angular/core';
 
 import { ServoyBaseComponent, PropertyUtils, Format } from '@servoy/public';
 
@@ -7,26 +7,26 @@ import { ServoyBaseComponent, PropertyUtils, Format } from '@servoy/public';
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBaseComponent<T> {
 
-    @Input() onActionMethodID!: (e: Event, data?: any) => void;
-    @Input() onRightClickMethodID!: (e: Event, data?: any) => void;
-    @Input() onDoubleClickMethodID!: (e: Event, data?: any) => void;
+    readonly onActionMethodID = input<(e: Event, data?: any) => void>(undefined as any);
+    readonly onRightClickMethodID = input<(e: Event, data?: any) => void>(undefined as any);
+    readonly onDoubleClickMethodID = input<(e: Event, data?: any) => void>(undefined as any);
 
-    @Input() background!: string;
-    @Input() borderType!: string;
-    @Input() dataProviderID: any;
-    @Input() displaysTags!: boolean;
-    @Input() enabled!: boolean;
-    @Input() fontType!: string;
-    @Input() foreground!: string;
-    @Input() format!: Format;
-    @Input() horizontalAlignment: any;
-    @Input() margin: any;
-    @Input() styleClass!: string;
-    @Input() tabSeq!: number;
-    @Input() text!: string;
-    @Input() toolTipText!: string;
-    @Input() transparent!: boolean;
-    @Input() scrollbars: any;
+    readonly background = input<string>(undefined as any);
+    readonly borderType = input<string>(undefined as any);
+    readonly dataProviderID = model<any>(undefined);
+    readonly displaysTags = input<boolean>(undefined as any);
+    readonly enabled = input<boolean>(undefined as any);
+    readonly fontType = input<string>(undefined as any);
+    readonly foreground = input<string>(undefined as any);
+    readonly format = input<Format>(undefined as any);
+    readonly horizontalAlignment = input<any>(undefined);
+    readonly margin = input<any>(undefined);
+    readonly styleClass = input<string>(undefined as any);
+    readonly tabSeq = input<number>(undefined as any);
+    readonly text = input<string>(undefined as any);
+    readonly toolTipText = model<string>(undefined as any);
+    readonly transparent = input<boolean>(undefined as any);
+    readonly scrollbars = input<any>(undefined);
 
     timeoutID: number | null = null;
 
@@ -74,7 +74,7 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
                         break;
                     case 'background':
                     case 'transparent':
-                        this.renderer.setStyle(this.getNativeChild(), 'backgroundColor', this.transparent ? 'transparent' : change.currentValue);
+                        this.renderer.setStyle(this.getNativeChild(), 'backgroundColor', this.transparent() ? 'transparent' : change.currentValue);
                         break;
                     case 'foreground':
                         this.renderer.setStyle(this.getNativeChild(), 'color', change.currentValue);
@@ -120,9 +120,9 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
     }
 
     protected attachHandlers() {
-        if (this.onRightClickMethodID) {
+        if (this.onRightClickMethodID()) {
             this.renderer.listen(this.getNativeElement(), 'contextmenu', e => {
-                this.onRightClickMethodID(e); return false;
+                this.onRightClickMethodID()(e); return false;
             });
         }
     }

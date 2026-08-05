@@ -49,11 +49,12 @@ describe('TypeaheadComponent', () => {
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
 
     component = fixture.componentInstance;
-    component.valuelistID = mockData;
-    component.dataProviderID = 3;
-    component.format = new Format();
-    component.format.type = 'NUMBER';
-    component.format.display = '####';
+    fixture.componentRef.setInput('valuelistID', mockData);
+    component.dataProviderID.set(3);
+    const fmt = new Format();
+    fmt.type = 'NUMBER';
+    fmt.display = '####';
+    fixture.componentRef.setInput('format', fmt);
     component.ngOnInit();
 
     fixture.detectChanges();
@@ -64,7 +65,7 @@ describe('TypeaheadComponent', () => {
   });
 
   it('should set initial list of values', () => {
-    expect(component.valuelistID.length).toBe(3);
+    expect(component.valuelistID().length).toBe(3);
   });
 
   it('should set initial dropdown closed', () => {

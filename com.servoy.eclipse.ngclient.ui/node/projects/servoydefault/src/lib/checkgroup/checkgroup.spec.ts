@@ -48,9 +48,9 @@ describe('ServoyDefaultCheckGroup', () => {
     fixture = TestBed.createComponent(ServoyDefaultCheckGroup);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
     component = fixture.componentInstance;
-    component.valuelistID = mockData;
-    component.enabled = true;
-    component.editable = true;
+    fixture.componentRef.setInput('valuelistID', mockData);
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
     fixture.detectChanges();
   });
 
@@ -80,36 +80,36 @@ describe('ServoyDefaultCheckGroup', () => {
 
   it('should getSelectionFromDP', () => {
     vi.useFakeTimers();
-    component.dataProviderID = 1;
+    component.dataProviderID.set(1);
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
     vi.advanceTimersByTime(0);
-    expect(component.getSelectedElements()[0]).toBe(component.dataProviderID);
+    expect(component.getSelectedElements()[0]).toBe(component.dataProviderID());
     vi.useRealTimers();
   });
 
   it('shoud getSelectionFromMultipleDp', () => {
     vi.useFakeTimers();
-    component.dataProviderID = '1\n3';
+    component.dataProviderID.set('1\n3');
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
     vi.advanceTimersByTime(0);
     const selectedElements = component.getSelectedElements();
-    expect(selectedElements).toContain(+component.dataProviderID[0]);
-    expect(selectedElements).toContain(+component.dataProviderID[2]);
+    expect(selectedElements).toContain(+component.dataProviderID()[0]);
+    expect(selectedElements).toContain(+component.dataProviderID()[2]);
     vi.useRealTimers();
   });
 
   it('should get DP from selection', () => {
     vi.useFakeTimers();
-    component.dataProviderID = '1\n3';
+    component.dataProviderID.set('1\n3');
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
     vi.advanceTimersByTime(0);
     const selectedElements = component.getDataproviderFromSelection();
-    expect(selectedElements).toContain(component.dataProviderID[0]);
-    expect(selectedElements).toContain(component.dataProviderID[2]);
-    expect(selectedElements!.length).toBe(component.dataProviderID.length);
+    expect(selectedElements).toContain(component.dataProviderID()[0]);
+    expect(selectedElements).toContain(component.dataProviderID()[2]);
+    expect(selectedElements!.length).toBe(component.dataProviderID().length);
     vi.useRealTimers();
   });
 

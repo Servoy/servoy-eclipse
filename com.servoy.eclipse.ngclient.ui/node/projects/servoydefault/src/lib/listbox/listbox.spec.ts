@@ -58,9 +58,9 @@ describe('ServoyDefaultListBox', () => {
     debugEl = fixture.debugElement;
 
     // set some default values
-    component.valuelistID = mockDataValueList;
-    component.multiselectListbox = false;
-    component.dataProviderID = 1;
+    fixture.componentRef.setInput('valuelistID', mockDataValueList);
+    fixture.componentRef.setInput('multiselectListbox', false);
+    component.dataProviderID.set(1);
 
     fixture.detectChanges();
   });
@@ -70,7 +70,7 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('multiselect should be false by default', () => {
-    expect(component.multiselectListbox).toBe(false);
+    expect(component.multiselectListbox()).toBe(false);
   });
 
   it('should show `Bucuresti Timisoara Cluj` as options', () => {
@@ -89,7 +89,7 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('should call multiUpdate method', () => {
-    component.multiselectListbox = true;
+    fixture.componentRef.setInput('multiselectListbox', true);
     fixture.detectChanges();
     vi.spyOn(component, 'multiUpdate');
     const select = debugEl.query(By.css('select')).nativeElement;
@@ -103,14 +103,14 @@ describe('ServoyDefaultListBox', () => {
     select.value = select.options[1].value;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(component.dataProviderID).toEqual(2);
+    expect(component.dataProviderID()).toEqual(2);
   });
 
   it('should test selectedValues', () => {
-    component.multiselectListbox = true;
-    component.dataProviderID = 'test1\ntest2';
+    fixture.componentRef.setInput('multiselectListbox', true);
+    component.dataProviderID.set('test1\ntest2');
         component.ngOnChanges({
-            dataProviderID: new SimpleChange(null, component.dataProviderID, true)
+            dataProviderID: new SimpleChange(null, component.dataProviderID(), true)
         });
     fixture.detectChanges();
     expect(component.selectedValues[0]).toEqual('test1');
@@ -118,7 +118,7 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('should call ngOnChanges', () => {
-      component.multiselectListbox = true;
+      fixture.componentRef.setInput('multiselectListbox', true);
       vi.spyOn(component, 'ngOnChanges');
       component.ngOnChanges({dataProviderID: new SimpleChange(1, 2, false)});
       fixture.detectChanges();

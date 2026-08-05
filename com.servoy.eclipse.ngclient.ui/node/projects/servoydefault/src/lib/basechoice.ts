@@ -36,7 +36,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
                     this.setSelectionFromDataprovider();
                     break;
                 case 'valuelistID':
-                    if (this.valuelistID && this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0]))
+                    if (this.valuelistID() && this.valuelistID().length > 0 && this.isValueListNull(this.valuelistID()[0]))
                         this.allowNullinc = 1;
                     else this.allowNullinc = 0;
                     this.setSelectionFromDataprovider();
@@ -51,7 +51,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
             event.preventDefault();
         }
         if (changed) {
-            this.dataProviderID = dp;
+            this.dataProviderID.set(dp);
             this.pushUpdate();
         }
         event.target.blur();
@@ -64,24 +64,24 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     attachEventHandlers(element: any, index: any) {
         if (!element)
             element = this.getNativeElement();
-        if (this.onFocusGainedMethodID) {
+        if (this.onFocusGainedMethodID()) {
             this.renderer.listen(element, 'focus', (event) => {
                 if ( this.mustExecuteOnFocus !== false ) {
-                    this.onFocusGainedMethodID( event );
+                    this.onFocusGainedMethodID()( event );
                 }
                 this.mustExecuteOnFocus = true;
             });
         }
 
-        if (this.onFocusLostMethodID) {
+        if (this.onFocusLostMethodID()) {
             this.renderer.listen(element, 'blur', (event) => {
-                this.onFocusLostMethodID(event);
+                this.onFocusLostMethodID()(event);
             });
         }
 
-        if (this.onRightClickMethodID) {
+        if (this.onRightClickMethodID()) {
             this.renderer.listen(element, 'contextmenu', (e) => {
-                this.onRightClickMethodID(e);
+                this.onRightClickMethodID()(e);
             });
         }
     }
@@ -97,7 +97,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     getSelectedElements() {
         return this.selection
             .map((item, index) => {
-                if (item === true) return this.valuelistID[index + this.allowNullinc].realValue;
+                if (item === true) return this.valuelistID()[index + this.allowNullinc].realValue;
                 return null;
             })
             .filter(item => item !== null);

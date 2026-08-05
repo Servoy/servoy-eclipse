@@ -5,13 +5,13 @@
     triggers="manual"
     #tooltip="ngbTooltip"
     container="body"
-    [sabloTabseq]="tabSeq"
-    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq()"
+    [svyTooltip]="toolTipText()"
     [svyStartEdit]="'dataProviderID'"
-    [svyFormat]="format"
-    [findmode]="findmode"
+    [svyFormat]="format()"
+    [findmode]="findmode()"
     [hostComponent]="this"
-    [disabled]="readOnly || !enabled"
+    [disabled]="readOnly() || !enabled()"
     [id]="servoyApi.getMarkupId() + '_btn'"
     #input><span class="svy-dropdown-text">{{formattedValue}}</span></button>
     <div ngbDropdownMenu
@@ -19,14 +19,14 @@
       [ngStyle]="{ 'width.px': getDropDownWidth() }"
       (keydown)="handleKeyDown($event)">
       @if (openState) {
-        @for (value of valuelistID; track value) {
+        @for (value of valuelistID(); track value) {
           <button
             ngbDropdownItem
             class="svy-ngbdropdownitem input-sm"
             [ngClass]="{active:valueComparator(value)}"
             (click)="updateValue(value.realValue, $event)">
             <!-- do not break the next line -->
-            {{getRemainingValueBefore(value.displayValue | formatFilter:format | emptyValue)}}<strong>{{getStrongValue(value.displayValue | formatFilter:format | emptyValue)}}</strong>{{getRemainingValueAfter(value.displayValue | formatFilter:format | emptyValue)}}
+            {{getRemainingValueBefore(value.displayValue | formatFilter:format() | emptyValue)}}<strong>{{getStrongValue(value.displayValue | formatFilter:format() | emptyValue)}}</strong>{{getRemainingValueAfter(value.displayValue | formatFilter:format() | emptyValue)}}
           </button>
         }
       }

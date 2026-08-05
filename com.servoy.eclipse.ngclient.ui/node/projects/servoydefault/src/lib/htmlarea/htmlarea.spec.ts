@@ -32,7 +32,7 @@ describe('HtmlareaComponent', () => {
 
     fixture.componentInstance.servoyApi = servoyApi;
     component = fixture.componentInstance;
-    component.dataProviderID = 'WhatArea';
+    component.dataProviderID.set('WhatArea');
     fixture.detectChanges();
   });
 
