@@ -1,4 +1,4 @@
-import { Directive , Input , HostListener} from '@angular/core';
+import { Directive, input, HostListener} from '@angular/core';
 import {IPopupSupportComponent} from '../spectypes.service';
 
 @Directive({
@@ -7,7 +7,7 @@ import {IPopupSupportComponent} from '../spectypes.service';
 })
 export class TabFixDirective {
     // this directive needs to be in a module because of listener priority, so i put it here
-    @Input('svyTabFix') typeahead!: IPopupSupportComponent;
+    readonly typeahead = input<IPopupSupportComponent>(undefined as any, { alias: 'svyTabFix' });
     startedTyping = false;
 
     constructor() { }
@@ -26,7 +26,7 @@ export class TabFixDirective {
         if (event.key !== 'Tab') {
             this.startedTyping = true;
         } else if (!this.startedTyping) {
-            this.typeahead.closePopup();
+            this.typeahead().closePopup();
         }
     }
 }

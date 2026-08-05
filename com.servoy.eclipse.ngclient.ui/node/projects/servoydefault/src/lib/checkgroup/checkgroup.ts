@@ -1,5 +1,5 @@
 
-import { Component, Renderer2, Output, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { Component, Renderer2, output, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
 import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseChoice } from '../basechoice';
 
@@ -12,7 +12,7 @@ import { ServoyDefaultBaseChoice } from '../basechoice';
 })
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 
-    @Output() mainTabIndex: any;
+    mainTabIndex: any;
 
     constructor(renderer: Renderer2, formattingService: FormattingService, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) doc: Document) {
         super(renderer, cdRef, formattingService, doc);

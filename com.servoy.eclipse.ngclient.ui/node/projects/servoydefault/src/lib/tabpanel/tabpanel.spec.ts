@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { ServoyDefaultTabpanel, DefaultTabpanelActiveTabVisibilityListener } from './tabpanel';
 import { Tab } from './basetabpanel';
 
-import { ServoyApi, LoggerFactory, WindowRefService, ServoyPublicService,
+import { LoggerFactory, WindowRefService, ServoyPublicService, ServoyApi,
          SabloTabseq, TooltipDirective, TooltipService, HtmlFilterPipe, TrustAsHtmlPipe } from '@servoy/public';
 import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 
@@ -21,7 +21,7 @@ describe( 'ServoyDefaultTabpanel', () => {
             disconnect() {}
             takeRecords() { return []; }
         };
-       
+
         servoyApi = { getMarkupId: vi.fn(), formWillShow: vi.fn(), hideForm: vi.fn(), isInAbsoluteLayout: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
         servoyApi.getMarkupId.mockReturnValue( '1' );
         servoyApi.isInAbsoluteLayout.mockReturnValue( true );
@@ -39,8 +39,7 @@ describe( 'ServoyDefaultTabpanel', () => {
 
     const createComponentWithTabs = () => {
         const fixture = TestBed.createComponent( ServoyDefaultTabpanel );
-
-        fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
+        fixture.componentInstance.servoyApi = servoyApi;
 
         const tabs = [];
         let tab = new Tab();
@@ -57,22 +56,21 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.tabs = tabs;
         return fixture;
     };
-    it( 'should create the tabpanel component', async () => {
+
+    it( 'should create the tabpanel component', () => {
         const fixture = createComponentWithTabs();
-        const app = fixture.debugElement.componentInstance;
-        expect( app ).toBeTruthy();
+        expect( fixture.componentInstance ).toBeTruthy();
     } );
 
     it( 'should select first tab and change 2 second', async () => {
-        vi.useFakeTimers();
         const fixture = createComponentWithTabs();
 
         let changes: SimpleChanges = {};
         changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
-        fixture.componentInstance.ngOnChanges( changes );
+        fixture.componentInstance.svyOnChanges( changes );
 
         fixture.detectChanges();
-        
+
         mockMOCallback([{attributeName:'class', target: observerTarget}]);
         fixture.detectChanges();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_0' );
@@ -82,45 +80,43 @@ describe( 'ServoyDefaultTabpanel', () => {
 
         changes = {};
         changes['tabIndex'] = new SimpleChange( 1, 2, false );
-        fixture.componentInstance.ngOnChanges( changes );
-        await vi.advanceTimersByTimeAsync(0);
+        fixture.componentInstance.svyOnChanges( changes );
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 0));
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
-        vi.useRealTimers();
     } );
 
     it( 'should select second  tab on index', async () => {
-        vi.useFakeTimers();
         const fixture = createComponentWithTabs();
         fixture.componentInstance.tabIndex = 2;
 
         const changes: SimpleChanges = {};
         changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
         changes['tabIndex'] = new SimpleChange( null, 2, true);
-        fixture.componentInstance.ngOnChanges( changes );
+        fixture.componentInstance.svyOnChanges( changes );
 
         fixture.detectChanges();
-        await vi.advanceTimersByTimeAsync(250);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 0));
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
-        vi.useRealTimers();
       } );
 
     it( 'should select second  tab on name', async () => {
-        vi.useFakeTimers();
         const fixture = createComponentWithTabs();
         fixture.componentInstance.tabIndex = 'tab2';
 
         const changes: SimpleChanges = {};
         changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
         changes['tabIndex'] = new SimpleChange( null, 2, true);
-        fixture.componentInstance.ngOnChanges( changes );
+        fixture.componentInstance.svyOnChanges( changes );
 
         fixture.detectChanges();
-        await vi.advanceTimersByTimeAsync(250);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 0));
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
-        vi.useRealTimers();
       } );
-
 } );

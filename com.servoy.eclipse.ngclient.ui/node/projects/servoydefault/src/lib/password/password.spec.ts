@@ -73,8 +73,9 @@ describe('PasswordComponent', () => {
       directiveInstance = inputEl.injector.get(TooltipDirective);
       inputEl.nativeElement.dispatchEvent(new Event('mouseenter'));
       expect(directiveInstance.isActive).toBe(false); // false because the text is undefined
-      directiveInstance.tooltipText = 'Hi';
-      expect(directiveInstance.tooltipText).toBe('Hi');
+      component.toolTipText = 'Hi';
+      fixture.detectChanges();
+      expect(directiveInstance.tooltipText()).toBe('Hi');
   });
 
   it('should have class: svy-password form-control input-sm svy-padding-xs ng-untouched ng-pristine ng-valid', () => {

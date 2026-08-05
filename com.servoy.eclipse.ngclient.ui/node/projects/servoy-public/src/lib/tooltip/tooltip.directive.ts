@@ -1,4 +1,4 @@
-import { Directive, HostListener, Input, OnDestroy, inject } from '@angular/core';
+import { Directive, HostListener, input, OnDestroy, inject } from '@angular/core';
 import { TooltipService } from './tooltip.service';
 import { HTMLTooltipDirective } from './tooltip-html.directive';
 import { ServoyPublicService } from '../services/servoy_public.service';
@@ -9,7 +9,7 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 })
 export class TooltipDirective extends HTMLTooltipDirective {
 
-    @Input('svyTooltip') override tooltipText: string | undefined;
+    override readonly tooltipText = input<string | undefined>(undefined, { alias: 'svyTooltip' });
 
     private servoyService: ServoyPublicService;
 

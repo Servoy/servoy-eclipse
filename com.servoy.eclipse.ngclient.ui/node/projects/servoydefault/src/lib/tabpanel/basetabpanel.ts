@@ -1,4 +1,4 @@
-import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef } from '@angular/core';
+import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef, output } from '@angular/core';
 
 import { BaseCustomObject, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
@@ -26,7 +26,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     @Input() transparent: any;
 
     @Input() tabIndex: any;
-    @Output() tabIndexChange = new EventEmitter();
+    @Output() tabIndexChange = new EventEmitter<any>();
 
     @ContentChild(TemplateRef, { static: true })
     templateRef!: TemplateRef<any>;
@@ -169,7 +169,6 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                 for (let i = 0; i < this.tabs.length; i++) {
                     if (this.tabs[i].name === this.tabIndex) {
                         this.tabIndex = i + 1;
-                        this.tabIndexChange.emit(i);
                         return i;
                     }
                 }

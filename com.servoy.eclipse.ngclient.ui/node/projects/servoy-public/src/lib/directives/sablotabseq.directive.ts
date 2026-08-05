@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, SimpleChanges, OnChanges, inject } from '@angular/core';
+import { Directive, input, OnInit, ElementRef, HostListener, OnDestroy, SimpleChanges, OnChanges, inject } from '@angular/core';
 
 @Directive({
     // eslint-disable-next-line @angular-eslint/directive-selector
@@ -8,8 +8,10 @@ import { Directive, Input, OnInit, ElementRef, HostListener, OnDestroy, SimpleCh
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
-    @Input('sabloTabseq') designTabSeq: number | undefined;
-    @Input('sabloTabseqConfig') config!: SabloTabseqConfig;
+    readonly designTabSeqInput = input<number | undefined>(undefined, { alias: 'sabloTabseq' });
+    readonly configInput = input<SabloTabseqConfig>(undefined as any, { alias: 'sabloTabseqConfig' });
+
+    designTabSeq: number | undefined;
     
     designChildIndexToArrayPosition: { [designChildTabSeq: number]: number } = {};
     designChildTabSeq: Array<number> = []; // contains ordered numbers that will be keys in 'runtimeChildIndexes'; can have duplicates
@@ -34,6 +36,10 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
         this._elemRef = elemRef ?? inject(ElementRef);
     }
     
+    private get config(): SabloTabseqConfig {
+        return this.configInput();
+    }
+
     private setParentSTS(parentSTS: SabloTabseq) {
         this.parentSTS = parentSTS;
     }
@@ -149,7 +155,7 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit(): void {
         // called by angular in parents first then in children
-        if (!this.designTabSeq) this.designTabSeq = 0;
+        this.designTabSeq = this.designTabSeqInput() || 0;
 
         this.initializing = true;
         this.isEnabled = true;
@@ -173,11 +179,11 @@ export class SabloTabseq implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        const change = changes['designTabSeq'];
+        const change = changes['designTabSeqInput'];
         if (change && !change.firstChange) {
             if (!(this.config && this.config.root)) {
                 if (change.previousValue !== -2) this.triggerUnregisterCSTSInParent(change.previousValue as number, this.runtimeIndex);
-                if (!this.designTabSeq) this.designTabSeq = 0;
+                this.designTabSeq = this.designTabSeqInput() || 0;
                 this.runtimeIndex.startIndex = -1;
                 this.runtimeIndex.nextAvailableIndex = -1;
                 this.initializing = true;

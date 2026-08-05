@@ -1,4 +1,4 @@
-import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject, DOCUMENT } from '@angular/core';
+import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef, Inject, DOCUMENT, output } from '@angular/core';
 
 import { PropertyUtils, FormattingService, IValuelist } from '@servoy/public';
 
@@ -14,7 +14,7 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     @Input() onFocusGainedMethodID!: (e: Event, data?: any) => void;
     @Input() onFocusLostMethodID!: (e: Event, data?: any) => void;
 
-    @Output() dataProviderIDChange = new EventEmitter();
+    readonly dataProviderIDChange = output<any>();
     @Input() editable!: boolean;
     @Input() findmode!: boolean;
     @Input() placeholderText!: string;

@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnChanges, SimpleChanges, EventEmitter, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, output, OnChanges, SimpleChanges, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { BGPane } from './bg_pane.component';
 @Component( {
@@ -15,7 +15,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     @Input() divSize: any;
     @Input() divLocation: any;
 
-    @Output() onDividerChange = new EventEmitter();
+    readonly onDividerChange = output<any>();
 
     private drag = false;
     private handler;
@@ -55,7 +55,6 @@ export class BGSplitter implements AfterContentInit , OnChanges {
         let index = 1;
         this.panes.forEach(( item ) => {
             item.index = index++;
-            if ( item.minSize === undefined ) item.minSize = 0;
         } );
         this.renderer.insertBefore( this.elementRef.nativeElement, this.handler, this.panes.last.element.nativeElement );
 
@@ -91,8 +90,8 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos! < this.panes.first.minSize ) return;
-                if ( height - pos! < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize() ) return;
+                if ( height - pos! < this.panes.last.minSize() ) return;
             }
 
             this.renderer.setStyle( this.handler, 'top', pos + 'px' );
@@ -104,8 +103,8 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos! < this.panes.first.minSize ) return;
-                if ( width - pos! < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize() ) return;
+                if ( width - pos! < this.panes.last.minSize() ) return;
             }
 
             this.renderer.setStyle( this.handler, 'left', pos + 'px' );

@@ -1,4 +1,4 @@
-import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable, inject } from '@angular/core';
+import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable, inject } from '@angular/core';
 import { ServoyApi } from './servoy_api';
 
 /**
@@ -18,7 +18,7 @@ import { ServoyApi } from './servoy_api';
 export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
     @Input() name!: string;
     @Input() servoyApi!: ServoyApi;
-    @Input() servoyAttributes!: { [property: string]: string };
+    readonly servoyAttributes = input<{ [property: string]: string }>(undefined as any);
 
     @ViewChild('element', { static: false, read: ElementRef }) elementRef!: ElementRef<T>;
 
@@ -213,9 +213,9 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * @internal
      */
     protected addAttributes() {
-        if (!this.servoyAttributes) return;
-        for (const key of Object.keys(this.servoyAttributes)) {
-            this.renderer.setAttribute(this.getNativeElement(), key, this.servoyAttributes[key]);
+        if (!this.servoyAttributes()) return;
+        for (const key of Object.keys(this.servoyAttributes())) {
+            this.renderer.setAttribute(this.getNativeElement(), key, this.servoyAttributes()[key]);
         }
     }
 }

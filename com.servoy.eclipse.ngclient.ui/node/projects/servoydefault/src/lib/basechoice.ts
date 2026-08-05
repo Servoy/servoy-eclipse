@@ -1,5 +1,5 @@
 
-import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef, Input, OnInit, Inject, DOCUMENT } from '@angular/core';
+import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef, input, OnInit, Inject, DOCUMENT } from '@angular/core';
 import { FormattingService } from '@servoy/public';
 import { ServoyDefaultBaseField } from './basefield';
 
@@ -112,13 +112,13 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
 })
 export class ChoiceElementDirective implements OnInit {
 
-    @Input() svyBaseChoiceElement!: ServoyDefaultBaseChoice;
-    @Input() index!: number;
+    readonly svyBaseChoiceElement = input<ServoyDefaultBaseChoice>(undefined as any);
+    readonly index = input<number>(undefined as any);
 
     constructor(private el: ElementRef) {
     }
     
     ngOnInit(): void {
-        this.svyBaseChoiceElement.attachEventHandlers(this.el.nativeElement, this.index);
+        this.svyBaseChoiceElement().attachEventHandlers(this.el.nativeElement, this.index());
     }
 }

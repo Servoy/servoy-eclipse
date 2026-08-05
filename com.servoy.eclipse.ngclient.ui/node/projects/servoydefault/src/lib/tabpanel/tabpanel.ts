@@ -1,4 +1,4 @@
-import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy,  ViewChild, ElementRef, EventEmitter, Output, AfterViewInit, OnDestroy, Input} from '@angular/core';
+import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy,  ViewChild, ElementRef, output, AfterViewInit, OnDestroy, input} from '@angular/core';
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
@@ -119,8 +119,8 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
 })
 export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit, OnDestroy {
 
-    @Input() tab!: Tab;
-    @Output() visibleTab: EventEmitter<Tab> = new EventEmitter();
+    readonly tab = input<Tab>(undefined as any);
+    readonly visibleTab = output<Tab>();
 
     @ViewChild('element') elementRef!: ElementRef;
 
@@ -140,7 +140,7 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
                     if (mutation.attributeName === 'class') {
                         const oldValueA = mutation.oldValue ? mutation.oldValue.split(' ') : [];
                         if (oldValueA.indexOf('active') === -1 && (mutation.target as any)['classList'].contains('active')) {
-                            this.visibleTab.emit(this.tab);
+                            this.visibleTab.emit(this.tab());
                         }
                     }
                 });
@@ -152,7 +152,7 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
             });
         } else {
             this.log.warn('MutationObserver not available, default-tabpanel may not work correctly.');
-            this.visibleTab.emit(this.tab);
+            this.visibleTab.emit(this.tab());
         }
     }
 

@@ -1,5 +1,5 @@
 
-import { Directive, Renderer2, ElementRef, Input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject, DOCUMENT, inject } from '@angular/core';
+import { Directive, Renderer2, ElementRef, input, HostListener, forwardRef, AfterViewInit, OnChanges, Inject, DOCUMENT, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MaskFormat } from './maskformat';
 import { Format, FormattingService } from './formatting.service';
@@ -53,8 +53,8 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private static TIMEFORMAT: Format = { display: 'HH:mm', type: 'DATETIME' } as Format;
     private static BROWSERNUMBERFORMAT = new NumberParser();
 
-    @Input('svyFormat') format!: Format;
-    @Input() findmode!: boolean;
+    readonly format = input<Format>(undefined as any, { alias: 'svyFormat' });
+    readonly findmode = input<boolean>(undefined as any);
 
     private hasFocus = false;
     private realValue: any = null;
@@ -85,10 +85,10 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             this.hasFocus = false;
             this.dateInputChange((target as any).value);
             const inputType = this.getType();
-            if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
+            if (this.format().display && !this.format().isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
                 this.writeValue(this.realValue);
             }
-            if (!this.format.isMask && (this.format.uppercase || this.format.lowercase) && this.focusText != this._elementRef.nativeElement.value && inputType === 'text') {
+            if (!this.format().isMask && (this.format().uppercase || this.format().lowercase) && this.focusText != this._elementRef.nativeElement.value && inputType === 'text') {
                 this._elementRef.nativeElement.dispatchEvent(new CustomEvent('change', { bubbles: true }));
             }
         }
@@ -100,7 +100,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         setTimeout(() => {
             this.focusText = this._elementRef.nativeElement.value;
         });
-        if (this.format.display && this.format.edit && this.format.edit !== this.format.display) {
+        if (this.format().display && this.format().edit && this.format().edit !== this.format().display) {
             this.writeValue(this.realValue);
         }
     }
@@ -122,17 +122,17 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
                 data = FormatDirective.BROWSERNUMBERFORMAT.parse(data as string);
             } else if (inputType === 'email') {
                 data = (target as any).value;
-            } else if (!this.findmode && this.format) {
-                const type = this.format.type;
-                let format = this.format.display ? this.format.display : this.format.edit;
-                if (this.hasFocus && this.format.edit && !this.format.isMask) format = this.format.edit;
+            } else if (!this.findmode() && this.format()) {
+                const type = this.format().type;
+                let format = this.format().display ? this.format().display : this.format().edit;
+                if (this.hasFocus && this.format().edit && !this.format().isMask) format = this.format().edit;
                 try {
                     data = this.formatService.unformat(data, format, type, this.realValue, true);
                 } catch (e) {
                     this.log.error(e);
                     //TODO set error state
                 }
-                if (this.format.type === 'TEXT' && this.format.isRaw && this.format.isMask && typeof data === 'string') {
+                if (this.format().type === 'TEXT' && this.format().isRaw && this.format().isMask && typeof data === 'string') {
                     if (data && format && data.length === format.length) {
                         let ret = '';
                         for (let i = 0; i < format.length; i++) {
@@ -219,20 +219,20 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
         } else if (inputType === 'email') {
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', value);
-        } else if ((value !== null && value !== undefined) && this.format) {
+        } else if ((value !== null && value !== undefined) && this.format()) {
             let data = value;
-            if (!this.findmode) {
-                data = inputType === 'number' && data.toString().length >= this.format.maxLength ? data.toString().substring(0, this.format.maxLength) : data;
-                let useEdit = !this.format.display;
-                if (this.format.edit && !this.format.isMask && this.hasFocus) useEdit = true;
+            if (!this.findmode()) {
+                data = inputType === 'number' && data.toString().length >= this.format().maxLength ? data.toString().substring(0, this.format().maxLength) : data;
+                let useEdit = !this.format().display;
+                if (this.format().edit && !this.format().isMask && this.hasFocus) useEdit = true;
                 try {
-                    data = this.formatService.format(data, this.format, useEdit);
+                    data = this.formatService.format(data, this.format(), useEdit);
                 } catch (e) {
                     this.log.error(e);
                 }
-                if (data && this.format.type === 'TEXT') {
-                    if (this.format.uppercase) data = data.toUpperCase();
-                    else if (this.format.lowercase) data = data.toLowerCase();
+                if (data && this.format().type === 'TEXT') {
+                    if (this.format().uppercase) data = data.toUpperCase();
+                    else if (this.format().lowercase) data = data.toLowerCase();
                 }
             }
             this._renderer.setProperty(this._elementRef.nativeElement, 'value', data);
@@ -253,26 +253,26 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             this.maskFormat.destroy();
             this.maskFormat = null;
         }
-        if (this.format) {
-            if (!this.findmode && (this.format.uppercase || this.format.lowercase)) {
+        if (this.format()) {
+            if (!this.findmode() && (this.format().uppercase || this.format().lowercase)) {
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', () => this.upperOrLowerCase()));
             }
-            if (this.format.isNumberValidator || this.format.type === 'NUMBER' || this.format.type === 'INTEGER') {
+            if (this.format().isNumberValidator || this.format().type === 'NUMBER' || this.format().type === 'INTEGER') {
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'keypress', (event) => {
                     this.isKeyPressEventFired = true;
-                    return this.formatService.testForNumbersOnly(event, null, this._elementRef.nativeElement, this.findmode, true, this.format, false);
+                    return this.formatService.testForNumbersOnly(event, null, this._elementRef.nativeElement, this.findmode(), true, this.format(), false);
                 }));
                 this.listeners.push(this._renderer.listen(this._elementRef.nativeElement, 'input', (event) => this.inputFiredForNumbersCheck(event)));
             }
-            if (this.format.maxLength) {
-                if (!this.findmode) {
-                    this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
+            if (this.format().maxLength) {
+                if (!this.findmode()) {
+                    this._renderer.setAttribute(this._elementRef.nativeElement, 'maxlength', this.format().maxLength + '');
                 } else {
                     this._renderer.removeAttribute(this._elementRef.nativeElement, 'maxlength');
                 }
             }
-            if (!this.findmode && this.format.isMask) {
-                this.maskFormat = new MaskFormat(this.format, this._renderer, this._elementRef.nativeElement, this.formatService, this.doc);
+            if (!this.findmode() && this.format().isMask) {
+                this.maskFormat = new MaskFormat(this.format(), this._renderer, this._elementRef.nativeElement, this.formatService, this.doc);
             }
             this.writeValue(this.realValue);
         }
@@ -283,7 +283,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private upperOrLowerCase() {
         const element = this._elementRef.nativeElement;
         const caretPos = element.selectionStart;
-        element.value = this.format.uppercase ? element.value.toUpperCase() : element.value.toLowerCase();
+        element.value = this.format().uppercase ? element.value.toUpperCase() : element.value.toLowerCase();
         element.setSelectionRange(caretPos, caretPos);
     }
 
@@ -299,13 +299,13 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             const pasted = inserted.length > 1 || (!inserted && !removed);
 
             if (!pasted && !removed) {
-                if (!this.formatService.testForNumbersOnly(event, inserted, this._elementRef.nativeElement, this.findmode, true, this.format, true)) {
+                if (!this.formatService.testForNumbersOnly(event, inserted, this._elementRef.nativeElement, this.findmode(), true, this.format(), true)) {
                     currentValue = this.oldInputValue;
                 }
             }
 
             //If number validator, check all chars in string and extract only the valid chars.
-            if ((event.target as HTMLInputElement).type.toUpperCase() === 'NUMBER' || this.format.type === 'NUMBER' || this.format.type === 'INTEGER' || this.format.isNumberValidator) {
+            if ((event.target as HTMLInputElement).type.toUpperCase() === 'NUMBER' || this.format().type === 'NUMBER' || this.format().type === 'INTEGER' || this.format().isNumberValidator) {
                 currentValue = this.getNumbersFromString(event, currentValue, this.oldInputValue);
             }
 
@@ -351,12 +351,12 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             return currentValue;
         }
         let stripped = '';
-		const editFormat = this.format.edit ? this.format.edit : this.format.display;
+		const editFormat = this.format().edit ? this.format().edit : this.format().display;
         for (let i = 0; i < currentValue.length; i++) {
-            if (this.formatService.testForNumbersOnly(e, currentValue.charAt(i), this._elementRef.nativeElement, this.findmode, true, this.format, true)
+            if (this.formatService.testForNumbersOnly(e, currentValue.charAt(i), this._elementRef.nativeElement, this.findmode(), true, this.format(), true)
 				|| (editFormat && i < editFormat.length && editFormat.charAt(i) === currentValue.charAt(i))) {
                 stripped = stripped + currentValue.charAt(i);
-                if (stripped.length === this.format.maxLength) break;
+                if (stripped.length === this.format().maxLength) break;
             }
         }
         return stripped;

@@ -49,22 +49,23 @@ describe('Directive: Tooltip', () => {
   });
 
   it('should not display when text is undefined', () => {
-    directiveInstance.tooltipText = undefined;
+    component.textTooltip = undefined as any;
+    fixture.detectChanges();
     inputEl.nativeElement.dispatchEvent(mouseEnter);
     fixture.detectChanges();
     assertTooltipInstance(directiveInstance, false);
   });
 
   it('should display when text is present', () => {
-    directiveInstance.tooltipText = 'Hi';
+    component.textTooltip = 'Hi'; fixture.detectChanges();
     fixture.detectChanges();
-    expect(directiveInstance.tooltipText).toBe('Hi');
+    expect(directiveInstance.tooltipText()).toBe('Hi');
   });
 
   it('show tooltip on requestedDelay', () => {
     vi.useFakeTimers();
     vi.advanceTimersByTime(0);
-    directiveInstance.tooltipText = 'Hi';
+    component.textTooltip = 'Hi'; fixture.detectChanges();
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
     vi.advanceTimersByTime(200);
@@ -82,7 +83,7 @@ describe('Directive: Tooltip', () => {
   it('close tooltip after requestedDelay', () => {
     vi.useFakeTimers();
     vi.advanceTimersByTime(0);
-    directiveInstance.tooltipText = 'Hi';
+    component.textTooltip = 'Hi'; fixture.detectChanges();
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
     vi.advanceTimersByTime(6000);
@@ -94,7 +95,7 @@ describe('Directive: Tooltip', () => {
   it('show when hover over input', () => {
     vi.useFakeTimers();
     vi.advanceTimersByTime(0);
-    directiveInstance.tooltipText = 'Hi';
+    component.textTooltip = 'Hi'; fixture.detectChanges();
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
     vi.advanceTimersByTime(200);
@@ -148,7 +149,8 @@ describe('Directive: Tooltip', () => {
 
   /**Create tooltip and add 800 delay in order to really display tooltip. */
    function initTooltip(directiveInstance: TooltipDirective, inputEl: DebugElement) {
-    directiveInstance.tooltipText = 'Him';
+    component.textTooltip = 'Him';
+    fixture.detectChanges();
     inputEl.nativeElement.dispatchEvent(mouseEnter);
   }
 });

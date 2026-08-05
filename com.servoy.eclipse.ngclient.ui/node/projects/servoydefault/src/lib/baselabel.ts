@@ -1,4 +1,4 @@
-import { Input, ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
+import { Input, ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive, input } from '@angular/core';
 
 import { PropertyUtils } from '@servoy/public';
 
