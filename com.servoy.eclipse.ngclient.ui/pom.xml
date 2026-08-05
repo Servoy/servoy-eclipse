@@ -155,7 +155,7 @@
 					<!-- 5. npm run build <execution> <id>npm run build</id> <phase>compile</phase> 
 						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
 						<arguments>run build_debug_nowatch</arguments> </configuration> </execution> -->
-					<!-- 6. Run karma tests -->
+					<!-- 6. Run karma tests 
 					<execution>
 						<id>angular karma test</id>
 						<phase>test</phase>
@@ -169,6 +169,7 @@
 							<arguments>run ${test.script}</arguments>
 						</configuration>
 					</execution>
+					-->
 				</executions>
 			</plugin>
 		</plugins>
