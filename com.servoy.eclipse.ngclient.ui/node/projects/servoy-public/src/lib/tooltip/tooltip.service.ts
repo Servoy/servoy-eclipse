@@ -8,10 +8,10 @@ export class TooltipService {
     isTooltipActive: Subject<boolean>;
     tipInitialTimeout: any;
     tipTimeout: any;
-    private tooltipDiv: HTMLDivElement;
+    private tooltipDiv!: HTMLDivElement;
     private tipmousemouveEventX: any;
     private tipmousemouveEventY: any;
-    private tipmousemouveEventIsPage: boolean;
+    private tipmousemouveEventIsPage!: boolean;
     private doc: Document;
     constructor(@Inject(DOCUMENT) _doc: any, private windowRefService: WindowRefService) {
         this.isTooltipActive = new Subject<boolean>();
@@ -26,9 +26,9 @@ export class TooltipService {
         let e = event;
         if (!e) e = this.windowRefService.nativeWindow.event as MouseEvent;
 
-        let targ;
+        let targ: any;
         if (e.target) targ = e.target;
-        else if (e.srcElement) targ = e.srcElement;
+        else if ((e as any).srcElement) targ = (e as any).srcElement;
         if (targ.nodeType === 3) // defeat Safari bug
             targ = targ.parentNode;
 

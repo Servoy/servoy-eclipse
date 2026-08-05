@@ -36,7 +36,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
             this.logger.error('[CustomObjectTypeFactory] cannot find custom object client side type "'
                 + specificTypeInfo + '" for spec "' + webObjectSpecName
                 + '"; that spec. didn\'t register any client side types; ignoring...');
-            return undefined;
+            return undefined!;
         }
     }
 
@@ -59,7 +59,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
             const customTypeDetails = details[customTypeName];
             const properties: { [propName: string]: IPropertyDescription } = {};
             for (const propertyName of Object.keys(customTypeDetails)) {
-                properties[propertyName] = this.typesRegistry.processPropertyDescriptionFromServer(customTypeDetails[propertyName], webObjectSpecName);
+                properties[propertyName] = this.typesRegistry.processPropertyDescriptionFromServer(customTypeDetails[propertyName], webObjectSpecName)!;
             }
             customTypesForThisSpec[customTypeName].setPropertyDescriptions(properties);
         }
@@ -70,12 +70,14 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
 /** implementers of this interface are generated via initCustomObjectValue */
 class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDestroyAwareValue {
 
+    [key: string]: any;
+
     // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
     // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)
     // so to avoid this double object creation + copy, this class is used via Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
     // that means unfortunately that fields don't work properly, especially new ECMA private class fields so we can't use #internalState to
     // avoid iteration/enumeration/public access to/on it
-    __internalState: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
+    __internalState!: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
 
     initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: { [propName: string]: IPropertyDescription }) {
         Object.defineProperty(this, ChangeAwareState.INTERNAL_STATE_MEMBER_NAME, {
@@ -124,7 +126,7 @@ class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDes
 /** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use externally otherwise. */
 export class CustomObjectType implements IType<CustomObjectValue> {
 
-    private propertyDescriptions: { [propName: string]: IPropertyDescription };
+    private propertyDescriptions!: { [propName: string]: IPropertyDescription };
     
     private static customObjectValuePrototypeWithDeprecated: any;
     static {
@@ -146,7 +148,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
     fromServerToClient(serverJSONValue: ICOTDataFromServer, currentClientValue: CustomObjectValue, propertyContext: PropertyContext): CustomObjectValue {
         let newValue: CustomObjectValue = currentClientValue;
         // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
-        let internalState: CustomObjectState = null;
+        let internalState: CustomObjectState | null = null;
 
         try {
             if (instanceOfFullValueFromServer(serverJSONValue)) {
@@ -166,7 +168,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                     for (const k of Object.keys(currentClientValue)) {
                         const obsoleteSubProp = currentClientValue[k];
                         if (instanceOfChangeAwareValue(obsoleteSubProp)) {
-                            obsoleteSubProp.getInternalState().setChangeListener(undefined);
+                            obsoleteSubProp.getInternalState().setChangeListener(undefined!);
                         }
                     }
                 }
@@ -212,7 +214,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                         const oldElemValue = currentClientValue[key];
                         if (instanceOfChangeAwareValue(oldElemValue)) {
                             // child is able to handle it's own change mechanism
-                            oldElemValue.getInternalState().setChangeListener(undefined);
+                            oldElemValue.getInternalState().setChangeListener(undefined!);
                         }
 
                         currentClientValue[key] = val = this.converterService.convertFromServerToClient(val, this.getStaticPropertyType(key), currentClientValue[key],
@@ -230,7 +232,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                 //}
             } else if (!instanceOfNoOpFromServer(serverJSONValue))
                 // anything else would not be supported...
-                newValue = null;
+                newValue = null!;
         } finally {
             if (internalState) internalState.ignoreChanges = false;
         }
@@ -244,8 +246,8 @@ export class CustomObjectType implements IType<CustomObjectValue> {
         // as expected in that scenario; there was one more scenario for arrays at least (see comment from json_array_converter.ts) where getInternalState() could be
         // present on the oldValue but return undefined - so we check for that as well here
 
-        let internalState: CustomObjectState;
-        let newClientDataInited: CustomObjectValue;
+        let internalState: CustomObjectState | undefined;
+        let newClientDataInited: CustomObjectValue | undefined;
 
         try {
             if (newClientData) {
@@ -293,17 +295,17 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             if (newClientDataInited) {
                 let calculatedPushToServerOfWholeProp: PushToServerEnum; 
                 if (propertyContext.isInsideModel) {
-                    internalState.calculatedPushToServerOfWholeProp = (typeof propertyContext?.getPushToServerCalculatedValue() != 'undefined' ? propertyContext?.getPushToServerCalculatedValue() : PushToServerEnum.REJECT);
-                    calculatedPushToServerOfWholeProp = internalState.calculatedPushToServerOfWholeProp;
+                    internalState!.calculatedPushToServerOfWholeProp = (typeof propertyContext?.getPushToServerCalculatedValue() != 'undefined' ? propertyContext?.getPushToServerCalculatedValue() : PushToServerEnum.REJECT);
+                    calculatedPushToServerOfWholeProp = internalState!.calculatedPushToServerOfWholeProp;
                 } else calculatedPushToServerOfWholeProp = PushToServerEnum.ALLOW; // args/return values are always "allow"
 
                 const propertyContextCreator = new ChildPropertyContextCreator(
                         this.getCustomObjectPropertyContextGetter(newClientDataInited, propertyContext),
                         this.propertyDescriptions, propertyContext?.getPushToServerCalculatedValue(), propertyContext?.isInsideModel);
 
-                if (!propertyContext?.isInsideModel || internalState.hasChanges()) { // so either it has changes or it's used as an arg/return value to a handler/api call
+                if (!propertyContext?.isInsideModel || internalState!.hasChanges()) { // so either it has changes or it's used as an arg/return value to a handler/api call
                     const changes = {} as ICOTFullObjectToServer | ICOTGranularUpdatesToServer;
-                    if (!propertyContext?.isInsideModel || internalState.hasFullyChanged()) { // fully changed or arg/return value of handler/api call
+                    if (!propertyContext?.isInsideModel || internalState!.hasFullyChanged()) { // fully changed or arg/return value of handler/api call
                         const fullChange = changes as ICOTFullObjectToServer;
                         // we can't rely/use the current contentVersion here because, in case of a change-by-reference in a service followed
                         // by a now deprecated ServoyPublicService.sendServiceChanges that did not have an oldPropertyValue argument, we sometimes do not have
@@ -316,10 +318,10 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                         // full new values anyway with no previous value - and not in sync with any client side value), because it is possible to send as argument or
                         // return value a value that is also present in the model at the same time, in which case this full send as an arg/return value should not
                         // alter client side version in the model - that version must remain unaltered, in sync with the server side version in the model)
-                        if (propertyContext?.isInsideModel) internalState.contentVersion = 1; // start fresh;
+                        if (propertyContext?.isInsideModel) internalState!.contentVersion = 1; // start fresh;
                         
                         // send all
-                        const toBeSentObj = fullChange.v = {};
+                        const toBeSentObj: Record<string, any> = fullChange.v = {};
                         for (const key of Object.keys(newClientDataInited)) {
                             const val = newClientDataInited[key];
 
@@ -327,7 +329,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                             // that is, if this conversion is sending model values; otherwise (handler/api call arg/return values) it will always be sent fully anyway
                             if (instanceOfChangeAwareValue(val) && propertyContext?.isInsideModel) val.getInternalState().markAllChanged(false);
 
-                            const converted = this.converterService.convertFromClientToServer(val, this.getPropertyType(internalState, key),
+                            const converted = this.converterService.convertFromClientToServer(val, this.getPropertyType(internalState!, key),
                                                 oldClientData ? oldClientData[key] : undefined, propertyContextCreator.withPushToServerFor(key));
                             // TODO although this is a full change, we give oldClientData[key] (oldvalue) because server side does the same for some reason,
                             // but normally both should use undefined/null for old value of subprops as this is a full change; SVY-17854 is created for looking into this
@@ -343,21 +345,21 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                                  === PushToServerEnum.REJECT) delete toBeSentObj[key]; // don't send to server pushToServer reject keys
                         }
 
-                        if (propertyContext?.isInsideModel) internalState.clearChanges();
+                        if (propertyContext?.isInsideModel) internalState!.clearChanges();
 
                         if (calculatedPushToServerOfWholeProp === PushToServerEnum.REJECT) {
                             // if whole value is reject, don't sent anything
                             return [{ n: true }, newClientDataInited];
                         } else return [changes, newClientDataInited];
                     } else {
-                        changes.vEr = internalState.contentVersion;
+                        changes.vEr = internalState!.contentVersion;
 
                         const granularUpdateChanges = changes as ICOTGranularUpdatesToServer;
                         // send only changed keys
                         const changedElements = granularUpdateChanges.u = [] as ICOTGranularOpToServer[];
-                        for (const key of internalState.changedKeys.keys()) {
+                        for (const key of internalState!.changedKeys.keys()) {
                             const newVal = newClientDataInited[key];
-                            const oldVal = internalState.changedKeys.get(key);
+                            const oldVal = internalState!.changedKeys.get(key);
 
                             let changed = (newVal !== oldVal);
                             if (!changed) {
@@ -373,7 +375,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                                 const ch = {} as ICOTGranularOpToServer;
                                 ch.k = key;
 
-                                const converted = this.converterService.convertFromClientToServer(newVal, this.getPropertyType(internalState, key), oldVal,
+                                const converted = this.converterService.convertFromClientToServer(newVal, this.getPropertyType(internalState!, key), oldVal,
                                                         propertyContextCreator.withPushToServerFor(key));
 
                                 ch.v = converted[0];
@@ -386,7 +388,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
                                 changedElements.push(ch);
                             }
                         }
-                        internalState.clearChanges();
+                        internalState!.clearChanges();
                         return [changes, newClientDataInited];
                     }
                 } else {
@@ -579,10 +581,10 @@ export interface BCOSBackup extends CASBackup {
 export abstract class BaseCustomObjectState<KeyT extends number | string, VT> extends ChangeAwareState
     implements IParentAccessForSubpropertyChanges<KeyT> {
 
-    public contentVersion: number;
+    public contentVersion!: number;
 
-    public calculatedPushToServerOfWholeProp: PushToServerEnum;
-    public dynamicPropertyTypesHolder: Record<string, any>;
+    public calculatedPushToServerOfWholeProp!: PushToServerEnum;
+    public dynamicPropertyTypesHolder!: Record<string, any>;
     public ignoreChanges = false;
 
     public changedKeys = new Map<KeyT, any>(); // changed key/index -> oldValue of that subprop

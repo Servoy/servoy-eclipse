@@ -11,7 +11,7 @@ const scrollbarConstants = {
 };
 export class PropertyUtils {
 
-    public static setHorizontalAlignment( element: any, renderer: Renderer2, halign ) {
+    public static setHorizontalAlignment( element: any, renderer: Renderer2, halign: any ) {
         if ( halign !== -1 ) {
             if ( halign === 0 ) {
                 renderer.setStyle( element, 'text-align', 'center' );
@@ -39,7 +39,7 @@ export class PropertyUtils {
         }
     }
 
-    public static setBorder( element: any, renderer: Renderer2, newVal ) {
+    public static setBorder( element: any, renderer: Renderer2, newVal: any ) {
         if ( typeof newVal !== 'object' || newVal == null ) {
          renderer.removeStyle( element, 'border' ); return;
         }
@@ -86,7 +86,7 @@ export class PropertyUtils {
         }
     }
 
-    public static setFont( element: any, renderer: Renderer2, newVal ) {
+    public static setFont( element: any, renderer: Renderer2, newVal: any ) {
         if ( typeof newVal !== 'object' || newVal == null ) {
  renderer.removeStyle( element, 'font' ); return;
 }
@@ -97,7 +97,7 @@ export class PropertyUtils {
         }
     }
 
-    public static setVisible( element: any, renderer: Renderer2, newVal ) {
+    public static setVisible( element: any, renderer: Renderer2, newVal: any ) {
         let correctElement = element;
         if (renderer.parentNode(renderer.parentNode(element)) === element.closest('.svy-wrapper')) {
             correctElement = renderer.parentNode(renderer.parentNode(element));
@@ -121,7 +121,7 @@ export class PropertyUtils {
         } );
     }
     public static getScrollbarsStyleObj(scrollbars: number) {
-       const style = {};
+       const style: Record<string, any> = {};
        /* eslint-disable no-bitwise */
        if ((scrollbars & scrollbarConstants.HORIZONTAL_SCROLLBAR_NEVER) === scrollbarConstants.HORIZONTAL_SCROLLBAR_NEVER) {
          style['overflowX'] = 'hidden';
@@ -142,14 +142,14 @@ export class PropertyUtils {
        return style;
      }
 
-     public static setScrollbars(element: any, renderer: Renderer2, value) {
+     public static setScrollbars(element: any, renderer: Renderer2, value: any) {
        const style = this.getScrollbarsStyleObj(value);
        Object.keys(style).forEach(key => {
         renderer.setStyle(element, key, style[key]);
        });
      }
      // internal function
-     public static getPropByStringPath(o, s) {
+     public static getPropByStringPath(o: any, s: any) {
        s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
        s = s.replace(/^\./, '');           // strip a leading dot
        const a = s.split('.');

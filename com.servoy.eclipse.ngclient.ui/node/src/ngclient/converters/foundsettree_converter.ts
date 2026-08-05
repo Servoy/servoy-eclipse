@@ -47,7 +47,7 @@ export class FoundsetTreeType implements IType<FoundsetTree> {
                     deferredValue : 'No value for ' + handledIDAndState.id, handledIDAndState.value);
             }
         } else {
-            newValue = null;
+            newValue = null!;
             const oldInternalState = currentClientValue ? currentClientValue.getInternalState() : undefined; // internal state / $sabloConverters interface
             if (oldInternalState)
                 this.sabloDeferHelper.cancelAll(oldInternalState);
@@ -85,15 +85,15 @@ export class FoundsetTreeType implements IType<FoundsetTree> {
 }
 
 class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
-    public getChildrenReq: { getChildren: string; id: number; level: number };
-    public updateSelectionReq: {updateSelection: Array<string>};
-    public updateCheckboxValueReq: {updateCheckboxValue: string; value: boolean};
-    public updateExpandedNodesReq: { updateExpandedNodes: Array<string> };
-    public newChildren: {key: any};
-    public newCheckedValues: {key: boolean};
+    public getChildrenReq?: { getChildren: string; id: number; level: number };
+    public updateSelectionReq?: {updateSelection: Array<string>};
+    public updateCheckboxValueReq?: {updateCheckboxValue: string; value: boolean};
+    public updateExpandedNodesReq?: { updateExpandedNodes: Array<string> };
+    public newChildren: {key: any} | null = null;
+    public newCheckedValues: {key: boolean} | null = null;
 
-    deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
-    timeoutRejectLogPrefix: string;
+    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
+    timeoutRejectLogPrefix!: string;
 
     init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } }, timeoutRejectLogPrefix: string) {
         this.deferred = deferred;
@@ -171,15 +171,15 @@ export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAw
         this.internalState.notifyChangeListener();
     }
 
-    getAndResetNewChildren(): {key: any}{
+    getAndResetNewChildren(): {key: any} {
         const tmp = this.getInternalState().newChildren;
         this.getInternalState().newChildren = null;
-        return tmp;
+        return tmp!;
     }
 
-    getAndResetUpdatedCheckboxValues(): {key: boolean}{
+    getAndResetUpdatedCheckboxValues(): {key: boolean} {
         const tmp = this.getInternalState().newCheckedValues;
         this.getInternalState().newCheckedValues = null;
-        return tmp;
+        return tmp!;
     }
 }

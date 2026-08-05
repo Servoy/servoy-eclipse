@@ -25,7 +25,7 @@ export class BSWindowManager {
         this.renderer = rendererFactory.createRenderer(null, null);
     }
 
-    findWindowByID(id) {
+    findWindowByID(id: any): BSWindow | null {
         let returnValue = null;
         this.windows.forEach( (window) => {
             if (window.id === id) {
@@ -65,9 +65,9 @@ export class BSWindowManager {
     }
 
     setFocused(focused_window: BSWindow) {
-        let focusedWindowIndex: number;
+        let focusedWindowIndex!: number;
         while (focused_window.getBlocker()) {
-            focused_window = focused_window.getBlocker();
+            focused_window = focused_window.getBlocker()!;
         }
          this.windows.forEach((windowHandle, index ) => {
             windowHandle.setActive(false);
@@ -95,10 +95,10 @@ export class BSWindowManager {
         this.setFocused(this.windows[this.windows.length-1]);
    }
 
-   initialize(options) {
+   initialize(options: any) {
        this.options = options;
        if (this.options.container) {
-           Array.from(this.doc.querySelectorAll(this.options.container)).forEach((element => {
+            Array.from(this.doc.querySelectorAll(this.options.container)).forEach(((element: Element) => {
                this.renderer.addClass(element, 'window-pane');
            }));
        }
@@ -109,7 +109,7 @@ export class BSWindowManager {
        }
    }
 
-   setNextFocused = function() {
+   setNextFocused = function(this: BSWindowManager) {
        this.setFocused(this.windows[this.windows.length-1]);
    };
 
@@ -147,7 +147,7 @@ export class BSWindowManager {
         return window_object;
     }
 
-    createWindow(window_options: BSWindowOptions) {
+    createWindow(window_options: Partial<BSWindowOptions>) {
         let final_options = Object.create(window_options) as BSWindowOptions;
         if (this.options.windowTemplate && !final_options.template) {
             final_options.template = this.options.windowTemplate;
@@ -168,7 +168,7 @@ export class BSWindowManager {
                 clearTimeout(this.modalBackdropRemoverTimeout);
                 this.modalBackdropRemoverTimeout = null;
             }
-            this.utils.getMainBody().appendChild(windowObj.options.modalBackdrop);
+            this.utils.getMainBody()!.appendChild(windowObj.options.modalBackdrop!);
             setTimeout(() => {
                 const backdrop = this.doc.getElementsByClassName('modal-backdrop');
                 Array.from(backdrop).forEach((el, index) => {

@@ -2,12 +2,12 @@
   "name": "@servoy/servoydefault",
   "version": "2025.9.0",
   "peerDependencies": {
-    "@angular/common": "^20",
-    "@angular/core": "^20",
+    "@angular/common": "^22",
+    "@angular/core": "^22",
     "@servoy/public": "*"
   },
   "dependencies": {
-    "@angular/cdk": "^21",
+    "@angular/cdk": "^22",
     "@eonasdan/tempus-dominus": "<6.11",
     "@ng-bootstrap/ng-bootstrap": "^20",
     "@popperjs/core": "<3",

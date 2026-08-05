@@ -11,7 +11,7 @@ import {ServoyService} from './servoy.service';
 import { ClientFunctionService } from '../sablo/clientfunction.service';
 
 describe('FormService', () => {
-  let websocketService;
+  let websocketService: any;
   let sabloService;
   let converterService;
   let servoyService;

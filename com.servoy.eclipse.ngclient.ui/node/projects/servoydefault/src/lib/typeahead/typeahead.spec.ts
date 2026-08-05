@@ -25,7 +25,7 @@ const mockData = [
 describe('TypeaheadComponent', () => {
   let component: ServoyDefaultTypeahead;
   let fixture: ComponentFixture<ServoyDefaultTypeahead>;
-  let servoyApi;
+  let servoyApi: any;
 
   beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent', 'getClientProperty']);

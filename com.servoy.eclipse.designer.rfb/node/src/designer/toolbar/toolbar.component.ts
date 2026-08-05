@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -61,6 +61,7 @@ export enum TOOLBAR_CATEGORIES {
 @Component({
     selector: 'designer-toolbar',
     templateUrl: './toolbar.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ToolbarComponent implements OnInit, ISelectionChangedListener {
@@ -69,47 +70,47 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     items: Map<TOOLBAR_CATEGORIES, ToolbarItem[]> = new Map();
 
-    btnPlaceField: ToolbarItem;
-    btnHighlightWebcomponents: ToolbarItem;
-    btnToggleDynamicGuides: ToolbarItem;
+    btnPlaceField!: ToolbarItem;
+    btnHighlightWebcomponents!: ToolbarItem;
+    btnToggleDynamicGuides!: ToolbarItem;
 
-    btnToggleShowData: ToolbarItem;
-    btnToggleDesignMode: ToolbarItem;
-    btnSolutionCss: ToolbarItem;
+    btnToggleShowData!: ToolbarItem;
+    btnToggleDesignMode!: ToolbarItem;
+    btnSolutionCss!: ToolbarItem;
 
-    btnTabSequence: ToolbarItem;
-    btnZoomIn: ToolbarItem;
-    btnZoomOut: ToolbarItem;
-    btnSetMaxLevelContainer: ToolbarItem;
-    btnSaveAsTemplate: ToolbarItem;
+    btnTabSequence!: ToolbarItem;
+    btnZoomIn!: ToolbarItem;
+    btnZoomOut!: ToolbarItem;
+    btnSetMaxLevelContainer!: ToolbarItem;
+    btnSaveAsTemplate!: ToolbarItem;
 
-    btnHideInheritedElements: ToolbarItem;
-    btnVisualFeedbackOptions: ToolbarItem;
-    btnOrderingActionsCSSForm: ToolbarItem;
-    btnAlignActions: ToolbarItem;
-    btnSpaceDistributionActions: ToolbarItem;
+    btnHideInheritedElements!: ToolbarItem;
+    btnVisualFeedbackOptions!: ToolbarItem;
+    btnOrderingActionsCSSForm!: ToolbarItem;
+    btnAlignActions!: ToolbarItem;
+    btnSpaceDistributionActions!: ToolbarItem;
     
-    btnMoveUp: ToolbarItem;
-    btnMoveDown: ToolbarItem;
+    btnMoveUp!: ToolbarItem;
+    btnMoveDown!: ToolbarItem;
 
-    btnReload: ToolbarItem;
-    btnOpenInBrowser: ToolbarItem;
-    btnToggleI18NValues: ToolbarItem;
+    btnReload!: ToolbarItem;
+    btnOpenInBrowser!: ToolbarItem;
+    btnToggleI18NValues!: ToolbarItem;
 
-    btnShowErrors: ToolbarItem;
+    btnShowErrors!: ToolbarItem;
 
-    elements: ToolbarItem[];
-    form: ToolbarItem[];
-    display: ToolbarItem[];
-    ordering: ToolbarItem[];
-    alignment: ToolbarItem[];
-    distribution: ToolbarItem[];
-    zoom_level: ToolbarItem[];
-    design_mode: ToolbarItem[];
-    sticky: ToolbarItem[];
-    zoom: ToolbarItem[];
-    standard_actions: ToolbarItem[];
-    show_data: ToolbarItem[];
+    elements!: ToolbarItem[];
+    form!: ToolbarItem[];
+    display!: ToolbarItem[];
+    ordering!: ToolbarItem[];
+    alignment!: ToolbarItem[];
+    distribution!: ToolbarItem[];
+    zoom_level!: ToolbarItem[];
+    design_mode!: ToolbarItem[];
+    sticky!: ToolbarItem[];
+    zoom!: ToolbarItem[];
+    standard_actions!: ToolbarItem[];
+    show_data!: ToolbarItem[];
 
     constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
         protected designSize: DesignSizeService, private readonly renderer: Renderer2, private editorContentService: EditorContentService) {
@@ -256,9 +257,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         if (this.editorContentService.getDesignerElementById('errorsDiv') !== null) {
             this.btnShowErrors.enabled = true;
             if (this.editorContentService.getDesignerElementById('closeErrors')) {
-                this.editorContentService.getDesignerElementById('closeErrors').addEventListener('click', () => {
+                this.editorContentService.getDesignerElementById('closeErrors')!.addEventListener('click', () => {
                     this.btnShowErrors.state = !this.btnShowErrors.state;
-                    this.editorContentService.getDesignerElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
+                    this.editorContentService.getDesignerElementById('errorsDiv')!.style.display = this.btnShowErrors.state ? 'block' : 'none';
                 });
             }
         }
@@ -372,7 +373,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             }
         );
         this.btnSolutionCss.tooltip = 'Enable/disable solution css';
-        this.btnSolutionCss.getIconStyle = (selection) => {
+        this.btnSolutionCss.getIconStyle = (selection): object => {
             if (selection == TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS) {
                 return { 'background-image': TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON };
             }
@@ -382,6 +383,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (selection == TOOLBAR_CONSTANTS.NO_CSS) {
                 return { 'background-image': TOOLBAR_CONSTANTS.NO_CSS_ICON };
             }
+            return {};
         };
         this.btnSolutionCss.list = [
             { 'text': TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON } },
@@ -389,7 +391,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             { 'text': TOOLBAR_CONSTANTS.NO_CSS, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.NO_CSS_ICON } }
         ];
         this.btnSolutionCss.onselection = (selection) => {
-            this.btnSolutionCss.onclick(selection);
+            this.btnSolutionCss.onclick!(selection);
             return selection;
         }
 
@@ -439,7 +441,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 return this.editorSession.getState().showWireframe;
             },
             (value) => {
-                const lvl = parseInt(value);
+                const lvl = parseInt(value!);
                 this.editorSession.getState().maxLevel = lvl;
                 this.editorContentService.sendMessageToIframe({ id: 'maxLevel', value: value });
                 this.editorSession.setZoomLevel(lvl);
@@ -615,8 +617,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_LEFT) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let left: number = null;
+                    const obj: Record<string, any> = {};
+                    let left: number | null = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
@@ -651,8 +653,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_RIGHT) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let right = null;
+                    const obj: Record<string, any> = {};
+                    let right: number | null = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
@@ -674,7 +676,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
                             if ((elementRect.x + elementRect.width) != right) {
                                 obj[nodeid] = {
-                                    x: (right - elementRect.width),
+                                    x: (right! - elementRect.width),
                                     y: elementRect.y
                                 };
                             }
@@ -687,8 +689,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_TOP) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let top: number = null;
+                    const obj: Record<string, any> = {};
+                    let top: number | null = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
@@ -723,8 +725,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_BOTTOM) {
                 const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let bottom = null;
+                    const obj: Record<string, any> = {};
+                    let bottom: number | null = null;
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
                         const element = this.editorContentService.getContentElement(nodeid);
@@ -747,7 +749,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             if ((elementRect.y + elementRect.height) != bottom) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
-                                    y: (bottom - elementRect.height)
+                                    y: (bottom! - elementRect.height)
                                 };
                             }
                         }
@@ -759,8 +761,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
              if (action == TOOLBAR_CONSTANTS.ALIGN_CENTER) {
                   const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let centerElementModel: DOMRect = null;
+                    const obj: Record<string, any> = {};
+                    let centerElementModel: DOMRect | null = null;
                     const sortedSelection: Array<DOMRect> = [];
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
@@ -789,9 +791,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             this.updateElementPositionUsingParentPosition(element, elementRect, false, true);
-                            if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
+                            if (elementRect.x != centerElementModel!.x || elementRect.y != centerElementModel!.y) {
                                 obj[nodeid] = {
-                                    x: (centerElementModel.x + centerElementModel.width / 2 - elementRect.width / 2),
+                                    x: (centerElementModel!.x + centerElementModel!.width / 2 - elementRect.width / 2),
                                     y: elementRect.y
                                 };
                             }
@@ -804,8 +806,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             if (action == TOOLBAR_CONSTANTS.ALIGN_MIDDLE) {
                  const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
-                    const obj = {};
-                    let centerElementModel: DOMRect = null;
+                    const obj: Record<string, any> = {};
+                    let centerElementModel: DOMRect | null = null;
                     const sortedSelection: Array<DOMRect> = [];
                     for (let i = 0; i < selection.length; i++) {
                         const nodeid = selection[i];
@@ -834,10 +836,10 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
                             this.updateElementPositionUsingParentPosition(element, elementRect, true, false);
-                            if (elementRect.x != centerElementModel.x || elementRect.y != centerElementModel.y) {
+                            if (elementRect.x != centerElementModel!.x || elementRect.y != centerElementModel!.y) {
                                 obj[nodeid] = {
                                     x: elementRect.x,
-                                    y: (centerElementModel.y + centerElementModel.height / 2 - elementRect.height / 2)
+                                    y: (centerElementModel!.y + centerElementModel!.height / 2 - elementRect.height / 2)
                                 };
                             }
                         }
@@ -925,7 +927,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             false,
             () => {
                 this.btnShowErrors.state = !this.btnShowErrors.state;
-                this.editorContentService.getDesignerElementById('errorsDiv').style.display = this.btnShowErrors.state ? 'block' : 'none';
+                this.editorContentService.getDesignerElementById('errorsDiv')!.style.display = this.btnShowErrors.state ? 'block' : 'none';
             }
         );
         this.btnShowErrors.disabledIcon = 'toolbar/icons/disabled_error.png';
@@ -949,15 +951,15 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         if (!this.items.has(category)) {
             this.items.set(category, new Array<ToolbarItem>());
         }
-        this.items.get(category).push(item);
+        this.items.get(category)!.push(item);
     }
 
     hasCategoryItems(category: TOOLBAR_CATEGORIES): boolean {
-        return this.items.has(category) && this.items.get(category).length > 0;
+        return this.items.has(category) && this.items.get(category)!.length > 0;
     }
 
     getCategoryItems(category: TOOLBAR_CATEGORIES): ToolbarItem[] {
-        return this.hasCategoryItems(category) ? this.items.get(category) : [];
+        return this.hasCategoryItems(category) ? this.items.get(category)! : [];
     }
 
     toggleShowSolutionLayoutsCss() {
@@ -992,7 +994,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         });
     }
 
-    setShowSolutionCss(state) {
+    setShowSolutionCss(state: any) {
         this.editorContentService.querySelectorAllInContent('link[svy-stylesheet]').forEach(link  => {
             const htmlLink = link as HTMLLinkElement;
             htmlLink.disabled = !state;
@@ -1068,7 +1070,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 }
     
                 if (!(wrapper && wrapper.classList.contains('inherited_element'))) {
-                    filteredSvyIds.push(element.getAttribute('svy-id'));
+                    filteredSvyIds.push(element.getAttribute('svy-id')!);
                 }
             });
             this.editorSession.updateSelection(filteredSvyIds, true); //this is changing also the initial selection so we need to restore
@@ -1084,7 +1086,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             const filteredSelection: string[] = [];
         
             selection.forEach((selectionId) => {
-              let wrapper = this.editorContentService.getContentElement(selectionId);
+              let wrapper: HTMLElement | null = this.editorContentService.getContentElement(selectionId);
         
               while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
                 wrapper = wrapper.parentElement;
@@ -1116,27 +1118,27 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 export class ToolbarItem {
 
     hide = false;
-    style: string;
-    disabledIcon: string;
-    faIcon: string;
-    list: Array<{ text: string; iconStyle?: { 'background-image': string }; tooltip?: string}>;
-    getIconStyle: (text: string) => object;
-    onselection: (text: string) => string;
-    initialValue: number;
-    min: number;
-    max: number;
-    incIcon: string;
-    decIcon: string;
-    decbutton_text: string;
-    incbutton_text: string;
-    state: boolean;
-    tooltip: string;
-    onSet: (value: unknown) => void;
+    style!: string;
+    disabledIcon!: string;
+    faIcon!: string;
+    list!: Array<{ text: string; iconStyle?: { 'background-image': string }; tooltip?: string}>;
+    getIconStyle!: (text: string) => object;
+    onselection!: (text: string) => string;
+    initialValue!: number;
+    min!: number;
+    max!: number;
+    incIcon!: string;
+    decIcon!: string;
+    decbutton_text!: string;
+    incbutton_text!: string;
+    state!: boolean;
+    tooltip!: string;
+    onSet!: (value: unknown) => void;
 
     constructor(
         public text: string,
-        public icon: string,
+        public icon: string | null,
         public enabled: (() => boolean) | boolean,
-        public onclick: (text?: string) => void) {
+        public onclick: ((text?: string) => void) | null) {
     }
 }

@@ -10,8 +10,8 @@ import { By } from '@angular/platform-browser';
 describe('ServoyDefaultRectangle', () => {
   let component: ServoyDefaultRectangle;
   let fixture: ComponentFixture<ServoyDefaultRectangle>;
-  let servoyApi;
-  let rectangle;
+  let servoyApi: any;
+  let rectangle: any;
 
   beforeEach(waitForAsync(() => {
       servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);

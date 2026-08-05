@@ -1,4 +1,4 @@
-import { Component, Inject, DOCUMENT } from '@angular/core';
+import { Component, Inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 
 import { ServoyPublicService, PopupForm } from '@servoy/public';
 import { PopupFormService } from '../popupform.service';
@@ -6,11 +6,12 @@ import { PopupFormService } from '../popupform.service';
 @Component({
     selector: 'svy-popupform',
     templateUrl: './popupform.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ServoyFormPopupComponent {
 
-    public popup: PopupForm;
+    public popup!: PopupForm;
     _left = 0;
     _top = 0;
     _width = 0;
@@ -35,9 +36,9 @@ export class ServoyFormPopupComponent {
         if (!popupheight || popupheight <= 0) {
             popupheight = formCache.size.height;
         }
-        let popupLeft: number;
-        let popupTop: number;
-        let rect: DOMRect;
+        let popupLeft = 0;
+        let popupTop = 0;
+        let rect: DOMRect | undefined;
         let compWidth = 0;
         let compHeight = 0;
         
@@ -55,10 +56,10 @@ export class ServoyFormPopupComponent {
 		} else if (rect) {
 			popupLeft = rect.left;
 		} else {
-			popupLeft = this.doc.defaultView.innerWidth / 2 - popupwidth / 2;
+			popupLeft = this.doc.defaultView!.innerWidth / 2 - popupwidth / 2;
 		}
 		if (this.popup.x !== null || this.popup.component) {
-			if ((popupLeft + popupwidth > this.doc.defaultView.innerWidth) && (popupLeft - popupwidth + compWidth > 0)) {
+			if ((popupLeft + popupwidth > this.doc.defaultView!.innerWidth) && (popupLeft - popupwidth + compWidth > 0)) {
                 popupLeft = popupLeft - popupwidth + compWidth;
             }
 		}
@@ -68,10 +69,10 @@ export class ServoyFormPopupComponent {
 		} else if (rect) {
 			popupTop = rect.top;
 		} else {
-			popupTop = this.doc.defaultView.innerHeight / 2 - popupheight / 2;
+			popupTop = this.doc.defaultView!.innerHeight / 2 - popupheight / 2;
 		}		
 		if (this.popup.y !== null || this.popup.component) {
-			if ((popupTop + popupheight > this.doc.defaultView.innerHeight) && (popupTop - popupheight + compHeight > 0)) {
+			if ((popupTop + popupheight > this.doc.defaultView!.innerHeight) && (popupTop - popupheight + compHeight > 0)) {
                 popupTop = popupTop - popupheight + compHeight;
             }
 		}
@@ -96,7 +97,7 @@ export class ServoyFormPopupComponent {
     }
 
     firstElementFocused(event: Event) {
-        const tabIndex = parseInt(this.doc.getElementById('tabStop').getAttribute('tabindex'), 10);
+        const tabIndex = parseInt(this.doc.getElementById('tabStop')!.getAttribute('tabindex')!, 10);
         const newTarget: any = this.doc.querySelector('[tabindex=\'' + (tabIndex - 1) + '\']');
         // if there is no focusable element in the window, then newTarget == e.target,
         // do a check here to avoid focus cycling

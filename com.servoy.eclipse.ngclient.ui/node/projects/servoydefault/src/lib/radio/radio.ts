@@ -14,10 +14,10 @@ import { ServoyDefaultBaseField } from '../basefield';
 export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     @Input() horizontalAlignment: any;
 
-    @ViewChild('input', { static: false }) input: ElementRef<HTMLInputElement>;
+    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
 
     selected = false;
-    private log: LoggerService;
+    private log!: LoggerService;
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
         super( renderer, cdRef, formattingService, doc );

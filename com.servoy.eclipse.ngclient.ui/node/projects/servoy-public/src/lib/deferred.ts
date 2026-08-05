@@ -6,8 +6,8 @@ export interface IDeferred<T> {
 
 export class Deferred <T> implements IDeferred<T> {
     public readonly promise: Promise<T>;
-    private _resolve: ( value: T ) => void;
-    private _reject: ( reason: unknown ) => void;
+    private _resolve!: ( value: T ) => void;
+    private _reject!: ( reason: unknown ) => void;
     constructor() {
         this.promise = new Promise<T>(( resolve, reject ) => {
             this._reject = reject;

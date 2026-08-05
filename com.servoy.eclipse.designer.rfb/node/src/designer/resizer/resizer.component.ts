@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject, DOCUMENT } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -6,10 +6,11 @@ import { EditorSessionService } from '../services/editorsession.service';
     selector: 'designer-resizer',
     templateUrl: './resizer.component.html',
     styleUrls: ['./resizer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ResizerComponent implements OnInit {
-    @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
+    @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
 
     constructor(protected readonly renderer: Renderer2, @Inject(DOCUMENT) private doc: Document, protected readonly editorSession: EditorSessionService) {
     }

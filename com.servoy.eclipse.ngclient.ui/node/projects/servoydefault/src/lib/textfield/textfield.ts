@@ -17,7 +17,7 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
         super(renderer, cdRef, formattingService, doc);
     }
 
-    onModelChange(newValue) {
+    onModelChange(newValue: any) {
         if(newValue && typeof newValue.getTime === 'function' && isNaN(newValue.getTime())) {
             // invalid date, force dataprovider display with invalid date text
             this.dataProviderID = null;
@@ -30,7 +30,7 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElem
         }
     }
     
-    onClick(event){
+    onClick(event: any){
         if (this.editable == false && this.onActionMethodID) {
             this.onActionMethodID(event)
         }

@@ -133,7 +133,7 @@ export abstract class ServoyPublicService {
 export interface IFormCache {
     absolute: boolean;
     size: {width: number; height: number};
-    getComponent(name: string): IComponentCache;
+    getComponent(name: string): IComponentCache | undefined;
 }
 
 /**

@@ -8,12 +8,12 @@ import { ServoyApi, ServoyPublicTestingModule, LoggerFactory, WindowRefService }
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 describe( 'ServoyDefaultTabpanel', () => {
-    let servoyApi;
-    let mockMO;
-    let observerTarget;
+    let servoyApi: any;
+    let mockMO: any;
+    let observerTarget: any;
     beforeEach( waitForAsync(() => {
         mockMO = spyOn(window, "MutationObserver");
-        mockMO.and.returnValue( { observe: (param) => {observerTarget=param }, disconnect: () => { },takeRecords: () => [] } );
+        mockMO.and.returnValue( { observe: (param: any) => {observerTarget=param }, disconnect: () => { },takeRecords: () => [] } );
        
         servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'isInAbsoluteLayout', 'trustAsHtml','registerComponent','unRegisterComponent'] );
         servoyApi.getMarkupId.and.returnValue( '1' );

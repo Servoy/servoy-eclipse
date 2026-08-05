@@ -762,6 +762,10 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 						designerWebsocketSession.valueChanged();
 					}
 				});
+				if (showedContainer instanceof LayoutContainer && persists.contains(showedContainer))
+				{
+					editorPart.setContentDescription("Showing container: " + DesignerUtil.getLayoutContainerAsString((LayoutContainer)showedContainer));
+				}
 			}
 		}
 

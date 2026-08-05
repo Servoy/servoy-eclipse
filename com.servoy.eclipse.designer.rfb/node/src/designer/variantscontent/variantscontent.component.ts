@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Renderer2, Input } from '@angular/core';
+import { Component, OnInit, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -8,19 +8,20 @@ import { EditorContentService } from '../services/editorcontent.service';
     selector: 'designer-variantscontent',
     templateUrl: './variantscontent.component.html',
     styleUrls: ['./variantscontent.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class VariantsContentComponent implements OnInit {
 
-    @Input() component: PaletteComp;
+    @Input() component!: PaletteComp;
 
-	variantItemBeingDragged: Node;
-	variantsIFrame: HTMLIFrameElement;
+	variantItemBeingDragged!: Node;
+	variantsIFrame!: HTMLIFrameElement;
 	activeVariant = false;
     firstQuery = true;
 
 
-	private variantsQueryHandler: ReturnType<typeof setInterval>;
+	private variantsQueryHandler!: ReturnType<typeof setInterval>;
     
     constructor(protected readonly renderer: Renderer2, private windowRef: WindowRefService, 
                 private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
@@ -42,7 +43,7 @@ export class VariantsContentComponent implements OnInit {
 			}
 			if (value.status === 'hidden') {
 				if (this.variantsIFrame) {
-					this.variantsIFrame.contentWindow.postMessage({ id: 'destroyVariants'});
+					this.variantsIFrame.contentWindow!.postMessage({ id: 'destroyVariants'});
 				}
 			}
 		});
@@ -73,14 +74,14 @@ export class VariantsContentComponent implements OnInit {
 			if (!this.variantsIFrame) {
 				this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
 			}
-            this.variantsIFrame.contentWindow.postMessage({ id: 'destroyVariants' }, '*');
+            this.variantsIFrame.contentWindow!.postMessage({ id: 'destroyVariants' }, '*');
 			const message = { 
 				id: 'createVariants', 
 				variants: result as Array<Variant>,
 				model: this.component.model, 
 				name: this.convertToJSName(this.component.name), 
 			};
-			this.variantsIFrame.contentWindow.postMessage(message, '*');
+			this.variantsIFrame.contentWindow!.postMessage(message, '*');
 			if (this.variantsQueryHandler) {
 				clearInterval(this.variantsQueryHandler);
 			}
@@ -90,7 +91,7 @@ export class VariantsContentComponent implements OnInit {
                     this.firstQuery = false;
                     return;
                 }
-                this.variantsIFrame.contentWindow.postMessage({ id: 'sendVariantsSize' }, '*')}, 50);
+                this.variantsIFrame.contentWindow!.postMessage({ id: 'sendVariantsSize' }, '*')}, 50);
 		});
 	}
 		

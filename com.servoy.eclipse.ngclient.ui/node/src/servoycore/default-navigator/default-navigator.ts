@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormService } from '../../ngclient/form.service';
 import { ComponentCache } from '../../ngclient/types';
 
@@ -6,20 +6,21 @@ import { ComponentCache } from '../../ngclient/types';
   selector: 'svy-default-navigator',
   templateUrl: './default-navigator.html',
   styleUrls: ['./default-navigator.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class DefaultNavigator {
 
-  readonly name = input<string>(undefined);
-  navigatorComponentCache: ComponentCache;
-  sliderValue: number;
+  readonly name = input<string | null | undefined>(undefined);
+  navigatorComponentCache!: any;
+  sliderValue!: number;
 
   constructor( private formservice: FormService ) {
   }
 
   ngOnInit() {
-    this.navigatorComponentCache = this.formservice.getFormCacheByName( this.name() ).getComponent('svy_default_navigator');
-    this.sliderValue = -this.navigatorComponentCache.model.currentIndex;
+    this.navigatorComponentCache = this.formservice.getFormCacheByName( this.name()! ).getComponent('svy_default_navigator')! as ComponentCache;
+    this.sliderValue = -(this.navigatorComponentCache.model as any).currentIndex;
   }
 
   setIndex(newIndex: any) {
@@ -29,6 +30,6 @@ export class DefaultNavigator {
     }
     this.navigatorComponentCache.model.currentIndex = i;
     this.sliderValue = -i;
-    this.formservice.executeEvent(this.name(), this.navigatorComponentCache.name, 'setSelectedIndex', [i]);
+    this.formservice.executeEvent(this.name()!, this.navigatorComponentCache.name, 'setSelectedIndex', [i]);
   }
 }

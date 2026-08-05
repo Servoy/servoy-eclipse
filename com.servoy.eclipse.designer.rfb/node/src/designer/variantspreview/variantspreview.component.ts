@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, AfterViewInit, Input, ViewEncapsulation, ElementRef } from '@angular/core';
+import { Component, Renderer2, ViewChild, AfterViewInit, Input, ViewEncapsulation, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -12,20 +12,21 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
     templateUrl: './variantspreview.component.html',
     styleUrls: ['./variantspreview.component.css'],
     encapsulation: ViewEncapsulation.Emulated,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class VariantsPreviewComponent implements AfterViewInit {
 
-    @Input() component: PaletteComp;
-    @ViewChild('popover') popover: NgbPopover;
-	@ViewChild('variantGlasspane') glasspane: ElementRef; 
-	@ViewChild('variantContent') content: ElementRef;
+    @Input() component!: PaletteComp;
+    @ViewChild('popover') popover!: NgbPopover;
+	@ViewChild('variantGlasspane') glasspane!: ElementRef; 
+	@ViewChild('variantContent') content!: ElementRef;
 
-    clientURL: SafeResourceUrl;
+    clientURL!: SafeResourceUrl;
     margin = 16; //ng-popover margin
-	variantItemBeingDragged: Node;
-	variantItemBeingDisplayed: Node;
-	variantsIFrame: HTMLIFrameElement;
+	variantItemBeingDragged!: Node | null;
+	variantItemBeingDisplayed!: Node | null;
+	variantsIFrame!: HTMLIFrameElement;
 	top = -1000;
 	left = -1000;
 	placement = 'right right-top right-bottom top-left bottom-left';
@@ -45,8 +46,8 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	
 		this.editorSession.variantsTrigger.subscribe((value) => {
 			if (value.show == true) {
-				this.top = value.top;
-				this.left = value.left;
+				this.top = value.top!;
+				this.left = value.left!;
 				this.showPopover();
 			} else if (value.show == false) {
 				this.hidePopover();
@@ -55,7 +56,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 
 		this.editorSession.variantsScroll.subscribe((value) => {
 			if (this.isPopoverInitialized) {
-				const popoverCtrl = this.document.getElementById('VariantsCtrl');
+				const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
 				popoverCtrl.style.top = this.top - value.scrollPos + 'px';
 			}
 		});
@@ -82,8 +83,8 @@ export class VariantsPreviewComponent implements AfterViewInit {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 			} else if (event.data.id === 'variantsReady') {
 				this.variantsIFrame = this.document.getElementById('VariantsForm') as HTMLIFrameElement;
-				this.variantsIFrame.contentWindow.document.body.addEventListener('mouseup', this.onMouseUp);
-                this.variantsIFrame.contentWindow.document.body.addEventListener('mousemove', this.onMouseMove);
+				this.variantsIFrame.contentWindow!.document.body.addEventListener('mouseup', this.onMouseUp);
+                this.variantsIFrame.contentWindow!.document.body.addEventListener('mousemove', this.onMouseMove);
 			} else if (event.data.id === 'variantsEscapePressed') {
 				this.editorSession.variantsTrigger.emit({ show: false });
 			}
@@ -107,7 +108,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	hidePopover() {
 		this.editorSession.variantsPopup.emit({status: 'hidden'});
         this.variantsIFrame && (this.variantsIFrame.style.display = 'none');
-        const popoverCtrl = this.document.getElementById('VariantsCtrl');
+        const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
         popoverCtrl.style.top = this.popupParkingPosition;
         popoverCtrl.style.left = this.popupParkingPosition;	
 	}
@@ -140,7 +141,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		body.style.height = height + this.margin + 'px';
 
 		//set popover position
-		const popoverCtrl = this.document.getElementById('VariantsCtrl');
+		const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
 		popoverCtrl.style.top = this.top - palette.scrollTop + 'px';
 		popoverCtrl.style.left = this.left + 'px';
         popoverCtrl.style.display = 'inline-block';
@@ -159,8 +160,8 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	}
 
 	onVariantMouseDown = (pageX: number, pageY: number) => {
-		this.variantItemBeingDragged = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY)?.cloneNode(true) as Element;
-		this.variantItemBeingDisplayed = this.variantsIFrame.contentWindow.document.elementFromPoint(pageX, pageY)?.parentNode.cloneNode(true) as Element;
+		this.variantItemBeingDragged = this.variantsIFrame.contentWindow!.document.elementFromPoint(pageX, pageY)?.cloneNode(true) as Element;
+		this.variantItemBeingDisplayed = this.variantsIFrame.contentWindow!.document.elementFromPoint(pageX, pageY)?.parentNode!.cloneNode(true) as Element;
 		this.renderer.setAttribute(this.variantItemBeingDragged, 'id', 'svy_variantelement');
 
 		const applyStyles = (element: Element) => {
@@ -171,13 +172,13 @@ export class VariantsPreviewComponent implements AfterViewInit {
 		
         applyStyles(this.variantItemBeingDragged as Element);
 		applyStyles(this.variantItemBeingDisplayed as Element);
-		this.variantsIFrame.contentWindow.document.body.appendChild(this.variantItemBeingDisplayed);
+		this.variantsIFrame.contentWindow!.document.body.appendChild(this.variantItemBeingDisplayed);
 	}
 
 	onMouseUp = (event: MouseEvent) => {
 		event.stopPropagation();
 		if (this.variantItemBeingDisplayed) {
-			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDisplayed);
+			this.variantsIFrame.contentWindow!.document.body.removeChild(this.variantItemBeingDisplayed);
 			this.windowRef.nativeWindow.postMessage({ id: 'onVariantMouseUp'});
 		}
 		this.variantItemBeingDragged = null;
@@ -186,7 +187,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 
 	onMouseMove = () => {
 		if (this.variantItemBeingDisplayed) {
-			this.variantsIFrame.contentWindow.document.body.removeChild(this.variantItemBeingDisplayed);
+			this.variantsIFrame.contentWindow!.document.body.removeChild(this.variantItemBeingDisplayed);
 			this.variantItemBeingDragged = null;
 			this.variantItemBeingDisplayed = null;
 			this.hidePopover();

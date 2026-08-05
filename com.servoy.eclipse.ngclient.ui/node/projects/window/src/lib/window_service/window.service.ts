@@ -7,10 +7,10 @@ import { LoggerFactory, LoggerService, ServoyPublicService, PopupForm, Callback,
 
 @Injectable()
 export class WindowPluginService {
-    private _shortcuts: Shortcut[];
-    private _popupmenus: Popup[];
-    private _popupMenuShowCommand: PopupMenuShowCommand;
-    private _popupform: PopupForm;
+    private _shortcuts!: Shortcut[];
+    private _popupmenus!: Popup[];
+    private _popupMenuShowCommand!: PopupMenuShowCommand | null;
+    private _popupform!: PopupForm;
     private log: LoggerService;
 
     constructor(private shortcutService: ShortcutService,
@@ -45,7 +45,7 @@ export class WindowPluginService {
                 const translatedShortcut = this.translateSwingShortcut(newvalue.shortcut);
                 if (!this.shortcutService.all_shortcuts[translatedShortcut]) {
                     this.shortcutService.add(translatedShortcut, (e: KeyboardEvent) => {
-                        let targetEl: EventTarget;
+                        let targetEl: EventTarget = null!;
                         if (e.target) targetEl = e.target;
                         else if (e.srcElement) targetEl = e.srcElement;
                         let retValue = true;
@@ -53,8 +53,8 @@ export class WindowPluginService {
                         for (var j = 0; j < this._shortcuts.length; j++) {
                             if (translatedShortcut == this.translateSwingShortcut(this._shortcuts[j].shortcut)) {
                                 const callback = this._shortcuts[j].callback;
-                                let contextFilter = null;
-                                let contextFilterElement = null;
+                                let contextFilter: string | null = null;
+                                let contextFilterElement: string | null = null;
                                 if (this._shortcuts[j].contextFilter) {
                                     const contextFilterParts = this._shortcuts[j].contextFilter.split('.');
                                     contextFilter = contextFilterParts[0];
@@ -63,7 +63,7 @@ export class WindowPluginService {
                                     }
                                 }
 
-                                const jsEvent = this.servoyService.createJSEvent(e, newvalue.shortcut, contextFilter, contextFilterElement);
+                                const jsEvent = this.servoyService.createJSEvent(e as any, newvalue.shortcut, contextFilter ?? undefined, contextFilterElement ?? undefined);
 
                                 if (!jsEvent) continue;
 
@@ -99,7 +99,7 @@ export class WindowPluginService {
         }
     }
 
-    get popupMenuShowCommand(): PopupMenuShowCommand {
+    get popupMenuShowCommand(): PopupMenuShowCommand | null {
         return this._popupMenuShowCommand;
     }
 
@@ -136,12 +136,12 @@ export class WindowPluginService {
     private showPopupMenu() {
         if (this._popupmenus && this._popupMenuShowCommand) {
             for (const i of Object.keys(this._popupmenus)) {
-                if (this._popupMenuShowCommand.popupName === this._popupmenus[i].name) {
+                if (this._popupMenuShowCommand.popupName === this._popupmenus[i as any].name) {
                     this.popupMenuService.initClosePopupHandler(() => {
                         this._popupMenuShowCommand = null;
                         this.servoyService.sendServiceChanges('window', 'popupMenuShowCommand', this._popupMenuShowCommand);
                     });
-                    this.popupMenuService.initMenu(this._popupmenus[i]);
+                    this.popupMenuService.initMenu(this._popupmenus[i as any]);
                     if (this._popupMenuShowCommand?.elementId) {
                         const element = this.doc.querySelector("[id^="+this._popupMenuShowCommand.elementId+"]") as HTMLElement;
                         if (element && this._popupMenuShowCommand.x && this._popupMenuShowCommand.y) {
@@ -205,20 +205,20 @@ export class WindowPluginService {
 }
 
 class Shortcut {
-    public shortcut: string;
-    public callback: Callback;
-    public contextFilter: string;
-    public consumeEvent: boolean;
-    public arguments: Array<any>;
+    public shortcut!: string;
+    public callback!: Callback;
+    public contextFilter!: string;
+    public consumeEvent!: boolean;
+    public arguments!: Array<any>;
 
 }
 
 export class PopupMenuShowCommand extends BaseCustomObject {
-    public popupName: string;
-    public elementId: string;
-    public height: number;
-    public positionTop: boolean
-    public x: number;
-    public y: number;
+    public popupName!: string;
+    public elementId!: string;
+    public height!: number;
+    public positionTop!: boolean
+    public x!: number;
+    public y!: number;
 }
 

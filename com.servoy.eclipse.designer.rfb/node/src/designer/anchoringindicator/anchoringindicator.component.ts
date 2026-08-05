@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -9,6 +9,7 @@ import { URLParserService } from '../services/urlparser.service';
     selector: 'designer-anchoring-indicator',
     templateUrl: './anchoringindicator.component.html',
     styleUrls: ['./anchoringindicator.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener {
@@ -22,9 +23,9 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     TOP_RIGHT_BOTTOM_IMAGE = 'designer/assets/images/anchoringtoprightbottom.png';
     TOP_RIGHT_LEFT_BOTTOM_IMAGE = 'designer/assets/images/anchoringtoprightleftbottom.png';
 
-    anchoringIndicator: boolean;
-    editorStateSubscription: Subscription;
-    indicator: SameSizeIndicator;
+    anchoringIndicator!: boolean;
+    editorStateSubscription!: Subscription;
+    indicator!: SameSizeIndicator | null;
     
     constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService, protected urlParser: URLParserService,) {
         this.editorSession.addSelectionChangedListener(this);
@@ -65,12 +66,12 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(selection[0])
                 if (element) {
-                    if (element.parentElement.closest('.svy-responsivecontainer') || element.closest('.svy-csspositioncontainer')) return;
+                    if (element.parentElement!.closest('.svy-responsivecontainer') || element.closest('.svy-csspositioncontainer')) return;
                     const elementRect = element.getBoundingClientRect();
-                    let wrapperRect: DOMRect = null;
-                    let image: string;
+                    let wrapperRect: DOMRect | null = null;
+                    let image!: string;
                     if (!this.urlParser.isCSSPositionFormLayout()) {
-                        const selectionAnchor = parseInt(element.getAttribute('svy-anchors'));
+                        const selectionAnchor = parseInt(element.getAttribute('svy-anchors')!);
                         if (selectionAnchor == 0 || selectionAnchor == 9) {
                             image = this.TOP_LEFT_IMAGE;
                         }
@@ -100,7 +101,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                         }
                     }
                     else {
-                        const wrapper: HTMLDivElement = element.closest('.svy-wrapper');
+                        const wrapper: HTMLDivElement = element.closest('.svy-wrapper')!;
                         if (element.classList.contains('svy-formcomponent')) {
 							wrapperRect = wrapper.getBoundingClientRect();
 						}

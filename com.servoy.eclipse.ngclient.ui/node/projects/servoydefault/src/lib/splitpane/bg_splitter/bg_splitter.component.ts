@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnChanges,SimpleChanges, EventEmitter, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, OnChanges, SimpleChanges, EventEmitter, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { BGPane } from './bg_pane.component';
 @Component( {
@@ -6,13 +6,14 @@ import { BGPane } from './bg_pane.component';
     template: '<div class="split-panes" #element><ng-content></ng-content></div>',
     styleUrls: ['./bg_splitter.css'],
     encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 } )
 export class BGSplitter implements AfterContentInit , OnChanges {
 
     @Input() orientation = 'vertical';
-    @Input() divSize;
-    @Input() divLocation;
+    @Input() divSize: any;
+    @Input() divLocation: any;
 
     @Output() onDividerChange = new EventEmitter();
 
@@ -20,16 +21,16 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     private handler;
 
     @ContentChildren( BGPane )
-    private panes: QueryList<BGPane>;
+    private panes!: QueryList<BGPane>;
 
     @ViewChild( 'element' , {static: true})
-    private elementRef: ElementRef;
+    private elementRef!: ElementRef;
 
     constructor( private readonly renderer: Renderer2 ) {
         this.handler = this.renderer.createElement( 'div' );
         this.renderer.addClass( this.handler, 'split-handler' );
 
-        this.handler.addEventListener( 'mousedown', ( ev ) => {
+        this.handler.addEventListener( 'mousedown', ( ev: any ) => {
             ev.preventDefault();
             this.drag = true;
         } );
@@ -62,7 +63,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     }
 
     @HostListener( 'document:mouseup', ['$event'] )
-    mouseup( event ) {
+    mouseup( event: any ) {
         if ( this.drag ) {
             let dividerLocation;
             if(this.orientation === 'vertical' ) {
@@ -76,12 +77,12 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     }
 
     @HostListener( 'mousemove', ['$event'] )
-    mousemove( event ) {
+    mousemove( event: any ) {
         if ( !this.drag ) return;
         this.adjustLocation(event);
     }
 
-    private adjustLocation(event?,wantedPosition?) {
+    private adjustLocation(event?: any, wantedPosition?: any) {
         if (!this.panes || this.panes.length != 2) return;
         const bounds = this.elementRef.nativeElement.getBoundingClientRect();
         const pos = this.getPosition(bounds, event, wantedPosition);
@@ -90,8 +91,8 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos < this.panes.first.minSize ) return;
-                if ( height - pos < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize ) return;
+                if ( height - pos! < this.panes.last.minSize ) return;
             }
 
             this.renderer.setStyle( this.handler, 'top', pos + 'px' );
@@ -103,8 +104,8 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos < this.panes.first.minSize ) return;
-                if ( width - pos < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize ) return;
+                if ( width - pos! < this.panes.last.minSize ) return;
             }
 
             this.renderer.setStyle( this.handler, 'left', pos + 'px' );
@@ -116,23 +117,23 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     private getPosition(bounds: any, event?: any, wantedPosition?: number) {
         if ( this.orientation === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
-            if ((wantedPosition < 0 || wantedPosition === undefined) && !event) {
+            if ((wantedPosition! < 0 || wantedPosition === undefined) && !event) {
                 return height / 2;
             } else if (event) {
                 return event.clientY - bounds.top;
             }
-            if (wantedPosition >= 0 && wantedPosition <= 1) {
-                return Math.round(height * wantedPosition);
+            if (wantedPosition! >= 0 && wantedPosition! <= 1) {
+                return Math.round(height * wantedPosition!);
             }
         } else {//horizontal
             const width = bounds.right - bounds.left;
-            if ((wantedPosition < 0 || wantedPosition === undefined) && !event) {
+            if ((wantedPosition! < 0 || wantedPosition === undefined) && !event) {
                 return width / 2;
             } else if (event) {
                 return event.clientX - bounds.left;
             }
-            if (wantedPosition >= 0 && wantedPosition <= 1) {
-                return Math.round(width * wantedPosition);
+            if (wantedPosition! >= 0 && wantedPosition! <= 1) {
+                return Math.round(width * wantedPosition!);
             }
         }
         return wantedPosition;

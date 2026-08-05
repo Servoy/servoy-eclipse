@@ -116,7 +116,7 @@ export class BaseCustomObject {
      * @deprecated
      */
     getWatchedProperties(): Array<string> {
-        return null;
+        return null!;
     }
 
 }
@@ -366,7 +366,7 @@ export interface IJSMenu{
     name: string;
     styleClass: string;
     pushDataProviderValue(category: string, propertyName: string, itemIndex: number, dataproviderValue: any): void;
-    setSelectedItem(itemID: string);
+    setSelectedItem(itemID: string): void;
 }
 
 export interface IJSMenuItem{
@@ -382,7 +382,7 @@ export interface IJSMenuItem{
 }
 
 export interface IPopupSupportComponent {
-    closePopup();
+    closePopup(): void;
 }
 
 export interface IFoundsetFieldsOnly {
@@ -620,7 +620,7 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * This method has been added in Servoy 8.3.
      */
     // eslint-disable-next-line @typescript-eslint/ban-types
-    getRecordRefByRowID(rowId: string): object;
+    getRecordRefByRowID(rowId: string): object | null;
 
     /**
      * Sets the preferred viewPort options hint on the server for this foundset, so that the next

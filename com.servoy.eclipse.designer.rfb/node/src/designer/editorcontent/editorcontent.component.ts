@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -10,23 +10,24 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-editorcontent',
     templateUrl: './editorcontent.component.html',
     styleUrls: ['./editorcontent.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {
 
-    initialWidth: string;
-    contentStyle: CSSStyleDeclaration = {
+    initialWidth!: string;
+    contentStyle: Record<string, string> = {
         position: 'absolute',
         top: '20px',
         left: '20px'
-    } as CSSStyleDeclaration;
+    };
     contentSizeFull = false;
-    lastHeight: string;
+    lastHeight!: string;
 
-    clientURL: SafeResourceUrl;
-    @ViewChild('element', { static: true }) elementRef: ElementRef<HTMLElement>;
+    clientURL!: SafeResourceUrl;
+    @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
     
-    @Input() styleVariantPreview: boolean
+    @Input() styleVariantPreview!: boolean
     @Output() previewReady = new EventEmitter<{previewReady: boolean}>();
     
     constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
@@ -142,7 +143,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             left: '20px',
             right: '20px',
             bottom: '20px'
-        } as CSSStyleDeclaration;
+        };
         this.contentSizeFull = true;
         delete this.contentStyle['width'];
         delete this.contentStyle['height'];

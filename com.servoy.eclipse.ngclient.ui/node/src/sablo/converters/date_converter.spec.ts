@@ -8,7 +8,7 @@ describe('DateType', () => {
       dateType = new DateType();
   });
 
-  const offsetString = (wantedOffset) => {
+  const offsetString = (wantedOffset: any) => {
       let offsetStr = '';
       const offset = currentOffset+wantedOffset;
       if (offset < 0) {
@@ -75,7 +75,7 @@ describe('DateType', () => {
       const date = new Date();
       date.setFullYear(2018, 0, 1);
       date.setHours(0, 0, 0, 0);
-    const dateString = dateType.fromClientToServer(date)[0];
+    const dateString = dateType.fromClientToServer(date)![0];
     expect(dateString).toBe('2018-01-01T00:00:00.000' + offsetString(0));
   });
 

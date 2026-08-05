@@ -36,10 +36,10 @@ export class MobileBridge implements IWebSocket {
             }
         }        
     }
-    onmessage: (message: WebsocketCustomEvent) => true | void;
-    onconnecting: (evt: WebsocketCustomEvent) => void;
-    onclose: (evt: WebsocketCustomEvent) => void;
-    onopen: (evt: WebsocketCustomEvent) => void;
-    onerror: (evt: WebsocketCustomEvent) => void;
+    onmessage!: (message: WebsocketCustomEvent) => true | void;
+    onconnecting!: (evt: WebsocketCustomEvent) => void;
+    onclose!: (evt: WebsocketCustomEvent) => void;
+    onopen!: (evt: WebsocketCustomEvent) => void;
+    onerror!: (evt: WebsocketCustomEvent) => void;
 
 }

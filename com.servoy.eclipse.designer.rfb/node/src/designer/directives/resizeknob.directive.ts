@@ -11,21 +11,21 @@ import { Subscription } from 'rxjs';
 })
 export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
-    @Input('resizeKnob') resizeInfo: ResizeInfo;
+    @Input('resizeKnob') resizeInfo!: ResizeInfo;
 
-    lastresizeStartPosition: {x: number; y: number};
-    initialElementInfo: Map<string, ElementInfo>;
-    currentElementInfo: Map<string, ElementInfo>;
+    lastresizeStartPosition!: {x: number; y: number};
+    initialElementInfo!: Map<string, ElementInfo>;
+    currentElementInfo!: Map<string, ElementInfo>;
 
-    contentAreaMouseMove:  (event: MouseEvent) => void;
-    contentAreaMouseUp: (event: MouseEvent) => void;
-    contentAreaMouseLeave: (event: MouseEvent) => void;
-    contentAreaKeyDown: (event: KeyboardEvent) => void;
+    contentAreaMouseMove!:  (event: MouseEvent) => void;
+    contentAreaMouseUp!: (event: MouseEvent) => void;
+    contentAreaMouseLeave!: (event: MouseEvent) => void;
+    contentAreaKeyDown!: (event: KeyboardEvent) => void;
 
-    topContentAreaAdjust: number;
-    leftContentAreaAdjust: number;
-    snapData: SnapData;
-    subscription: Subscription;
+    topContentAreaAdjust!: number;
+    leftContentAreaAdjust!: number;
+    snapData!: SnapData;
+    subscription!: Subscription;
 
     constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService, private guidesService: DynamicGuidesService) {
     }
@@ -76,8 +76,8 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
-        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
-            this.snap(value);
+        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
+            if (value) this.snap(value);
         })
     }
 
@@ -85,7 +85,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
         if (this.currentElementInfo && this.editorSession.getState().resizing) {
             this.snapData = data;
             if (this.initialElementInfo.size == 1 && (this.snapData?.width || this.snapData?.height)) {
-                const elementInfo = this.initialElementInfo.values().next().value;
+                const elementInfo = this.initialElementInfo.values().next().value!;
                 elementInfo.element.style.position = 'absolute';
                 
                 if (this.snapData.width) {
@@ -129,7 +129,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
                     const nodeid = selection[i];
                     let element = this.editorContentService.getContentElement(nodeid);
                     while(element && !element.classList.contains('svy-wrapper')) {
-                        element = element.parentElement;
+                        element = element.parentElement!;
                     }
 
                     if (element) {
@@ -184,8 +184,8 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private cleanResizeState() {
-        this.initialElementInfo = null;
-        this.currentElementInfo = null;
+        this.initialElementInfo = null!;
+        this.currentElementInfo = null!;
         this.editorContentService.getContentArea().removeEventListener('mousemove', this.contentAreaMouseMove);
         this.editorContentService.getContentArea().removeEventListener('mouseup', this.contentAreaMouseUp);
         this.editorContentService.getContentArea().removeEventListener('mouseleave', this.contentAreaMouseLeave);
@@ -245,24 +245,24 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
     private sendChanges(elementInfos: Map<string, ElementInfo>) {
         if(elementInfos) {
-            const changes = {};
+            const changes: Record<string, any> = {};
             for(const nodeId of elementInfos.keys()) {
                 const elementInfo = elementInfos.get(nodeId);
                 if (this.snapData && elementInfos.size == 1) {
                     changes[nodeId] = {
-                        x: this.snapData?.width ? Math.round(this.snapData.left) : elementInfo.x,
-                        y: this.snapData?.height ? Math.round(this.snapData.top) : elementInfo.y,
-                        width: this.snapData?.width ? Math.round(this.snapData.width) : elementInfo.width,
-                        height: this.snapData?.height ? Math.round(this.snapData.height) : elementInfo.height,
+                        x: this.snapData?.width ? Math.round(this.snapData.left) : elementInfo!.x,
+                        y: this.snapData?.height ? Math.round(this.snapData.top) : elementInfo!.y,
+                        width: this.snapData?.width ? Math.round(this.snapData.width) : elementInfo!.width,
+                        height: this.snapData?.height ? Math.round(this.snapData.height) : elementInfo!.height,
                         cssPos: this.snapData.cssPosition
                     }
                 }
                 else {
                     changes[nodeId] = {
-                        x: elementInfo.x,
-                        y: elementInfo.y,
-                        width: elementInfo.width,
-                        height: elementInfo.height,
+                        x: elementInfo!.x,
+                        y: elementInfo!.y,
+                        width: elementInfo!.width,
+                        height: elementInfo!.height,
                         move: false
                     }
                 }
@@ -289,11 +289,11 @@ export class ElementInfo {
 }
 
 class ResizeInfo {
-    node: SelectionNode;
-    position: string;
-    direction: string;
-    top: number;
-    left: number;
-    width: number;
-    height: number;
+    node!: SelectionNode;
+    position!: string;
+    direction!: string;
+    top!: number;
+    left!: number;
+    width!: number;
+    height!: number;
 }

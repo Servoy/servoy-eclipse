@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import {  WpmService } from '../wpm.service';
@@ -7,6 +7,7 @@ import {  WpmService } from '../wpm.service';
     selector: 'wpm-update-dialog',
     templateUrl: './update-dialog.component.html',
     styleUrls: ['./update-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class UpdatePackagesDialogComponent {

@@ -8,9 +8,9 @@ import { DefaultLoginWindowComponent } from './default-login-window.component';
 describe('DefaultLoginWindowComponent', () => {
   let component: DefaultLoginWindowComponent;
   let fixture: ComponentFixture<DefaultLoginWindowComponent>;
-  let sabloService;
-  let localStorageService;
-  let ngbActiveModal;
+  let sabloService: any;
+  let localStorageService: any;
+  let ngbActiveModal: any;
   beforeEach(waitForAsync(() => {
       sabloService = jasmine.createSpyObj('SabloService',['callService']);
       localStorageService = jasmine.createSpyObj('LocalStorageService',['set']);

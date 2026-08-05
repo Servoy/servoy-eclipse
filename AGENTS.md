@@ -19,6 +19,15 @@ This project has Eclipse MCP servers configured in `opencode.json`. **Always pre
 - **Use `eclipse-ide` tools** (`readProjectResource`, `getSource`, `getFilteredSource`, `getMethodSource`, `getClassOutline`) for reading Java source files.
 - **Use `eclipse-ide` tools** (`fileSearch`, `fileSearchRegExp`, `findFiles`, `findReferences`) for searching code.
 
+### Navigation & Discovery Tools
+
+For quick codebase orientation and type/method lookup, use the JDT-powered search tools:
+
+- **`eclipse-ide_searchTypes`** — Fuzzy type search via JDT SearchEngine. Supports wildcards (`*Payment*`), CamelCase (`PS` → `PaymentService`), prefix, and package-qualified patterns. Equivalent to Eclipse's Open Type (Ctrl+Shift+T). Use this instead of grep/glob when looking for a class by partial name.
+- **`eclipse-ide_searchMethods`** — Method name search with the same pattern support, plus optional declaring type filter. Use when you need to find where a method is defined without knowing the full class name.
+- **`eclipse-ide_getPackageSummary`** — Returns each type's name, kind, Javadoc first sentence, method/field counts, and interfaces for a package — a table-of-contents in one call. Use to quickly understand what a package contains.
+- **`eclipse-ide_getWorkspaceOverview`** — High-level architectural map of projects → packages → type names for immediate orientation. Use as the first step when exploring an unfamiliar part of the codebase.
+
 ### After Every Code Change
 1. **Always call `eclipse-ide_getCompilationErrors`** after modifying code to check for compilation errors.
 2. If errors are found and have quick fixes available, **use `eclipse-ide_executeQuickFix`** to resolve them automatically.
@@ -37,7 +46,7 @@ This project has Eclipse MCP servers configured in `opencode.json`. **Always pre
 ### Testing
 - **Use `eclipse-ide_runAllTests`**, `eclipse-ide_runClassTests`, or `eclipse-ide_runTestMethod` for running JUnit tests.
 - **Use `eclipse-pde_runJUnitPluginTests`** or `eclipse-pde_runJUnitPluginTestClass` for plugin integration tests.
-- Test project: `com.servoy.eclipse.tests`
+- Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`
 
 ### Other Tools
 - **Use `eclipse-ide_formatFile`** or `eclipse-coder_formatFile` to format Java files after editing.
@@ -132,6 +141,10 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 - Never place spec files inside a plugin or module subdirectory.
 - When asked to write a spec, always create it in `docs/` unless explicitly told otherwise.
 
+## Jira API
+
+When asked to create, update, or link Jira issues, load the instructions from `JIRA.md` in this repository.
+
 ## Code Style & Conventions
 
 - Follow existing code style and conventions for each language and module
@@ -144,8 +157,8 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 
 ## Testing
 
-- **Java plugin tests:** `com.servoy.eclipse.tests` (eclipse-test-plugin packaging)
-- **Debug type system tests:** `com.servoy.eclipse.debug.tests` â `ViewFoundSetTypeHierarchyIntegrationTest` [Plugin JUnit]
+- **Model tests:** `com.servoy.eclipse.model.tests` (eclipse-test-plugin packaging)
+- **NG Client UI tests:** `com.servoy.eclipse.ngclient.ui.tests` (eclipse-test-plugin packaging)
 - **Designer tests:** `com.servoy.eclipse.designer.tests` â `TestCssValues`, `TestSnapCSSPosition` [JUnit]
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
@@ -153,6 +166,9 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 - **SVY-21118 jsType in signatures:** `j2db_documentation.tests` → `FunctionDocumentationTest` [Plugin JUnit] — tests that `getJSType()` is used in signature generation when set on a parameter
 - **SVY-21118 doc generator parsing:** `com.servoy.eclipse.docgenerator.tests` (in `docgenerator-ui` repo) → `DocumentedParameterDataTest` [Plugin JUnit, requires m2e in target] — tests that `{Object<String>}` in `@param` descriptions is extracted as jsType
 - **SVY-21257 WebComponent clone UUID:** `j2db_test` → `WebComponentCloneTest` [JUnit] — tests that `WebComponent.cloneObj()` regenerates UUIDs for custom type children (AG Grid columns)
+- **SVY-21121 Console/AI view in perspective:** `com.servoy.eclipse.ui.tests` → `DesignPerspectiveTest` [Plugin JUnit] — tests that Console and Servoy AI views are added as visible views (not placeholders) in the bottom folder of the Servoy Design perspective
+- **SVY-21272 ClassCastException in hasChildren:** `com.servoy.eclipse.ui.tests` → `SolutionExplorerTreeContentProviderHasChildrenTest` [JUnit] — tests that `hasChildren()` does not throw ClassCastException when parent is a plain SimpleUserNode (e.g., RETURNTYPEPLACEHOLDER), and correctly returns false for UserNode with TABLE/INMEMORY_DATASOURCE/VIEW_FOUNDSET types
+- **SVY-21149 Dark theme icon existence:** `com.servoy.eclipse.ui.tests` → `ImageReplacementMapperDarkIconsTest` [JUnit] — tests that `darkicons/expandall-disabled.png` and `darkicons/expandall-disabled@2x.png` exist in `com.servoy.eclipse.ui.tweaks` and are valid PNGs with correct dimensions (16×16 and 32×32)
 
 ## Dependencies
 

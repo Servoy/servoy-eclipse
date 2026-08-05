@@ -8,14 +8,14 @@ import { timeout } from 'rxjs';
 @Injectable()
 export class PopupMenuService {
 
-	menu: HTMLElement = null;
+	menu: HTMLElement | null = null;
 	menuPopper: any = null;
 	menuItemTosubMenuMap: Map<HTMLElement, HTMLElement> = new Map();
 	subMenuToPopperMap: Map<HTMLElement, any> = new Map();
 
-	activeMenu: HTMLElement = null;
-	activeMenuItem: HTMLElement = null;
-	previousActiveMenuItem: HTMLElement = null;
+	activeMenu: HTMLElement | null = null;
+	activeMenuItem: HTMLElement | null = null;
+	previousActiveMenuItem: HTMLElement | null = null;
 	visibleSubMenuPath: HTMLElement[] = [];
 	hideSubMenusetTimeout: any = null;
 
@@ -31,7 +31,7 @@ export class PopupMenuService {
 				let parent = this.previousActiveMenuItem.parentElement;
 				while (parent) {
 					if (parent === targetElement.parentElement) {
-						this.hideSubMenusOf(this.activeMenu);
+						this.hideSubMenusOf(this.activeMenu!);
 						break;
 					}
 					let parentFound = false;
@@ -46,7 +46,7 @@ export class PopupMenuService {
 				this.previousActiveMenuItem = null;
 			}
 			this.activeMenuItem = targetElement;
-			this.showSubMenu(subMenu);
+			this.showSubMenu(subMenu!);
 		} else if (event.type == 'mouseleave') {
 			this.previousActiveMenuItem = this.activeMenuItem;
 			this.activeMenuItem = null;
@@ -68,25 +68,26 @@ export class PopupMenuService {
 		const isTouchScreen = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0));
 		if (isTouchScreen) {
 			const targetElement = (event.target as HTMLElement).closest('div');
-			const parentNode = targetElement.parentNode as HTMLElement;
+			const parentNode = targetElement!.parentNode as HTMLElement;
 			const prevActiveMenu = this.activeMenu;
-			const subMenu = this.menuItemTosubMenuMap.get(targetElement);
+			const subMenu = this.menuItemTosubMenuMap.get(targetElement!);
 			if (subMenu) {
 				event.preventDefault();
 				this.activeMenu = subMenu;
-				if (this.shouldHideMenuMobile(this.activeMenu, prevActiveMenu)) {
-					this.hideSubMenuMobile(this.activeMenu);
+			if (this.shouldHideMenuMobile(this.activeMenu, prevActiveMenu)) {
+				this.hideSubMenuMobile(this.activeMenu!);
 					const idx = this.parentNode.indexOf(parentNode);
 					(idx > -1) && this.parentNode.splice(idx);
-					this.activeMenu = this.visibleSubMenuPath.length > 1 ? prevActiveMenu : null;
+					this.activeMenu = this.visibleSubMenuPath.length > 1 ? prevActiveMenu : null!;
 				} else {
-					if (this.visibleSubMenuPath.includes(prevActiveMenu) && this.parentNode.includes(parentNode)) {
+					if (this.visibleSubMenuPath.includes(prevActiveMenu!) && this.parentNode.includes(parentNode)) {
 						if (this.visibleSubMenuPath.length > 1 && this.visibleSubMenuPath.indexOf(this.activeMenu) === -1) {
 							this.hideSubMenuMobile(this.visibleSubMenuPath[this.parentNode.indexOf(parentNode) + 1]);
 							this.parentNode.splice(this.parentNode.indexOf(parentNode) + 1);
 						}
 					}
-					this.showSubMenu(this.activeMenu);
+					this.showSubMenu(this.activeMenu!);
+
 					(!this.parentNode.includes(parentNode)) && this.parentNode.push(parentNode);
 				}
 			} else {
@@ -111,7 +112,7 @@ export class PopupMenuService {
 		}
 	}
 
-	private shouldHideMenuMobile(activeMenu: HTMLElement, previousActiveMenu: HTMLElement) {
+	private shouldHideMenuMobile(activeMenu: HTMLElement | null, previousActiveMenu: HTMLElement | null) {
 		if (activeMenu === null || previousActiveMenu === null) return false;
 		if ((activeMenu === previousActiveMenu && this.visibleSubMenuPath.includes(activeMenu)) || this.visibleSubMenuPath.includes(activeMenu)) {
 			return true;
@@ -137,9 +138,9 @@ export class PopupMenuService {
 			this.hideSubMenusetTimeout = null;
 			let hideSubmenusOf = this.activeMenu;
 			if (this.activeMenuItem && this.menuItemTosubMenuMap.get(this.activeMenuItem)) {
-				hideSubmenusOf = this.menuItemTosubMenuMap.get(this.activeMenuItem);
+				hideSubmenusOf = this.menuItemTosubMenuMap.get(this.activeMenuItem)!;
 			}
-			this.hideSubMenusOf(hideSubmenusOf);
+			this.hideSubMenusOf(hideSubmenusOf!);
 		}, 200);
 	}
 
@@ -177,7 +178,7 @@ export class PopupMenuService {
 			if (event.target instanceof HTMLDivElement && event.target.classList.contains('dropdown-menu')) return;
             // don't dispose if element is a divider, disabled, submenu or autoClose is disabled, as we need to keep it open when clicking on those elements
             if (this.keepMenuOpen(event)) return;
-			this.hideSubMenusOf(this.menu);
+			this.hideSubMenusOf(this.menu!);
 			this.visibleSubMenuPath.splice(0, this.visibleSubMenuPath.length);
 			this.parentNode.splice(0, this.parentNode.length);
 			this.menuItemTosubMenuMap.clear();
@@ -226,9 +227,9 @@ export class PopupMenuService {
 	}
 
 	public showMenuAt(element: HTMLElement, displayTop: boolean) {
-		this.showSubMenu(this.menu);
-		this.updateMenuHeight(element.getBoundingClientRect().top, element.getBoundingClientRect().height, this.menu.getBoundingClientRect().height);
-		this.menuPopper = createPopper(element, this.menu, {
+		this.showSubMenu(this.menu!);
+		this.updateMenuHeight(element.getBoundingClientRect().top, element.getBoundingClientRect().height, this.menu!.getBoundingClientRect().height);
+		this.menuPopper = createPopper(element, this.menu!, {
 			placement: (displayTop ? 'top' : 'bottom'),
 			modifiers: [
 				{
@@ -243,8 +244,8 @@ export class PopupMenuService {
 	}
 
 	public showMenu(x: number, y: number, displayTop: boolean) {
-		this.showSubMenu(this.menu);
-		this.updateMenuHeight(y, 0, this.menu.getBoundingClientRect().height);
+		this.showSubMenu(this.menu!);
+		this.updateMenuHeight(y, 0, this.menu!.getBoundingClientRect().height);
 		const virtualElement: VirtualElement = {
 			getBoundingClientRect: () => {
 				return {
@@ -257,7 +258,7 @@ export class PopupMenuService {
 				} as DOMRect;
 			}
 		};
-		this.menuPopper = createPopper(virtualElement, this.menu, {
+		this.menuPopper = createPopper(virtualElement, this.menu!, {
 			placement: (displayTop ? 'top' : 'bottom'),
 			modifiers: [
 				{
@@ -270,7 +271,7 @@ export class PopupMenuService {
 				{
 					name: 'offset',
 					options: {
-						offset: ({ placement, reference, popper }) => {
+						offset: ({ placement, reference, popper }: { placement: any, reference: any, popper: any }) => {
 							if (reference.x + popper.width / 2 < this.doc.documentElement.clientWidth) {
 								return [popper.width / 2, 0];
 							} else {
@@ -358,7 +359,7 @@ export class PopupMenuService {
 					link.style.color = item.foregroundColor;
 				}
 				const span = this.doc.createElement('span');
-				span.innerHTML = item.text ? this.domSanitizer.sanitize(SecurityContext.HTML, item.text) : 'no text';
+				span.innerHTML = item.text ? this.domSanitizer.sanitize(SecurityContext.HTML, item.text)! : 'no text';
 				link.appendChild(span);
 				const menuItemId = parentId + '/' + span.innerHTML;
 				if (this.servoyService.isInTestingMode()) {
@@ -390,40 +391,40 @@ export class PopupMenuService {
 		const bottomValue = window.innerHeight - (elementTop + elementHeight);
 		if (menuHeight >= topValue && menuHeight >= bottomValue) {
 			if (topValue >= bottomValue) {
-				this.menu.style.maxHeight = `${topValue - 10}px`;
+				this.menu!.style.maxHeight = `${topValue - 10}px`;
 			}
 			else {
-				this.menu.style.maxHeight = `${bottomValue - 10}px`;
+				this.menu!.style.maxHeight = `${bottomValue - 10}px`;
 			}
-			this.menu.style.overflow = 'auto';
+			this.menu!.style.overflow = 'auto';
 		}
 	}
 }
 
 export class Popup extends BaseCustomObject {
-	public name: string;
-	public cssClass: string;
-	public items: MenuItem[];
+	public name!: string;
+	public cssClass!: string;
+	public items!: MenuItem[];
 }
 
 export class MenuItem extends BaseCustomObject {
-	public id: string;
-	public text: string;
-	public callback: Callback;
-	public name: string;
-	public align: number;
-	public enabled: boolean;
-	public visible: boolean;
-	public icon: string;
-	public fa_icon: string;
-	public mnemonic: string;
-	public backgroundColor: string;
-	public foregroundColor: string;
-	public selected: boolean;
-	public accelarator: string;
-	public methodArguments: Array<any>;
-	public cssClass: string;
-	public items: MenuItem[];
-	public tooltipText: string;
-    public autoClose: boolean;
+	public id!: string;
+	public text!: string;
+	public callback!: Callback;
+	public name!: string;
+	public align!: number;
+	public enabled!: boolean;
+	public visible!: boolean;
+	public icon!: string;
+	public fa_icon!: string;
+	public mnemonic!: string;
+	public backgroundColor!: string;
+	public foregroundColor!: string;
+	public selected!: boolean;
+	public accelarator!: string;
+	public methodArguments!: Array<any>;
+	public cssClass!: string;
+	public items!: MenuItem[];
+	public tooltipText!: string;
+    public autoClose!: boolean;
 }

@@ -24,6 +24,16 @@
     border: 2px dashed;
 }
 
+.svy-responsive-wrapper {
+    display: contents;
+}
+
+.svy-responsive-wrapper.invisible_element > * {
+    opacity: 0.3;
+    outline: 2px dotted;
+    border: 2px dashed;
+}
+
 .inherited_element {
     outline:1px dotted red;
 }

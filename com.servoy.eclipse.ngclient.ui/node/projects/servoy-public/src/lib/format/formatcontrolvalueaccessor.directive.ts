@@ -18,10 +18,10 @@ class NumberParser {
         const parts = (new Intl.NumberFormat(locale) as any).formatToParts(12345.6);
         const numerals = [...new Intl.NumberFormat(locale, { useGrouping: false }).format(9876543210)].reverse();
         const index = new Map(numerals.map((d, i) => [d, i]));
-        this._group = new RegExp(`[${parts.find(d => d.type === 'group').value}]`, 'g');
-        this._decimal = new RegExp(`[${parts.find(d => d.type === 'decimal').value}]`);
+        this._group = new RegExp(`[${parts.find((d: any) => d.type === 'group').value}]`, 'g');
+        this._decimal = new RegExp(`[${parts.find((d: any) => d.type === 'decimal').value}]`);
         this._numeral = new RegExp(`[${numerals.join('')}]`, 'g');
-        this._index = d => index.get(d).toString();
+        this._index = d => index.get(d)!.toString();
     }
     parse(str: string) {
         return (str.trim().replace(this._group, '').replace(this._decimal, '.').replace(this._numeral, this._index)) ? +str : NaN;
@@ -53,29 +53,29 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
     private static TIMEFORMAT: Format = { display: 'HH:mm', type: 'DATETIME' } as Format;
     private static BROWSERNUMBERFORMAT = new NumberParser();
 
-    @Input('svyFormat') format: Format;
-    @Input() findmode: boolean;
+    @Input('svyFormat') format!: Format;
+    @Input() findmode!: boolean;
 
     private hasFocus = false;
-    private realValue = null;
+    private realValue: any = null;
 
     private isKeyPressEventFired = false;
-    private oldInputValue = null;
-    private listeners = [];
-    private maskFormat: MaskFormat;
+    private oldInputValue: any = null;
+    private listeners: any[] = [];
+    private maskFormat: MaskFormat | null = null;
     private readonly log: LoggerService;
-    private focusText: string;
+    private focusText!: string;
 
     constructor(private _renderer: Renderer2, private _elementRef: ElementRef, private formatService: FormattingService,
         @Inject(DOCUMENT) private doc: Document, logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('formatdirective');
     }
 
-    @HostListener('blur', ['$event.target']) touched(target: EventTarget) {
-        if ("value" in target) {
+    @HostListener('blur', ['$event.target']) touched(target: EventTarget | null) {
+        if (target && "value" in target) {
             this.onTouchedCallback();
             this.hasFocus = false;
-            this.dateInputChange(target.value);
+            this.dateInputChange((target as any).value);
             const inputType = this.getType();
             if (this.format.display && !this.format.isMask && !(inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week')) {
                 this.writeValue(this.realValue);
@@ -103,9 +103,9 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
         }
     }
 
-    @HostListener('change', ['$event.target']) input(target: EventTarget) {
-        if ("value" in target) {
-            let data = target.value;
+    @HostListener('change', ['$event.target']) input(target: EventTarget | null) {
+        if (target && "value" in target) {
+            let data: any = (target as any).value;
             const inputType = this.getType();
             if (inputType === 'datetime-local' || inputType === 'date' || inputType === 'time' || inputType === 'month' || inputType === 'week') {
                 return;
@@ -113,7 +113,7 @@ export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnC
             else if (inputType === 'number') {
                 data = FormatDirective.BROWSERNUMBERFORMAT.parse(data as string);
             } else if (inputType === 'email') {
-                data = target.value;
+                data = (target as any).value;
             } else if (!this.findmode && this.format) {
                 const type = this.format.type;
                 let format = this.format.display ? this.format.display : this.format.edit;

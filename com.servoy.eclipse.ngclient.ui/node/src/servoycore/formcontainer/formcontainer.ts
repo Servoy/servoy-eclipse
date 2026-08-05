@@ -79,24 +79,24 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 	readonly relationName = input<any>(undefined);
 	// deprecated, not used anymore
 	readonly waitForData = input<any>(undefined);
-	readonly height = input<string>(undefined);
-	readonly tabSeq = input<number>(undefined);
-	readonly toolTipText = input<string>(undefined);
-	readonly animation = input<string>(undefined);
-	readonly styleClass = input<string>(undefined);
+	readonly height = input<string | undefined>(undefined);
+	readonly tabSeq = input<number | undefined>(undefined);
+	readonly toolTipText = input<string | undefined>(undefined);
+	readonly animation = input<string | undefined>(undefined);
+	readonly styleClass = input<string | undefined>(undefined);
 
 	readonly templateRef = contentChild(TemplateRef);
 
-	form1_state: string;
-	form2_state: string;
+	form1_state!: string;
+	form2_state!: string;
 
-	form1_visible: boolean;
-	form2_visible: boolean;
+	form1_visible = false;
+	form2_visible = false;
 
 	private realContainedForm: any;
 
-	private form1: string;
-	private form2: string;
+	private form1!: string;
+	private form2!: string;
 
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
 		super(renderer, cdRef);
@@ -110,8 +110,8 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 					case 'containedForm': {
 						if (change.currentValue !== change.previousValue) {
 							if (change.previousValue && this.realContainedForm) {
-								this.form1_state = this.animation();
-								this.form2_state = this.animation();
+								this.form1_state = this.animation()!;
+								this.form2_state = this.animation()!;
 							}
 							this.switchForm(change.currentValue);
 						}
@@ -125,8 +125,8 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 					}
 					case 'animation': {
 						if (this.realContainedForm) {
-							this.form1_state = this.animation();
-							this.form2_state = this.animation();
+							this.form1_state = this.animation()!;
+							this.form2_state = this.animation()!;
 						}
 						break;
 					}
@@ -183,8 +183,8 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 	}
 
 	getContainerStyle(name: string) {
-		const styl = {};
-		let minHeight: string | number;
+		const styl: Record<string, any> = {};
+		let minHeight: string | number | undefined;
 		const height = this.height();
   if (height && height !== '0') {
 			minHeight = height;

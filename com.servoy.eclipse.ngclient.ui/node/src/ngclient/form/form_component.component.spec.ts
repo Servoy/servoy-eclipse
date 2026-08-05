@@ -59,6 +59,7 @@ import { By } from '@angular/platform-browser';
         </testcomponents-custom-component>
       }
     </ng-template>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 class TestHostComponent {
@@ -88,12 +89,12 @@ class TestHostComponent {
 })
 export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButtonElement> {
 
-    readonly arrayOfCustomObjects = input<Array<SomeCustomObject>>(undefined);
+    readonly arrayOfCustomObjects = input<Array<SomeCustomObject>>(undefined as any);
 
-    readonly divLocation = input<number>(undefined);
+    readonly divLocation = input<number>(undefined as any);
     readonly divLocationChange = output<number>();
     
-    _divLocation = signal<number>(undefined);
+    _divLocation = signal<number>(undefined as any);
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);
@@ -308,7 +309,7 @@ describe('FormComponentComponentTest', () => {
                     ]
                 }
             ]
-        }, null);
+        }, null as any);
     }));
 
     beforeEach(() => {
@@ -320,7 +321,7 @@ describe('FormComponentComponentTest', () => {
         button2InsideTestComponentDebug = fixture.debugElement.query(By.css('.button2'));
         button3InsideTestComponentDebug = fixture.debugElement.query(By.css('.button3'));
 
-        testComponentModel = formService.getFormCacheByName('aForm').getComponent('myCustomTestComponent').model as ComponentModelContents;
+        testComponentModel = formService.getFormCacheByName('aForm')!.getComponent('myCustomTestComponent')!.model as ComponentModelContents;
         expect(sabloService.callService).toHaveBeenCalledWith(
             'formService',
             'formLoaded',

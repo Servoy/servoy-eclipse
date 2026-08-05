@@ -11,7 +11,7 @@ export class AutosaveDirective {
   }
 
   @HostListener('click', ['$event.target'])
-  onClick(target): void {
+  onClick(target: any): void {
     if (target == this.elementRef.nativeElement || target.parentNode == this.elementRef.nativeElement) {
       this.servoyService.callService('applicationServerService', 'autosave', {}, true);
     }

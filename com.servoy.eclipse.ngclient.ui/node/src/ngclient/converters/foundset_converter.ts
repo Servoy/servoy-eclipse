@@ -23,8 +23,8 @@ export class FoundsetType implements IType<FoundsetValue> {
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
         const hasListeners = (currentClientValue && currentClientValue.getInternalState().changeListeners.length > 0);
-        const notificationParamForListeners: FoundsetChangeEvent = hasListeners ? { } : undefined;
-        let requestInfos: any[]; // these will end up in notificationParamForListeners but only if there is another change that
+        const notificationParamForListeners: FoundsetChangeEvent | undefined = hasListeners ? { } : undefined;
+        let requestInfos: any[] | undefined; // these will end up in notificationParamForListeners but only if there is another change that
         // need to be announced; otherwise, they should not trigger the listener just by themselves - the requestInfos
 
         // remove smart notifiers and proxy notification effects for changes that come from server
@@ -32,15 +32,15 @@ export class FoundsetType implements IType<FoundsetValue> {
 
         // see if this is an update or whole value and handle it
         if (!serverJSONValue) {
-            newValue = undefined;
-            if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue : currentClientValue, newValue };
+            newValue = undefined!;
+            if (hasListeners) notificationParamForListeners!.fullValueChanged = { oldValue : currentClientValue, newValue };
 
             const oldInternalState: FoundsetTypeInternalState = currentClientValue?.getInternalState(); // internal state / this.sabloConverters interface
             if (oldInternalState) this.sabloDeferHelper.cancelAll(oldInternalState);
         } else {
             // check for updates
             if (serverJSONValue.upd_serverSize !== undefined) {
-                if (hasListeners) notificationParamForListeners.serverFoundsetSizeChanged = {
+                if (hasListeners) notificationParamForListeners!.serverFoundsetSizeChanged = {
                     oldValue: currentClientValue.serverSize,
                     newValue: serverJSONValue.upd_serverSize
                 };
@@ -48,11 +48,11 @@ export class FoundsetType implements IType<FoundsetValue> {
                 currentClientValue.serverSize = serverJSONValue.upd_serverSize; // currentClientValue should always be defined in this case
             }
             if (serverJSONValue.upd_foundsetDefinition !== undefined) {
-                if (hasListeners) notificationParamForListeners.foundsetDefinitionChanged = true;
+                if (hasListeners) notificationParamForListeners!.foundsetDefinitionChanged = true;
             }
 
             if (serverJSONValue.upd_hasMoreRows !== undefined) {
-                if (hasListeners) notificationParamForListeners.hasMoreRowsChanged = {
+                if (hasListeners) notificationParamForListeners!.hasMoreRowsChanged = {
                     oldValue : currentClientValue.hasMoreRows,
                     newValue : serverJSONValue.upd_hasMoreRows
                 };
@@ -61,7 +61,7 @@ export class FoundsetType implements IType<FoundsetValue> {
             }
 
             if (serverJSONValue.upd_multiSelect !== undefined) {
-                if (hasListeners) notificationParamForListeners.multiSelectChanged = {
+                if (hasListeners) notificationParamForListeners!.multiSelectChanged = {
                     oldValue : currentClientValue.multiSelect,
                     newValue : serverJSONValue.upd_multiSelect
                 };
@@ -70,20 +70,20 @@ export class FoundsetType implements IType<FoundsetValue> {
             }
 
             if (serverJSONValue.upd_foundsetId !== undefined) {
-                currentClientValue.foundsetId = serverJSONValue.upd_foundsetId ? serverJSONValue.upd_foundsetId : undefined;
+                currentClientValue.foundsetId = serverJSONValue.upd_foundsetId ? serverJSONValue.upd_foundsetId : undefined!;
             }
 
             if (serverJSONValue.upd_columnFormats !== undefined) {
-                if (hasListeners) notificationParamForListeners.columnFormatsChanged = {
-                    oldValue : currentClientValue.columnFormats,
-                    newValue : serverJSONValue.upd_columnFormats
+                if (hasListeners) notificationParamForListeners!.columnFormatsChanged = {
+                    oldValue : currentClientValue.columnFormats!,
+                    newValue : serverJSONValue.upd_columnFormats!
                 };
 
                 currentClientValue.columnFormats = serverJSONValue.upd_columnFormats;
             }
 
             if (serverJSONValue.upd_sortColumns !== undefined) {
-                if (hasListeners) notificationParamForListeners.sortColumnsChanged = {
+                if (hasListeners) notificationParamForListeners!.sortColumnsChanged = {
                     oldValue : currentClientValue.sortColumns,
                     newValue : serverJSONValue.upd_sortColumns
                 };
@@ -93,12 +93,12 @@ export class FoundsetType implements IType<FoundsetValue> {
 
             if (serverJSONValue.upd_selectedRowIndexes !== undefined) {
                 if (hasListeners) {
-                    notificationParamForListeners.selectedRowIndexesChanged = {
+                    notificationParamForListeners!.selectedRowIndexesChanged = {
                         oldValue : currentClientValue.selectedRowIndexes,
                         newValue : serverJSONValue.upd_selectedRowIndexes
                     };
                     if (serverJSONValue.upd_userSetSelection !== undefined) {
-                        notificationParamForListeners.userSetSelection = true;
+                        notificationParamForListeners!.userSetSelection = true;
                     }
                 }
                 currentClientValue.selectedRowIndexes = serverJSONValue.upd_selectedRowIndexes;
@@ -109,7 +109,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                 const internalState: FoundsetTypeInternalState = currentClientValue.getInternalState();
 
                 if (viewPortUpdate.startIndex !== undefined && currentClientValue.viewPort.startIndex !== viewPortUpdate.startIndex) {
-                    if (hasListeners) notificationParamForListeners.viewPortStartIndexChanged = {
+                    if (hasListeners) notificationParamForListeners!.viewPortStartIndexChanged = {
                             oldValue : currentClientValue.viewPort.startIndex,
                             newValue : viewPortUpdate.startIndex
                     };
@@ -117,7 +117,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                     currentClientValue.viewPort.startIndex = viewPortUpdate.startIndex;
                 }
                 if (viewPortUpdate.size !== undefined && currentClientValue.viewPort.size !== viewPortUpdate.size) {
-                    if (hasListeners) notificationParamForListeners.viewPortSizeChanged = {
+                    if (hasListeners) notificationParamForListeners!.viewPortSizeChanged = {
                         oldValue : currentClientValue.viewPort.size,
                         newValue : viewPortUpdate.size
                     };
@@ -128,21 +128,21 @@ export class FoundsetType implements IType<FoundsetValue> {
                     const oldRows = currentClientValue.viewPort.rows.slice(); // create shallow copy of old rows as ref. will be the same otherwise
                     currentClientValue.viewPort.rows =
                         this.viewportService.updateWholeViewport(currentClientValue.viewPort.rows, internalState, viewPortUpdate.rows,
-                                                        viewPortUpdate[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY], undefined, internalState.propertyContextCreator,
+                                                        (viewPortUpdate as any)[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY], undefined!, internalState.propertyContextCreator,
                                                         false, () => new RowValue(newValue));
 
-                    if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = {
+                    if (hasListeners) notificationParamForListeners!.viewportRowsCompletelyChanged = {
                         oldValue : oldRows,
                         newValue : currentClientValue.viewPort.rows
                     };
                 } else if (viewPortUpdate.upd_rows !== undefined) {
                     this.viewportService.updateViewportGranularly(currentClientValue.viewPort.rows, internalState,
-                                            viewPortUpdate.upd_rows, undefined, internalState.propertyContextCreator, false,
+                                            viewPortUpdate.upd_rows, undefined!, internalState.propertyContextCreator, false,
                                             () => new RowValue(newValue));
 
                     if (hasListeners) {
                         // viewPortUpdate[UPDATE_PREFIX + ROWS] was already prepared for listeners by this.viewportModule.updateViewportGranularly
-                        notificationParamForListeners.viewportRowsUpdated = viewPortUpdate.upd_rows;
+                        notificationParamForListeners!.viewportRowsUpdated = viewPortUpdate.upd_rows;
                     }
                 }
             }
@@ -156,7 +156,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                 // not updates - so the whole thing was received
 
                 let internalState: FoundsetTypeInternalState;
-                let oldValueShallowCopy: FoundsetFieldsOnly;
+                let oldValueShallowCopy: FoundsetFieldsOnly | undefined;
 
                 if (!newValue /* newValue is now already currentValue, see code above, so we are checking current value here */) {
                     newValue = new FoundsetValue(propertyContext, this.sabloDeferHelper, this.viewportService, this.log, this.sabloService);
@@ -175,10 +175,10 @@ export class FoundsetType implements IType<FoundsetValue> {
                 // relocate conversion info in internal state and convert
                 newValue.viewPort.rows = this.viewportService.updateWholeViewport([] /* this is a full viewport replace; no need to give old/currentClientValue rows here I think */,
                         internalState, newValue.viewPort.rows, newValue.viewPort[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY],
-                        undefined, internalState.propertyContextCreator, false, () => new RowValue(newValue));
+                        undefined!, internalState.propertyContextCreator, false, () => new RowValue(newValue));
                 delete newValue.viewPort[ConverterService.CONVERSION_CL_SIDE_TYPE_KEY];
 
-                if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue : oldValueShallowCopy, newValue };
+                if (hasListeners) notificationParamForListeners!.fullValueChanged = { oldValue : oldValueShallowCopy!, newValue };
             }
 
             if (handledClientRequests != undefined) {
@@ -195,7 +195,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                         }
                         if (defer === internalState.selectionUpdateDefer) {
                             this.sabloService.resolveDeferedEvent(handledReq.id, currentClientValue.selectedRowIndexes, handledReq.value);
-                            delete internalState.selectionUpdateDefer;
+                            internalState.selectionUpdateDefer = undefined!;
                         } else {
                             this.sabloService.resolveDeferedEvent(handledReq.id, undefined, handledReq.value);
                         }
@@ -218,7 +218,7 @@ export class FoundsetType implements IType<FoundsetValue> {
                 if (!requestInfos) requestInfos = [];
                 requestInfos.push(currentRequestInfo);
             }
-            if (requestInfos) notificationParamForListeners.requestInfos = requestInfos;
+            if (requestInfos) notificationParamForListeners!.requestInfos = requestInfos;
 
             // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
             currentClientValue.getInternalState().fireChanges(notificationParamForListeners);
@@ -243,6 +243,8 @@ export class FoundsetType implements IType<FoundsetValue> {
 
 export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAwareValue {
 
+    [key: string]: any;
+
     /**
      * An identifier that allows you to use this foundset via the 'foundsetRef' and
      * 'record' types.
@@ -256,31 +258,31 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
      * this identifier on client (so you can use it to find the actual foundset
      * property in the model, if server side script put it in the model as well).
      */
-    public foundsetId: number;
+    public foundsetId!: number;
 
     /**
      * the size of the foundset on server (so not necessarily the total record count
      * in case of large DB tables)
      */
-    public serverSize: number;
+    public serverSize!: number;
 
     /**
      * this is the data you need to have loaded on client (just request what you need via provided
      * loadRecordsAsync loadExtraRecordsAsync, etc)
      */
-    public viewPort: Viewport;
+    public viewPort!: Viewport;
 
     /**
      * array of selected records in foundset; indexes can be out of current
      * viewPort as well
      */
-    public selectedRowIndexes: number[];
+    public selectedRowIndexes: number[] = [];
 
     /**
      * sort string of the foundset, the same as the one used in scripting for
      * foundset.sort and foundset.getCurrentSort. Example: 'orderid asc'.
      */
-    public sortColumns: string;
+    public sortColumns: string = '';
 
     /**
      * the multiselect mode of the server's foundset; if this is false,
@@ -300,7 +302,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
      * viewport to load records at index serverSize-1 or greater will load more
      * records in the foundset)
      */
-    public hasMoreRows: boolean;
+    public hasMoreRows: boolean = false;
 
     /**
      * columnFormats is only present if you specify
@@ -331,7 +333,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadRecordsAsync requested with (' + startIndex + ', ' + size + ')')));
         if (isNaN(startIndex) || isNaN(size)) throw new Error('loadRecordsAsync: start or size are not numbers (' + startIndex + ',' + size + ')');
 
-        const req = {newViewPort: {startIndex, size}};
+        const req: Record<string, any> = {newViewPort: {startIndex, size}};
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -344,7 +346,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadExtraRecordsAsync requested with (' + negativeOrPositiveCount + ', ' + dontNotifyYet + ')')));
         if (isNaN(negativeOrPositiveCount)) throw new Error('loadExtraRecordsAsync: extrarecords is not a number (' + negativeOrPositiveCount + ')');
 
-        const req = { loadExtraRecords: negativeOrPositiveCount };
+        const req: Record<string, any> = { loadExtraRecords: negativeOrPositiveCount };
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -357,7 +359,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         this.log.spam(this.log.buildMessage(() => ('svy foundset * loadLessRecordsAsync requested with (' + negativeOrPositiveCount + ', ' + dontNotifyYet + ')')));
         if (isNaN(negativeOrPositiveCount)) throw new Error('loadLessRecordsAsync: lessrecords is not a number (' + negativeOrPositiveCount + ')');
 
-        const req = { loadLessRecords: negativeOrPositiveCount };
+        const req: Record<string, any> = { loadLessRecords: negativeOrPositiveCount };
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -373,7 +375,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
 
     public sort(columns: any): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * sort requested with ' + JSON.stringify(columns))));
-        const req = { sort: columns };
+        const req: Record<string, any> = { sort: columns };
         const requestID = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         req[ViewportService.ID_KEY] = requestID;
         this.__internalState.requests.push(req);
@@ -397,18 +399,18 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
         if (this.__internalState.selectionUpdateDefer) {
             this.__internalState.selectionUpdateDefer.reject('Selection change defer cancelled because we are already sending another selection to server.');
         }
-        delete this.__internalState.selectionUpdateDefer;
+        this.__internalState.selectionUpdateDefer = undefined!;
 
         const msgId = this.__internalState.sabloDeferHelper.getNewDeferId(this.__internalState);
         this.__internalState.selectionUpdateDefer = this.__internalState.deferred[msgId].defer;
 
-        const req = {newClientSelectionRequest: tmpSelectedRowIdxs, selectionRequestID: msgId};
+        const req: Record<string, any> = {newClientSelectionRequest: tmpSelectedRowIdxs, selectionRequestID: msgId};
         req[ViewportService.ID_KEY] = msgId;
         this.__internalState.requests.push(req);
         this.__internalState.notifyChangeListener();
 
         return this.__internalState.selectionUpdateDefer.promise.finally(() => {
-            delete this.__internalState.selectionUpdateDefer;
+            this.__internalState.selectionUpdateDefer = undefined!;
         })
     }
     
@@ -422,7 +424,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
     public columnDataChangedByRowId(rowID: string, columnName: string, newValue: any, oldValue: any): RequestInfoPromise<any> {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * columnDataChangedByRowId requested with ("' + rowID + '", ' + columnName + ', ' + newValue)));
         return this.__internalState.viewportService.sendCellChangeToServerBasedOnRowId(this.viewPort.rows, this.__internalState, this.__internalState, rowID, columnName,
-                                        this.__internalState.propertyContextCreator, newValue, oldValue);
+                                        this.__internalState.propertyContextCreator, newValue, oldValue) as RequestInfoPromise<any>;
     }
 
     public columnDataChanged(rowIndex: number, columnName: string, newValue: any, oldValue?: any): RequestInfoPromise<any> {
@@ -431,7 +433,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    public getRecordRefByRowID(rowID: string): RecordRefForServer {
+    public getRecordRefByRowID(rowID: string): RecordRefForServer | null {
         if (rowID) {
             return RecordRefType.generateRecordRef(rowID, this.foundsetId);
         }
@@ -475,8 +477,8 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
             // their UI is destroyed...
 
             // in the future we could also clear these automatically - in case only the UI of forms adds such listeners/caches to the model
-            afterNgOnDestroyOfChildrenPotentialRunner(() => {
-                let possibleWarnMessage: string;
+            afterNgOnDestroyOfChildrenPotentialRunner!(() => {
+                let possibleWarnMessage: string | undefined;
                 this.viewPort.rows.forEach(row => {
                     if (row._cache) {
 
@@ -488,7 +490,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
                             + debugLocator + '\n[\n';
                         possibleWarnMessage += '  {';
                         let sep = '';
-                        row._cache.forEach((v, k) => {
+                        row._cache.forEach((v: any, k: any) => {
                             possibleWarnMessage += sep + k + ": " + ((typeof(v == 'object') ? v.constructor?.name : v))
                             sep = ', ';
                         });
@@ -504,17 +506,17 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
 
 class FoundsetTypeInternalState extends FoundsetViewportState implements IDeferedState {
 
-    deferred: { [key: string]: { defer: Deferred<any>; timeoutId: number } };
-    timeoutRejectLogPrefix: string;
-    selectionUpdateDefer: Deferred<any>;
-    propertyContextCreator: IPropertyContextCreatorForRow;
+    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: number } };
+    timeoutRejectLogPrefix!: string;
+    selectionUpdateDefer!: Deferred<any>;
+    propertyContextCreator!: IPropertyContextCreatorForRow;
 
-    unwatchSelection: () => void;
+    unwatchSelection!: () => void;
 
     constructor(propertyContext: IPropertyContext, log: LoggerService, public readonly sabloDeferHelper: SabloDeferHelper, public readonly viewportService: ViewportService,
         protected sabloService: SabloService) {
             
-        super(undefined, log, sabloService);
+        super(undefined!, log, sabloService);
 
         this.propertyContextCreator = {
             // currently foundset prop columns always have foundset prop's pushToServer so only one property context needed
@@ -543,7 +545,7 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
     
     public override uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
         this.sabloDeferHelper.cancelAll(this);
-        delete this.selectionUpdateDefer;
+        this.selectionUpdateDefer = undefined!;
         
         super.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator);
     }
@@ -553,8 +555,8 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
 export class RowValue {
 
    [columnName: string]: any;
-   _svyRowId: string;
-   private readonly _foundset: FoundsetValue;
+   _svyRowId!: string;
+   private readonly _foundset!: FoundsetValue;
 
     constructor(foundset: FoundsetValue) {
         // make foundset private member non-iterable in JS world
@@ -582,6 +584,7 @@ export class RowValue {
 }
 
 interface Viewport {
+    [key: string]: any;
     startIndex: number;
     size: number;
     rows: RowValue[];
@@ -614,6 +617,8 @@ class FoundsetFieldsOnly implements IFoundsetFieldsOnly {
 }
 
 interface ServerSentJSONForFoundset {
+
+    [key: string]: any;
 
     serverSize?: number;
     foundsetId?: number;

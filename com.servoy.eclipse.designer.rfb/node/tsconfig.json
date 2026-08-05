@@ -27,7 +27,8 @@
         "./node_modules/@angular/*"
       ]
     },
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

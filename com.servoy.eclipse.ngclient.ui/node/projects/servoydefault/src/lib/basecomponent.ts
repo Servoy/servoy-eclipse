@@ -7,28 +7,28 @@ import { ServoyBaseComponent, PropertyUtils, Format } from '@servoy/public';
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBaseComponent<T> {
 
-    @Input() onActionMethodID: (e: Event, data?: any) => void;
-    @Input() onRightClickMethodID: (e: Event, data?: any) => void;
-    @Input() onDoubleClickMethodID: (e: Event, data?: any) => void;
+    @Input() onActionMethodID!: (e: Event, data?: any) => void;
+    @Input() onRightClickMethodID!: (e: Event, data?: any) => void;
+    @Input() onDoubleClickMethodID!: (e: Event, data?: any) => void;
 
-    @Input() background: string;
-    @Input() borderType: string;
+    @Input() background!: string;
+    @Input() borderType!: string;
     @Input() dataProviderID: any;
-    @Input() displaysTags: boolean;
-    @Input() enabled: boolean;
-    @Input() fontType: string;
-    @Input() foreground: string;
-    @Input() format: Format;
-    @Input() horizontalAlignment;
-    @Input() margin;
-    @Input() styleClass: string;
-    @Input() tabSeq: number;
-    @Input() text: string;
-    @Input() toolTipText: string;
-    @Input() transparent: boolean;
-    @Input() scrollbars;
+    @Input() displaysTags!: boolean;
+    @Input() enabled!: boolean;
+    @Input() fontType!: string;
+    @Input() foreground!: string;
+    @Input() format!: Format;
+    @Input() horizontalAlignment: any;
+    @Input() margin: any;
+    @Input() styleClass!: string;
+    @Input() tabSeq!: number;
+    @Input() text!: string;
+    @Input() toolTipText!: string;
+    @Input() transparent!: boolean;
+    @Input() scrollbars: any;
 
-    timeoutID: number;
+    timeoutID: number | null = null;
 
     constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
         super(renderer, cdRef);

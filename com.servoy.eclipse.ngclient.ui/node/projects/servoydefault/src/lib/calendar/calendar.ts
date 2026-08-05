@@ -18,17 +18,17 @@ import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dom
 })
 export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('inputElement') inputElementRef: ElementRef;
+    @ViewChild('inputElement') inputElementRef!: ElementRef;
     
-    @ViewChild(FormatDirective) svyFormat: FormatDirective;
+    @ViewChild(FormatDirective) svyFormat!: FormatDirective;
 
     private log: LoggerService;
-    private picker: TempusDominus;
+    private picker: TempusDominus | null = null;
 
     private hasFocus = false;
     private isBlur = false;
 
-    private readonly config: Options = {
+    private readonly config = {
         allowInputToggle: false,
         useCurrent: false,
         display: {
@@ -59,7 +59,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             locale: 'nl',
             hourCycle: 'h23'
         }
-    };
+    } as Options;
 
     constructor(renderer: Renderer2,
         cdRef: ChangeDetectorRef,
@@ -68,13 +68,13 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         @Inject(DOCUMENT) doc: Document,
         logFactory: LoggerFactory) {
         super(renderer, cdRef, formattingService, doc);
-        this.config.localization.locale = servoyService.getLocale();
-        this.loadCalendarLocale(this.config.localization.locale);
+        this.config.localization!.locale = servoyService.getLocale();
+        this.loadCalendarLocale(this.config.localization!.locale);
         this.log = logFactory.getLogger('default-calendar');
-        this.config.localization.startOfTheWeek = getFirstDayOfWeek(servoyService.getLocaleObject() ? servoyService.getLocaleObject().full : servoyService.getLocale());
+        this.config.localization!.startOfTheWeek = getFirstDayOfWeek(servoyService.getLocaleObject() ? servoyService.getLocaleObject().full : servoyService.getLocale());
         const lts = LuxonDateTime.now().setLocale(servoyService.getLocale()).toLocaleString(LuxonDateTime.DATETIME_FULL).toUpperCase();
         if (lts.indexOf('AM') >= 0 || lts.indexOf('PM') >= 0) {
-            this.config.localization.hourCycle = 'h12';
+            this.config.localization!.hourCycle = 'h12';
         }
     }
 
@@ -89,14 +89,14 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     attachFocusListeners(nativeElement: any) {
-        if (this.onFocusGainedMethodID) {
+        if (this.onFocusGainedMethodID != null) {
             this.renderer.listen(nativeElement, 'focus', () => this.checkOnFocus());
-            this.picker.subscribe(Namespace.events.show, () => this.checkOnFocus());
+            this.picker!.subscribe(Namespace.events.show, () => this.checkOnFocus());
         }
 
-        if (this.onFocusLostMethodID) {
+        if (this.onFocusLostMethodID != null) {
             this.renderer.listen(nativeElement, 'blur', () => this.checkOnBlur());
-            this.picker.subscribe(Namespace.events.hide, () => this.checkOnBlur());
+            this.picker!.subscribe(Namespace.events.hide, () => this.checkOnBlur());
         }
     }
 
@@ -104,19 +104,19 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         super.svyOnChanges(changes);
         if (changes.findmode)
             if (changes.findmode.currentValue) {
-                this.picker.dispose();
+                this.picker!.dispose();
                 this.picker = null;
             } else {
                 this.initializePicker();
             }
 
         if (changes.dataProviderID && this.picker) {
-            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID, null, this.config.localization) : null;
+            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID, undefined, this.config.localization) : undefined;
             this.picker.dates.setValue(value);
         }
         if (this.dataProviderID && !this.findmode) {
-            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID, null, this.config.localization) : null;
-            this.config.viewDate = value;
+            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID, undefined, this.config.localization) : undefined;
+            this.config.viewDate = value ?? undefined;
        }
         if (changes.format)
             if (changes.format.currentValue) {
@@ -128,21 +128,21 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                     const showHour = format.indexOf('h') >= 0 || format.indexOf('H') >= 0;
                     const showMinute = format.indexOf('m') >= 0;
                     const showSecond = format.indexOf('s') >= 0;
-                    this.config.display.components.calendar = showYear || showMonth || showDate;
-                    this.config.display.components.decades = showYear;
-                    this.config.display.components.year = showYear;
-                    this.config.display.components.month = showMonth;
-                    this.config.display.components.date = showDate;
-                    this.config.display.components.clock = showHour || showMinute || showSecond;
-                    this.config.display.components.hours = showHour;
-                    this.config.display.components.minutes = showMinute;
-                    this.config.display.components.seconds = showSecond;
+                    this.config.display!.components!.calendar = showYear || showMonth || showDate;
+                    this.config.display!.components!.decades = showYear;
+                    this.config.display!.components!.year = showYear;
+                    this.config.display!.components!.month = showMonth;
+                    this.config.display!.components!.date = showDate;
+                    this.config.display!.components!.clock = showHour || showMinute || showSecond;
+                    this.config.display!.components!.hours = showHour;
+                    this.config.display!.components!.minutes = showMinute;
+                    this.config.display!.components!.seconds = showSecond;
                     if (format.indexOf('a') >= 0 || format.indexOf('A') >= 0 || format.indexOf('am') >= 0 || format.indexOf('AM') >= 0) {
-						this.config.localization.hourCycle = 'h12';
+						this.config.localization!.hourCycle = 'h12';
 					} else if (format.indexOf('H') >= 0) {
-						this.config.localization.hourCycle = 'h23';
+						this.config.localization!.hourCycle = 'h23';
 					} else if (format.indexOf('h') >= 0) {
-						this.config.localization.hourCycle = 'h12';
+						this.config.localization!.hourCycle = 'h12';
 					}
                     if (this.picker !== null) this.picker.updateOptions(this.config);
                 } else {
@@ -162,7 +162,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         super.pushUpdate();
     }
 
-    public modelChange(event) {
+    public modelChange(event: any) {
         if (this.findmode) {
             this.dataProviderID = event;
             super.pushUpdate();
@@ -192,13 +192,13 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             this.picker.dates.parseInput =  (value: string) => {
                 const parsed = this.formattingService.parse(value?value.trim():null, this.format, true, this.dataProviderID, true);
                 if (parsed instanceof Date && !isNaN(parsed.getTime())) return  new DateTime(parsed);
-                return null;
+                return null as unknown as DateTime;
             };
             this.picker.subscribe(Namespace.events.change, (event) => this.dateChanged(event));
-            if (this.onFocusGainedMethodID) {
+            if (this.onFocusGainedMethodID != null) {
                 this.picker.subscribe(Namespace.events.show, () => this.checkOnFocus());
             }
-            if (this.onFocusLostMethodID) {
+            if (this.onFocusLostMethodID != null) {
                 this.picker.subscribe(Namespace.events.hide, () => this.checkOnBlur());
             }
         }
@@ -207,7 +207,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
     private checkOnBlur() {
         this.isBlur = true;
         setTimeout(() => {
-            if (this.hasFocus && this.isBlur && (this.doc.activeElement.parentElement !== this.getNativeElement())) {
+            if (this.hasFocus && this.isBlur && (this.doc.activeElement!.parentElement !== this.getNativeElement())) {
                 this.hasFocus = false;
                 this.isBlur = false;
                 this.onFocusLostMethodID(new CustomEvent('blur'));
@@ -233,8 +233,8 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         
         const moduleLoader =  (module: { default: { localization: { [key: string]: string | number} }}) => {
             const copy = Object.assign({}, module.default.localization);
-            copy.startOfTheWeek =   this.config.localization.startOfTheWeek;
-            copy.hourCycle = this.config.localization.hourCycle;
+            copy.startOfTheWeek = this.config.localization!.startOfTheWeek!;
+            copy.hourCycle = this.config.localization!.hourCycle!;
             this.config.localization = copy;
             if (this.picker) this.picker.updateOptions(this.config);
         }
@@ -242,24 +242,43 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 this.log.info('Locale ' + locale + ' for calendar not found, default to english');
         }
         switch(language) {
+            // @ts-ignore
             case 'ar-sa': import('@eonasdan/tempus-dominus/dist/locales/ar-SA.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ar': import('@eonasdan/tempus-dominus/dist/locales/ar.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ca': import('@eonasdan/tempus-dominus/dist/locales/ca.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'cs': import('@eonasdan/tempus-dominus/dist/locales/cs.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'de': import('@eonasdan/tempus-dominus/dist/locales/de.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'es': import('@eonasdan/tempus-dominus/dist/locales/es.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'fi': import('@eonasdan/tempus-dominus/dist/locales/fi.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'fr': import('@eonasdan/tempus-dominus/dist/locales/fr.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'hr': import('@eonasdan/tempus-dominus/dist/locales/hr.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'hy': import('@eonasdan/tempus-dominus/dist/locales/hy.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'it': import('@eonasdan/tempus-dominus/dist/locales/it.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'nl': import('@eonasdan/tempus-dominus/dist/locales/nl.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'pl': import('@eonasdan/tempus-dominus/dist/locales/pl.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ro': import('@eonasdan/tempus-dominus/dist/locales/ro.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'ru': import('@eonasdan/tempus-dominus/dist/locales/ru.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'sl': import('@eonasdan/tempus-dominus/dist/locales/sl.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'sr': import('@eonasdan/tempus-dominus/dist/locales/sr.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'sr-latn': import('@eonasdan/tempus-dominus/dist/locales/sr-Latn.js').then(moduleLoader,errorHandler); break;
+            // @ts-ignore
             case 'tr': import('@eonasdan/tempus-dominus/dist/locales/tr.js').then(moduleLoader,errorHandler); break;
         }
     }

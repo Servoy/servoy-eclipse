@@ -46,7 +46,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
       }
     
       @if (!useScrolling) {
-        @if (cache&&containedForm()&&containedForm().absoluteLayout) {
+        @if (cache&&containedForm()&&containedForm()!.absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track row; let i = $index) {
               <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{height: getRowHeight() !== null ? getRowHeight() + 'px' : null, width: getRowWidth()}" style="display:inline-block; position: relative">
@@ -59,7 +59,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
             }
           </div>
         }
-        @if (cache&&containedForm()&&!containedForm().absoluteLayout) {
+        @if (cache&&containedForm()&&!containedForm()!.absoluteLayout) {
           <div>
             @for (row of getViewportRows(); track trackByFn(i, row); let i = $index) {
               <div tabindex="-1" (click)="onRowClick(row, $event)" [class]="getRowClasses(i)" [style]="{'width' : getRowWidth()}" style="display:inline-block">
@@ -108,24 +108,24 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 
-    readonly containedForm = input<FormComponentValue>(undefined);
+    readonly containedForm = input<FormComponentValue | undefined>(undefined);
     readonly containedFormMargin = input<any>(undefined);
-    readonly foundset = input<IFoundset>(undefined);
-    readonly selectionClass = input<string>(undefined);
-    readonly styleClass = input<string>(undefined);
-    readonly rowStyleClass = input<string>(undefined);
-    readonly rowStyleClassDataprovider = input<string[]>(undefined);
-    readonly rowEditableDataprovider = input<boolean[]>(undefined);
-    readonly rowEnableDataprovider = input<boolean[]>(undefined);
-    readonly responsivePageSize = input<number>(undefined);
-    readonly responsiveHeight = input<number>(undefined);
-    readonly pageLayout = input<string>(undefined);
-    readonly readOnly = input<boolean>(undefined);
-    readonly editable = input<boolean>(undefined);
-    readonly tabSeq = input<number>(undefined);
+    readonly foundset = input<IFoundset | undefined>(undefined);
+    readonly selectionClass = input<string | undefined>(undefined);
+    readonly styleClass = input<string | undefined>(undefined);
+    readonly rowStyleClass = input<string | undefined>(undefined);
+    readonly rowStyleClassDataprovider = input<string[] | undefined>(undefined);
+    readonly rowEditableDataprovider = input<boolean[] | undefined>(undefined);
+    readonly rowEnableDataprovider = input<boolean[] | undefined>(undefined);
+    readonly responsivePageSize = input<number | undefined>(undefined);
+    readonly responsiveHeight = input<number | undefined>(undefined);
+    readonly pageLayout = input<string | undefined>(undefined);
+    readonly readOnly = input<boolean | undefined>(undefined);
+    readonly editable = input<boolean | undefined>(undefined);
+    readonly tabSeq = input<number | undefined>(undefined);
 
-    readonly onSelectionChanged = input<(event: any) => void>(undefined);
-    readonly onListItemClick = input<(record: any, event: any) => void>(undefined);
+    readonly onSelectionChanged = input<((event: any) => void) | undefined>(undefined);
+    readonly onListItemClick = input<((record: any, event: any) => void) | undefined>(undefined);
 
     readonly svyResponsiveDiv = viewChild<TemplateRef<any>>('svyResponsiveDiv');
     readonly formComponentAbsoluteDiv = viewChild<TemplateRef<any>>('formComponentAbsoluteDiv');
@@ -145,17 +145,17 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     // Reference to the sabloTabseq directive
     readonly sabloTabseqDirective = viewChild('aggrid', { read: SabloTabseq });
     
-    _foundset = signal<IFoundset>(undefined);
+    _foundset = signal<IFoundset | undefined>(undefined);
     override elementRef!: ElementRef<HTMLDivElement>;
 
     // TODO: remove this when switching completely to scrollable LFC
     useScrolling = false;
 
     // used for scrolling with AGGGrid
-    parent: AbstractFormComponent;
-    agGridOptions: GridOptions;
+    parent!: AbstractFormComponent;
+    agGridOptions!: GridOptions;
     numberOfColumns = 1;
-    resizeObserver: ResizeObserver;
+    resizeObserver!: ResizeObserver;
     resizeTimeout: any;
     previousWidth = 0;
     private rowHeightMeasured = false;
@@ -165,11 +165,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     numberOfCells = 0;
     selectionChangedByKey = false;
 
-    cache: FormComponentCache;
-    removeListenerFunction: () => void;
+    cache!: FormComponentCache;
+    removeListenerFunction!: (() => void) | null;
     private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
     private log: LoggerService;
-    private rowItems: Array<IChildComponentPropertyValue | FormComponentCache>;
+    private rowItems!: Array<IChildComponentPropertyValue | FormComponentCache>;
 
     private designerViewportRows = [{} as ViewPortRow];
 
@@ -199,7 +199,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     handleKeyDown(event: any) {
-        const foundset = this._foundset();
+        const foundset = this._foundset()!;
         if (!foundset.multiSelect && event.key === 'ArrowUp' || event.key === 'ArrowDown') {
             let selectedRowIndex = foundset.selectedRowIndexes[0];
             if (event.key === 'ArrowUp') {
@@ -236,8 +236,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     onRowClick(row: any, event: Event) {
-        for (let i = 0; i < this._foundset().viewPort.rows.length; i++) {
-            const foundset = this._foundset();
+        for (let i = 0; i < this._foundset()!.viewPort.rows.length; i++) {
+            const foundset = this._foundset()!;
             if (foundset.viewPort.rows[i][ViewportService.ROW_ID_COL_KEY] === row['_svyRowId']) {
                 const index = i + foundset.viewPort.startIndex;
                 const selected = foundset.selectedRowIndexes;
@@ -265,7 +265,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             this.rowItems = [];
             containedForm.childElements.forEach(elem => {
                 if (elem.specName === 'servoycore-formcomponent') // TODO this used elem.type before which was always camel-case; does this mean that this if should be removed instead of making it work?
-                    this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name));
+                    this.rowItems.push(this.parent.getFormCache().getFormComponent(elem.name)!);
                 else this.rowItems.push(elem);
             });
         }
@@ -276,7 +276,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         this._foundset.set(this.foundset());
 
-        this.cache = this.parent.getFormCache().getFormComponent(this.name);
+        this.cache = this.parent.getFormCache().getFormComponent(this.name)!;
 
         if (this.servoyApi.isInDesigner()) {
             return;
@@ -307,7 +307,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     suppressKeyboardEvent: (params: any) => {
                         if(params.event.keyCode === 9) {
                             if(params.event.altKey) {
-                                const nextIndex = this.sabloTabseqDirective().runtimeIndex.nextAvailableIndex;
+                                const nextIndex = this.sabloTabseqDirective()!.runtimeIndex.nextAvailableIndex;
                                 const nextElement = this.doc.querySelector('[tabindex="' + nextIndex + '"]');
                                 if (nextElement) {
                                     (nextElement as HTMLElement).focus();
@@ -319,13 +319,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     }
                 },
                 columnDefs: [
-                    { cellRenderer: 'row-renderer', autoHeight: !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0 ? false : true }
+                    { cellRenderer: 'row-renderer', autoHeight: !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight()! < 0 ? false : true }
                 ],
                 rowModelType: 'serverSide',
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
                 infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
                 //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
-                rowHeight: this.getRowHeight(),
+                rowHeight: this.getRowHeight()!,
                 navigateToNextCell: (params: any) => {
                     const previousCell = params.previousCellPosition;
                     const suggestedNextCell = params.nextCellPosition;
@@ -333,12 +333,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     const KEY_UP = 38;
                     const KEY_DOWN = 40;
 
-                    let selectedIdx = this._foundset().selectedRowIndexes[0];
+                    let selectedIdx = this._foundset()!.selectedRowIndexes[0];
 
                     switch (params.key) {
                         case KEY_DOWN:
                             selectedIdx = selectedIdx + 1;
-                            if (selectedIdx >= this._foundset().serverSize) selectedIdx = this._foundset().serverSize - 1;
+                            if (selectedIdx >= this._foundset()!.serverSize) selectedIdx = this._foundset()!.serverSize - 1;
                             suggestedNextCell.rowIndex = Math.floor(selectedIdx / this.getNumberOfColumns());
                             return suggestedNextCell;
                         case KEY_UP:
@@ -353,12 +353,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 onFirstDataRendered: (params: any) => {
                     this.scrollToSelection();
                 },
-                domLayout: this.responsiveHeight() < 0 ? 'autoHeight' : 'normal'
+                domLayout: this.responsiveHeight()! < 0 ? 'autoHeight' : 'normal'
             };
         }
 
         if (!this.useScrolling) {
-            this.removeListenerFunction = this._foundset().addChangeListener((event: FoundsetChangeEvent) => {
+            this.removeListenerFunction = this._foundset()!.addChangeListener((event: FoundsetChangeEvent) => {
                 if (event.serverFoundsetSizeChanged) this.updatePagingControls();
                 if (event.viewportRowsUpdated) {
                     const changes = event.viewportRowsUpdated;
@@ -373,22 +373,22 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         return;
                     } else if (event.fullValueChanged) {
                         this._foundset.set(event.fullValueChanged.newValue);
-                        if (this._foundset().serverSize > 0 && this.numberOfCells > 0 && this.page * this.numberOfCells >= this._foundset().serverSize)
+                        if (this._foundset()!.serverSize > 0 && this.numberOfCells > 0 && this.page * this.numberOfCells >= this._foundset()!.serverSize)
                         {
-                            this.page = Math.floor((this._foundset().serverSize - 1) / this.numberOfCells);
+                            this.page = Math.floor((this._foundset()!.serverSize - 1) / this.numberOfCells);
                         }
                         this.calculateCells();
                         return;
                     }
 
-                    let viewportSizeAfterShiftingIsDone = this._foundset().viewPort.size;
+                    let viewportSizeAfterShiftingIsDone = this._foundset()!.viewPort.size;
                     if (event.viewPortStartIndexChanged) {
                         // an insert/delete before current page made viewport start index no longer match page start index; adjust
-                        const shiftedPageDelta = this.page * this.numberOfCells - this._foundset().viewPort.startIndex; // can be negative (insert) or positive(delete)
+                        const shiftedPageDelta = this.page * this.numberOfCells - this._foundset()!.viewPort.startIndex; // can be negative (insert) or positive(delete)
                         if (shiftedPageDelta !== 0) {
-                            const wantedVPSize = this._foundset().viewPort.size;
+                            const wantedVPSize = this._foundset()!.viewPort.size;
                             const wantedVPStartIndex = this.page * this.numberOfCells;
-                            const serverSize = this._foundset().serverSize;
+                            const serverSize = this._foundset()!.serverSize;
 
                             // so shifting means loading "shiftedPageDelta" more/less in one end of the viewport and "shiftedPageDelta" less/more at the other end
 
@@ -397,7 +397,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                             if (loadExtraCorrected > 0 /*so shift right*/ && wantedVPStartIndex + wantedVPSize > serverSize)
                                 loadExtraCorrected -= (wantedVPStartIndex + wantedVPSize - serverSize);
                             if (loadExtraCorrected !== 0) {
-                                this._foundset().loadExtraRecordsAsync(loadExtraCorrected, true);
+                                this._foundset()!.loadExtraRecordsAsync(loadExtraCorrected, true);
                                 viewportSizeAfterShiftingIsDone += Math.abs(loadExtraCorrected);
                             }
 
@@ -406,15 +406,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                             if (loadLessCorrected < 0 /*so shift left*/ && wantedVPSize < this.numberOfCells && wantedVPStartIndex + wantedVPSize < serverSize) //
                                 loadLessCorrected += Math.min(serverSize - wantedVPStartIndex - wantedVPSize, this.numberOfCells - wantedVPSize);
                             if (loadLessCorrected !== 0) {
-                                this._foundset().loadLessRecordsAsync(loadLessCorrected, true);
+                                this._foundset()!.loadLessRecordsAsync(loadLessCorrected, true);
                                 viewportSizeAfterShiftingIsDone -= Math.abs(loadLessCorrected);
                             }
                         }
                         this.updateSelection();
                     }
 
-                    const foundset = this._foundset();
-                    if (event.viewPortSizeChanged && this._foundset().serverSize > 0 && (this.page * this.numberOfCells >= this._foundset().serverSize)
+                    const foundset = this._foundset()!;
+                    if (event.viewPortSizeChanged && this._foundset()!.serverSize > 0 && (this.page * this.numberOfCells >= this._foundset()!.serverSize)
                         && foundset.viewPort.size === 0 && this.numberOfCells > 0) {
                         this.page = Math.floor((foundset.serverSize - 1) / this.numberOfCells);
                         this.calculateCells();
@@ -456,8 +456,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 }
             });
         } else {
-            this.removeListenerFunction = this._foundset().addChangeListener((event: FoundsetChangeEvent) => {
-                const agGrid = this.agGrid();
+            this.removeListenerFunction = this._foundset()!.addChangeListener((event: FoundsetChangeEvent) => {
+                const agGrid = this.agGrid()!;
                 if ((event.requestInfos && event.requestInfos.includes('AGGridDatasourceGetRows')) || agGrid.api.isDestroyed()) {
                     return;
                 }
@@ -475,7 +475,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     });
                     if (insertOrDeletes) {
                         agGrid.api.refreshServerSide({ purge: true });
-                        const foundset = this._foundset();
+                        const foundset = this._foundset()!;
                         agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
                     }
                     else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex){
@@ -493,8 +493,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     private scrollToSelection() {
-        const foundset = this._foundset();
-        const agGrid = this.agGrid();
+        const foundset = this._foundset()!;
+        const agGrid = this.agGrid()!;
         if(foundset.selectedRowIndexes.length && !agGrid.api.isDestroyed()) {
             const rowCount = agGrid.api.getDisplayedRowCount();
             if(rowCount > 1) {
@@ -509,8 +509,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     private calculateNumberOfColumns(): number
     {
-        const parentWidth = this.element().nativeElement.offsetWidth;
-        let width = this.containedForm().formWidth;
+        const parentWidth = this.element()!.nativeElement.offsetWidth;
+        let width = this.containedForm()!.formWidth;
         const containedFormMargin = this.containedFormMargin();
         if(containedFormMargin) {
             let left = parseInt(containedFormMargin.paddingLeft, 10);
@@ -521,11 +521,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     ngAfterViewInit() {
-        this.elementRef = this.element();
+        this.elementRef = this.element()!;
         super.ngAfterViewInit();
         this.calculateCells();
         if (this.useScrolling) {
-            this.agGrid().api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
+            this.agGrid()!.api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
             if(!this.servoyApi.isInAbsoluteLayout()) {
                 this.resizeObserver = new ResizeObserver((entries) => {
                     const newWidth = entries[0].contentRect.width;
@@ -537,12 +537,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                                 clearTimeout(this.resizeTimeout);
                             }
                             this.resizeTimeout = setTimeout(() => {
-                                const agGrid = this.agGrid();
+                                const agGrid = this.agGrid()!;
                                 if(!agGrid.api.isDestroyed()) {
                                     this.numberOfColumns = this.calculateNumberOfColumns();
                                     this.resizeTimeout = null;
                                     agGrid.api.refreshServerSide({ purge: true });
-                                    const foundset = this._foundset();
+                                    const foundset = this._foundset()!;
                                     agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
                                     setTimeout(() => {
                                         this.scrollToSelection();
@@ -552,20 +552,20 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         }
                     }
                 });
-                this.resizeObserver.observe(this.element().nativeElement);
+                this.resizeObserver.observe(this.element()!.nativeElement);
             }
         }
     }
 
     ngOnDestroy() {
-        if (this.resizeObserver) this.resizeObserver.unobserve(this.element().nativeElement);
+        if (this.resizeObserver) this.resizeObserver.unobserve(this.element()!.nativeElement);
         if (this.removeListenerFunction != null) {
             this.removeListenerFunction();
             this.removeListenerFunction = null;
         }
         const containedForm = this.containedForm();
         if (containedForm && containedForm.childElements) {
-            containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null);
+            containedForm.childElements.forEach(component => component.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = null!);
         }
         this._foundset()?.viewPort.rows.forEach(elem => {
             if (elem._cache) {
@@ -582,7 +582,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
     
     private deleteDescriptorAndKeepSimpleValue(obj: any, propName: string) {
-        let oldVal = (Object.getOwnPropertyDescriptor(obj, propName).get as any as ICellValuePropGetter).getStoredBasePropValue();
+        let oldVal = (Object.getOwnPropertyDescriptor(obj, propName)!.get as any as ICellValuePropGetter).getStoredBasePropValue();
         delete obj[propName]; // delete the descriptor with getter/setter for this prop
         obj[propName] = oldVal; // keep the value, but as a simple value, not as property descriptor with getter/setter - to be used if the form is made visible again
     }
@@ -593,7 +593,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             return this.designerViewportRows;
         }
         if (this.numberOfCells === 0) return [];
-        return this._foundset().viewPort.rows;
+        return this._foundset()!.viewPort.rows;
     }
 
     getStyleClasses(): string[] {
@@ -606,7 +606,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getRowStyle(includeHeight: boolean): any {
-        const rowStyle = {
+        const rowStyle: Record<string, any> = {
             'width': this.getRowWidth()
         };
         const containedFormMargin = this.containedFormMargin();
@@ -620,19 +620,19 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return rowStyle;
     }
 
-    getRowHeight(): number {
-        const containedForm = this.containedForm();
+    getRowHeight(): number | null {
+        const containedForm = this.containedForm()!;
         return containedForm.formHeight ? containedForm.formHeight : null;
     }
 
     onRowRendererAfterViewInit(elementRef: ElementRef): void {
-        if (!this.rowHeightMeasured && !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0) {
+        if (!this.rowHeightMeasured && !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight()! < 0) {
             this.rowHeightMeasured = true;
             requestAnimationFrame(() => {
                 const contentEl = elementRef.nativeElement.querySelector(':first-child');
                 const measuredHeight = contentEl ? contentEl.scrollHeight : elementRef.nativeElement.scrollHeight;
                 if (measuredHeight > 0) {
-                    const agGrid = this.agGrid();
+                    const agGrid = this.agGrid()!;
                     if (agGrid && !agGrid.api.isDestroyed()) {
                         agGrid.api.setGridOption('rowHeight', measuredHeight);
                         agGrid.api.resetRowHeights();
@@ -646,7 +646,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.pageLayout() === 'listview') {
             return '100%';
         }
-        return this.containedForm().formWidth + 'px';
+        return this.containedForm()!.formWidth + 'px';
     }
 
     getRowItems(): Array<IChildComponentPropertyValue | FormComponentCache> {
@@ -674,21 +674,21 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getRowItemTemplate(item: StructureCache | FormComponentCache | ComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
-            return item.tagname ? this[item.tagname]() : this.svyResponsiveDiv();
+            return item.tagname ? (this as any)[item.tagname]() : this.svyResponsiveDiv()!;
         }
         if (item instanceof FormComponentCache) {
-            return (item as FormComponentCache).responsive ? this.formComponentResponsiveDiv() : this.formComponentAbsoluteDiv();
+            return (item as FormComponentCache).responsive ? this.formComponentResponsiveDiv()! : this.formComponentAbsoluteDiv()!;
         }
         return this.parent.getTemplateForLFC(item);
     }
 
-    findElement(items: Array<StructureCache | ComponentCache | FormComponentCache>, item: ComponentCache): IChildComponentPropertyValue {
+    findElement(items: Array<StructureCache | ComponentCache | FormComponentCache>, item: ComponentCache): IChildComponentPropertyValue | null {
         for (const elem of items) {
             if (elem['name'] === item.name) {
                 return (elem as unknown) as IChildComponentPropertyValue;
             }
-            if (elem['items']) {
-                const found = this.findElement(elem['items'], item);
+            if ((elem as any)['items']) {
+                const found = this.findElement((elem as any)['items'], item);
                 if (found) {
                     return found;
                 }
@@ -701,7 +701,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (item instanceof StructureCache || item instanceof FormComponentCache) {
             return item;
         }
-        let cm: IChildComponentPropertyValue = null;
+        let cm: IChildComponentPropertyValue = null!;
         if (item instanceof ComponentCache) {
             if (this.servoyApi.isInDesigner()) {
                 cm = this.findElement(this.cache.items, item) as IChildComponentPropertyValue;
@@ -726,7 +726,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({ [property: string]: ServoyBaseComponent<any> }), componentModel: any) => {
                     const ui = rowObject[cm.name];
                     if (ui) {
-                        const changes = {};
+                        const changes: Record<string, any> = {};
                         propertiesChangedButNotByRef.forEach((propertyChangedButNotByRef) => {
                             const newValue = componentModel && (componentModel[propertyChangedButNotByRef.propertyName] !== undefined) ? componentModel[propertyChangedButNotByRef.propertyName] : propertyChangedButNotByRef.newPropertyValue;
                             changes[propertyChangedButNotByRef.propertyName] = new SimpleChange(newValue, newValue, false);
@@ -738,12 +738,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
                 let relativeStartIndex = relativeRowIndex, relativeStopIndex = relativeRowIndex + 1;
                 if (relativeRowIndex === -1 /*this means all rows*/) {
-                    relativeStartIndex = this._foundset().viewPort.startIndex;
-                    relativeStopIndex = this._foundset().viewPort.startIndex + this._foundset().viewPort.rows.length;
+                    relativeStartIndex = this._foundset()!.viewPort.startIndex;
+                    relativeStopIndex = this._foundset()!.viewPort.startIndex + this._foundset()!.viewPort.rows.length;
                 }
                 for(let relativeIndex = relativeStartIndex; relativeIndex < relativeStopIndex; relativeIndex++) {
-                    if (this.componentCache[this._foundset().viewPort.startIndex + relativeIndex]) {
-                        triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this._foundset().viewPort.startIndex + relativeIndex], cm.modelViewport ? cm.modelViewport[relativeIndex] : cm.model);
+                    if (this.componentCache[this._foundset()!.viewPort.startIndex + relativeIndex]) {
+                        triggerNgOnChangeForThisComponentInGivenRow(this.componentCache[this._foundset()!.viewPort.startIndex + relativeIndex], cm.modelViewport ? cm.modelViewport[relativeIndex] : cm.model);
                     }
                 }
             };
@@ -751,7 +751,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         const rowId = row[ViewportService.ROW_ID_COL_KEY];
         const handlers = {};
-        const rowItem = new Cell(cm, handlers, rowId, this._foundset().viewPort.startIndex + rowIndex, rowIndex);
+        const rowItem = new Cell(cm, handlers, rowId, this._foundset()!.viewPort.startIndex + rowIndex, rowIndex);
 
         if (cm.mappedHandlers) {
             cm.mappedHandlers.forEach((value, key) => {
@@ -783,10 +783,10 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         // TODO: 'enabledDataProvider' and 'visibleDataProvider' should not be in the model - on the server side
         // they should be evaluated for each row and added to the model as regular 'enabled' and 'visible' properties
         let elementEnabled = rowItem.model.enabled;
-        let getterForEnabled = function get() {
+        let getterForEnabled = function get(this: any) {
             const rowEnableDataprovider = thisLFC.rowEnableDataprovider();
             if (rowEnableDataprovider && rowEnableDataprovider.length > idx) {
-                return thisLFC.rowEditableDataprovider()[idx]
+                return rowEnableDataprovider[idx];
             }
             if(this.enabledDataProvider !== undefined) {
                 return this.enabledDataProvider;
@@ -803,7 +803,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         });
         
         let elementVisible = rowItem.model.visible;
-        let getterForVisible = function get() {
+        let getterForVisible = function get(this: any) {
             if(this.visibleDataProvider !== undefined) {
                 return this.visibleDataProvider;
             }
@@ -825,12 +825,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     callApi(componentName: string, apiName: string, args: any[], path?: string[]): any {
         if (path && componentName === 'containedForm' && path[0] === 'childElements') {
-            const compModel = this.containedForm().childElements[parseInt(path[1], 10)];
-            const selectedIndex = this._foundset().selectedRowIndexes[0];
+            const compModel = this.containedForm()!.childElements[parseInt(path[1], 10)];
+            const selectedIndex = this._foundset()!.selectedRowIndexes[0];
             let row = this.componentCache[selectedIndex];
             if (!row) {
                 this.log.warn('calling api ' + apiName + ' on' + componentName + ' in LFC:' + this.name + ' but selected record ' + selectedIndex +
-                    '  is not in the view' + this._foundset().viewPort + ' fallback to the nearest visible row');
+                    '  is not in the view' + this._foundset()!.viewPort + ' fallback to the nearest visible row');
                 // TODO is this a good idea? what if requestFocus() is called for example with the intention of showing and starting edit on selected row?
                 let closestIndex = selectedIndex;
                 let difference = Number.MAX_VALUE;
@@ -867,12 +867,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     getServoyApi(cell: Cell) {
         if (cell.api == null) {
-            cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormName(), this.containedForm().absoluteLayout, this.formservice, this.servoyService, this, this.servoyApi.isInDesigner());
+            cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormName(), this.containedForm()!.absoluteLayout, this.formservice, this.servoyService, this, this.servoyApi.isInDesigner());
         }
         return cell.api;
     }
 
-    getDesignNGClass(item: StructureCache): { [klass: string]: any } {
+    getDesignNGClass(item: StructureCache): { [klass: string]: any } | null {
        if (this.parent instanceof DesignFormComponent){
           return this.parent.getNGClass(item);
        }
@@ -896,12 +896,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         if (!this.useScrolling) {
             const containedForm = this.containedForm();
-            this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && containedForm && containedForm.absoluteLayout ? 0 : this.responsivePageSize();
+            this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && containedForm && containedForm.absoluteLayout ? 0 : this.responsivePageSize()!;
             if (this.numberOfCells <= 0) {
                 const containedFormValue = this.containedForm();
                 if (this.servoyApi.isInAbsoluteLayout() && containedFormValue && containedFormValue.absoluteLayout) {
-                    const parentWidth = this.element().nativeElement.offsetWidth;
-                    const parentHeight = this.element().nativeElement.offsetHeight;
+                    const parentWidth = this.element()!.nativeElement.offsetWidth;
+                    const parentHeight = this.element()!.nativeElement.offsetHeight;
                     const height = containedFormValue.formHeight;
                     const width = containedFormValue.formWidth;
                     const nrColumns = (this.pageLayout() === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
@@ -920,7 +920,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             }
 
             const startIndex = this.page * this.numberOfCells;
-            const foundset = this._foundset();
+            const foundset = this._foundset()!;
             if (foundset.viewPort.startIndex !== startIndex) {
                 this.waitingForLoad = true;
                 foundset.loadRecordsAsync(startIndex, this.numberOfCells).finally(() => this.waitingForLoad = false);
@@ -944,18 +944,18 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     updatePagingControls() {
-        this.renderer.setStyle(this.elementFirstRef().nativeElement, 'visibility', this.page > 0 ? 'visible' : 'hidden');
-        this.renderer.setStyle(this.elementLeftRef().nativeElement, 'visibility', this.page > 0 ? 'visible' : 'hidden');
-        const foundset = this._foundset();
+        this.renderer.setStyle(this.elementFirstRef()!.nativeElement, 'visibility', this.page > 0 ? 'visible' : 'hidden');
+        this.renderer.setStyle(this.elementLeftRef()!.nativeElement, 'visibility', this.page > 0 ? 'visible' : 'hidden');
+        const foundset = this._foundset()!;
         const hasMorePages = foundset.hasMoreRows || (foundset.serverSize - (this.page * this.numberOfCells + Math.min(this.numberOfCells, foundset.viewPort.rows.length))) > 0;
-        this.renderer.setStyle(this.elementRightRef().nativeElement, 'visibility', hasMorePages ? 'visible' : 'hidden');
+        this.renderer.setStyle(this.elementRightRef()!.nativeElement, 'visibility', hasMorePages ? 'visible' : 'hidden');
     }
 
     getRowClasses(index: number) {
         let rowClasses = 'svy-listformcomponent-row';
         const selectionClass = this.selectionClass();
         if (selectionClass) {
-            if (this._foundset().selectedRowIndexes.indexOf(this._foundset().viewPort.startIndex + index) !== -1) {
+            if (this._foundset()!.selectedRowIndexes.indexOf(this._foundset()!.viewPort.startIndex + index) !== -1) {
                 rowClasses += ' ' + selectionClass;
             }
         }
@@ -971,8 +971,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     updateSelection() {
-        const selectedRowIndex = this._foundset().selectedRowIndexes[0];
-        const element = this.element().nativeElement.children[(this.page > 0) ? selectedRowIndex - this.numberOfCells * this.page : selectedRowIndex];
+        const selectedRowIndex = this._foundset()!.selectedRowIndexes[0];
+        const element = this.element()!.nativeElement.children[(this.page > 0) ? selectedRowIndex - this.numberOfCells * this.page : selectedRowIndex];
         if (element && !element.contains(this.doc.activeElement) && this.selectionChangedByKey && !element.className.includes('svyPagination')) {
             element.focus();
             this.selectionChangedByKey = false;
@@ -1005,15 +1005,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getAGGridStyle(): any {
-        const aggridStyle = {
+        const aggridStyle: Record<string, any> = {
             '--ag-row-height': 42,
             '--ag-header-height': 48,
             '--ag-list-item-height': 24
         };
-        if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight() < 1) {
+        if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight()! < 1) {
             aggridStyle['height'] = '100%';
         } else {
-            aggridStyle['height'] = this.responsiveHeight() + 'px';
+            aggridStyle['height'] = this.responsiveHeight()! + 'px';
         }
         return aggridStyle;
     }
@@ -1021,7 +1021,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
 class Cell {
 
-    api: ServoyApi;
+    api!: ServoyApi;
     name: string;
     /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
     readonly model: any;
@@ -1077,7 +1077,7 @@ class ListFormComponentServoyApi extends ServoyApi {
     private fireOnSelectionChangeIfNeeded(): void {
         const onSelectionChanged = this.fc.onSelectionChanged();
         if (onSelectionChanged) {
-            const selected = this.fc._foundset().selectedRowIndexes;
+            const selected = this.fc._foundset()!.selectedRowIndexes;
             if (!selected || selected.indexOf(this.cell.rowIndex) === -1) {
                 onSelectionChanged(new CustomEvent('SelectionChanged'));
             }
@@ -1095,23 +1095,23 @@ class AGGridDatasource implements IServerSideDatasource {
 
     getRows(params: IServerSideGetRowsParams): void {
         // load record if endRow is not in viewPort
-        const startIndex = Math.ceil(this.lfc._foundset().viewPort.startIndex / this.lfc.getNumberOfColumns()); // start index of view port (0-based)
-        const endIndex = startIndex + Math.ceil(this.lfc._foundset().viewPort.size / this.lfc.getNumberOfColumns()); // end index of the view port (0-based)
+        const startIndex = Math.ceil(this.lfc._foundset()!.viewPort.startIndex / this.lfc.getNumberOfColumns()); // start index of view port (0-based)
+        const endIndex = startIndex + Math.ceil(this.lfc._foundset()!.viewPort.size / this.lfc.getNumberOfColumns()); // end index of the view port (0-based)
 
         // index in the cached viewPort (0-based);
-        let viewPortStartIndex = params.request.startRow - startIndex;
-        let viewPortEndIndex = params.request.endRow - startIndex;
+        let viewPortStartIndex = params.request.startRow! - startIndex;
+        let viewPortEndIndex = params.request.endRow! - startIndex;
 
-        if (params.request.startRow < startIndex || (params.request.endRow > endIndex && this.getLastRowIndex() === -1)) {
+        if (params.request.startRow! < startIndex || (params.request.endRow! > endIndex && this.getLastRowIndex() === -1)) {
             let requestViewPortStartIndex: any;
             // keep the previous chunk in cache
-            if (params.request.startRow >= AGGRID_CACHE_BLOCK_SIZE && params.request.endRow >= endIndex) {
-                requestViewPortStartIndex = params.request.startRow - AGGRID_CACHE_BLOCK_SIZE;
+            if (params.request.startRow! >= AGGRID_CACHE_BLOCK_SIZE && params.request.endRow! >= endIndex) {
+                requestViewPortStartIndex = params.request.startRow! - AGGRID_CACHE_BLOCK_SIZE;
             } else {
-                requestViewPortStartIndex = params.request.startRow;
+                requestViewPortStartIndex = params.request.startRow!;
             }
 
-            const size = (params.request.endRow - requestViewPortStartIndex) * this.lfc.getNumberOfColumns();
+            const size = (params.request.endRow! - requestViewPortStartIndex) * this.lfc.getNumberOfColumns();
             const promise = this.loadExtraRecordsAsync(requestViewPortStartIndex * this.lfc.getNumberOfColumns(), size);
             promise.requestInfo = 'AGGridDatasourceGetRows';
             promise.then(() => {
@@ -1120,8 +1120,8 @@ class AGGridDatasource implements IServerSideDatasource {
                 const lastRowIndex = this.getLastRowIndex();
 
                 // update viewPortStatIndex
-                viewPortStartIndex = params.request.startRow - Math.ceil(this.lfc._foundset().viewPort.startIndex / this.lfc.getNumberOfColumns());
-                viewPortEndIndex = params.request.endRow - Math.ceil(this.lfc._foundset().viewPort.startIndex / this.lfc.getNumberOfColumns());
+                viewPortStartIndex = params.request.startRow! - Math.ceil(this.lfc._foundset()!.viewPort.startIndex / this.lfc.getNumberOfColumns());
+                viewPortEndIndex = params.request.endRow! - Math.ceil(this.lfc._foundset()!.viewPort.startIndex / this.lfc.getNumberOfColumns());
 
                 params.success({
                     rowData: this.getViewPortData(viewPortStartIndex, viewPortEndIndex),
@@ -1139,7 +1139,7 @@ class AGGridDatasource implements IServerSideDatasource {
     }
 
     hasMoreRecordsToLoad() {
-        const foundset = this.lfc._foundset();
+        const foundset = this.lfc._foundset()!;
         return foundset.hasMoreRows || (foundset.viewPort.startIndex + foundset.viewPort.size) < foundset.serverSize;
     }
 
@@ -1147,35 +1147,35 @@ class AGGridDatasource implements IServerSideDatasource {
         if (this.hasMoreRecordsToLoad()) {
             return -1;
         } else {
-            return Math.ceil(this.lfc._foundset().serverSize / this.lfc.getNumberOfColumns());
+            return Math.ceil(this.lfc._foundset()!.serverSize / this.lfc.getNumberOfColumns());
         }
     }
 
     loadExtraRecordsAsync(startIndex: number, size: number) {
         size = (size * AGGRID_MAX_BLOCKS_IN_CACHE * this.lfc.getNumberOfColumns()) + size;
         if (this.hasMoreRecordsToLoad() === false) {
-            size = Math.min(size, this.lfc._foundset().serverSize - startIndex);
+            size = Math.min(size, this.lfc._foundset()!.serverSize - startIndex);
         }
         if (size < 0) {
             size = 0;
         }
 
-        return this.lfc._foundset().loadExtraRecordsAsync(size);
+        return this.lfc._foundset()!.loadExtraRecordsAsync(size);
     }
 
     getViewPortData(startIndex: number, endIndex: number) {
         const result = [];
         let fsStartIndex = startIndex ? startIndex * this.lfc.getNumberOfColumns() : 0;
         let fsEndIndex = endIndex * this.lfc.getNumberOfColumns();
-        if (fsEndIndex > this.lfc._foundset().viewPort.rows.length) fsEndIndex = this.lfc._foundset().viewPort.rows.length;
+        if (fsEndIndex > this.lfc._foundset()!.viewPort.rows.length) fsEndIndex = this.lfc._foundset()!.viewPort.rows.length;
 
         // index cannot exceed ServerSize
-        fsStartIndex = Math.min(fsStartIndex, this.lfc._foundset().serverSize);
-        fsEndIndex = Math.min(fsEndIndex, this.lfc._foundset().serverSize);
+        fsStartIndex = Math.min(fsStartIndex, this.lfc._foundset()!.serverSize);
+        fsEndIndex = Math.min(fsEndIndex, this.lfc._foundset()!.serverSize);
 
         let line = [];
         for (let j = fsStartIndex; j < fsEndIndex; j++) {
-            line.push(this.lfc._foundset().viewPort.rows[j]);
+            line.push(this.lfc._foundset()!.viewPort.rows[j]);
             if (line.length === this.lfc.getNumberOfColumns()) {
                 result.push(line);
                 line = [];

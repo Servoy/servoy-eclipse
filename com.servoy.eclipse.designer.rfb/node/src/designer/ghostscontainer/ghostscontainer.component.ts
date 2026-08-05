@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { Point } from '../mouseselection/mouseselection.component';
@@ -8,40 +8,41 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 
-    @ViewChild('element', { static: false }) elementRef: ElementRef<Element>;
+    @ViewChild('element', { static: false }) elementRef!: ElementRef<Element>;
 
     ghostOffset = 20;
-    containerLeftOffset: number;
-    containerTopOffset: number;
-    leftOffsetRelativeToSelectedGhost: number;
-    topOffsetRelativeToSelectedGhost: number;
+    containerLeftOffset!: number;
+    containerTopOffset!: number;
+    leftOffsetRelativeToSelectedGhost!: number;
+    topOffsetRelativeToSelectedGhost!: number;
 
-    ghostContainers: Array<GhostContainer>;
-    removeSelectionChangedListener: () => void;
-    mousedownpoint: Point;
-    draggingGhost: Ghost;
-    draggingInGhostContainer: GhostContainer;
-    draggingClone: Element;
-    draggingGhostComponents: Array<DraggingGhostInfo>;
+    ghostContainers!: Array<GhostContainer>;
+    removeSelectionChangedListener!: () => void;
+    mousedownpoint!: Point;
+    draggingGhost!: Ghost;
+    draggingInGhostContainer!: GhostContainer;
+    draggingClone!: Element;
+    draggingGhostComponents!: Array<DraggingGhostInfo>;
 
-    draggingGhostComponent: HTMLElement;
-    formWidth: number;
-    formHeight: number;
-    partTopPosition: number;
+    draggingGhostComponent!: HTMLElement;
+    formWidth!: number;
+    formHeight!: number;
+    partTopPosition!: number;
 
     private topLimit = 0;
     private bottomLimit = 0;
     private isLowestPart = false;
-    private editorContent: HTMLElement;
-    private contentArea: HTMLElement;
-    private glasspane: HTMLElement;
+    private editorContent!: HTMLElement;
+    private contentArea!: HTMLElement;
+    private glasspane!: HTMLElement;
     private ghostsBottom = 0;
     private lastMouseY = 0;
-    private frameRect: DOMRect;
+    private frameRect!: DOMRect;
 
     constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
         protected urlParser: URLParserService, private editorContentService: EditorContentService) {
@@ -72,8 +73,8 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
-            this.formWidth = data.width;
-            this.formHeight = data.height;
+            this.formWidth = data.width!;
+            this.formHeight = data.height!;
             this.renderGhosts();
         }
 
@@ -103,9 +104,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     hideShowGhosts(visibility: string) {
         if (this.elementRef) {
             const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
-            Array.from(ghostsContainer).slice(1).forEach((item: HTMLElement) => {
+            Array.from(ghostsContainer).slice(1).forEach((item: any) => {
                 item.style.visibility = visibility;
-                item.querySelectorAll('.ghost').forEach((ghost: HTMLElement) => ghost.style.visibility = visibility);
+                item.querySelectorAll('.ghost').forEach((ghost: any) => ghost.style.visibility = visibility);
             });
         }
     }
@@ -130,10 +131,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (!ghostContainer.style) ghostContainer.style = {} as CSSStyleDeclaration;
                 if (ghostContainer.containerPositionInComp != undefined) {
                     const odd = (ghostContainer.containerPositionInComp % 2);
-                    ghostContainer.style['background-color'] = odd ? 'rgba(150, 150, 150, 0.05)' : 'rgba(0, 100, 80, 0.05)';
-                    ghostContainer.style['color'] = odd ? 'rgb(150, 150, 150)' : 'rgb(0, 100, 80)';
+                    (ghostContainer.style as any)['background-color'] = odd ? 'rgba(150, 150, 150, 0.05)' : 'rgba(0, 100, 80, 0.05)';
+                    (ghostContainer.style as any)['color'] = odd ? 'rgb(150, 150, 150)' : 'rgb(0, 100, 80)';
                     if (odd) {
-                        ghostContainer.style['border-top'] = ghostContainer.style['border-bottom'] = 'dashed 1px';
+                        (ghostContainer.style as any)['border-top'] = (ghostContainer.style as any)['border-bottom'] = 'dashed 1px';
                     }
                 }
                 if (!this.urlParser.isAbsoluteFormLayout()) {
@@ -145,10 +146,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 if (ghostContainer.parentCompBounds) {
                     const spaceForEachContainer = 62 /*(basicWebComponent.getSize().height / totalGhostContainersOfComp)*/;
                     let emptySpaceTopBeforGhosts = 0; // see if we have room to add some extra pixels to top location - it shows nicer on large components when space is available
-                    if (ghostContainer.parentCompBounds.height > ghostContainer.totalGhostContainersOfComp * spaceForEachContainer + 30) emptySpaceTopBeforGhosts = 30;
+                    if (ghostContainer.parentCompBounds.height! > ghostContainer.totalGhostContainersOfComp * spaceForEachContainer + 30) emptySpaceTopBeforGhosts = 30;
 
-                    ghostContainer.style.left = (ghostContainer.parentCompBounds.left + 20) + 'px';
-                    ghostContainer.style.top = (ghostContainer.parentCompBounds.top + ghostContainer.containerPositionInComp * spaceForEachContainer + emptySpaceTopBeforGhosts + 20) + 'px';
+                    ghostContainer.style.left = (ghostContainer.parentCompBounds.left! + 20) + 'px';
+                    ghostContainer.style.top = (ghostContainer.parentCompBounds.top! + ghostContainer.containerPositionInComp * spaceForEachContainer + emptySpaceTopBeforGhosts + 20) + 'px';
                     ghostContainer.style.width = ghostContainer.parentCompBounds.width + 'px';
                     ghostContainer.style.height = spaceForEachContainer + 'px';
                 }
@@ -172,7 +173,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                         // groups are deprecated in new designer
                         continue;
                     }
-                    let style = {};
+                    let style: Record<string, any> = {};
                     ghost.hrstyle = { display: 'none' } as CSSStyleDeclaration;
                     if (ghost.type == GHOST_TYPES.GHOST_TYPE_PART) { // parts
                         style = {
@@ -279,7 +280,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             this.draggingGhost = ghost;
             this.draggingInGhostContainer = ghostContainer;
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION || this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {
-                const parentRect = (event.currentTarget as Element).parentElement.getBoundingClientRect();
+                const parentRect = (event.currentTarget as Element).parentElement!.getBoundingClientRect();
                 this.containerLeftOffset = parentRect.left;
                 this.containerTopOffset = parentRect.top;
                 const rect = (event.currentTarget as Element).getBoundingClientRect();
@@ -310,7 +311,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                 this.draggingGhostComponent = this.editorContentService.querySelector('[svy-id="' + this.draggingGhost.uuid + '"]');
                 const containerHeight = parseInt(ghostContainer.style.height.replace('px', ''));
-                const parentRect = (event.currentTarget as Element).parentElement.getBoundingClientRect();
+                const parentRect = (event.currentTarget as Element).parentElement!.getBoundingClientRect();
                 this.containerTopOffset = parentRect.top;
                 this.topLimit = this.draggingGhostComponent.previousSibling ? (this.draggingGhostComponent.previousElementSibling as HTMLElement).offsetTop + 5 : 5;
                 this.bottomLimit = (this.draggingGhostComponent.nextElementSibling as HTMLElement).offsetTop - 5;
@@ -330,7 +331,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         if (this.draggingGhost) {
             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-                    const obj = {};
+                    const obj: Record<string, any> = {};
                     for (const ghost of this.draggingInGhostContainer.ghosts) {
                         obj[ghost.uuid] = { 'x': ghost.location.x, 'y': ghost.location.y };
                     }
@@ -340,7 +341,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     this.renderGhostsInternal(this.ghostContainers);
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
-                    const changes = {};
+                    const changes: Record<string, any> = {};
                     if (this.partTopPosition < this.topLimit) {
                         this.partTopPosition = this.topLimit;
                     }
@@ -348,7 +349,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                         this.partTopPosition = this.bottomLimit;
                     }
                     if (this.isLowestPart) {
-                        const id = document.querySelector('.ghost[svy-ghosttype="form"]').getAttribute('svy-id');
+                        const id = document.querySelector('.ghost[svy-ghosttype="form"]')!.getAttribute('svy-id')!;
                         changes[id] = { 'y': this.partTopPosition };
                         this.editorSession.sendChanges(changes);
 
@@ -366,13 +367,13 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
         if (this.draggingClone) {
             this.draggingClone.remove();
-            this.draggingClone = null;
+            this.draggingClone = null!;
         }
         this.editorContentService.getGlassPane().style.cursor = 'default';
-        this.draggingGhost = null;
-        this.draggingInGhostContainer = null;
-        this.draggingGhostComponent = null;
-        this.draggingGhostComponents = null;
+        this.draggingGhost = null!;
+        this.draggingInGhostContainer = null!;
+        this.draggingGhostComponent = null!;
+        this.draggingGhostComponents = null!;
         this.renderGhosts();
     }
 
@@ -516,26 +517,26 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 }
 
 class GhostContainer {
-    propertyName: string;
-    uuid: string;
-    class: string;
-    style: CSSStyleDeclaration;
-    parentCompBounds: { left?: number, top?: number; width?: number; height?: number };
-    containerPositionInComp: number;
-    totalGhostContainersOfComp: number;
-    ghosts: Array<Ghost>;
+    propertyName!: string;
+    uuid!: string;
+    class!: string;
+    style!: CSSStyleDeclaration;
+    parentCompBounds!: { left?: number, top?: number; width?: number; height?: number };
+    containerPositionInComp!: number;
+    totalGhostContainersOfComp!: number;
+    ghosts!: Array<Ghost>;
 }
 
 class Ghost {
-    uuid: string;
-    text: string;
-    type: GHOST_TYPES;
-    class: string;
-    propertyType: string;
-    style: { left?: string, top?: string; right?: string; width?: string; height?: string };
-    hrstyle: CSSStyleDeclaration;
-    location: { x: number, y: number };
-    size: { width: number, height: number };
+    uuid!: string;
+    text!: string;
+    type!: GHOST_TYPES;
+    class!: string;
+    propertyType!: string;
+    style!: { left?: string, top?: string; right?: string; width?: string; height?: string };
+    hrstyle!: CSSStyleDeclaration;
+    location!: { x: number, y: number };
+    size!: { width: number, height: number };
 }
 
 export enum GHOST_TYPES {

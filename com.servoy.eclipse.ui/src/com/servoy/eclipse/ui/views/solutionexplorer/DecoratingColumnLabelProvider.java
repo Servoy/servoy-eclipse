@@ -107,6 +107,11 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 	{
 		Image image = provider.getImage(element);
 
+		if (image != null && image.isDisposed())
+		{
+			return null;
+		}
+
 		if (element instanceof PlatformSimpleUserNode)
 		{
 			if (((PlatformSimpleUserNode)element).getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE) return image;

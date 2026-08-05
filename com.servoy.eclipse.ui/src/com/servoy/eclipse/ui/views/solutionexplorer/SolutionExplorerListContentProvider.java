@@ -2203,6 +2203,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				c = c.replaceFirst("@return", "<br/>@return");
 				c = c.replaceFirst("@properties", "<br/><b>@properties</b>");
 			}
+			else
+			{
+				c = c.replaceAll("\n", "<br/>");
+				c = c.replaceAll("(?<!<br/>)(@param|@return|@example|@element)", "<br/>$1");
+			}
 
 			c = c.replaceAll(separator, "<br/>");
 		}

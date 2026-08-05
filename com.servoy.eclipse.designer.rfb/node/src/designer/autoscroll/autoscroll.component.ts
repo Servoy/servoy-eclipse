@@ -1,5 +1,5 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
@@ -7,18 +7,19 @@ import { EditorContentService } from '../services/editorcontent.service';
     selector: 'designer-autoscroll',
     templateUrl: './autoscroll.component.html',
     styleUrls: ['./autoscroll.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 
 export class AutoscrollComponent implements OnInit, AfterViewInit {
 
-    @ViewChild('autoscroll', {static: false}) autoscrollElement: ElementRef<HTMLElement>;
-    @Input() placement: string;
+    @ViewChild('autoscroll', {static: false}) autoscrollElement!: ElementRef<HTMLElement>;
+    @Input() placement!: string;
 
     private scrollTarget: ISupportAutoscroll | null | undefined;
-    private handler: ReturnType<typeof setInterval>;
-    private direction: number;
-    private mousePoint: Point;
+    private handler!: ReturnType<typeof setInterval>;
+    private direction!: number;
+    private mousePoint!: Point;
     private isAutoscrollActive = false;
     private stopAutoscrollOffset = 3; 
     private step = 0;

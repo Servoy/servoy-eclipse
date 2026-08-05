@@ -29,7 +29,7 @@ export class SabloDeferHelper {
      */
     public retrieveDeferForHandling(msgId: number, state: IDeferedState): IDeferred<any> {
         const deferred = state.deferred[msgId];
-        let defer: IDeferred<any>;
+        let defer!: IDeferred<any>;
         if (deferred) {
             defer = deferred.defer;
             clearTimeout(deferred.timeoutId);

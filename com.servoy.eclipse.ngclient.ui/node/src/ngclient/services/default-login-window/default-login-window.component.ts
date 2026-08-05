@@ -1,19 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { LocalStorageService } from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
 
 @Component({
     templateUrl: './default-login-window.component.html',
     styleUrls: ['./default-login-window.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DefaultLoginWindowComponent {
 
-    username: string;
-    password: string;
+    username!: string;
+    password!: string;
     remember = true;
-    message: string;
-    onLoginCallback : () => void;
+    message!: string;
+    onLoginCallback!: () => void;
     
     constructor(
         private sabloService: SabloService,
@@ -34,7 +35,7 @@ export class DefaultLoginWindowComponent {
         });
     }
     
-    public setOnLoginCallback(callback){
+    public setOnLoginCallback(callback: any){
         this.onLoginCallback = callback;
     }
 }

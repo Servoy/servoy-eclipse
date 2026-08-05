@@ -18,16 +18,16 @@ describe('ComboboxComponent', () => {
     // the following construct does nothing but make sure that an error is generated at compile-time if ServoyApi changes
     // so that when that happens we can update the jasmine.createSpyObj below which is based on strings only
     class _X extends ServoyApi {
-        formWillShow(_fn: string, _rn?: string, _fi?: number): Promise<boolean> { return undefined; }
-        hideForm(_fn: string, _rn?: string, _fi?: number, _fntws?: string, _rntwbs?: string, _fitwbs?: number): Promise<boolean> { return undefined; }
+        formWillShow(_fn: string, _rn?: string, _fi?: number): Promise<boolean> { return undefined as any; }
+        hideForm(_fn: string, _rn?: string, _fi?: number, _fntws?: string, _rntwbs?: string, _fitwbs?: number): Promise<boolean> { return undefined as any; }
         startEdit(_p: string) {}
         apply(_propertyName: string, _value: any) {}
         callServerSideApi(_methodName: string, _args: Array<any>) {}
         isInDesigner(): boolean { return false; }
         trustAsHtml(): boolean { return false; }
         isInAbsoluteLayout(): boolean { return false; }
-        getMarkupId(): string  { return undefined; }
-        getFormName(): string  { return undefined; }
+        getMarkupId(): string  { return undefined as any; }
+        getFormName(): string  { return undefined as any; }
         registerComponent(_component: ServoyBaseComponent<any>) {}
         unRegisterComponent(_component: ServoyBaseComponent<any>) {}
         getClientProperty(_key:string): any { return undefined; }

@@ -71,19 +71,19 @@ describe('FoundsetLinked Converter', () => {
                     rows: [{ _svyRowId: 'bla bla' }, { _svyRowId: 'har har' }]
                 }
             };
-            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
+            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, undefined as any);
             propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.REJECT, true);
 
             serverValue = { forFoundset: 'myfoundset' };
 
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                    undefined, undefined, undefined, propertyContext);
+                                    undefined as any, undefined as any, undefined as any, propertyContext);
             realClientValue.getInternalState().setChangeListener((doNotPush?: boolean) => {
                 changeNotified = true;
             });
             serverValue = { forFoundset: 'myfoundset', sv: ':) --- static string ***' };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                    realClientValue, undefined, undefined, propertyContext);
+                                    realClientValue, undefined as any, undefined as any, propertyContext);
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
@@ -113,12 +113,12 @@ describe('FoundsetLinked Converter', () => {
                     rows: [{ _svyRowId: 'bla bla' }, { _svyRowId: 'har har' }, { _svyRowId: 'bl bl' }, { _svyRowId: 'ha ha' }, { _svyRowId: 'b b' }, { _svyRowId: 'h h' }]
                 }
             };
-            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
+            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, undefined as any);
             propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.REJECT, true);
 
             serverValue = { forFoundset: 'myfoundset' };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                undefined, undefined, undefined, propertyContext);
+                                                undefined as any, undefined as any, undefined as any, propertyContext);
             realClientValue.getInternalState().setChangeListener((doNotPush?: boolean) => {
                 changeNotified = true;
             });
@@ -130,7 +130,7 @@ describe('FoundsetLinked Converter', () => {
             };
 
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                realClientValue, undefined, undefined, propertyContext);
+                                                realClientValue, undefined as any, undefined as any, propertyContext);
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
@@ -166,12 +166,12 @@ describe('FoundsetLinked Converter', () => {
                     rows: [{ _svyRowId: 'bla bla' }, { _svyRowId: 'har har' }, { _svyRowId: 'bl bl' }, { _svyRowId: 'ha ha' }, { _svyRowId: 'b b' }, { _svyRowId: 'h h' }]
                 }
             };
-            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
+            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, undefined as any);
             propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.ALLOW, true);
 
             serverValue = { forFoundset: 'myfoundset', w: false };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                undefined, undefined, undefined, propertyContext);
+                                                undefined as any, undefined as any, undefined as any, propertyContext);
             realClientValue.getInternalState().setChangeListener((doNotPush?: boolean) => {
                 changeNotified = true;
             });
@@ -181,7 +181,7 @@ describe('FoundsetLinked Converter', () => {
                 vp: [10643, 10702, 10835, 10952, 11011, 11081]
             };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                realClientValue, undefined, undefined, propertyContext);
+                                                realClientValue, undefined as any, undefined as any, propertyContext);
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
@@ -192,7 +192,7 @@ describe('FoundsetLinked Converter', () => {
         it('Should not auto-send value updates for when pushToServer is ALLOW, but it should send explicit changes via api', () => {
             serverValue = { forFoundset: 'myfoundset', w: false, vp: [10643, 10702, 10835, 10952, 11011, 11081] };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                undefined, undefined, undefined, propertyContext);
+                                                undefined as any, undefined as any, undefined as any, propertyContext);
             realClientValue.getInternalState().setChangeListener((doNotPush?: boolean) => {
                 changeNotified = true;
             });
@@ -228,20 +228,20 @@ describe('FoundsetLinked Converter', () => {
                     rows: [{ _svyRowId: 'bla bla' }, { _svyRowId: 'har har' }]
                 }
             };
-            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, undefined);
+            const fs = converterService.convertFromServerToClient(myfoundset, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, undefined as any);
             propertyContext = new PropertyContext((prop) => ({ myfoundset: fs }[prop]), PushToServerEnum.SHALLOW, true);
 
             serverValue = { forFoundset: 'myfoundset', w: false };
 
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                undefined, undefined, undefined, propertyContext);
+                                                undefined as any, undefined as any, undefined as any, propertyContext);
             realClientValue.getInternalState().setChangeListener((doNotPush?: boolean) => {
                 changeNotified = true;
             });
 
             serverValue = { sv: ':) --- static string ***' };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                realClientValue, undefined, undefined, propertyContext);
+                                                realClientValue, undefined as any, undefined as any, propertyContext);
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
@@ -252,7 +252,7 @@ describe('FoundsetLinked Converter', () => {
         it('Should send value updates for when pushToServer is SHALLOW', () => {
             serverValue = { forFoundset: 'myfoundset', w: false };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                undefined, undefined, undefined, propertyContext);
+                                                undefined as any, undefined as any, undefined as any, propertyContext);
             realClientValue.getInternalState().setChangeListener((doNotPush?: boolean) => {
                 changeNotified = true;
             });
@@ -271,7 +271,7 @@ describe('FoundsetLinked Converter', () => {
         it('Should not send value updates for when pushToServer is not specified', () => {
             serverValue = { forFoundset: 'myfoundset', w: false, vp: [10643, 10702, 10835, 10952, 11011, 11081] };
             realClientValue = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetLinkedType.TYPE_NAME),
-                                                undefined, undefined, undefined, propertyContext);
+                                                undefined as any, undefined as any, undefined as any, propertyContext);
             realClientValue.getInternalState().setChangeListener((doNotPush?: boolean) => {
                 changeNotified = true;
             });

@@ -7,7 +7,7 @@ import { WebStorage } from './webstorage.interface';
 })
 export class LocalStorageService implements WebStorage {
 
-    hasLocalStorage: boolean;
+    hasLocalStorage!: boolean;
     prefix = '';
     private log: LoggerService;
 
@@ -96,11 +96,11 @@ export class LocalStorageService implements WebStorage {
 		return true;
     }
 
-    key(index: number) {
+    key(index: number): string {
         if (this.hasLocalStorage) {
-			return localStorage.key(index);
+			return localStorage.key(index)!;
 		}
-		return null;
+		return null!;
     }
 
     changePrefix(newPrefix: string) {

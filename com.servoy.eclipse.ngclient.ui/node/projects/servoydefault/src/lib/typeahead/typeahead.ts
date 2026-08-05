@@ -14,12 +14,12 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/oper
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElement> {
 	// this is a hack so that this can be none static access because this references in this component to a conditional template
-	@ViewChild('instance', { static: true }) instance: NgbTypeahead;
+	@ViewChild('instance', { static: true }) instance!: NgbTypeahead;
 	focus$ = new Subject<string>();
 	click$ = new Subject<string>();
 
 	currentValue: any;
-	showPopupOnFocusGain: boolean;
+	showPopupOnFocusGain!: boolean;
 
 	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
 		formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
@@ -72,7 +72,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 
 		setTimeout(() => {
 			const popup = this.doc.getElementById(this.instance.popupId);
-			const activeElements = popup.getElementsByClassName('active');
+			const activeElements = popup!.getElementsByClassName('active');
 			if (activeElements.length === 1) {
 				const elem = activeElements[0] as HTMLElement;
 				elem.scrollIntoView({

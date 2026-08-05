@@ -5,9 +5,12 @@ pipeline {
         // Quiet period en log-rotatie volledig in code gevangen
         quietPeriod(120)
         buildDiscarder(logRotator(daysToKeepStr: '40', numToKeepStr: '70'))
+        
+        // Annuleer een eventueel al LOPENDE build als er een nieuwe start
+        disableConcurrentBuilds(abortPrevious: true)
     }
     
-   triggers {
+    triggers {
         GenericTrigger(
             genericVariables: [
                 [key: 'ref', value: '$.ref']
@@ -19,6 +22,9 @@ pipeline {
     }
     
     parameters {
+        // New boolean toggle for manual workspace wiping
+        booleanParam(name: 'WIPE_WORKSPACE', defaultValue: false, description: 'Check this box to completely wipe the workspace BEFORE running the build.')
+ 
         string(name: 'goals', defaultValue: 'clean install', trim: false)
     }
     
@@ -33,7 +39,46 @@ pipeline {
     }
     
     stages {
-        stage('Build with Tycho 5') {
+        stage('Clear Queued Builds') {
+            steps {
+                script {
+                    // Annuleer builds die in de queue wachten op de quietPeriod timer voor dit specifieke pad
+                    def currentJob = env.JOB_NAME
+                    def queue = jenkins.model.Jenkins.get().queue
+                    
+                    queue.items.each { item ->
+                        def queuedJobName = item.task.ownerTask?.fullName
+                        if (queuedJobName == currentJob) {
+                            echo "Removing pending queued build for ${currentJob} (Queue ID #${item.id})..."
+                            queue.cancel(item)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Clean workspace if requested, then automatically re-trigger without wipe
+        stage('Manual UI Workspace Wipe') {
+            when {
+                expression { params.WIPE_WORKSPACE }
+            }
+            steps {
+                echo "Manual workspace wipe requested via UI toggle. Cleaning up..."
+                cleanWs()
+                
+                echo "Re-triggering ${env.JOB_NAME} with WIPE_WORKSPACE = false..."
+                build job: env.JOB_NAME, wait: false, parameters: [
+                    booleanParam(name: 'WIPE_WORKSPACE', value: false),
+                    string(name: 'goals', value: params.goals)
+                ]
+            }
+        }
+
+        // Only runs if WIPE_WORKSPACE is FALSE
+        stage('Build with Tycho') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
             steps {
                 wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
                     configFileProvider([
@@ -49,37 +94,49 @@ pipeline {
     
     post {
         always {
-            // Karma unit testen archiveren
-            junit allowEmptyResults: false, testResults: 'com.servoy.eclipse.ngclient.ui/target/*karma.xml'
-            
-            // HTML Publisher voor Coverage rapportages
-            publishHTML([
-                allowMissing: false, 
-                alwaysLinkToLastBuild: false, 
-                keepAll: true, 
-                reportDir: 'com.servoy.eclipse.ngclient.ui/target/coverage', 
-                reportFiles: 'app/index.html,servoy-public/index.html', 
-                reportName: 'Coverage', 
-                reportTitles: ''
-            ])
+            script {
+                if (!params.WIPE_WORKSPACE) {
+                    // Karma unit testen archiveren
+                    junit allowEmptyResults: false, testResults: 'com.servoy.eclipse.ngclient.ui/target/*karma.xml'
+                    
+                    // HTML Publisher voor Coverage rapportages
+                    publishHTML([
+                        allowMissing: false, 
+                        alwaysLinkToLastBuild: false, 
+                        keepAll: true, 
+                        reportDir: 'com.servoy.eclipse.ngclient.ui/target/coverage', 
+                        reportFiles: 'app/index.html,servoy-public/index.html', 
+                        reportName: 'Coverage', 
+                        reportTitles: ''
+                    ])
+                }
+            }
         }
         
-       failure {
-            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Failed'
+        failure {
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Failed', adaptiveCards: true
         }
         
         unstable {
-            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Unstable'
-            build job: 'build', wait: false
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Unstable', adaptiveCards: true
+            script {
+                if (!params.WIPE_WORKSPACE) {
+                    build job: 'build', wait: false
+                }
+            }
         }
         
         fixed {
-            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Back to Normal'
+            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Back to Normal', adaptiveCards: true
         }
         
         success {
-            // Downstream project triggeren bij succes
-            build job: 'build', wait: false
+            script {
+                if (!params.WIPE_WORKSPACE) {
+                    // Downstream project triggeren bij succes
+                    build job: 'build', wait: false
+                }
+            }
         }
     }
 }

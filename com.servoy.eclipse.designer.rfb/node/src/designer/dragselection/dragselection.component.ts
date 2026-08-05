@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from '../directives/resizeknob.directive';
@@ -10,36 +10,37 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'dragselection',
     templateUrl: './dragselection.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {
-    frameRect: { x?: number; y?: number; top?: number; left?: number };
-    leftContentAreaAdjust: number;
-    topContentAreaAdjust: number;
-    dragCopy: boolean;
+    frameRect!: { x?: number; y?: number; top?: number; left?: number };
+    leftContentAreaAdjust!: number;
+    topContentAreaAdjust!: number;
+    dragCopy = false;
 
-    dragStartEvent: MouseEvent;
-    dragNode: HTMLElement = null;
-    selectionToDrag: string[] = null;
-    currentElementsInfo: Map<string, ElementInfo>;
+    dragStartEvent: MouseEvent | null = null;
+    dragNode: HTMLElement | null = null;
+    selectionToDrag: string[] | null = null;
+    currentElementsInfo: Map<string, ElementInfo> | null = null;
 
-    glasspane: HTMLElement;
-    contentArea: HTMLElement;
+    glasspane!: HTMLElement;
+    contentArea!: HTMLElement;
 	
-	formComponentBoundary: Element;
-	listFormComponentBoundary: Element;
+	formComponentBoundary: Element | null = null;
+	listFormComponentBoundary: Element | null = null;
 
     scroll = { x: 0, y: 0 };
 
-    autoscrollMargin = 100; //how many pixels we can drag beyong current margins
+    autoscrollMargin = 100;
     autoscrollOffset = { x: 0, y: 0 };
-    containerOffset = 0; //same for vertical / horizontal positioning
+    containerOffset = 0;
     minimumMargins = { bottom: 0, right: 0 };
     selectionRect = { top: 0, left: 0, width: 0, height: 0 };
     mousedownpoint = { x: 0, y: 0 };
-    mouseOffset = { top: 0, left: 0 }; //autoscroll limits will refer to this parameter
-    snapData: SnapData;
-    subscription: Subscription;
+    mouseOffset = { top: 0, left: 0 };
+    snapData: SnapData | null = null;
+    subscription!: Subscription;
 
     constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private guidesService: DynamicGuidesService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) { }
 
@@ -63,7 +64,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         this.scroll.x = this.contentArea.scrollLeft;
         this.scroll.y = this.contentArea.scrollTop;
 
-        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData) => {
+        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
             this.snap(value);
         })
     }
@@ -73,17 +74,16 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     }
 
     private onKeyup(event: KeyboardEvent) {
-        //if control is released during drag, the copy is deleted and the original element must be moved
         if (this.dragCopy && this.dragStartEvent && this.dragStartEvent.ctrlKey && (event.code.startsWith('Control') || event.code.startsWith('Meta'))) {
-            for (let i = 0; i < this.selectionToDrag.length; i++) {
-                const cloneInfo = this.currentElementsInfo.get(this.selectionToDrag[i]);
-                const node = this.getSvyWrapper(this.editorContentService.getContentElement(cloneInfo.element.getAttribute('cloneuuid')));
-                node.style.top = cloneInfo.element.style.top;
-                node.style.left = cloneInfo.element.style.left;
-                this.currentElementsInfo.delete(this.selectionToDrag[i]);
-                this.selectionToDrag[i] = cloneInfo.element.getAttribute('cloneuuid');
-                this.currentElementsInfo.set(this.selectionToDrag[i], new ElementInfo(node));
-                this.renderer.removeChild(cloneInfo.element.parentElement, cloneInfo.element);
+            for (let i = 0; i < this.selectionToDrag!.length; i++) {
+                const cloneInfo = this.currentElementsInfo!.get(this.selectionToDrag![i]);
+                const node = this.getSvyWrapper(this.editorContentService.getContentElement(cloneInfo!.element.getAttribute('cloneuuid')!));
+                node!.style.top = cloneInfo!.element.style.top;
+                node!.style.left = cloneInfo!.element.style.left;
+                this.currentElementsInfo!.delete(this.selectionToDrag![i]);
+                this.selectionToDrag![i] = cloneInfo!.element.getAttribute('cloneuuid')!;
+                this.currentElementsInfo!.set(this.selectionToDrag![i], new ElementInfo(node!));
+                this.renderer.removeChild(cloneInfo!.element.parentElement, cloneInfo!.element);
             }
             this.dragCopy = false;
         }
@@ -94,7 +94,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if (this.dragNode === null) {
             this.dragNode = this.designerUtilsService.getNode(event);
         }
-        if (this.dragNode && this.dragNode.parentElement.closest('.svy-responsivecontainer')) {
+        if (this.dragNode && this.dragNode.parentElement!.closest('.svy-responsivecontainer')) {
             // we are inside responsive container, let dragselection-responsive handle this
             this.dragNode = null;
             return;
@@ -117,7 +117,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
     onMouseUp(event: MouseEvent) {
         if (this.dragStartEvent != null) {
-            if (this.currentElementsInfo.size > 0) this.sendChanges(this.currentElementsInfo, event);
+            if (this.currentElementsInfo!.size > 0) this.sendChanges(this.currentElementsInfo!, event);
             this.dragStartEvent = null;
 
             //force redrawing of the selection decorator to the new position
@@ -136,17 +136,17 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
     private sendChanges(elementInfos: Map<string, ElementInfo>, event: MouseEvent) {
         if (elementInfos && elementInfos.size) {
-            const changes = (event.ctrlKey || event.metaKey) ? [] : {};
+            const changes: Record<string, any> = (event.ctrlKey || event.metaKey) ? [] : {};
             let i = 0;
             for (const nodeId of elementInfos.keys()) {
-                const elementInfo = elementInfos.get(nodeId);
+                const elementInfo = elementInfos.get(nodeId)!;
                 const id = (event.ctrlKey || event.metaKey) ? i++ : nodeId;
                 changes[id] = {
                     x: Math.round(elementInfo.x),
                     y: Math.round(elementInfo.y),
                     move: true
                 };
-                if (this.snapData && this.selectionToDrag.length == 1) {
+                if (this.snapData && this.selectionToDrag!.length == 1) {
                     const cssPos = this.snapData.cssPosition;
                     changes[id]['cssPos'] = cssPos;
                     changes[id]['x'] = Math.round(this.snapData?.left);
@@ -176,7 +176,6 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if (!this.editorSession.getState().dragging) {
             if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                 this.editorSession.setDragging(true);
-                //this.autoscrollElementClientBounds = this.designerUtilsService.getAutoscrollElementClientBounds();
             } else return;
         }
         
@@ -185,8 +184,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null) {
             this.dragCopy = true;
             const selection = this.editorSession.getSelection();
-            if (this.dragNode && !selection.includes(this.dragNode.getAttribute('svy-id'))) {
-                selection.push(this.dragNode.getAttribute('svy-id'));
+            if (this.dragNode && !selection.includes(this.dragNode.getAttribute('svy-id')!)) {
+                selection.push(this.dragNode.getAttribute('svy-id')!);
             }
             this.initSelectionToDrag(selection);
         }
@@ -194,20 +193,20 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if (!this.selectionToDrag) {
             let selection = this.editorSession.getSelection();
             if (!selection || selection.length == 0) {
-                selection = [this.dragNode.getAttribute('svy-id')];
+                selection = [this.dragNode!.getAttribute('svy-id')!];
             }
             this.initSelectionToDrag(selection);
         }
 
-		if (this.selectionToDrag.length > 0) {
+		if (this.selectionToDrag!.length > 0) {
 			let changeX = event.clientX - this.dragStartEvent.clientX;
 			let changeY = event.clientY - this.dragStartEvent.clientY;
 			
 			//restrict dragging to only allow inside the form component or list form component
 			if (this.formComponentBoundary || this.listFormComponentBoundary) {
-				const formRect = (this.formComponentBoundary ? this.formComponentBoundary : this.listFormComponentBoundary).getBoundingClientRect();
+				const formRect = (this.formComponentBoundary ? this.formComponentBoundary : this.listFormComponentBoundary)!.getBoundingClientRect();
 
-				const draggedElement = this.dragNode;
+				const draggedElement = this.dragNode!;
 				const dragRect = draggedElement.getBoundingClientRect();
 
 				const projectedRight = dragRect.right + changeX;
@@ -241,7 +240,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             if (!node) {
                 continue;
             }
-            node = this.getSvyWrapper(node);
+            node = this.getSvyWrapper(node)!;
             if (this.dragCopy) {
                 const clone = node.cloneNode(true) as HTMLElement;
                 this.renderer.setAttribute(clone, 'id', 'dragNode' + i);
@@ -249,19 +248,19 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
                 this.renderer.appendChild(this.editorContentService.getContentBodyElement(), clone);
 
                 this.selectionToDrag.push('dragNode' + i);
-                this.currentElementsInfo.set(this.selectionToDrag[i], new ElementInfo(clone));
+                this.currentElementsInfo!.set(this.selectionToDrag[i], new ElementInfo(clone));
             }
             else {
                 this.selectionToDrag.push(selection[i]);
-                this.currentElementsInfo.set(selection[i], new ElementInfo(node));
+                this.currentElementsInfo!.set(selection[i], new ElementInfo(node));
             }
         }
         this.initAutoscrollData();
     }
 
-    private getSvyWrapper(node: HTMLElement) {
+    private getSvyWrapper(node: HTMLElement): HTMLElement | null {
         while (node && !node.classList.contains('svy-wrapper')) {
-            node = node.parentElement;
+            node = node.parentElement!;
         }
         return node;
     }
@@ -281,7 +280,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         }
 
         for (let i = 0; i < this.selectionToDrag.length; i++) {
-            const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[i]);
+            const elementInfo = this.currentElementsInfo!.get(this.selectionToDrag[i])!;
             elementInfo.x = elementInfo.x + changeX;
             if (elementInfo.x < 0) elementInfo.x = 0;
             if (minX != undefined && elementInfo.x < minX) elementInfo.x = minX;
@@ -323,11 +322,11 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         }
     }
 
-    snap(data: SnapData) {
+    snap(data: SnapData | null) {
         if (this.selectionToDrag) {
             this.snapData = data;
             if (this.snapData?.top && this.snapData?.left && this.selectionToDrag.length == 1) {
-                const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[0]);
+                const elementInfo = this.currentElementsInfo!.get(this.selectionToDrag[0])!;
                 const changeX = this.snapData.left - elementInfo.x;
                 const changeY = this.snapData.top - elementInfo.y;
                 this.updateLocation(changeX, changeY);
@@ -339,13 +338,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     initAutoscrollData() {
         if (this.selectionToDrag == null) return;
 
-        //compute selected components rectangle
         this.selectionRect.top = 0;
         this.selectionRect.left = 0;
         let bottom = 0;
         let right = 0;
         for (let i = 0; i < this.selectionToDrag.length; i++) {
-            const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[i]);
+            const elementInfo = this.currentElementsInfo!.get(this.selectionToDrag[i])!;
             this.selectionRect.top = i == 0 ? elementInfo.y : Math.min(this.selectionRect.top, elementInfo.y);
             this.selectionRect.left = i == 0 ? elementInfo.x : Math.min(this.selectionRect.left, elementInfo.x);
             bottom = i == 0 ? elementInfo.y + elementInfo.height : Math.max(bottom, elementInfo.y + elementInfo.height);
@@ -371,7 +369,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
         const ghostsList = this.editorContentService.getContentArea().getElementsByClassName('ghost label');
         for (let index = 0; index < ghostsList.length; index++) {
-            const ghost = ghostsList.item(index);
+            const ghost = ghostsList.item(index)!;
             const ghostType = ghost.getAttribute('svy-ghosttype');
             if (ghostType == 'part') {//coordinates relative to itself
                 this.minimumMargins.bottom += (ghost as HTMLElement).offsetHeight;
@@ -467,7 +465,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             } else {
                 this.scroll.x = 0;
             }
-            if (this.selectionToDrag.length > 0) {
+            if (this.selectionToDrag!.length > 0) {
                 if (this.canMove(this.scroll.x, this.scroll.y)) {
                     this.updateLocation(this.scroll.x, this.scroll.y);
                 }
@@ -479,14 +477,13 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     }
     
     canMove(x: number, y: number): boolean {
-        //make sure no element goes offscreen top or left
         let canMove = true;
-        for (let i = 0; i < this.selectionToDrag.length; i++) {
-            const elementInfo = this.currentElementsInfo.get(this.selectionToDrag[i]);
+        for (let i = 0; i < this.selectionToDrag!.length; i++) {
+            const elementInfo = this.currentElementsInfo!.get(this.selectionToDrag![i]);
             if (!elementInfo) {
-                let node = this.editorContentService.getContentElement(this.selectionToDrag[i]);
-                node = this.getSvyWrapper(node);
-                this.currentElementsInfo.set(this.selectionToDrag[i], new ElementInfo(node));
+                let node = this.editorContentService.getContentElement(this.selectionToDrag![i]);
+                node = this.getSvyWrapper(node)!;
+                this.currentElementsInfo!.set(this.selectionToDrag![i], new ElementInfo(node));
             }
             if (elementInfo && (elementInfo.y + y < 0 || elementInfo.x + x < 0)) {
                 canMove = false;
@@ -496,7 +493,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         return canMove;
     }
 
-    private findAncestor(el: HTMLElement, cls: string): Element {
+    private findAncestor(el: HTMLElement | null, cls: string): Element | null {
 		if (!el) return null;
         var ancestor = el.closest('.' + cls);
         if (ancestor && ancestor.parentElement && ancestor.parentElement.classList.contains('svy-wrapper')) {

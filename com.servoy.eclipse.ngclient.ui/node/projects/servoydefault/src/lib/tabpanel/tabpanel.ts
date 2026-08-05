@@ -16,10 +16,10 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
     
-    containerStyle = { position: 'relative', overflow: 'auto' };
+    containerStyle: Record<string, any> = { position: 'relative', overflow: 'auto' };
     height: any = '100%';
     
-    private visibleTabIndex: number;
+    private visibleTabIndex!: number;
     
     constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super( windowRefService, log, renderer, cdRef );
@@ -34,10 +34,10 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
         this.updateNavpane(element);
         if (this.servoyApi.isInAbsoluteLayout()) {
             const tabs = element.querySelector('ul');
-            let calcHeight = tabs.clientHeight;
-            const clientRects = tabs.getClientRects();
+            let calcHeight = tabs!.clientHeight;
+            const clientRects = tabs!.getClientRects();
             if (clientRects && clientRects.length > 0) {
-                calcHeight = tabs.getClientRects()[0].height;
+                calcHeight = tabs!.getClientRects()[0].height;
             }
             this.containerStyle['height'] = 'calc(100% - ' + calcHeight + 'px)';
             // should we set this to absolute ? it cannot be relative
@@ -68,12 +68,12 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
             else this.renderer.setStyle(navpane, 'height', '100%');
             this.renderer.setStyle(navpane, 'position', 'relative');
             if (this.height === '100%') {
-                const tabs = element.querySelector('ul');
-                let calcHeight = tabs.clientHeight;
-                const clientRects = tabs.getClientRects();
-                if (clientRects && clientRects.length > 0) {
-                    calcHeight = tabs.getClientRects()[0].height;
-                }
+            const tabs = element.querySelector('ul');
+            let calcHeight = tabs!.clientHeight;
+            const clientRects = tabs!.getClientRects();
+            if (clientRects && clientRects.length > 0) {
+                calcHeight = tabs!.getClientRects()[0].height;
+            }
                 this.renderer.setStyle(navpane.parentElement, 'height', 'calc(100% - ' + calcHeight + 'px)');
             }
         } else {
@@ -114,16 +114,17 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
 @Component({
     selector: 'default-tabpanel-active-tab-visibility-listener',
     template: '<div #element></div>',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit, OnDestroy {
 
-    @Input() tab: Tab;
+    @Input() tab!: Tab;
     @Output() visibleTab: EventEmitter<Tab> = new EventEmitter();
 
-    @ViewChild('element') elementRef: ElementRef;
+    @ViewChild('element') elementRef!: ElementRef;
 
-    observer: MutationObserver;
+    observer!: MutationObserver;
     log: LoggerService;
 
     constructor(logFactory: LoggerFactory) {
@@ -138,7 +139,7 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
                 mutations.forEach((mutation) => {
                     if (mutation.attributeName === 'class') {
                         const oldValueA = mutation.oldValue ? mutation.oldValue.split(' ') : [];
-                        if (oldValueA.indexOf('active') === -1 && mutation.target['classList'].contains('active')) {
+                        if (oldValueA.indexOf('active') === -1 && (mutation.target as any)['classList'].contains('active')) {
                             this.visibleTab.emit(this.tab);
                         }
                     }

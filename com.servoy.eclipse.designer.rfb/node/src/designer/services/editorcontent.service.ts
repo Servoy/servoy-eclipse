@@ -5,17 +5,17 @@ import { URLParserService } from '../services/urlparser.service';
 
 @Injectable()
 export class EditorContentService {
-    private frameElement: HTMLIFrameElement;
-    private contentAreaElement: HTMLElement;
-    private contentElement: HTMLElement;
-    private glassPaneElement: HTMLElement;
-    private palette: HTMLElement;
+    private frameElement!: HTMLIFrameElement;
+    private contentAreaElement!: HTMLElement;
+    private contentElement!: HTMLElement;
+    private glassPaneElement!: HTMLElement;
+    private palette!: HTMLElement;
     private afterInitCallbacks: Array<() => void> = new Array<() => void>();
     private contentMessageListeners: Array<IContentMessageListener> = new Array<IContentMessageListener>();
     private contentWasInit = false;
     
-    private topAdjust: number;
-    private leftAdjust: number;
+    private topAdjust!: number;
+    private leftAdjust!: number;
     
     constructor(@Inject(DOCUMENT) private document: Document, private windowRefService: WindowRefService, private urlParser: URLParserService) {
         windowRefService.nativeWindow.addEventListener('message', (event: MessageEvent<{ id: string, formname: string }>) => {
@@ -38,27 +38,27 @@ export class EditorContentService {
 
     getContentElement(nodeid: string): HTMLElement {
         this.initIFrame();
-        return this.frameElement.contentWindow.document.querySelector("[svy-id='" + nodeid + "']");
+        return this.frameElement.contentWindow!.document.querySelector("[svy-id='" + nodeid + "']") as HTMLElement;
     }
 
     getAllContentElements(): Array<HTMLElement> {
         this.initIFrame();
-        return Array.from(this.frameElement.contentWindow.document.querySelectorAll("[svy-id]"));
+        return Array.from(this.frameElement.contentWindow!.document.querySelectorAll("[svy-id]"));
     }
 
     querySelectorAllInContent(selector: string): Array<HTMLElement> {
         this.initIFrame();
-        return Array.from(this.frameElement.contentWindow.document.querySelectorAll(selector));
+        return Array.from(this.frameElement.contentWindow!.document.querySelectorAll(selector));
     }
 
     getContentForm(): HTMLElement {
         this.initIFrame();
-        return this.frameElement.contentWindow.document.querySelector('.svy-form');
+        return this.frameElement.contentWindow!.document.querySelector('.svy-form') as HTMLElement;
     }
 
     getContentElementsFromPoint(point: { x: number; y: number; }): Element[] {
         this.initIFrame();
-        return Array.from(this.frameElement.contentWindow.document.elementsFromPoint(point.x, point.y));
+        return Array.from(this.frameElement.contentWindow!.document.elementsFromPoint(point.x, point.y));
     }
 
     getTopPositionIframe(variants?: boolean): number {
@@ -75,28 +75,28 @@ export class EditorContentService {
 
     getContentArea(): HTMLElement {
         if (!this.contentAreaElement) {
-            this.contentAreaElement = this.document.querySelector('.content-area');
+            this.contentAreaElement = this.document.querySelector('.content-area')!;
         }
         return this.contentAreaElement;
     }
 
     getPallete(): HTMLElement {
         if (!this.palette) {
-            this.palette = this.document.querySelector('.palette');
+            this.palette = this.document.querySelector('.palette')!;
         }
         return this.palette;
     }
 
     getContent(): HTMLElement {
         if (!this.contentElement) {
-            this.contentElement = this.document.querySelector('.content');
+            this.contentElement = this.document.querySelector('.content')!;
         }
         return this.contentElement;
     }
 
     getGlassPane(): HTMLElement {
         if (!this.glassPaneElement) {
-            this.glassPaneElement = this.document.querySelector('.contentframe-overlay');
+            this.glassPaneElement = this.document.querySelector('.contentframe-overlay')!;
         }
         return this.glassPaneElement;
     }
@@ -111,29 +111,29 @@ export class EditorContentService {
 
     getContentBodyElement(): HTMLElement {
         this.initIFrame();
-        return this.frameElement.contentWindow.document.body;
+        return this.frameElement.contentWindow!.document.body;
     }
 
     querySelector(selector: string): HTMLElement {
-        return this.document.querySelector(selector);
+        return this.document.querySelector(selector)!;
     }
 
     querySelectorAll(selector: string): Array<HTMLElement> {
         return Array.from(this.document.querySelectorAll(selector));
     }
 
-    sendMessageToIframe(message) {
+    sendMessageToIframe(message: any) {
         this.initIFrame();
-        this.frameElement.contentWindow.postMessage(message, '*');
+        this.frameElement.contentWindow!.postMessage(message, '*');
     }
 
     getContentElementById(id: string, variants?: boolean): HTMLElement {
         this.initIFrame(variants);
-        return this.frameElement.contentWindow.document.getElementById(id);
+        return this.frameElement.contentWindow!.document.getElementById(id) as HTMLElement;
     }
 
     getDesignerElementById(id: string): HTMLElement {
-        return this.document.getElementById(id);
+        return this.document.getElementById(id)!;
     }
     
     executeOnlyAfterInit(callback: () => void) {

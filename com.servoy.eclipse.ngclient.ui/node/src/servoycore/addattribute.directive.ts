@@ -9,11 +9,11 @@ import { StructureCache } from '../ngclient/types';
 })
 export class AddAttributeDirective implements OnChanges {
     readonly svyContainerStyle = input<any>(undefined);
-    readonly svyContainerLayout = input(undefined);
-    readonly svyContainerClasses = input<Array<string>>(undefined);
+    readonly svyContainerLayout = input<{ [property: string]: string } | undefined>(undefined);
+    readonly svyContainerClasses = input<Array<string>>(undefined!);
     readonly svyContainerAttributes = input(undefined);
 
-    parent: AbstractFormComponent;
+    parent!: AbstractFormComponent;
 
     constructor(private el: ElementRef, private renderer: Renderer2, private _injector: Injector) {
         try {
@@ -31,11 +31,11 @@ export class AddAttributeDirective implements OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.svyContainerClasses) {
             if (changes.svyContainerClasses.previousValue) {
-                changes.svyContainerClasses.previousValue.forEach(cls => this.renderer.removeClass(this.el.nativeElement, cls));
+                changes.svyContainerClasses.previousValue.forEach((cls: any) => this.renderer.removeClass(this.el.nativeElement, cls));
             }
             const svyContainerClasses = this.svyContainerClasses();
             if (svyContainerClasses) {
-                svyContainerClasses.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
+                svyContainerClasses.forEach((cls: any) => this.renderer.addClass(this.el.nativeElement, cls));
             }
         }
 
@@ -61,7 +61,7 @@ export class AddAttributeDirective implements OnChanges {
         const svyContainerStyle = this.svyContainerStyle();
         if (changes.svyContainerStyle && svyContainerStyle && svyContainerStyle.cssPositionContainer) {
             this.renderer.setStyle(this.el.nativeElement, 'position', 'relative');
-            this.renderer.setStyle(this.el.nativeElement, 'height', svyContainerAttributes.size.height + 'px');
+            this.renderer.setStyle(this.el.nativeElement, 'height', (svyContainerAttributes as any)!.size.height + 'px');
         }
     }
 

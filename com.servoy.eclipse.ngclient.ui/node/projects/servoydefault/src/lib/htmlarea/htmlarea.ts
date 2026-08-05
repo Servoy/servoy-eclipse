@@ -22,8 +22,9 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         promotion: false,
         toolbar: 'fontselect fontsizeselect | bold italic underline | superscript subscript | undo redo |alignleft aligncenter alignright alignjustify | styleselect | outdent indent bullist numlist'
     };
-    lastServerValueAsSeenByTinyMCEContent: string;
-    editor: Editor;
+    lastServerValueAsSeenByTinyMCEContent!: string;
+    editor!: Editor;
+    override mustExecuteOnFocus: boolean = true;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
         super(renderer, cdRef, formattingService, doc);
@@ -50,7 +51,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         if (this.onActionMethodID) this.onActionMethodID(new MouseEvent(event.type, event));
     }
 
-    contextMenu(event) {
+    contextMenu(event: any) {
         if (this.onRightClickMethodID) {
             this.onRightClickMethodID(new CustomEvent('contextmenu'));
             event.event.preventDefault();
@@ -166,7 +167,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         this.mustExecuteOnFocus = mustExecuteOnFocusGainedMethod;
         if (this.getEditor()) {
 			this.getEditor().focus();
-			delete this.mustExecuteOnFocus;
+			this.mustExecuteOnFocus = true;
 		} else {
 			setTimeout(() => this.requestFocus(this.mustExecuteOnFocus), 10);
 		}

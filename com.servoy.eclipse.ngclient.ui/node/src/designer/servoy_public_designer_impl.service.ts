@@ -36,7 +36,7 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
         })
     }
     getClientnr(): string {
-        return this.sabloService.getClientnr();
+        return this.sabloService.getClientnr()!;
     }
     callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): Promise<T> {
         return this.sabloService.callService(serviceName, methodName, argsObject, async);
@@ -51,7 +51,7 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
         return this.localeService.getAgGridLocale();
     }
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
-        return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement);
+        return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement)!;
     }
     showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
 
@@ -100,7 +100,7 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
     }
 
     getTemplateForFormComponentChild(_formName: string, _item: IComponentCache): TemplateRef<any> {
-        return null;
+        return null!;
     }
 }
 

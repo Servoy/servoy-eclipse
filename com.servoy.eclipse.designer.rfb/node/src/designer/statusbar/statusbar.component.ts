@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -6,11 +6,12 @@ import { EditorSessionService } from '../services/editorsession.service';
     selector: 'designer-status-bar',
     templateUrl: './statusbar.component.html',
     styleUrls: ['./statusbar.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class StatusBarComponent implements AfterViewInit, OnDestroy {
     statusText = '';
-    editorStateSubscription: Subscription;
+    editorStateSubscription!: Subscription;
 
     constructor(protected readonly editorSession: EditorSessionService) {
     }

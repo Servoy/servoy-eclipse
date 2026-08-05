@@ -6,18 +6,18 @@ import { EditorSessionService } from './editorsession.service';
 @Injectable()
 export class DesignSizeService {
 
-    lastWidth: string;
+    lastWidth!: string;
     lastHeight = 'auto';
     isPortrait = true;
-    lastClicked: string;
+    lastClicked!: string;
 
-    btnDesktopSize: ToolbarItem;
-    btnTabletSize: ToolbarItem;
-    btnMobileSize: ToolbarItem;
-    btnCustomHeight: ToolbarItem;
-    btnCustomWidth: ToolbarItem;
+    btnDesktopSize!: ToolbarItem;
+    btnTabletSize!: ToolbarItem;
+    btnMobileSize!: ToolbarItem;
+    btnCustomHeight!: ToolbarItem;
+    btnCustomWidth!: ToolbarItem;
 
-    editor: EditorContentComponent;
+    editor!: EditorContentComponent;
 
     constructor(protected readonly editorSession: EditorSessionService) {
     }
@@ -71,35 +71,35 @@ export class DesignSizeService {
             }
         );
 
-        this.btnCustomHeight = new ToolbarItem(
+        this.    btnCustomHeight = new ToolbarItem(
             'auto',
-            null,
+            null!,
             true,
             (selection) => {
-                this.setSize(this.lastWidth, selection);
+                this.setSize(this.lastWidth, selection!);
             }
         );
         this.btnCustomHeight.tooltip = 'Fixed design height',
             this.btnCustomHeight.list = [{ 'text': 'auto' }, { 'text': '480px' }, { 'text': '640px' }, { 'text': '1024px' }, { 'text': '2048px' }];
         this.btnCustomHeight.onselection = (selection) => {
-            this.btnCustomHeight.onclick(selection);
+            this.btnCustomHeight.onclick!(selection);
             return selection;
         };
 
         this.btnCustomWidth = new ToolbarItem(
             '',
-            null,
+            null!,
             true,
-            (selection: string) => {
-                this.editor.setContentSize(selection, this.lastHeight);
-                this.lastWidth = selection;
+            (selection?: string) => {
+                this.editor.setContentSize(selection!, this.lastHeight);
+                this.lastWidth = selection!;
                 void this.editorSession.setFormFixedSize({ 'width': this.lastWidth });
             }
         );
 
         this.btnCustomWidth.tooltip = 'Fixed design width';
         this.btnCustomWidth.onselection = (selection) => {
-            this.btnCustomWidth.onclick(selection);
+            this.btnCustomWidth.onclick!(selection);
             return selection;
         };
         this.btnCustomWidth.faIcon = 'fas fa-times fa-sm';

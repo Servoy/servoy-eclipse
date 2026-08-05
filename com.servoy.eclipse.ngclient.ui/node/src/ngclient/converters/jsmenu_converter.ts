@@ -16,8 +16,8 @@ export class JSMenuType implements IType<any> {
                         if (serverJSONValue.items[i].extraProperties[category]) {
                             for (const property in serverJSONValue.items[i].extraProperties[category]) {
                                 if (serverJSONValue.items[i].extraProperties[category][property] instanceof Object && serverJSONValue.items[i].extraProperties[category][property][ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] !== undefined) {
-                                    serverJSONValue.items[i].extraProperties[category][property] = this.converterService.convertFromServerToClient(serverJSONValue.items[i].extraProperties[category][property], undefined,
-                                        currentClientValue?.items[i]?.extraProperties[category][property], undefined, undefined, propertyContext);
+                                    serverJSONValue.items[i].extraProperties[category][property] = this.converterService.convertFromServerToClient(serverJSONValue.items[i].extraProperties[category][property], undefined!,
+                                        currentClientValue?.items[i]?.extraProperties[category][property], undefined!, undefined!, propertyContext);
                                 }
                             }
                         }
@@ -80,23 +80,24 @@ export class JSMenu implements IJSMenu, IChangeAwareValue, IUIDestroyAwareValue 
     }
     
     public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
-        if (this.items)
-            for (const i in this.items)
-                if (this.items[i].extraProperties)
-                    for (const category in this.items[i].extraProperties)
-                        if (this.items[i].extraProperties[category])
-                            for (const property in this.items[i].extraProperties[category])
-                                if (this.items[i].extraProperties[category][property] instanceof Object && this.items[i].extraProperties[category][property][ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] !== undefined)
-                                    if (instanceOfUIDestroyAwareValue(this.items[i].extraProperties[category][property]))
-                                        this.items[i].extraProperties[category][property].uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner,
+        const items: any = this.items;
+        if (items)
+            for (const i in items)
+                if (items[i].extraProperties)
+                    for (const category in items[i].extraProperties)
+                        if (items[i].extraProperties[category])
+                            for (const property in items[i].extraProperties[category])
+                                if (items[i].extraProperties[category][property] instanceof Object && items[i].extraProperties[category][property][ConverterService.CONVERSION_CL_SIDE_TYPE_KEY] !== undefined)
+                                    if (instanceOfUIDestroyAwareValue(items[i].extraProperties[category][property]))
+                                        items[i].extraProperties[category][property].uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner,
                                             debugLocator ? debugLocator + 'items[' + i + '].extraProperties[' + category + '][' + property + ']' : undefined);
     }
 
 }
 
 class MenuState extends ChangeAwareState {
-    public pushValueRequest: { category: string; propertyName: string; itemIndex: number; dataproviderValue: any; };
-    public selectedItemRequest: { selectedItemID: string; };
+    public pushValueRequest: { category: string; propertyName: string; itemIndex: number; dataproviderValue: any; } | undefined;
+    public selectedItemRequest: { selectedItemID: string; } | undefined;
 
     hasChanges(): boolean {
         return super.hasChanges() || this.pushValueRequest !== undefined || this.selectedItemRequest !== undefined;

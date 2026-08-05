@@ -11,14 +11,14 @@ const SVY_FORMAT_DECIMAL_CHAR = '.';
   * Class reflecting a Format object coming from the server (format spec property)
   */
 export class Format {
-    display: string = null;
+    display: string = null!;
     uppercase = false;
     lowercase = false;
-    type: string = null;
+    type: string = null!;
     isMask = false;
     isRaw = false;
     isNumberValidator = false;
-    edit: string = null;
+    edit: string = null!;
     placeHolder = '';
     percent = '';
     allowedCharacters = '';
@@ -66,7 +66,7 @@ export class FormattingService {
      * utility function to test if a certain key is pressed
      */
     public testKeyPressed(event: KeyboardEvent, keyCode: number) {
-        let code: number;
+        let code!: number;
 
         if (!event) event = window.event as KeyboardEvent;
         if (!event) return false;
@@ -78,7 +78,7 @@ export class FormattingService {
     /**
      * utility function to test if only numbers ar pressed.
      */
-    public testForNumbersOnly(e, keyChar, vElement, vFindMode, vCheckNumbers, vSvyFormat, skipMaxLength) {
+    public testForNumbersOnly(e: any, keyChar: any, vElement: any, vFindMode: any, vCheckNumbers: any, vSvyFormat: any, skipMaxLength: any) {
         if (!vFindMode && vCheckNumbers) {
             if (this.testKeyPressed(e, 13) && e.target.tagName.toUpperCase() === 'INPUT') {
                 // enter key is pressed
@@ -161,12 +161,12 @@ export class FormattingService {
 	
 	private findClosestDate(dateMap: Map<string,Date>, servoyFormat: string): Date {
         // if there is just one return that.
-		if (dateMap.size === 1) return dateMap.values().next().value
+		if (dateMap.size === 1) return dateMap.values().next().value!
         // else find the one closest to the current format (starts with the same letters)
         const strippedFormat = servoyFormat.replace(/[^a-zA-Z]/g, '');
         for (const key of dateMap.keys()) {
             if (strippedFormat.startsWith(key) || servoyFormat.startsWith(key)) {
-                return dateMap.get(key);
+                return dateMap.get(key)!;
             }
         }
         // fallback to closest date
@@ -303,11 +303,11 @@ export class FormattingService {
         return ret;
     }
 
-    private numbersonly(e, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength, vSvyFormat) {
-        let key;
+    private numbersonly(e: any, decimal: any, decimalChar: any, groupingChar: any, currencyChar: any, percentChar: any, vElement: any, mlength: any, vSvyFormat: any) {
+        let key: any;
 
         if (window.event) {
-            key = window.event['keyCode'];
+            key = (window.event as any)['keyCode'];
         } else if (e) {
             key = e.which;
         } else {
@@ -322,7 +322,7 @@ export class FormattingService {
         const keychar = String.fromCharCode(key);
         if (this.numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) && vSvyFormat !== null) {
             const value = vElement.value;
-            if (value.includes(decimalChar) && window.getSelection().toString() !== value) {
+            if (value.includes(decimalChar) && window.getSelection()!.toString() !== value) {
                 const allowToConcat = value.indexOf(decimalChar);
                 if (e.target.selectionStart <= allowToConcat) {
                     return true;
@@ -340,7 +340,7 @@ export class FormattingService {
         }
     }
 
-    private numbersonlyForChar(keychar, decimal, decimalChar, groupingChar, currencyChar, percentChar, vElement, mlength) {
+    private numbersonlyForChar(keychar: any, decimal: any, decimalChar: any, groupingChar: any, currencyChar: any, percentChar: any, vElement: any, mlength: any) {
         const value = vElement.value;
         if (mlength > 0 && value) {
             let counter = 0;
@@ -373,7 +373,7 @@ export class FormattingService {
         return false;
     }
 
-    private getSelectedText(textarea) {
+    private getSelectedText(textarea: any) {
         let sel = null;
         if (textarea) {
             const start = textarea['selectionStart'];
@@ -468,7 +468,7 @@ export class FormattingService {
         }
         // scientific notation case
         if (servoyFormat.indexOf('E') > -1) {
-            const frmt = /([0#.,]+)E0+.*/.exec(patchedFormat)[1];
+            const frmt = /([0#.,]+)E0+.*/.exec(patchedFormat)![1];
             let integerDigits = 0;
             let fractionalDigits = 0;
             let countIntegerState = true;
@@ -566,7 +566,7 @@ export class FormattingService {
         return prefix + ret + sufix;
     }
 
-    private formatText(data, servoyFormat: string): string {
+    private formatText(data: any, servoyFormat: string): string {
         if (!servoyFormat) return data;
         const error = 'input string not corresponding to format : ' + data + ' , ' + servoyFormat;
         let ret = '';
@@ -625,7 +625,7 @@ export class FormattingService {
         return ret;
     }
 
-    private formatDate(data, dateFormat: string): string {
+    private formatDate(data: any, dateFormat: string): string {
         if (!(data instanceof Date)) return data;
         // single quote escape workaround until https://github.com/moment/luxon/issues/649 is fixed
         dateFormat = this.convertFormat(dateFormat).replace("''", "'svy_quote'");

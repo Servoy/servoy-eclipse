@@ -140,6 +140,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 
 	protected BaseVisualFormEditorDesignPage graphicaleditor = null;
 	private boolean closing = false;
+	private volatile boolean isSaving = false;
 
 	private final CommandStack commandStack = new CommandStack();
 
@@ -374,8 +375,27 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
+		isSaving = true;
 		try
 		{
+			CommandStack cs = getCommandStack();
+			if (cs.isDirty())
+			{
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				servoyModel.startCollectingPersistChanges(false);
+				try
+				{
+					while (cs.canUndo())
+						cs.undo();
+					while (cs.canRedo())
+						cs.redo();
+				}
+				finally
+				{
+					servoyModel.stopCollectingPersistChanges(false);
+				}
+			}
+
 			List<IPersist> removes = new ArrayList<IPersist>();
 			for (IPersist ip : form.getAllObjectsAsList())
 			{
@@ -411,6 +431,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
+		}
+		finally
+		{
+			isSaving = false;
 		}
 	}
 
@@ -744,6 +768,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 		if (changedChildren.size() > 0)
 		{
+			if (!commandStackEventListener.isRunningCommand() && !isSaving)
+			{
+				flagModified();
+			}
 			refresh(changedChildren, full_refresh);
 		}
 	}

@@ -1,5 +1,5 @@
 import { TestBed, ComponentFixture, fakeAsync, tick, waitForAsync, inject } from '@angular/core/testing';
-import { Component, Input, ViewChild, ElementRef, DebugElement } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, DebugElement, ChangeDetectionStrategy } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { ServoyPublicServiceTestingImpl, ServoyPublicTestingModule } from '../testing/publictesting.module';
@@ -7,11 +7,12 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Component({
     template: '<input type="text" [svyDecimalKeyConverter]="format" #element>',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 class TestDecimalKeyConverterComponent {
-    @Input() format;
-    @ViewChild('element', { static: true }) elementRef: ElementRef;
+    @Input() format: any;
+    @ViewChild('element', { static: true }) elementRef!: ElementRef;
 }
 
 describe('Directive: DecimalKeyConverter', () => {
@@ -55,7 +56,7 @@ describe('Directive: DecimalKeyConverter', () => {
         fixture.detectChanges();
 
         expect(inputEl.nativeElement.value).toEqual('12,');
-        service.setLocaleNumberSymbol(null);
+        service.setLocaleNumberSymbol(null as any);
     }));
 
     it('should insert comma decimal (en == .)', fakeAsync(() => {
@@ -74,6 +75,6 @@ describe('Directive: DecimalKeyConverter', () => {
         fixture.detectChanges();
         tick();
         expect(inputEl.nativeElement.value).toEqual('12.');
-        service.setLocaleNumberSymbol(null);
+        service.setLocaleNumberSymbol(null as any);
     }));
 });

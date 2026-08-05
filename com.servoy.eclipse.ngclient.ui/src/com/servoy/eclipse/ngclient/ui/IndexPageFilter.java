@@ -31,10 +31,10 @@ import com.servoy.j2db.server.ngclient.AngularIndexPageWriter;
 import com.servoy.j2db.server.ngclient.NGLocalesFilter;
 import com.servoy.j2db.server.ngclient.StatelessLoginHandler;
 import com.servoy.j2db.server.ngclient.auth.CloudStatelessAccessManager;
+import com.servoy.j2db.server.ngclient.auth.LoginResult;
 import com.servoy.j2db.server.ngclient.auth.OAuthHandler;
 import com.servoy.j2db.server.ngclient.auth.StatelessLoginUtils;
 import com.servoy.j2db.util.MimeTypes;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 import jakarta.servlet.DispatcherType;
@@ -125,18 +125,21 @@ public class IndexPageFilter implements Filter
 					requestURI.toLowerCase().endsWith("/index.html")) ||
 				requestURI.contains("/svy_oauth/"))
 			{
-				Pair<Boolean, String> showLogin = null;
+				LoginResult showLogin = null;
 				if (request.getParameter("formpreview") != null)
 				{
-					showLogin = new Pair<>(Boolean.FALSE, null);
+					showLogin = LoginResult.authenticated(null);
 				}
 				else if (OAuthHandler.isOAuthRequest(request))
 				{
 					showLogin = OAuthHandler.handleOauth(request, response);
-					if (Boolean.FALSE.equals(showLogin.getLeft()))
+					if (showLogin.isResponseHandled())
 					{
-						if (showLogin.getRight() == null) return; // oauth was successful but the cloud returned html
-						request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+						return;
+					}
+					if (showLogin.isAuthenticated())
+					{
+						request.getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getToken());
 						String queryString = StatelessLoginUtils.checkForPossibleSavedDeeplink(request);
 						String redirectBasePath = request.getRequestURI().replace("/svy_oauth", "");
 						if (!redirectBasePath.startsWith("/") || redirectBasePath.startsWith("//"))
@@ -156,16 +159,16 @@ public class IndexPageFilter implements Filter
 					showLogin = StatelessLoginHandler.mustAuthenticate(request, response, solutionName);
 				}
 
-				if (showLogin.getLeft().booleanValue())
+				if (!showLogin.isAuthenticated())
 				{
-					StatelessLoginHandler.writeLoginPage(request, response, solutionName, showLogin.getRight());
+					StatelessLoginHandler.writeLoginPage(request, response, solutionName, showLogin);
 					return;
 				}
 
 				HttpServletRequest req = request;
-				if (showLogin.getRight() != null)
+				if (showLogin.getToken() != null)
 				{
-					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getRight());
+					((HttpServletRequest)servletRequest).getSession().setAttribute(StatelessLoginHandler.ID_TOKEN, showLogin.getToken());
 				}
 
 				String indexHtml = FileUtils.readFileToString(indexFile, "UTF-8");

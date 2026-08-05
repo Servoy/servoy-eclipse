@@ -25,7 +25,7 @@ describe('ServoyDefaultCheckGroup', () => {
   let component: ServoyDefaultSpinner;
   let fixture: ComponentFixture<ServoyDefaultSpinner>;
   let buttonUp: any; let buttonDown: any;
-  let servoyApi;
+  let servoyApi: any;
 
   beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId','registerComponent','unRegisterComponent']);

@@ -205,10 +205,37 @@ needed for the initial release — the MCP tool accepts an optional path overrid
       for functions with uncovered lines; it does not embed raw source code.
 - [ ] Both MCP tools accept an optional `coveragePath` parameter to read from a
       non-default location.
+- [ ] The `getJSUnitCoverageReport` and `suggestTestsFromCoverage` tools are
+      exposed on the `servoy-test` MCP server (developer.mcp) so external AI
+      clients can access them.
 - [ ] Coverage collection does not break existing JSUnit test results or the
       JUnit view in Eclipse.
 
-## 6. Out of scope
+## 6. MCP exposure to external AI tools (developer.mcp)
+
+The `IJSUnitCoverageTool` in `servoypilot` uses langchain4j `@Tool`/`@P`
+annotations and is consumed by the legacy `/mcp` servlet (the internal
+ServoyAI system). External AI tools (opencode, Kiro, Claude Desktop via
+`com.servoy.eclipse.developer.mcp`) use a separate annotation-driven MCP
+server system with `@McpServer`, `@Tool`, and `@ToolParam` annotations.
+
+To make coverage visible to external AI consumers:
+
+1. **`JSUnitCoverageService`** (new class in `developer.mcp` `services/`)
+   — self-contained service that reads `jsunit-coverage.json` and provides
+   `getCoverageReport(coveragePath)` and `suggestTests(coveragePath, max)`.
+   Same logic as `IJSUnitCoverageTool` but without langchain4j annotations.
+
+2. **`ServoyTestingServer`** (`@McpServer(name = "servoy-test")`) — two new
+   `@Tool`-annotated methods that delegate to `JSUnitCoverageService`:
+   - `getJSUnitCoverageReport(coveragePath)` — markdown coverage summary
+   - `suggestTestsFromCoverage(coveragePath, maxFunctions)` — test suggestions
+
+3. The `servoy-test` MCP server must be included in the MCP client
+   configuration used by ServoyAI's orchestrator (if ServoyAI now consumes
+   `developer.mcp` servers instead of the langchain4j `/mcp` endpoint).
+
+## 7. Out of scope
 
 - Branch/function-level coverage (line-level only).
 - Preference UI for the output path (deferred).

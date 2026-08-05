@@ -4,32 +4,32 @@ import { WebsocketService } from '@servoy/sablo';
 @Injectable()
 export class URLParserService {
 
-    formName: string;
-    solutionName: string;
-    layout: string;
-    showingInContainer: string;
-    hideDefault: boolean;
-    marqueeSelectOuter: string;
-    formWidth: number;
-    formHeight: number;
-    formComponent: string;
-    contentClientNr : string;
+    formName!: string;
+    solutionName!: string;
+    layout!: string;
+    showingInContainer!: string;
+    hideDefault!: boolean;
+    marqueeSelectOuter!: string;
+    formWidth!: number;
+    formHeight!: number;
+    formComponent!: string;
+    contentClientNr!: string;
     
     constructor(private websocketService: WebsocketService) {
         this.parseURL();
     }
 
     parseURL() {
-        this.formName = this.websocketService.getURLParameter('f');
-        this.solutionName = this.websocketService.getURLParameter('s');
-        this.layout = this.websocketService.getURLParameter('l');
+        this.formName = this.websocketService.getURLParameter('f')!;
+        this.solutionName = this.websocketService.getURLParameter('s')!;
+        this.layout = this.websocketService.getURLParameter('l')!;
         this.hideDefault = this.websocketService.getURLParameter('hd') === 'true';
-        this.marqueeSelectOuter = this.websocketService.getURLParameter('mso');
-        this.formWidth = parseInt(this.websocketService.getURLParameter('w'), 10);
-        this.formHeight = parseInt(this.websocketService.getURLParameter('h'), 10);
-        this.formComponent = this.websocketService.getURLParameter('fc');
-        this.showingInContainer = this.websocketService.getURLParameter('cont');
-        this.contentClientNr = this.websocketService.getURLParameter('c_clientnr');
+        this.marqueeSelectOuter = this.websocketService.getURLParameter('mso')!;
+        this.formWidth = parseInt(this.websocketService.getURLParameter('w')!, 10);
+        this.formHeight = parseInt(this.websocketService.getURLParameter('h')!, 10);
+        this.formComponent = this.websocketService.getURLParameter('fc')!;
+        this.showingInContainer = this.websocketService.getURLParameter('cont')!;
+        this.contentClientNr = this.websocketService.getURLParameter('c_clientnr')!;
     }
 
     public getFormName() {

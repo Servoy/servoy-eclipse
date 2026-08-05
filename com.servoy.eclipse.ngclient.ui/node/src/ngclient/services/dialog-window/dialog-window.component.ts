@@ -1,4 +1,4 @@
-import { Component, Inject, DOCUMENT } from '@angular/core';
+import { Component, Inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
 
@@ -8,11 +8,12 @@ import { FormService } from '../../form.service';
   selector: 'servoycore-dialog-window',
   templateUrl: './dialog-window.component.html',
   styleUrls: ['./dialog-window.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
   export class DialogWindowComponent {
 
-    window: SvyWindow;
+    window!: SvyWindow;
     firstTimeFocus = true;
 
     constructor(private sabloService: SabloService, private formservice: FormService, @Inject(DOCUMENT) private doc: Document) {
@@ -22,14 +23,14 @@ import { FormService } from '../../form.service';
       this.window = window;
     }
 
-    getFormName(): string {
+    getFormName(): string | null {
         const name =  this.window.form ? this.window.form.name : undefined;
         if (name && this.formservice.hasFormCacheEntry(name))
             return name;
         return null;
     }
 
-    getNavigatorFormName(): string {
+    getNavigatorFormName(): string | null {
         const name = (this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) ?
                 this.window.navigatorForm.name : null;
         if (name && this.formservice.hasFormCacheEntry(name))
@@ -38,7 +39,7 @@ import { FormService } from '../../form.service';
     }
 
     hasDefaultNavigator(): boolean{
-        return this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') >= 0;
+        return !!(this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') >= 0);
     }
 
     isUndecorated(): boolean {
@@ -53,7 +54,7 @@ import { FormService } from '../../form.service';
       return this.window.title;
     }
 
-    getBackgroundColor(): string {
+    getBackgroundColor(): string | null {
       return this.window.transparent ? 'transparent' : null;
     }
 
@@ -66,8 +67,8 @@ import { FormService } from '../../form.service';
     }
 
     firstElementFocused(event: Event) {
-      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart').getAttribute('tabindex'), 10);
-      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop').getAttribute('tabindex'), 10);
+      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart')!.getAttribute('tabindex')!, 10);
+      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop')!.getAttribute('tabindex')!, 10);
       if (this.firstTimeFocus === true) {						
         for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
           const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
@@ -94,8 +95,8 @@ import { FormService } from '../../form.service';
     }
 
     lastElementFocused(event: Event) {
-      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart').getAttribute('tabindex'), 10);
-      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop').getAttribute('tabindex'), 10);
+      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart')!.getAttribute('tabindex')!, 10);
+      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop')!.getAttribute('tabindex')!, 10);
       for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
         const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
         // if there is no focusable element in the window, then newTarget == e.target,
@@ -108,7 +109,7 @@ import { FormService } from '../../form.service';
       }
     }
 
-    isElementVisibleAndNotDisabled(element): boolean {
+    isElementVisibleAndNotDisabled(element: any): boolean {
       return (element.offsetWidth > 0 || element.offsetHeight > 0) && !element.disabled;
     }
   }

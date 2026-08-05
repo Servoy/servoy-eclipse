@@ -45,7 +45,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		String editorArea = layout.getEditorArea();
 		IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.29f, editorArea);//0.21f
 		left.addView(SolutionExplorerView.PART_ID);
-//		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
+		//		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
 		IFolderLayout rightmost = layout.createFolder("rightmost", IPageLayout.RIGHT, 0.65f, editorArea);
 		rightmost.addPlaceholder("org.eclipse.help.ui.HelpView");
@@ -53,11 +53,12 @@ public class DesignPerspective implements IPerspectiveFactory
 		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.65f, editorArea);//0.8f
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
-//		right.addPlaceholder("org.eclipse.help.ui.HelpView");
+		right.addView("com.servoy.eclipse.opencode.OpenCodeView");
+		//		right.addPlaceholder("org.eclipse.help.ui.HelpView");
 
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
-		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);//move to debug perspective only
+		bottom.addView(IConsoleConstants.ID_CONSOLE_VIEW);
 		bottom.addView(IPageLayout.ID_TASK_LIST);
 		bottom.addView(IPageLayout.ID_BOOKMARKS);
 		bottom.addView("com.servoy.eclipse.debug.scriptingconsole");

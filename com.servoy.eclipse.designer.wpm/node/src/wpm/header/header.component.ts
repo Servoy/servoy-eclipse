@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { WpmService } from '../wpm.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ExtendedPackage, UpdatePackagesDialogComponent } from '../update-dialog/update-dialog.component';
@@ -11,6 +11,7 @@ const SERVOY_DEFAULT= 'Servoy Default';
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class HeaderComponent implements OnInit {
@@ -182,6 +183,7 @@ export class HeaderComponent implements OnInit {
 @Component({
     selector: 'wpm-add-repository-dialog',
     templateUrl: 'add-repository-dialog.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class AddRepositoryDialogComponent {
@@ -197,6 +199,7 @@ export class AddRepositoryDialogComponent {
 @Component({
     selector: 'wpm-error-dialog',
     templateUrl: 'error-dialog.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ErrorDialogComponent {

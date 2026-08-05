@@ -17,8 +17,8 @@ import { PopupFormService } from '../ngclient/services/popupform.service';
 
 class TestDeferred implements IDeferred<any> {
   promise: Promise<any> = {
-      then: (_value) => null, catch: (_err) => null,
-      finally:() => null,
+      then: (_value) => null as any, catch: (_err) => null as any,
+      finally:() => null as any,
       [Symbol.toStringTag]: ''
   };
   reject(_reason: any) {

@@ -69,14 +69,14 @@ describe('FoundsetConverter', () => {
 
     // as property types reuse parts of JSON that comes from server, return a new instance each time to avoid meddling between separate tests due to this
     const createDefaultFoundset = () => {
-        const json = {};
+        const json: any = {};
         json['foundsetId'] = 1;
         json['serverSize'] = 10;
         json['sortColumns'] = '';
         json['selectedRowIndexes'] = [0];
         json['multiSelect'] = false;
         json['hasMoreRows'] = true;
-        const viewport = {};
+        const viewport: any = {};
         viewport['startIndex'] = 0;
         viewport['size'] = 5;
         viewport['rows'] = [{ _svyRowId: '5.ALFKI;_0' },
@@ -96,7 +96,7 @@ describe('FoundsetConverter', () => {
 
     it('should convert from server to client', () => {
         fs = converterService.convertFromServerToClient(createDefaultFoundset(), typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME),
-                undefined, undefined, undefined, propertyContextWithReject);
+                undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         expect(fs).toBeDefined();
         expect(fs.foundsetId).toBe(1, 'foundsetId should be \'1\' ');
         expect(fs.serverSize).toBe(10, 'foundset serverSize should be \'10');
@@ -124,7 +124,7 @@ describe('FoundsetConverter', () => {
             }
         };
 
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -151,7 +151,7 @@ describe('FoundsetConverter', () => {
                 rows: []
             }
         };
-        fs = converterService.convertFromServerToClient(updateValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(updateValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -170,7 +170,7 @@ describe('FoundsetConverter', () => {
         fs.loadRecordsAsync(0, 6);
         expect(getAndClearNotified()).toEqual(true);
         expect(fs.getInternalState().hasChanges()).toEqual(true);
-        let updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined)[0];
+        let updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any)[0];
         expect(updates[0].newViewPort).toEqual({ startIndex: 0, size: 6 });
         expect(getAndClearNotified()).toEqual(false);
         expect(fs.getInternalState().hasChanges()).toEqual(false);
@@ -195,7 +195,7 @@ describe('FoundsetConverter', () => {
                 id: updates[0]['id'],
                 value: true
             }]
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 6;
@@ -216,14 +216,14 @@ describe('FoundsetConverter', () => {
         // *** Selection change from Client
         fs.requestSelectionUpdate([1]); // WAS fs.selectedRowIndexes[0] = 1;
         expect(fs.getInternalState().hasChanges()).toEqual(true);
-        updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined)[0];
+        updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any)[0];
         expect(updates[0].newClientSelectionRequest).toEqual([1], 'The selection change notification sent');
         expect(fs.getInternalState().hasChanges()).toEqual(false);
 
         fs = converterService.convertFromServerToClient({ upd_selectedRowIndexes: [2], handledClientReqIds: [{
             id: updates[0]['id'],
             value: true
-        }] }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }] }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
         expect(fs.selectedRowIndexes.length).toBe(1);
         expect(fs.selectedRowIndexes[0]).toBe(2, 'should get selection update from server');
     });
@@ -246,7 +246,7 @@ describe('FoundsetConverter', () => {
             }
         };
 
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -290,7 +290,7 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 8;
@@ -328,7 +328,7 @@ describe('FoundsetConverter', () => {
                 { d: someDate, i: 1234, _svyRowId: '5.11011;_5' }]
             }
         };
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -351,7 +351,7 @@ describe('FoundsetConverter', () => {
                         { startIndex: 1, endIndex: 1, type: 2 }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 5;
@@ -368,7 +368,7 @@ describe('FoundsetConverter', () => {
 
     it('Foundset changed completely (relation & parent record changed for example on server - to something that is larger then we want to cache; so we will request smaller viewport)', () => {
         fs = converterService.convertFromServerToClient(createDefaultFoundset(), typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME),
-                undefined, undefined, undefined, propertyContextWithReject);
+                undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -377,7 +377,7 @@ describe('FoundsetConverter', () => {
             upd_serverSize: 12,
             upd_selectedRowIndexes: [0],
             upd_viewPort: { startIndex: 0, size: 0, rows: [] }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         expect(fs.serverSize).toEqual(12);
         expect(fs.selectedRowIndexes[0]).toEqual(0);
@@ -389,7 +389,7 @@ describe('FoundsetConverter', () => {
         fs.loadRecordsAsync(0, 9);
         expect(getAndClearNotified()).toEqual(true);
         expect(fs.getInternalState().hasChanges()).toEqual(true);
-        const updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined)[0];
+        const updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any)[0];
         expect(updates[0].newViewPort).toEqual({ startIndex: 0, size: 9 });
         expect(getAndClearNotified()).toEqual(false);
         expect(fs.getInternalState().hasChanges()).toEqual(false);
@@ -418,7 +418,7 @@ describe('FoundsetConverter', () => {
                 id: updates[0]['id'],
                 value: true
             }]
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         // we don't care too much about the state on the expectedfs, it has to be equal to the original one
         const expectedfs: any = {};
@@ -428,7 +428,7 @@ describe('FoundsetConverter', () => {
         expectedfs.foundsetId = 1;
         expectedfs.sortColumns = '';
         expectedfs.hasMoreRows = true;
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: []) => jasmine.objectContaining(value))};
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
         expect(fs).toEqual(jasmine.objectContaining(expectedfs));
     });
 
@@ -452,7 +452,7 @@ describe('FoundsetConverter', () => {
                 ]
             }
         };
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -502,7 +502,7 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 14;
@@ -538,7 +538,7 @@ describe('FoundsetConverter', () => {
             multiSelect: false,
             viewPort: { startIndex: 0, size: 9, rows: rows.slice() }
         };
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -572,14 +572,14 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 15;
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
         rows[8] = { d: someDate, i: 1234, _svyRowId: '5.11115;_29' };
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: []) => jasmine.objectContaining(value))};
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
         expect(fs).toEqual(jasmine.objectContaining(expectedfs));
     });
 
@@ -600,7 +600,7 @@ describe('FoundsetConverter', () => {
             multiSelect: false,
             viewPort: { startIndex: 0, size: 9, rows: rows.slice() }
         };
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -627,14 +627,14 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 14;
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
         rows[8] = { d: someDate, i: 1234, _svyRowId: '5.11106;_29' };
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: []) => jasmine.objectContaining(value))};
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
         expect(fs).toEqual(jasmine.objectContaining(expectedfs));
     });
 
@@ -655,7 +655,7 @@ describe('FoundsetConverter', () => {
             multiSelect: false,
             viewPort: { startIndex: 0, size: 9, rows: rows.slice() }
         };
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithReject);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -687,13 +687,13 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithReject);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 13;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: []) => jasmine.objectContaining(value))};
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
         expectedfs.viewPort.rows.shift();
         expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11107;_29' }));
         expect(fs).toEqual(jasmine.objectContaining(expectedfs));
@@ -716,7 +716,7 @@ describe('FoundsetConverter', () => {
             multiSelect: false,
             viewPort: { startIndex: 0, size: 9, rows: rows.slice() }
         };
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithAllow);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithAllow);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -724,7 +724,7 @@ describe('FoundsetConverter', () => {
         fs.loadExtraRecordsAsync(4);
         expect(getAndClearNotified()).toEqual(true);
         expect(fs.getInternalState().hasChanges()).toEqual(true);
-        const updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined)[0];
+        const updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any)[0];
         expect(updates[0].loadExtraRecords).toEqual(4);
 
         expect(getAndClearNotified()).toEqual(false);
@@ -755,13 +755,13 @@ describe('FoundsetConverter', () => {
                 id: updates[0]['id'],
                 value: true
             }]
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithAllow);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithAllow);
 
         const expectedfs: any = {};
         expectedfs.serverSize = 13;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
-        expectedfs.viewPort = { startIndex: 0, size: 13, rows: rows.map((value: any, _index: number, _array: []) => jasmine.objectContaining(value))};
+        expectedfs.viewPort = { startIndex: 0, size: 13, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
         expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10610;_9' }));
         expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10631;_10' }));
         expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10787;_11' }));
@@ -775,7 +775,7 @@ describe('FoundsetConverter', () => {
         expect(fs.getInternalState().hasChanges()).toEqual(true);
         expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithAllow)[0]).toEqual(
             [{ viewportDataChanged: { _svyRowId: '5.10832;_12', dp: 'd',
-            value: converterService.convertFromClientToServer(newDate, typesRegistry.getAlreadyRegisteredType('Date'), undefined, undefined)[0] }, id: 1 }]
+            value: converterService.convertFromClientToServer(newDate, typesRegistry.getAlreadyRegisteredType('Date'), undefined, undefined as any)[0] }, id: 1 }]
         );
         expect(getAndClearNotified()).toEqual(false);
         expect(fs.getInternalState().hasChanges()).toEqual(false);
@@ -814,7 +814,7 @@ describe('FoundsetConverter', () => {
                             _T: { mT: null, cT: { d: {_T: 'Date'} } } }
         };
         fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME),
-                undefined, undefined, undefined, propertyContextWithShallow);
+                undefined as any, undefined as any, undefined as any, propertyContextWithShallow);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -826,7 +826,7 @@ describe('FoundsetConverter', () => {
         expect(fs.getInternalState().hasChanges()).toEqual(true);
         expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
             [{ viewportDataChanged: { _svyRowId: '5.11113;_2', dp: 'd',
-            value: converterService.convertFromClientToServer(newDate, typesRegistry.getAlreadyRegisteredType('Date'), undefined, undefined)[0] } }]
+            value: converterService.convertFromClientToServer(newDate, typesRegistry.getAlreadyRegisteredType('Date'), undefined, undefined as any)[0] } }]
         );
         expect(getAndClearNotified()).toEqual(false);
         expect(fs.getInternalState().hasChanges()).toEqual(false);
@@ -837,7 +837,7 @@ describe('FoundsetConverter', () => {
         expect(converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, propertyContextWithShallow)[0]).toEqual(
             [{ viewportDataChanged: { _svyRowId: '5.10350;_0', dp: 'd',
                 value: converterService.convertFromClientToServer(newDate,
-                    typesRegistry.getAlreadyRegisteredType('Date'), undefined, undefined)[0] } }]
+                    typesRegistry.getAlreadyRegisteredType('Date'), undefined, undefined as any)[0] } }]
         );
         expect(getAndClearNotified()).toEqual(false);
         expect(fs.getInternalState().hasChanges()).toEqual(false);
@@ -857,7 +857,7 @@ describe('FoundsetConverter', () => {
             }
         };
 
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithShallow);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -890,7 +890,7 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithShallow);
 
         // see that data is ok
         expect(fs.viewPort.rows.length).toBe(3, 'model viewport size should be 6');
@@ -932,7 +932,7 @@ describe('FoundsetConverter', () => {
             }
         };
 
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithShallow);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -957,7 +957,7 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithShallow);
 
         // see that data is ok
         expect(fs.viewPort.rows.length).toBe(2, 'model viewport size should be 6');
@@ -994,7 +994,7 @@ describe('FoundsetConverter', () => {
             }
         };
 
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithShallow);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -1027,7 +1027,7 @@ describe('FoundsetConverter', () => {
                         }
                     ]
             }
-        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+        }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithShallow);
 
         // see that data is ok
         expect(fs.viewPort.rows.length).toBe(4, 'model viewport size should be 6');
@@ -1071,7 +1071,7 @@ describe('FoundsetConverter', () => {
             }
         };
 
-        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined, undefined, undefined, propertyContextWithShallow);
+        fs = converterService.convertFromServerToClient(serverValue, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), undefined as any, undefined as any, undefined as any, propertyContextWithShallow);
         fs.getInternalState().setChangeListener((_doNotPush?: boolean) => {
             changeNotified = true;
         });
@@ -1091,7 +1091,7 @@ describe('FoundsetConverter', () => {
                             { d: someDateMs, i: 6565, _svyRowId: '5.WERTY;_1' }
                         ]
                 }
-            }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined, undefined, propertyContextWithShallow);
+            }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithShallow);
 
         // the old record that was replaced by reference should no trigger send to server anymore, in case component keeps an obsolete reference to it
         recThatWillBeFullyReplaced['i'] = 7531;

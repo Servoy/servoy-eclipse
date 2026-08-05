@@ -7,14 +7,14 @@ import { LoggerFactory } from '@servoy/public';
 import { WindowRefService } from '@servoy/public';
 
 describe('ReconnectionWebsocket', () => {
-  let normalWebSocket = null;
+  let normalWebSocket: any = null;
   beforeEach(() => {
-      normalWebSocket =  window['WebSocket'];
-     window['Web' + 'Socket'] = WebSocketMock;
+      normalWebSocket =  (window as any)['WebSocket'];
+     (window as any)['Web' + 'Socket'] = WebSocketMock;
   });
 
   afterEach(() => {
-      window['WebSocket'] = normalWebSocket;
+      (window as any)['WebSocket'] = normalWebSocket;
   });
 
   it('should be connecting and reconnecting', fakeAsync(() => {
@@ -22,8 +22,8 @@ describe('ReconnectionWebsocket', () => {
       expect(socket.__latestEvent.name).toBe('connecting');
       tick(10);
       expect(socket.__latestEvent.name).toBe('open');
-      expect(socket.__latestEvent['isReconnect']).toBe(false, 'reconnect should be false');
-      WebSocketMock.instance['onclose'](new CustomEvent('close')); // internal websocket closed, reconnect should happen
+      expect((socket.__latestEvent as any)['isReconnect']).toBe(false, 'reconnect should be false');
+      (WebSocketMock.instance as any)['onclose'](new CustomEvent('close')); // internal websocket closed, reconnect should happen
       expect(socket.__latestEvent.name).toBe('close');
       tick(1500);
       expect(socket.__latestEvent.name).toBe('open');
@@ -38,13 +38,13 @@ describe('ReconnectionWebsocket', () => {
       const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()));
 
       socket.send('some data');
-      expect(WebSocketMock.instance.data).toBe('some data');
+      expect((WebSocketMock.instance as any).data).toBe('some data');
 
       const event = new CustomEvent('message');
-      event['data'] = 'mymessage';
-      WebSocketMock.instance['onmessage'](event);
+      (event as any)['data'] = 'mymessage';
+      (WebSocketMock.instance as any)['onmessage'](event);
       expect(socket.__latestEvent.name).toBe('message');
-      expect(socket.__latestEvent['data']).toBe('mymessage');
+      expect((socket.__latestEvent as any)['data']).toBe('mymessage');
     });
 
 it('test url as function param', () => {
@@ -63,36 +63,36 @@ class WebSocketMock {
         this.url = url;
         WebSocketMock.instance = this;
         setTimeout(() => {
-            WebSocketMock.instance['onopen'](new CustomEvent('open'));
+            (WebSocketMock.instance as any)['onopen'](new CustomEvent('open'));
         },1);
     }
 
     public close() {
         this.closed = true;
-        WebSocketMock.instance['onclose'](new CustomEvent('close'));
+        (WebSocketMock.instance as any)['onclose'](new CustomEvent('close'));
     }
 
-    public send(data) {
+    public send(data: any) {
         this.data = data;
     }
 }
 
 class TestReconnectingWebSocket extends ReconnectingWebSocket {
-    public __latestEvent: CustomEvent;
+    public __latestEvent!: CustomEvent;
 
-    public onopen(event) {
+    public onopen(event: any) {
         this.__latestEvent = event;
     }
-    public onclose(event) {
+    public onclose(event: any) {
         this.__latestEvent = event;
     }
-    public onconnecting(event) {
+    public onconnecting(event: any) {
         this.__latestEvent = event;
     }
-    public onmessage(event) {
+    public onmessage(event: any) {
         this.__latestEvent = event;
     }
-    public onerror(event) {
+    public onerror(event: any) {
         this.__latestEvent = event;
     }
 }

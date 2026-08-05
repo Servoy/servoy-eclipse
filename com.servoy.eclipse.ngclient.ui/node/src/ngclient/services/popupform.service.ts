@@ -5,17 +5,17 @@ import { FormService } from '../form.service';
 import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
-import { MainViewRefService, PopupForm } from '@servoy/public';
+import { MainViewRefService, PopupForm, EventLike } from '@servoy/public';
 import { isEqual } from 'lodash-es';
 
 @Injectable()
 export class PopupFormService {
 
-    formPopupComponent: ComponentRef<ServoyFormPopupComponent>;
-    clickedComponentId: string;
-    x: number;
-    y: number;
-    sequencePopup: boolean; 
+    formPopupComponent: ComponentRef<ServoyFormPopupComponent> | null = null;
+    clickedComponentId: string | null = null;
+    x!: number;
+    y!: number;
+    sequencePopup = false;
 
     constructor(private mainViewRefService: MainViewRefService,
         private formService: FormService,
@@ -57,7 +57,7 @@ export class PopupFormService {
                 const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                 });
-                this.doc.getElementById('mainForm').dispatchEvent(customEvent);
+                this.doc.getElementById('mainForm')!.dispatchEvent(customEvent);
             }
             /*
              * Because server side code in window_server.js checks for scope.model.popupform != null when closing a form popup it must have the correct value server-side; so
@@ -74,9 +74,9 @@ export class PopupFormService {
                 this.servicesService.callServiceServerSideApi('window', 'clearPopupForm', []);
             }
             if (this.formPopupComponent) {
-                let popup = this.formPopupComponent;
+                let popup: ComponentRef<ServoyFormPopupComponent> | null = this.formPopupComponent;
                 while (popup) {
-                    const parent = popup.instance.popup.parentInstance ? popup.instance.popup.parentInstance as ComponentRef<ServoyFormPopupComponent> : null;
+                    const parent: ComponentRef<ServoyFormPopupComponent> | null = popup.instance.popup.parentInstance ? popup.instance.popup.parentInstance as ComponentRef<ServoyFormPopupComponent> : null;
                     popup.destroy();
                     if (parent) {
                         popup = parent;
@@ -88,8 +88,8 @@ export class PopupFormService {
             }
         } else if (typeof disableClearPopupFormCallToServer_or_name === 'string') {
             const frms: ComponentRef<ServoyFormPopupComponent>[] = [];
-            let newFormPopupComponent: ComponentRef<ServoyFormPopupComponent> = null;
-            let current = this.formPopupComponent;
+            let newFormPopupComponent: ComponentRef<ServoyFormPopupComponent> | null = null;
+            let current: ComponentRef<ServoyFormPopupComponent> | null = this.formPopupComponent;
             while (current) {
                 const popup: PopupForm = current.instance.popup;
                 if (popup.form === disableClearPopupFormCallToServer_or_name) {
@@ -153,7 +153,7 @@ export class PopupFormService {
 				}
 				
 				// set the right instance of parent
-				popup.parentInstance = null;
+				popup.parentInstance = null!;
 				let parent = this.formPopupComponent.instance.popup;
 				while (parent) {
 					if (isEqual(parent.parent, popup.parent) && parent.parentInstance) {
@@ -188,7 +188,7 @@ export class PopupFormService {
 	private hidePopupForm(popup: PopupForm) {
 		this.formService.hideForm(popup.form);
 		if (popup.onClose) {
-			const jsEvent = this.utils.createJSEvent({ target: this.doc.getElementById('formpopup') }, 'popupClose');
+			const jsEvent = this.utils.createJSEvent({ target: this.doc.getElementById('formpopup') } as EventLike, 'popupClose');
 			if (jsEvent) {
 				jsEvent.formName = popup.onClose.formname;
 			}

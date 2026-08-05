@@ -12,9 +12,9 @@ import { BGSplitter } from './bg_splitter.component';
 })
 export class BGPane{
 
-    @Input()minSize;
+    @Input()minSize: any;
 
-    index;
+    index: any;
 
     constructor(public element: ElementRef) {
 
