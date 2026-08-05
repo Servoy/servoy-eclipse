@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 
 export class CustomEventEmitter {
     private subject = new Subject<CustomEvent>();
