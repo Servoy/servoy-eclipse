@@ -1,6 +1,9 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServoyPublicTestingModule, UploadDirective, FormattingService, TooltipService, ServoyApi, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicService, UploadDirective, FormattingService, TooltipService, ServoyApi,
+         TooltipDirective, SabloTabseq, ImageMediaIdDirective } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { ServoyDefaultImageMedia } from './imagemedia';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
@@ -14,12 +17,13 @@ describe('ServoyDefaultImageMedia', () => {
 
   beforeEach(() => {
 
-    servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'getFormName','registerComponent','unRegisterComponent']);
+    servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), getFormName: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
     TestBed.configureTestingModule({
-        declarations: [ ServoyDefaultImageMedia, UploadDirective],
-        imports: [ServoyPublicTestingModule],
-        providers: [FormattingService, TooltipService, {provide: ServoyApi, useValue: servoyApi}],
+        declarations: [ServoyDefaultImageMedia, TooltipDirective, SabloTabseq,
+                       ImageMediaIdDirective, UploadDirective],
+        providers: [FormattingService, TooltipService, {provide: ServoyApi, useValue: servoyApi},
+                    { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }],
       })
       .compileComponents();
     servoyPublicService = TestBed.inject(ServoyPublicService);
@@ -50,7 +54,7 @@ describe('ServoyDefaultImageMedia', () => {
   });
 
   it('should call the upload service', () => {
-    const spy = spyOn(servoyPublicService, 'showFileOpenDialog');
+    const spy = vi.spyOn(servoyPublicService, 'showFileOpenDialog').mockImplementation(() => {});
     imgUpload = fixture.debugElement.queryAll(By.css('.fa-upload'));
     imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
     fixture.detectChanges();
@@ -59,11 +63,10 @@ describe('ServoyDefaultImageMedia', () => {
 
   it('should download file', () => {
       component.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
-      const spy = spyOn(component, 'downloadMedia');
+      const spy = vi.spyOn(component, 'downloadMedia');
       imgUpload = fixture.debugElement.queryAll(By.css('.fa-download'));
       imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
       fixture.detectChanges();
       expect(spy).toHaveBeenCalled();
     });
 });
-

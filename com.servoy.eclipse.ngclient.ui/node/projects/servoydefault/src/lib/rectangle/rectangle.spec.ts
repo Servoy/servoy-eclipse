@@ -1,9 +1,12 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultRectangle } from './rectangle';
 
 import {FormsModule} from '@angular/forms';
-import { ServoyPublicTestingModule ,ServoyApi,TooltipService,FormattingService} from '@servoy/public';
+import { ServoyApi, TooltipService, FormattingService, ServoyPublicService,
+         TooltipDirective } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { SimpleChange } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
@@ -13,15 +16,16 @@ describe('ServoyDefaultRectangle', () => {
   let servoyApi: any;
   let rectangle: any;
 
-  beforeEach(waitForAsync(() => {
-      servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
+  beforeEach(async () => {
+      servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
       TestBed.configureTestingModule({
-        declarations: [ ServoyDefaultRectangle ],
-        imports: [ServoyPublicTestingModule, FormsModule],
-        providers: [FormattingService, TooltipService]
+        declarations: [ServoyDefaultRectangle, TooltipDirective],
+        imports: [FormsModule],
+        providers: [FormattingService, TooltipService,
+                    { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
       })
       .compileComponents();
-    }));
+    });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultRectangle);

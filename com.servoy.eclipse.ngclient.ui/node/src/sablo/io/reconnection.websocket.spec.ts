@@ -1,4 +1,5 @@
-import { TestBed,fakeAsync,tick } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 
 import {ReconnectingWebSocket} from './reconnecting.websocket';
 
@@ -17,22 +18,23 @@ describe('ReconnectionWebsocket', () => {
       (window as any)['WebSocket'] = normalWebSocket;
   });
 
-  it('should be connecting and reconnecting', fakeAsync(() => {
+  it('should be connecting and reconnecting', () => {
+      vi.useFakeTimers();
       const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()));
       expect(socket.__latestEvent.name).toBe('connecting');
-      tick(10);
+      vi.advanceTimersByTime(10);
       expect(socket.__latestEvent.name).toBe('open');
-      expect((socket.__latestEvent as any)['isReconnect']).toBe(false, 'reconnect should be false');
+      expect((socket.__latestEvent as any)['isReconnect']).toBe(false);
       (WebSocketMock.instance as any)['onclose'](new CustomEvent('close')); // internal websocket closed, reconnect should happen
       expect(socket.__latestEvent.name).toBe('close');
-      tick(1500);
+      vi.advanceTimersByTime(1500);
       expect(socket.__latestEvent.name).toBe('open');
       socket.close(); // now a real close of the reconnection socket, now it should really stay closed.
       expect(socket.__latestEvent.name).toBe('close');
-      tick(1500);
+      vi.advanceTimersByTime(1500);
       expect(socket.__latestEvent.name).toBe('close');
-
-    }));
+      vi.useRealTimers();
+    });
 
   it('should send and receive data', () => {
       const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()));

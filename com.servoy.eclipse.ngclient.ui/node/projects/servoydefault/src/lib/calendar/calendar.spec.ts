@@ -1,6 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Format, ServoyPublicTestingModule } from '@servoy/public';
+import { Format, ServoyPublicService, TooltipDirective, SabloTabseq, StartEditDirective,
+         FormatDirective, FormattingService, TooltipService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 
 import { By, BrowserModule } from '@angular/platform-browser';
 import { ServoyDefaultCalendar } from './calendar';
@@ -12,21 +15,21 @@ import { runOnPushChangeDetection } from '../testingutils';
 describe('ServoyDefaultCalendar', () => {
     let component: ServoyDefaultCalendar;
     let fixture: ComponentFixture<ServoyDefaultCalendar>;
-    // let dateTimeAdapter;
-   // let owlDateTimeIntl;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [ServoyDefaultCalendar],
-            imports: [ServoyPublicTestingModule, BrowserModule,  FormsModule],
-            providers: [Renderer2, FormsModule]
+            declarations: [ServoyDefaultCalendar, TooltipDirective, SabloTabseq,
+                           StartEditDirective, FormatDirective],
+            imports: [BrowserModule, FormsModule],
+            providers: [Renderer2, FormattingService, TooltipService,
+                        { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
         }).compileComponents();
     });
 
     beforeEach(() => {
         fixture = TestBed.createComponent(ServoyDefaultCalendar);
         component = fixture.componentInstance;
-        component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
+        component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), startEdit: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
         component.format = new Format();
         component.format.type = 'DATETIME';
         component.format.display = 'dd-MM-yyyy';
@@ -41,7 +44,7 @@ describe('ServoyDefaultCalendar', () => {
         expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
     });
 
-    it('should be showing a formatted a date', waitForAsync(() => {
+    it('should be showing a formatted a date', async () => {
         component.dataProviderID = new Date(2020, 10, 10);
         runOnPushChangeDetection(fixture);
         fixture.whenStable().then(() => {
@@ -49,6 +52,5 @@ describe('ServoyDefaultCalendar', () => {
             const el = input.nativeElement;
             expect(el.value).toBe('10-11-2020');
         });
-    }));
+    });
 });
-

@@ -1,6 +1,10 @@
-import {  ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
+import {  ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServoyPublicTestingModule, FormattingService, TooltipService, Format, ServoyPublicService } from '@servoy/public';
+import { FormattingService, TooltipService, Format, ServoyPublicService,
+         TooltipDirective, SabloTabseq, StartEditDirective, FormatDirective,
+         DecimalkeyconverterDirective } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import numbro from 'numbro';
 import languages from 'numbro/dist/languages.min';
 import { ServoyDefaultTextField } from './textfield';
@@ -24,24 +28,26 @@ describe('ServoyDefaultTextField', () => {
     
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultTextField],
-      imports: [ServoyPublicTestingModule, FormsModule],
-      providers: [FormattingService, TooltipService]
+      declarations: [ServoyDefaultTextField, TooltipDirective, SabloTabseq,
+                     StartEditDirective, FormatDirective, DecimalkeyconverterDirective],
+      imports: [FormsModule],
+      providers: [FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
     servoyPublicService = TestBed.inject(ServoyPublicService);
   });
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ServoyDefaultTextField);
     textField = fixture.debugElement.query(By.css('input'));
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
+    component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), startEdit: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     component.format = new Format();
     component.format.type = 'NUMBER';
     component.format.display = '#,###.00';
     fixture.detectChanges();
-  }));
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -67,15 +73,15 @@ describe('ServoyDefaultTextField', () => {
   });
 
   it('should call update method', () => {
-    spyOn(component, 'pushUpdate');
+    vi.spyOn(component, 'pushUpdate');
     textField = fixture.debugElement.query(By.css('input'));
     textField.nativeElement.dispatchEvent(new Event('change'));
     expect(component.pushUpdate).toHaveBeenCalled();
   });
 
   it('onfocusgained and lost needs to be called method', () => {
-      component.onFocusGainedMethodID = jasmine.createSpy('onFocusGainedMethodID');
-      component.onFocusLostMethodID = jasmine.createSpy('onFocusLostMethodID');
+      component.onFocusGainedMethodID = vi.fn();
+      component.onFocusLostMethodID = vi.fn();
       component.attachFocusListeners(component.getFocusElement());
       textField.triggerEventHandler('focus', null);
       expect(component.onFocusGainedMethodID).toHaveBeenCalled();

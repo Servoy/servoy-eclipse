@@ -1,6 +1,9 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServoyPublicTestingModule, StartEditDirective, FormattingService, TooltipService } from '@servoy/public';
+import { TooltipService, TooltipDirective, SabloTabseq, StartEditDirective,
+         FormattingService, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 
 import { ServoyDefaultTextArea } from './textarea';
 import { DebugElement } from '@angular/core';
@@ -16,9 +19,10 @@ describe('ServoyDefaultTextArea', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultTextArea, StartEditDirective],
-      imports: [ServoyPublicTestingModule, FormsModule],
-      providers: [FormattingService, TooltipService]
+      declarations: [ServoyDefaultTextArea, TooltipDirective, SabloTabseq, StartEditDirective],
+      imports: [FormsModule],
+      providers: [FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
   });
@@ -27,7 +31,7 @@ describe('ServoyDefaultTextArea', () => {
     fixture = TestBed.createComponent(ServoyDefaultTextArea);
     textArea = fixture.debugElement.query(By.css('textarea'));
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit','registerComponent','unRegisterComponent']);
+    component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), startEdit: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     fixture.detectChanges();
   });
 
@@ -44,15 +48,15 @@ describe('ServoyDefaultTextArea', () => {
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
 
-  it('should have value test', waitForAsync(() => {
+  it('should have value test', async () => {
     component.dataProviderID = 'test';
     runOnPushChangeDetection(fixture);
     fixture.whenStable().then(() =>
       expect(component.getNativeElement().value).toBe('test'));
-  }));
+  });
 
   it('should call update method', () => {
-    spyOn(component, 'pushUpdate');
+    vi.spyOn(component, 'pushUpdate');
     textArea.nativeElement.dispatchEvent(new Event('change'));
     expect(component.pushUpdate).toHaveBeenCalled();
   });

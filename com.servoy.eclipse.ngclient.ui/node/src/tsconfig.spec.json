@@ -3,22 +3,19 @@
   "compilerOptions": {
     "outDir": "../out-tsc/spec",
     "types": [
-      "jasmine",
       "node",
-      "electron"
+      "vitest/globals"
     ],
     "paths": {
-        "@servoy/public": [
-            "../projects/servoy-public/src/public-api"
-        ]
+      "@servoy/public": [
+        "../projects/servoy-public/src/public-api"
+      ]
     }
   },
-  "files": [
-    "test.ts",
-    "polyfills.ts"
-  ],
+  "files": [],
   "include": [
     "**/*.spec.ts",
+    "**/*.ts",
     "**/*.d.ts"
   ],
   "angularCompilerOptions": {

@@ -1,26 +1,31 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {SimpleChange} from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
-import { ServoyPublicTestingModule, TooltipService, ComponentContributor, ServoyApi, FormattingService} from '@servoy/public';
+import { TooltipService, ComponentContributor, TooltipDirective, SabloTabseq,
+         ImageMediaIdDirective, FormatFilterPipe, MnemonicletterFilterPipe,
+         TrustAsHtmlPipe, FormattingService, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { runOnPushChangeDetection } from '../testingutils';
 
 describe( 'SvLabel', () => {
     let component: ServoyDefaultLabel;
     let fixture: ComponentFixture<ServoyDefaultLabel>;
     let element: any;
-    const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
+    const servoyApi: any = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
-    beforeEach( waitForAsync(() => {
+    beforeEach( async () => {
         TestBed.configureTestingModule( {
-            declarations: [ServoyDefaultLabel],
-            providers: [TooltipService, FormattingService, ComponentContributor],
-            imports: [
-                ServoyPublicTestingModule],
+            declarations: [ServoyDefaultLabel, TooltipDirective, SabloTabseq,
+                           ImageMediaIdDirective, FormatFilterPipe, MnemonicletterFilterPipe,
+                           TrustAsHtmlPipe],
+            providers: [TooltipService, FormattingService, ComponentContributor,
+                        { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }],
         } )
             .compileComponents();
-    } ) );
+    } );
 
     beforeEach(() => {
         fixture = TestBed.createComponent( ServoyDefaultLabel );
@@ -41,20 +46,20 @@ describe( 'SvLabel', () => {
     } );
 
     it( 'should render html', () => {
-        servoyApi.trustAsHtml.and.returnValue( true );
+        servoyApi.trustAsHtml.mockReturnValue( true );
         component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
          runOnPushChangeDetection(fixture);
         expect( component.child.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID );
     } );
     it( 'should not render html', () => {
-        servoyApi.trustAsHtml.and.returnValue( false );
+        servoyApi.trustAsHtml.mockReturnValue( false );
         component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
          runOnPushChangeDetection(fixture);
         expect( component.child.nativeElement.children[1].innerHTML ).toBe( '<div class="myclass">hallo</div>' );
     } );
 
     it( 'should render markupid ', () => {
-        servoyApi.getMarkupId.and.returnValue( 'myid');
+        servoyApi.getMarkupId.mockReturnValue( 'myid');
          runOnPushChangeDetection(fixture);
         expect(element.id).toBe('myid');
     } );

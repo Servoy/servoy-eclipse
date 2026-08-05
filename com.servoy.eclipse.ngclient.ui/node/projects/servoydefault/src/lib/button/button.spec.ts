@@ -1,8 +1,12 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultButton } from './button';
 
-import { TooltipService, ComponentContributor, ServoyApi, ServoyPublicTestingModule} from '@servoy/public';
+import { TooltipService, ComponentContributor, TooltipDirective, SabloTabseq,
+         ImageMediaIdDirective, FormatFilterPipe, MnemonicletterFilterPipe,
+         TrustAsHtmlPipe, FormattingService, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 
 import { runOnPushChangeDetection } from '../testingutils';
 
@@ -10,17 +14,18 @@ describe('SvyButton', () => {
   let component: ServoyDefaultButton;
   let fixture: ComponentFixture<ServoyDefaultButton>;
 
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent']);
+  const servoyApi: any = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultButton],
-      providers: [ TooltipService, ComponentContributor],
-      imports: [
-               ServoyPublicTestingModule],
+      declarations: [ServoyDefaultButton, TooltipDirective, SabloTabseq,
+                     ImageMediaIdDirective, FormatFilterPipe, MnemonicletterFilterPipe,
+                     TrustAsHtmlPipe],
+      providers: [TooltipService, ComponentContributor, FormattingService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }],
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultButton);
@@ -40,7 +45,7 @@ describe('SvyButton', () => {
   });
 
   it( 'should render html', async () => {
-    servoyApi.trustAsHtml.and.returnValue( true );
+    servoyApi.trustAsHtml.mockReturnValue( true );
     component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
     runOnPushChangeDetection(fixture);
     expect( component.child.nativeElement.children[1].innerHTML ).toBe(component.dataProviderID);

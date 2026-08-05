@@ -16,6 +16,6 @@ export class WindowServiceModule {
         specTypesService.registerType('window.popup', Popup);
         specTypesService.registerType('window.shortcut', Shortcut);
         specTypesService.registerType('window.menuitem', MenuItem);
-        specTypesService.registerType('window.popupform', PopupForm);
+        specTypesService.registerType('window.popupform', PopupForm as any);
     }
 }

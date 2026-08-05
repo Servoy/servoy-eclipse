@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { EditorContentService } from './editorcontent.service';
 import { FormService } from '../ngclient/form.service';
@@ -9,23 +10,21 @@ import { LoggerFactory } from '@servoy/public';
 
 describe('EditorContentService', () => {
     let service: EditorContentService;
-    let formServiceMock: jasmine.SpyObj<FormService>;
-    let converterServiceMock: jasmine.SpyObj<ConverterService<unknown>>;
-    let typesRegistryMock: jasmine.SpyObj<TypesRegistry>;
-    let loggerFactoryMock: jasmine.SpyObj<LoggerFactory>;
-    let designFormCallbackMock: jasmine.SpyObj<IDesignFormComponent>;
+    let formServiceMock: any;
+    let converterServiceMock: any;
+    let typesRegistryMock: any;
+    let loggerFactoryMock: any;
+    let designFormCallbackMock: any;
 
     beforeEach(() => {
-        formServiceMock = jasmine.createSpyObj('FormService', ['getFormCacheByName']);
-        converterServiceMock = jasmine.createSpyObj('ConverterService', ['convertFromServerToClient']);
-        typesRegistryMock = jasmine.createSpyObj('TypesRegistry', ['getComponentSpecification']);
-        loggerFactoryMock = jasmine.createSpyObj('LoggerFactory', ['getLogger']);
-        loggerFactoryMock.getLogger.and.returnValue(jasmine.createSpyObj('LoggerService', ['error', 'buildMessage']));
+        formServiceMock = { getFormCacheByName: vi.fn() } as any;
+        converterServiceMock = { convertFromServerToClient: vi.fn() } as any;
+        typesRegistryMock = { getComponentSpecification: vi.fn() } as any;
+        loggerFactoryMock = { getLogger: vi.fn() } as any;
+        loggerFactoryMock.getLogger.mockReturnValue({ error: vi.fn(), buildMessage: vi.fn() } as any);
 
-        designFormCallbackMock = jasmine.createSpyObj('IDesignFormComponent', [
-            'getFormName', 'refresh', 'renderGhosts', 'updateForm', 'redrawDecorators', 'contentRefresh'
-        ]);
-        designFormCallbackMock.getFormName.and.returnValue('testForm');
+        designFormCallbackMock = { getFormName: vi.fn(), refresh: vi.fn(), renderGhosts: vi.fn(), updateForm: vi.fn(), redrawDecorators: vi.fn(), contentRefresh: vi.fn() } as any;
+        designFormCallbackMock.getFormName.mockReturnValue('testForm');
 
         service = new EditorContentService(formServiceMock, converterServiceMock, typesRegistryMock, loggerFactoryMock);
         service.setDesignFormComponent(designFormCallbackMock);
@@ -37,20 +36,20 @@ describe('EditorContentService', () => {
             const existingContainer = new StructureCache('div', ['col-md-6'], { 'svy-id': 'container-1', 'svy-priority': '1' }, [], 'container-1', false, {});
             existingContainer['parent'] = new StructureCache('div', ['row'], { 'svy-id': 'old-parent' }, [existingContainer], 'old-parent', false, {});
 
-            const formCacheMock = jasmine.createSpyObj('FormCache', ['getLayoutContainer', 'getFormComponent', 'addLayoutContainer', 'getComponent', 'removeComponent', 'removeFormComponent', 'getFormCacheByName', 'getPart']);
+            const formCacheMock = { getLayoutContainer: vi.fn(), getFormComponent: vi.fn(), addLayoutContainer: vi.fn(), getComponent: vi.fn(), removeComponent: vi.fn(), removeFormComponent: vi.fn(), getFormCacheByName: vi.fn(), getPart: vi.fn() } as any;
             formCacheMock.absolute = false;
             formCacheMock.mainStructure = new StructureCache(null as any, null as any);
             formCacheMock.layoutContainersCache = new Map();
             formCacheMock.partComponentsCache = [];
 
-            formCacheMock.getLayoutContainer.and.callFake((id: string) => {
+            formCacheMock.getLayoutContainer.mockImplementation((id: string) => {
                 if (id === 'container-1') return existingContainer;
                 return null;
             });
-            formCacheMock.getFormComponent.and.returnValue(null);
-            formCacheMock.getComponent.and.returnValue(null);
-            formCacheMock.getPart.and.returnValue(null);
-            formServiceMock.getFormCacheByName.and.returnValue(formCacheMock);
+            formCacheMock.getFormComponent.mockReturnValue(null);
+            formCacheMock.getComponent.mockReturnValue(null);
+            formCacheMock.getPart.mockReturnValue(null);
+            formServiceMock.getFormCacheByName.mockReturnValue(formCacheMock);
 
             const updates = JSON.stringify({
                 ng2containers: [{
@@ -74,20 +73,20 @@ describe('EditorContentService', () => {
             const oldParent = new StructureCache('div', ['row'], { 'svy-id': 'old-parent', 'svy-priority': '0' }, [existingContainer], 'old-parent', false, {});
             existingContainer['parent'] = oldParent;
 
-            const formCacheMock = jasmine.createSpyObj('FormCache', ['getLayoutContainer', 'getFormComponent', 'addLayoutContainer', 'getComponent', 'removeComponent', 'removeFormComponent', 'getPart']);
+            const formCacheMock = { getLayoutContainer: vi.fn(), getFormComponent: vi.fn(), addLayoutContainer: vi.fn(), getComponent: vi.fn(), removeComponent: vi.fn(), removeFormComponent: vi.fn(), getPart: vi.fn() } as any;
             formCacheMock.absolute = false;
             formCacheMock.mainStructure = new StructureCache(null as any, null as any);
             formCacheMock.layoutContainersCache = new Map();
             formCacheMock.partComponentsCache = [];
 
-            formCacheMock.getLayoutContainer.and.callFake((id: string) => {
+            formCacheMock.getLayoutContainer.mockImplementation((id: string) => {
                 if (id === 'container-1') return existingContainer;
                 return null;
             });
-            formCacheMock.getFormComponent.and.returnValue(null);
-            formCacheMock.getComponent.and.returnValue(null);
-            formCacheMock.getPart.and.returnValue(null);
-            formServiceMock.getFormCacheByName.and.returnValue(formCacheMock);
+            formCacheMock.getFormComponent.mockReturnValue(null);
+            formCacheMock.getComponent.mockReturnValue(null);
+            formCacheMock.getPart.mockReturnValue(null);
+            formServiceMock.getFormCacheByName.mockReturnValue(formCacheMock);
 
             const updates = JSON.stringify({
                 ng2containers: [{
@@ -110,16 +109,16 @@ describe('EditorContentService', () => {
     describe('updateFormData - sortChildren null container guard (SVY-21255)', () => {
 
         it('should not throw TypeError when reorderLayoutContainers contains null entries', () => {
-            const formCacheMock = jasmine.createSpyObj('FormCache', ['getLayoutContainer', 'getFormComponent', 'addLayoutContainer', 'getComponent', 'removeComponent', 'removeFormComponent', 'getPart']);
+            const formCacheMock = { getLayoutContainer: vi.fn(), getFormComponent: vi.fn(), addLayoutContainer: vi.fn(), getComponent: vi.fn(), removeComponent: vi.fn(), removeFormComponent: vi.fn(), getPart: vi.fn() } as any;
             formCacheMock.absolute = false;
             formCacheMock.mainStructure = new StructureCache(null as any, null as any);
             formCacheMock.layoutContainersCache = new Map();
             formCacheMock.partComponentsCache = [];
-            formCacheMock.getLayoutContainer.and.returnValue(null);
-            formCacheMock.getFormComponent.and.returnValue(null);
-            formCacheMock.getComponent.and.returnValue(null);
-            formCacheMock.getPart.and.returnValue(null);
-            formServiceMock.getFormCacheByName.and.returnValue(formCacheMock);
+            formCacheMock.getLayoutContainer.mockReturnValue(null);
+            formCacheMock.getFormComponent.mockReturnValue(null);
+            formCacheMock.getComponent.mockReturnValue(null);
+            formCacheMock.getPart.mockReturnValue(null);
+            formServiceMock.getFormCacheByName.mockReturnValue(formCacheMock);
 
             const updates = JSON.stringify({});
 

@@ -1,4 +1,5 @@
-import {TestBed, ComponentFixture, tick, fakeAsync} from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import {TestBed, ComponentFixture} from '@angular/core/testing';
 import {TooltipDirective} from './tooltip.directive';
 import {TooltipService} from './tooltip.service';
 import {Component, DebugElement, ChangeDetectionStrategy} from '@angular/core';
@@ -6,12 +7,14 @@ import {By} from '@angular/platform-browser';
 import { WindowRefService } from '../services/windowref.service';
 import { ServoyPublicServiceTestingImpl } from '../testing/publictesting.module';
 import { ServoyPublicService } from '../services/servoy_public.service';
+import { ServoyPublicModule } from '../servoy_public.module';
 const mouseEnter: Event = new Event('pointerenter');
 
 @Component({
     template: '<input  type="text" [svyTooltip]="textTooltip">',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    standalone: true,
+    imports: [ServoyPublicModule]
 })
 class TestTooltipWrapperComponent {
   textTooltip = 'Hi';
@@ -27,7 +30,7 @@ describe('Directive: Tooltip', () => {
  const service = new ServoyPublicServiceTestingImpl();
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TooltipDirective, TestTooltipWrapperComponent],
+      imports: [TestTooltipWrapperComponent],
       providers: [TooltipService, WindowRefService,
         { provide: ServoyPublicService, useValue: service }]
     });
@@ -58,50 +61,56 @@ describe('Directive: Tooltip', () => {
     expect(directiveInstance.tooltipText).toBe('Hi');
   });
 
-  it('show tooltip on requestedDelay', fakeAsync(() => {
-    tick();
+  it('show tooltip on requestedDelay', () => {
+    vi.useFakeTimers();
+    vi.advanceTimersByTime(0);
     directiveInstance.tooltipText = 'Hi';
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
-    tick(200);
+    vi.advanceTimersByTime(200);
     assertTooltipInstance(directiveInstance, false);
 
-    tick(800);
+    vi.advanceTimersByTime(800);
     assertTooltipInstance(directiveInstance, true);
 
-    tick(6000);
+    vi.advanceTimersByTime(6000);
     assertTooltipInstance(directiveInstance, false);
 
-  }));
+    vi.useRealTimers();
+  });
 
-  it('close tooltip after requestedDelay', fakeAsync(() => {
-    tick();
+  it('close tooltip after requestedDelay', () => {
+    vi.useFakeTimers();
+    vi.advanceTimersByTime(0);
     directiveInstance.tooltipText = 'Hi';
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
-    tick(6000);
+    vi.advanceTimersByTime(6000);
     fixture.detectChanges();
     assertTooltipInstance(directiveInstance, false);
-  }));
+    vi.useRealTimers();
+  });
 
-  it('show when hover over input', fakeAsync(() => {
-    tick();
+  it('show when hover over input', () => {
+    vi.useFakeTimers();
+    vi.advanceTimersByTime(0);
     directiveInstance.tooltipText = 'Hi';
     inputEl.nativeElement.dispatchEvent(mouseEnter);
 
-    tick(200);
+    vi.advanceTimersByTime(200);
     assertTooltipInstance(directiveInstance, false);
 
-    tick(800);
+    vi.advanceTimersByTime(800);
     assertTooltipInstance(directiveInstance, true);
 
-    tick(60000);
+    vi.advanceTimersByTime(60000);
     assertTooltipInstance(directiveInstance, false);
 
     fixture.detectChanges();
     assertTooltipInstance(directiveInstance, false);
 
-  }));
+    vi.useRealTimers();
+  });
 
   describe('should destroy', () => {
     beforeEach(() => {
@@ -109,26 +118,26 @@ describe('Directive: Tooltip', () => {
       fixture.detectChanges();
     });
 
-    it('should destroy on mouseout', fakeAsync(() => {
+    it('should destroy on mouseout', () => {
       inputEl.triggerEventHandler('mouseout', null);
       assertTooltipInstance(directiveInstance, false);
-    }));
+    });
 
-    it('should destroy on click', fakeAsync(() => {
+    it('should destroy on click', () => {
       inputEl.triggerEventHandler('click', null);
       assertTooltipInstance(directiveInstance, false);
 
-    }));
+    });
 
-    it('should destroy on right-click', fakeAsync(() => {
+    it('should destroy on right-click', () => {
       inputEl.triggerEventHandler('contextmenu', null);
       assertTooltipInstance(directiveInstance, false);
-    }));
+    });
 
-    it('should destroy on onDestroy', fakeAsync(() => {
+    it('should destroy on onDestroy', () => {
       directiveInstance.ngOnDestroy();
       assertTooltipInstance(directiveInstance, false);
-    }));
+    });
   });
 
 

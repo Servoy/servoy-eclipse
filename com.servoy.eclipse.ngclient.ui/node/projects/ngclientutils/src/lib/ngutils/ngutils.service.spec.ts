@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed, inject } from '@angular/core/testing';
 
 import { NGUtilsService } from './ngutils.service';
@@ -13,7 +14,7 @@ describe('NGUtilsService', () => {
      windowRef =  {};
      windowRef.nativeWindow = {};
      windowRef.nativeWindow.location = {};
-     platformLocation = jasmine.createSpyObj('PlatformLocation', ['onPopState']);
+     platformLocation = { onPopState: vi.fn() } as any;
      // we use a useFactory because when using useValue that will be cloned, so you can adjust windowRef later on.
     TestBed.configureTestingModule({
       providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef },

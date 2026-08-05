@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
@@ -148,16 +149,16 @@ describe('ComponentConverter', () => {
 
     it('fs should be there', () => {
         expect(fsProp).toBeDefined();
-        expect(fsProp.foundsetId).toBe(1, 'foundsetId should be \'1\' ');
-        expect(fsProp.serverSize).toBe(10, 'foundset serverSize should be \'10');
-        expect(fsProp.sortColumns).toBe('', 'foundset sort columns should be empty');
-        expect(fsProp.multiSelect).toBe(false, 'foundset should not allow multiSelect');
-        expect(fsProp.selectedRowIndexes.length).toBe(1, 'foundset should have \'1\' record selected ');
-        expect(fsProp.selectedRowIndexes[0]).toBe(0, 'foundset should have first record selected');
-        expect(fsProp.hasMoreRows).toBe(true, 'foundset should have more rows');
+        expect(fsProp.foundsetId).toBe(1);
+        expect(fsProp.serverSize).toBe(10);
+        expect(fsProp.sortColumns).toBe('');
+        expect(fsProp.multiSelect).toBe(false);
+        expect(fsProp.selectedRowIndexes.length).toBe(1);
+        expect(fsProp.selectedRowIndexes[0]).toBe(0);
+        expect(fsProp.hasMoreRows).toBe(true);
         expect(fsProp.viewPort).toBeDefined();
-        expect(fsProp.viewPort.size).toBe(5, 'viewport size should be \'5\'');
-        expect(fsProp.viewPort.startIndex).toBe(0, 'viewport startIndex should be \'0\'');
+        expect(fsProp.viewPort.size).toBe(5);
+        expect(fsProp.viewPort.startIndex).toBe(0);
     });
 
     it('Should convert child component prop. from server to client', () => {
@@ -168,12 +169,12 @@ describe('ComponentConverter', () => {
         });
         expect(getAndClearNotified()).toEqual(false);
 
-        expect(comp.model.nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "model"');
-        expect(comp.modelViewport.length).toBe(5, 'model viewport size should be 5');
-        expect(comp.modelViewport[0].recDepProp).toBe(10248, 'record dep. prop. value should be correct in "modelViewport"');
-        expect(comp.modelViewport[0].nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "modelViewport"');
-        expect(comp.modelViewport[1].recDepProp).toBe(10255, 'record dep. prop. value should be correct in "modelViewport"');
-        expect(comp.modelViewport[1].nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "modelViewport"');
+        expect(comp.model.nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport.length).toBe(5);
+        expect(comp.modelViewport[0].recDepProp).toBe(10248);
+        expect(comp.modelViewport[0].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[1].recDepProp).toBe(10255);
+        expect(comp.modelViewport[1].nonRecDepProp).toBe("Hello there!");
     });
 
     it('Should send property changes to server when asked to do so (api call on ChildComponentPropertyValue) for root properties by the component that uses the child component property', () => {
@@ -255,14 +256,14 @@ describe('ComponentConverter', () => {
             }
         }, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, undefined as any, undefined as any, propertyContextWithAllow);
 
-        expect(comp.model.nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "model"');
-        expect(comp.modelViewport.length).toBe(6, 'model viewport size should be 6');
-        expect(comp.modelViewport[0].recDepProp).toBe(191919, 'record dep. prop. value should be correct in "modelViewport"');
-        expect(comp.modelViewport[0].nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "modelViewport"');
-        expect(comp.modelViewport[1].recDepProp).toBe(10248, 'record dep. prop. value should be correct in "modelViewport"');
-        expect(comp.modelViewport[1].nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "modelViewport"');
-        expect(comp.modelViewport[2].recDepProp).toBe(10255, 'record dep. prop. value should be correct in "modelViewport"');
-        expect(comp.modelViewport[2].nonRecDepProp).toBe("Hello there!", 'non-record-dependent-prop should be correct in "modelViewport"');
+        expect(comp.model.nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport.length).toBe(6);
+        expect(comp.modelViewport[0].recDepProp).toBe(191919);
+        expect(comp.modelViewport[0].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[1].recDepProp).toBe(10248);
+        expect(comp.modelViewport[1].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[2].recDepProp).toBe(10255);
+        expect(comp.modelViewport[2].nonRecDepProp).toBe("Hello there!");
     });
 
 });

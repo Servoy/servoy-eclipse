@@ -1,35 +1,41 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SimpleChanges, SimpleChange } from '@angular/core';
-import { TestBed, fakeAsync, tick, waitForAsync, discardPeriodicTasks } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ServoyDefaultTabpanel, DefaultTabpanelActiveTabVisibilityListener } from './tabpanel';
 import { Tab } from './basetabpanel';
 
-import { ServoyApi, ServoyPublicTestingModule, LoggerFactory, WindowRefService } from '@servoy/public';
+import { ServoyApi, LoggerFactory, WindowRefService, ServoyPublicService,
+         SabloTabseq, TooltipDirective, TooltipService, HtmlFilterPipe, TrustAsHtmlPipe } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi: any;
-    let mockMO: any;
+    let mockMOCallback: any;
     let observerTarget: any;
-    beforeEach( waitForAsync(() => {
-        mockMO = spyOn(window, "MutationObserver");
-        mockMO.and.returnValue( { observe: (param: any) => {observerTarget=param }, disconnect: () => { },takeRecords: () => [] } );
+    beforeEach( async () => {
+        (window as any).MutationObserver = class {
+            constructor(cb: any) { mockMOCallback = cb; }
+            observe(target: any) { observerTarget = target; }
+            disconnect() {}
+            takeRecords() { return []; }
+        };
        
-        servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'isInAbsoluteLayout', 'trustAsHtml','registerComponent','unRegisterComponent'] );
-        servoyApi.getMarkupId.and.returnValue( '1' );
-        servoyApi.isInAbsoluteLayout.and.returnValue( true );
-        servoyApi.formWillShow.and.returnValue( Promise.resolve( true ) );
-        servoyApi.hideForm.and.returnValue( Promise.resolve( true ) );
-        servoyApi.trustAsHtml.and.returnValue(  true );
+        servoyApi = { getMarkupId: vi.fn(), formWillShow: vi.fn(), hideForm: vi.fn(), isInAbsoluteLayout: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
+        servoyApi.getMarkupId.mockReturnValue( '1' );
+        servoyApi.isInAbsoluteLayout.mockReturnValue( true );
+        servoyApi.formWillShow.mockReturnValue( Promise.resolve( true ) );
+        servoyApi.hideForm.mockReturnValue( Promise.resolve( true ) );
+        servoyApi.trustAsHtml.mockReturnValue(  true );
         TestBed.configureTestingModule( {
-            declarations: [
-                ServoyDefaultTabpanel,
-                DefaultTabpanelActiveTabVisibilityListener
-            ],
-            imports: [NgbModule, ServoyPublicTestingModule],
-            providers: [WindowRefService, LoggerFactory]
+            declarations: [ServoyDefaultTabpanel, DefaultTabpanelActiveTabVisibilityListener,
+                           SabloTabseq, TooltipDirective, HtmlFilterPipe, TrustAsHtmlPipe],
+            imports: [NgbModule],
+            providers: [WindowRefService, LoggerFactory, TooltipService,
+                        { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
         } ).compileComponents();
-    } ) );
+    } );
 
     const createComponentWithTabs = () => {
         const fixture = TestBed.createComponent( ServoyDefaultTabpanel );
@@ -51,13 +57,14 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.tabs = tabs;
         return fixture;
     };
-    it( 'should create the tabpanel component', waitForAsync(() => {
+    it( 'should create the tabpanel component', async () => {
         const fixture = createComponentWithTabs();
         const app = fixture.debugElement.componentInstance;
         expect( app ).toBeTruthy();
-    } ) );
+    } );
 
-    it( 'should select first tab and change 2 second', fakeAsync(() => {
+    it( 'should select first tab and change 2 second', async () => {
+        vi.useFakeTimers();
         const fixture = createComponentWithTabs();
 
         let changes: SimpleChanges = {};
@@ -66,7 +73,7 @@ describe( 'ServoyDefaultTabpanel', () => {
 
         fixture.detectChanges();
         
-        mockMO.calls.mostRecent().args[0]([{attributeName:'class', target: observerTarget}]);
+        mockMOCallback([{attributeName:'class', target: observerTarget}]);
         fixture.detectChanges();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_0' );
         expect( fixture.componentInstance.tabIndex ).toBe( 1 );
@@ -76,12 +83,14 @@ describe( 'ServoyDefaultTabpanel', () => {
         changes = {};
         changes['tabIndex'] = new SimpleChange( 1, 2, false );
         fixture.componentInstance.ngOnChanges( changes );
-        tick();
+        await vi.advanceTimersByTimeAsync(0);
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
-    } ) );
+        vi.useRealTimers();
+    } );
 
-    it( 'should select second  tab on index', fakeAsync(() => {
+    it( 'should select second  tab on index', async () => {
+        vi.useFakeTimers();
         const fixture = createComponentWithTabs();
         fixture.componentInstance.tabIndex = 2;
 
@@ -91,13 +100,14 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
-        tick(250);
-		discardPeriodicTasks();
+        await vi.advanceTimersByTimeAsync(250);
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
-      } ) );
+        vi.useRealTimers();
+      } );
 
-    it( 'should select second  tab on name', fakeAsync(() => {
+    it( 'should select second  tab on name', async () => {
+        vi.useFakeTimers();
         const fixture = createComponentWithTabs();
         fixture.componentInstance.tabIndex = 'tab2';
 
@@ -107,11 +117,10 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
 
         fixture.detectChanges();
-        tick(250);
-		discardPeriodicTasks();
+        await vi.advanceTimersByTimeAsync(250);
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
-      } ) );
+        vi.useRealTimers();
+      } );
 
 } );
-

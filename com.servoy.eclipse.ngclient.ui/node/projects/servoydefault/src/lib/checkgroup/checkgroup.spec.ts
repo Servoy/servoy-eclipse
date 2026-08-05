@@ -1,7 +1,10 @@
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultCheckGroup } from './checkgroup';
-import { IValuelist, ServoyPublicTestingModule, FormattingService, ServoyApi, TooltipService, NotNullOrEmptyPipe } from '@servoy/public';
+import { IValuelist, FormattingService, ServoyApi, TooltipService, NotNullOrEmptyPipe,
+         TooltipDirective, SabloTabseq, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 
@@ -27,17 +30,19 @@ describe('ServoyDefaultCheckGroup', () => {
   let fixture: ComponentFixture<ServoyDefaultCheckGroup>;
   let servoyApi: any;
 
-  beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
+  beforeEach(async () => {
+    servoyApi = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     mockData.hasRealValues = () => true;
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultCheckGroup,ChoiceElementDirective],
-      imports: [ServoyPublicTestingModule, FormsModule],
-      providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
+      declarations: [ServoyDefaultCheckGroup, TooltipDirective, SabloTabseq,
+                     NotNullOrEmptyPipe, ChoiceElementDirective],
+      imports: [FormsModule],
+      providers: [NotNullOrEmptyPipe, FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultCheckGroup);
@@ -53,11 +58,11 @@ describe('ServoyDefaultCheckGroup', () => {
     expect(component).toBeTruthy();
   });
 
-  xit ('should set initial styles', () => {
+  it.skip ('should set initial styles', () => {
 
   });
 
-  xit('should click change value', () => {
+  it.skip('should click change value', () => {
     const input = fixture.debugElement.query(By.css('input')).nativeElement;
     const label = fixture.debugElement.query(By.css('label')).nativeElement;
     const span = fixture.debugElement.query(By.css('span')).nativeElement;
@@ -73,34 +78,40 @@ describe('ServoyDefaultCheckGroup', () => {
     expect(input.checked).toBeFalsy();
   });
 
-  it('should getSelectionFromDP', fakeAsync(() => {
+  it('should getSelectionFromDP', () => {
+    vi.useFakeTimers();
     component.dataProviderID = 1;
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     expect(component.getSelectedElements()[0]).toBe(component.dataProviderID);
-  }));
+    vi.useRealTimers();
+  });
 
-  it('shoud getSelectionFromMultipleDp', fakeAsync(() => {
+  it('shoud getSelectionFromMultipleDp', () => {
+    vi.useFakeTimers();
     component.dataProviderID = '1\n3';
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     const selectedElements = component.getSelectedElements();
     expect(selectedElements).toContain(+component.dataProviderID[0]);
     expect(selectedElements).toContain(+component.dataProviderID[2]);
-  }));
+    vi.useRealTimers();
+  });
 
-  it('should get DP from selection', fakeAsync(() => {
+  it('should get DP from selection', () => {
+    vi.useFakeTimers();
     component.dataProviderID = '1\n3';
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     const selectedElements = component.getDataproviderFromSelection();
     expect(selectedElements).toContain(component.dataProviderID[0]);
     expect(selectedElements).toContain(component.dataProviderID[2]);
     expect(selectedElements!.length).toBe(component.dataProviderID.length);
-  }));
+    vi.useRealTimers();
+  });
 
 
 });

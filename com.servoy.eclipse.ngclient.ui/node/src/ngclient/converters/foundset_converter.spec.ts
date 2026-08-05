@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
@@ -98,16 +99,16 @@ describe('FoundsetConverter', () => {
         fs = converterService.convertFromServerToClient(createDefaultFoundset(), typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME),
                 undefined as any, undefined as any, undefined as any, propertyContextWithReject);
         expect(fs).toBeDefined();
-        expect(fs.foundsetId).toBe(1, 'foundsetId should be \'1\' ');
-        expect(fs.serverSize).toBe(10, 'foundset serverSize should be \'10');
-        expect(fs.sortColumns).toBe('', 'foundset sort columns should be empty');
-        expect(fs.multiSelect).toBe(false, 'foundset should not allow multiSelect');
-        expect(fs.selectedRowIndexes.length).toBe(1, 'foundset should have \'1\' record selected ');
-        expect(fs.selectedRowIndexes[0]).toBe(0, 'foundset should have first record selected');
-        expect(fs.hasMoreRows).toBe(true, 'foundset should have more rows');
+        expect(fs.foundsetId).toBe(1);
+        expect(fs.serverSize).toBe(10);
+        expect(fs.sortColumns).toBe('');
+        expect(fs.multiSelect).toBe(false);
+        expect(fs.selectedRowIndexes.length).toBe(1);
+        expect(fs.selectedRowIndexes[0]).toBe(0);
+        expect(fs.hasMoreRows).toBe(true);
         expect(fs.viewPort).toBeDefined();
-        expect(fs.viewPort.size).toBe(5, 'viewport size should be \'5\'');
-        expect(fs.viewPort.startIndex).toBe(0, 'viewport startIndex should be \'0\'');
+        expect(fs.viewPort.size).toBe(5);
+        expect(fs.viewPort.startIndex).toBe(0);
     });
 
     it('should not send change of int value to server when no pushToServer is specified for property', () => {
@@ -202,22 +203,22 @@ describe('FoundsetConverter', () => {
         expectedfs.selectedRowIndexes = [0];
         expectedfs.multiSelect = false;
         expectedfs.viewPort = { startIndex: 0, size: 6, rows: [] };
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10643;_0' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10692;_1' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10702;_2' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: null, i: 1234, _svyRowId: '5.10835;_3' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10952;_4' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11011;_5' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10643;_0' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10692;_1' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10702;_2' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: null, i: 1234, _svyRowId: '5.10835;_3' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10952;_4' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11011;_5' }));
         expect(fs.serverSize).toEqual(expectedfs.serverSize);
         expect(fs.selectedRowIndexes).toEqual(expectedfs.selectedRowIndexes);
         expect(fs.multiSelect).toEqual(expectedfs.multiSelect);
-        expect(fs.viewPort).toEqual(jasmine.objectContaining(expectedfs.viewPort));
+        expect(fs.viewPort).toEqual(expect.objectContaining(expectedfs.viewPort));
 
         // *** Selection change from Client
         fs.requestSelectionUpdate([1]); // WAS fs.selectedRowIndexes[0] = 1;
         expect(fs.getInternalState().hasChanges()).toEqual(true);
         updates = converterService.convertFromClientToServer(fs, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any)[0];
-        expect(updates[0].newClientSelectionRequest).toEqual([1], 'The selection change notification sent');
+        expect(updates[0].newClientSelectionRequest).toEqual([1]);
         expect(fs.getInternalState().hasChanges()).toEqual(false);
 
         fs = converterService.convertFromServerToClient({ upd_selectedRowIndexes: [2], handledClientReqIds: [{
@@ -225,7 +226,7 @@ describe('FoundsetConverter', () => {
             value: true
         }] }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithReject);
         expect(fs.selectedRowIndexes.length).toBe(1);
-        expect(fs.selectedRowIndexes[0]).toBe(2, 'should get selection update from server');
+        expect(fs.selectedRowIndexes[0]).toBe(2);
     });
 
     // eslint-disable-next-line max-len
@@ -297,15 +298,15 @@ describe('FoundsetConverter', () => {
         expectedfs.selectedRowIndexes = [4];
         expectedfs.multiSelect = false;
         expectedfs.viewPort = { startIndex: 0, size: 8, rows: [] };
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10643;_0' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: null, i: 1234, _svyRowId: '5.11078;_1' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11079;_2' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10692;_1' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10702;_2' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: null, i: 1234, _svyRowId: '5.10835;_3' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10952;_4' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11011;_5' }));
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10643;_0' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: null, i: 1234, _svyRowId: '5.11078;_1' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11079;_2' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10692;_1' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10702;_2' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: null, i: 1234, _svyRowId: '5.10835;_3' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10952;_4' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11011;_5' }));
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
         expect(fs.selectedRowIndexes[0]).toEqual(4);
     });
 
@@ -358,12 +359,12 @@ describe('FoundsetConverter', () => {
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
         expectedfs.viewPort = { startIndex: 0, size: 5, rows: [] };
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10643;_0' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10702;_2' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: null, i: 1234, _svyRowId: '5.10835;_3' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10952;_4' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11011;_5' }));
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10643;_0' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10702;_2' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: null, i: 1234, _svyRowId: '5.10835;_3' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10952;_4' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11011;_5' }));
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
     });
 
     it('Foundset changed completely (relation & parent record changed for example on server - to something that is larger then we want to cache; so we will request smaller viewport)', () => {
@@ -428,8 +429,8 @@ describe('FoundsetConverter', () => {
         expectedfs.foundsetId = 1;
         expectedfs.sortColumns = '';
         expectedfs.hasMoreRows = true;
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => expect.objectContaining(value))};
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
     });
 
     it('Should insert 2 at index 1 (now viewport stays the same as bounds but 2 get inserted and 2 from bottom get removed)', () => {
@@ -509,16 +510,16 @@ describe('FoundsetConverter', () => {
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
         expectedfs.viewPort = { startIndex: 0, size: 9, rows: [] };
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11112;_1' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11113;_2' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.10350;_0' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11110;_1' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11111;_2' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11108;_3' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11109;_4' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11106;_5' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11107;_6' }));
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11112;_1' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11113;_2' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.10350;_0' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11110;_1' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11111;_2' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11108;_3' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11109;_4' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11106;_5' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDateMs, i: 1234, _svyRowId: '5.11107;_6' }));
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
     });
 
     it('Should insert at last position (but still part of foundset)', () => {
@@ -579,8 +580,8 @@ describe('FoundsetConverter', () => {
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
         rows[8] = { d: someDate, i: 1234, _svyRowId: '5.11115;_29' };
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => expect.objectContaining(value))};
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
     });
 
     it('Should delete last position of viewport (new record should be received in its place)', () => {
@@ -634,8 +635,8 @@ describe('FoundsetConverter', () => {
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
         rows[8] = { d: someDate, i: 1234, _svyRowId: '5.11106;_29' };
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => expect.objectContaining(value))};
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
     });
 
     it('Should delete first position (new record should be received in its place)', () => {
@@ -693,10 +694,10 @@ describe('FoundsetConverter', () => {
         expectedfs.serverSize = 13;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
-        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
+        expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows.map((value: any, _index: number, _array: any[]) => expect.objectContaining(value))};
         expectedfs.viewPort.rows.shift();
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11107;_29' }));
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.11107;_29' }));
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
     });
 
     it('Should scroll down to bottom of foundset - viewport needs to be expanded )', () => {
@@ -761,12 +762,12 @@ describe('FoundsetConverter', () => {
         expectedfs.serverSize = 13;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
-        expectedfs.viewPort = { startIndex: 0, size: 13, rows: rows.map((value: any, _index: number, _array: any[]) => jasmine.objectContaining(value))};
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10610;_9' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10631;_10' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10787;_11' }));
-        expectedfs.viewPort.rows.push(jasmine.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10832;_12' }));
-        expect(fs).toEqual(jasmine.objectContaining(expectedfs));
+        expectedfs.viewPort = { startIndex: 0, size: 13, rows: rows.map((value: any, _index: number, _array: any[]) => expect.objectContaining(value))};
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10610;_9' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10631;_10' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10787;_11' }));
+        expectedfs.viewPort.rows.push(expect.objectContaining({ d: someDate, i: 1234, _svyRowId: '5.10832;_12' }));
+        expect(fs).toEqual(expect.objectContaining(expectedfs));
 
         // Should send change of date value to server
         const newDate: number = new Date().getTime() + 1;
@@ -893,10 +894,10 @@ describe('FoundsetConverter', () => {
         }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithShallow);
 
         // see that data is ok
-        expect(fs.viewPort.rows.length).toBe(3, 'model viewport size should be 6');
-        expect(fs.viewPort.rows[0].i).toBe(9876, 'new rec value should be ok');
-        expect(fs.viewPort.rows[1].i).toBe(1234, 'shifted to 1 rec value should be ok');
-        expect(fs.viewPort.rows[2].i).toBe(4321234, 'shifted to 2 rec value should be ok');
+        expect(fs.viewPort.rows.length).toBe(3);
+        expect(fs.viewPort.rows[0].i).toBe(9876);
+        expect(fs.viewPort.rows[1].i).toBe(1234);
+        expect(fs.viewPort.rows[2].i).toBe(4321234);
         expect(getAndClearNotified()).toEqual(false);
         
         // see that proxies for rows that slided were updated
@@ -960,9 +961,9 @@ describe('FoundsetConverter', () => {
         }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithShallow);
 
         // see that data is ok
-        expect(fs.viewPort.rows.length).toBe(2, 'model viewport size should be 6');
-        expect(fs.viewPort.rows[0].i).toBe(1234, 'unaffected rec value should be ok');
-        expect(fs.viewPort.rows[1].i).toBe(3456, 'shifted to 1 rec value should be ok');
+        expect(fs.viewPort.rows.length).toBe(2);
+        expect(fs.viewPort.rows[0].i).toBe(1234);
+        expect(fs.viewPort.rows[1].i).toBe(3456);
         expect(getAndClearNotified()).toEqual(false);
         
         // see that proxies for rows that slided were updated
@@ -1030,9 +1031,9 @@ describe('FoundsetConverter', () => {
         }, typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME), fs, undefined as any, undefined as any, propertyContextWithShallow);
 
         // see that data is ok
-        expect(fs.viewPort.rows.length).toBe(4, 'model viewport size should be 6');
-        expect(fs.viewPort.rows[1].i).toBe(6565, 'fully changed rec value should be ok');
-        expect(fs.viewPort.rows[2].i).toBe(3434, 'partially changed rec value should be ok');
+        expect(fs.viewPort.rows.length).toBe(4);
+        expect(fs.viewPort.rows[1].i).toBe(6565);
+        expect(fs.viewPort.rows[2].i).toBe(3434);
         expect(getAndClearNotified()).toEqual(false);
         
         // see that proxies for rows that updated are ok

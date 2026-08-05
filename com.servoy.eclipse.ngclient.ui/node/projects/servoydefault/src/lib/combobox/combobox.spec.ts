@@ -1,6 +1,10 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
-import { ServoyPublicTestingModule, Format, ServoyApi, IValuelist, ServoyBaseComponent } from '@servoy/public';
+import { Format, IValuelist, ServoyPublicService,
+         TooltipDirective, SabloTabseq, StartEditDirective, FormatDirective,
+         FormatFilterPipe, EmptyValueFilterPipe, FormattingService, TooltipService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
 import { By } from '@angular/platform-browser';
@@ -10,58 +14,28 @@ import { FormsModule } from '@angular/forms';
 describe('ComboboxComponent', () => {
   let component: ServoyDefaultCombobox;
   let fixture: ComponentFixture<ServoyDefaultCombobox>;
-  let servoyApi: ServoyApi;
+  let servoyApi: any;
   let combobox: DebugElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
 
-    // the following construct does nothing but make sure that an error is generated at compile-time if ServoyApi changes
-    // so that when that happens we can update the jasmine.createSpyObj below which is based on strings only
-    class _X extends ServoyApi {
-        formWillShow(_fn: string, _rn?: string, _fi?: number): Promise<boolean> { return undefined as any; }
-        hideForm(_fn: string, _rn?: string, _fi?: number, _fntws?: string, _rntwbs?: string, _fitwbs?: number): Promise<boolean> { return undefined as any; }
-        startEdit(_p: string) {}
-        apply(_propertyName: string, _value: any) {}
-        callServerSideApi(_methodName: string, _args: Array<any>) {}
-        isInDesigner(): boolean { return false; }
-        trustAsHtml(): boolean { return false; }
-        isInAbsoluteLayout(): boolean { return false; }
-        getMarkupId(): string  { return undefined as any; }
-        getFormName(): string  { return undefined as any; }
-        registerComponent(_component: ServoyBaseComponent<any>) {}
-        unRegisterComponent(_component: ServoyBaseComponent<any>) {}
-        getClientProperty(_key:string): any { return undefined; }
-    };
-    new _X(); // just to remove unused class warning
-
-    servoyApi = jasmine.createSpyObj( 'ServoyApi', [
-        'formWillShow',
-        'hideForm',
-        'startEdit',
-        'apply',
-        'callServerSideApi',
-        'isInDesigner',
-        'trustAsHtml',
-        'isInAbsoluteLayout',
-        'getMarkupId',
-        'getFormName',
-        'registerComponent',
-        'unRegisterComponent',
-        'getClientProperty'
-    ]);
+    servoyApi = { formWillShow: vi.fn(), hideForm: vi.fn(), startEdit: vi.fn(), apply: vi.fn(), callServerSideApi: vi.fn(), isInDesigner: vi.fn(), trustAsHtml: vi.fn(), isInAbsoluteLayout: vi.fn(), getMarkupId: vi.fn(), getFormName: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn(), getClientProperty: vi.fn() } as any;
 
 
     TestBed.configureTestingModule({
-        declarations: [ ServoyDefaultCombobox ],
-        providers: [ ],
-        imports: [ServoyPublicTestingModule, NgbModule, FormsModule]
+        declarations: [ServoyDefaultCombobox, TooltipDirective, SabloTabseq,
+                       StartEditDirective, FormatDirective, FormatFilterPipe,
+                       EmptyValueFilterPipe],
+        imports: [NgbModule, FormsModule],
+        providers: [FormattingService, TooltipService,
+                    { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultCombobox);
-    fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
+    fixture.componentInstance.servoyApi = servoyApi;
 
     const dummyValuelist = new DummyValuelist();
     dummyValuelist.push({
@@ -79,7 +53,7 @@ describe('ComboboxComponent', () => {
 
     component = fixture.componentInstance;
     component.valuelistID = dummyValuelist;
-    component.servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit','registerComponent','unRegisterComponent','getClientProperty']);
+    component.servoyApi = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), startEdit: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn(), getClientProperty: vi.fn() } as any;
     component.dataProviderID = 3;
     component.format = new Format();
     component.format.type = 'TEXT';
@@ -109,9 +83,8 @@ describe('ComboboxComponent', () => {
     expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
 
-  xit('should call update method', () => {
-     // test should be to click on the combo to open the tree and then click on an item.
-    spyOn(component, 'updateValue');
+  it.skip('should call update method', () => {
+    vi.spyOn(component, 'updateValue');
     combobox.nativeElement.dispatchEvent(new Event('update'));
     fixture.detectChanges();
     expect(component.updateValue).toHaveBeenCalled();

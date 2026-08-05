@@ -1,6 +1,9 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ServoyDefaultTypeahead } from './typeahead';
-import { FormattingService, TooltipService, ServoyApi, Format, IValuelist, ServoyPublicTestingModule} from '@servoy/public';
+import { FormattingService, TooltipService, ServoyApi, Format, IValuelist, ServoyPublicService,
+         TooltipDirective, SabloTabseq, StartEditDirective } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -27,18 +30,19 @@ describe('TypeaheadComponent', () => {
   let fixture: ComponentFixture<ServoyDefaultTypeahead>;
   let servoyApi: any;
 
-  beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent', 'getClientProperty']);
+  beforeEach(async () => {
+    servoyApi = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn(), getClientProperty: vi.fn() } as any;
     mockData.hasRealValues = () => true;
     mockData.filterList = () => of(mockData);
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultTypeahead ],
-      providers: [ FormattingService , TooltipService],
-      imports: [ServoyPublicTestingModule, NgbModule, FormsModule]
+      declarations: [ServoyDefaultTypeahead, TooltipDirective, SabloTabseq, StartEditDirective],
+      imports: [NgbModule, FormsModule],
+      providers: [FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultTypeahead);
@@ -67,34 +71,34 @@ describe('TypeaheadComponent', () => {
     expect(component.instance.isPopupOpen()).toBeFalsy();
   });
 
-  it('should open dropdown on container click', fakeAsync(() => {
+  it('should open dropdown on container click', () => {
+    vi.useFakeTimers();
     fixture.detectChanges();
     component.click$.next('');
-    tick(100);
+    vi.advanceTimersByTime(100);
     fixture.detectChanges();
     expect(component.instance.isPopupOpen()).toBeTruthy();
-  }));
-
-
-  it('should open dropdown on container focus', fakeAsync(() => {
-    fixture.detectChanges();
-    component.focus$.next('');
-    tick(100);
-    fixture.detectChanges();
-    expect(component.instance.isPopupOpen()).toBeTruthy();
-  }));
-
-  it('should set initial list of values', (done) => {
-    component.values(of('')).subscribe(values => {
-      expect(values).toEqual(mockData);
-      done();
-    });
+    vi.useRealTimers();
   });
 
-  // it('should filter the list of values', (done) => {
-  //   component.values(of('Bu')).subscribe(values => {
-  //     expect(values).toEqual([mockData[0]]);
-  //     done();
-  //   });
-  // });
+
+  it('should open dropdown on container focus', () => {
+    vi.useFakeTimers();
+    fixture.detectChanges();
+    component.focus$.next('');
+    vi.advanceTimersByTime(100);
+    fixture.detectChanges();
+    expect(component.instance.isPopupOpen()).toBeTruthy();
+    vi.useRealTimers();
+  });
+
+  it('should set initial list of values', async () => {
+    const values = await new Promise(resolve => {
+      component.values(of('')).subscribe(v => {
+        resolve(v);
+      });
+    });
+    expect(values).toEqual(mockData);
+  });
+
 });

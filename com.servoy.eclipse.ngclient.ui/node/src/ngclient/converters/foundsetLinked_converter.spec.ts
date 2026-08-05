@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
@@ -48,8 +49,6 @@ describe('FoundsetLinked Converter', () => {
         changeNotified = false;
 
         const angularEquality = (first: any, second: any) => (JSON.stringify(first) === JSON.stringify(second)); // WAS angular.equals(first, second);
-
-        jasmine.addCustomEqualityTester(angularEquality);
     });
 
     const getAndClearNotified = () => {
@@ -87,7 +86,7 @@ describe('FoundsetLinked Converter', () => {
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
-            expect(realClientValue).toEqual([':) --- static string ***', ':) --- static string ***']);
+            expect([...realClientValue]).toEqual([':) --- static string ***', ':) --- static string ***']);
         });
 
 
@@ -134,7 +133,7 @@ describe('FoundsetLinked Converter', () => {
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
-            expect(realClientValue).toEqual([10643, 10702, 10835, 10952, 11011, 11081]);
+            expect([...realClientValue]).toEqual([10643, 10702, 10835, 10952, 11011, 11081]);
         });
 
 
@@ -185,7 +184,7 @@ describe('FoundsetLinked Converter', () => {
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
-            expect(realClientValue).toEqual([10643, 10702, 10835, 10952, 11011, 11081]);
+            expect([...realClientValue]).toEqual([10643, 10702, 10835, 10952, 11011, 11081]);
 
         });
 
@@ -245,7 +244,7 @@ describe('FoundsetLinked Converter', () => {
 
             expect(getAndClearNotified()).toEqual(false);
             expect(realClientValue.getInternalState().hasChanges()).toEqual(false);
-            expect(realClientValue).toEqual([':) --- static string ***', ':) --- static string ***']);
+            expect([...realClientValue]).toEqual([':) --- static string ***', ':) --- static string ***']);
 
         });
 
