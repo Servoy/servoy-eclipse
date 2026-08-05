@@ -15,7 +15,7 @@
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
-		<test.script>test_headless</test.script>
+		<test.script>test</test.script>
 	</properties>
 	<build>
 		<plugins>
@@ -155,9 +155,9 @@
 					<!-- 5. npm run build <execution> <id>npm run build</id> <phase>compile</phase> 
 						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
 						<arguments>run build_debug_nowatch</arguments> </configuration> </execution> -->
-					<!-- 6. Run karma tests 
+					<!-- 6. Run vitest tests --> 
 					<execution>
-						<id>angular karma test</id>
+						<id>angular vitest</id>
 						<phase>test</phase>
 						<goals>
 							<goal>npm</goal>
@@ -169,7 +169,6 @@
 							<arguments>run ${test.script}</arguments>
 						</configuration>
 					</execution>
-					-->
 				</executions>
 			</plugin>
 		</plugins>
