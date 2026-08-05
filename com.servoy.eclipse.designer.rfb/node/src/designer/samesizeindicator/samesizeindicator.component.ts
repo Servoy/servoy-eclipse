@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -18,7 +18,10 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
     editorStateSubscription!: Subscription;
     indicators!: SameSizeIndicator[];
     
-    constructor(protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
+    protected readonly editorSession = inject(EditorSessionService);
+    private editorContentService = inject(EditorContentService);
+
+    constructor() {
         this.editorSession.addSelectionChangedListener(this);
         this.editorContentService.addContentMessageListener(this);
     }
@@ -32,8 +35,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             if (id == 'dragging'){
                 if (this.editorSession.getState().dragging){
                     this.indicators = null!;
-                }
-                else{
+                } else{
                     this.selectionChanged(this.editorSession.getSelection());
                 }
             }
@@ -50,7 +52,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
         }
     }
 
-    selectionChanged(selection: Array<string>): void {
+    selectionChanged(selection: string[]): void {
         const newindicators: SameSizeIndicator[] = [];
 
         if (this.sameSizeIndicator && selection && selection.length == 1) {
@@ -88,7 +90,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
         this.indicators = newindicators;
     }
 
-    private removeHiddenElements(elements: Array<HTMLElement>) {
+    private removeHiddenElements(elements: HTMLElement[]) {
         const filteredElements = elements.filter((element) => {
             let wrapper = element.parentElement;
             

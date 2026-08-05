@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -21,8 +21,14 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
   snapData!: { top: number, left: number, guideX?: number, guideY?: number, guides?: Guide[] } | null;
   subscription!: Subscription;
 
-  constructor(private el: ElementRef, protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2,
-    private urlParser: URLParserService, private editorContentService: EditorContentService, private guidesService: DynamicGuidesService) {
+  private el = inject(ElementRef);
+  protected readonly editorSession = inject(EditorSessionService);
+  private readonly renderer = inject(Renderer2);
+  private urlParser = inject(URLParserService);
+  private editorContentService = inject(EditorContentService);
+  private guidesService = inject(DynamicGuidesService);
+
+  constructor() {
       this.editorContentService.executeOnlyAfterInit(() => {
         this.editorSession.getSnapThreshold().then((thresholds: any) => {
             if (thresholds.alignment > 0 || thresholds.distance > 0) {

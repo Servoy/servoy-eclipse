@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { Point } from './../mouseselection/mouseselection.component';
@@ -24,8 +24,9 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
     private glasspane!: HTMLElement;
     private ghostsRight = 0;
 
-    constructor(protected readonly renderer: Renderer2, protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
-    }
+    protected readonly renderer = inject(Renderer2);
+    protected readonly editorSession = inject(EditorSessionService);
+    private editorContentService = inject(EditorContentService);
 
     ngOnInit() {
         this.elementRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
@@ -43,7 +44,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
             let partWidth = 0;
 
             const ghostsList = this.contentArea.getElementsByClassName('ghost label');
-            for (let index=0; index < ghostsList.length; index++) {
+            for (const _ghost of ghostsList) {
                 const ghost = ghostsList.item(0)!;
                 const ghostType = ghost.getAttribute('svy-ghosttype');
                 if (ghostType == 'comp') {
@@ -68,8 +69,8 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
             if ( step != 0 ) {
                 this.currentPosition += step;
                 if (this.currentPosition >= this.widthLimit) {
-                    for (let index = 0; index < this.ghostContainers.length; index++) {
-                        this.renderer.setStyle(this.ghostContainers[index], 'width', this.currentPosition +'px');
+                    for (const ghostContainer of this.ghostContainers) {
+                        this.renderer.setStyle(ghostContainer, 'width', this.currentPosition +'px');
                     }
                     this.renderer.setStyle(this.editorContent, 'width', this.currentPosition +'px'); 
         
@@ -109,11 +110,11 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
         return 'resize-editor-width';
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     updateLocationCallback(changeX: number, _changeY: number) {
         if (this.currentPosition >= this.widthLimit) {
-            for (let index = 0; index < this.ghostContainers.length; index++) {
-                this.renderer.setStyle(this.ghostContainers[index], 'width', this.currentPosition +'px');
+            for (const ghostContainer of this.ghostContainers) {
+                this.renderer.setStyle(ghostContainer, 'width', this.currentPosition +'px');
             }
             this.renderer.setStyle(this.editorContent, 'width', this.currentPosition +'px'); 
     

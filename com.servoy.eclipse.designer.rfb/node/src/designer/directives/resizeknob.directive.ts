@@ -1,7 +1,7 @@
-import { AfterViewInit, Directive, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Directive, HostListener, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
-import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
 import { Subscription } from 'rxjs';
 
@@ -27,8 +27,9 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     snapData!: SnapData;
     subscription!: Subscription;
 
-    constructor(protected readonly editorSession: EditorSessionService, private editorContentService : EditorContentService, private guidesService: DynamicGuidesService) {
-    }
+    protected readonly editorSession = inject(EditorSessionService);
+    private editorContentService = inject(EditorContentService);
+    private guidesService = inject(DynamicGuidesService);
 
     ngOnInit(): void {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
@@ -110,8 +111,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
-        if(event.button == 0)
-        {
+        if(event.button == 0) {
             this.setCursorStyle(this.resizeInfo.direction +'-resize');
             event.preventDefault();
             event.stopPropagation();
@@ -125,8 +125,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 
             const selection = this.editorSession.getSelection();
             if (selection && selection.length > 0) {
-                for (let i = 0; i < selection.length; i++) {
-                    const nodeid = selection[i];
+                for (const nodeid of selection) {
                     let element = this.editorContentService.getContentElement(nodeid);
                     while(element && !element.classList.contains('svy-wrapper')) {
                         element = element.parentElement!;
@@ -156,8 +155,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
                 this.contentAreaMouseUp(event);
             });
             this.editorContentService.getContentArea().addEventListener('keydown', this.contentAreaKeyDown = (event: KeyboardEvent) => {
-                if (event.keyCode == 27)
-                {
+                if (event.keyCode == 27) {
                     for(const elementInfo of this.initialElementInfo.values()) {
                         elementInfo.element.style.top = elementInfo.y + 'px';
                         elementInfo.element.style.left =  elementInfo.x + 'px';
@@ -177,7 +175,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     }
 
     @HostListener('mouseup', ['$event'])
-    onMouseUp(event: MouseEvent): void {
+    onMouseUp(_event: MouseEvent): void {
         this.sendChanges(this.currentElementInfo);
         this.setCursorStyle('');
         this.cleanResizeState();
@@ -256,8 +254,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
                         height: this.snapData?.height ? Math.round(this.snapData.height) : elementInfo!.height,
                         cssPos: this.snapData.cssPosition
                     }
-                }
-                else {
+                } else {
                     changes[nodeId] = {
                         x: elementInfo!.x,
                         y: elementInfo!.y,

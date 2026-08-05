@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { WebsocketService } from '@servoy/sablo';
 
 @Injectable()
@@ -15,7 +15,9 @@ export class URLParserService {
     formComponent!: string;
     contentClientNr!: string;
     
-    constructor(private websocketService: WebsocketService) {
+    private websocketService = inject(WebsocketService);
+
+    constructor() {
         this.parseURL();
     }
 

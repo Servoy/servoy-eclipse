@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, Inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, Renderer2, DOCUMENT, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -12,8 +12,9 @@ import { EditorSessionService } from '../services/editorsession.service';
 export class ResizerComponent implements OnInit {
     @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
 
-    constructor(protected readonly renderer: Renderer2, @Inject(DOCUMENT) private doc: Document, protected readonly editorSession: EditorSessionService) {
-    }
+    protected readonly renderer = inject(Renderer2);
+    private doc = inject(DOCUMENT);
+    protected readonly editorSession = inject(EditorSessionService);
 
     ngOnInit() {
         this.elementRef.nativeElement.addEventListener('mousedown', () => {

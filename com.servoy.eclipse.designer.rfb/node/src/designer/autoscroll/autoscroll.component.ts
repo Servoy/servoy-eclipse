@@ -1,5 +1,5 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
@@ -25,11 +25,9 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     private step = 0;
     private speed = 0;
 
-    constructor(protected readonly renderer: Renderer2, 
-        protected readonly editorSession: EditorSessionService, 
-        private editorContent: EditorContentService) {
-   
-    }
+    protected readonly renderer = inject(Renderer2);
+    protected readonly editorSession = inject(EditorSessionService);
+    private editorContent = inject(EditorContentService);
 
     ngOnInit() {
         this.editorSession.autoscrollBehavior.subscribe((scrollTarget: ISupportAutoscroll | null | undefined) => {
@@ -53,11 +51,21 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.autoscrollElement.nativeElement.addEventListener('mouseenter', (event) => {this.onMouseEnter(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mouseleave', (event) => {this.onMouseLeave(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mouseup', (event) => {this.onMouseUp(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mousedown', (event) => {this.onMouseDown(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mousemove', (event) => {this.onMouseMove(event)})
+        this.autoscrollElement.nativeElement.addEventListener('mouseenter', (event) => {
+this.onMouseEnter(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mouseleave', (event) => {
+this.onMouseLeave(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mouseup', (event) => {
+this.onMouseUp(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mousedown', (event) => {
+this.onMouseDown(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mousemove', (event) => {
+this.onMouseMove(event)
+})
     }
 
     public onMouseEnter(event: MouseEvent) {
@@ -67,7 +75,7 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     public onMouseLeave(_event: MouseEvent) {
         if (this.scrollTarget && this.isAutoscrollActive) {
             this.stopAutoscroll();
@@ -150,7 +158,9 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     startAutoScroll() {
         if (!this.isAutoscrollActive) {
             this.isAutoscrollActive = true;
-            this.handler = setInterval(() => {this.autoscroll()}, 50);
+            this.handler = setInterval(() => {
+this.autoscroll()
+}, 50);
         }
     }
 

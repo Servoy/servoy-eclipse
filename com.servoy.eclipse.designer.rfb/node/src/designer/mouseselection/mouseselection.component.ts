@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Inject, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -18,7 +18,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     @ViewChild('lasso', { static: false }) lassoRef!: ElementRef<HTMLElement>;
     @ViewChildren('selected') selectedRef!: QueryList<ElementRef<HTMLElement>>;
 
-    nodes: Array<SelectionNode> = new Array<SelectionNode>();
+    nodes: SelectionNode[] = new Array<SelectionNode>();
     contentInit = false;
     topAdjust!: number;
     leftAdjust!: number;
@@ -33,9 +33,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     editorStateSubscription!: Subscription;
     removeSelectionChangedListener!: () => void;
 
-    constructor(public readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2,
-        protected urlParser: URLParserService, protected designerUtilsService: DesignerUtilsService,
-        private editorContentService: EditorContentService) {
+    public readonly editorSession = inject(EditorSessionService);
+    protected readonly renderer = inject(Renderer2);
+    protected urlParser = inject(URLParserService);
+    protected designerUtilsService = inject(DesignerUtilsService);
+    private editorContentService = inject(EditorContentService);
+
+    constructor() {
         this.editorContentService.addContentMessageListener(this);
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
     }
@@ -97,7 +101,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
     }
 
-    selectionChanged(selection: Array<string>, redrawDecorators?: boolean): void {
+    selectionChanged(selection: string[], redrawDecorators?: boolean): void {
         if (this.contentInit) {
             this.createNodes(selection);
         }
@@ -109,17 +113,17 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         }
     }
 
-    contentMessageReceived(id: string, data: { property: string }) {
+    contentMessageReceived(id: string, _data: { property: string }) {
         if (id === 'redrawDecorators') {
             this.selectionChanged(this.editorSession.getSelection(), true);
         }
     }
 
-    private createNodes(selection: Array<string>) {
+    private createNodes(selection: string[]) {
         this.createNodesImpl(selection);
     }
 
-    private createNodesImpl(selection: Array<string>) {
+    private createNodesImpl(selection: string[]) {
         if (selection.length > 0) {
             this.editorContentService.executeOnlyAfterInit(() => {
                 const newNodes = new Array<SelectionNode>();
@@ -176,8 +180,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (found) {
             if (this.editorSession.getSelection().indexOf(found.getAttribute('svy-id')!) !== -1) {
                 return;  //already selected
-            }
-            else if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
+            } else if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
                 let wrapper = found.parentElement;
                 while (wrapper && !wrapper.classList.contains('svy-wrapper')) {
                     wrapper = wrapper.parentElement;
@@ -186,8 +189,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     this.editorSession.setSelection([found.getAttribute('svy-id')!], this);
                 }
             }
-        }
-        else {
+        } else {
             //lasso select
             this.nodes = [];
             this.editorSession.setSelection([], this);
@@ -262,8 +264,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             });
             this.nodes = newNodes;
             this.editorSession.setSelection(newSelection, this);
-        }
-        else {
+        } else {
             const point = { x: event.pageX, y: event.pageY };
             point.x = point.x - this.editorContentService.getLeftPositionIframe();
             point.y = point.y - this.editorContentService.getTopPositionIframe();
@@ -278,8 +279,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     while (wrapper && !wrapper.classList.contains('svy-wrapper')) wrapper = wrapper.parentElement;
                     addToSelection = wrapper && wrapper.style.visibility === 'hidden' ? false : true;
 
-                }
-                else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ':before').height) > 0) {
+                } else if (node['offsetParent'] !== null && parseInt(window.getComputedStyle(node, ':before').height) > 0) {
                     const computedStyle = window.getComputedStyle(node, ':before');
                     //the top and left positions of the before pseudo element are computed as the sum of:
                     //top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
@@ -317,13 +317,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         if (index >= 0) {
                             this.nodes.splice(index, 1);
                             selection.splice(index, 1);
-                        }
-                        else {
+                        } else {
                             this.nodes.push(newNode);
                             selection.push(id);
                         }
-                    }
-                    else if (isNewSelection) {
+                    } else if (isNewSelection) {
                         const newNodes = new Array<SelectionNode>();
                         newNodes.push(newNode);
                         this.nodes = newNodes;
@@ -492,8 +490,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (droptarget) component['dropTargetUUID'] = droptarget;
         if (before) {
             component['rightSibling'] = node.svyid;
-        }
-        else
+        } else
             if (htmlNode.nextElementSibling) {
                 component['rightSibling'] = htmlNode.nextElementSibling.getAttribute('svy-id');
             }
@@ -534,9 +531,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 export class PositionMenuDirective implements OnInit {
     @Input('positionMenu') selectionNode!: SelectionNode;
 
-    constructor(private editorContentService: EditorContentService, private elementRef: ElementRef<HTMLElement>) {
-
-    }
+    private editorContentService = inject(EditorContentService);
+    private elementRef = inject(ElementRef<HTMLElement>);
 
     ngOnInit(): void {
         const htmlNode = this.editorContentService.getContentElement(this.selectionNode.svyid);

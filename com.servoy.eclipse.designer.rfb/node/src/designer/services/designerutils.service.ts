@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EditorSessionService } from './editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
 @Injectable()
 export class DesignerUtilsService {
 
-    constructor(protected readonly editorSession: EditorSessionService, protected readonly editorContentService: EditorContentService) {
-    }
+    protected readonly editorSession = inject(EditorSessionService);
+    protected readonly editorContentService = inject(EditorContentService);
 
     public adjustElementRect(node: Element, position: DOMRect): DOMRect {
         if (position.width == 0 || position.height == 0) {
@@ -61,7 +61,7 @@ export class DesignerUtilsService {
     }
 
     getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string, dragNode?: HTMLElement): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
-        let dropTarget: Element = null!;
+        let dropTarget!: Element;
         if (type == 'layout' || ((type == 'component' || type === 'jsmenu') && !absoluteLayout)) {
             const realName = layoutName ? layoutName : 'component';
 
@@ -106,8 +106,7 @@ export class DesignerUtilsService {
                         // can we enhance it ?
                         if (eventPage.y < absolutePoint.y && eventPage.x < absolutePoint.x) {
                             beforeNode = node;
-                        }
-                        else
+                        } else
                             break;
 
                     }
@@ -176,8 +175,7 @@ export class DesignerUtilsService {
                         dropTarget: undefined,
                         beforeChild: undefined,
                     };
-                }
-                else {
+                } else {
                     // we drop directly on the node, try to determine its position between children
                     let beforeNode: Element = null!;
                     for (let i = dropTarget.childNodes.length - 1; i >= 0; i--) {
@@ -195,8 +193,7 @@ export class DesignerUtilsService {
                             // can we enhance it ?
                             if (event.pageY < absolutePoint.y && event.pageX < absolutePoint.x) {
                                 beforeNode = node;
-                            }
-                            else
+                            } else
                                 break;
 
                         }
@@ -281,7 +278,7 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getNode(event: MouseEvent, topContainer?: boolean, skipNodeId?: string): HTMLElement {
+    getNode(event: MouseEvent, _topContainer?: boolean, skipNodeId?: string): HTMLElement {
         const point = { x: event.pageX, y: event.pageY };
         point.x = point.x - this.editorContentService.getLeftPositionIframe();
         point.y = point.y - this.editorContentService.getTopPositionIframe();
@@ -294,8 +291,7 @@ export class DesignerUtilsService {
             
             if (node['offsetParent'] !== null && position.x <= point.x && position.x + position.width >= point.x && position.y <= point.y && position.y + position.height >= point.y) {
                 return node;
-            }
-            else if (node['offsetParent'] !== null) {
+            } else if (node['offsetParent'] !== null) {
                 const computedStyle = window.getComputedStyle(node, ':before');
                 if (parseInt(computedStyle.height) > 0) {
                     const nodeComputedStyle = window.getComputedStyle(node);
@@ -324,23 +320,23 @@ export class DesignerUtilsService {
 
     isTopContainer(layoutName: string) {
         const packages = this.editorSession.getState().packages;
-        for (let i = 0; i < packages.length; i++) {
-            if (packages[i].components[0] && packages[i].components[0].componentType === 'layout') {
-                for (let j = 0; j < packages[i].components.length; j++) {
-                    if (packages[i].components[j].topContainer && packages[i].packageName + '.' + packages[i].components[j].layoutName === layoutName) {
+        for (const pkg of packages) {
+            if (pkg.components[0] && pkg.components[0].componentType === 'layout') {
+                for (const comp of pkg.components) {
+                    if (comp.topContainer && pkg.packageName + '.' + comp.layoutName === layoutName) {
                         return true;
                     }
                 }
             }
             
             // loop over categories as well
-            if (packages[i].categories) {
-                const keys = Object.keys(packages[i].categories!);
-                for (let j = 0; j < keys.length; j++) {
-                    const category = (packages[i].categories as any)[keys[j]];
+            if (pkg.categories) {
+                const keys = Object.keys(pkg.categories!);
+                for (const key of keys) {
+                    const category = (pkg.categories as any)[key];
                     if (category[0] && category[0].componentType === 'layout') {
-                        for (let k = 0; k < category.length; k++) {
-                            if (category[k].topContainer && packages[i].packageName + '.' + category[k].layoutName === layoutName) {
+                        for (const item of category) {
+                            if (item.topContainer && pkg.packageName + '.' + item.layoutName === layoutName) {
                                 return true;
                             }
                         }
@@ -351,7 +347,7 @@ export class DesignerUtilsService {
         return false;
     }
 
-    isInsideAutoscrollElementClientBounds(autoscrollElementClientBounds: Array<DOMRect>, clientX: number, clientY: number): boolean {
+    isInsideAutoscrollElementClientBounds(autoscrollElementClientBounds: DOMRect[], clientX: number, clientY: number): boolean {
         if (!autoscrollElementClientBounds) return false;
 
         let inside = false;
@@ -363,10 +359,10 @@ export class DesignerUtilsService {
         return inside;
     }
 
-    getAutoscrollElementClientBounds(): Array<DOMRect> {
+    getAutoscrollElementClientBounds(): DOMRect[] {
         const bottomAutoscrollArea = this.editorContentService.querySelector('.bottomAutoscrollArea');
 
-        let autoscrollElementClientBounds!: Array<DOMRect>;
+        let autoscrollElementClientBounds!: DOMRect[];
         if (bottomAutoscrollArea) {
             autoscrollElementClientBounds = [];
             autoscrollElementClientBounds[0] = bottomAutoscrollArea.getBoundingClientRect();

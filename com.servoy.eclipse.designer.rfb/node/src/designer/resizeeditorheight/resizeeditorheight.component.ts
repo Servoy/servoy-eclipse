@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { Point } from './../mouseselection/mouseselection.component';
@@ -27,8 +27,9 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
     private heightLimit = 5;     //minimum distance between parts labels
     private ghostsBottom = 0;
 
-    constructor(protected readonly renderer: Renderer2, protected readonly editorSession: EditorSessionService, private editorContentService: EditorContentService) {
-    }
+    protected readonly renderer = inject(Renderer2);
+    protected readonly editorSession = inject(EditorSessionService);
+    private editorContentService = inject(EditorContentService);
 
     ngOnInit() {
         this.resizerRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
@@ -81,8 +82,8 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
             if ( step != 0 ) {                
                 this.currentPosition += step;
                 if (this.currentPosition >= this.heightLimit) {
-                    for (let index = 0; index < this.ghostContainers.length; index++) {//components outside view became ghost places in a separate container
-                        this.renderer.setStyle(this.ghostContainers[index], 'height', this.currentPosition +'px');
+                    for (const ghostContainer of this.ghostContainers) {
+                        this.renderer.setStyle(ghostContainer, 'height', this.currentPosition +'px');
                     }                    
                     this.renderer.setStyle(this.editorContent, 'height', this.currentPosition  + 'px');
                     if (this.lowestPart) {
@@ -134,8 +135,7 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
  
     updateLocationCallback(_changeX: number, changeY: number) {
         if (this.currentPosition >= this.heightLimit) {
-            for (let index = 0; index < this.ghostContainers.length; index++) {
-                const ghostContainer = this.ghostContainers[index];
+            for (const ghostContainer of this.ghostContainers) {
                 this.renderer.setStyle(ghostContainer, 'height', this.currentPosition +'px');
             }
             this.renderer.setStyle(this.editorContent, 'height', this.currentPosition +'px');

@@ -29,7 +29,7 @@
             },
             "index": "src/index.html",
             "polyfills": [
-              "src/polyfills.ts"
+              "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -85,6 +85,13 @@
             "production": {
               "buildTarget": "servoy-designer:build:production"
             }
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "servoy-designer:build",
+            "runnerConfig": "vitest-base.config.ts"
           }
         },
         "lint": {

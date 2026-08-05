@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { inject, Injectable, EventEmitter } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider, TypesRegistry } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
@@ -22,8 +22,8 @@ export class EditorSessionService implements ServiceProvider {
     public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null!);
-    private allowedChildren: { [key: string]: string[] }  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
-    private wizardProperties: { [key: string]: string[] } = {};
+    private allowedChildren: Record<string, string[]>  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
+    private wizardProperties: Record<string, string[]> = {};
     private developerMenus: Record<string, any> = {};
 
     private bIsDirty = false;
@@ -34,8 +34,13 @@ export class EditorSessionService implements ServiceProvider {
     variantsPopup = new EventEmitter<{status: string}>();
     paletteRefresher!: ISupportRefreshPalette;
 
-    constructor(private websocketService: WebsocketService, private services: ServicesService,
-        private urlParser: URLParserService, private editorContentService: EditorContentService, private typesRegistry: TypesRegistry) {
+    private websocketService = inject(WebsocketService);
+    private services = inject(ServicesService);
+    private urlParser = inject(URLParserService);
+    private editorContentService = inject(EditorContentService);
+    private typesRegistry = inject(TypesRegistry);
+
+    constructor() {
         this.services.setServiceProvider(this);
         this.stateListener = new BehaviorSubject('');
         this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null!);
@@ -57,7 +62,7 @@ export class EditorSessionService implements ServiceProvider {
         this.wsSession = this.websocketService.connect('', [this.websocketService.getURLParameter('clientnr')!]);
         if (!this.urlParser.isAbsoluteFormLayout()) {
             this.wsSession.callService('formeditor', 'getAllowedChildren').then((result: any) => {
-                this.allowedChildren = JSON.parse(result) as { [key: string]: string[] } ;
+                this.allowedChildren = JSON.parse(result) as Record<string, string[]> ;
                 this.editorContentService.executeOnlyAfterInit(() => {
                     this.editorContentService.sendMessageToIframe({ id: 'allowedChildren', value: this.allowedChildren });
                 });
@@ -137,12 +142,14 @@ export class EditorSessionService implements ServiceProvider {
         return this.wsSession.callService('formeditor', 'executeDeveloperMenu', { isForm, name: property }, false);
     }
 
-    setSelection(selection: Array<string>, skipListener?: ISelectionChangedListener) {
+    setSelection(selection: string[], skipListener?: ISelectionChangedListener) {
         this.selection = selection;
         void this.wsSession.callService('formeditor', 'setSelection', {
             selection: selection
         }, true);
-        this.selectionChangedListeners.forEach(listener => { if (listener != skipListener) listener.selectionChanged(selection) });
+        this.selectionChangedListeners.forEach(listener => {
+ if (listener != skipListener) listener.selectionChanged(selection) 
+});
     }
 
     isInheritedForm() {
@@ -245,7 +252,7 @@ export class EditorSessionService implements ServiceProvider {
         void this.wsSession.callService('formeditor', action, params, true);
     }
 
-    updateSelection(ids: Array<string>, redrawDecorators?: boolean, designerChange?: boolean) {
+    updateSelection(ids: string[], redrawDecorators?: boolean, designerChange?: boolean) {
         this.selection = ids;
         this.selectionChangedListeners.forEach(listener => listener.selectionChanged(ids, redrawDecorators, designerChange));
     }
@@ -277,7 +284,7 @@ export class EditorSessionService implements ServiceProvider {
         this.dynamicGuidesChangedListeners.forEach(listener => listener.showDynamicGuidesChanged(result));
     }
 
-    getSelection(): Array<string> {
+    getSelection(): string[] {
         return this.selection;
     }
 
@@ -314,7 +321,7 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     getShortcuts() {
-        return this.wsSession.callService<{ [key: string]: string; }>('formeditor', 'getShortcuts');
+        return this.wsSession.callService<Record<string, string>>('formeditor', 'getShortcuts');
     }
 
     toggleHighlight() {
@@ -377,12 +384,11 @@ export class EditorSessionService implements ServiceProvider {
         let devMenus = null;
         if (this.developerMenus) {
             if(isForm)
-                devMenus = this.developerMenus["FORM"];
+                devMenus = this.developerMenus['FORM'];
             else {
-                const compMenus = this.developerMenus["COMPONENT"];
-                if(compMenus)
-                {
-                    const allCompMenus = compMenus[""];
+                const compMenus = this.developerMenus['COMPONENT'];
+                if(compMenus) {
+                    const allCompMenus = compMenus[''];
                     const specMenus = compMenus[formElementType];
                     devMenus = [...(allCompMenus ?? []), ...(specMenus ?? [])];
                 }
@@ -392,14 +398,14 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     getSuperForms() {
-        return this.wsSession.callService<Array<string>>('formeditor', 'getSuperForms');
+        return this.wsSession.callService<string[]>('formeditor', 'getSuperForms');
     }
 
     hasCypressFormTest() {
         return this.wsSession.callService<boolean>('formeditor', 'hasCypressFormTest');
     }
 
-    setCssAnchoring(selection: Array<string>, anchors: { top: string; left: string; bottom: string; right: string }) {
+    setCssAnchoring(selection: string[], anchors: { top: string; left: string; bottom: string; right: string }) {
         void this.wsSession.callService('formeditor', 'setCssAnchoring', { 'selection': selection, 'anchors': anchors }, true);
     }
 
@@ -452,10 +458,9 @@ export class EditorSessionService implements ServiceProvider {
     sameSize(width: boolean) {
         const selection = this.getSelection();
         if (selection && selection.length > 1) {
-            const obj: { [key: string]: { width: number; height: number }; } = {};
+            const obj: Record<string, { width: number; height: number }> = {};
             let firstSize: { width: number; height: number } = null!;
-            for (let i = 0; i < selection.length; i++) {
-                const nodeid = selection[i];
+            for (const nodeid of selection) {
                 const element = this.editorContentService.getContentElement(nodeid);
                 if (element) {
                     const elementRect = element.getBoundingClientRect();
@@ -543,7 +548,7 @@ export class EditorSessionService implements ServiceProvider {
 
 export interface ISelectionChangedListener {
 
-    selectionChanged(selection: Array<string>, redrawDecorators?: boolean, designerChange?: boolean): void;
+    selectionChanged(selection: string[], redrawDecorators?: boolean, designerChange?: boolean): void;
 
 }
 
@@ -567,7 +572,7 @@ class State {
     resizing = false;
     ghosthandle = false;
     pointerEvents = 'none';
-    packages!: Array<Package>;
+    packages!: Package[];
     drop_highlight!: string;
 }
 
@@ -588,19 +593,19 @@ export class PaletteComp {
     dropTargetUUID?: string;
     isOpen!: boolean;
     propertyName!: string; // ghost
-    components!: Array<PaletteComp>;
-    properties!: Array<string>;
+    components!: PaletteComp[];
+    properties!: string[];
     isAbsoluteCSSPositionMix?: boolean; // formcomponent property
     icon?: string;
     model?: { property: any };
-    types?: Array<PaletteComp>; // the ghosts
+    types?: PaletteComp[]; // the ghosts
     multiple?: boolean; //ghost property
     propertyValue?: { property: string }; // formcomponents
     componentType?: string;
     topContainer!: boolean;
     layoutName?: string;
-    attributes?: { [property: string]: string };
-    children?: [{ [property: string]: string }];
+    attributes?: Record<string, string>;
+    children?: [Record<string, string>];
     rightSibling?: string;
     variant?: string;
     cssPos?: { property: string };
@@ -611,9 +616,9 @@ export class Package {
     id!: string;
     packageName!: string;
     packageDisplayname!: string;
-    components!: Array<PaletteComp>;
-    propertyValues?: Array<PaletteComp>;
-    categories?: { property: Array<PaletteComp> };
+    components!: PaletteComp[];
+    propertyValues?: PaletteComp[];
+    categories?: { property: PaletteComp[] };
 }
 
 export interface ISupportAutoscroll {
@@ -631,5 +636,5 @@ export class Variant {
     name!: string;
     category!: string;
     displayName!: string;
-    classes!: Array<string>;
+    classes!: string[];
 }

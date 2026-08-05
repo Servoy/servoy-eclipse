@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, Input, Output, EventEmitter, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -30,11 +30,16 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     @Input() styleVariantPreview!: boolean
     @Output() previewReady = new EventEmitter<{previewReady: boolean}>();
     
-    constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        protected designSize: DesignSizeService, private editorContentService: EditorContentService, private windowRef: WindowRefService,
-        private editorSession: EditorSessionService) {
+    private sanitizer = inject(DomSanitizer);
+    private urlParser = inject(URLParserService);
+    protected readonly renderer = inject(Renderer2);
+    protected designSize = inject(DesignSizeService);
+    private editorContentService = inject(EditorContentService);
+    private windowRef = inject(WindowRefService);
+    private editorSession = inject(EditorSessionService);
 
-        designSize.setEditor(this);
+    constructor() {
+        this.designSize.setEditor(this);
         this.editorContentService.addContentMessageListener(this);
     }
 
@@ -43,8 +48,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
         if (this.urlParser.isAbsoluteFormLayout()) {
             this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
             this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
-        }
-        else {
+        } else {
             this.contentStyle['bottom'] = '20px';
             this.contentStyle['right'] = '20px';
             this.contentStyle['minWidth'] = '992px';
@@ -65,7 +69,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
         this.editorContentService.removeContentMessageListener(this);
     }
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     contentMessageReceived(id: string, data: { property: string, width? : number, height? : number, eventData?: any }) {
         if (id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
             this.contentStyle['width'] = data.width + 'px';
@@ -174,8 +178,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
         // if size is auto, the listener from content will set the height
         if (height != 'auto') {
             this.contentStyle['height'] = height;
-        }
-        else {
+        } else {
             this.adjustFromContentSize();
         }
         delete this.contentStyle['top'];

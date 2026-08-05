@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -37,13 +37,14 @@ export class ContextMenuComponent implements OnInit {
 	selection!: string[];
 	selectionAnchor = 0;
 
-	constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService,
-		protected urlParser: URLParserService, private windowRef: WindowRefService) {
-	}
+	protected readonly editorSession = inject(EditorSessionService);
+	protected editorContentService = inject(EditorContentService);
+	protected urlParser = inject(URLParserService);
+	private windowRef = inject(WindowRefService);
 
 	ngOnInit(): void {
-		void this.editorSession.getShortcuts().then((shortcuts: { [key: string]: string; }) => {
-			void this.editorSession.getSuperForms().then((superForms: Array<string>) => {
+		void this.editorSession.getShortcuts().then((shortcuts: Record<string, string>) => {
+			void this.editorSession.getSuperForms().then((superForms: string[]) => {
 				this.setup(shortcuts, superForms);
 			});
 		});
@@ -52,7 +53,7 @@ export class ContextMenuComponent implements OnInit {
 		});
 	}
 
-	private setup(shortcuts: { [key: string]: string; }, superForms: Array<string>): void {
+	private setup(shortcuts: Record<string, string>, superForms: string[]): void {
 		this.createItems(shortcuts, superForms);
 		const contentArea = this.editorContentService.getContentArea();
 		contentArea.addEventListener('contextmenu', (event: MouseEvent) => {
@@ -77,7 +78,7 @@ export class ContextMenuComponent implements OnInit {
 					const formElementType = node.getAttribute('svy-formelement-type');
 					if (formElementType) {
 						for (let i = 1; i < this.selection.length; i++) {
-							let nextNode = this.editorContentService.getContentElement(this.selection[i]);
+							const nextNode = this.editorContentService.getContentElement(this.selection[i]);
 							if (nextNode && formElementType !== nextNode.getAttribute('svy-formelement-type')) {
 								isValidSelect = false;
 								break;
@@ -92,85 +93,85 @@ export class ContextMenuComponent implements OnInit {
 				isFormNode = !this.selection || this.selection.length == 0;
 			}
 			if (node) {
-				for (let i = 0; i < this.menuItems.length; i++) {
-					if (this.menuItems[i].text === 'Add') {
-						const allowedChildren = node.getAttribute('svy-types') != null ? [] : this.editorSession.getAllowedChildrenForContainer(node.getAttribute('svy-layoutname')!);
-						const types = node.getAttribute('svy-types');
-						if (allowedChildren || types) {
-							this.menuItems[i].getItemClass = () => { return 'dropdown-submenu' };
-							this.menuItems[i].subMenu = [];
-							const typesArray: Array<{ type: string; property: string }> = [];
-							if (types) {
-								const typesA = types.trim().split(',');
-								const propertiesA = node.getAttribute('svy-types-properties')!.trim().split(',');
-								for (let x = 0; x < typesA.length; x++) {
-									typesArray.push({ type: typesA[x], property: propertiesA[x] });
-								}
+			for (const menuItem of this.menuItems) {
+				if (menuItem.text === 'Add') {
+					const allowedChildren = node.getAttribute('svy-types') != null ? [] : this.editorSession.getAllowedChildrenForContainer(node.getAttribute('svy-layoutname')!);
+					const types = node.getAttribute('svy-types');
+					if (allowedChildren || types) {
+						menuItem.getItemClass = () => {
+ return 'dropdown-submenu' 
+};
+						menuItem.subMenu = [];
+						const typesArray: { type: string; property: string }[] = [];
+						if (types) {
+							const typesA = types.trim().split(',');
+							const propertiesA = node.getAttribute('svy-types-properties')!.trim().split(',');
+							for (let x = 0; x < typesA.length; x++) {
+								typesArray.push({ type: typesA[x], property: propertiesA[x] });
 							}
-							if (allowedChildren)
-								for (const child of allowedChildren) {
-									const submenuItem = new ContextmenuItem(this.getDisplayName(child),
-										() => {
-											this.hide();
-											let component: PaletteComp = {} as PaletteComp;
-											if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id')!;
-
-											if (child.indexOf('.') > 0) {
-												const nameAndPackage = child.split('.');
-												component.name = nameAndPackage[1];
-												component.packageName = nameAndPackage[0];
-											} else {
-												component.name = child;
-												component.packageName = undefined!;
-											}
-											component = this.convertToContentPoint(component) as PaletteComp;
-											this.editorSession.createComponent(component);
-											return false;
-										});
-									this.menuItems[i].subMenu.push(submenuItem);
-								}
-							for (const type of typesArray) {
-								const submenuItem = new ContextmenuItem(type.type + ' -> ' + type.property,
+						}
+						if (allowedChildren)
+							for (const child of allowedChildren) {
+								const submenuItem = new ContextmenuItem(this.getDisplayName(child),
 									() => {
 										this.hide();
 										let component: PaletteComp = {} as PaletteComp;
 										if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id')!;
 
-										component.type = type.type;
-										component.ghostPropertyName = type.property;
-
+										if (child.indexOf('.') > 0) {
+											const nameAndPackage = child.split('.');
+											component.name = nameAndPackage[1];
+											component.packageName = nameAndPackage[0];
+										} else {
+											component.name = child;
+											component.packageName = undefined!;
+										}
 										component = this.convertToContentPoint(component) as PaletteComp;
 										this.editorSession.createComponent(component);
-									}
-								);
-								this.menuItems[i].subMenu.push(submenuItem);
+										return false;
+									});
+								menuItem.subMenu.push(submenuItem);
 							}
+						for (const type of typesArray) {
+							const submenuItem = new ContextmenuItem(type.type + ' -> ' + type.property,
+								() => {
+									this.hide();
+									let component: PaletteComp = {} as PaletteComp;
+									if (node.getAttribute('svy-id')) component.dropTargetUUID = node.getAttribute('svy-id')!;
+
+									component.type = type.type;
+									component.ghostPropertyName = type.property;
+
+									component = this.convertToContentPoint(component) as PaletteComp;
+									this.editorSession.createComponent(component);
+								}
+							);
+							menuItem.subMenu.push(submenuItem);
 						}
-						else {
-							this.menuItems[i].getItemClass = function() { return 'invisible' };
-						}
+					} else {
+						menuItem.getItemClass = () => 'invisible';
 					}
 				}
+			}
 				if (selectionChanged) {
-					const existingItem = this.menuItems.findIndex(item => item.text.startsWith("Configure"));
+					const existingItem = this.menuItems.findIndex(item => item.text.startsWith('Configure'));
 					if (existingItem >= 0) this.menuItems.splice(existingItem, 1);
 					const wizardProperties = this.editorSession.getWizardProperties(node.getAttribute('svy-formelement-type')!);
 					if (wizardProperties) {
-						const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
+						const insertIndex = this.menuItems.findIndex(item => item.text.startsWith('Delete'));//insert above delete
 						if (wizardProperties.length == 1) {
 							this.menuItems.splice(insertIndex, 0, new ContextmenuItem(
-								"Configure " + wizardProperties[0],
+								'Configure ' + wizardProperties[0],
 								() => {
 									this.hide();
 									this.editorSession.openConfigurator(wizardProperties[0]);
 								}
 							));
-						}
-						else if (wizardProperties.length > 1) {
-							let menuItem = new ContextmenuItem("Configure", null!);
+						} else if (wizardProperties.length > 1) {
+							const menuItem = new ContextmenuItem('Configure', null!);
 							menuItem.subMenu = [];
 							wizardProperties.forEach((value) => {
-								menuItem.subMenu.push(new ContextmenuItem("Configure " + value,
+								menuItem.subMenu.push(new ContextmenuItem('Configure ' + value,
 									() => {
 										this.hide();
 										this.editorSession.openConfigurator(value);
@@ -186,7 +187,7 @@ export class ContextMenuComponent implements OnInit {
 					);
 					const developerMenus = this.editorSession.getDeveloperMenus(isFormNode, node.getAttribute('svy-formelement-type')!);
 					if (developerMenus) {
-						const insertIndex = this.menuItems.findIndex(item => item.text.startsWith("Delete"));//insert above delete
+						const insertIndex = this.menuItems.findIndex(item => item.text.startsWith('Delete'));//insert above delete
 						const devMenus = developerMenus.map(value => {
 							const devMenu = new ContextmenuItem(value, () => {
 								this.hide()
@@ -252,8 +253,7 @@ export class ContextMenuComponent implements OnInit {
 			if (node) {
 				if (!content || content.length == 0 || content[0].types.indexOf('text/plain') < 0) {
 					node.classList.add('disabled');
-				}
-				else {
+				} else {
 					node.classList.remove('disabled');
 				}
 			}
@@ -308,8 +308,7 @@ export class ContextMenuComponent implements OnInit {
 
 			this.element.nativeElement.style.left = left + 'px';
 			this.element.nativeElement.style.top = top + 'px';
-		}
-		else {
+		} else {
 			const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
 			if (submenu) {
 				const menu: HTMLElement = submenu.querySelector('.dropdown-menu')!;
@@ -327,8 +326,7 @@ export class ContextMenuComponent implements OnInit {
 				if (this.element.nativeElement.offsetWidth + this.getElementOffset(this.element.nativeElement).left + menu.offsetWidth > viewport.right) {
 					//+5 to make it overlap the menu a bit
 					menu.style.left = -1 * menu.offsetWidth + 5 + 'px';
-				}
-				else {
+				} else {
 					menu.style.left = this.element.nativeElement.offsetWidth - 5 + 'px';
 				}
 			}
@@ -344,7 +342,7 @@ export class ContextMenuComponent implements OnInit {
 		};
 	}
 
-	private createItems(shortcuts: { [key: string]: string; }, forms: Array<string>) {
+	private createItems(shortcuts: Record<string, string>, forms: string[]) {
 		this.menuItems = new Array<ContextmenuItem>();
 		let entry: ContextmenuItem;
 
@@ -875,8 +873,7 @@ export class ContextMenuComponent implements OnInit {
 					if (node.parentElement!.closest('.inherited_element')) return false;
 				}
 			}
-		}
-		else return false;
+		} else return false;
 		return true;
 	}
 
@@ -919,13 +916,13 @@ export class ContextMenuComponent implements OnInit {
 		}
 	}
 
-	private findComponentDisplayName(arrayOfComponents: Array<{ name: string; displayName: string }>, componentName: string) {
+	private findComponentDisplayName(arrayOfComponents: { name: string; displayName: string }[], componentName: string) {
 		if (arrayOfComponents && arrayOfComponents.length) {
-			for (let j = 0; j < arrayOfComponents.length; j++) {
-				if (arrayOfComponents[j].name == componentName) {
-					return arrayOfComponents[j].displayName;
-				}
+		for (const comp of arrayOfComponents) {
+			if (comp.name == componentName) {
+				return comp.displayName;
 			}
+		}
 		}
 		return null;
 	}
@@ -936,12 +933,12 @@ export class ContextMenuComponent implements OnInit {
 			const packageAndComponent = componentName.split('.');
 			if (componentName == 'component' || packageAndComponent[1] == '*') return 'Component [...]';
 			if (componentName == 'template') return 'Template [...]';
-			for (let i = 0; i < packages.length; i++) {
-				if (packages[i].packageName == packageAndComponent[0]) {
-					let displayName = this.findComponentDisplayName(packages[i].components, packageAndComponent[1]);
-					if (displayName) return displayName;
+		for (const pkg of packages) {
+			if (pkg.packageName == packageAndComponent[0]) {
+				let displayName = this.findComponentDisplayName(pkg.components, packageAndComponent[1]);
+				if (displayName) return displayName;
 
-					const categories = packages[i].categories;
+				const categories = pkg.categories;
 					if (categories) {
 						for (const property in categories) {
 							displayName = this.findComponentDisplayName((categories as any)[property], packageAndComponent[1]);

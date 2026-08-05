@@ -14,8 +14,7 @@ export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnI
   ngOnInit() {
     if(this.item.initialValue !== undefined) {
       this.value = this.item.initialValue;
-    }
-    else if(this.item.min !== undefined){
+    } else if(this.item.min !== undefined){
       this.value = this.item.min;
     }
   }

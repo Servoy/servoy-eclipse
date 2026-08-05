@@ -1,5 +1,5 @@
 
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, ChangeDetectorRef, Renderer2, ViewChild, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ChangeDetectorRef, Renderer2, ViewChild, DOCUMENT, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -25,9 +25,11 @@ export class InlineEditComponent implements AfterViewInit {
 
     lastValue = {node: '', directEditProperty: '', propertyValue: ''}
     
-    constructor(protected readonly editorSession: EditorSessionService, private readonly designerUtilsService: DesignerUtilsService,
-        @Inject(DOCUMENT) private doc: Document, protected readonly renderer: Renderer2, private readonly cdRef: ChangeDetectorRef) {
-    }
+    protected readonly editorSession = inject(EditorSessionService);
+    private readonly designerUtilsService = inject(DesignerUtilsService);
+    private doc = inject(DOCUMENT);
+    protected readonly renderer = inject(Renderer2);
+    private readonly cdRef = inject(ChangeDetectorRef);
 
     ngAfterViewInit(): void {
         // if time between mouseup and mousedown is too much, browser won't trigger click/dblclick event; so we have to fake a double click
@@ -45,10 +47,9 @@ export class InlineEditComponent implements AfterViewInit {
         if (selection && selection.length > 0) {
             let eventNode = this.designerUtilsService.getNode(event);
             if (eventNode) {
-                for (let i = 0; i < selection.length; i++) {
-                    const node = selection[i];
-                    if (eventNode.getAttribute("svy-id") === node) {
-                        const directEditProperty = eventNode.getAttribute("directEditPropertyName");
+                for (const node of selection) {
+                    if (eventNode.getAttribute('svy-id') === node) {
+                        const directEditProperty = eventNode.getAttribute('directEditPropertyName');
                         if (directEditProperty) {
                             this.editorSession.getComponentPropertyWithTags(node, directEditProperty).then((propertyValue: any) => {
                                 if (eventNode.clientHeight === 0 && eventNode.clientWidth === 0 && eventNode.firstElementChild instanceof HTMLElement) {
@@ -80,7 +81,7 @@ export class InlineEditComponent implements AfterViewInit {
         const newValue = this.elementRef.nativeElement.textContent;
         const oldValue = propertyValue;
        let sameValue = false;
-        if (oldValue != newValue && !(oldValue === null && newValue === "")) {
+        if (oldValue != newValue && !(oldValue === null && newValue === '')) {
             const value: Record<string, any> = {};
             value[directEditProperty] = newValue;
             changes[node] = value;
@@ -143,7 +144,7 @@ export class InlineEditComponent implements AfterViewInit {
                     return false; //do not dispatch the event further
                 }
             });
-            this.blurListener = this.renderer.listen(this.elementRef.nativeElement, 'blur', (event: Event) => {
+            this.blurListener = this.renderer.listen(this.elementRef.nativeElement, 'blur', (_event: Event) => {
                 this.applyValue(this.node, this.directEditProperty, this.propertyValue);
             });
         }

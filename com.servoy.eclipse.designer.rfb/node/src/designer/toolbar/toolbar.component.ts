@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -68,7 +68,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     TOOLBAR_CATEGORIES = TOOLBAR_CATEGORIES;
 
-    items: Map<TOOLBAR_CATEGORIES, ToolbarItem[]> = new Map();
+    items = new Map<TOOLBAR_CATEGORIES, ToolbarItem[]>();
 
     btnPlaceField!: ToolbarItem;
     btnHighlightWebcomponents!: ToolbarItem;
@@ -112,8 +112,13 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     standard_actions!: ToolbarItem[];
     show_data!: ToolbarItem[];
 
-    constructor(protected readonly editorSession: EditorSessionService, protected urlParser: URLParserService,
-        protected designSize: DesignSizeService, private readonly renderer: Renderer2, private editorContentService: EditorContentService) {
+    protected readonly editorSession = inject(EditorSessionService);
+    protected urlParser = inject(URLParserService);
+    protected designSize = inject(DesignSizeService);
+    private readonly renderer = inject(Renderer2);
+    private editorContentService = inject(EditorContentService);
+
+    constructor() {
         this.createItems();
         this.designSize.createItems(this);
         this.editorSession.addSelectionChangedListener(this);
@@ -147,8 +152,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             void ShowSameSizeIndicatorPromise.then((result: boolean) => {
                 if (!result) {
                     this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': 'none' };
-                }
-                else {
+                } else {
                     this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 }
                 this.editorSession.setSameSizeIndicator(result);
@@ -158,8 +162,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             void ShowAnchoringIndicatorPromise.then((result: boolean) => {
                 if (!result) {
                     this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': 'none' };
-                }
-                else {
+                } else {
                     this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 }
                 this.editorSession.setAnchoringIndicator(result);
@@ -332,7 +335,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                     this.editorSession.getState().showWireframe = result;
                     this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
                     // wait for css classes to be applied
-                    setTimeout(()=>{this.editorSession.stateListener.next('showWireframe');}, 300);
+                    setTimeout(()=>{
+this.editorSession.stateListener.next('showWireframe');
+}, 300);
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
                     // this.editorSession.setContentSizes();
@@ -509,8 +514,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.editorSession.setSameSizeIndicator(!this.editorSession.getState().sameSizeIndicator);
                 if (this.editorSession.getState().sameSizeIndicator) {
                     this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
-                }
-                else {
+                } else {
                     this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': 'none' };
                 }
             }
@@ -518,8 +522,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.editorSession.setAnchoringIndicator(!this.editorSession.getState().anchoringIndicator);
                 if (this.editorSession.getState().anchoringIndicator) {
                     this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
-                }
-                else {
+                } else {
                     this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': 'none' };
                 }
             }
@@ -619,8 +622,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj: Record<string, any> = {};
                     let left: number | null = null;
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -632,8 +634,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -655,8 +656,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj: Record<string, any> = {};
                     let right: number | null = null;
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -668,8 +668,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -691,8 +690,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj: Record<string, any> = {};
                     let top: number | null = null;
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -704,8 +702,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -727,8 +724,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 if (selection && selection.length > 1) {
                     const obj: Record<string, any> = {};
                     let bottom: number | null = null;
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -740,8 +736,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -762,10 +757,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                   const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj: Record<string, any> = {};
-                    let centerElementModel: DOMRect | null = null;
-                    const sortedSelection: Array<DOMRect> = [];
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    const sortedSelection: DOMRect[] = [];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -784,9 +777,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    const centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -807,10 +799,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                  const selection = this.editorSession.getSelection();
                 if (selection && selection.length > 1) {
                     const obj: Record<string, any> = {};
-                    let centerElementModel: DOMRect | null = null;
-                    const sortedSelection: Array<DOMRect> = [];
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    const sortedSelection: DOMRect[] = [];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -829,9 +819,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                             }
                         }
                     }
-                    centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
-                    for (let i = 0; i < selection.length; i++) {
-                        const nodeid = selection[i];
+                    const centerElementModel = sortedSelection[Math.round((sortedSelection.length - 1) / 2)];
+                    for (const nodeid of selection) {
                         const element = this.editorContentService.getContentElement(nodeid);
                         if (element) {
                             const elementRect = element.getBoundingClientRect();
@@ -985,8 +974,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 classes.split(' ').forEach(cssclass => {
                     if (state) {
                         this.renderer.addClass(element, cssclass);
-                    }
-                    else {
+                    } else {
                         this.renderer.removeClass(element, cssclass);
                     }
                 });
@@ -1001,7 +989,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         });
     }
 
-    selectionChanged(selection: Array<string>): void {
+    selectionChanged(selection: string[]): void {
         // do we need to enable/disable the actions ? maybe just keep them always enabled
         //this.btnTabSequence.enabled = selection.length > 1;
         //this.btnSameWidth.enabled = selection.length > 1;
@@ -1025,8 +1013,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             //this.btnSendBackward.enabled = selection.length > 0;
             //this.btnBringToFront.enabled = selection.length > 0;
             //this.btnSendToBack.enabled = selection.length > 0;
-        }
-        else {
+        } else {
             this.btnMoveUp.enabled = selection.length == 1;
             this.btnMoveDown.enabled = selection.length == 1;
             this.btnZoomIn.enabled = selection.length == 1;
@@ -1042,8 +1029,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             elements.forEach((node) => {
                 if (hideInherited) {
                     this.renderer.setStyle(node, 'visibility', 'hidden');
-                }
-                else {
+                } else {
                     this.renderer.setStyle(node, 'visibility', 'visible');
                     //if there is only one eleent in the current selection we must trigger a redraw decorators
                     const selection = this.editorSession.getSelection();
@@ -1080,7 +1066,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
     updateSelection(hideInherited?: boolean){
         if (hideInherited === undefined) {
-           setTimeout(()=>{this.editorSession.setSelection(this.editorSession.getSelection());}, 100);
+           setTimeout(()=>{
+this.editorSession.setSelection(this.editorSession.getSelection());
+}, 100);
         } else if (hideInherited) {
             const selection = this.editorSession.getSelection();
             const filteredSelection: string[] = [];
@@ -1121,7 +1109,7 @@ export class ToolbarItem {
     style!: string;
     disabledIcon!: string;
     faIcon!: string;
-    list!: Array<{ text: string; iconStyle?: { 'background-image': string }; tooltip?: string}>;
+    list!: { text: string; iconStyle?: { 'background-image': string }; tooltip?: string}[];
     getIconStyle!: (text: string) => object;
     onselection!: (text: string) => string;
     initialValue!: number;

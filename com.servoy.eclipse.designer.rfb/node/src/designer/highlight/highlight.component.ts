@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService, IShowHighlightChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -15,7 +15,12 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
     showPermanentHighlight = false;
     onMoveTimer!: ReturnType<typeof setTimeout>;
 
-    constructor(protected readonly editorSession: EditorSessionService, private readonly renderer: Renderer2, private urlParser: URLParserService, private editorContentService: EditorContentService) {
+    protected readonly editorSession = inject(EditorSessionService);
+    private readonly renderer = inject(Renderer2);
+    private urlParser = inject(URLParserService);
+    private editorContentService = inject(EditorContentService);
+
+    constructor() {
         this.editorSession.addHighlightChangedListener(this);
         this.editorContentService.addContentMessageListener(this);
     }
@@ -30,7 +35,7 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
         this.editorContentService.removeContentMessageListener(this);
     }
 
-    contentMessageReceived(id: string, data: { property: string }) {
+    contentMessageReceived(id: string, _data: { property: string }) {
         if (id === 'redrawDecorators') {
             this.shouldRepeatHighlight = true;
             this.highlightChanged(this.showPermanentHighlight);
@@ -102,8 +107,7 @@ export class HighlightComponent implements IShowHighlightChangedListener, OnInit
                 }
                 if (showHighlight) {
                     this.renderer.addClass(node, 'highlight_element');
-                }
-                else {
+                } else {
                     this.renderer.removeClass(node, 'highlight_element');
                 }
             });
