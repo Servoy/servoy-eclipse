@@ -1,6 +1,7 @@
 import {
-    Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren,
-    OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input, forwardRef
+  Component, OnInit, AfterViewInit, ElementRef, Renderer2, QueryList, ViewChildren,
+  OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input, forwardRef,
+  viewChild
 } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -21,7 +22,7 @@ import { ResizeKnobDirective } from '../directives/resizeknob.directive';
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy, IContentMessageListener {
 
-    @ViewChild('lasso', { static: false }) lassoRef!: ElementRef<HTMLElement>;
+    readonly lassoRef = viewChild.required<ElementRef<HTMLElement>>('lasso');
     @ViewChildren('selected') selectedRef!: QueryList<ElementRef<HTMLElement>>;
 
     nodes: SelectionNode[] = new Array<SelectionNode>();
@@ -201,10 +202,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.nodes = [];
             this.editorSession.setSelection([], this);
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
+            const lassoRef = this.lassoRef();
+            this.renderer.setStyle(lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'width', '0px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'height', '0px');
 
             if (event.button !== 2) {
                 this.lassostarted = true;
@@ -400,7 +402,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             }
         }
         this.lassostarted = false;
-        this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'none');
+        this.renderer.setStyle(this.lassoRef().nativeElement, 'display', 'none');
         this.applyWireframe();
 
         if (event.button == 0 && event.timeStamp - this.lastTimestamp < 350) {
@@ -449,19 +451,20 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (this.editorSession.getState().dragging) return;
         if (this.lassostarted) {
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+            const lassoRef = this.lassoRef();
             if (event.pageX < this.mousedownpoint.x) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect.left + 'px');
+                this.renderer.setStyle(lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect.left + 'px');
             }
             if (event.pageY < this.mousedownpoint.y) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect.top + 'px');
+                this.renderer.setStyle(lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect.top + 'px');
             }
-            if (this.lassoRef.nativeElement.style.display === 'none') {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'block');
+            if (lassoRef.nativeElement.style.display === 'none') {
+                this.renderer.setStyle(lassoRef.nativeElement, 'display', 'block');
             }
             const currentWidth = event.pageX - this.mousedownpoint.x;
             const currentHeight = event.pageY - this.mousedownpoint.y;
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
         }
         if (this.editorSession.getState().resizing) {
 			this.redrawDecorators();

@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { Point } from './../mouseselection/mouseselection.component';
@@ -10,7 +10,7 @@ import { Point } from './../mouseselection/mouseselection.component';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
-    @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
+    readonly elementRef = viewChild.required<ElementRef<HTMLElement>>('element');
 
     private currentPosition = 0;
     private widthLimit = 5;
@@ -28,7 +28,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
     private editorContentService = inject(EditorContentService);
 
     ngOnInit() {
-        this.elementRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
+        this.elementRef().nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
             event.stopPropagation();
             this.draggingEvent = event;
             this.editorContentService.getDocument().addEventListener('mousemove', (event) =>this.onMouseMove(event));

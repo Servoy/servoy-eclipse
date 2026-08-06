@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { Point } from './../mouseselection/mouseselection.component';
@@ -10,7 +10,7 @@ import { Point } from './../mouseselection/mouseselection.component';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
-    @ViewChild('resizer', { static: true }) resizerRef!: ElementRef<HTMLElement>;
+    readonly resizerRef = viewChild.required<ElementRef<HTMLElement>>('resizer');
 
     
     private lowestPart: Element | null = null;
@@ -31,7 +31,7 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
     private editorContentService = inject(EditorContentService);
 
     ngOnInit() {
-        this.resizerRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
+        this.resizerRef().nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
             event.stopPropagation();
             this.editorContentService.getDocument().addEventListener('mousemove', this.onMouseMove);
             this.editorContentService.getDocument().addEventListener('mouseup', this.onMouseUp);

@@ -25,6 +25,7 @@ describe('DesignerComponent', () => {
     (component as any).editorSession = editorSession;
     (component as any).urlParser = urlParser;
     (component as any).renderer = renderer;
+    (component as any).contentArea = () => undefined;
   });
 
   describe('ngOnInit', () => {
@@ -40,7 +41,7 @@ describe('DesignerComponent', () => {
 
     it('should register callback listener on contentArea when available', () => {
       const nativeElement = document.createElement('div');
-      (component as any).contentArea = { nativeElement };
+      (component as any).contentArea = () => ({ nativeElement });
       component.ngOnInit();
       editorSession.registerCallback.next({ event: 'click', function: () => undefined });
       expect(renderer.listen).toHaveBeenCalledWith(nativeElement, 'click', expect.any(Function));

@@ -1,5 +1,5 @@
 
-import { AfterViewInit, Component, ElementRef, ChangeDetectorRef, Renderer2, ViewChild, DOCUMENT, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ChangeDetectorRef, Renderer2, DOCUMENT, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -11,7 +11,7 @@ import { EditorSessionService } from '../services/editorsession.service';
 })
 export class InlineEditComponent implements AfterViewInit {
 
-    @ViewChild('inlineedit', { static: true }) elementRef!: ElementRef<HTMLElement>;
+    readonly elementRef = viewChild.required<ElementRef<HTMLElement>>('inlineedit');
     showDirectEdit = false;
     node!: string;
     directEditProperty!: string;
@@ -77,7 +77,7 @@ export class InlineEditComponent implements AfterViewInit {
     
     applyValue(node: string, directEditProperty: string, propertyValue: string) {
         const changes: Record<string, any> = {};
-        const newValue = this.elementRef.nativeElement.textContent;
+        const newValue = this.elementRef().nativeElement.textContent;
         const oldValue = propertyValue;
        let sameValue = false;
         if (oldValue != newValue && !(oldValue === null && newValue === '')) {
@@ -104,9 +104,9 @@ export class InlineEditComponent implements AfterViewInit {
     
     addListeners(){
         if (!this.keyupListener) {
-            this.keyupListener = this.renderer.listen(this.elementRef.nativeElement, 'keyup', (event: KeyboardEvent) => {
+            this.keyupListener = this.renderer.listen(this.elementRef().nativeElement, 'keyup', (event: KeyboardEvent) => {
                 if (event.key === 'Escape') {
-                    this.elementRef.nativeElement.textContent = this.propertyValue;
+                    this.elementRef().nativeElement.textContent = this.propertyValue;
                     this.showDirectEdit = false;
                     this.editorSession.setInlineEditMode(false);
                     
@@ -116,7 +116,7 @@ export class InlineEditComponent implements AfterViewInit {
                     return false;
                 }
             });
-            this.keydownListener = this.renderer.listen(this.elementRef.nativeElement, 'keydown', (event: KeyboardEvent) => {
+            this.keydownListener = this.renderer.listen(this.elementRef().nativeElement, 'keydown', (event: KeyboardEvent) => {
                 if (event.key === 'Backspace' || event.key == 'Delete') {
                     event.stopPropagation();
                 }
@@ -143,7 +143,7 @@ export class InlineEditComponent implements AfterViewInit {
                     return false; //do not dispatch the event further
                 }
             });
-            this.blurListener = this.renderer.listen(this.elementRef.nativeElement, 'blur', (_event: Event) => {
+            this.blurListener = this.renderer.listen(this.elementRef().nativeElement, 'blur', (_event: Event) => {
                 this.applyValue(this.node, this.directEditProperty, this.propertyValue);
             });
         }
@@ -158,13 +158,14 @@ export class InlineEditComponent implements AfterViewInit {
         this.propertyValue = propertyValue;
         
         this.editorSession.setInlineEditMode(true);
-        this.renderer.setProperty(this.elementRef.nativeElement, 'innerHTML', propertyValue);
-        this.renderer.setStyle(this.elementRef.nativeElement, 'left', absolutePoint.x+'px');
-        this.renderer.setStyle(this.elementRef.nativeElement, 'top', absolutePoint.y + 'px');
-        this.renderer.setStyle(this.elementRef.nativeElement, 'min-width', absolutePoint.width + 'px');
-        this.renderer.setStyle(this.elementRef.nativeElement, 'height', absolutePoint.height + 'px');
+        const elementRef = this.elementRef();
+        this.renderer.setProperty(elementRef.nativeElement, 'innerHTML', propertyValue);
+        this.renderer.setStyle(elementRef.nativeElement, 'left', absolutePoint.x+'px');
+        this.renderer.setStyle(elementRef.nativeElement, 'top', absolutePoint.y + 'px');
+        this.renderer.setStyle(elementRef.nativeElement, 'min-width', absolutePoint.width + 'px');
+        this.renderer.setStyle(elementRef.nativeElement, 'height', absolutePoint.height + 'px');
 
-        setTimeout(() => this.elementRef.nativeElement.focus());
+        setTimeout(() => this.elementRef().nativeElement.focus());
     }
 
 }

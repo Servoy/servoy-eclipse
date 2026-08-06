@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { EditorSessionService } from './services/editorsession.service';
 import { URLParserService } from 'src/designer/services/urlparser.service';
 import { ToolbarComponent } from './toolbar/toolbar.component';
@@ -33,7 +33,7 @@ import { InlineEditComponent } from './inlinedit/inlineedit.component';
 })
 export class DesignerComponent implements OnInit {
 
-    @ViewChild('contentArea', { static: false }) contentArea!: ElementRef<HTMLElement>;
+    readonly contentArea = viewChild.required<ElementRef<HTMLElement>>('contentArea');
 
     public readonly editorSession = inject(EditorSessionService);
     public urlParser = inject(URLParserService);
@@ -42,7 +42,8 @@ export class DesignerComponent implements OnInit {
     ngOnInit() {
         this.editorSession.connect();
         this.editorSession.registerCallback.subscribe(value => {
-            if (this.contentArea) this.renderer.listen(this.contentArea.nativeElement, value.event, value.function);
+            const contentArea = this.contentArea();
+            if (contentArea) this.renderer.listen(contentArea.nativeElement, value.event, value.function);
         })
 
         this.renderer.listen('window', 'mouseup', (event: MouseEvent) => {

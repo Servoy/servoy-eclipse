@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, Renderer2, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject, input, viewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -19,9 +19,9 @@ import { NgbPopover as NgbPopover_1 } from '@ng-bootstrap/ng-bootstrap/popover';
 export class VariantsPreviewComponent implements AfterViewInit {
 
     component = input<PaletteComp>();
-    @ViewChild('popover') popover!: NgbPopover;
-	@ViewChild('variantGlasspane') glasspane!: ElementRef; 
-	@ViewChild('variantContent') content!: ElementRef;
+    readonly popover = viewChild.required<NgbPopover>('popover');
+	readonly glasspane = viewChild.required<ElementRef>('variantGlasspane'); 
+	readonly content = viewChild.required<ElementRef>('variantContent');
 
     clientURL!: SafeResourceUrl;
     margin = 16; //ng-popover margin
@@ -105,7 +105,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
     }
 
     initPopover() {
-        this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
+        this.popover().open({ popOv: this.popover(), clientURL: this.clientURL});
         this.top = -1000;
         this.left = -1000;
         //need to create the form prior to correctly rendering variants in designer

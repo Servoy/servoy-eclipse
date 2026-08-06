@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ElementRef, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { Point } from '../mouseselection/mouseselection.component';
@@ -16,7 +16,7 @@ import { ResizeEditorHeightComponent } from '../resizeeditorheight/resizeeditorh
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 
-    @ViewChild('element', { static: false }) elementRef!: ElementRef<Element>;
+    readonly elementRef = viewChild.required<ElementRef<Element>>('element');
 
     ghostOffset = 20;
     containerLeftOffset!: number;
@@ -109,8 +109,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     hideShowGhosts(visibility: string) {
-        if (this.elementRef) {
-            const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
+        const elementRef = this.elementRef();
+        if (elementRef) {
+            const ghostsContainer = document.querySelectorAll(`.${elementRef.nativeElement.classList.value}`);
             Array.from(ghostsContainer).slice(1).forEach((item: any) => {
                 item.style.visibility = visibility;
                 item.querySelectorAll('.ghost').forEach((ghost: any) => ghost.style.visibility = visibility);

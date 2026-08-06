@@ -40,7 +40,7 @@ describe('GhostsContainerComponent', () => {
     (component as any).ghostContainers = null;
     (component as any).ghostOffset = 20;
     (component as any).draggingGhost = null;
-    (component as any).elementRef = { nativeElement: { classList: { value: 'ghostcontainer' } } };
+    (component as any).elementRef = () => ({ nativeElement: { classList: { value: 'ghostcontainer' } } });
     (component as any).formWidth = 800;
     (component as any).formHeight = 600;
     (component as any).partTopPosition = 0;
@@ -107,7 +107,7 @@ describe('GhostsContainerComponent', () => {
 
   describe('hideShowGhosts', () => {
     it('should not throw when elementRef is undefined', () => {
-      (component as any).elementRef = undefined;
+      (component as any).elementRef = () => undefined;
       expect(() => component.hideShowGhosts('visible')).not.toThrow();
     });
   });
