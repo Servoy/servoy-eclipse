@@ -95,6 +95,7 @@ describe('MouseSelectionComponent', () => {
       const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => {});
       component.selectionChanged(['id1']);
       expect(spy).toHaveBeenCalledWith(['id1']);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should not call createNodes when contentInit is false', () => {

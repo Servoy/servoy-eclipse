@@ -45,6 +45,7 @@ describe('SameSizeIndicatorComponent', () => {
       component.ngAfterViewInit();
       stateListener.next('sameSizeIndicator');
       expect(component.sameSizeIndicator).toBe(true);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should clear indicators when sameSizeIndicator is turned off', () => {
@@ -53,6 +54,7 @@ describe('SameSizeIndicatorComponent', () => {
       component.ngAfterViewInit();
       stateListener.next('sameSizeIndicator');
       expect(component.indicators).toEqual([]);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should null indicators when dragging starts', () => {
@@ -60,6 +62,7 @@ describe('SameSizeIndicatorComponent', () => {
       component.ngAfterViewInit();
       stateListener.next('dragging');
       expect(component.indicators).toBeNull();
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should call selectionChanged when dragging stops', () => {
@@ -92,18 +95,21 @@ describe('SameSizeIndicatorComponent', () => {
       component.sameSizeIndicator = false;
       component.selectionChanged(['uuid-1']);
       expect(component.indicators).toEqual([]);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should clear indicators when selection has multiple items', () => {
       component.sameSizeIndicator = true;
       component.selectionChanged(['uuid-1', 'uuid-2']);
       expect(component.indicators).toEqual([]);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should clear indicators when selection is empty', () => {
       component.sameSizeIndicator = true;
       component.selectionChanged([]);
       expect(component.indicators).toEqual([]);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should find same-width elements and create indicators', () => {

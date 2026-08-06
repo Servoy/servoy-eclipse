@@ -50,6 +50,7 @@ describe('AnchoringIndicatorComponent', () => {
       component.ngAfterViewInit();
       stateListener.next('anchoringIndicator');
       expect(component.anchoringIndicator).toBe(true);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should clear indicator when anchoringIndicator turns off', () => {
@@ -58,6 +59,7 @@ describe('AnchoringIndicatorComponent', () => {
       component.ngAfterViewInit();
       stateListener.next('anchoringIndicator');
       expect(component.indicator).toBeNull();
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should null indicator when dragging starts', () => {
@@ -66,6 +68,7 @@ describe('AnchoringIndicatorComponent', () => {
       component.ngAfterViewInit();
       stateListener.next('dragging');
       expect(component.indicator).toBeNull();
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
   });
 

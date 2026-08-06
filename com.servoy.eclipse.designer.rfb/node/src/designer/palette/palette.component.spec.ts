@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { of } from 'rxjs';
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette.component';
 
 describe('PaletteComponent', () => {
@@ -38,6 +39,7 @@ describe('PaletteComponent', () => {
     const windowRef = { nativeWindow: { addEventListener: vi.fn(), location: { host: 'localhost' } } };
 
     component = Object.create(PaletteComponent.prototype);
+    (component as any).cdr = { markForCheck: vi.fn() };
     (component as any).editorSession = editorSession;
     (component as any).urlParser = urlParser;
     (component as any).editorContentService = editorContentService;
@@ -82,6 +84,16 @@ describe('PaletteComponent', () => {
       const pkgs = [{ packageName: 'test' }];
       editorSession.getState.mockReturnValue({ packages: pkgs });
       expect(component.getPackages()).toBe(pkgs);
+    });
+  });
+
+  describe('refreshPalette', () => {
+    it('should call markForCheck after HTTP response', () => {
+      const packages = [{ packageName: 'servoydefault', components: [] }];
+      (component as any).http.get.mockReturnValue(of(packages));
+      (component as any).activeIds = [];
+      component.refreshPalette();
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
   });
 

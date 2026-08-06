@@ -32,12 +32,15 @@ describe('StatusBarComponent', () => {
       component.ngAfterViewInit();
       stateListener.next('statusText');
       expect(component.statusText).toBe('Button [myBtn]');
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should not update statusText for other state changes', () => {
       component.ngAfterViewInit();
+      (component as any).cdr.markForCheck.mockClear();
       stateListener.next('dragging');
       expect(component.statusText).toBe('');
+      expect((component as any).cdr.markForCheck).not.toHaveBeenCalled();
     });
   });
 
