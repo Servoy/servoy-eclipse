@@ -1,19 +1,25 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
-    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
+    "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "declaration": false,
     "module": "es2020",
     "moduleResolution": "bundler",
+    "importHelpers": true,
     "experimentalDecorators": true,
     "target": "ES2022",
     "typeRoots": [
       "node_modules/@types"
     ],
     "useDefineForClassFields": false
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
   }
 }
