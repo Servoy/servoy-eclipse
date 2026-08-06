@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Message, Package, PackagesAndRepositories, PackagesInfo, Repository, WebsocketService } from './websocket.service';
 import { Observable, Observer, BehaviorSubject } from 'rxjs';
 import { map, share } from 'rxjs/operators';
@@ -39,9 +39,9 @@ export class WpmService {
   packageToBeRemoved: BehaviorSubject<Package>;
  url: URL;
 
-  needRefresh = false;
+  needRefresh = signal(false);
 
-  contentAvailable = true;
+  contentAvailable = signal(true);
 
   constructor(wsService: WebsocketService) {
     const loc = window.location;
@@ -149,11 +149,11 @@ export class WpmService {
   }
 
   isNeedRefresh(): boolean {
-    return this.needRefresh;
+    return this.needRefresh();
   }
 
   isContentAvailable(): boolean {
-    return this.contentAvailable;
+    return this.contentAvailable();
   }
 
   setNewSelectedRepository(repositoryName: string) {
@@ -219,15 +219,15 @@ export class WpmService {
   }
 
   refreshRemotePackages = () =>{
-		this.needRefresh = true;
+		this.needRefresh.set(true);
   }
   
   contentNotAvailable = () => {
-    this.contentAvailable = false;
+    this.contentAvailable.set(false);
   }
 
   installError = () => {
-    this.contentAvailable = false;
+    this.contentAvailable.set(false);
   }
 
   addRepository(newPackagesAndRepositories: PackagesAndRepositories) {

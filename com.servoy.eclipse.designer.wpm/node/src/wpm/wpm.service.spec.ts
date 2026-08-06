@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject, Observable, Observer } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { WpmService, ALL_PACKAGE_TYPES, PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE } from './wpm.service';
 import { Package, Repository } from './websocket.service';
@@ -36,8 +37,8 @@ describe('WpmService', () => {
     messageSender = { next: vi.fn() };
     (service as any).messageSender = messageSender;
     (service as any).solutions = [];
-    (service as any).needRefresh = false;
-    (service as any).contentAvailable = true;
+    (service as any).needRefresh = signal(false);
+    (service as any).contentAvailable = signal(true);
     (service as any).url = new URL('http://localhost:8080/wpm/angular2/?darkTheme=false');
 
     (service as any).packageLists = new BehaviorSubject<PackageList[]>([]);
@@ -227,7 +228,7 @@ describe('WpmService', () => {
   describe('refreshRemotePackages', () => {
     it('should set needRefresh to true', () => {
       expect(service.isNeedRefresh()).toBe(false);
-      (service as any).needRefresh = true;
+      service.needRefresh.set(true);
       expect(service.isNeedRefresh()).toBe(true);
     });
   });
@@ -235,7 +236,7 @@ describe('WpmService', () => {
   describe('contentNotAvailable', () => {
     it('should set contentAvailable to false', () => {
       expect(service.isContentAvailable()).toBe(true);
-      (service as any).contentAvailable = false;
+      service.contentAvailable.set(false);
       expect(service.isContentAvailable()).toBe(false);
     });
   });

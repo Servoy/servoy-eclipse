@@ -1,4 +1,4 @@
-import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { enableProdMode, provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 
 import { environment } from './environments/environment';
 import { WebsocketService } from './wpm/websocket.service';
@@ -25,6 +25,7 @@ if (environment.production) {
 
 bootstrapApplication(MainComponent, {
     providers: [
+        provideZonelessChangeDetection(),
         importProvidersFrom(
             BrowserModule, BrowserAnimationsModule,
             MatButtonModule, MatTabsModule, MatSelectModule, MatOptionModule,
