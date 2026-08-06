@@ -508,8 +508,16 @@ this.editorSession.stateListener.next('showWireframe');
         this.btnVisualFeedbackOptions.tooltip = 'Visual feedback options';
 
         this.btnVisualFeedbackOptions.list = [
-            { 'text': TOOLBAR_CONSTANTS.ANCHOR_INDICATOR, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON }, 'tooltip': 'Whether anchor indicator (hint image) is shown for a selected component.' },
-            { 'text': TOOLBAR_CONSTANTS.SAME_SIZE, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON } , 'tooltip': 'Whether same width and same height indicators (hint images) are shown for a selected component and all components that match its width or height.'}
+            {
+                'text': TOOLBAR_CONSTANTS.ANCHOR_INDICATOR,
+                'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON },
+                'tooltip': 'Whether anchor indicator (hint image) is shown for a selected component.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.SAME_SIZE,
+                'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON },
+                'tooltip': 'Whether same width and same height indicators (hint images) are shown for a selected component and all components that match its width or height.'
+            }
         ];
 
         this.btnVisualFeedbackOptions.onselection = (selection) => {
@@ -543,13 +551,31 @@ this.editorSession.stateListener.next('showWireframe');
             null
         );
         
-        this.btnOrderingActionsCSSForm.tooltip = 'Form Index (zIndex) ordering actions applied to selected element(s).If there is no selection or selected element doesn\'t have any overlapping neighbour components it doesn\'t do anything. It modifies the formIndex of selected element(s) and all the elements it has common space with.';
+        this.btnOrderingActionsCSSForm.tooltip = 'Form Index (zIndex) ordering actions applied to selected element(s).'
+            + 'If there is no selection or selected element doesn\'t have any overlapping neighbour components it doesn\'t do anything.'
+            + ' It modifies the formIndex of selected element(s) and all the elements it has common space with.';
         
         this.btnOrderingActionsCSSForm.list = [
-            { 'text': TOOLBAR_CONSTANTS.BRING_FORWARD, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.BRING_FORWARD_ICON }, 'tooltip': 'Moves selected element(s) one step up in zIndex layers.' },
-            { 'text': TOOLBAR_CONSTANTS.SEND_BACKWARD, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.SEND_BACKWARD_ICON }, 'tooltip': 'Moves selected element(s) one step down in zIndex layers.' },
-            { 'text': TOOLBAR_CONSTANTS.BRING_TO_FRONT, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.BRING_TO_FRONT_ICON }, 'tooltip': 'Moves selected element(s) to top so it is always fully visible (top most zIndex layer)' },
-            { 'text': TOOLBAR_CONSTANTS.SEND_TO_BACK, 'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.SEND_TO_BACK_ICON }, 'tooltip': 'Moves selected element(s) to bottom so it is the least visible one (all the elements it intersects will be on top of it).' }
+            {
+                'text': TOOLBAR_CONSTANTS.BRING_FORWARD,
+                'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.BRING_FORWARD_ICON },
+                'tooltip': 'Moves selected element(s) one step up in zIndex layers.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.SEND_BACKWARD,
+                'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.SEND_BACKWARD_ICON },
+                'tooltip': 'Moves selected element(s) one step down in zIndex layers.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.BRING_TO_FRONT,
+                'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.BRING_TO_FRONT_ICON },
+                'tooltip': 'Moves selected element(s) to top so it is always fully visible (top most zIndex layer)'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.SEND_TO_BACK,
+                'iconStyle': { 'background-image': TOOLBAR_CONSTANTS.SEND_TO_BACK_ICON },
+                'tooltip': 'Moves selected element(s) to bottom so it is the least visible one (all the elements it intersects will be on top of it).'
+            }
         ];
 
         this.btnOrderingActionsCSSForm.onselection = (selection) => {
@@ -600,17 +626,50 @@ this.editorSession.stateListener.next('showWireframe');
             null
         );
         
-        this.btnAlignActions.tooltip = 'Align actions that will be applied to selected components. At least two components must be selected, otherwise will have no effect.';
+        this.btnAlignActions.tooltip = 'Align actions that will be applied to selected components.'
+            + ' At least two components must be selected, otherwise will have no effect.';
         
         this.btnAlignActions.list = [
-            { 'text': TOOLBAR_CONSTANTS.ALIGN_LEFT, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignleft.png)' }, 'tooltip': 'Changes left position of all selected components to be the same as the position of left most component.' },
-            { 'text': TOOLBAR_CONSTANTS.ALIGN_RIGHT, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignright.png)' }, 'tooltip': 'Changes right position of all selected components to be the same as the position of right most.' },
-            { 'text': TOOLBAR_CONSTANTS.ALIGN_TOP, 'iconStyle': { 'background-image': 'url(designer/assets/images/aligntop.png)' }, 'tooltip': 'Changes top position of all selected components to be the same as the position of top most component.' },
-            { 'text': TOOLBAR_CONSTANTS.ALIGN_BOTTOM, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignbottom.png)' }, 'tooltip': 'Changes bottom position of all selected components to be the same as the position of bottom most component.' },
-            { 'text': TOOLBAR_CONSTANTS.ALIGN_CENTER, 'iconStyle': { 'background-image': 'url(designer/assets/images/aligncenter.png)' }, 'tooltip': 'Changes left position of all selected components so all components are vertically centered compared to component that is first selected.' },
-            { 'text': TOOLBAR_CONSTANTS.ALIGN_MIDDLE, 'iconStyle': { 'background-image': 'url(designer/assets/images/alignmid.png)' }, 'tooltip': 'Changes top position of all selected components so all components are horizontally centered compared to component that is first selected.' },
-            { 'text': TOOLBAR_CONSTANTS.SAME_WIDTH, 'iconStyle': { 'background-image': 'url(designer/assets/images/same_width.png)' }, 'tooltip': 'Changes width of all selected components to be the same as the width of component that is first selected.' },
-            { 'text': TOOLBAR_CONSTANTS.SAME_HEIGHT, 'iconStyle': { 'background-image': 'url(designer/assets/images/same_height.png)' }, 'tooltip': 'Changes height of all selected components to be the same as the height of component that is first selected.' }
+            {
+                'text': TOOLBAR_CONSTANTS.ALIGN_LEFT,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/alignleft.png)' },
+                'tooltip': 'Changes left position of all selected components to be the same as the position of left most component.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.ALIGN_RIGHT,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/alignright.png)' },
+                'tooltip': 'Changes right position of all selected components to be the same as the position of right most.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.ALIGN_TOP,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/aligntop.png)' },
+                'tooltip': 'Changes top position of all selected components to be the same as the position of top most component.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.ALIGN_BOTTOM,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/alignbottom.png)' },
+                'tooltip': 'Changes bottom position of all selected components to be the same as the position of bottom most component.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.ALIGN_CENTER,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/aligncenter.png)' },
+                'tooltip': 'Changes left position of all selected components so all components are vertically centered compared to component that is first selected.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.ALIGN_MIDDLE,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/alignmid.png)' },
+                'tooltip': 'Changes top position of all selected components so all components are horizontally centered compared to component that is first selected.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.SAME_WIDTH,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/same_width.png)' },
+                'tooltip': 'Changes width of all selected components to be the same as the width of component that is first selected.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.SAME_HEIGHT,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/same_height.png)' },
+                'tooltip': 'Changes height of all selected components to be the same as the height of component that is first selected.'
+            }
         ];
 
         this.btnAlignActions.onselection = (action) => {
@@ -850,15 +909,40 @@ this.editorSession.stateListener.next('showWireframe');
             null
         );
         
-        this.btnSpaceDistributionActions.tooltip = 'Space distribution actions between selected components (horizontal or vertical space). At least three components must be selected, otherwise will have no effect.';
+        this.btnSpaceDistributionActions.tooltip = 'Space distribution actions between selected components (horizontal or vertical space).'
+            + ' At least three components must be selected, otherwise will have no effect.';
         
         this.btnSpaceDistributionActions.list = [
-            { 'text': TOOLBAR_CONSTANTS.HORIZONTAL_SPACING, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_hspace.png)' }, 'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed based on the horizontal position of selected elements.' },
-            { 'text': TOOLBAR_CONSTANTS.HORIZONTAL_CENTERS, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_hcenters.png)' }, 'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed based on the horizontal center of selected elements.' },
-            { 'text': TOOLBAR_CONSTANTS.LEFTWARD, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_leftward.png)' }, 'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed toward the left-most element of selected elements.' },
-            { 'text': TOOLBAR_CONSTANTS.VERTICAL_SPACING, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_vspace.png)' }, 'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed based on the vertical position of selected elements.' },
-            { 'text': TOOLBAR_CONSTANTS.VERTICAL_CENTERS, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_vcenters.png)' }, 'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed based on the vertical center of selected elements.' },
-            { 'text': TOOLBAR_CONSTANTS.UPWARD, 'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_upward.png)' }, 'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed toward the top-most element of selected elements.' }
+            {
+                'text': TOOLBAR_CONSTANTS.HORIZONTAL_SPACING,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_hspace.png)' },
+                'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed based on the horizontal position of selected elements.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.HORIZONTAL_CENTERS,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_hcenters.png)' },
+                'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed based on the horizontal center of selected elements.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.LEFTWARD,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_leftward.png)' },
+                'tooltip': 'Changes left position of all selected components so the in between horizontal space is distributed toward the left-most element of selected elements.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.VERTICAL_SPACING,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_vspace.png)' },
+                'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed based on the vertical position of selected elements.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.VERTICAL_CENTERS,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_vcenters.png)' },
+                'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed based on the vertical center of selected elements.'
+            },
+            {
+                'text': TOOLBAR_CONSTANTS.UPWARD,
+                'iconStyle': { 'background-image': 'url(designer/assets/images/distribute_upward.png)' },
+                'tooltip': 'Changes top position of all selected components so the in between vertical space is distributed toward the top-most element of selected elements.'
+            }
         ];
 
         this.btnSpaceDistributionActions.onselection = (action) => {

@@ -20,7 +20,8 @@ import { DesignerComponent } from './designer/designer.component';
 bootstrapApplication(DesignerComponent, {
     providers: [
         importProvidersFrom(BrowserModule, ServoyPublicModule, FormsModule, CommonModule, NgbModule, DragDropModule),
-        EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService, EditorContentService, DynamicGuidesService, provideHttpClient(withXhr(), withInterceptorsFromDi())
+        EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService,
+        EditorContentService, DynamicGuidesService, provideHttpClient(withXhr(), withInterceptorsFromDi())
     ]
 })
   .catch(err => console.error(err));

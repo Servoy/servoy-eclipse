@@ -47,7 +47,10 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     }
 
     ngOnInit() {
-        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/' + this.urlParser.getFormName() + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
+        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl(
+            'http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName()
+            + '/form/' + this.urlParser.getFormName() + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html'
+        );
         if (this.urlParser.isAbsoluteFormLayout()) {
             this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
             this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';

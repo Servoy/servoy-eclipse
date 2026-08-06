@@ -24,7 +24,12 @@ import { InlineEditComponent } from './inlinedit/inlineedit.component';
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ToolbarComponent, VariantsPreviewComponent, PaletteComponent, ResizerComponent, MouseSelectionComponent, HighlightComponent, GhostsContainerComponent, DragselectionComponent, DragselectionResponsiveComponent, SameSizeIndicatorComponent, AnchoringIndicatorComponent, DynamicGuidesComponent, EditorContentComponent, AutoscrollComponent, StatusBarComponent, ContextMenuComponent, InlineEditComponent]
+    imports: [
+        ToolbarComponent, VariantsPreviewComponent, PaletteComponent, ResizerComponent, MouseSelectionComponent,
+        HighlightComponent, GhostsContainerComponent, DragselectionComponent, DragselectionResponsiveComponent,
+        SameSizeIndicatorComponent, AnchoringIndicatorComponent, DynamicGuidesComponent, EditorContentComponent,
+        AutoscrollComponent, StatusBarComponent, ContextMenuComponent, InlineEditComponent
+    ]
 })
 export class DesignerComponent implements OnInit {
 

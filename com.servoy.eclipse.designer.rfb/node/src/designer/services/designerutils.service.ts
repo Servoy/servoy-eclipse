@@ -60,7 +60,10 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string, dragNode?: HTMLElement): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
+    getDropNode(
+        absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string,
+        event: MouseEvent, componentName?: string, skipNodeId?: string, dragNode?: HTMLElement
+    ): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget!: Element;
         if (type == 'layout' || ((type == 'component' || type === 'jsmenu') && !absoluteLayout)) {
             const realName = layoutName ? layoutName : 'component';

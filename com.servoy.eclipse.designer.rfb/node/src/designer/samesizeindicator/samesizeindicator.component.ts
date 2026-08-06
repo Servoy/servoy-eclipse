@@ -111,7 +111,11 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
     }
 
     private addSameSizeIndicator(newindicators: SameSizeIndicator[], elementRect: DOMRect, horizontal: boolean) {
-        newindicators.push(new SameSizeIndicator(horizontal ? this.SAME_WIDTH_IMAGE : this.SAME_HEIGHT_IMAGE, this.editorContentService.getGlasspaneTopDistance() + elementRect.top + 1, this.editorContentService.getGlasspaneLeftDistance() + (horizontal ? elementRect.left + elementRect.width - 14 : elementRect.left + 2)));
+        newindicators.push(new SameSizeIndicator(
+            horizontal ? this.SAME_WIDTH_IMAGE : this.SAME_HEIGHT_IMAGE,
+            this.editorContentService.getGlasspaneTopDistance() + elementRect.top + 1,
+            this.editorContentService.getGlasspaneLeftDistance() + (horizontal ? elementRect.left + elementRect.width - 14 : elementRect.left + 2)
+        ));
     }
 }
 

@@ -74,7 +74,10 @@ export class VariantsPreviewComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/VariantsForm/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
+        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl(
+            'http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName()
+            + '/form/VariantsForm/clientnr/' + this.urlParser.getContentClientNr() + '/index.html'
+        );
 		this.windowRef.nativeWindow.addEventListener('message', (event) => {
              
 			if (event.data.id === 'resizePopover') {

@@ -135,7 +135,11 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                             }
                         }
                     }
-                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + (wrapperRect ? wrapperRect.top : elementRect.top) + 1, (wrapperRect ? wrapperRect.left : elementRect.left) + this.editorContentService.getGlasspaneLeftDistance() + (wrapperRect ? wrapperRect.width : elementRect.width) + 2);
+                    this.indicator = new SameSizeIndicator(
+                        image,
+                        this.editorContentService.getGlasspaneTopDistance() + (wrapperRect ? wrapperRect.top : elementRect.top) + 1,
+                        (wrapperRect ? wrapperRect.left : elementRect.left) + this.editorContentService.getGlasspaneLeftDistance() + (wrapperRect ? wrapperRect.width : elementRect.width) + 2
+                    );
                 }
                 this.cdr.markForCheck();
             });

@@ -19,7 +19,11 @@ import { KeyValuePipe } from '@angular/common';
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ServoyPublicModule, VariantsContentComponent, KeyValuePipe, forwardRef(() => SearchTextPipe), forwardRef(() => SearchTextDeepPipe)]
+    imports: [
+        FormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle,
+        NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ServoyPublicModule,
+        VariantsContentComponent, KeyValuePipe, forwardRef(() => SearchTextPipe), forwardRef(() => SearchTextDeepPipe)
+    ]
 })
 export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
 
@@ -191,8 +195,14 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: Record<string, unknown>, ghost: PaletteComp, propertyName?: string, propertyValue?: Record<string, string>, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: Record<string, string>, children?: [Record<string, string>]) {
-        if (event.target && ((event.target as Element).getAttribute('name') === 'variants' || (event.target as Element).getAttribute('name') === 'favIcon') || (event.target as HTMLElement).id === 'chevron') {
+    onMouseDown(
+        event: MouseEvent, elementName: string, packageName: string, model: Record<string, unknown>,
+        ghost: PaletteComp, propertyName?: string, propertyValue?: Record<string, string>,
+        componentType?: string, topContainer?: boolean, layoutName?: string,
+        attributes?: Record<string, string>, children?: [Record<string, string>]
+    ) {
+        if (event.target && ((event.target as Element).getAttribute('name') === 'variants'
+            || (event.target as Element).getAttribute('name') === 'favIcon') || (event.target as HTMLElement).id === 'chevron') {
             return; // it has a separate handler
         }
         event.stopPropagation();
@@ -230,7 +240,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.canDrop = { dropAllowed: false };
         if (!ghost) {
             this.editorSession.setDragging(true);
-            this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
+            this.editorContentService.sendMessageToIframe({
+                id: 'createElement', name: this.convertToJSName(elementName), model: model,
+                type: componentType, attributes: attributes, children: children
+            });
         }
 
         this.editorSession.registerAutoscroll(this);
@@ -241,7 +254,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             return; // it has a separate handler
         }
         if (this.canDrop && !this.canDrop.dropTarget) {
-            this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!, event, this.dragItem.elementName!);
+            this.canDrop = this.designerUtilsService.getDropNode(
+                this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!,
+                this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!,
+                event, this.dragItem.elementName!
+            );
         }
         if (this.dragItem.paletteItemBeingDragged) {
             this.editorSession.setDragging(false);
@@ -356,7 +373,9 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     onMouseMove = (event: MouseEvent) => {
         const paletteRect: DOMRect = this.editorContentService.getPallete().getBoundingClientRect();
-        if (event.pageX >= paletteRect.width && event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
+        if (event.pageX >= paletteRect.width && event.pageX >= this.editorContentService.getLeftPositionIframe()
+            && event.pageY >= this.editorContentService.getTopPositionIframe()
+            && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
@@ -368,10 +387,20 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
             if (this.dragItem.contentItemBeingDragged) {
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.editorContentService.getLeftPositionIframe() + 'px');
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
+                this.renderer.setStyle(
+                    this.dragItem.contentItemBeingDragged, 'left',
+                    event.pageX - this.editorContentService.getLeftPositionIframe() + 'px'
+                );
+                this.renderer.setStyle(
+                    this.dragItem.contentItemBeingDragged, 'top',
+                    event.pageY - this.editorContentService.getTopPositionIframe() + 'px'
+                );
 
-                this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!, event, this.dragItem.elementName!);
+            this.canDrop = this.designerUtilsService.getDropNode(
+                this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!,
+                this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!,
+                event, this.dragItem.elementName!
+            );
 
                 if (!this.canDrop.dropAllowed) {
                     this.editorContentService.getGlassPane().style.cursor = 'not-allowed';

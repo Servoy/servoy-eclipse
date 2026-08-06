@@ -1,4 +1,7 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input, forwardRef } from '@angular/core';
+import {
+    Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren,
+    OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input, forwardRef
+} from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -143,7 +146,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         const layoutName = node.getAttribute('svy-layoutname');
                         newNodes.push({
                             style: style,
-                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer')
+                            ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                             svyid: node.getAttribute('svy-id')!,
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
@@ -215,7 +219,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 		}
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust });
+            this.editorSession.updateFieldPositioner({
+                x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust,
+                y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust
+            });
         }
         this.fieldLocation = null!;
         if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
@@ -238,7 +245,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     const position =  this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                     const iframeLeft = this.editorContentService.getLeftPositionIframe();
                     const iframeTop = this.editorContentService.getTopPositionIframe();
-                    const rect1 = new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y))
+                    const rect1 = new DOMRect(
+                        Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y),
+                        Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y)
+                    )
                     const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height);
 					const compFullInside = this.urlParser.isMarqueeSelectOuter();
 					if (this.rectanglesIntersect(rect1, rect2, compFullInside)) {
@@ -252,7 +262,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                 display: 'block'
                             } as CSSStyleDeclaration,
                             svyid: node.getAttribute('svy-id')!,
-                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isResizable: this.urlParser.isAbsoluteFormLayout()
+                                && !node.parentElement!.closest('.svy-responsivecontainer')
+                                ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
                             containerName: layoutName!,
@@ -306,7 +318,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             left: position.left + this.leftAdjust + 'px',
                             display: 'block'
                         } as CSSStyleDeclaration,
-                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                        isResizable: this.urlParser.isAbsoluteFormLayout()
+                            && !node.parentElement!.closest('.svy-responsivecontainer')
+                            ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                         svyid: node.getAttribute('svy-id')!,
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
@@ -343,7 +357,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     const element = this.editorContentService.getContentElement(selection[0]);
                     if (element) {
                         const position2 =  this.designerUtilsService.adjustElementRect(element, element.getBoundingClientRect());
-                        const rect1 = new DOMRect(Math.min(position1.left, position2.left), Math.min(position1.top, position2.top), Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top))
+                        const rect1 = new DOMRect(
+                            Math.min(position1.left, position2.left), Math.min(position1.top, position2.top),
+                            Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top)
+                        )
                         Array.from(elements).forEach((node) => {
                             const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                             if (this.rectanglesIntersect(rect1, position, false)) {
@@ -357,7 +374,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                         left: position.left + this.leftAdjust + 'px',
                                         display: 'block'
                                     } as CSSStyleDeclaration,
-                                    isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isResizable: this.urlParser.isAbsoluteFormLayout()
+                                && !node.parentElement!.closest('.svy-responsivecontainer')
+                                ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                                     svyid: node.getAttribute('svy-id')!,
                                     isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                                     maxLevelDesign: node.classList.contains('maxLevelDesign'),
@@ -402,7 +421,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         const node = this.editorContentService.getContentElement(selectedNode.nativeElement.getAttribute('id')!);
         if (node === undefined) return;
         const position = node.getBoundingClientRect();
-        if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer') && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
+        if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer')
+            && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
             this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title')!);
             if (this.editorSession.getState().showWireframe) {
                 this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
