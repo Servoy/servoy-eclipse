@@ -9,7 +9,7 @@
   "dependencies": {
     "@angular/cdk": "^22",
     "@eonasdan/tempus-dominus": "<6.11",
-    "@ng-bootstrap/ng-bootstrap": "^20",
+    "@ng-bootstrap/ng-bootstrap": "^21",
     "@popperjs/core": "<3",
     "@tinymce/tinymce-angular": "<8",
     "bootstrap": "<6",
