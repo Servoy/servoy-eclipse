@@ -7,7 +7,11 @@ export default defineConfig({
       inline: []
     },
     setupFiles: ['./vitest-setup.ts'],
-    reporters: ['default', 'junit'],
+    reporters: ['default', ['junit', {
+      suiteName: 'ngclient.ui',
+      classnameTemplate: ({ filename }) =>
+        `ngclient.ui.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
+    }]],
     outputFile: {
       junit: '../target/vitest-results.xml'
     }

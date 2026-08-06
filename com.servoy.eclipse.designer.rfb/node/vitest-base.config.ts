@@ -17,7 +17,11 @@ export default defineConfig({
       inline: []
     },
     setupFiles: ['./vitest-setup.ts'],
-    reporters: ['default', 'junit'],
+    reporters: ['default', ['junit', {
+      suiteName: 'designer.rfb',
+      classnameTemplate: ({ filename }) =>
+        `designer.rfb.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
+    }]],
     outputFile: {
       junit: '../target/vitest-results.xml'
     }
