@@ -121,8 +121,7 @@ export class HeaderComponent implements OnInit {
   onActiveRepositoryChange() {
     if(this.activeRepository == ADD_REMOVE_TEXT) {
       this.showAddRepositoryDialog();
-    }
-    else {
+    } else {
       this.wpmService.setNewSelectedRepository(this.activeRepository);
     }
   }
@@ -137,11 +136,11 @@ export class HeaderComponent implements OnInit {
 
   showAddRepositoryDialog(): void {
     const dialogRef = this.dialog.open(AddRepositoryDialogComponent, {
-      data: <Repository> { name: '', url: ''}
+      data: { name: '', url: ''} as Repository
     });
   
     dialogRef.afterClosed().subscribe(result => {
-      const newRepo = <Repository>result;
+      const newRepo = result as Repository;
 
       if(newRepo) {
         if(newRepo.name == ADD_REMOVE_TEXT) {
@@ -160,12 +159,11 @@ export class HeaderComponent implements OnInit {
           }
         }
         this.wpmService.addNewRepository(newRepo);
-      }
-      else {
+      } else {
         this.activeRepository = SERVOY_DEFAULT;
         this.wpmService.setNewSelectedRepository(this.activeRepository);
       }
-    }, err => {
+    }, _err => {
       this.activeRepository = SERVOY_DEFAULT;
       this.wpmService.setNewSelectedRepository(this.activeRepository);
     });
@@ -174,7 +172,7 @@ export class HeaderComponent implements OnInit {
   showAddRepositoryErrorDialog(message: string) {
     this.dialog.open(ErrorDialogComponent, {
       data: message
-    }).afterClosed().subscribe(result => {
+    }).afterClosed().subscribe(_result => {
       this.showAddRepositoryDialog();
     })
   }

@@ -10,7 +10,7 @@ export const PACKAGE_TYPE_WEB_LAYOUT = 'Web-Layout';
 export const PACKAGE_TYPE_MODULE = 'Solution';
 export const PACKAGE_TYPE_SOLUTION = 'Solution-Main';
 
-export const PACKAGE_TYPE_TO_TITLE_MAP: {[key:string]:string;} = {
+export const PACKAGE_TYPE_TO_TITLE_MAP: Record<string, string> = {
   'Web-Component': 'Components',
   'Web-Service': 'Services',
   'Web-Layout': 'Layouts',
@@ -62,7 +62,7 @@ export class WpmService {
       }));
     this.messageSender = webSocketConnection.messageSender;
     this.messages.subscribe(m => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+       
       (this as unknown as Record<string, (data: unknown) => void>)[m.method](m.data);
     });
     
@@ -74,7 +74,7 @@ export class WpmService {
       this.repositoriesObserver = obs;
     }).pipe(share());
     
-    this.packageLists = new BehaviorSubject([] as Array<PackageList>);
+    this.packageLists = new BehaviorSubject([] as PackageList[]);
     this.packageToBeRemoved = new BehaviorSubject({} as Package);
   }
 
@@ -185,14 +185,14 @@ export class WpmService {
    */
 
   requestAllInstalledPackages(packagesArray: Package[]) {
-    const typeOfPackages: Map<string, Package[]> = new Map();
+    const typeOfPackages = new Map<string, Package[]>();
 
-		for(let i = 0; i < packagesArray.length; i++) {
-      if(!typeOfPackages.has(packagesArray[i].packageType)) {
-        typeOfPackages.set(packagesArray[i].packageType, []);
+		for(const pkg of packagesArray) {
+      if(!typeOfPackages.has(pkg.packageType)) {
+        typeOfPackages.set(pkg.packageType, []);
       }
-      const packages: Package[] = typeOfPackages.get(packagesArray[i].packageType)!;
-      packages.push(packagesArray[i]);
+      const packages: Package[] = typeOfPackages.get(pkg.packageType)!;
+      packages.push(pkg);
     }
 
     if(typeOfPackages.size > 0) {
@@ -260,8 +260,7 @@ export class WpmService {
 			const ival1 = parseInt(av1[i]);
 			const ival2 = parseInt(av2[i]);
 			if (ival1 != ival2) return ival1 - ival2;
-		}
-		else if (av1[i] < av2[i]) return -1;
+		} else if (av1[i] < av2[i]) return -1;
 		else if (av1[i] > av2[i]) return 1;
 	}
 

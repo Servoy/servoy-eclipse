@@ -27,8 +27,7 @@ export class ContentComponent implements OnInit {
       const packageListIdx = this.getPackageListIdx(p.packageType);
       if(p.packages.length == 0) {
         if(packageListIdx != -1) this.packageLists.splice(packageListIdx, 1);
-      }
-      else {
+      } else {
         if(packageListIdx == -1) {
           const packageList =  {
             title: PACKAGE_TYPE_TO_TITLE_MAP[p.packageType],
@@ -37,8 +36,7 @@ export class ContentComponent implements OnInit {
             packages: p.packages
           }
           this.packageLists.splice(this.getPackageListInsertIdx(p.packageType), 0, packageList);
-        }
-        else {
+        } else {
           this.packageLists[packageListIdx].packages = p.packages;
           this.packageLists[packageListIdx].updateCount = this.getUpgradeCount(p.packages);
         }
@@ -53,8 +51,7 @@ export class ContentComponent implements OnInit {
 
   getUpgradeCount(packages: Package[]): number {
     let count = 0;
-      for (let i = 0; i < packages.length; i++) {
-          const pckg = packages[i];
+      for (const pckg of packages) {
           if (pckg?.installed && pckg?.releases[0]?.version && this.wpmService.versionCompare(pckg?.installed, pckg?.releases[0]?.version) < 0) {
             count++;
           }

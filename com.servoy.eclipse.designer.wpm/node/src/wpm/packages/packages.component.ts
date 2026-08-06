@@ -75,7 +75,7 @@ export class PackagesComponent implements OnChanges {
         return this.isPackageSelected(p) && this.descriptionExpanded;
     }
 
-    togglePackageSelection(event: MouseEvent, p: Package) {
+    togglePackageSelection(event: Event, p: Package) {
         if (this.isPackageSelected(p)) {
             this.descriptionExpanded = !this.descriptionExpanded;
             if (this.descriptionExpanded) this.descriptionExpanded = !!p.description; // allow expand only if it has a description
@@ -112,7 +112,9 @@ export class PackagesComponent implements OnChanges {
             const installedVersion = p.installed == 'unknown' ? '' : p.installed;
             return p.installing ?
                 (this.wpmService.versionCompare(p.selected, installedVersion) > 0 ? 'Upgrading the ' + packageType + '...' : 'Downgrading the ' + packageType + '...') :
-                (this.wpmService.versionCompare(p.selected, installedVersion) > 0 ? 'Upgrade the ' + packageType + ' to the selected release version.' : 'Downgrade the ' + packageType + ' to the selected release version.');
+                (this.wpmService.versionCompare(p.selected, installedVersion) > 0 ?
+                  'Upgrade the ' + packageType + ' to the selected release version.' :
+                  'Downgrade the ' + packageType + ' to the selected release version.');
         } else if (p.installing) {
             return 'Adding the ' + packageType + '...';
         } else {
