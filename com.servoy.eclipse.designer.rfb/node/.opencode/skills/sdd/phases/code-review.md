@@ -47,13 +47,16 @@ Work through every changed file:
 - [ ] Layout type handling correct (absolute vs responsive, if applicable)
 
 **TypeScript & Angular**
-- [ ] No `any` types without justification
+- [ ] No `any` types without justification — use proper types, generics, or `unknown`
+- [ ] No `$any()` casts in templates — fix method signatures instead (e.g. `MouseEvent` → `Event`)
+- [ ] No `as any` casts — prefer type guards, generics, or widening the parameter type
 - [ ] Strict null checks handled (`strictNullChecks` is implied by strict mode)
 - [ ] Components use correct lifecycle hooks
 - [ ] Services properly injected (no manual instantiation)
 - [ ] RxJS subscriptions cleaned up (no orphan subscriptions)
-- [ ] New components declared in `DesignerModule`
-- [ ] `standalone: false` on all new components/directives/pipes
+- [ ] New components are standalone with own `imports` array
+- [ ] `ChangeDetectionStrategy.OnPush` on all components
+- [ ] `markForCheck()` called in subscription callbacks that modify template-bound state
 
 **Build & lint**
 - [ ] `npm run lint` → zero warnings

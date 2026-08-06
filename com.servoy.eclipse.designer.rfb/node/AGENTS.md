@@ -50,12 +50,15 @@ All source lives under `src/designer/`:
 
 - Component selector prefix: `designer-` or `app-` (kebab-case)
 - Directive selector prefix: `designer` or `app` (camelCase)
-- All components: `standalone: false`, declared in `DesignerModule`
+- All components: standalone with own `imports` array, bootstrapped via `bootstrapApplication()`
 - **Dependency injection:** Use `inject()` function at field level (not constructor injection)
+- **Change detection:** All components use `ChangeDetectionStrategy.OnPush`
 - Single quotes enforced
 - Arrow functions preferred
 - 2-space indentation
-- No `any` types without justification
+- **No `any` types without justification** — use proper types, generics, or `unknown` with type narrowing
+- **No `$any()` casts in templates** — fix the method signature instead (e.g. `MouseEvent` → `Event` when handling both click and keydown)
+- **No `as any` casts unless unavoidable** — prefer type guards, generics, or widening the parameter type
 
 ## Linting
 

@@ -50,7 +50,9 @@ All source lives under `src/wpm/`:
 - Bootstrap via `bootstrapApplication()` in `main.ts` (no NgModule)
 - Single quotes enforced
 - Arrow functions preferred
-- No `any` types without justification
+- **No `any` types without justification** — use proper types, generics, or `unknown` with type narrowing
+- **No `$any()` casts in templates** — fix the method signature instead (e.g. `MouseEvent` → `Event` when handling both click and keydown)
+- **No `as any` casts unless unavoidable** — prefer type guards, generics, or widening the parameter type
 
 ## Linting
 
