@@ -34,7 +34,6 @@ All source lives under `src/wpm/`:
 | File/Directory | Purpose |
 |----------------|---------|
 | `main.component.ts` | Root component (app-wpm) |
-| `wpm.module.ts` | NgModule declarations and providers |
 | `wpm.service.ts` | Core service: WebSocket messaging, package management |
 | `websocket.service.ts` | WebSocket connection management |
 | `header/` | Header component (repository selector, update-all button) |
@@ -46,8 +45,9 @@ All source lives under `src/wpm/`:
 
 - Component selector prefix: `app-` or `wpm-` (kebab-case)
 - Directive selector prefix: `app` or `wpm` (camelCase)
-- All components: `standalone: false`, declared in `WpmModule`
+- All components: `standalone: true` with own `imports` array
 - All components use `ChangeDetectionStrategy.OnPush`
+- Bootstrap via `bootstrapApplication()` in `main.ts` (no NgModule)
 - Single quotes enforced
 - Arrow functions preferred
 - No `any` types without justification

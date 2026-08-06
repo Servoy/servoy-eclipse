@@ -2,13 +2,20 @@ import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } f
 import { MatDialog } from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.service';
+import { NgClass, NgStyle } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSelect, MatOption } from '@angular/material/select';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatCardContent } from '@angular/material/card';
 
 @Component({
     selector: 'app-packages',
     templateUrl: './packages.component.html',
     styleUrls: ['./packages.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgClass, MatTooltip, NgStyle, MatIcon, MatFormField, MatLabel, MatSelect, MatOption, MatIconButton, MatButton, MatProgressBar, MatCardContent]
 })
 export class PackagesComponent implements OnChanges {
 

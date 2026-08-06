@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Package } from '../websocket.service';
 import {WpmService, PACKAGE_TYPE_TO_TITLE_MAP, ALL_PACKAGE_TYPES} from '../wpm.service'
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { PackagesComponent } from '../packages/packages.component';
 
 export interface PackageList {
   title: string;
@@ -14,7 +16,7 @@ export interface PackageList {
     templateUrl: './content.component.html',
     styleUrls: ['./content.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatTabGroup, MatTab, PackagesComponent]
 })
 export class ContentComponent implements OnInit {
 

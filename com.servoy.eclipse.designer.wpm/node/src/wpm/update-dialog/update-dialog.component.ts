@@ -1,14 +1,18 @@
 import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
-import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import {  WpmService } from '../wpm.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'wpm-update-dialog',
     templateUrl: './update-dialog.component.html',
     styleUrls: ['./update-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, MatButton, MatDialogClose]
 })
 export class UpdatePackagesDialogComponent {
 

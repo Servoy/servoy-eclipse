@@ -1,8 +1,16 @@
 import { Component, OnInit, Inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { WpmService } from '../wpm.service';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { ExtendedPackage, UpdatePackagesDialogComponent } from '../update-dialog/update-dialog.component';
 import { Package, Repository } from '../websocket.service';
+import { MatSelect, MatOption, MatFormField } from '@angular/material/select';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { NgStyle } from '@angular/common';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
 
 const ADD_REMOVE_TEXT = 'Add...';
 const SERVOY_DEFAULT= 'Servoy Default';
@@ -12,7 +20,7 @@ const SERVOY_DEFAULT= 'Servoy Default';
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatSelect, MatTooltip, MatOption, MatIconButton, MatIcon, NgStyle, MatButton]
 })
 export class HeaderComponent implements OnInit {
 
@@ -185,7 +193,7 @@ export class HeaderComponent implements OnInit {
     selector: 'wpm-add-repository-dialog',
     templateUrl: 'add-repository-dialog.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose]
 })
 export class AddRepositoryDialogComponent {
 
@@ -201,7 +209,7 @@ export class AddRepositoryDialogComponent {
     selector: 'wpm-error-dialog',
     templateUrl: 'error-dialog.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class ErrorDialogComponent {
   constructor(

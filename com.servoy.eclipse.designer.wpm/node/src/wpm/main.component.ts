@@ -1,12 +1,14 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { WpmService } from './wpm.service';
+import { HeaderComponent } from './header/header.component';
+import { ContentComponent } from './content/content.component';
 
 @Component({
     selector: 'app-wpm',
     templateUrl: './main.component.html',
     styleUrls: ['./main.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [HeaderComponent, ContentComponent]
 })
 export class MainComponent {
   url: URL;
