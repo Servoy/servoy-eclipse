@@ -16,6 +16,10 @@ export default defineConfig({
     deps: {
       inline: []
     },
-    setupFiles: ['./vitest-setup.ts']
+    setupFiles: ['./vitest-setup.ts'],
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: '../target/vitest-results.xml'
+    }
   }
 });
