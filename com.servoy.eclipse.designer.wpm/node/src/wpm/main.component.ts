@@ -5,7 +5,7 @@ import { WpmService } from './wpm.service';
     selector: 'app-wpm',
     templateUrl: './main.component.html',
     styleUrls: ['./main.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class MainComponent {

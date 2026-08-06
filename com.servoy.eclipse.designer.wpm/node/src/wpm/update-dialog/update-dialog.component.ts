@@ -7,7 +7,7 @@ import {  WpmService } from '../wpm.service';
     selector: 'wpm-update-dialog',
     templateUrl: './update-dialog.component.html',
     styleUrls: ['./update-dialog.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class UpdatePackagesDialogComponent {

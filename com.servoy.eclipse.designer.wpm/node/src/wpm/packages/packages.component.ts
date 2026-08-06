@@ -7,7 +7,7 @@ import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.s
     selector: 'app-packages',
     templateUrl: './packages.component.html',
     styleUrls: ['./packages.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class PackagesComponent implements OnChanges {

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Package } from '../websocket.service';
 import {WpmService, PACKAGE_TYPE_TO_TITLE_MAP, ALL_PACKAGE_TYPES} from '../wpm.service'
 
@@ -13,14 +13,14 @@ export interface PackageList {
     selector: 'app-content',
     templateUrl: './content.component.html',
     styleUrls: ['./content.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class ContentComponent implements OnInit {
 
   packageLists: PackageList[] = []
 
-  constructor(public wpmService: WpmService) { }
+  constructor(public wpmService: WpmService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.wpmService.getPackages().subscribe(p => {
@@ -42,6 +42,7 @@ export class ContentComponent implements OnInit {
         }
       }
       this.wpmService.setPackageLists(this.packageLists);
+      this.cdr.markForCheck();
     });
   }
 
