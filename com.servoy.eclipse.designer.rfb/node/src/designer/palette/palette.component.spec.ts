@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette.component';
 
@@ -11,7 +12,8 @@ describe('PaletteComponent', () => {
   beforeEach(() => {
     editorSession = {
       setPaletteRefresher: vi.fn(),
-      getState: vi.fn().mockReturnValue({ packages: [], dragging: false }),
+      packages: signal([]),
+      dragging: signal(false),
       variantsTrigger: { emit: vi.fn() },
       variantsScroll: { emit: vi.fn() },
       registerAutoscroll: vi.fn(),
@@ -82,7 +84,7 @@ describe('PaletteComponent', () => {
   describe('getPackages', () => {
     it('should return packages from editor state', () => {
       const pkgs = [{ packageName: 'test' }];
-      editorSession.getState.mockReturnValue({ packages: pkgs });
+      editorSession.packages.set(pkgs);
       expect(component.getPackages()).toBe(pkgs);
     });
   });

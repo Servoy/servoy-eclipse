@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { GhostsContainerComponent, GHOST_TYPES } from './ghostscontainer.component';
 
 describe('GhostsContainerComponent', () => {
@@ -8,7 +9,8 @@ describe('GhostsContainerComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false, ghosthandle: false }),
+      dragging: signal(false),
+      ghosthandle: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       setSelection: vi.fn(),
       addSelectionChangedListener: vi.fn().mockReturnValue(() => undefined),

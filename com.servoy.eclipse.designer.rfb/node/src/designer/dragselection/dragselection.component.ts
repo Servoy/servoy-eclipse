@@ -178,7 +178,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if (!this.dragStartEvent || this.snapData) {
             return;
         }
-        if (!this.editorSession.getState().dragging) {
+        if (!this.editorSession.dragging()) {
             if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                 this.editorSession.setDragging(true);
             } else return;

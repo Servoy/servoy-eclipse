@@ -929,7 +929,7 @@ export class ContextMenuComponent implements OnInit {
 	}
 
 	private getDisplayName(componentName: string): string {
-		const packages = this.editorSession.getState().packages;
+		const packages = this.editorSession.packages();
 		if (packages && packages.length) {
 			const packageAndComponent = componentName.split('.');
 			if (componentName == 'component' || packageAndComponent[1] == '*') return 'Component [...]';

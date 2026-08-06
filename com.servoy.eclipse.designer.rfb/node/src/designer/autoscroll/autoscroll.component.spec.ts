@@ -11,7 +11,7 @@ describe('AutoscrollComponent', () => {
   beforeEach(() => {
     editorSession = {
       autoscrollBehavior: { subscribe: vi.fn() },
-      getState: vi.fn().mockReturnValue({ pointerEvents: 'none' }),
+      pointerEvents: signal('none'),
     };
 
     component = Object.create(AutoscrollComponent.prototype);

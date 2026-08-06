@@ -1,4 +1,4 @@
-import { importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 
 
 import { EditorSessionService } from './designer/services/editorsession.service';
@@ -20,7 +20,8 @@ bootstrapApplication(DesignerComponent, {
     providers: [
         importProvidersFrom(BrowserModule, ServoyPublicModule, FormsModule, CommonModule, NgbModule, DragDropModule),
         EditorSessionService, URLParserService, WindowRefService, DesignSizeService, DesignerUtilsService,
-        EditorContentService, DynamicGuidesService, provideHttpClient(withXhr(), withInterceptorsFromDi())
+        EditorContentService, DynamicGuidesService, provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        provideZonelessChangeDetection()
     ]
 })
   .catch(err => console.error(err));

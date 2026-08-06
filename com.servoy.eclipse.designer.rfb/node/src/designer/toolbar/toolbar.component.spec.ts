@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { ToolbarComponent, TOOLBAR_CATEGORIES } from './toolbar.component';
 
 describe('ToolbarComponent', () => {
@@ -8,11 +9,12 @@ describe('ToolbarComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false, packages: [], showWireframe: false }),
+      dragging: signal(false),
+      packages: signal([]),
+      showWireframe: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       addSelectionChangedListener: vi.fn(),
       executeAction: vi.fn(),
-      stateListener: { next: vi.fn() },
       getSession: vi.fn().mockReturnValue({ onopen: vi.fn() })
     };
     urlParser = {

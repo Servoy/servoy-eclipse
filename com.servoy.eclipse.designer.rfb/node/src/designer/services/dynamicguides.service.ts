@@ -134,7 +134,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     }
 
     private onMouseMove(event: MouseEvent): void {
-	  if (this.editorSession.getSelection()?.length > 1 || !this.editorSession.getState().dragging && !this.editorSession.getState().resizing) return;
+	  if (this.editorSession.getSelection()?.length > 1 || !this.editorSession.dragging() && !this.editorSession.resizing()) return;
 	  let guidesEnabled = this.guidesEnabled;
 	  let statusText: string;
 	  if (event.altKey) {
@@ -264,7 +264,7 @@ this.snapToEndEnabled = !event.shiftKey;
 	}
 
 	private findComponentPackage(componentType: any) {
-		return this.editorSession.getState().packages.find(pack => pack.packageName !== 'commons' &&
+		return this.editorSession.packages().find(pack => pack.packageName !== 'commons' &&
 			pack.components.length > 0 && pack.components.some(component => component.name === componentType));
 	}
 
@@ -298,7 +298,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			this.snapDataListener.next(null);
 			return;
 		}
-		const resizing = this.editorSession.getState().resizing ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
+		const resizing = this.editorSession.resizing() ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
         const elem = this.editorContentService.getContentElementsFromPoint(point).find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'))!;
         const draggedItem = this.editorContentService.getContentElementById('svy_draggedelement');
 		if (!draggedItem && !resizing) {

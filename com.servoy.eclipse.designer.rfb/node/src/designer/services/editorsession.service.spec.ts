@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 import { EditorSessionService } from './editorsession.service';
@@ -30,15 +31,12 @@ describe('EditorSessionService', () => {
     (service as any).selectionChangedListeners = [];
     (service as any).highlightChangedListeners = [];
     (service as any).dynamicGuidesChangedListeners = [];
-    (service as any).state = {
-      statusText: '',
-      dragging: false,
-      resizing: false,
-      sameSizeIndicator: false,
-      anchoringIndicator: false,
-      packages: [],
-    };
-    (service as any).stateListener = new BehaviorSubject('');
+    (service as any).statusText = signal('');
+    (service as any).dragging = signal(false);
+    (service as any).resizing = signal(false);
+    (service as any).sameSizeIndicator = signal(false);
+    (service as any).anchoringIndicator = signal(false);
+    (service as any).packages = signal([]);
     (service as any).allowedChildren = { 'topContainer': ['component'] };
     (service as any).wizardProperties = { 'mySpec': ['prop1', 'prop2'] };
     (service as any).developerMenus = {
@@ -107,36 +105,32 @@ describe('EditorSessionService', () => {
   });
 
   describe('state management', () => {
-    it('getState should return state object', () => {
-      const state = service.getState();
-      expect(state.dragging).toBe(false);
-      expect(state.resizing).toBe(false);
+    it('signals should return initial values', () => {
+      expect(service.dragging()).toBe(false);
+      expect(service.resizing()).toBe(false);
+      expect(service.statusText()).toBe('');
+      expect(service.sameSizeIndicator()).toBe(false);
+      expect(service.anchoringIndicator()).toBe(false);
     });
 
-    it('setStatusBarText should update state and emit', () => {
-      const emissions: string[] = [];
-      (service as any).stateListener.subscribe((v: string) => emissions.push(v));
+    it('setStatusBarText should update signal', () => {
       service.setStatusBarText('hello');
-      expect(service.getState().statusText).toBe('hello');
-      expect(emissions).toContain('statusText');
+      expect(service.statusText()).toBe('hello');
     });
 
-    it('setDragging should update state and emit', () => {
-      const emissions: string[] = [];
-      (service as any).stateListener.subscribe((v: string) => emissions.push(v));
+    it('setDragging should update signal', () => {
       service.setDragging(true);
-      expect(service.getState().dragging).toBe(true);
-      expect(emissions).toContain('dragging');
+      expect(service.dragging()).toBe(true);
     });
 
-    it('setSameSizeIndicator should update state and emit', () => {
+    it('setSameSizeIndicator should update signal', () => {
       service.setSameSizeIndicator(true);
-      expect(service.getState().sameSizeIndicator).toBe(true);
+      expect(service.sameSizeIndicator()).toBe(true);
     });
 
-    it('setAnchoringIndicator should update state and emit', () => {
+    it('setAnchoringIndicator should update signal', () => {
       service.setAnchoringIndicator(true);
-      expect(service.getState().anchoringIndicator).toBe(true);
+      expect(service.anchoringIndicator()).toBe(true);
     });
   });
 

@@ -81,7 +81,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     }
 
     snap( data: SnapData): void {
-        if (this.currentElementInfo && this.editorSession.getState().resizing) {
+        if (this.currentElementInfo && this.editorSession.resizing()) {
             this.snapData = data;
             if (this.initialElementInfo.size == 1 && (this.snapData?.width || this.snapData?.height)) {
                 const elementInfo = this.initialElementInfo.values().next().value!;
@@ -119,7 +119,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
             };
 
             this.cleanResizeState();
-            this.editorSession.getState().resizing = true;
+            this.editorSession.resizing.set(true);
 
             const selection = this.editorSession.getSelection();
             if (selection && selection.length > 0) {
@@ -186,7 +186,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
         this.editorContentService.getContentArea().removeEventListener('mouseup', this.contentAreaMouseUp);
         this.editorContentService.getContentArea().removeEventListener('mouseleave', this.contentAreaMouseLeave);
         this.editorContentService.getContentArea().removeEventListener('keydown', this.contentAreaKeyDown);
-        this.editorSession.getState().resizing = false;
+        this.editorSession.resizing.set(false);
     }
 
     private setCursorStyle(style: string) {

@@ -1,5 +1,5 @@
 @for (node of nodes; track node) {
-  <div #selected class="decorationOverlay" [ngStyle]="node.style" [style.visibility]="checkIfNodeIsVisible(node) ? 'unset' : 'hidden'" [id]="node.svyid" [hidden]="editorSession.getState().dragging">
+  <div #selected class="decorationOverlay" [ngStyle]="node.style" [style.visibility]="checkIfNodeIsVisible(node) ? 'unset' : 'hidden'" [id]="node.svyid" [hidden]="editorSession.dragging()">
     <div class="knob t l decorator {{node.isResizable?.t && node.isResizable?.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'tl',direction:'nw',top:1,left:1,width:-1,height:-1}"></div>
     <div class="knob t decorator {{node.isResizable?.t ? '': 'hidden'}}" [resizeKnob]="{node, position:'t',direction:'n',top:1,left:0,width:0,height:-1}"></div>
     <div class="knob t r decorator {{node.isResizable?.t && node.isResizable?.r ? '': 'hidden'}}" [resizeKnob]="{node, position:'tr',direction:'ne',top:1,left:0,width:1,height:-1}"></div>

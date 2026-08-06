@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { ResizeEditorHeightComponent } from './resizeeditorheight.component';
 
 describe('ResizeEditorHeightComponent', () => {
@@ -8,7 +9,7 @@ describe('ResizeEditorHeightComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false }),
+      dragging: signal(false),
       sendChanges: vi.fn(),
       registerAutoscroll: vi.fn(),
       unregisterAutoscroll: vi.fn()

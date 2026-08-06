@@ -1,15 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { signal, WritableSignal } from '@angular/core';
 
 import { DesignerUtilsService } from './designerutils.service';
 
 describe('DesignerUtilsService', () => {
   let service: DesignerUtilsService;
-  let editorSession: Record<string, ReturnType<typeof vi.fn>>;
+  let editorSession: any;
   let editorContentService: Record<string, ReturnType<typeof vi.fn>>;
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ packages: [] }),
+      packages: signal([]),
       getSelection: vi.fn().mockReturnValue([]),
       getAllowedChildrenForContainer: vi.fn().mockReturnValue(null),
     };
@@ -113,59 +114,51 @@ describe('DesignerUtilsService', () => {
 
   describe('isTopContainer', () => {
     it('should return true when layout is a top container in a package', () => {
-      editorSession.getState.mockReturnValue({
-        packages: [{
-          packageName: 'mypackage',
-          components: [
-            { componentType: 'layout', topContainer: true, layoutName: 'container12' },
-            { componentType: 'layout', topContainer: false, layoutName: 'column' },
-          ],
-        }],
-      });
+      (editorSession.packages as WritableSignal<any[]>).set([{
+        packageName: 'mypackage',
+        components: [
+          { componentType: 'layout', topContainer: true, layoutName: 'container12' },
+          { componentType: 'layout', topContainer: false, layoutName: 'column' },
+        ],
+      }]);
       expect(service.isTopContainer('mypackage.container12')).toBe(true);
     });
 
     it('should return false when layout is not a top container', () => {
-      editorSession.getState.mockReturnValue({
-        packages: [{
-          packageName: 'mypackage',
-          components: [
-            { componentType: 'layout', topContainer: false, layoutName: 'column' },
-          ],
-        }],
-      });
+      (editorSession.packages as WritableSignal<any[]>).set([{
+        packageName: 'mypackage',
+        components: [
+          { componentType: 'layout', topContainer: false, layoutName: 'column' },
+        ],
+      }]);
       expect(service.isTopContainer('mypackage.column')).toBe(false);
     });
 
     it('should return false when layoutName does not match', () => {
-      editorSession.getState.mockReturnValue({
-        packages: [{
-          packageName: 'mypackage',
-          components: [
-            { componentType: 'layout', topContainer: true, layoutName: 'container12' },
-          ],
-        }],
-      });
+      (editorSession.packages as WritableSignal<any[]>).set([{
+        packageName: 'mypackage',
+        components: [
+          { componentType: 'layout', topContainer: true, layoutName: 'container12' },
+        ],
+      }]);
       expect(service.isTopContainer('mypackage.nonexistent')).toBe(false);
     });
 
     it('should search in categories as well', () => {
-      editorSession.getState.mockReturnValue({
-        packages: [{
-          packageName: 'bootstrap',
-          components: [{ componentType: 'component' }],
-          categories: {
-            'Layout': [
-              { componentType: 'layout', topContainer: true, layoutName: 'container' },
-            ],
-          },
-        }],
-      });
+      (editorSession.packages as WritableSignal<any[]>).set([{
+        packageName: 'bootstrap',
+        components: [{ componentType: 'component' }],
+        categories: {
+          'Layout': [
+            { componentType: 'layout', topContainer: true, layoutName: 'container' },
+          ],
+        },
+      }]);
       expect(service.isTopContainer('bootstrap.container')).toBe(true);
     });
 
     it('should return false when packages is empty', () => {
-      editorSession.getState.mockReturnValue({ packages: [] });
+      (editorSession.packages as WritableSignal<any[]>).set([]);
       expect(service.isTopContainer('anything.anything')).toBe(false);
     });
   });

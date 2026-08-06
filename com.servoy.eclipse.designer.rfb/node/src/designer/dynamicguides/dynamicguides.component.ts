@@ -82,7 +82,7 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
 
   private setGuides(data: SnapData) {
 	this.clearGuides();
-    if (!this.editorSession.getState().dragging && !this.editorSession.getState().resizing) {
+    if (!this.editorSession.dragging() && !this.editorSession.resizing()) {
       return;
     }
     this.snapData = data;

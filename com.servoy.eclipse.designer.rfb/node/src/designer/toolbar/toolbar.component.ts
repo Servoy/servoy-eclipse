@@ -200,8 +200,8 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         const wireframePromise = this.editorSession.isShowWireframe();
         void wireframePromise.then((result: boolean) => {
             this.btnToggleDesignMode.state = result;
-            this.editorSession.getState().showWireframe = result;
-            this.editorSession.stateListener.next('showWireframe');
+            this.editorSession.showWireframe.set(result);
+            
             // always send showwireframe because this will also display the ghosts
             this.editorContentService.executeOnlyAfterInit(() => {
                 this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
@@ -228,7 +228,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.btnSolutionCss.text = TOOLBAR_CONSTANTS.COMPONENTS_CSS;
                 this.setSolutionLayoutsCss(result);
             }
-            this.editorSession.getState().showSolutionSpecificLayoutContainerClasses = result;
+            this.editorSession.showSolutionSpecificLayoutContainerClasses.set(result);
         });
         const solutionCssPromise = this.editorSession.isShowSolutionCss();
         void solutionCssPromise.then((result: boolean) => {
@@ -238,13 +238,13 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.setShowSolutionCss(result);
             });
         }
-            this.editorSession.getState().showSolutionCss = result;
+            this.editorSession.showSolutionCss.set(result);
         });
         const zoomLevelPromise = this.editorSession.getZoomLevel();
         void zoomLevelPromise.then((result: number) => {
             if (result) {
                 this.btnSetMaxLevelContainer.initialValue = result;
-                this.editorSession.getState().maxLevel = result;
+                this.editorSession.maxLevel.set(result);
                 this.editorContentService.executeOnlyAfterInit(() => {
                     this.editorContentService.sendMessageToIframe({ id: 'maxLevel', value: result });
                 });
@@ -335,12 +335,10 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 const promise = this.editorSession.toggleShowWireframe();
                 void promise.then((result: boolean) => {
                     this.btnToggleDesignMode.state = result;
-                    this.editorSession.getState().showWireframe = result;
+                    this.editorSession.showWireframe.set(result);
                     this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
                     // wait for css classes to be applied
-                    setTimeout(()=>{
-this.editorSession.stateListener.next('showWireframe');
-}, 300);
+                    setTimeout(() => { /* allow CSS reflow */ }, 300);
                     // TODO:
                     // $rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
                     // this.editorSession.setContentSizes();
@@ -355,26 +353,26 @@ this.editorSession.stateListener.next('showWireframe');
             true,
             (selection) => {
                 if (selection == TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS) {
-                    if (!this.editorSession.getState().showSolutionCss) {
+                    if (!this.editorSession.showSolutionCss()) {
                         this.toggleShowSolutionCss();
                     }
-                    if (!this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
+                    if (!this.editorSession.showSolutionSpecificLayoutContainerClasses()) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
                 if (selection == TOOLBAR_CONSTANTS.COMPONENTS_CSS) {
-                    if (!this.editorSession.getState().showSolutionCss) {
+                    if (!this.editorSession.showSolutionCss()) {
                         this.toggleShowSolutionCss();
                     }
-                    if (this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
+                    if (this.editorSession.showSolutionSpecificLayoutContainerClasses()) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
                 if (selection == TOOLBAR_CONSTANTS.NO_CSS) {
-                    if (this.editorSession.getState().showSolutionCss) {
+                    if (this.editorSession.showSolutionCss()) {
                         this.toggleShowSolutionCss();
                     }
-                    if (!this.editorSession.getState().showSolutionSpecificLayoutContainerClasses) {
+                    if (!this.editorSession.showSolutionSpecificLayoutContainerClasses()) {
                         this.toggleShowSolutionLayoutsCss();
                     }
                 }
@@ -446,11 +444,11 @@ this.editorSession.stateListener.next('showWireframe');
             'Maximum level for a container to be fully displayed',
             null,
             () => {
-                return this.editorSession.getState().showWireframe;
+                return this.editorSession.showWireframe();
             },
             (value) => {
                 const lvl = parseInt(value!);
-                this.editorSession.getState().maxLevel = lvl;
+                this.editorSession.maxLevel.set(lvl);
                 this.editorContentService.sendMessageToIframe({ id: 'maxLevel', value: value });
                 this.editorSession.setZoomLevel(lvl);
             }
@@ -522,16 +520,16 @@ this.editorSession.stateListener.next('showWireframe');
 
         this.btnVisualFeedbackOptions.onselection = (selection) => {
             if (selection == TOOLBAR_CONSTANTS.SAME_SIZE) {
-                this.editorSession.setSameSizeIndicator(!this.editorSession.getState().sameSizeIndicator);
-                if (this.editorSession.getState().sameSizeIndicator) {
+                this.editorSession.setSameSizeIndicator(!this.editorSession.sameSizeIndicator());
+                if (this.editorSession.sameSizeIndicator()) {
                     this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 } else {
                     this.btnVisualFeedbackOptions.list[1].iconStyle = { 'background-image': 'none' };
                 }
             }
             if (selection == TOOLBAR_CONSTANTS.ANCHOR_INDICATOR) {
-                this.editorSession.setAnchoringIndicator(!this.editorSession.getState().anchoringIndicator);
-                if (this.editorSession.getState().anchoringIndicator) {
+                this.editorSession.setAnchoringIndicator(!this.editorSession.anchoringIndicator());
+                if (this.editorSession.anchoringIndicator()) {
                     this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': TOOLBAR_CONSTANTS.CHECK_ICON };
                 } else {
                     this.btnVisualFeedbackOptions.list[0].iconStyle = { 'background-image': 'none' };
@@ -1041,7 +1039,7 @@ this.editorSession.stateListener.next('showWireframe');
     toggleShowSolutionLayoutsCss() {
         const promise = this.editorSession.toggleShowSolutionLayoutsCss();
         void promise.then((result: boolean) => {
-            this.editorSession.getState().showSolutionSpecificLayoutContainerClasses = result;
+            this.editorSession.showSolutionSpecificLayoutContainerClasses.set(result);
             this.setSolutionLayoutsCss(result);
         });
     }
@@ -1049,7 +1047,7 @@ this.editorSession.stateListener.next('showWireframe');
     toggleShowSolutionCss() {
         const promise = this.editorSession.toggleShowSolutionCss();
         void promise.then((result: boolean) => {
-            this.editorSession.getState().showSolutionCss = result;
+            this.editorSession.showSolutionCss.set(result);
             this.setShowSolutionCss(result);
         });
     }

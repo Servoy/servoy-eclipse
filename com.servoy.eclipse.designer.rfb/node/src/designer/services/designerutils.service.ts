@@ -322,7 +322,7 @@ export class DesignerUtilsService {
 	}
 
     isTopContainer(layoutName: string) {
-        const packages = this.editorSession.getState().packages;
+        const packages = this.editorSession.packages();
         for (const pkg of packages) {
             if (pkg.components[0] && pkg.components[0].componentType === 'layout') {
                 for (const comp of pkg.components) {

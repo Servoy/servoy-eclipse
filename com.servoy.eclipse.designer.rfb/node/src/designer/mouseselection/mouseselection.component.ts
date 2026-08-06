@@ -1,12 +1,11 @@
 import {
   Component, OnInit, AfterViewInit, ElementRef, Renderer2,
-  OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input, forwardRef,
+  OnDestroy, Directive, ChangeDetectionStrategy, inject, input, forwardRef,
   viewChild, viewChildren, effect
 } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
-import { Subscription } from 'rxjs';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 import { NgStyle } from '@angular/common';
 import { ResizeKnobDirective } from '../directives/resizeknob.directive';
@@ -36,7 +35,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     mousedownpoint!: Point;
     fieldLocation!: Point;
-    editorStateSubscription!: Subscription;
     removeSelectionChangedListener!: () => void;
 
     public readonly editorSession = inject(EditorSessionService);
@@ -44,14 +42,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     protected urlParser = inject(URLParserService);
     protected designerUtilsService = inject(DesignerUtilsService);
     private editorContentService = inject(EditorContentService);
-    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.editorContentService.addContentMessageListener(this);
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
         effect(() => {
             this.selectedRef();
-            if (this.editorSession.getState().showWireframe) {
+            if (this.editorSession.showWireframe()) {
                 this.applyWireframe();
             }
         });
@@ -65,7 +62,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     ngOnDestroy(): void {
-        this.editorStateSubscription.unsubscribe();
         this.removeSelectionChangedListener();
         this.editorContentService.removeContentMessageListener(this);
     }
@@ -77,24 +73,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             setTimeout(()=>{
 				this.createNodes(this.editorSession.getSelection());
 			}, 50);
-        });
-
-        this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
-            if (id === 'showWireframe') {
-                this.selectedRef().forEach((selectedNode) => {
-                    if (!this.editorSession.getState().showWireframe) {
-                        this.renderer.removeClass(selectedNode.nativeElement, 'showWireframe');
-                    }
-                });
-
-                this.editorContentService.executeOnlyAfterInit(() => {
-                    this.redrawDecorators();
-                    if (this.editorSession.getState().showWireframe) {
-                        this.applyWireframe();
-                    }
-                    this.cdr.markForCheck();
-                });
-            }
         });
     }
     redrawDecorators() {
@@ -121,7 +99,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (redrawDecorators) {
             this.redrawDecorators();
         }
-        this.cdr.markForCheck();
     }
 
     contentMessageReceived(id: string, _data: { property: string }) {
@@ -181,7 +158,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     private onMouseDown(event: MouseEvent) {
 		this.mouseDownEvent = event;
         this.fieldLocation = { x: event.pageX, y: event.pageY };
-        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
+        if (this.editorSession.dragging() || this.editorSession.ghosthandle()) return;
         let found;
         if (this.moveFCorLFC) {
 			found = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
@@ -232,7 +209,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             });
         }
         this.fieldLocation = null!;
-        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
+        if (this.editorSession.dragging() || this.editorSession.ghosthandle()) return;
         if (event.button == 2 && this.editorSession.getSelection().length > 1) {
             //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
             const node = this.designerUtilsService.getNode(event);
@@ -425,7 +402,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer')
             && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
             this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title')!);
-            if (this.editorSession.getState().showWireframe) {
+            if (this.editorSession.showWireframe()) {
                 this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
             }
             selectedNode.nativeElement.style.setProperty('--svyBackgroundColor', window.getComputedStyle(node).backgroundColor);
@@ -446,7 +423,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 	}
 
     private onMouseMove(event: MouseEvent) {
-        if (this.editorSession.getState().dragging) return;
+        if (this.editorSession.dragging()) return;
         if (this.lassostarted) {
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
             const lassoRef = this.lassoRef();
@@ -464,7 +441,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             this.renderer.setStyle(lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
             this.renderer.setStyle(lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
         }
-        if (this.editorSession.getState().resizing) {
+        if (this.editorSession.resizing()) {
 			this.redrawDecorators();
 		}
     }

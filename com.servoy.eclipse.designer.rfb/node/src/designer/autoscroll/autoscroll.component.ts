@@ -33,9 +33,9 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.editorSession.autoscrollBehavior.subscribe((scrollTarget: ISupportAutoscroll | null | undefined) => {
             this.scrollTarget = scrollTarget;
-            this.editorSession.getState().pointerEvents = 'none';
+            this.editorSession.pointerEvents.set('none');
             if (scrollTarget) {
-                this.editorSession.getState().pointerEvents = 'all';
+                this.editorSession.pointerEvents.set('all');
                 this.setPosition();
             }
         });

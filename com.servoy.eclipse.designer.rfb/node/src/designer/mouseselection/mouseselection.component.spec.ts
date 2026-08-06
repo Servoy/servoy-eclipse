@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { MouseSelectionComponent } from './mouseselection.component';
 
 describe('MouseSelectionComponent', () => {
@@ -10,7 +11,10 @@ describe('MouseSelectionComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false, ghosthandle: false, showWireframe: false, resizing: false }),
+      dragging: signal(false),
+      ghosthandle: signal(false),
+      showWireframe: signal(false),
+      resizing: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       setSelection: vi.fn(),
       requestSelection: vi.fn().mockResolvedValue(undefined),
@@ -21,7 +25,6 @@ describe('MouseSelectionComponent', () => {
       openConfigurator: vi.fn(),
       createComponent: vi.fn(),
       getWizardProperties: vi.fn().mockReturnValue(null),
-      stateListener: { subscribe: vi.fn() },
       updateSelection: vi.fn()
     };
     editorContentService = {
@@ -95,7 +98,6 @@ describe('MouseSelectionComponent', () => {
       const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => undefined);
       component.selectionChanged(['id1']);
       expect(spy).toHaveBeenCalledWith(['id1']);
-      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
     });
 
     it('should not call createNodes when contentInit is false', () => {

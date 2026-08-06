@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { DragselectionComponent } from './dragselection.component';
 
 describe('DragselectionComponent', () => {
@@ -8,7 +9,7 @@ describe('DragselectionComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false }),
+      dragging: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       setDragging: vi.fn(),
       sendChanges: vi.fn(),

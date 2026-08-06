@@ -269,7 +269,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         } else {
             if (event.button == 2 && selection.indexOf(ghost.uuid) >= 0) {
                 //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
-                this.editorSession.getState().ghosthandle = true;
+                this.editorSession.ghosthandle.set(true);
                 return;
             } else if (this.editorSession.getSelection().indexOf(ghost.uuid) == -1 || ghost.type != GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                 this.editorSession.setSelection([ghost.uuid]);
@@ -277,7 +277,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 
         }
         if (event.button == 0) {
-            this.editorSession.getState().dragging = true;
+            this.editorSession.dragging.set(true);
             this.mousedownpoint = { x: event.pageX, y: event.pageY };
             this.draggingGhost = ghost;
             this.draggingInGhostContainer = ghostContainer;
@@ -329,7 +329,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     onMouseUp(event: MouseEvent) {
-        this.editorSession.getState().ghosthandle = false;
+        this.editorSession.ghosthandle.set(false);
         if (this.draggingGhost) {
             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
@@ -364,7 +364,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             }
             // this is just to re-render the decorators
             this.editorSession.updateSelection(this.editorSession.getSelection(), true);
-            this.editorSession.getState().dragging = false;
+            this.editorSession.dragging.set(false);
             this.editorSession.unregisterAutoscroll(this);
         }
         if (this.draggingClone) {

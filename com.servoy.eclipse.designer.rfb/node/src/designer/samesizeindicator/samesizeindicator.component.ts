@@ -1,5 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, effect } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 
@@ -9,43 +8,34 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     styleUrls: ['./samesizeindicator.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener  {
+export class SameSizeIndicatorComponent implements OnDestroy, ISelectionChangedListener, IContentMessageListener  {
     SAME_WIDTH_IMAGE = 'designer/assets/images/samewidthindicator.png';
     SAME_HEIGHT_IMAGE = 'designer/assets/images/sameheightindicator.png';
 
-    sameSizeIndicator!: boolean;
-    editorStateSubscription!: Subscription;
     indicators!: SameSizeIndicator[];
     
     protected readonly editorSession = inject(EditorSessionService);
     private editorContentService = inject(EditorContentService);
-    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.editorSession.addSelectionChangedListener(this);
         this.editorContentService.addContentMessageListener(this);
-    }
-
-    ngAfterViewInit(): void {
-        this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
-            if (id === 'sameSizeIndicator') {
-                this.sameSizeIndicator = this.editorSession.getState().sameSizeIndicator;
-                if (!this.sameSizeIndicator) this.indicators = [];
-                this.cdr.markForCheck();
-            }
-            if (id == 'dragging'){
-                if (this.editorSession.getState().dragging){
-                    this.indicators = null!;
-                } else{
-                    this.selectionChanged(this.editorSession.getSelection());
-                }
-                this.cdr.markForCheck();
+        effect(() => {
+            const sameSizeOn = this.editorSession.sameSizeIndicator();
+            if (!sameSizeOn) this.indicators = [];
+        });
+        effect(() => {
+            const dragging = this.editorSession.dragging();
+            if (dragging) {
+                this.indicators = null!;
+            } else {
+                this.selectionChanged(this.editorSession.getSelection());
             }
         });
     }
 
     ngOnDestroy(): void {
-        this.editorStateSubscription.unsubscribe();
+        this.editorContentService.removeContentMessageListener(this);
     }
     
     contentMessageReceived(id: string) {
@@ -57,7 +47,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
     selectionChanged(selection: string[]): void {
         const newindicators: SameSizeIndicator[] = [];
 
-        if (this.sameSizeIndicator && selection && selection.length == 1) {
+        if (this.editorSession.sameSizeIndicator() && selection && selection.length == 1) {
             const nodeid = selection[0];
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(nodeid);
@@ -90,7 +80,6 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             });
         }
         this.indicators = newindicators;
-        this.cdr.markForCheck();
     }
 
     private removeHiddenElements(elements: HTMLElement[]) {

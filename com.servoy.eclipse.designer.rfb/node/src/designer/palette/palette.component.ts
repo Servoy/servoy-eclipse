@@ -169,7 +169,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.dragItem.model = model;
 
         this.canDrop = { dropAllowed: false };
-        this.editorSession.getState().dragging = true;
+        this.editorSession.dragging.set(true);
         this.editorContentService.sendMessageToIframe({
             id: 'createElement',
             name: this.convertToJSName(this.dragItem.elementName!),
@@ -471,7 +471,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     getPackages(): Package[] {
-        return this.editorSession.getState().packages;
+        return this.editorSession.packages();
     }
 
     updateLocationCallback(changeX: number, changeY: number) {
@@ -526,7 +526,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     }
                 }
             }
-            this.editorSession.getState().packages = packages;
+            this.editorSession.packages.set(packages);
             this.cdr.markForCheck();
         });
     }

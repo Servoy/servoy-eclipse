@@ -69,7 +69,7 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
             this.heightOffset = this.ghostContainers[0].offsetTop + partHeight; //offset relative to glasspane
 
             this.dragingEvent = event;
-            this.editorSession.getState().dragging = true;
+            this.editorSession.dragging.set(true);
             this.editorSession.registerAutoscroll(this);
         });
     }
@@ -122,7 +122,7 @@ export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
             const glasspaneHeight = Math.max((this.lowestPart ? this.currentPosition : this.ghostContainers[0].offsetHeight) + this.heightOffset ,  this.ghostsBottom);
             this.glasspane.style.height = glasspaneHeight + 'px';
 
-            this.editorSession.getState().dragging = false;   
+            this.editorSession.dragging.set(false);   
             this.dragingEvent = null;
             this.editorSession.unregisterAutoscroll(this);
         }

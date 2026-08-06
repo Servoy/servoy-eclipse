@@ -56,7 +56,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
             this.widthOffset = this.ghostContainers[0].offsetLeft + partWidth; //offset relative to glasspane
             
             this.mousePoint = { x: event.pageX, y: event.pageY };
-            this.editorSession.getState().dragging = true;
+            this.editorSession.dragging.set(true);
             this.editorSession.registerAutoscroll(this);
         });
     }
@@ -99,7 +99,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
             this.glasspane.style.width = Math.max(this.currentPosition + this.widthOffset, this.ghostsRight) + 'px';
             this.editorSession.sendChanges(changes);
             
-            this.editorSession.getState().dragging = false;   
+            this.editorSession.dragging.set(false);   
             this.editorSession.unregisterAutoscroll(this);
             this.draggingEvent = null;
         }

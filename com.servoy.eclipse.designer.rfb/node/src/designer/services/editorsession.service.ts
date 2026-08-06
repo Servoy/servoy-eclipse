@@ -1,4 +1,4 @@
-import { inject, Injectable, EventEmitter } from '@angular/core';
+import { inject, Injectable, EventEmitter, signal } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider, TypesRegistry } from '@servoy/sablo';
 import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
@@ -14,12 +14,10 @@ export class EditorSessionService implements ServiceProvider {
 
     private wsSession!: WebsocketSession;
     private inlineEdit!: boolean;
-    private state = new State();
     private selection = new Array<string>();
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     private dynamicGuidesChangedListeners = new Array<IShowDynamicGuidesChangedListener>();
-    public stateListener: BehaviorSubject<string>;
     public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
     public registerCallback = new BehaviorSubject<CallbackFunction>(null!);
     private allowedChildren: Record<string, string[]>  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
@@ -28,7 +26,21 @@ export class EditorSessionService implements ServiceProvider {
 
     private bIsDirty = false;
     private lockAutoscrollId = '';
-    
+
+    readonly dragging = signal(false);
+    readonly resizing = signal(false);
+    readonly ghosthandle = signal(false);
+    readonly pointerEvents = signal('none');
+    readonly showWireframe = signal(false);
+    readonly showSolutionSpecificLayoutContainerClasses = signal(false);
+    readonly showSolutionCss = signal(false);
+    readonly maxLevel = signal(0);
+    readonly packages = signal<Package[]>([]);
+    readonly drop_highlight = signal('');
+    readonly statusText = signal('');
+    readonly sameSizeIndicator = signal(false);
+    readonly anchoringIndicator = signal(false);
+
     variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
     variantsScroll = new EventEmitter<{scrollPos: number}>();
     variantsPopup = new EventEmitter<{status: string}>();
@@ -42,7 +54,6 @@ export class EditorSessionService implements ServiceProvider {
 
     constructor() {
         this.services.setServiceProvider(this);
-        this.stateListener = new BehaviorSubject('');
         this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null!);
         this.editorContentService.executeOnlyAfterInit(() => {
             this.initialized();
@@ -428,27 +439,19 @@ export class EditorSessionService implements ServiceProvider {
     }
 
     setStatusBarText(text: string) {
-        this.state.statusText = text;
-        this.stateListener.next('statusText');
+        this.statusText.set(text);
     }
 
     setSameSizeIndicator(flag: boolean) {
-        this.state.sameSizeIndicator = flag;
-        this.stateListener.next('sameSizeIndicator');
+        this.sameSizeIndicator.set(flag);
     }
 
     setAnchoringIndicator(flag: boolean) {
-        this.state.anchoringIndicator = flag;
-        this.stateListener.next('anchoringIndicator');
+        this.anchoringIndicator.set(flag);
     }
 
     setDragging(dragging : boolean){
-        this.state.dragging = dragging;
-        this.stateListener.next('dragging');
-    }
-    
-    getState(): State {
-        return this.state;
+        this.dragging.set(dragging);
     }
 
     getSession(): WebsocketSession {
@@ -558,22 +561,6 @@ export interface IShowHighlightChangedListener {
 
 export interface IShowDynamicGuidesChangedListener {
     showDynamicGuidesChanged(result: boolean): void;
-}
-
-class State {
-    showWireframe!: boolean;
-    showSolutionSpecificLayoutContainerClasses!: boolean;
-    showSolutionCss!: boolean;
-    sameSizeIndicator!: boolean;
-    anchoringIndicator!: boolean;
-    statusText!: string;
-    maxLevel!: number;
-    dragging = false;
-    resizing = false;
-    ghosthandle = false;
-    pointerEvents = 'none';
-    packages!: Package[];
-    drop_highlight!: string;
 }
 
 export class PaletteComp {

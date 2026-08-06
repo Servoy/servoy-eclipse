@@ -1,5 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 
 @Component({
@@ -8,23 +7,6 @@ import { EditorSessionService } from '../services/editorsession.service';
     styleUrls: ['./statusbar.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StatusBarComponent implements AfterViewInit, OnDestroy {
-    statusText = '';
-    editorStateSubscription!: Subscription;
-
+export class StatusBarComponent {
     protected readonly editorSession = inject(EditorSessionService);
-    private readonly cdr = inject(ChangeDetectorRef);
-
-    ngAfterViewInit(): void {
-        this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
-            if (id === 'statusText') {
-                this.statusText = this.editorSession.getState().statusText;
-                this.cdr.markForCheck();
-            }
-        });
-    }
-
-    ngOnDestroy(): void {
-        this.editorStateSubscription.unsubscribe();
-    }
 }

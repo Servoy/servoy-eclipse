@@ -9,7 +9,7 @@ describe('ResizeKnobDirective', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ resizing: false }),
+      resizing: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       sendChanges: vi.fn()
     };
@@ -54,7 +54,7 @@ describe('ResizeKnobDirective', () => {
 
   describe('snap', () => {
     it('should apply snap data to element when resizing with single selection', () => {
-      editorSession.getState.mockReturnValue({ resizing: true });
+      editorSession.resizing.set(true);
       const el = document.createElement('div');
       el.style.position = 'absolute';
       const elementInfo = { x: 50, y: 50, element: el };
@@ -71,7 +71,7 @@ describe('ResizeKnobDirective', () => {
     });
 
     it('should not apply snap when not resizing', () => {
-      editorSession.getState.mockReturnValue({ resizing: false });
+      editorSession.resizing.set(false);
       (directive as any).currentElementInfo = new Map();
       directive.snap({ left: 30, top: 40, width: 200, height: 100 } as any);
       expect((directive as any).snapData).toBeNull();
