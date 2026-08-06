@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WpmService } from './wpm.service';
 import { HeaderComponent } from './header/header.component';
 import { ContentComponent } from './content/content.component';
@@ -11,10 +11,12 @@ import { ContentComponent } from './content/content.component';
     imports: [HeaderComponent, ContentComponent]
 })
 export class MainComponent {
+  wpmService = inject(WpmService);
+
   url: URL;
   darkTheme: boolean;
 
-  constructor(public wpmService: WpmService) {
+  constructor() {
 	this.url = new URL(window.location.href);
 	this.darkTheme = this.wpmService.isDarkTheme();
 	if (this.darkTheme) {

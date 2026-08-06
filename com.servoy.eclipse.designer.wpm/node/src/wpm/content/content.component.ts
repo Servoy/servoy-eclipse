@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Package } from '../websocket.service';
 import {WpmService, PACKAGE_TYPE_TO_TITLE_MAP, ALL_PACKAGE_TYPES} from '../wpm.service'
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
@@ -19,10 +19,11 @@ export interface PackageList {
     imports: [MatTabGroup, MatTab, PackagesComponent]
 })
 export class ContentComponent implements OnInit {
+  wpmService = inject(WpmService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   packageLists: PackageList[] = []
-
-  constructor(public wpmService: WpmService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.wpmService.getPackages().subscribe(p => {

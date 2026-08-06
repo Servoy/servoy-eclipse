@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, ChangeDetectionStrategy, input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.service';
@@ -18,13 +18,13 @@ import { MatCardContent } from '@angular/material/card';
     imports: [NgClass, MatTooltip, NgStyle, MatIcon, MatFormField, MatLabel, MatSelect, MatOption, MatIconButton, MatButton, MatProgressBar, MatCardContent]
 })
 export class PackagesComponent implements OnChanges {
+    wpmService = inject(WpmService);
+    dialog = inject(MatDialog);
+
 
     readonly packages = input.required<Package[]>();
     selectedPackage!: Package;
     descriptionExpanded = false;
-
-    constructor(public wpmService: WpmService, public dialog: MatDialog) {
-    }
 
     ngOnChanges(changes: SimpleChanges) {
         const packages = this.packages();

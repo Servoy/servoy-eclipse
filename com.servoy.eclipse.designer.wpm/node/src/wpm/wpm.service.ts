@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Message, Package, PackagesAndRepositories, PackagesInfo, Repository, WebsocketService } from './websocket.service';
 import { Observable, Observer, BehaviorSubject } from 'rxjs';
 import { map, share } from 'rxjs/operators';
@@ -43,7 +43,9 @@ export class WpmService {
 
   contentAvailable = signal(true);
 
-  constructor(wsService: WebsocketService) {
+  constructor() {
+    const wsService = inject(WebsocketService);
+
     const loc = window.location;
     this.url = new URL(loc.href);
     const uri = 'ws://'+loc.host+'/wpm/angular2/websocket';

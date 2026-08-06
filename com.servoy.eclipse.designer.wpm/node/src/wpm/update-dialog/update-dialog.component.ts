@@ -1,4 +1,4 @@
-import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import {  WpmService } from '../wpm.service';
@@ -15,12 +15,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatCheckbox, FormsModule, MatDialogActions, MatButton, MatDialogClose]
 })
 export class UpdatePackagesDialogComponent {
+    dialogRef = inject<MatDialogRef<UpdatePackagesDialogComponent>>(MatDialogRef);
+    data = inject<Package[]>(MAT_DIALOG_DATA);
+    wpmService = inject(WpmService);
+
 
     extendedData: ExtendedPackage[] = [];
     installingOrRemoving = false;
 
-    constructor(public dialogRef: MatDialogRef<UpdatePackagesDialogComponent>, 
-        @Inject(MAT_DIALOG_DATA) public data: Package[], public wpmService: WpmService) {
+    constructor() {
+        const data = this.data;
+
         data.forEach(p => {
             if (this.wpmService.versionCompare(p.installed, p.releases[0].version) < 0) {
                 this.extendedData.push({package: p, isSelected: p.packageType != 'Solution-Main' ? true : false});

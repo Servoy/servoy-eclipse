@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { WpmService } from '../wpm.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { ExtendedPackage, UpdatePackagesDialogComponent } from '../update-dialog/update-dialog.component';
@@ -23,14 +23,15 @@ const SERVOY_DEFAULT= 'Servoy Default';
     imports: [MatSelect, MatTooltip, MatOption, MatIconButton, MatIcon, NgStyle, MatButton]
 })
 export class HeaderComponent implements OnInit {
+  wpmService = inject(WpmService);
+  dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+
 
   repositories: string[] = [SERVOY_DEFAULT, ADD_REMOVE_TEXT];
   activeRepository: string = SERVOY_DEFAULT;
   packages: Package[] = [];
   isUpdateAllButtonDisabled = false;
-
-  constructor(public wpmService: WpmService, public dialog: MatDialog, private cdr: ChangeDetectorRef) {
-  }
 
   ngOnInit() {
 
@@ -196,9 +197,9 @@ export class HeaderComponent implements OnInit {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose]
 })
 export class AddRepositoryDialogComponent {
+  dialogRef = inject<MatDialogRef<AddRepositoryDialogComponent>>(MatDialogRef);
+  data = inject<Repository>(MAT_DIALOG_DATA);
 
-  constructor(
-    public dialogRef: MatDialogRef<AddRepositoryDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: Repository) {}
 
   onCancelClick(): void {
     this.dialogRef.close();
@@ -212,8 +213,9 @@ export class AddRepositoryDialogComponent {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class ErrorDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ErrorDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: string) {}
+  dialogRef = inject<MatDialogRef<ErrorDialogComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
 
   onOkClick(): void {
     this.dialogRef.close();
