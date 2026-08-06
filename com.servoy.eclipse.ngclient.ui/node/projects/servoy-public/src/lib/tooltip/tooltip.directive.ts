@@ -11,12 +11,7 @@ export class TooltipDirective extends HTMLTooltipDirective {
 
     override readonly tooltipText = input<string | undefined>(undefined, { alias: 'svyTooltip' });
 
-    private servoyService: ServoyPublicService;
-
-    constructor(tooltipService?: TooltipService, servoyService?: ServoyPublicService) {
-        super(tooltipService);
-        this.servoyService = servoyService ?? inject(ServoyPublicService);
-    }
+    private servoyService = inject(ServoyPublicService);
 
     protected getInitialDelay(): number {
         let initialDelay = super.getInitialDelay();

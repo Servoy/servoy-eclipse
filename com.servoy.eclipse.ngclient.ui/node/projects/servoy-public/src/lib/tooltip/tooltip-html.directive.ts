@@ -19,10 +19,9 @@ export class HTMLTooltipDirective implements OnDestroy {
     isActive = false;
     
     private unsubscribeIsTooltipActive: Subscription;
-    protected tooltipService: TooltipService;
+    protected tooltipService = inject(TooltipService);
 
-    constructor(tooltipService?: TooltipService) {
-        this.tooltipService = tooltipService ?? inject(TooltipService);
+    constructor() {
         this.unsubscribeIsTooltipActive = this.tooltipService.isTooltipActive.subscribe(a => {
             this.isActive = a;
         });

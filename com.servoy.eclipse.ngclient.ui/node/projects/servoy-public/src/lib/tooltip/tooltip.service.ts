@@ -1,12 +1,11 @@
 
-import { Inject, inject, Injectable, DOCUMENT, Signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { inject, Injectable, DOCUMENT, Signal, signal, WritableSignal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { WindowRefService } from '../services/windowref.service';
 
 @Injectable()
 export class TooltipService {
-    isTooltipActive: Subject<boolean>;
+    isTooltipActive = new Subject<boolean>();
     readonly isTooltipActiveSignal: Signal<boolean>;
     tipInitialTimeout: any;
     tipTimeout: any;
@@ -14,13 +13,13 @@ export class TooltipService {
     private tipmousemouveEventX: any;
     private tipmousemouveEventY: any;
     private tipmousemouveEventIsPage!: boolean;
-    private doc: Document;
-    private windowRefService: WindowRefService;
-    constructor(@Inject(DOCUMENT) _doc?: any, windowRefService?: WindowRefService) {
-        this.isTooltipActive = new Subject<boolean>();
-        this.isTooltipActiveSignal = toSignal(this.isTooltipActive, { initialValue: false });
-        this.doc = _doc ?? inject(DOCUMENT);
-        this.windowRefService = windowRefService ?? inject(WindowRefService);
+    private doc = inject(DOCUMENT);
+    private windowRefService = inject(WindowRefService);
+    private _isTooltipActiveSignal: WritableSignal<boolean> = signal(false);
+
+    constructor() {
+        this.isTooltipActiveSignal = this._isTooltipActiveSignal.asReadonly();
+        this.isTooltipActive.subscribe(v => this._isTooltipActiveSignal.set(v));
     }
 
 

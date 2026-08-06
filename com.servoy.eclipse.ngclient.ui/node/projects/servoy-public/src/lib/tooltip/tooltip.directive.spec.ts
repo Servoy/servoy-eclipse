@@ -113,6 +113,18 @@ describe('Directive: Tooltip', () => {
     vi.useRealTimers();
   });
 
+  it('isTooltipActiveSignal reflects tooltip state', () => {
+    const tooltipService = TestBed.inject(TooltipService);
+
+    expect(tooltipService.isTooltipActiveSignal()).toBe(false);
+
+    tooltipService.isTooltipActive.next(true);
+    expect(tooltipService.isTooltipActiveSignal()).toBe(true);
+
+    tooltipService.isTooltipActive.next(false);
+    expect(tooltipService.isTooltipActiveSignal()).toBe(false);
+  });
+
   describe('should destroy', () => {
     beforeEach(() => {
       initTooltip(directiveInstance, inputEl);
