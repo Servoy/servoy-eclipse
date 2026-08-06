@@ -7,8 +7,7 @@ import { EditorSessionService } from '../services/editorsession.service';
     selector: 'designer-inline-edit',
     templateUrl: './inlineedit.component.html',
     styleUrls: ['./inlineedit.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InlineEditComponent implements AfterViewInit {
 

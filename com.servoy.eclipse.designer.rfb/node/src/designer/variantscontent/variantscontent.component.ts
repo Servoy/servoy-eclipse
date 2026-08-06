@@ -3,13 +3,14 @@ import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRe
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
 
 @Component({
     selector: 'designer-variantscontent',
     templateUrl: './variantscontent.component.html',
     styleUrls: ['./variantscontent.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgStyle]
 })
 export class VariantsContentComponent implements OnInit {
 

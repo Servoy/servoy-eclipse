@@ -3,13 +3,16 @@ import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } f
 import { URLParserService } from '../services/urlparser.service';
 import { Point } from '../mouseselection/mouseselection.component';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
+import { ResizeEditorWidthComponent } from '../resizeeditorwidth/resizeeditorwidth.component';
+import { ResizeEditorHeightComponent } from '../resizeeditorheight/resizeeditorheight.component';
 
 @Component({
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgStyle, ResizeEditorWidthComponent, ResizeEditorHeightComponent]
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 

@@ -7,8 +7,7 @@ import { Point } from './../mouseselection/mouseselection.component';
     selector: 'designer-resizeeditorwidth',
     templateUrl: './resizeeditorwidth.component.html',
     styleUrls: ['./resizeeditorwidth.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
     @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;

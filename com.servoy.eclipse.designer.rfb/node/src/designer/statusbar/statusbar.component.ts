@@ -6,8 +6,7 @@ import { EditorSessionService } from '../services/editorsession.service';
     selector: 'designer-status-bar',
     templateUrl: './statusbar.component.html',
     styleUrls: ['./statusbar.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StatusBarComponent implements AfterViewInit, OnDestroy {
     statusText = '';

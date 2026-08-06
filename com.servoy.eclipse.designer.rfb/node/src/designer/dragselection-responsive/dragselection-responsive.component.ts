@@ -8,8 +8,7 @@ import { URLParserService } from '../services/urlparser.service';
 @Component({
     selector: 'dragselection-responsive',
     templateUrl: './dragselection-responsive.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll { // ISupportAutoscroll
     allowedChildren: any;

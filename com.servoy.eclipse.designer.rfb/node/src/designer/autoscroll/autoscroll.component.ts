@@ -2,13 +2,14 @@ import { Point } from './../mouseselection/mouseselection.component';
 import { Component, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
 
 @Component({
     selector: 'designer-autoscroll',
     templateUrl: './autoscroll.component.html',
     styleUrls: ['./autoscroll.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgStyle]
 })
 
 export class AutoscrollComponent implements OnInit, AfterViewInit {

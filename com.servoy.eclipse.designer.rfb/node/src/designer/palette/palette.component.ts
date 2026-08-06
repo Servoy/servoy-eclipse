@@ -1,4 +1,4 @@
-import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject, forwardRef } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
@@ -7,13 +7,19 @@ import { EditorContentService } from '../services/editorcontent.service';
 import { WindowRefService } from '@servoy/public';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
 import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody } from '@ng-bootstrap/ng-bootstrap/accordion';
+import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
+import { ServoyPublicModule } from '../../../../../com.servoy.eclipse.ngclient.ui/node/projects/servoy-public/src/lib/servoy_public.module';
+import { VariantsContentComponent } from '../variantscontent/variantscontent.component';
+import { KeyValuePipe } from '@angular/common';
 
 @Component({
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [FormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ServoyPublicModule, VariantsContentComponent, KeyValuePipe, forwardRef(() => SearchTextPipe), forwardRef(() => SearchTextDeepPipe)]
 })
 export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
 
@@ -591,10 +597,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 }
 
-@Pipe({
-    name: 'searchTextFilter',
-    standalone: false
-})
+@Pipe({ name: 'searchTextFilter' })
 export class SearchTextPipe implements PipeTransform {
     transform(items: PaletteComp[], text: string): PaletteComp[] {
         let sortedItems = items;
@@ -612,10 +615,7 @@ export class SearchTextPipe implements PipeTransform {
     }
 }
 
-@Pipe({
-    name: 'searchTextFilterDeep',
-    standalone: false
-})
+@Pipe({ name: 'searchTextFilterDeep' })
 export class SearchTextDeepPipe implements PipeTransform {
     transform(items: Package[], text: string): Package[] {
         if (items)

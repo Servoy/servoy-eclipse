@@ -7,8 +7,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-samesize-indicator',
     templateUrl: './samesizeindicator.component.html',
     styleUrls: ['./samesizeindicator.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener  {
     SAME_WIDTH_IMAGE = 'designer/assets/images/samewidthindicator.png';

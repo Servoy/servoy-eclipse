@@ -7,8 +7,7 @@ import { Point } from './../mouseselection/mouseselection.component';
     selector: 'designer-resizeeditorheight',
     templateUrl: './resizeeditorheight.component.html',
     styleUrls: ['./resizeeditorheight.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResizeEditorHeightComponent implements OnInit, ISupportAutoscroll {
     @ViewChild('resizer', { static: true }) resizerRef!: ElementRef<HTMLElement>;

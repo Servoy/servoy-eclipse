@@ -6,6 +6,7 @@ import { EditorSessionService, PaletteComp } from '../services/editorsession.ser
 import { EditorContentService } from '../services/editorcontent.service';
 import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPopover as NgbPopover_1 } from '@ng-bootstrap/ng-bootstrap/popover';
 
 @Component({
     selector: 'designer-variantspreview',
@@ -13,7 +14,7 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
     styleUrls: ['./variantspreview.component.css'],
     encapsulation: ViewEncapsulation.Emulated,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgbPopover_1]
 })
 export class VariantsPreviewComponent implements AfterViewInit {
 

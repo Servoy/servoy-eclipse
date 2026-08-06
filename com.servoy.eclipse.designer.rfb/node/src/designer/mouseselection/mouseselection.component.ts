@@ -1,16 +1,18 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input, forwardRef } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { Subscription } from 'rxjs';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
+import { ResizeKnobDirective } from '../directives/resizeknob.directive';
 
 @Component({
     selector: 'selection-decorators',
     templateUrl: './mouseselection.component.html',
     styleUrls: ['./mouseselection.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [NgStyle, ResizeKnobDirective, forwardRef(() => PositionMenuDirective)]
 })
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy, IContentMessageListener {
@@ -524,10 +526,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
 }
-@Directive({
-    selector: '[positionMenu]',
-    standalone: false
-})
+@Directive({ selector: '[positionMenu]' })
 export class PositionMenuDirective implements OnInit {
     selectionNode = input<SelectionNode>(undefined!, { alias: 'positionMenu' });
 

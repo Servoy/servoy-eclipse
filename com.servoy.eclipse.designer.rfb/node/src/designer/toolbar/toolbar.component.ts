@@ -3,6 +3,9 @@ import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { ToolbarButtonComponent } from './item/toolbarbutton.component';
+import { ToolbarSpinnerComponent } from './item/toolbarspinner.component';
+import { ToolbarSwitchComponent } from './item/toolbarswitch.component';
 
 export enum TOOLBAR_CONSTANTS {
     LAYOUTS_COMPONENTS_CSS = 'Solution CSS',
@@ -62,7 +65,7 @@ export enum TOOLBAR_CATEGORIES {
     selector: 'designer-toolbar',
     templateUrl: './toolbar.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [ToolbarButtonComponent, ToolbarSpinnerComponent, ToolbarSwitchComponent]
 })
 export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 

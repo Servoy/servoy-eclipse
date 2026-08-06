@@ -6,8 +6,7 @@ import { EditorSessionService } from '../services/editorsession.service';
     selector: 'designer-resizer',
     templateUrl: './resizer.component.html',
     styleUrls: ['./resizer.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResizerComponent implements OnInit {
     @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;

@@ -5,13 +5,16 @@ import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { KeyboardLayoutDirective } from '../directives/keyboardlayout.directive';
+import { NgStyle } from '@angular/common';
+
 
 @Component({
     selector: 'designer-editorcontent',
     templateUrl: './editorcontent.component.html',
     styleUrls: ['./editorcontent.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [KeyboardLayoutDirective, NgStyle]
 })
 export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {
 

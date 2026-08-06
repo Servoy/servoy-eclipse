@@ -9,8 +9,7 @@ import { URLParserService } from '../services/urlparser.service';
     selector: 'designer-anchoring-indicator',
     templateUrl: './anchoringindicator.component.html',
     styleUrls: ['./anchoringindicator.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener {
     TOP_LEFT_IMAGE = 'designer/assets/images/anchoringtopleft.png';

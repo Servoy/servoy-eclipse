@@ -4,6 +4,7 @@ import { EditorSessionService, PaletteComp } from '../services/editorsession.ser
 import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
+import { NgClass, NgStyle } from '@angular/common';
 
 export enum SHORTCUT_IDS {
 	SET_TAB_SEQUENCE_ID = 'com.servoy.eclipse.designer.rfb.settabseq',
@@ -22,11 +23,11 @@ export enum SHORTCUT_IDS {
 	OPEN_FORM_HIERARCHY_ID = 'com.servoy.eclipse.ui.OpenFormHierarchyAction'
 }
 @Component({
-	selector: 'designer-contextmenu',
-	templateUrl: './contextmenu.component.html',
-	styleUrls: ['./contextmenu.component.css'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+    selector: 'designer-contextmenu',
+    templateUrl: './contextmenu.component.html',
+    styleUrls: ['./contextmenu.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgClass, NgStyle]
 })
 export class ContextMenuComponent implements OnInit {
 
