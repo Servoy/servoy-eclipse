@@ -1,7 +1,7 @@
 import {
-  Component, OnInit, AfterViewInit, ElementRef, Renderer2, QueryList, ViewChildren,
+  Component, OnInit, AfterViewInit, ElementRef, Renderer2,
   OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input, forwardRef,
-  viewChild
+  viewChild, viewChildren, effect
 } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -23,7 +23,7 @@ import { ResizeKnobDirective } from '../directives/resizeknob.directive';
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy, IContentMessageListener {
 
     readonly lassoRef = viewChild.required<ElementRef<HTMLElement>>('lasso');
-    @ViewChildren('selected') selectedRef!: QueryList<ElementRef<HTMLElement>>;
+    readonly selectedRef = viewChildren<ElementRef<HTMLElement>>('selected');
 
     nodes: SelectionNode[] = new Array<SelectionNode>();
     contentInit = false;
@@ -36,7 +36,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     mousedownpoint!: Point;
     fieldLocation!: Point;
-    selectedRefSubscription!: Subscription;
     editorStateSubscription!: Subscription;
     removeSelectionChangedListener!: () => void;
 
@@ -50,6 +49,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     constructor() {
         this.editorContentService.addContentMessageListener(this);
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
+        effect(() => {
+            this.selectedRef();
+            if (this.editorSession.getState().showWireframe) {
+                this.applyWireframe();
+            }
+        });
     }
 
     ngOnInit(): void {
@@ -60,7 +65,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     ngOnDestroy(): void {
-        if (this.selectedRefSubscription !== undefined) this.selectedRefSubscription.unsubscribe();
         this.editorStateSubscription.unsubscribe();
         this.removeSelectionChangedListener();
         this.editorContentService.removeContentMessageListener(this);
@@ -77,7 +81,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
         this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
             if (id === 'showWireframe') {
-                Array.from(this.selectedRef).forEach((selectedNode) => {
+                this.selectedRef().forEach((selectedNode) => {
                     if (!this.editorSession.getState().showWireframe) {
                         this.renderer.removeClass(selectedNode.nativeElement, 'showWireframe');
                     }
@@ -347,9 +351,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         selection = [id];
                     }
                     this.editorSession.setSelection(selection, this);
-                    this.selectedRefSubscription = this.selectedRef.changes.subscribe(() => {
-                        this.applyWireframe();
-                    })
                     return node;
                 }
             });
@@ -394,9 +395,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             }
                         });
                         this.editorSession.setSelection(selection, this);
-                        this.selectedRefSubscription = this.selectedRef.changes.subscribe(() => {
-                            this.applyWireframe();
-                        })
                     }
                 }
             }
@@ -415,7 +413,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private applyWireframe() {
-        Array.from(this.selectedRef).forEach((selectedNode) => {
+        this.selectedRef().forEach((selectedNode) => {
             this.applyWireframeForNode(selectedNode);
         });
     }
