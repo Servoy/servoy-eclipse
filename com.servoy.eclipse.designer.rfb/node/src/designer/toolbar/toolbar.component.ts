@@ -61,7 +61,7 @@ export enum TOOLBAR_CATEGORIES {
 @Component({
     selector: 'designer-toolbar',
     templateUrl: './toolbar.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class ToolbarComponent implements OnInit, ISelectionChangedListener {

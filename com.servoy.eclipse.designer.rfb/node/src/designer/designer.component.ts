@@ -6,7 +6,7 @@ import { URLParserService } from 'src/designer/services/urlparser.service';
     selector: 'app-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class DesignerComponent implements OnInit {

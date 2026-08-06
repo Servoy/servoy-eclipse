@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, ChangeDetectionStrategy, ChangeDetectorRef, inject, input } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
@@ -9,7 +9,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'selection-decorators',
     templateUrl: './mouseselection.component.html',
     styleUrls: ['./mouseselection.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
@@ -38,6 +38,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     protected urlParser = inject(URLParserService);
     protected designerUtilsService = inject(DesignerUtilsService);
     private editorContentService = inject(EditorContentService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.editorContentService.addContentMessageListener(this);
@@ -80,6 +81,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     if (this.editorSession.getState().showWireframe) {
                         this.applyWireframe();
                     }
+                    this.cdr.markForCheck();
                 });
             }
         });
@@ -105,12 +107,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (this.contentInit) {
             this.createNodes(selection);
         }
-        //fix this
         if (redrawDecorators) {
-            //     setTimeout(() => {
             this.redrawDecorators();
-            //     }, 400);
         }
+        this.cdr.markForCheck();
     }
 
     contentMessageReceived(id: string, _data: { property: string }) {

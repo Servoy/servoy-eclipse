@@ -27,6 +27,7 @@ describe('SameSizeIndicatorComponent', () => {
     };
 
     component = Object.create(SameSizeIndicatorComponent.prototype);
+    (component as any).cdr = { markForCheck: vi.fn() };
     (component as any).editorSession = editorSession;
     (component as any).editorContentService = editorContentService;
     component.sameSizeIndicator = false;

@@ -4,7 +4,7 @@ import { ToolbarItemComponent } from './toolbaritem.component';
 @Component({
     selector: 'designer-toolbar-switch',
     templateUrl: './toolbarswitch.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class ToolbarSwitchComponent extends ToolbarItemComponent{

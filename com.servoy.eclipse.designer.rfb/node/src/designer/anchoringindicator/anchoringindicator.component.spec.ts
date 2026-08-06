@@ -31,6 +31,7 @@ describe('AnchoringIndicatorComponent', () => {
     };
 
     component = Object.create(AnchoringIndicatorComponent.prototype);
+    (component as any).cdr = { markForCheck: vi.fn() };
     (component as any).editorSession = editorSession;
     (component as any).editorContentService = editorContentService;
     (component as any).urlParser = urlParser;

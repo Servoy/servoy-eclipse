@@ -4,7 +4,7 @@ import { ToolbarItemComponent } from './toolbaritem.component';
 @Component({
     selector: 'designer-toolbar-spinner',
     templateUrl: './toolbarspinner.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class ToolbarSpinnerComponent extends ToolbarItemComponent implements OnInit, OnChanges {

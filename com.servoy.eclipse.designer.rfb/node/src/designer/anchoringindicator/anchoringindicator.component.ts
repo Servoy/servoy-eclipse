@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -9,7 +9,7 @@ import { URLParserService } from '../services/urlparser.service';
     selector: 'designer-anchoring-indicator',
     templateUrl: './anchoringindicator.component.html',
     styleUrls: ['./anchoringindicator.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener {
@@ -30,6 +30,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     protected readonly editorSession = inject(EditorSessionService);
     protected editorContentService = inject(EditorContentService);
     protected urlParser = inject(URLParserService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.editorSession.addSelectionChangedListener(this);
@@ -41,6 +42,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             if (id === 'anchoringIndicator') {
                 this.anchoringIndicator = this.editorSession.getState().anchoringIndicator;
                 if (!this.anchoringIndicator) this.indicator = null;
+                this.cdr.markForCheck();
             }
             if (id == 'dragging'){
                 if (this.editorSession.getState().dragging){
@@ -48,6 +50,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                 } else{
                     this.selectionChanged(this.editorSession.getSelection());
                 }
+                this.cdr.markForCheck();
             }
         });
     }
@@ -135,6 +138,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                     }
                     this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + (wrapperRect ? wrapperRect.top : elementRect.top) + 1, (wrapperRect ? wrapperRect.left : elementRect.left) + this.editorContentService.getGlasspaneLeftDistance() + (wrapperRect ? wrapperRect.width : elementRect.width) + 2);
                 }
+                this.cdr.markForCheck();
             });
         }
     }

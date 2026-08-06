@@ -10,7 +10,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-editorcontent',
     templateUrl: './editorcontent.component.html',
     styleUrls: ['./editorcontent.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {

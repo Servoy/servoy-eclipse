@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -7,7 +7,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-samesize-indicator',
     templateUrl: './samesizeindicator.component.html',
     styleUrls: ['./samesizeindicator.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener  {
@@ -20,6 +20,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
     
     protected readonly editorSession = inject(EditorSessionService);
     private editorContentService = inject(EditorContentService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.editorSession.addSelectionChangedListener(this);
@@ -31,6 +32,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             if (id === 'sameSizeIndicator') {
                 this.sameSizeIndicator = this.editorSession.getState().sameSizeIndicator;
                 if (!this.sameSizeIndicator) this.indicators = [];
+                this.cdr.markForCheck();
             }
             if (id == 'dragging'){
                 if (this.editorSession.getState().dragging){
@@ -38,6 +40,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
                 } else{
                     this.selectionChanged(this.editorSession.getSelection());
                 }
+                this.cdr.markForCheck();
             }
         });
     }
@@ -88,6 +91,7 @@ export class SameSizeIndicatorComponent implements AfterViewInit, OnDestroy, ISe
             });
         }
         this.indicators = newindicators;
+        this.cdr.markForCheck();
     }
 
     private removeHiddenElements(elements: HTMLElement[]) {

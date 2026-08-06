@@ -8,7 +8,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {

@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
     selector: 'dynamic-guides',
     templateUrl: './dynamicguides.component.html',
     styleUrls: ['./dynamicguides.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {

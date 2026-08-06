@@ -16,6 +16,7 @@ describe('StatusBarComponent', () => {
     };
 
     component = Object.create(StatusBarComponent.prototype);
+    (component as any).cdr = { markForCheck: vi.fn() };
     (component as any).editorSession = editorSession;
     component.statusText = '';
   });

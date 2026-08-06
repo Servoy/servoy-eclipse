@@ -6,7 +6,7 @@ import { EditorSessionService } from '../services/editorsession.service';
     selector: 'designer-resizer',
     templateUrl: './resizer.component.html',
     styleUrls: ['./resizer.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class ResizerComponent implements OnInit {

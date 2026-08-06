@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 @Component({
     selector: 'dragselection',
     templateUrl: './dragselection.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {

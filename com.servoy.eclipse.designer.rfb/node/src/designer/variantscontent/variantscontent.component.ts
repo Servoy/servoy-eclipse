@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, inject, input } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -8,7 +8,7 @@ import { EditorContentService } from '../services/editorcontent.service';
     selector: 'designer-variantscontent',
     templateUrl: './variantscontent.component.html',
     styleUrls: ['./variantscontent.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class VariantsContentComponent implements OnInit {
@@ -27,6 +27,7 @@ export class VariantsContentComponent implements OnInit {
     private windowRef = inject(WindowRefService);
     private editorSession = inject(EditorSessionService);
     private editorContentService = inject(EditorContentService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
 		this.editorSession.variantsTrigger.subscribe((value) => {
@@ -36,6 +37,7 @@ export class VariantsContentComponent implements OnInit {
 			} else {
                 this.activeVariant = false;
 			}
+			this.cdr.markForCheck();
 		});
 		this.editorSession.variantsPopup.subscribe((value) => {
 			if (value.status === 'visible') {

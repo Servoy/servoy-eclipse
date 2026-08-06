@@ -7,7 +7,7 @@ import { EditorContentService } from '../services/editorcontent.service';
     selector: 'designer-autoscroll',
     templateUrl: './autoscroll.component.html',
     styleUrls: ['./autoscroll.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 

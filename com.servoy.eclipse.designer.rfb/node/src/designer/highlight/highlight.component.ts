@@ -7,7 +7,7 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
     selector: 'designer-highlight',
     templateUrl: './highlight.component.html',
     styleUrls: ['./highlight.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class HighlightComponent implements IShowHighlightChangedListener, OnInit, IContentMessageListener, OnDestroy {

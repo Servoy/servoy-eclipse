@@ -1,4 +1,4 @@
-import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
 export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
@@ -41,6 +41,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     private editorContentService = inject(EditorContentService);
     private windowRef = inject(WindowRefService);
     private guidesService = inject(DynamicGuidesService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.editorSession.setPaletteRefresher(this);
@@ -491,6 +492,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                 }
             }
             this.editorSession.getState().packages = packages;
+            this.cdr.markForCheck();
         });
     }
 
