@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.VfeCommandStackEventListener;
 
-@DisplayName("VfeCommandStackEventListener")
 class VfeCommandStackEventListenerTest
 {
 	private VfeCommandStackEventListener listener;
@@ -30,7 +29,6 @@ class VfeCommandStackEventListenerTest
 	}
 
 	@Nested
-	@DisplayName("isRunningCommand()")
 	class IsRunningCommand
 	{
 		@Test

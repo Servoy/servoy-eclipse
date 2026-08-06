@@ -31,7 +31,6 @@ class SolutionSerializerTest {
 	}
 
 	@Nested
-	@DisplayName("generateParams")
 	class GenerateParams {
 		@Test
 		@DisplayName("returns false for null input")

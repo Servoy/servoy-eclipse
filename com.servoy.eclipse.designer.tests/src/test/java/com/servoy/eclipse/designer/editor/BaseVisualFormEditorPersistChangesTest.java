@@ -21,12 +21,10 @@ import org.junit.jupiter.api.Test;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.VfeCommandStackEventListener;
 
-@DisplayName("BaseVisualFormEditor.persistChanges structural verification (SVY-21249)")
 class BaseVisualFormEditorPersistChangesTest {
 	private static final String SOURCE_RELATIVE_PATH = "src/com/servoy/eclipse/designer/editor/BaseVisualFormEditor.java";
 
 	@Nested
-	@DisplayName("source-inspection: persistChanges guards flagModified with isRunningCommand check")
 	class PersistChangesFlagModifiedGuard {
 		@Test
 		@DisplayName("persistChanges contains flagModified() guarded by !commandStackEventListener.isRunningCommand()")
@@ -79,7 +77,6 @@ class BaseVisualFormEditorPersistChangesTest {
 	}
 
 	@Nested
-	@DisplayName("structural: VfeCommandStackEventListener is accessible from BaseVisualFormEditor")
 	class VfeCommandStackEventListenerAccessibility {
 		@Test
 		@DisplayName("BaseVisualFormEditor has a field of type VfeCommandStackEventListener")

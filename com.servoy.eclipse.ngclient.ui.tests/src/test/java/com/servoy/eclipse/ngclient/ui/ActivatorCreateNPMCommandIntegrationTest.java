@@ -14,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("Activator.createNPMCommand - Integration")
 class ActivatorCreateNPMCommandIntegrationTest {
 	private Activator activator;
 	private File originalNodePath;
@@ -39,7 +38,6 @@ class ActivatorCreateNPMCommandIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("when nodePath is null (Node.js not available)")
 	class WhenNodePathIsNull {
 		@BeforeEach
 		void setNodePathNull() throws Exception {
@@ -56,7 +54,6 @@ class ActivatorCreateNPMCommandIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("when nodePath is set (Node.js available)")
 	class WhenNodePathIsSet {
 		@BeforeEach
 		void setNodePath() throws Exception {

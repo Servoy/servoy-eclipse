@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-@DisplayName("FormOutlinePage expand state preservation (SVY-21202)")
 class FormOutlineExpandStateIntegrationTest {
 	private Display display;
 	private Shell shell;
@@ -55,7 +54,6 @@ class FormOutlineExpandStateIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("when TreeViewer.refresh() is called (mechanism used by persistChanges)")
 	class RefreshPreservesState {
 		@Test
 		@DisplayName("previously collapsed nodes remain collapsed after refresh")
@@ -186,7 +184,6 @@ class FormOutlineExpandStateIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("when expandToLevel is called (mechanism used by defaultExpand on initial creation)")
 	class DefaultExpandBehavior {
 		@Test
 		@DisplayName("expandToLevel(4) expands responsive form tree to correct depth")
@@ -245,7 +242,6 @@ class FormOutlineExpandStateIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("persistChanges behavior verification")
 	class PersistChangesVerification {
 		@Test
 		@DisplayName("refresh() does not include defaultExpand in its execution path")
@@ -344,7 +340,6 @@ class FormOutlineExpandStateIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("AC3: drag-and-drop (node reparenting) preserves state")
 	class DragAndDropPreservesState {
 		@Test
 		@DisplayName("moving a node to a different parent preserves other collapsed nodes")
@@ -440,7 +435,6 @@ class FormOutlineExpandStateIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("AC5: grouped/ungrouped toggle behavior")
 	class GroupedUngroupedToggle {
 		@Test
 		@DisplayName("refresh without defaultExpand preserves state (view toggle only calls refresh)")
@@ -495,7 +489,6 @@ class FormOutlineExpandStateIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("selectionChanged reveal mechanism")
 	class SelectionChangedReveal {
 		@Test
 		@DisplayName("expanding ancestor chain reveals a deeply nested node without affecting other branches")
@@ -549,7 +542,6 @@ class FormOutlineExpandStateIntegrationTest {
 	}
 
 	@Nested
-	@DisplayName("element equality contract (PersistContext uses equals/hashCode)")
 	class ElementEqualityPreservesState {
 		@Test
 		@DisplayName("refresh preserves state when elements have proper equals/hashCode")

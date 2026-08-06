@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.json.JSONObject;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.servoy.j2db.persistence.CSSPosition;
@@ -32,7 +31,6 @@ import com.servoy.j2db.persistence.CSSPositionUtils;
  * Unit tests for css position when snapping to a component edge.
  * @author emera
  */
-@DisplayName("SnapCSSPosition")
 class TestSnapCSSPosition
 {
 	@Test

@@ -15,7 +15,6 @@ import com.servoy.j2db.persistence.CSSPositionLayoutContainer;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.util.UUID;
 
-@DisplayName("DesignerUtil.getLayoutContainerAsString")
 class DesignerUtilGetLayoutContainerAsStringTest {
 
 	private LayoutContainer createLayoutContainer() throws Exception {
@@ -33,7 +32,6 @@ class DesignerUtilGetLayoutContainerAsStringTest {
 	}
 
 	@Nested
-	@DisplayName("basic layout container")
 	class BasicLayoutContainer {
 
 		private LayoutContainer container;
@@ -111,7 +109,6 @@ class DesignerUtilGetLayoutContainerAsStringTest {
 	}
 
 	@Nested
-	@DisplayName("CSSPositionLayoutContainer")
 	class CSSPositionContainer {
 
 		private CSSPositionLayoutContainer container;
