@@ -116,7 +116,9 @@ export class VariantsPreviewComponent implements AfterViewInit {
 
 	hidePopover() {
 		this.editorSession.variantsPopup.emit({status: 'hidden'});
-        this.variantsIFrame && (this.variantsIFrame.style.display = 'none');
+        if (this.variantsIFrame) {
+            this.variantsIFrame.style.display = 'none';
+        }
         const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
         popoverCtrl.style.top = this.popupParkingPosition;
         popoverCtrl.style.left = this.popupParkingPosition;	

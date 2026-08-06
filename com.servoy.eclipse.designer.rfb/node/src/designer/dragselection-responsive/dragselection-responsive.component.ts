@@ -6,6 +6,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'dragselection-responsive',
     templateUrl: './dragselection-responsive.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush

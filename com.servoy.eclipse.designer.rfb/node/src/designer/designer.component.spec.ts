@@ -12,7 +12,7 @@ describe('DesignerComponent', () => {
   beforeEach(() => {
     editorSession = {
       connect: vi.fn(),
-      registerCallback: new BehaviorSubject({ event: '', function: () => {} }),
+      registerCallback: new BehaviorSubject({ event: '', function: () => undefined }),
     };
     urlParser = {
       isAbsoluteFormLayout: vi.fn().mockReturnValue(true),
@@ -42,7 +42,7 @@ describe('DesignerComponent', () => {
       const nativeElement = document.createElement('div');
       (component as any).contentArea = { nativeElement };
       component.ngOnInit();
-      editorSession.registerCallback.next({ event: 'click', function: () => {} });
+      editorSession.registerCallback.next({ event: 'click', function: () => undefined });
       expect(renderer.listen).toHaveBeenCalledWith(nativeElement, 'click', expect.any(Function));
     });
 

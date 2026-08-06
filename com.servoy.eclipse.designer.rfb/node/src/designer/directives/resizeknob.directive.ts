@@ -5,6 +5,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
 import { Subscription } from 'rxjs';
 
+// eslint-disable-next-line @angular-eslint/directive-selector
 @Directive({ selector: '[resizeKnob]' })
 export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
 

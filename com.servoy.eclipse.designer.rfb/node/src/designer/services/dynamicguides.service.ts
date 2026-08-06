@@ -69,7 +69,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 				if (!this.element) this.element = contentElements.find(e => e.getAttribute('svy-id') && !e.classList.contains('svy-csspositioncontainer'))!;
 			}
 			const parent = contentElements.find(e => this.isParentContainer(e))!;
-            this.uuid = this.element?.getAttribute('svy-id')!;
+            this.uuid = this.element?.getAttribute('svy-id') ?? '';
 			const persistId = this.uuid ? PersistIdentifier.fromJSONString(this.uuid) : null;
 			const parentSvyName = parent?.getAttribute('svy-id');
 			const parentPersistId = parentSvyName ? PersistIdentifier.fromJSONString(parentSvyName) : null;
@@ -94,7 +94,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
                 this.middleV.set(id, (bounds.top + bounds.bottom) / 2);
                 this.middleH.set(id, (bounds.left + bounds.right) / 2);
 				this.types.set(id, componentType);
-				this.parents.set(id, compParent?.getAttribute('svy-id')!);
+				this.parents.set(id, compParent?.getAttribute('svy-id') ?? '');
                 if (id !== this.uuid){
 					this.rectangles.push(bounds);
 					this.uuids.push(id);
@@ -311,7 +311,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			this.element = elem;
 		}
 
-		const uuid = this.element?.getAttribute('svy-id')!;
+		const uuid = this.element?.getAttribute('svy-id') ?? '';
         let rect = this.getDraggedElementRect(point, resizing!);
 		if (!rect) {
 			this.snapDataListener.next(null);
@@ -559,7 +559,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				// e-resize: left edge is unchanged, so width is anchored to rect.left.
 				// non-resize: left has just been adjusted above, so use the (mutated) properties.left.
 				const widthAnchor = resizing ? rect.left : properties.left;
-				if (adjustSize && this.shouldSnapToSize(snapX?.uuid!, resizing!, guideX - widthAnchor, 'width')) {
+				if (adjustSize && this.shouldSnapToSize(snapX?.uuid ?? '', resizing!, guideX - widthAnchor, 'width')) {
 					properties['width'] = guideX - widthAnchor;
 				}
 			}
@@ -652,7 +652,7 @@ this.snapToEndEnabled = !event.shiftKey;
 				// s-resize: top edge is unchanged, so height is anchored to rect.top.
 				// non-resize: top has just been adjusted above, so use the (mutated) properties.top.
 				const heightAnchor = resizing ? rect.top : properties.top;
-				if (adjustSize && this.shouldSnapToSize(snapY?.uuid!, resizing!, guideY - heightAnchor, 'height')) {
+				if (adjustSize && this.shouldSnapToSize(snapY?.uuid ?? '', resizing!, guideY - heightAnchor, 'height')) {
 					properties['height'] = guideY - heightAnchor;
 				}
 			}

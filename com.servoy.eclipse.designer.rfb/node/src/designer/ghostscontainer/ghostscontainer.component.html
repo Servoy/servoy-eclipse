@@ -12,7 +12,7 @@
         [ngStyle]="ghost.style" [attr.svy-id]="ghost.uuid" [attr.svy-types]="[ghost.propertyType]" [attr.svy-ghosttype]="[ghost.type]"
         (dblclick)="openContainedForm(ghost)" (mousedown)="onMouseDown($event, ghost, container)">
         <hr [ngStyle]="ghost.hrstyle">
-        @if (draggingGhost == ghost) {
+        @if (draggingGhost === ghost) {
           <i class="fas fa-anchor"></i>
         }
         {{ghost.text}}&nbsp;

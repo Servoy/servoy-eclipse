@@ -1,5 +1,4 @@
-import { provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { importProvidersFrom } from '@angular/core';
 
 
 import { EditorSessionService } from './designer/services/editorsession.service';

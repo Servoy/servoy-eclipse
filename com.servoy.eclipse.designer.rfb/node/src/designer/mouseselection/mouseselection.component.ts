@@ -11,6 +11,7 @@ import { NgStyle } from '@angular/common';
 import { ResizeKnobDirective } from '../directives/resizeknob.directive';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'selection-decorators',
     templateUrl: './mouseselection.component.html',
     styleUrls: ['./mouseselection.component.css'],
@@ -546,6 +547,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
 }
+// eslint-disable-next-line @angular-eslint/directive-selector
 @Directive({ selector: '[positionMenu]' })
 export class PositionMenuDirective implements OnInit {
     selectionNode = input<SelectionNode>(undefined!, { alias: 'positionMenu' });

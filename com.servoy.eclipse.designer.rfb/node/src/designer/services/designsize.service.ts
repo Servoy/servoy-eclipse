@@ -76,7 +76,7 @@ export class DesignSizeService {
                 this.setSize(this.lastWidth, selection!);
             }
         );
-        this.btnCustomHeight.tooltip = 'Fixed design height',
+        this.btnCustomHeight.tooltip = 'Fixed design height';
             this.btnCustomHeight.list = [{ 'text': 'auto' }, { 'text': '480px' }, { 'text': '640px' }, { 'text': '1024px' }, { 'text': '2048px' }];
         this.btnCustomHeight.onselection = (selection) => {
             this.btnCustomHeight.onclick!(selection);

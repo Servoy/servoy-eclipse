@@ -56,7 +56,7 @@ describe('AutoscrollComponent', () => {
     it('should stop autoscroll when active and scrollTarget exists', () => {
       (component as any).scrollTarget = scrollTarget;
       (component as any).isAutoscrollActive = true;
-      (component as any).handler = setInterval(() => {}, 1000);
+      (component as any).handler = setInterval(() => undefined, 1000);
       component.onMouseLeave({} as MouseEvent);
       expect((component as any).isAutoscrollActive).toBe(false);
     });
@@ -73,7 +73,7 @@ describe('AutoscrollComponent', () => {
     it('should stop autoscroll and call scrollTarget.onMouseUp', () => {
       (component as any).scrollTarget = scrollTarget;
       (component as any).isAutoscrollActive = true;
-      (component as any).handler = setInterval(() => {}, 1000);
+      (component as any).handler = setInterval(() => undefined, 1000);
       const event = {} as MouseEvent;
       component.onMouseUp(event);
       expect((component as any).isAutoscrollActive).toBe(false);
@@ -169,7 +169,7 @@ describe('AutoscrollComponent', () => {
       (component as any).direction = 1;
       (component as any).mousePoint = { x: 100, y: 100 };
       (component as any).isAutoscrollActive = true;
-      (component as any).handler = setInterval(() => {}, 1000);
+      (component as any).handler = setInterval(() => undefined, 1000);
       component.onMouseMove({ pageX: 100, pageY: 95 } as MouseEvent);
       expect((component as any).isAutoscrollActive).toBe(false);
       vi.useRealTimers();

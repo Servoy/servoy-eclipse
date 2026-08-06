@@ -89,7 +89,7 @@ describe('EditorContentComponent', () => {
     });
 
     it('should handle auto height', () => {
-      const spy = vi.spyOn(component, 'adjustFromContentSize').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'adjustFromContentSize').mockImplementation(() => undefined);
       component.setContentSize('500px', 'auto');
       expect((component as any).contentStyle['width']).toBe('500px');
       expect(spy).toHaveBeenCalled();

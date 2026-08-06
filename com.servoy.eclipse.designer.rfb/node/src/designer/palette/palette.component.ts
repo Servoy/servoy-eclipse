@@ -109,7 +109,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.editorSession.variantsScroll.emit({ scrollPos: this.editorContentService.getPallete().scrollTop });
     }
     
-    onFavoriteCLick(event: MouseEvent, component: PaletteComp) {
+    onFavoriteCLick(event: Event, component: PaletteComp) {
         event.stopPropagation();
         this.editorSession.updateFavoritesComponents(component);
     }
@@ -594,7 +594,9 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     closeSuggestions(): void {
         if (!this.keepSuggestionsOpen) {
-            this.searchText && this.addToHistory(this.searchText);
+            if (this.searchText) {
+                this.addToHistory(this.searchText);
+            }
             this.showSuggestions = false;
         }
     }

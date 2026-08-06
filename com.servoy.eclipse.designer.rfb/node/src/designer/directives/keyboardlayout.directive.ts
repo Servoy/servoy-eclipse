@@ -4,6 +4,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from './resizeknob.directive';
 
+// eslint-disable-next-line @angular-eslint/directive-selector
 @Directive({ selector: '[keyboardlayout]' })
 export class KeyboardLayoutDirective {
 

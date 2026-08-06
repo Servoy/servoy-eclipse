@@ -1,4 +1,4 @@
-<div (click)="item()!.onclick?.()" class="toolbar-switch"> <div class="btn btn-xs ng-binding" >{{item()!.text}}</div>
+<div (click)="item()!.onclick?.()" (keydown.enter)="item()!.onclick?.()" tabindex="0" class="toolbar-switch"> <div class="btn btn-xs ng-binding" >{{item()!.text}}</div>
 	<div class="onoffswitch">
 	    <input type="checkbox" name="onoffswitch" [ngModel]="item()!.state" (ngModelChange)="item()!.state = $event" [disabled]="true" class="onoffswitch-checkbox" [id]="item()!.text">
 	    <label class="onoffswitch-label" [for]="item()!.text">

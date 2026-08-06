@@ -102,7 +102,7 @@ describe('VariantsPreviewComponent', () => {
       (component as any).variantsIFrame = { contentWindow: { document: { body } }, style: { display: '' } };
       const displayedNode = document.createElement('div');
       (component as any).variantItemBeingDisplayed = displayedNode;
-      const spy = vi.spyOn(component, 'hidePopover').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'hidePopover').mockImplementation(() => undefined);
       (component as any).onMouseMove();
       expect(body.removeChild).toHaveBeenCalled();
       expect((component as any).variantItemBeingDragged).toBeNull();
@@ -117,7 +117,7 @@ describe('VariantsPreviewComponent', () => {
 
   describe('onAreaMouseUp (arrow property)', () => {
     beforeEach(() => {
-      (component as any).onAreaMouseUp = function(_this: any, event: any) {
+      (component as any).onAreaMouseUp = (_this: any, event: any) => {
         event.stopPropagation();
       };
     });

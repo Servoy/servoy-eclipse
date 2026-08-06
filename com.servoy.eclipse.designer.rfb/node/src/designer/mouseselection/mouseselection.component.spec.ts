@@ -14,7 +14,7 @@ describe('MouseSelectionComponent', () => {
       getSelection: vi.fn().mockReturnValue([]),
       setSelection: vi.fn(),
       requestSelection: vi.fn().mockResolvedValue(undefined),
-      addSelectionChangedListener: vi.fn().mockReturnValue(() => {}),
+      addSelectionChangedListener: vi.fn().mockReturnValue(() => undefined),
       updateFieldPositioner: vi.fn(),
       executeAction: vi.fn(),
       keyPressed: vi.fn(),
@@ -92,7 +92,7 @@ describe('MouseSelectionComponent', () => {
 
   describe('selectionChanged', () => {
     it('should call createNodes when contentInit is true', () => {
-      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => {});
+      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => undefined);
       component.selectionChanged(['id1']);
       expect(spy).toHaveBeenCalledWith(['id1']);
       expect((component as any).cdr.markForCheck).toHaveBeenCalled();
@@ -100,7 +100,7 @@ describe('MouseSelectionComponent', () => {
 
     it('should not call createNodes when contentInit is false', () => {
       (component as any).contentInit = false;
-      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => {});
+      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => undefined);
       component.selectionChanged(['id1']);
       expect(spy).not.toHaveBeenCalled();
     });
@@ -108,7 +108,7 @@ describe('MouseSelectionComponent', () => {
 
   describe('contentMessageReceived', () => {
     it('should call selectionChanged on redrawDecorators message', () => {
-      const spy = vi.spyOn(component, 'selectionChanged').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'selectionChanged').mockImplementation(() => undefined);
       editorSession.getSelection.mockReturnValue(['abc']);
       component.contentMessageReceived('redrawDecorators', { property: '' });
       expect(spy).toHaveBeenCalledWith(['abc'], true);

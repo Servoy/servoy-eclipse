@@ -8,6 +8,7 @@ import { DynamicGuidesService, SnapData } from '../services/dynamicguides.servic
 import { Subscription } from 'rxjs';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'dragselection',
     templateUrl: './dragselection.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush

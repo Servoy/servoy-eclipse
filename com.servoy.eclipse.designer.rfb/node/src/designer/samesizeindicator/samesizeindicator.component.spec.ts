@@ -177,7 +177,7 @@ describe('SameSizeIndicatorComponent', () => {
   });
 });
 
-function createMockElement(left: number, top: number, width: number, height: number, inResponsive: boolean) {
+const createMockElement = (left: number, top: number, width: number, height: number, inResponsive: boolean) => {
   const parentElement = {
     closest: (selector: string) => inResponsive && selector === '.svy-responsivecontainer' ? {} : null,
     classList: { contains: () => false },

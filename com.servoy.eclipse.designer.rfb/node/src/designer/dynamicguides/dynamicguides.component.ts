@@ -6,6 +6,7 @@ import { DynamicGuidesService, Guide, SnapData } from '../services/dynamicguides
 import { Subscription } from 'rxjs';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'dynamic-guides',
     templateUrl: './dynamicguides.component.html',
     styleUrls: ['./dynamicguides.component.css'],
