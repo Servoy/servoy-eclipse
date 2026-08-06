@@ -1,8 +1,8 @@
-import { Directive, HostListener } from "@angular/core";
-import { EditorSessionService } from "../services/editorsession.service";
+import { Directive, HostListener, inject } from '@angular/core';
+import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
-import { URLParserService } from "../services/urlparser.service";
-import { ElementInfo } from "./resizeknob.directive";
+import { URLParserService } from '../services/urlparser.service';
+import { ElementInfo } from './resizeknob.directive';
 
 @Directive({
     selector: '[keyboardlayout]',
@@ -13,7 +13,9 @@ export class KeyboardLayoutDirective {
     isSendChanges = true;
     boundsUpdating = false;
 
-    constructor(private editorSession: EditorSessionService, private urlParser: URLParserService, private editorContentService : EditorContentService) {}
+    private editorSession = inject(EditorSessionService);
+    private urlParser = inject(URLParserService);
+    private editorContentService = inject(EditorContentService);
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
@@ -78,8 +80,7 @@ export class KeyboardLayoutDirective {
 				// if (selection.length > 0)
 				// 	highlightDiv.style.display = 'none';
 
-                for (let i = 0; i < selection.length; i++) {
-					const node = selection[i];
+                for (const node of selection) {
                     let element = this.editorContentService.getContentElement(node);
                     while(element && !element.classList.contains('svy-wrapper')) {
                         element = element.parentElement!;
@@ -126,8 +127,7 @@ export class KeyboardLayoutDirective {
 								}
 							}
 						}
-                    }
-                    else if (!isResize) {
+                    } else if (!isResize) {
 						// var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 						// editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
 
@@ -153,8 +153,7 @@ export class KeyboardLayoutDirective {
 		    // highlightDiv.style.display = 'none';
             // selection = utils.addGhostsToSelection(selection);
 
-            for (var i = 0; i < selection.length; i++) {
-                const node = selection[i];
+            for (const node of selection) {
                 let element = this.editorContentService.getContentElement(node);
                 while(element && !element.classList.contains('svy-wrapper')) {
                     element = element.parentElement!;

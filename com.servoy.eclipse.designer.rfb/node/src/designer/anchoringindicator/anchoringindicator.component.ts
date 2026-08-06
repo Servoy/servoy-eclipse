@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
@@ -27,7 +27,11 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     editorStateSubscription!: Subscription;
     indicator!: SameSizeIndicator | null;
     
-    constructor(protected readonly editorSession: EditorSessionService, protected editorContentService: EditorContentService, protected urlParser: URLParserService,) {
+    protected readonly editorSession = inject(EditorSessionService);
+    protected editorContentService = inject(EditorContentService);
+    protected urlParser = inject(URLParserService);
+
+    constructor() {
         this.editorSession.addSelectionChangedListener(this);
         this.editorContentService.addContentMessageListener(this);
     }
@@ -41,8 +45,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
             if (id == 'dragging'){
                 if (this.editorSession.getState().dragging){
                     this.indicator = null;
-                }
-                else{
+                } else{
                     this.selectionChanged(this.editorSession.getSelection());
                 }
             }
@@ -60,7 +63,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
         }
     }
 
-    selectionChanged(selection: Array<string>): void {
+    selectionChanged(selection: string[]): void {
         this.indicator = null;
         if (this.anchoringIndicator && selection && selection.length == 1) {
             this.editorContentService.executeOnlyAfterInit(() => {
@@ -74,33 +77,24 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                         const selectionAnchor = parseInt(element.getAttribute('svy-anchors')!);
                         if (selectionAnchor == 0 || selectionAnchor == 9) {
                             image = this.TOP_LEFT_IMAGE;
-                        }
-                        else if (selectionAnchor == 3) {
+                        } else if (selectionAnchor == 3) {
                             image = this.TOP_RIGHT_IMAGE;
-                        }
-                        else if (selectionAnchor == 12) {
+                        } else if (selectionAnchor == 12) {
                             image = this.BOTTOM_LEFT_IMAGE;
-                        }
-                        else if (selectionAnchor == 6) {
+                        } else if (selectionAnchor == 6) {
                             image = this.BOTTOM_RIGHT_IMAGE;
-                        }
-                        else if (selectionAnchor == 14) {
+                        } else if (selectionAnchor == 14) {
                             image = this.BOTTOM_RIGHT_LEFT_IMAGE;
-                        }
-                        else if (selectionAnchor == 11) {
+                        } else if (selectionAnchor == 11) {
                             image = this.TOP_RIGHT_LEFT_IMAGE;
-                        }
-                        else if (selectionAnchor == 13) {
+                        } else if (selectionAnchor == 13) {
                             image = this.TOP_LEFT_BOTTOM_IMAGE;
-                        }
-                        else if (selectionAnchor == 7) {
+                        } else if (selectionAnchor == 7) {
                             image = this.TOP_RIGHT_BOTTOM_IMAGE;
-                        }
-                        else if (selectionAnchor == 15) {
+                        } else if (selectionAnchor == 15) {
                             image = this.TOP_RIGHT_LEFT_BOTTOM_IMAGE;
                         }
-                    }
-                    else {
+                    } else {
                         const wrapper: HTMLDivElement = element.closest('.svy-wrapper')!;
                         if (element.classList.contains('svy-formcomponent')) {
 							wrapperRect = wrapper.getBoundingClientRect();
@@ -110,39 +104,31 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                                 if (wrapper.style.bottom) {
                                     if (wrapper.style.right) {
                                         image = this.TOP_RIGHT_LEFT_BOTTOM_IMAGE;
-                                    }
-                                    else {
+                                    } else {
                                         image = this.TOP_LEFT_BOTTOM_IMAGE;
                                     }
-                                }
-                                else {
+                                } else {
                                     if (wrapper.style.right) {
                                         image = this.TOP_RIGHT_LEFT_IMAGE;
-                                    }
-                                    else {
+                                    } else {
                                         image = this.TOP_LEFT_IMAGE;
                                     }
                                 }
-                            }
-                            else {
+                            } else {
                                 if (wrapper.style.bottom) {
                                     image = this.TOP_RIGHT_BOTTOM_IMAGE;
-                                }
-                                else {
+                                } else {
                                     image = this.TOP_RIGHT_IMAGE;
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             if (wrapper.style.left) {
                                 if (wrapper.style.right) {
                                     image = this.BOTTOM_RIGHT_LEFT_IMAGE;
-                                }
-                                else {
+                                } else {
                                     image = this.BOTTOM_LEFT_IMAGE;
                                 }
-                            }
-                            else {
+                            } else {
                                 image = this.BOTTOM_RIGHT_IMAGE;
                             }
                         }

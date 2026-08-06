@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 
@@ -188,17 +189,17 @@ describe('JSONObjectConverter', () => {
         let tab = val as Tab;
 
         expect(tab).toBeDefined();
-        expect(tab.name).toBe('test', 'name should be test');
-        expect(tab.myvalue).toBe('test', 'myvalue should be test');
+        expect(tab.name).toBe('test');
+        expect(tab.myvalue).toBe('test');
 
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
 
         tab = converterService.convertFromServerToClient({ u: [{ k: 'myvalue', v: 'test2' }], vEr: 1 } as ICOTGranularUpdatesFromServer,
                oneTabType , tab, undefined as any, undefined as any, getParentPropertyContext(oneTabPushToServer)) as Tab;
         tabAsSeenInternally = val as IChangeAwareValue;
 
-        expect(tab.myvalue).toBe('test2', 'myvalue should be test2');
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tab.myvalue).toBe('test2');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
     });
 
     it('object created and changed from client side', () => {
@@ -223,11 +224,11 @@ describe('JSONObjectConverter', () => {
 
         tab.rejectString = 'changedMyself';
         checkNotifiedAndTriggeredAndClear(false, false); // (REJECT pushToServer on subProp) not marked by obj proxy that it has change by ref, and not triggered to be sent automatically
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes because of REJECT pushToServer');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
 
         tab.name = 'test2';
         checkNotifiedAndTriggeredAndClear(true, false); // (ALLOW pushToServer on subProp) marked by obj proxy that it has change by ref, and not triggered to be sent automatically
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes even if they are not sent unless manually triggered, because of ALLOW pushToServer');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true);
 
         tab.myvalue = 'test';
         checkNotifiedAndTriggeredAndClear(false, false); // value did not change!
@@ -237,19 +238,19 @@ describe('JSONObjectConverter', () => {
 
         const changes: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(tab, oneTabType, val,
             getParentPropertyContext(oneTabPushToServer))[0];
-        expect(changes).toBeDefined('change object should be generated');
+        expect(changes).toBeDefined();
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object  shoulld have updates');
-        expect(changes.u.length).toBe(2, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(2);
         expect(changes.u[0].k).toBe('name');
         expect(changes.u[0].v).toBe('test2');
         expect(changes.u[1].k).toBe('myvalue');
         expect(changes.u[1].v).toBe('test2');
 
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
 
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(tab, oneTabType, val, getParentPropertyContext(oneTabPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     });
 
     it( 'send obj as arg to handler, change a subprop by ref', () => {
@@ -269,8 +270,8 @@ describe('JSONObjectConverter', () => {
         
         tab = changesAndVal[1];
         
-        expect(changes.vEr).toBe(0, 'full value being sent to server');
-        expect(changes.v).toBeDefined('change object should have a value');
+        expect(changes.vEr).toBe(0);
+        expect(changes.v).toBeDefined();
         expect(changes.v.name).toBe('test');
         expect(changes.v.myvalue).toBe('test');
 
@@ -280,10 +281,10 @@ describe('JSONObjectConverter', () => {
 
         const changes2: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(tab, oneTabType, tab,
             getParentPropertyContext(oneTabPushToServer))[0];
-        expect( changes2.vEr ).toBe( 1, 'checking version for element update' );
-        expect( changes2.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( changes2.u[0].k ).toBe( 'myvalue', 'checking that it is the correct key' );
-        expect( changes2.u[0].v ).toBe( 'test4', 'checking that it is the correct value');
+        expect( changes2.vEr ).toBe( 1);
+        expect( changes2.u.length ).toBe( 1);
+        expect( changes2.u[0].k ).toBe( 'myvalue');
+        expect( changes2.u[0].v ).toBe( 'test4');
     } );
 
     it( 'send obj from model (with push to server reject) as arg to handler', () => {
@@ -303,8 +304,8 @@ describe('JSONObjectConverter', () => {
         
         valCoT = changesAndVal[1];
         
-        expect(changes.vEr).toBe(0, 'full value being sent to server');
-        expect(changes.v).toBeDefined('change object should have a value');
+        expect(changes.vEr).toBe(0);
+        expect(changes.v).toBeDefined();
         expect(changes.v.sa007).toBe('test');
 
         valCoT.sa007 = 'test4';
@@ -314,7 +315,7 @@ describe('JSONObjectConverter', () => {
         // inside the model it is push to server reject
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(valCoT, untypedObjectWithREJECTOnSubpropType, valCoT,
             getParentPropertyContext(untypedObjectWithREJECTOnSubpropPushToServer))[0];
-        expect( changes2.n ).toBeTrue();
+        expect( changes2.n ).toBe(true);
     } );
 
     it( 'change subprop. by ref but do not send to server (so it still has changes to send for the model property), then send obj as arg to handler, change another tab by ref; both tabs changed by ref in the model should be then sent to server', () => {
@@ -352,35 +353,35 @@ describe('JSONObjectConverter', () => {
         tabHolder = changesAndVal[1];
         
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object should have updates' );
+        expect( changes.v ).toBeDefined();
         let fullTabChange: ICOTFullObjectToServer = changes.v.tab;
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test', 'tab should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test', 'tab should be test1' );
+        expect( fullTabChange.v.name ).toBe( 'test');
+        expect( fullTabChange.v.myvalue ).toBe( 'test');
         let fullTabArrayChange: ICATFullArrayToServer = changes.v.tabs;
         expect( fullTabArrayChange.vEr ).toBe( 0 );
-        expect( fullTabArrayChange.v.length ).toBe( 1, 'should have only one Tab' );
+        expect( fullTabArrayChange.v.length ).toBe( 1);
         fullTabChange = fullTabArrayChange.v[0];
-        expect( fullTabChange.vEr ).toBe( 0, 'initial ver' );
-        expect( fullTabChange.v.name ).toBe( 'test11', 'should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test11', 'should be test1' );
+        expect( fullTabChange.vEr ).toBe( 0);
+        expect( fullTabChange.v.name ).toBe( 'test11');
+        expect( fullTabChange.v.myvalue ).toBe( 'test11');
 
         // ok, see if it kept track of the changes for model prop value.
         const changes2: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder,
             getParentPropertyContext(tabHolderPushToServer))[0];
-        expect( changes2.vEr ).toBe(1, 'checking initial version for full model update' );
-        expect( changes2.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( changes2.u[0].k).toBe( 'tabs', 'checking that it is tabs array' );
+        expect( changes2.vEr ).toBe(1);
+        expect( changes2.u.length ).toBe( 1);
+        expect( changes2.u[0].k).toBe( 'tabs');
         const partialTabChange: ICATGranularUpdatesToServer = changes2.u[0].v;
         expect( partialTabChange.vEr ).toBe( 1 );
-        expect( partialTabChange.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( partialTabChange.u[0].i ).toBe( 0, 'checking that it is first el' );
+        expect( partialTabChange.u.length ).toBe( 1);
+        expect( partialTabChange.u[0].i ).toBe( 0);
 
         fullTabChange = partialTabChange.u[0].v;
         
-        expect( fullTabChange.vEr ).toBe( 0, 'full send due to change by ref' );
-        expect( fullTabChange.v.name ).toBe( 'test11', 'full send' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test11', 'full send' );
+        expect( fullTabChange.vEr ).toBe( 0);
+        expect( fullTabChange.v.name ).toBe( 'test11');
+        expect( fullTabChange.v.myvalue ).toBe( 'test11');
     } );
 
     it( 'send obj as arg to handler, change a array subprop\'s element', () => {
@@ -411,18 +412,18 @@ describe('JSONObjectConverter', () => {
         tabHolder = changesAndVal[1];
         
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object should have updates' );
+        expect( changes.v ).toBeDefined();
         let fullTabChange: ICOTFullObjectToServer = changes.v.tab;
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test', 'tab should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test', 'tab should be test1' );
+        expect( fullTabChange.v.name ).toBe( 'test');
+        expect( fullTabChange.v.myvalue ).toBe( 'test');
         let fullTabArrayChange: ICATFullArrayToServer = changes.v.tabs;
         expect( fullTabArrayChange.vEr ).toBe( 0 );
-        expect( fullTabArrayChange.v.length ).toBe( 1, 'should have only one Tab' );
+        expect( fullTabArrayChange.v.length ).toBe( 1);
         fullTabChange = fullTabArrayChange.v[0];
-        expect( fullTabChange.vEr ).toBe( 0, 'initial ver' );
-        expect( fullTabChange.v.name ).toBe( 'test1', 'should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test1', 'should be test1' );
+        expect( fullTabChange.vEr ).toBe( 0);
+        expect( fullTabChange.v.name ).toBe( 'test1');
+        expect( fullTabChange.v.myvalue ).toBe( 'test1');
 
         tabElement = new Tab();
         tabElement.name = 'test11';
@@ -434,19 +435,19 @@ describe('JSONObjectConverter', () => {
 
         const changes2: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder,
             getParentPropertyContext(tabHolderPushToServer))[0];
-        expect( changes2.vEr ).toBe( 1, 'checking version for element update' );
-        expect( changes2.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( changes2.u[0].k).toBe( 'tabs', 'checking that it is tabs array' );
+        expect( changes2.vEr ).toBe( 1);
+        expect( changes2.u.length ).toBe( 1);
+        expect( changes2.u[0].k).toBe( 'tabs');
         const partialTabChange: ICATGranularUpdatesToServer = changes2.u[0].v;
         expect( partialTabChange.vEr ).toBe( 1 );
-        expect( partialTabChange.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( partialTabChange.u[0].i ).toBe( 0, 'checking that it is first el' );
+        expect( partialTabChange.u.length ).toBe( 1);
+        expect( partialTabChange.u[0].i ).toBe( 0);
 
         fullTabChange = partialTabChange.u[0].v;
         
-        expect( fullTabChange.vEr ).toBe( 0, 'full send due to change by ref' );
-        expect( fullTabChange.v.name ).toBe( 'test11', 'full send' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test11', 'full send' );
+        expect( fullTabChange.vEr ).toBe( 0);
+        expect( fullTabChange.v.name ).toBe( 'test11');
+        expect( fullTabChange.v.myvalue ).toBe( 'test11');
     } );
 
     it('create object in scripting', () => {
@@ -456,9 +457,9 @@ describe('JSONObjectConverter', () => {
         tab.rejectString = 'thisWillNotBeSentToServer';
 
         const changes: [ICOTFullObjectToServer, any] = converterService.convertFromClientToServer(tab, oneTabType, undefined, getParentPropertyContext(oneTabPushToServer));
-        expect(changes[0]).toBeDefined('change object should be generated');
-        expect(changes[0].vEr).toBe(0, 'new full value being sent to server');
-        expect(changes[0].v).toBeDefined('change object  shoulld have a value');
+        expect(changes[0]).toBeDefined();
+        expect(changes[0].vEr).toBe(0);
+        expect(changes[0].v).toBeDefined();
         expect(changes[0].v.name).toBe('test');
         expect(changes[0].v.myvalue).toBe('test2');
         
@@ -466,7 +467,7 @@ describe('JSONObjectConverter', () => {
 
         tabAsChangeAwareValue.getInternalState().setChangeListener(() => {});
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(tab, oneTabType, tab, getParentPropertyContext(oneTabPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     });
 
     it('nested object created in scripting', () => {
@@ -496,17 +497,17 @@ describe('JSONObjectConverter', () => {
         };
 
         let changes: ICOTFullObjectToServer = sendToServerResult[0];
-        expect(changes.v).toBeDefined('change object should have a value');
+        expect(changes.v).toBeDefined();
         expect(changes.v.id).toBe('test');
         expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).contentVersion)
-            .toBe(1, 'it has been sent to server/reset, it should have version 1 to be in sync with server now'); // it used to be NaN at some point
+            .toBe(1); // it used to be NaN at some point
 
         const tab2Changes: ICOTFullObjectToServer = changes.v.tab2;
         expect(tab2Changes.v).toBeDefined();
         expect(tab2Changes.v.name).toBe('test');
         expect(tab2Changes.v.myvalue).toBe('test');
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
-        expect(((tabHolder.tab2 as any) as IChangeAwareValue).getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect(((tabHolder.tab2 as any) as IChangeAwareValue).getInternalState().hasChanges()).toBe(false);
 
         tabHolder.clientSideOnlyTab.name = 'test2';
         checkNotifiedAndTriggeredAndClear(false, false); // (REJECT pushToServer on subProp) not marked by obj proxy that it has change by ref, and not triggered to be sent automatically
@@ -517,10 +518,10 @@ describe('JSONObjectConverter', () => {
 
         let changesGranular: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer))[0];
 
-        expect(changesGranular.u).toBeDefined('change object should have an update');
+        expect(changesGranular.u).toBeDefined();
         expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).contentVersion)
-            .toBe(1, 'update sent, version remains the same');
-        expect(changesGranular.u.length).toBe(1, 'only myvalue subprop can be sent to server and is changed');
+            .toBe(1);
+        expect(changesGranular.u.length).toBe(1);
         expect(changesGranular.u[0].k).toBe('tab2');
         expect(changesGranular.u[0].v.vEr).toBe(1);
         expect(changesGranular.u[0].v.u.length).toBe(2);
@@ -530,7 +531,7 @@ describe('JSONObjectConverter', () => {
         expect(changesGranular.u[0].v.u[1].v).toBe('test2');
 
         let changesNoOp: ICOTNoOpToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer))[0] as ICOTNoOpToServer;
-        expect(changesNoOp.n).toBe(true, 'should have no changes now');
+        expect(changesNoOp.n).toBe(true);
 
         const oldTabHolder = tabHolder;
         const oldTab2 = tabHolder.tab2;
@@ -550,9 +551,9 @@ describe('JSONObjectConverter', () => {
                 } as ICOTGranularUpdatesFromServer,
                tabHolderType , tabHolder, undefined as any, undefined as any, getParentPropertyContext(tabHolderPushToServer)) as TabHolder;
         tabHolderSeenInternally = (tabHolder as any) as IChangeAwareValue;
-        expect(tabHolder).toBe(oldTabHolder, 'Reference should not be changed; it is a granular update');
-        expect(tabHolder.tab2).toBe(oldTab2, 'Reference should not be changed; it is a granular update');
-        expect(tabHolder.tab2.name).toBe('ZelePuti', 'Granular update should have changed name in tab2');
+        expect(tabHolder).toBe(oldTabHolder);
+        expect(tabHolder.tab2).toBe(oldTab2);
+        expect(tabHolder.tab2.name).toBe('ZelePuti');
 
         // now add another child and see that sending it and getting it back works ok (it will go through another branch if the new obj. does not have child objs)
         tabHolder.tab3 = new Tab();
@@ -560,28 +561,28 @@ describe('JSONObjectConverter', () => {
         tabHolder.tab3.myvalue = 'test';
 
         const oldTab3 = tabHolder.tab3;
-        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'should not be completely changed');
+        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
         sendToServerResult = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer));
         changesGranular = sendToServerResult[0];
         tabHolder = sendToServerResult[1];
-        expect(tabHolder).toBe(oldTabHolder, 'Reference should not be changed; it is not a new value and it was already proxied...');
-        expect(tabHolder.tab3).not.toBe(oldTab3, 'Reference should be changed because the proxy was added; this is not a wanted thing, but it is needed');
-        expect(tabHolder.tab3.name).toBe('test', 'proxy should not affect subprop. values');
-        expect(tabHolder.tab3.myvalue).toBe('test', 'proxy should not affect subprop. values');
+        expect(tabHolder).toBe(oldTabHolder);
+        expect(tabHolder.tab3).not.toBe(oldTab3);
+        expect(tabHolder.tab3.name).toBe('test');
+        expect(tabHolder.tab3.myvalue).toBe('test');
 
-        expect(changesGranular.u).toBeDefined('should have updates');
+        expect(changesGranular.u).toBeDefined();
         expect(changesGranular.u[0].k).toBe('tab3');
         changes = changesGranular.u[0].v as ICOTFullObjectToServer;
         expect(changes).toBeDefined();
         expect(changes.v).toBeDefined();
         expect(changes.v.name).toBe('test');
         expect(changes.v.myvalue).toBe('test');
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false);
         const tab3SeenInternally = (tabHolder.tab3 as any) as IChangeAwareValue;
-        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false);
 
         changesNoOp = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer))[0];
-        expect(changesNoOp.n).toBe(true, 'should have no changes now');
+        expect(changesNoOp.n).toBe(true);
     });
 
     it('nested objects - if somehow marked as allchanged == true should send full values in-depth', () => {
@@ -595,12 +596,12 @@ describe('JSONObjectConverter', () => {
         tabHolder = sendToServerResult[1]; // it has been converted into a Proxy of original object
         let tabHolderSeenInternally = sendToServerResult[1] as IChangeAwareValue;
 
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false, 'it should have no more outgoing changes');
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false);
 
         // now make only one prop. change in nested tab
         tabHolder.tab.myvalue = 'test1';
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(true, 'we just changed myvalue');
-        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'we just changed myvalue, not the whole thing');
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(true);
+        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
 
         // simulate that it should be sent fully
         tabHolderSeenInternally.getInternalState().markAllChanged(false); // could be set at runtime for example by a parent custom object or custom array type when that one wants to be sent fully
@@ -611,17 +612,17 @@ describe('JSONObjectConverter', () => {
         const fullChanges = sendToServerResult1[0] as ICOTFullObjectToServer;
 
         // check that both tabHolder and tab are fully sent (so for tab we don't send just the change to myvalue)
-        expect(fullChanges.v).toBeDefined('it should send full value to server');
+        expect(fullChanges.v).toBeDefined();
         expect(fullChanges.v.id).toBe('test');
         const fullTabChanges: ICOTFullObjectToServer = fullChanges.v.tab;
         expect(fullTabChanges.v).toBeDefined();
         expect(fullTabChanges.v.name).toBe('test');
         expect(fullTabChanges.v.myvalue).toBe('test1');
         const tabHholderTabAsSeenInternally = (tabHolder.tab as any) as IChangeAwareValue;
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
-        expect(tabHholderTabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
-        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'should not have changes');
-        expect((tabHholderTabAsSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'should not have changes');
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect(tabHholderTabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
+        expect((tabHholderTabAsSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
     });
 
     it('nested object from server', () => {
@@ -633,26 +634,26 @@ describe('JSONObjectConverter', () => {
         tabHolderAsSeenInternally.getInternalState().setChangeListener(() => {});
         const tab2AsSeenInternally = (tabHolder.tab2 as any) as IChangeAwareValue;
 
-        expect(tabHolderAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
-        expect(tab2AsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
-        expect((tabHolderAsSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'should not have changes');
-        expect((tab2AsSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'should not have changes');
+        expect(tabHolderAsSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect(tab2AsSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect((tabHolderAsSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
+        expect((tab2AsSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
 
         tabHolder.tab2.name = 'test2';
-        expect(tabHolderAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should not have changes'); // knows it has changes but will not push directly to server
+        expect(tabHolderAsSeenInternally.getInternalState().hasChanges()).toBe(true); // knows it has changes but will not push directly to server
         tabHolder.tab2.myvalue = 'test2';
-        expect(tabHolderAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes');
+        expect(tabHolderAsSeenInternally.getInternalState().hasChanges()).toBe(true);
 
         const sendToServerResult = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer));
         const changesGranular: ICOTGranularUpdatesToServer = sendToServerResult[0];
-        expect(sendToServerResult[1]).toBe(tabHolder, 'it was already proxied when comming from server, the ref should remain the same here');
-        expect(changesGranular.u).toBeDefined('change object  should have an update value');
-        expect(changesGranular.u.length).toBe(1, 'should have 1 update');
+        expect(sendToServerResult[1]).toBe(tabHolder);
+        expect(changesGranular.u).toBeDefined();
+        expect(changesGranular.u.length).toBe(1);
         const granularUpdateOp = changesGranular.u[0] as ICOTGranularOpToServer;
         expect(granularUpdateOp.k).toBe('tab2');
         const granularTabUpdate = granularUpdateOp.v as ICOTGranularUpdatesToServer;
-        expect(granularTabUpdate.u).toBeDefined('change object  should have an update value');
-        expect(granularTabUpdate.u.length).toBe(2, 'should have 1 update');
+        expect(granularTabUpdate.u).toBeDefined();
+        expect(granularTabUpdate.u.length).toBe(2);
 
         expect(granularTabUpdate.u[0].k).toBe('name');
         expect(granularTabUpdate.u[0].v).toBe('test2');
@@ -678,12 +679,12 @@ describe('JSONObjectConverter', () => {
         const tab2SeenInternally = (tabHolder.tab2 as any) as IChangeAwareValue;
         let tab3SeenInternally = (tabHolder.tab3 as any) as IChangeAwareValue;
 
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false, 'it should have no more outgoing changes');
-        expect(tab2SeenInternally.getInternalState().hasChanges()).toBe(false, 'no change expected');
-        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false, 'no change expected');
-        expect((tab2SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'no change expected');
-        expect((tab3SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'no change expected');
-        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'no change expected');
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect(tab2SeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect((tab2SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
+        expect((tab3SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
+        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
 
         // simulate that tab3 gets the value of tab2 (so tab3's value is no longer used)
         const obsoleteTab3 = tabHolder.tab3;
@@ -692,30 +693,30 @@ describe('JSONObjectConverter', () => {
         const jsonToServer: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder, getParentPropertyContext(tabHolderPushToServer))[0];
 
         // check that both tabHolder and tab are fully sent (so for tab we don't send just the change to myvalue)
-        expect(jsonToServer.u).toBeDefined('change object  should have an update value');
-        expect(jsonToServer.u.length).toBe(2, 'should have 2 updates');
+        expect(jsonToServer.u).toBeDefined();
+        expect(jsonToServer.u.length).toBe(2);
         expect(jsonToServer.u[0].k).toBe('tab3');
         const fullTabToServer = jsonToServer.u[0].v as ICOTFullObjectToServer;
-        expect(fullTabToServer.v).toBeDefined('should send full value as it changed by ref');
-        expect(fullTabToServer.v.name).toBe('tab2Name', 'should have old tab2\'s name');
-        expect(fullTabToServer.v.myvalue).toBe('tab2MyValue', 'should have old tab2\'s myValue');
+        expect(fullTabToServer.v).toBeDefined();
+        expect(fullTabToServer.v.name).toBe('tab2Name');
+        expect(fullTabToServer.v.myvalue).toBe('tab2MyValue');
         expect(jsonToServer.u[1].k).toBe('tab2');
-        expect(jsonToServer.u[1].v).toBeNull('tab2 was set to null');
+        expect(jsonToServer.u[1].v).toBeNull();
 
         tab3SeenInternally = (tabHolder.tab3 as any) as IChangeAwareValue;
 
-        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false, 'no change expected');
-        expect((tab3SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'no change expected');
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false, 'no change expected');
-        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'no change expected');
+        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect((tab3SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
 
         // changing something in old tab3'v value should not trigger any changes as that value is no longer used
         obsoleteTab3.myvalue = 'aha';
 
-        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false, 'no change expected');
-        expect((tab3SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'no change expected');
-        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false, 'no change expected');
-        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false, 'no change expected');
+        expect(tab3SeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect((tab3SeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
+        expect(tabHolderSeenInternally.getInternalState().hasChanges()).toBe(false);
+        expect((tabHolderSeenInternally.getInternalState() as BaseCustomObjectState<string, any>).hasFullyChanged()).toBe(false);
     });
 
     it( 'test deep change in a custom object\'s "object" subprop. with various PTS pe subprop', () => {
@@ -726,13 +727,13 @@ describe('JSONObjectConverter', () => {
 //        { rejectSubprop: subProp(), allowSubprop: subProp(), shallowSubprop: subProp(), deepSubprop: subProp() }
 
         expect(val.rejectSubprop.x[1]).toBeInstanceOf(Date); // x should be a Date sent over via default/'object' conversions
-        expect(val.rejectSubprop.y).toBe(8, 'simple number in nested \'object\' not received correctly');
+        expect(val.rejectSubprop.y).toBe(8);
         expect(val.allowSubprop.x[1]).toBeInstanceOf(Date); // x should be a Date sent over via default/'object' conversions
-        expect(val.allowSubprop.y).toBe(8, 'simple number in nested \'object\' not received correctly');
+        expect(val.allowSubprop.y).toBe(8);
         expect(val.shallowSubprop.x[1]).toBeInstanceOf(Date); // x should be a Date sent over via default/'object' conversions
-        expect(val.shallowSubprop.y).toBe(8, 'simple number in nested \'object\' not received correctly');
+        expect(val.shallowSubprop.y).toBe(8);
         expect(val.deepSubprop.x[1]).toBeInstanceOf(Date); // x should be a Date sent over via default/'object' conversions
-        expect(val.deepSubprop.y).toBe(8, 'simple number in nested \'object\' not received correctly');
+        expect(val.deepSubprop.y).toBe(8);
 
         const valSeenInternally = (val as any) as IChangeAwareValue;
 
@@ -755,7 +756,7 @@ describe('JSONObjectConverter', () => {
 
         let changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectALLOWWithVariousSubpropPTSType, val,
             getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         val.allowSubprop = 'changedByRefOnALLOWPTS';
         checkNotifiedAndTriggeredAndClear(true, false); // marked by object proxy that it has change by ref, but not triggered automatically as it is ALLOW pushToServer on subprop
@@ -764,8 +765,8 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('allowSubprop');
         expect(changes.u[0].v).toBe('changedByRefOnALLOWPTS');
 
@@ -773,7 +774,7 @@ describe('JSONObjectConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped object; we do not automatically detect those
         changes2 = converterService.convertFromClientToServer(val, untypedObjectALLOWWithVariousSubpropPTSType, val,
             getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         val.markSubPropertyAsHavingDeepChanges!('shallowSubprop');
         checkNotifiedAndTriggeredAndClear(true, false); // DEEP change in element that was marked manually; but as it is SHALLOW it does no send it right away to server
@@ -781,16 +782,16 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('shallowSubprop');
-        expect(changes.u[0].v.y).toBe(15, 'deep change happened here');
+        expect(changes.u[0].v.y).toBe(15);
 
         val.deepSubprop.y = 55;
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped object; we do not automatically detect those
         changes2 = converterService.convertFromClientToServer(val, untypedObjectALLOWWithVariousSubpropPTSType, val,
             getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         val.markSubPropertyAsHavingDeepChanges!('deepSubprop');
         checkNotifiedAndTriggeredAndClear(true, true); // DEEP change in element that was marked manually; but as it is DEEP it does also send it right away to server
@@ -798,14 +799,14 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('deepSubprop');
-        expect(changes.u[0].v.y).toBe(55, 'deep change happened here');
+        expect(changes.u[0].v.y).toBe(55);
 
         changes2 = converterService.convertFromClientToServer(val, untypedObjectALLOWWithVariousSubpropPTSType, val,
             getParentPropertyContext(untypedObjectALLOWWithVariousSubpropPTSPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
     it( 'test deep change in a custom object with REJECT "object" subprops', () => {
@@ -845,7 +846,7 @@ describe('JSONObjectConverter', () => {
 
         let changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectWithREJECTOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithREJECTOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         val.b.a = false;
         checkNotifiedAndTriggeredAndClear(false, false); // no array proxy; it is REJECT; so it doesn't care about changes
@@ -854,7 +855,7 @@ describe('JSONObjectConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // it should be ignored; it is REJECT; so it doesn't care about changes
         changes2 = converterService.convertFromClientToServer(val, untypedObjectWithREJECTOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithREJECTOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
     it( 'test deep change in a custom object with ALLOW "object" subprops', () => {
@@ -883,8 +884,8 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectWithALLOWOnSubpropPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('a');
         expect(changes.u[0].v).toBe('changedByRef');
 
@@ -893,7 +894,7 @@ describe('JSONObjectConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped object; we do not automatically detect those
         let changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectWithALLOWOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithALLOWOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         val.markSubPropertyAsHavingDeepChanges!('b');
         checkNotifiedAndTriggeredAndClear(true, false); // DEEP change in element that was marked manually; but as it is ALLOW it does no send it right away to server
@@ -901,16 +902,16 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectWithALLOWOnSubpropPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('b');
-        expect(changes.u[0].v.a).toBe(false, 'should be changed');
-        expect(changes.u[0].v.test2).toBe(1, 'should be unchanged');
+        expect(changes.u[0].v.a).toBe(false);
+        expect(changes.u[0].v.test2).toBe(1);
 
 
         changes2 = converterService.convertFromClientToServer(val, untypedObjectWithALLOWOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithALLOWOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
 
@@ -940,8 +941,8 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectWithSHALLOWOnSubpropPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('a');
         expect(changes.u[0].v).toBe('changedByRef');
 
@@ -950,7 +951,7 @@ describe('JSONObjectConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped object; we do not automatically detect those
         let changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectWithSHALLOWOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithSHALLOWOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         val.markSubPropertyAsHavingDeepChanges!('b');
         checkNotifiedAndTriggeredAndClear(true, false); // DEEP change in element that was marked manually; but as it is SHALLOW it does no send it right away to server
@@ -958,16 +959,16 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectWithSHALLOWOnSubpropPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('b');
-        expect(changes.u[0].v.a).toBe(false, 'should be changed');
-        expect(changes.u[0].v.test2).toBe(1, 'should be unchanged');
+        expect(changes.u[0].v.a).toBe(false);
+        expect(changes.u[0].v.test2).toBe(1);
 
 
         changes2 = converterService.convertFromClientToServer(val, untypedObjectWithSHALLOWOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithSHALLOWOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
     it( 'test deep change in a custom object with DEEP "object" subprops', () => {
@@ -996,8 +997,8 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectWithDEEPOnSubpropPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('a');
         expect(changes.u[0].v).toBe('changedByRef');
 
@@ -1006,7 +1007,7 @@ describe('JSONObjectConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped object; we do not automatically detect those
         let changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectWithDEEPOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithDEEPOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         val.markSubPropertyAsHavingDeepChanges!('b');
         checkNotifiedAndTriggeredAndClear(true, true); // DEEP change in element that was marked manually; but as it is DEEP it does send it right away to server
@@ -1014,16 +1015,16 @@ describe('JSONObjectConverter', () => {
             getParentPropertyContext(untypedObjectWithDEEPOnSubpropPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].k).toBe('b');
-        expect(changes.u[0].v.a).toBe(false, 'should be changed');
-        expect(changes.u[0].v.test2).toBe(1, 'should be unchanged');
+        expect(changes.u[0].v.a).toBe(false);
+        expect(changes.u[0].v.test2).toBe(1);
 
 
         changes2 = converterService.convertFromClientToServer(val, untypedObjectWithDEEPOnSubpropType, val,
             getParentPropertyContext(untypedObjectWithDEEPOnSubpropPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
     it('legacy TabDeprecated created from server with correct instance, with old api available', () => {
@@ -1036,24 +1037,24 @@ describe('JSONObjectConverter', () => {
         const tab = val as TabDeprecated;
         
         for (const k in tab)
-            if (k === "constructor" || k === "get2ConcattedProps") fail("'" + k + "' should not be an enumerable property!");
+            if (k === "constructor" || k === "get2ConcattedProps") expect.fail("'" + k + "' should not be an enumerable property!");
         
         expect(tab).toBeDefined();
-        expect(tab.name).toBe('test', 'name should be test');
-        expect(tab.myvalue).toBe('test', 'myvalue should be test');
+        expect(tab.name).toBe('test');
+        expect(tab.myvalue).toBe('test');
 
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
 
         expect(tab.getWatchedProperties).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().getChangedKeys().add('isCollapsed')).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().markAllChanged).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         tab.getStateHolder().setPropertyAndHandleChanges(tab, "myvalue", "myvalue", "test101");
-        expect(tab.myvalue).toBe('test101', 'myvalue should be test101');
+        expect(tab.myvalue).toBe('test101');
 
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true);
         
-        expect(tab instanceof TabDeprecated).toBeTrue();
-        expect(tab instanceof BaseCustomObject).toBeTrue();
+        expect(tab instanceof TabDeprecated).toBe(true);
+        expect(tab instanceof BaseCustomObject).toBe(true);
         
         const tabNewImpl = val as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
@@ -1070,21 +1071,21 @@ describe('JSONObjectConverter', () => {
         const tab = val as TabDeprecated;
         
         expect(tab).toBeDefined();
-        expect(tab.name).toBe('test', 'name should be test');
-        expect(tab.myvalue).toBe('test', 'myvalue should be test');
+        expect(tab.name).toBe('test');
+        expect(tab.myvalue).toBe('test');
 
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
 
         expect(tab.getWatchedProperties).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().getChangedKeys().add('isCollapsed')).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().markAllChanged).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         tab.getStateHolder().setPropertyAndHandleChanges(tab, "myvalue", "myvalue", "test101");
-        expect(tab.myvalue).toBe('test101', 'myvalue should be test101');
+        expect(tab.myvalue).toBe('test101');
 
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true);
         
-        expect(tab instanceof TabDeprecated).toBeFalse();
-        expect(tab instanceof BaseCustomObject).toBeTrue();
+        expect(tab instanceof TabDeprecated).toBe(false);
+        expect(tab instanceof BaseCustomObject).toBe(true);
         
         const tabNewImpl = val as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
@@ -1102,8 +1103,8 @@ describe('JSONObjectConverter', () => {
         [, tab] = converterService.convertFromClientToServer(tab, oneTabType, undefined,
             getParentPropertyContext(oneTabPushToServer));
         
-        expect(tab instanceof TabDeprecated).toBeTrue();
-        expect(tab instanceof BaseCustomObject).toBeTrue();
+        expect(tab instanceof TabDeprecated).toBe(true);
+        expect(tab instanceof BaseCustomObject).toBe(true);
 
         const tabNewImpl = tab as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
@@ -1121,12 +1122,12 @@ describe('JSONObjectConverter', () => {
         const tab = val as Tab;
         
         expect(tab).toBeDefined();
-        expect(tab.name).toBe('test', 'name should be test');
-        expect(tab.myvalue).toBe('test', 'myvalue should be test');
+        expect(tab.name).toBe('test');
+        expect(tab.myvalue).toBe('test');
 
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false, 'should not have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(false);
 
-        expect(tab instanceof BaseCustomObject).toBeFalse(); // Tab is the new approch; doesn't need old/legacy API
+        expect(tab instanceof BaseCustomObject).toBe(false); // Tab is the new approch; doesn't need old/legacy API
         expect((tab as any)['getWatchedProperties']).toBeUndefined();
         expect((tab as any)['getStateHolder']).toBeUndefined();
         
@@ -1135,7 +1136,7 @@ describe('JSONObjectConverter', () => {
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
 
         tabNewImpl.markSubPropertyAsHavingDeepChanges!("myvalue"); // we are faking it - actually it doesn't have any changes
-        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true, 'should have changes');
+        expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true);
 
         expect(tab.get2ConcattedProps()).toEqual("test - test");
         specTypesService.registerCustomObjectType("Tab", undefined as any);
@@ -1151,8 +1152,8 @@ describe('JSONObjectConverter', () => {
         [, tab] = converterService.convertFromClientToServer(tab, oneTabType, undefined,
             getParentPropertyContext(oneTabPushToServer));
         
-        expect(tab instanceof Tab).toBeTrue();
-        expect(tab instanceof BaseCustomObject).toBeFalse();
+        expect(tab instanceof Tab).toBe(true);
+        expect(tab instanceof BaseCustomObject).toBe(false);
 
         const tabNewImpl = tab as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
@@ -1171,23 +1172,23 @@ describe('JSONObjectConverter', () => {
         let changeListenerWasCalled = false;
         (val as IChangeAwareValue).getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
 
-        expect(changeListenerWasCalled).toBeFalse();
+        expect(changeListenerWasCalled).toBe(false);
 
         // received as return value from a server side api call
         const childArray = converterService.convertFromServerToClient({ v: [ createTabJSON() ], vEr: 1},
                tabArrayType , undefined as any, undefined as any, undefined as any, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES) as Tab[];
         
-        expect(((childArray as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeFalse();
-        expect(((childArray[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        expect(((childArray as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(false);
+        expect(((childArray[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
 
         // assign it to model val's subproperty
         tabHolder.tabs = childArray;
 
-        expect(changeListenerWasCalled).toBeTrue();
+        expect(changeListenerWasCalled).toBe(true);
         changeListenerWasCalled = false;
 
-        expect(((childArray as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
-        expect(((childArray[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        expect(((childArray as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
+        expect(((childArray[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
 
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICOTGranularUpdatesToServer, any] = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder,
@@ -1197,9 +1198,9 @@ describe('JSONObjectConverter', () => {
         tabHolder = changesAndVal[1] as TabHolder;
         let tabHolderAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
         
-        expect(tabHolderAsSeenInternally.getInternalState().hasChangeListener()).toBeTrue();
-        expect(((tabHolder.tabs as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
-        expect(((tabHolder.tabs[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        expect(tabHolderAsSeenInternally.getInternalState().hasChangeListener()).toBe(true);
+        expect(((tabHolder.tabs as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
+        expect(((tabHolder.tabs[0] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
         
         expect(changes.vEr).toBe(1);
         expect(changes.u.length).toBe(1);

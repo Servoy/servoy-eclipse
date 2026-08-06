@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { ServoyService,SessionProblem } from '../servoy.service';
 import { WindowService } from './window.service';
@@ -6,8 +6,11 @@ import { WindowService } from './window.service';
 @Injectable()
 export class SessionService {
 
-    constructor(public servoyService: ServoyService, private windowService: WindowService) {
-        }
+    readonly servoyService = inject(ServoyService);
+    private readonly windowService = inject(WindowService);
+
+    constructor() {
+    }
 
     public expireSession(sessionExpired: SessionProblem){
         const exp = {

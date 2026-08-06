@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
 import { FormService } from '../ngclient/form.service';
@@ -6,9 +6,6 @@ import { EditorContentService } from './editorcontent.service';
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
 import { TypesRegistry } from '../sablo/types_registry';
 import { DesignFormComponent } from './designform_component.component';
-
-import { Inject } from '@angular/core';
-
 
 @Component({
     selector: 'servoy-designer',
@@ -33,14 +30,17 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     private wsSession!: WebsocketSession;
     variantsRequested!: boolean;
     variantsFormTemplate = '{"VariantsForm":{"responsive":true,"size":{"width": 640,"height":0},"children":[{"name":"","model":{"designSize":{"width":640,"height":0},"size":{"width":400,"height":0},"addMinSize":true,"useCssPosition":{},"absoluteLayout":{"":false},"hasExtraParts":false,"styleClass":" svy-overflowx-auto svy-overflowy-auto"}},{"layout":true,"cssPositionContainer":false,"styleclass":["flex"],"attributes":{"data-justify-content":"stretch","svy-id":"variants-responsive-grid","data-align-items":"stretch","svy-layoutname":"12grid.flexcontainer","svy-priority":"1","svy-title":"flex","data-direction":"column","designclass":"variants_container"},"children":[]}]}}';
-    constructor(private windowRef: WindowRefService,
-        private websocketService: WebsocketService,
-        private formService: FormService,
-        private services: ServicesService,
-        private editorContentService: EditorContentService,
-        private typesRegistry: TypesRegistry,
-        protected renderer: Renderer2,
-        @Inject(DOCUMENT) private doc: Document) {         }
+
+    private readonly windowRef = inject(WindowRefService);
+    private readonly websocketService = inject(WebsocketService);
+    private readonly formService = inject(FormService);
+    private readonly services = inject(ServicesService);
+    private readonly editorContentService = inject(EditorContentService);
+    private readonly typesRegistry = inject(TypesRegistry);
+    protected readonly renderer = inject(Renderer2);
+    private readonly doc = inject(DOCUMENT) as Document;
+
+    constructor() {         }
 
     ngOnInit() {
         this.renderer.setStyle(this.doc.body, "overflow", "hidden");

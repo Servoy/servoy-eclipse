@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { inject, Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import {PropertyUtils} from '../utils/property_utils';
 
@@ -43,7 +43,10 @@ export class HtmlFilterPipe implements PipeTransform {
     standalone: false
 } )
 export class TrustAsHtmlPipe implements PipeTransform {
-    constructor( private domSanitizer: DomSanitizer ) {
+    private domSanitizer: DomSanitizer;
+
+    constructor( domSanitizer?: DomSanitizer ) {
+        this.domSanitizer = domSanitizer ?? inject(DomSanitizer);
     }
 
     transform( input: string, trustAsHtml: boolean ): any {

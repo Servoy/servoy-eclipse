@@ -1,7 +1,10 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultRadiogroup } from './radiogroup';
-import { ServoyPublicTestingModule, IValuelist , FormattingService, TooltipService, NotNullOrEmptyPipe} from '@servoy/public';
+import { IValuelist, FormattingService, TooltipService, NotNullOrEmptyPipe,
+         TooltipDirective, SabloTabseq, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
@@ -30,22 +33,24 @@ describe('ServoyDefaultRadiogroup', () => {
   let fixture: ComponentFixture<ServoyDefaultRadiogroup>;
   let input: DebugElement;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultRadiogroup,ChoiceElementDirective],
-      imports: [ServoyPublicTestingModule, FormsModule],
-      providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
+      declarations: [ServoyDefaultRadiogroup, TooltipDirective, SabloTabseq,
+                     NotNullOrEmptyPipe, ChoiceElementDirective],
+      imports: [FormsModule],
+      providers: [NotNullOrEmptyPipe, FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultRadiogroup);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
-    component.valuelistID = mockData;
-    component.enabled = true;
-    component.editable = true;
+    component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
+    fixture.componentRef.setInput('valuelistID', mockData);
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
     fixture.detectChanges();
   });
 
@@ -62,7 +67,7 @@ describe('ServoyDefaultRadiogroup', () => {
     });
 
   it('should call itemClicked', () => {
-      spyOn(component, 'itemClicked');
+      vi.spyOn(component, 'itemClicked');
       input = fixture.debugElement.query(By.css('input'));
       input.nativeElement.dispatchEvent(new Event('click'));
       fixture.detectChanges();

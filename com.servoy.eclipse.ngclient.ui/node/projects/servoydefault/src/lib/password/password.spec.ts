@@ -1,8 +1,11 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultPassword } from './password';
 import { FormsModule } from '@angular/forms';
-import { ServoyPublicTestingModule, ServoyPublicModule, FormattingService, ServoyApi, TooltipService, TooltipDirective } from '@servoy/public';
+import { FormattingService, ServoyApi, TooltipService, TooltipDirective, SabloTabseq,
+         ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
@@ -16,11 +19,12 @@ describe('PasswordComponent', () => {
   let directiveInstance: TooltipDirective;
 
   beforeEach(() => {
-      servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
+      servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
       TestBed.configureTestingModule({
-        declarations: [ServoyDefaultPassword, TooltipDirective],
-        imports: [ServoyPublicTestingModule, FormsModule],
-        providers: [FormattingService, TooltipService]
+        declarations: [ServoyDefaultPassword, TooltipDirective, SabloTabseq],
+        imports: [FormsModule],
+        providers: [FormattingService, TooltipService,
+                    { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
       })
       .compileComponents();
     });
@@ -41,25 +45,25 @@ describe('PasswordComponent', () => {
   });
 
   it('should have value test', () => {
-    component.dataProviderID = 'test';
+    component.dataProviderID.set('test');
      runOnPushChangeDetection(fixture);
     fixture.whenStable().then(() =>
       expect(component.getNativeElement().value).toBe('test'));
   });
 
   it('should call update method', () => {
-    spyOn(component, 'pushUpdate');
+    vi.spyOn(component, 'pushUpdate');
     inputEl = fixture.debugElement.query(By.css('input'));
     inputEl.nativeElement.dispatchEvent(new Event('change'));
     expect(component.pushUpdate).toHaveBeenCalled();
   });
 
   it('should have a placeholder', () => {
-      expect( component.placeholderText ).toBeUndefined();
-      expect( component.toolTipText).toBeUndefined();
+      expect( component.placeholderText() ).toBeUndefined();
+      expect( component.toolTipText()).toBeUndefined();
       inputEl = fixture.debugElement.query(By.css('input'));
       directiveInstance = inputEl.injector.get(TooltipDirective);
-      component.placeholderText = 'placeholder';
+      fixture.componentRef.setInput('placeholderText', 'placeholder');
        runOnPushChangeDetection(fixture);
       expect( inputEl.nativeElement.placeholder ).toEqual('placeholder');
   });
@@ -69,8 +73,9 @@ describe('PasswordComponent', () => {
       directiveInstance = inputEl.injector.get(TooltipDirective);
       inputEl.nativeElement.dispatchEvent(new Event('mouseenter'));
       expect(directiveInstance.isActive).toBe(false); // false because the text is undefined
-      directiveInstance.tooltipText = 'Hi';
-      expect(directiveInstance.tooltipText).toBe('Hi');
+      component.toolTipText.set('Hi');
+      fixture.detectChanges();
+      expect(directiveInstance.tooltipText()).toBe('Hi');
   });
 
   it('should have class: svy-password form-control input-sm svy-padding-xs ng-untouched ng-pristine ng-valid', () => {

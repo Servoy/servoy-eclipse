@@ -55,12 +55,12 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 	};
 
 	focusGained() {
-		if (((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) && this.editable && !this.readOnly) || this.findmode) {
+		if (((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) && this.editable() && !this.readOnly()) || this.findmode()) {
 			this.focus$.next('');
 		}
 	}
 	onClick() {
-		if (((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) && this.editable && !this.readOnly) || this.findmode) {
+		if (((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) && this.editable() && !this.readOnly()) || this.findmode()) {
 			this.click$.next('');
 		}
 	}
@@ -86,17 +86,17 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 	svyOnChanges(changes: SimpleChanges) {
 		super.svyOnChanges(changes);
 		if (changes.enabled || changes.findmode) {
-			this.instance.setDisabledState(!this.enabled && !this.findmode);
+			this.instance.setDisabledState(!this.enabled() && !this.findmode());
 		}
 		if (changes.format || changes.findmode) {
-			if (this.format && this.format.maxLength) {
-				if (!this.findmode) {
-					this.renderer.setAttribute(this.elementRef.nativeElement, 'maxlength', this.format.maxLength + '');
+			if (this.format() && this.format().maxLength) {
+				if (!this.findmode()) {
+					this.renderer.setAttribute(this.elementRef.nativeElement, 'maxlength', this.format().maxLength + '');
 				} else {
 					this.renderer.removeAttribute(this.elementRef.nativeElement, 'maxlength');
 				}
 			}
-			if (this.valuelistID) this.instance.writeValue(this.dataProviderID);
+			if (this.valuelistID()) this.instance.writeValue(this.dataProviderID());
 		}
 		if (changes.dataProviderID) {
 			this.currentValue = changes.dataProviderID.currentValue;
@@ -108,47 +108,47 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 		const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
 		const inputFocus$ = this.focus$;
 
-		return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(switchMap(term => (this.valuelistID.filterList(term))));
+		return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(switchMap(term => (this.valuelistID().filterList(term))));
 	};
 
 	pushUpdate() {
-		if (!this.dataProviderID && (!this.isEditable() || this.findmode)) {
+		if (!this.dataProviderID() && (!this.isEditable() || this.findmode())) {
 			// data was changed, need to restore the value from UI
-			if (this.findmode || !this.valuelistID) {
-				this.dataProviderID = this.elementRef.nativeElement.value;
+			if (this.findmode() || !this.valuelistID()) {
+				this.dataProviderID.set(this.elementRef.nativeElement.value);
 			} else {
-				if (this.elementRef.nativeElement.value === this.valuelistID[0]?.displayValue) {
-					this.dataProviderID = this.valuelistID[0]?.realValue;
-					this.currentValue = this.dataProviderID;
+				if (this.elementRef.nativeElement.value === this.valuelistID()[0]?.displayValue) {
+					this.dataProviderID.set(this.valuelistID()[0]?.realValue);
+					this.currentValue = this.dataProviderID();
 					super.pushUpdate();
 				} else {
-					this.dataProviderID = this.currentValue;
+					this.dataProviderID.set(this.currentValue);
 				}
 				return;
 			}
 		}
-		this.currentValue = this.dataProviderID;
+		this.currentValue = this.dataProviderID();
 		super.pushUpdate();
 	}
 
 	isEditable() {
-		return this.valuelistID && !this.valuelistID.hasRealValues();
+		return this.valuelistID() && !this.valuelistID().hasRealValues();
 	}
 
 	resultFormatter = (result: { displayValue: string; realValue: any }) => {
 		// eslint-disable-next-line eqeqeq
 		if (result.displayValue === null || result.displayValue == '') return '\u00A0';
-		return this.formattingService.format(result.displayValue, this.format, false);
+		return this.formattingService.format(result.displayValue, this.format(), false);
 	};
 
 	private realToDisplay: Map<any, string> = new Map();
 	inputFormatter = (result: any) => {
 		if (result === null) return '';
 		if (result.displayValue !== undefined) result = result.displayValue;
-		else if (this.valuelistID?.hasRealValues()) {
+		else if (this.valuelistID()?.hasRealValues()) {
 			// on purpose test with == so that "2" equals to 2
 			// eslint-disable-next-line eqeqeq
-			const value = this.valuelistID.find((item) => {
+			const value = this.valuelistID().find((item) => {
 				if (item.realValue == result) {
 					return true;
 				}
@@ -162,7 +162,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 			} else {
 				let display = this.realToDisplay.get(result);
 				if (display === null || display === undefined) {
-					this.valuelistID.getDisplayValue(result).subscribe(val => {
+					this.valuelistID().getDisplayValue(result).subscribe(val => {
 						if (val) {
 							this.realToDisplay.set(result, val);
 							this.instance.writeValue(result);
@@ -176,14 +176,14 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 				}
 			}
 		}
-		return this.formattingService.format(result, this.format, false);
+		return this.formattingService.format(result, this.format(), false);
 	};
 
 	valueChanged(value: { displayValue: string; realValue: any }) {
-		if (value && value.realValue !== undefined) this.dataProviderID = value.realValue;
-		else if (value) this.dataProviderID = value;
-		else this.dataProviderID = null;
-		this.dataProviderIDChange.emit(this.dataProviderID);
-		this.currentValue = this.dataProviderID;
+		if (value && value.realValue !== undefined) this.dataProviderID.set(value.realValue);
+		else if (value) this.dataProviderID.set(value);
+		else this.dataProviderID.set(null);
+		this.dataProviderIDChange.emit(this.dataProviderID());
+		this.currentValue = this.dataProviderID();
 	}
 }

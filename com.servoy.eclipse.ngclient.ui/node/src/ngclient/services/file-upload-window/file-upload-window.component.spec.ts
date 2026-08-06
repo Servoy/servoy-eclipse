@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FileUploadWindowComponent } from './file-upload-window.component';
 import { HttpClient, HttpHandler } from '@angular/common/http';
@@ -13,19 +14,19 @@ describe('FileUploadWindowComponent', () => {
       messages: () =>i18n,
       destroy: () =>{}
   };
-  beforeEach(waitForAsync(() => {
-    i18nProvider = jasmine.createSpyObj('I18NProvider',['getI18NMessages', 'listenForI18NMessages']);
+  beforeEach(async () => {
+    i18nProvider = { getI18NMessages: vi.fn(), listenForI18NMessages: vi.fn() } as any;
     const promise = Promise.resolve({});
-    i18nProvider.getI18NMessages.and.returnValue(promise);
-    i18nProvider.listenForI18NMessages.and.returnValue(i18n);
+    i18nProvider.getI18NMessages.mockReturnValue(promise);
+    i18nProvider.listenForI18NMessages.mockReturnValue(i18n);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [ FileUploadWindowComponent ],
       providers: [ { provide: HttpClient }, {provide:HttpHandler}, {provide: I18NProvider, useValue: i18nProvider }]
 
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FileUploadWindowComponent);
@@ -105,11 +106,12 @@ describe('FileUploadWindowComponent', () => {
       new File([new ArrayBuffer(sizeKB * 1024)], name, { type: 'application/octet-stream' });
 
     const makeFileChangeEvent = (files: File[]): Event => {
-      const dataTransfer = new DataTransfer();
-      files.forEach(f => dataTransfer.items.add(f));
+      const fileList: any = Object.create(null);
+      files.forEach((f, i) => { fileList[String(i)] = f; });
+      Object.defineProperty(fileList, 'length', { value: files.length, enumerable: false });
       const input = document.createElement('input');
       input.type = 'file';
-      Object.defineProperty(input, 'files', { value: dataTransfer.files });
+      Object.defineProperty(input, 'files', { value: fileList });
       return { target: input } as unknown as Event;
     };
 
@@ -124,14 +126,14 @@ describe('FileUploadWindowComponent', () => {
       component.filter.set('.jpg,maxUploadFileSize=100');
       const event = makeFileChangeEvent([makeFile('big.jpg', 200)]);
       component.fileChange(event);
-      expect(component.oversizedFiles.has('big.jpg')).toBeTrue();
+      expect(component.oversizedFiles.has('big.jpg')).toBe(true);
     });
 
     it('should not mark file as oversized when it is within maxUploadFileSize', () => {
       component.filter.set('.jpg,maxUploadFileSize=500');
       const event = makeFileChangeEvent([makeFile('small.jpg', 200)]);
       component.fileChange(event);
-      expect(component.oversizedFiles.has('small.jpg')).toBeFalse();
+      expect(component.oversizedFiles.has('small.jpg')).toBe(false);
     });
 
     it('should still add oversized files to uploadFiles for display', () => {
@@ -139,7 +141,7 @@ describe('FileUploadWindowComponent', () => {
       const event = makeFileChangeEvent([makeFile('huge.jpg', 500)]);
       component.fileChange(event);
       expect(component.uploadFiles.length).toBe(1);
-      expect(component.oversizedFiles.has('huge.jpg')).toBeTrue();
+      expect(component.oversizedFiles.has('huge.jpg')).toBe(true);
     });
   });
 
@@ -161,13 +163,13 @@ describe('FileUploadWindowComponent', () => {
   describe('isFileValidForUpload', () => {
     it('should return true for files not in oversizedFiles', () => {
       const file = new File([], 'ok.pdf');
-      expect(component.isFileValidForUpload(file)).toBeTrue();
+      expect(component.isFileValidForUpload(file)).toBe(true);
     });
 
     it('should return false for files in oversizedFiles', () => {
       component.oversizedFiles.add('toobig.pdf');
       const file = new File([], 'toobig.pdf');
-      expect(component.isFileValidForUpload(file)).toBeFalse();
+      expect(component.isFileValidForUpload(file)).toBe(false);
     });
   });
 });

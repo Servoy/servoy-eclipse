@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from '../directives/resizeknob.directive';
@@ -42,7 +42,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     snapData: SnapData | null = null;
     subscription!: Subscription;
 
-    constructor(protected readonly editorSession: EditorSessionService, protected readonly renderer: Renderer2, protected urlParser: URLParserService, private guidesService: DynamicGuidesService, private readonly designerUtilsService: DesignerUtilsService, private editorContentService: EditorContentService) { }
+    protected readonly editorSession = inject(EditorSessionService);
+    protected readonly renderer = inject(Renderer2);
+    protected urlParser = inject(URLParserService);
+    private guidesService = inject(DynamicGuidesService);
+    private readonly designerUtilsService = inject(DesignerUtilsService);
+    private editorContentService = inject(EditorContentService);
 
     ngOnInit(): void {
         this.contentArea = this.editorContentService.getContentArea();
@@ -158,9 +163,9 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
                     this.renderer.removeChild(elementInfo.element.parentElement, elementInfo.element);
                 }
             }
-            if ((event.ctrlKey || event.metaKey) && (changes as Array<any>).length) {
+            if ((event.ctrlKey || event.metaKey) && (changes as any[]).length) {
                 this.editorSession.createComponents({
-                    "components": changes
+                    'components': changes
                 });
             } else {
                 this.editorSession.sendChanges(changes);
@@ -249,8 +254,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
                 this.selectionToDrag.push('dragNode' + i);
                 this.currentElementsInfo!.set(this.selectionToDrag[i], new ElementInfo(clone));
-            }
-            else {
+            } else {
                 this.selectionToDrag.push(selection[i]);
                 this.currentElementsInfo!.set(selection[i], new ElementInfo(node));
             }
@@ -279,8 +283,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
             return;
         }
 
-        for (let i = 0; i < this.selectionToDrag.length; i++) {
-            const elementInfo = this.currentElementsInfo!.get(this.selectionToDrag[i])!;
+        for (const selItem of this.selectionToDrag) {
+            const elementInfo = this.currentElementsInfo!.get(selItem)!;
             elementInfo.x = elementInfo.x + changeX;
             if (elementInfo.x < 0) elementInfo.x = 0;
             if (minX != undefined && elementInfo.x < minX) elementInfo.x = minX;
@@ -445,7 +449,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         this.contentArea.scrollLeft += changeX;
     }
 
-    scrollEnd(event: Event) {
+    scrollEnd(_event: Event) {
         if (this.dragStartEvent) {
             if (this.scroll.y != this.contentArea.scrollTop) {
                 if (this.contentArea.scrollTop > this.scroll.y) {
@@ -478,12 +482,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     
     canMove(x: number, y: number): boolean {
         let canMove = true;
-        for (let i = 0; i < this.selectionToDrag!.length; i++) {
-            const elementInfo = this.currentElementsInfo!.get(this.selectionToDrag![i]);
+        for (const selItem of this.selectionToDrag!) {
+            const elementInfo = this.currentElementsInfo!.get(selItem);
             if (!elementInfo) {
-                let node = this.editorContentService.getContentElement(this.selectionToDrag![i]);
+                let node = this.editorContentService.getContentElement(selItem);
                 node = this.getSvyWrapper(node)!;
-                this.currentElementsInfo!.set(this.selectionToDrag![i], new ElementInfo(node));
+                this.currentElementsInfo!.set(selItem, new ElementInfo(node));
             }
             if (elementInfo && (elementInfo.y + y < 0 || elementInfo.x + x < 0)) {
                 canMove = false;
@@ -495,7 +499,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
     private findAncestor(el: HTMLElement | null, cls: string): Element | null {
 		if (!el) return null;
-        var ancestor = el.closest('.' + cls);
+        let ancestor = el.closest('.' + cls);
         if (ancestor && ancestor.parentElement && ancestor.parentElement.classList.contains('svy-wrapper')) {
             ancestor = ancestor.parentElement;
         }

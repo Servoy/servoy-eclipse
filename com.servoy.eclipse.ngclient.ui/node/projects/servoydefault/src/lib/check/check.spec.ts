@@ -1,8 +1,11 @@
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By }              from '@angular/platform-browser';
 import { ServoyDefaultCheck } from './check';
 
-import { ServoyPublicTestingModule,  FormattingService, ServoyApi, TooltipService} from '@servoy/public';
+import { FormattingService, ServoyApi, TooltipService, TooltipDirective, SabloTabseq,
+         ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import {FormsModule} from '@angular/forms';
 
 describe('CheckComponent', () => {
@@ -10,23 +13,24 @@ describe('CheckComponent', () => {
   let fixture: ComponentFixture<ServoyDefaultCheck>;
   let servoyApi: any;
   let input: any; let label: any; let span: any;
-  beforeEach(waitForAsync(() => {
-  servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
+  beforeEach(async () => {
+  servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCheck ],
-      imports: [ServoyPublicTestingModule, FormsModule],
-      providers: [FormattingService, TooltipService]
+      declarations: [ServoyDefaultCheck, TooltipDirective, SabloTabseq],
+      imports: [FormsModule],
+      providers: [FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultCheck);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
     component = fixture.componentInstance;
-    component.text = 'Check me';
-    component.enabled = true;
-    component.editable = true;
+    fixture.componentRef.setInput('text', 'Check me');
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
 
     input = fixture.debugElement.query(By.css('input')).nativeElement;
     label = fixture.debugElement.query(By.css('label')).nativeElement;
@@ -51,42 +55,45 @@ describe('CheckComponent', () => {
       expect(input.checked).toBeFalsy();
   });
 
-  it('should click on span and change value', fakeAsync(() => {
-
+  it('should click on span and change value', () => {
+    vi.useFakeTimers();
     expect(input.checked).toBeFalsy(); // default state
     clickOnElement(span, fixture, input,true);
     clickOnElement(span, fixture, input,false);
-  }));
+    vi.useRealTimers();
+  });
 
-  it('should click on label and change', fakeAsync(() => {
+  it('should click on label and change', () => {
+    vi.useFakeTimers();
     expect(input.checked).toBeFalsy(); // default state
     clickOnElement(label, fixture, input, true);
     clickOnElement(label, fixture, input, false);
-  }));
+    vi.useRealTimers();
+  });
 
   it('should getSelectionFromDP', () => {
-      component.dataProviderID = 1;
+      component.dataProviderID.set(1);
       expect(component.getSelectionFromDataprovider()).toBeTruthy();
 
-      component.dataProviderID = '1';
+      component.dataProviderID.set('1');
       expect(component.getSelectionFromDataprovider()).toBeTruthy();
 
-      component.dataProviderID = 0;
+      component.dataProviderID.set(0);
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = '0';
+      component.dataProviderID.set('0');
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = '';
+      component.dataProviderID.set('');
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = 'something';
+      component.dataProviderID.set('something');
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = null;
+      component.dataProviderID.set(null);
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
 
-      component.dataProviderID = undefined;
+      component.dataProviderID.set(undefined);
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
   });
 
@@ -95,6 +102,6 @@ describe('CheckComponent', () => {
 async function clickOnElement(element: any, fixture: ComponentFixture<ServoyDefaultCheck>, checkInput: any, toTestFlag: any) {
   element.click();
   fixture.detectChanges();
-  tick();
+  vi.advanceTimersByTime(0);
   expect(checkInput.checked).toBe(toTestFlag);
 }

@@ -1,14 +1,17 @@
-import { TestBed, ComponentFixture, fakeAsync, tick, waitForAsync, inject } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Component, Input, ViewChild, ElementRef, DebugElement, ChangeDetectionStrategy } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { ServoyPublicServiceTestingImpl, ServoyPublicTestingModule } from '../testing/publictesting.module';
 import { ServoyPublicService } from '../services/servoy_public.service';
+import { ServoyPublicModule } from '../servoy_public.module';
 
 @Component({
     template: '<input type="text" [svyDecimalKeyConverter]="format" #element>',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    standalone: true,
+    imports: [ServoyPublicModule]
 })
 class TestDecimalKeyConverterComponent {
     @Input() format: any;
@@ -23,10 +26,7 @@ describe('Directive: DecimalKeyConverter', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [
-                TestDecimalKeyConverterComponent,
-            ],
-            imports: [ServoyPublicTestingModule],
+            imports: [TestDecimalKeyConverterComponent],
             providers: [
                   { provide: ServoyPublicService, useValue: service }
             ]
@@ -41,7 +41,8 @@ describe('Directive: DecimalKeyConverter', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should insert numpad decimal (nl == ,)', fakeAsync(() => {
+    it('should insert numpad decimal (nl == ,)', () => {
+        vi.useFakeTimers();
         service.setLocaleNumberSymbol(',');
         component.format = {
             uppercase: true, allowedCharacters: null, isMask: false, isRaw: false, edit: null,
@@ -57,9 +58,11 @@ describe('Directive: DecimalKeyConverter', () => {
 
         expect(inputEl.nativeElement.value).toEqual('12,');
         service.setLocaleNumberSymbol(null as any);
-    }));
+        vi.useRealTimers();
+    });
 
-    it('should insert comma decimal (en == .)', fakeAsync(() => {
+    it('should insert comma decimal (en == .)', () => {
+        vi.useFakeTimers();
         service.setLocaleNumberSymbol('.');
         component.format = {
             uppercase: true, allowedCharacters: null, isMask: false, isRaw: false, edit: null,
@@ -69,12 +72,13 @@ describe('Directive: DecimalKeyConverter', () => {
 
         component.elementRef.nativeElement.value = '12';
         fixture.detectChanges();
-        tick();
+        vi.advanceTimersByTime(0);
 
         inputEl.triggerEventHandler('keydown', { keyCode: 110, which: 110 });
         fixture.detectChanges();
-        tick();
+        vi.advanceTimersByTime(0);
         expect(inputEl.nativeElement.value).toEqual('12.');
         service.setLocaleNumberSymbol(null as any);
-    }));
+        vi.useRealTimers();
+    });
 });

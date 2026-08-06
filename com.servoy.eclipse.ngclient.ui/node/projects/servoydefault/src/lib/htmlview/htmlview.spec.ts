@@ -1,8 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultHTMLView } from './htmlview';
 
-import { ServoyPublicTestingModule,FormattingService, TooltipService, ServoyApi } from '@servoy/public';
+import { FormattingService, TooltipService, ServoyApi, ServoyPublicService,
+         TooltipDirective, SabloTabseq, TrustAsHtmlPipe } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { By } from '@angular/platform-browser';
 
 import { runOnPushChangeDetection } from '../testingutils';
@@ -10,16 +13,16 @@ import { runOnPushChangeDetection } from '../testingutils';
 describe('ServoyDefaultHTMLView', () => {
   let component: ServoyDefaultHTMLView;
   let fixture: ComponentFixture<ServoyDefaultHTMLView>;
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent','registerComponent','unRegisterComponent']);
+  const servoyApi: any = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultHTMLView],
-      imports: [ServoyPublicTestingModule ],
-      providers: [FormattingService, TooltipService]
+      declarations: [ServoyDefaultHTMLView, TooltipDirective, SabloTabseq, TrustAsHtmlPipe],
+      providers: [FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultHTMLView);
@@ -33,7 +36,7 @@ describe('ServoyDefaultHTMLView', () => {
   });
 
   it( 'should render markupid ', () => {
-      servoyApi.getMarkupId.and.returnValue( 'myid');
+      servoyApi.getMarkupId.mockReturnValue( 'myid');
       runOnPushChangeDetection(fixture);
       const div = fixture.debugElement.query(By.css('div')).nativeElement;
       expect(div.id).toBe('myid');
@@ -44,7 +47,7 @@ describe('ServoyDefaultHTMLView', () => {
   });
 
   it ('should test innerhtml', () => {
-      component.dataProviderID = '<p>some text herre</p>';
+      component.dataProviderID.set('<p>some text herre</p>');
        runOnPushChangeDetection(fixture);
       const spanEl = fixture.debugElement.query(By.css('span'));
       expect(spanEl.nativeElement.innerHTML).toBe('<p>some text herre</p>');

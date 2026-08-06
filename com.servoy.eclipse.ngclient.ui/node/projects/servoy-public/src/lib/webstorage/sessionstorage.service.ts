@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { LoggerFactory, LoggerService } from '../logger.service';
 import { WebStorage } from './webstorage.interface';
 
@@ -11,9 +11,9 @@ export class SessionStorageService implements WebStorage {
     prefix = '';
     private log: LoggerService;
 
-    constructor(logFactory: LoggerFactory) {
+    constructor(logFactory?: LoggerFactory) {
         this.hasSessionStorage = this.isSupported();
-         this.log = logFactory.getLogger('SessionStorageService');
+         this.log = (logFactory ?? inject(LoggerFactory)).getLogger('SessionStorageService');
     }
 
     isSupported(): boolean {

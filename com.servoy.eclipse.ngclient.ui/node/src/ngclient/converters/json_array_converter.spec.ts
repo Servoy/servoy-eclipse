@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { TypesRegistry, ICustomTypesFromServer, IPropertiesFromServer, IPropertyDescriptionFromServerWithMultipleEntries, ITypeFromServer,
             IFactoryTypeDetails, IPropertyContext, PushToServerEnum, PushToServerUtils } from '../../sablo/types_registry';
@@ -163,10 +164,10 @@ describe( 'JSONArrayConverter', () => {
                stringArrayType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
 
         expect( val ).toBeDefined();
-        expect( val.length ).toBe( 3, 'array length should be 3' );
-        expect( val[0] ).toBe( 'test1', 'array[0] should be test1' );
-        expect( val[1] ).toBe( 'test2', 'array[1] should be  test2' );
-        expect( val[2] ).toBe( 'test3', 'array[2] should be  test3' );
+        expect( val.length ).toBe( 3);
+        expect( val[0] ).toBe( 'test1');
+        expect( val[1] ).toBe( 'test2');
+        expect( val[2] ).toBe( 'test3');
     } );
 
     it( 'updates from server to client', () => {
@@ -184,12 +185,12 @@ describe( 'JSONArrayConverter', () => {
             } as ICATGranularUpdatesFromServer, stringArrayType, val, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
 
         expect( val ).toBeDefined();
-        expect( val.length ).toBe( 5, 'array length should be 3' );
-        expect( val[0] ).toBe( 'testNew1', 'array[0] should be test1' );
-        expect( val[1] ).toBe( 'testNew2', 'array[1] should be  test2' );
-        expect( val[2] ).toBe( 'test1', 'array[2] should be  test3' );
-        expect( val[3] ).toBe( 'testChanged', 'array[3] should be  test3' );
-        expect( val[4] ).toBe( 'testNew3', 'array[4] should be  test3' );
+        expect( val.length ).toBe( 5);
+        expect( val[0] ).toBe( 'testNew1');
+        expect( val[1] ).toBe( 'testNew2');
+        expect( val[2] ).toBe( 'test1');
+        expect( val[3] ).toBe( 'testChanged');
+        expect( val[4] ).toBe( 'testNew3');
     } );
 
     it( 'simple change of 1 index', () => {
@@ -204,14 +205,14 @@ describe( 'JSONArrayConverter', () => {
         const changes: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val,
             getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer))[0];
         expect( changes.vEr ).toBe( 1 );
-        expect( changes.u ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.u.length ).toBe( 1, 'should have 1 update' );
+        expect( changes.u ).toBeDefined();
+        expect( changes.u.length ).toBe( 1);
         expect( changes.u[0].i ).toBe( 0 );
         expect( changes.u[0].v ).toBe( 'test4' );
 
         const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val,
             getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'remove of 1 index', () => {
@@ -226,14 +227,14 @@ describe( 'JSONArrayConverter', () => {
         const changes: ICATFullArrayToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val,
             getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer))[0];
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.v.length ).toBe( 2, 'should have 2 updates' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 2);
         expect( changes.v[0] ).toBe( 'test1' );
         expect( changes.v[1] ).toBe( 'test3' );
 
         const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val,
             getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'add  of 1 index', () => {
@@ -248,8 +249,8 @@ describe( 'JSONArrayConverter', () => {
         const changes: ICATFullArrayToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val,
             getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer))[0];
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.v.length ).toBe( 4, 'should have 4 updates' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 4);
         expect( changes.v[0] ).toBe( 'test1' );
         expect( changes.v[1] ).toBe( 'test2' );
         expect( changes.v[2] ).toBe( 'test3' );
@@ -257,7 +258,7 @@ describe( 'JSONArrayConverter', () => {
 
         const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val,
             getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
 // THIS will currently no longer work - we need to be smarter if we want this; so a javascript port of java class ArrayGranularChangeKeeper
@@ -269,14 +270,14 @@ describe( 'JSONArrayConverter', () => {
 //        const changes: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val, getParentPropertyContext(PushToServerEnum.ALLOW))[0];
 //        expect( changes.vEr ).toBe( 1 );
 //        expect( changes.u ).toBeDefined( 'change object  shoulld have updates' );
-//        expect( changes.u.length ).toBe( 2, 'should have 2 updates' );
+//        expect( changes.u.length ).toBe( 2);
 //        expect( changes.u[0].i ).toBe( 1 );
 //        expect( changes.u[0].v ).toBe( 'test3' );
 //        expect( changes.u[1].i ).toBe( 2 );
 //        expect( changes.u[1].v ).toBe( 'test4' );
 //
 //        const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val, getParentPropertyContext(PushToServerEnum.ALLOW))[0];
-//        expect( changes2.n ).toBe( true, 'should have no changes now' );
+//        expect( changes2.n ).toBe( true);
 //    } );
 
 // THIS will currently no longer work - we need to be smarter if we want this; so a javascript port of java class ArrayGranularChangeKeeper
@@ -289,7 +290,7 @@ describe( 'JSONArrayConverter', () => {
 //        const changes: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val, getParentPropertyContext(PushToServerEnum.ALLOW))[0];
 //        expect( changes.vEr ).toBe( 1 );
 //        expect( changes.u ).toBeDefined( 'change object should have updates' );
-//        expect( changes.u.length ).toBe( 3, 'should have 3 updates' );
+//        expect( changes.u.length ).toBe( 3);
 //        expect( changes.u[0].i ).toBe( 0 );
 //        expect( changes.u[0].v ).toBe( 'test2' );
 //        expect( changes.u[1].i ).toBe( 1 );
@@ -298,7 +299,7 @@ describe( 'JSONArrayConverter', () => {
 //        expect( changes.u[2].v ).toBe( 'test5' );
 //
 //        const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, stringArrayWithShallowOnElementsType, val, getParentPropertyContext(PushToServerEnum.ALLOW))[0];
-//        expect( changes2.n ).toBe( true, 'should have no changes now' );
+//        expect( changes2.n ).toBe( true);
 //    } );
 
     it( 'type should be created an array from server to client with custom json objects', () => {
@@ -309,14 +310,14 @@ describe( 'JSONArrayConverter', () => {
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         expect( val ).toBeDefined();
-        expect( val.length ).toBe( 3, 'array length should be 3' );
-        expect( val[0].name ).toBe( 'test1', 'array[0] should be tab.name = test1' );
-        expect( val[1].name ).toBe( 'test2', 'array[1] should be tab.name = . test2' );
-        expect( val[2].name ).toBe( 'test3', 'array[2] should be  tab.name = .test3' );
+        expect( val.length ).toBe( 3);
+        expect( val[0].name ).toBe( 'test1');
+        expect( val[1].name ).toBe( 'test2');
+        expect( val[2].name ).toBe( 'test3');
 
         const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'updates from server to client for custom object element', () => {
@@ -334,12 +335,12 @@ describe( 'JSONArrayConverter', () => {
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         expect( val ).toBeDefined();
-        expect( val.length ).toBe( 3, 'array length should be 3' );
-        expect( val[2].name ).toBe( 'KM', 'array[2].name should be the updated one' );
+        expect( val.length ).toBe( 3);
+        expect( val[2].name ).toBe( 'KM');
 
         const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'change of one tab value', () => {
@@ -374,20 +375,20 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
 
         expect( changes.vEr ).toBe( 1 );
-        expect( changes.u ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.u.length ).toBe( 1, 'should have 1 update' );
+        expect( changes.u ).toBeDefined();
+        expect( changes.u.length ).toBe( 1);
         expect( changes.u[0].i ).toBe( 0 );
         const objElemChange: ICOTGranularUpdatesToServer = changes.u[0].v;
         expect( objElemChange.vEr ).toBe( 1 );
-        expect( objElemChange.u ).toBeDefined( 'change object  shoulld have updates' );
-        expect( objElemChange.u.length ).toBe( 1, 'should have 1 update' );
+        expect( objElemChange.u ).toBeDefined();
+        expect( objElemChange.u.length ).toBe( 1);
 
         expect( objElemChange.u[0].k ).toBe( 'myvalue' );
         expect( objElemChange.u[0].v ).toBe( 'test4' );
 
         changes2 = converterService.convertFromClientToServer(valSeenExternally, tabArrayWithShallowOnElementsType,
             valSeenExternally, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'delete 1 tab', () => {
@@ -403,20 +404,20 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
         // array is not smart enough yet to send granular delete to server; it sends full value; which means all children are seen as new
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.v.length ).toBe( 2, 'should have 2 values' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 2);
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test1', 'item[0].name should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test1', 'item[0].myvalue should be test1' );
+        expect( fullTabChange.v.name ).toBe( 'test1');
+        expect( fullTabChange.v.myvalue ).toBe( 'test1');
         fullTabChange = changes.v[1];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test3', 'item[1].name should be test3' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test3', 'item[1].myvalue should be test3' );
+        expect( fullTabChange.v.name ).toBe( 'test3');
+        expect( fullTabChange.v.myvalue ).toBe( 'test3');
 
         const changes2 = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'add 1 tab', () => {
@@ -434,18 +435,18 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
 
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.v.length ).toBe( 4, 'should have 4 values' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 4);
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
         expect( fullTabChange.vEr ).toBe( 0 );
         fullTabChange = changes.v[3];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test5', 'item[3].name should be test5' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test5', 'item[3].myvalue should be test5' );
+        expect( fullTabChange.v.name ).toBe( 'test5');
+        expect( fullTabChange.v.myvalue ).toBe( 'test5');
 
         const changes2 = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'change of one tab value delete 1 other', () => {
@@ -461,20 +462,20 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
 
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object should have updates' );
-        expect( changes.v.length ).toBe( 2, 'should have 2 values' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 2);
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test1', 'item[0].name should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test4', 'item[0].myvalue should be test1' );
+        expect( fullTabChange.v.name ).toBe( 'test1');
+        expect( fullTabChange.v.myvalue ).toBe( 'test4');
         fullTabChange = changes.v[1];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test3', 'item[1].name should be test3' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test3', 'item[1].myvalue should be test3' );
+        expect( fullTabChange.v.name ).toBe( 'test3');
+        expect( fullTabChange.v.myvalue ).toBe( 'test3');
 
         const changes2 = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'send array as arg to handler, change a tab by ref', () => {
@@ -493,20 +494,20 @@ describe( 'JSONArrayConverter', () => {
         val = changesAndVal[1];
         
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object should have updates' );
-        expect( changes.v.length ).toBe( 3, 'should have 3 values' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 3);
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test1', 'item[0].name should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test1', 'item[0].myvalue should be test1' );
+        expect( fullTabChange.v.name ).toBe( 'test1');
+        expect( fullTabChange.v.myvalue ).toBe( 'test1');
         fullTabChange = changes.v[1];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test2', 'item[1].name should be test2' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test2', 'item[1].myvalue should be test2' );
+        expect( fullTabChange.v.name ).toBe( 'test2');
+        expect( fullTabChange.v.myvalue ).toBe( 'test2');
         fullTabChange = changes.v[2];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test3', 'item[2].name should be test3' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test3', 'item[2].myvalue should be test3' );
+        expect( fullTabChange.v.name ).toBe( 'test3');
+        expect( fullTabChange.v.myvalue ).toBe( 'test3');
 
         val[0] = { name: 'test4', myvalue: 'test4' };
 
@@ -514,13 +515,13 @@ describe( 'JSONArrayConverter', () => {
 
         const changes2: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.vEr ).toBe( 1, 'checking version for element update' );
-        expect( changes2.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( changes2.u[0].i ).toBe( 0, 'checking that it is first el' );
+        expect( changes2.vEr ).toBe( 1);
+        expect( changes2.u.length ).toBe( 1);
+        expect( changes2.u[0].i ).toBe( 0);
         fullTabChange = changes2.u[0].v;
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test4', 'item[0].name should be test4 now' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test4', 'item[0].myvalue should be test4 now' );
+        expect( fullTabChange.v.name ).toBe( 'test4');
+        expect( fullTabChange.v.myvalue ).toBe( 'test4');
     } );
 
     it( 'send obj from model (with push to server reject) as arg to handler', () => {
@@ -540,8 +541,8 @@ describe( 'JSONArrayConverter', () => {
         
         valCaT = changesAndVal[1];
         
-        expect(changes.vEr).toBe(0, 'full value being sent to server');
-        expect(changes.v).toBeDefined('change object should have a value');
+        expect(changes.vEr).toBe(0);
+        expect(changes.v).toBeDefined();
         expect(changes.v[0]).toBe('test1');
 
         valCaT[0] = 'test4';
@@ -551,7 +552,7 @@ describe( 'JSONArrayConverter', () => {
         // inside the model it is push to server reject
         const changes2: ICATNoOpToServer = converterService.convertFromClientToServer(valCaT, untypedObjectArrayWithREJECTOnElementsType, valCaT,
             getParentPropertyContext(untypedObjectArrayWithREJECTOnElementsPushToServer))[0];
-        expect( changes2.n ).toBeTrue();
+        expect( changes2.n ).toBe(true);
     } );
 
     it( 'change array el. by ref but do not send to server (so it still has changes to send for the model property), then send array as arg to handler, change another tab by ref; both tabs changed by ref in the model should be then sent to server', () => {
@@ -572,20 +573,20 @@ describe( 'JSONArrayConverter', () => {
         val = changesAndVal[1];
         
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object should have updates' );
-        expect( changes.v.length ).toBe( 3, 'should have 3 values' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 3);
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test1', 'item[0].name should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test1', 'item[0].myvalue should be test1' );
+        expect( fullTabChange.v.name ).toBe( 'test1');
+        expect( fullTabChange.v.myvalue ).toBe( 'test1');
         fullTabChange = changes.v[1];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test2two', 'item[1].name should be test2two' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test2two', 'item[1].myvalue should be test2two' );
+        expect( fullTabChange.v.name ).toBe( 'test2two');
+        expect( fullTabChange.v.myvalue ).toBe( 'test2two');
         fullTabChange = changes.v[2];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test3', 'item[2].name should be test3' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test3', 'item[2].myvalue should be test3' );
+        expect( fullTabChange.v.name ).toBe( 'test3');
+        expect( fullTabChange.v.myvalue ).toBe( 'test3');
 
         val[0] = { name: 'test4', myvalue: 'test4' };
 
@@ -593,18 +594,18 @@ describe( 'JSONArrayConverter', () => {
 
         const changes2: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.vEr ).toBe( 1, 'checking version for element update' );
-        expect( changes2.u.length ).toBe( 2, 'checking that it is exactly 2 updates' );
-        expect( changes2.u[0].i ).toBe( 1, 'checking that first is the first el' );
-        expect( changes2.u[1].i ).toBe( 0, 'checking that first is the first el' );
+        expect( changes2.vEr ).toBe( 1);
+        expect( changes2.u.length ).toBe( 2);
+        expect( changes2.u[0].i ).toBe( 1);
+        expect( changes2.u[1].i ).toBe( 0);
         fullTabChange = changes2.u[0].v;
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test2two', 'item[1].name should be test2two now' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test2two', 'item[1].myvalue should be test2two now' );
+        expect( fullTabChange.v.name ).toBe( 'test2two');
+        expect( fullTabChange.v.myvalue ).toBe( 'test2two');
         fullTabChange = changes2.u[1].v;
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test4', 'item[0].name should be test4 now' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test4', 'item[0].myvalue should be test4 now' );
+        expect( fullTabChange.v.name ).toBe( 'test4');
+        expect( fullTabChange.v.myvalue ).toBe( 'test4');
     } );
 
     it( 'send array as arg to handler, change a tab subprop', () => {
@@ -623,20 +624,20 @@ describe( 'JSONArrayConverter', () => {
         val = changesAndVal[1];
         
         expect( changes.vEr ).toBe( 0 );
-        expect( changes.v ).toBeDefined( 'change object should have updates' );
-        expect( changes.v.length ).toBe( 3, 'should have 3 values' );
+        expect( changes.v ).toBeDefined();
+        expect( changes.v.length ).toBe( 3);
         let fullTabChange: ICOTFullObjectToServer = changes.v[0];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test1', 'item[0].name should be test1' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test1', 'item[0].myvalue should be test1' );
+        expect( fullTabChange.v.name ).toBe( 'test1');
+        expect( fullTabChange.v.myvalue ).toBe( 'test1');
         fullTabChange = changes.v[1];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test2', 'item[1].name should be test2' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test2', 'item[1].myvalue should be test2' );
+        expect( fullTabChange.v.name ).toBe( 'test2');
+        expect( fullTabChange.v.myvalue ).toBe( 'test2');
         fullTabChange = changes.v[2];
         expect( fullTabChange.vEr ).toBe( 0 );
-        expect( fullTabChange.v.name ).toBe( 'test3', 'item[2].name should be test3' );
-        expect( fullTabChange.v.myvalue ).toBe( 'test3', 'item[2].myvalue should be test3' );
+        expect( fullTabChange.v.name ).toBe( 'test3');
+        expect( fullTabChange.v.myvalue ).toBe( 'test3');
 
         val[0].myvalue = 'test4';
 
@@ -644,14 +645,14 @@ describe( 'JSONArrayConverter', () => {
 
         const changes2: ICATGranularUpdatesToServer = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, val,
             getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer))[0];
-        expect( changes2.vEr ).toBe( 1, 'checking version for element update' );
-        expect( changes2.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( changes2.u[0].i ).toBe( 0, 'checking that it is first el' );
+        expect( changes2.vEr ).toBe( 1);
+        expect( changes2.u.length ).toBe( 1);
+        expect( changes2.u[0].i ).toBe( 0);
         const partialTabChange: ICOTGranularUpdatesToServer = changes2.u[0].v;
         expect( partialTabChange.vEr ).toBe( 1 );
-        expect( partialTabChange.u.length ).toBe( 1, 'checking that it is exactly 1 update' );
-        expect( partialTabChange.u[0].k ).toBe( 'myvalue', 'checking that it is first el' );
-        expect( partialTabChange.u[0].v ).toBe( 'test4', 'item[0].myvalue should be test4 now' );
+        expect( partialTabChange.u.length ).toBe( 1);
+        expect( partialTabChange.u[0].k ).toBe( 'myvalue');
+        expect( partialTabChange.u[0].v ).toBe( 'test4');
     } );
 
 // THIS will currently not work - we need to be smarter if we want this; so a javascript port of java class ArrayGranularChangeKeeper
@@ -669,7 +670,7 @@ describe( 'JSONArrayConverter', () => {
 //
 //        expect( changes[CONTENT_VERSION] ).toBe( 1 );
 //        expect( changes[UPDATES] ).toBeDefined( 'change object  shoulld have updates' );
-//        expect( changes[UPDATES].length ).toBe( 2, 'should have 2 update' );
+//        expect( changes[UPDATES].length ).toBe( 2);
 //
 //        expect( changes[UPDATES][0][INDEX] ).toBe( 1 );
 //        expect( changes[UPDATES][0][VALUE] ).toBeDefined( 'change object  shoulld have value' );
@@ -700,11 +701,11 @@ describe( 'JSONArrayConverter', () => {
 //
 //        expect( changes[CONTENT_VERSION] ).toBe( 1 );
 //        expect( changes[UPDATES] ).toBeDefined( 'change object  shoulld have updates' );
-//        expect( changes[UPDATES].length ).toBe( 3, 'should have 1 update' );
+//        expect( changes[UPDATES].length ).toBe( 3);
 //        expect( changes[UPDATES][0][INDEX] ).toBe( 0 );
 //        expect( changes[UPDATES][0][VALUE][CONTENT_VERSION] ).toBe( 1 );
 //        expect( changes[UPDATES][0][VALUE][UPDATES] ).toBeDefined( 'change object  shoulld have updates' );
-//        expect( changes[UPDATES][0][VALUE][UPDATES].length ).toBe( 1, 'should have 1 update' );
+//        expect( changes[UPDATES][0][VALUE][UPDATES].length ).toBe( 1);
 //        expect( changes[UPDATES][0][VALUE][UPDATES][0][KEY] ).toBe( 'myvalue' );
 //        expect( changes[UPDATES][0][VALUE][UPDATES][0][VALUE] ).toBe( 'test4' );
 //
@@ -728,10 +729,10 @@ describe( 'JSONArrayConverter', () => {
         const val = arr as TabHolder;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
-        expect( val.tabs.length ).toBe( 3, 'should have 3 tabs' );
+        expect( val.tabs.length ).toBe( 3);
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, tabHolderElementsType, val,
             getParentPropertyContext(tabHolderElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'update a tab in the tabs array of the TabHolder', () => {
@@ -746,9 +747,9 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(tabHolderElementsPushToServer))[0];
 
         expect( changes.vEr ).toBe( 1 );
-        expect( changes.u ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.u.length ).toBe( 1, 'should have 1 update' );
-        expect( changes.u[0].k ).toBe( 'tabs', 'should have tabs key' );
+        expect( changes.u ).toBeDefined();
+        expect( changes.u.length ).toBe( 1);
+        expect( changes.u[0].k ).toBe( 'tabs');
         const changedTabsUpdates: ICATGranularUpdatesToServer = changes.u[0].v;
         expect( changedTabsUpdates.u ).toBeDefined();
         expect( changedTabsUpdates.u.length ).toBe( 1 );
@@ -760,7 +761,7 @@ describe( 'JSONArrayConverter', () => {
 
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, tabHolderElementsType, val,
             getParentPropertyContext(tabHolderElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'add script tabs array into a TabHolder', () => {
@@ -778,9 +779,9 @@ describe( 'JSONArrayConverter', () => {
         const changes: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(val, tabHolderElementsType, val,
             getParentPropertyContext(tabHolderElementsPushToServer))[0];
         expect( changes.vEr ).toBe( 1 );
-        expect( changes.u ).toBeDefined( 'change object  shoulld have updates' );
-        expect( changes.u.length ).toBe( 1, 'should have 1 update' );
-        expect( changes.u[0].k ).toBe( 'tabs', 'should have tabs key' );
+        expect( changes.u ).toBeDefined();
+        expect( changes.u.length ).toBe( 1);
+        expect( changes.u[0].k ).toBe( 'tabs');
         const changedTabsFull: ICATFullArrayToServer = changes.u[0].v;
         expect( changedTabsFull.v ).toBeDefined();
         expect( changedTabsFull.v.length ).toBe( 1 );
@@ -790,7 +791,7 @@ describe( 'JSONArrayConverter', () => {
 
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, tabHolderElementsType, val,
             getParentPropertyContext(tabHolderElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'test mark for change', () => {
@@ -807,9 +808,9 @@ describe( 'JSONArrayConverter', () => {
         const changes: ICOTGranularUpdatesToServer = converterService.convertFromClientToServer(val, tabHolderElementsType, val,
             getParentPropertyContext(tabHolderElementsPushToServer))[0];
         expect( changes.vEr ).toBe( 1 );
-        expect( changes.u ).toBeDefined( 'change object should have updates' );
-        expect( changes.u.length ).toBe( 1, 'should have 1 update' );
-        expect( changes.u[0].k ).toBe( 'tabs', 'should have tabs key' );
+        expect( changes.u ).toBeDefined();
+        expect( changes.u.length ).toBe( 1);
+        expect( changes.u[0].k ).toBe( 'tabs');
 
         const changedTabsFull: ICATFullArrayToServer = changes.u[0].v;
         expect( changedTabsFull.v ).toBeDefined();
@@ -827,27 +828,27 @@ describe( 'JSONArrayConverter', () => {
 
         const changes2: ICOTNoOpToServer = converterService.convertFromClientToServer(val, tabHolderElementsType, val,
             getParentPropertyContext(tabHolderElementsPushToServer))[0];
-        expect( changes2.n ).toBe( true, 'should have no changes now' );
+        expect( changes2.n ).toBe( true);
     } );
 
     it( 'test deep change in an "object[]" with ALLOW', () => {
         const val = converterService.convertFromServerToClient(createSimpleUntypedObjectArray(),
                untypedObjectArrayWithALLOWOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer));
 
-        expect(val.length).toBe(6, 'length not received correctly');
-        expect(val[0]).toBe('test1', 'el. 0 with no conversion not received correctly');
-        expect(val[1].test2).toBe(1, 'el. 1.test2 with no conversion not received correctly');
-        expect(val[1].a).toBe(true, 'el. 1.a with no conversion not received correctly');
-        expect(val[2]).toBe(5, 'el. 2 with no conversion not received correctly');
+        expect(val.length).toBe(6);
+        expect(val[0]).toBe('test1');
+        expect(val[1].test2).toBe(1);
+        expect(val[1].a).toBe(true);
+        expect(val[2]).toBe(5);
 
-        expect(val[3].length).toBe(3, 'el. 3 with no conversion has wrong length');
-        expect(val[3][0]).toBe(1, 'el. 3[0] with no conversion not received correctly');
-        expect(val[3][1]).toBe(2, 'el. 3[1] with no conversion not received correctly');
-        expect(val[3][2]).toBe(3, 'el. 3[2] with no conversion not received correctly');
-        expect(val[4].x.length).toBe(2, 'el. 4.x with conversion has wrong length');
-        expect(val[4].x[0]).toBe('bla', 'el. 4.x[0] with conversion not received correctly');
-        expect(val[4].x[1] instanceof Date).toBeTruthy('el. 4.x[1] with conversion not received correctly or not instance of Date');
-        expect(val[5] instanceof Date).toBeTruthy('el[5] with conversion not received correctly or not instance of Date');
+        expect(val[3].length).toBe(3);
+        expect(val[3][0]).toBe(1);
+        expect(val[3][1]).toBe(2);
+        expect(val[3][2]).toBe(3);
+        expect(val[4].x.length).toBe(2);
+        expect(val[4].x[0]).toBe('bla');
+        expect(val[4].x[1] instanceof Date).toBeTruthy();
+        expect(val[5] instanceof Date).toBeTruthy();
 
         const valSeenExternally = val as ICustomArrayValue<any>;
         const valSeenInternally = val as IChangeAwareValue;
@@ -872,8 +873,8 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].i).toBe(0);
         expect(changes.u[0].v).toBe('changedByRef');
 
@@ -882,7 +883,7 @@ describe( 'JSONArrayConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped array object[]; we do not automatically detect those
         let changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectArrayWithALLOWOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         valSeenExternally.markElementAsHavingDeepChanges!(3);
         checkNotifiedAndTriggeredAndClear(true, false); // DEEP change in element that was marked manually; but as it is ALLOW it does no send it right away to server
@@ -890,17 +891,17 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].i).toBe(3);
-        expect(changes.u[0].v[0]).toBe(1, 'should be unchanged');
-        expect(changes.u[0].v[1]).toBe(2, 'should be unchanged');
-        expect(changes.u[0].v[2]).toBe(15, 'deep change happened here');
+        expect(changes.u[0].v[0]).toBe(1);
+        expect(changes.u[0].v[1]).toBe(2);
+        expect(changes.u[0].v[2]).toBe(15);
 
 
         changes2 = converterService.convertFromClientToServer(val, untypedObjectArrayWithALLOWOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
     it( 'test deep change in an "object[]" with SHALLOW', () => {
@@ -931,8 +932,8 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].i).toBe(0);
         expect(changes.u[0].v).toBe('changedByRef');
 
@@ -941,7 +942,7 @@ describe( 'JSONArrayConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped array object[]; we do not automatically detect those
         let changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectArrayWithSHALLOWOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         valSeenExternally.markElementAsHavingDeepChanges!(3);
         checkNotifiedAndTriggeredAndClear(true, false); // DEEP change in element that was marked manually; but as it is SHALLOW it does no trigger a send right away to server
@@ -949,17 +950,17 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].i).toBe(3);
-        expect(changes.u[0].v[0]).toBe(1, 'should be unchanged');
-        expect(changes.u[0].v[1]).toBe(2, 'should be unchanged');
-        expect(changes.u[0].v[2]).toBe(15, 'deep change happened here');
+        expect(changes.u[0].v[0]).toBe(1);
+        expect(changes.u[0].v[1]).toBe(2);
+        expect(changes.u[0].v[2]).toBe(15);
 
 
         changes2 = converterService.convertFromClientToServer(val, untypedObjectArrayWithSHALLOWOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithSHALLOWOnElementsPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
     it( 'test deep change in an "object[]" with DEEP', () => {
@@ -990,8 +991,8 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithDEEPOnElementsPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].i).toBe(0);
         expect(changes.u[0].v).toBe('changedByRef');
 
@@ -1000,7 +1001,7 @@ describe( 'JSONArrayConverter', () => {
         checkNotifiedAndTriggeredAndClear(false, false); // DEEP change in element - in untyped array object[]; we do not automatically detect those
         let changes2: ICATNoOpToServer = converterService.convertFromClientToServer(val, untypedObjectArrayWithDEEPOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithALLOWOnElementsPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
 
         valSeenExternally.markElementAsHavingDeepChanges!(3);
         checkNotifiedAndTriggeredAndClear(true, true); // DEEP change in element that was marked manually; as it has DEEP pushToServer, it does trigger a send right away to server
@@ -1008,17 +1009,17 @@ describe( 'JSONArrayConverter', () => {
             getParentPropertyContext(untypedObjectArrayWithDEEPOnElementsPushToServer))[0];
 
         expect(changes.vEr).toBe(1);
-        expect(changes.u).toBeDefined('change object should have updates');
-        expect(changes.u.length).toBe(1, 'should have 1 update');
+        expect(changes.u).toBeDefined();
+        expect(changes.u.length).toBe(1);
         expect(changes.u[0].i).toBe(3);
-        expect(changes.u[0].v[0]).toBe(1, 'should be unchanged');
-        expect(changes.u[0].v[1]).toBe(2, 'should be unchanged');
-        expect(changes.u[0].v[2]).toBe(15, 'deep change happened here');
+        expect(changes.u[0].v[0]).toBe(1);
+        expect(changes.u[0].v[1]).toBe(2);
+        expect(changes.u[0].v[2]).toBe(15);
 
 
         changes2 = converterService.convertFromClientToServer(val, untypedObjectArrayWithDEEPOnElementsType, val,
             getParentPropertyContext(untypedObjectArrayWithDEEPOnElementsPushToServer))[0];
-        expect(changes2.n).toBe(true, 'should have no changes now');
+        expect(changes2.n).toBe(true);
     } );
 
     it( 'when an already smart value (received as return value from an server side api call for example) is assigned into the model into a new location and sent to server, it should still work - have a correct change listener etc.', () => {
@@ -1029,21 +1030,21 @@ describe( 'JSONArrayConverter', () => {
         let changeListenerWasCalled = false;
         (val as IChangeAwareValue).getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
 
-        expect(changeListenerWasCalled).toBeFalse();
+        expect(changeListenerWasCalled).toBe(false);
 
         // received as return value from a server side api call
         const childTab = converterService.convertFromServerToClient(createTabJSON('iAmArg'),
                tabJustForTypeType , undefined as any, undefined as any, undefined as any, PushToServerUtils.PROPERTY_CONTEXT_FOR_INCOMMING_ARGS_AND_RETURN_VALUES);
         
-        expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeFalse();
+        expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(false);
 
         // assign it to model val's subproperty
         tabArray[2] = childTab;
 
-        expect(changeListenerWasCalled).toBeTrue();
+        expect(changeListenerWasCalled).toBe(true);
         changeListenerWasCalled = false;
 
-        expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        expect(((childTab as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
 
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICATGranularUpdatesToServer, any] = converterService.convertFromClientToServer(tabArray, tabArrayWithShallowOnElementsType, tabArray,
@@ -1053,8 +1054,8 @@ describe( 'JSONArrayConverter', () => {
         tabArray = changesAndVal[1] as Tab[];
         let tabArrayAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
         
-        expect(tabArrayAsSeenInternally.getInternalState().hasChangeListener()).toBeTrue();
-        expect(((tabArray[2] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBeTrue();
+        expect(tabArrayAsSeenInternally.getInternalState().hasChangeListener()).toBe(true);
+        expect(((tabArray[2] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
         
         expect(changes.vEr).toBe(1);
         expect(changes.u.length).toBe(1);

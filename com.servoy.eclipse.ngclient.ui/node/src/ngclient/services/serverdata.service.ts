@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketService } from '../../sablo/websocket.service';
@@ -9,11 +9,12 @@ import { I18NProvider } from './i18n_provider.service';
 export class  ServerDataService {
 
     private data: {pathName: string;querystring: string;ipaddr: string;hostaddr: string; orientation: number;defaultTranslations: {[key: string]: string}};
-    constructor(windowRefService: WindowRefService,
-                websocketService: WebsocketService,
-                sabloService: SabloService,
-                servoyService: ServoyService,
-                i18NProvider: I18NProvider) {
+    constructor() {
+        const windowRefService = inject(WindowRefService);
+        const websocketService = inject(WebsocketService);
+        const sabloService = inject(SabloService);
+        const servoyService = inject(ServoyService);
+        const i18NProvider = inject(I18NProvider);
         this.data = (windowRefService.nativeWindow as any)['svyData'];
         if (this.data.querystring) websocketService.setQueryString(this.data.querystring);
         if (this.data.pathName) websocketService.setPathname(this.data.pathName);

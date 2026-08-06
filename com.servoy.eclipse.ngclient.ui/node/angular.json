@@ -151,22 +151,11 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "preserveSymlinks": true,
-            "main": "src/test.ts",
-            "karmaConfig": "./karma.conf.js",
-            "polyfills": ["src/polyfills.ts"],
             "tsConfig": "src/tsconfig.spec.json",
-            "codeCoverage": false,
-            "styles": [
-              "src/styles.css"
-            ],
-            "assets": [
-              "src/assets",
-              "src/favicon.ico"
-            ],
-            "sourceMap": true
+            "buildTarget": "dummy:build",
+            "runnerConfig": "vitest-base.config.ts"
           }
         },
         "lint": {
@@ -199,17 +188,11 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],            
-            "preserveSymlinks": true,
             "tsConfig": "projects/servoy-public/tsconfig.spec.json",
-            "karmaConfig": "projects/servoy-public/karma.conf.js",
-            "codeCoverage": false,
-            "sourceMap": true
+            "buildTarget": "dummy:build",
+            "runnerConfig": "vitest-base.config.ts"
           }
         }
       }
@@ -233,17 +216,11 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "preserveSymlinks": true,
             "tsConfig": "projects/ngclientutils/tsconfig.spec.json",
-            "karmaConfig": "projects/ngclientutils/karma.conf.js",
-            "codeCoverage": false,
-            "sourceMap": true
+            "buildTarget": "dummy:build",
+            "runnerConfig": "vitest-base.config.ts"
           }
         }
       }
@@ -267,17 +244,11 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "preserveSymlinks": true,
             "tsConfig": "projects/dialogs/tsconfig.spec.json",
-            "karmaConfig": "projects/dialogs/karma.conf.js",
-            "codeCoverage": false,
-            "sourceMap": true
+            "buildTarget": "dummy:build",
+            "runnerConfig": "vitest-base.config.ts"
           }
         }
       }
@@ -301,18 +272,39 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "preserveSymlinks": true,
             "tsConfig": "projects/window/tsconfig.spec.json",
-            "karmaConfig": "projects/window/karma.conf.js",
-            "codeCoverage": false,
-            "sourceMap": true
+            "buildTarget": "dummy:build",
+            "runnerConfig": "vitest-base.config.ts"
           }
+        }
+      }
+    },
+    "dummy": {
+      "projectType": "application",
+      "root": "projects/dummy",
+      "sourceRoot": "projects/dummy/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/dummy",
+            "index": "projects/dummy/src/index.html",
+            "browser": "projects/dummy/src/main.ts",
+            "tsConfig": "projects/dummy/tsconfig.app.json",
+            "polyfills": [
+              "zone.js"
+            ]
+          },
+          "configurations": {
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "development"
         }
       }
     },
@@ -335,17 +327,11 @@
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "preserveSymlinks": true,
             "tsConfig": "projects/servoydefault/tsconfig.spec.json",
-            "karmaConfig": "projects/servoydefault/karma.conf.js",
-            "codeCoverage": false,
-            "sourceMap": true
+            "buildTarget": "dummy:build",
+            "runnerConfig": "vitest-base.config.ts"
           }
         }
       }
@@ -390,3 +376,4 @@
     "analytics": "29dacfd7-cdec-49f1-8ea1-6dfee8c909c0"
   }
 }
+

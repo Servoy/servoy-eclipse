@@ -1,4 +1,4 @@
-import { Inject, Injectable, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 
 import {BaseCustomObject} from '@servoy/public';
 
@@ -6,7 +6,9 @@ import {BaseCustomObject} from '@servoy/public';
 export class ShortcutService {
     all_shortcuts: any = {};
 
-    constructor(@Inject(DOCUMENT) private doc: Document) {
+    private readonly doc = inject(DOCUMENT) as Document;
+
+    constructor() {
 
     }
 

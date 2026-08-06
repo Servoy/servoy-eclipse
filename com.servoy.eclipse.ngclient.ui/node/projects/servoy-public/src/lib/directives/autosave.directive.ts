@@ -1,4 +1,4 @@
-import { Directive , HostListener, ElementRef} from '@angular/core';
+import { Directive , HostListener, ElementRef, inject} from '@angular/core';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
@@ -7,7 +7,12 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 })
 export class AutosaveDirective {
 
-  constructor(private servoyService: ServoyPublicService, private elementRef: ElementRef) {
+  private servoyService: ServoyPublicService;
+  private elementRef: ElementRef;
+
+  constructor(servoyService?: ServoyPublicService, elementRef?: ElementRef) {
+      this.servoyService = servoyService ?? inject(ServoyPublicService);
+      this.elementRef = elementRef ?? inject(ElementRef);
   }
 
   @HostListener('click', ['$event.target'])

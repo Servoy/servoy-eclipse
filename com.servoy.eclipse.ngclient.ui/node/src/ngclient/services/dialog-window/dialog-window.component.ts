@@ -1,4 +1,4 @@
-import { Component, Inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
 
@@ -16,7 +16,11 @@ import { FormService } from '../../form.service';
     window!: SvyWindow;
     firstTimeFocus = true;
 
-    constructor(private sabloService: SabloService, private formservice: FormService, @Inject(DOCUMENT) private doc: Document) {
+    private readonly sabloService = inject(SabloService);
+    private readonly formservice = inject(FormService);
+    private readonly doc = inject(DOCUMENT) as Document;
+
+    constructor() {
     }
 
     setWindow(window: SvyWindow) {

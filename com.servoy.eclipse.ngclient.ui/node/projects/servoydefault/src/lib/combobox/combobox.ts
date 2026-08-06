@@ -116,18 +116,18 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     }
 
     attachFocusListeners(nativeElement: HTMLElement) {
-        if (this.onFocusGainedMethodID || this.showPopupOnFocusGain)
+        if (this.onFocusGainedMethodID() || this.showPopupOnFocusGain)
             this.renderer.listen(nativeElement, 'focus', (e) => {
-                if (this.onFocusGainedMethodID && !this.skipFocus && this.mustExecuteOnFocus) this.onFocusGainedMethodID(e);
+                if (this.onFocusGainedMethodID() && !this.skipFocus && this.mustExecuteOnFocus) this.onFocusGainedMethodID()(e);
                 if (!this.skipFocus && this.showPopupOnFocusGain && !this.comboboxDropdown.isOpen()) {
                     this.comboboxDropdown.open();
                 }
                 this.skipFocus = false;
                 this.mustExecuteOnFocus = true;
             });
-        if (this.onFocusLostMethodID)
+        if (this.onFocusLostMethodID())
             this.renderer.listen(nativeElement, 'blur', (e) => {
-                if (!this.openState) this.onFocusLostMethodID(e);
+                if (!this.openState) this.onFocusLostMethodID()(e);
             });
     }
 
@@ -160,42 +160,42 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     }
 
     svyOnChanges(changes: SimpleChanges) {
-        this.valueComparator = this.valuelistID && this.valuelistID.isRealValueDate() ? this.dateValueCompare : this.valueCompare;
-        if (changes['dataProviderID'] && this.findmode) {
-            this.formattedValue = this.dataProviderID;
-        } else if ( (changes['dataProviderID'] || changes['valuelistID']) && this.valuelistID) {
+        this.valueComparator = this.valuelistID() && this.valuelistID().isRealValueDate() ? this.dateValueCompare : this.valueCompare;
+        if (changes['dataProviderID'] && this.findmode()) {
+            this.formattedValue = this.dataProviderID();
+        } else if ( (changes['dataProviderID'] || changes['valuelistID']) && this.valuelistID()) {
             // eslint-disable-next-line eqeqeq
-            const valueListElem = this.valuelistID.find(this.valueComparator);
-            if (valueListElem) this.formattedValue = this.formatService.format(valueListElem.displayValue, this.format, false);
+            const valueListElem = this.valuelistID().find(this.valueComparator);
+            if (valueListElem) this.formattedValue = this.formatService.format(valueListElem.displayValue, this.format(), false);
             else {
-				if (!this.valuelistID.hasRealValues())
-                	this.formattedValue = this.formatService.format(this.dataProviderID, this.format, false);
+				if (!this.valuelistID().hasRealValues())
+                	this.formattedValue = this.formatService.format(this.dataProviderID(), this.format(), false);
                 else {
 					this.formattedValue = null;
-                	this.valuelistID.getDisplayValue(this.dataProviderID).subscribe(val => {
+                	this.valuelistID().getDisplayValue(this.dataProviderID()).subscribe(val => {
                     	this.formattedValue = val
                     	this.cdRef.detectChanges();
                 	});
 				}  
             }
         }
-        else if (changes['dataProviderID'] && !this.valuelistID) {
-            this.formattedValue = this.dataProviderID;
+        else if (changes['dataProviderID'] && !this.valuelistID()) {
+            this.formattedValue = this.dataProviderID();
         }
         delete changes['editable']; // ignore the editable property
         if (this.formattedValue === "" || this.formattedValue === null || this.formattedValue === undefined) {
             if (changes['placeholderText']) {
-                this.formattedValue = this.placeholderText;
+                this.formattedValue = this.placeholderText();
             }
         }
         super.svyOnChanges(changes);
     }
 
     updateValue(realValue: any, event: Event) {
-        this.dataProviderID = realValue;
-        this.dataProviderIDChange.emit(this.dataProviderID);
-        if (this.onActionMethodID) {
-            this.onActionMethodID(event);
+        this.dataProviderID.set(realValue);
+        this.dataProviderIDChange.emit(this.dataProviderID());
+        if (this.onActionMethodID()) {
+            this.onActionMethodID()(event);
         }
     }
     
@@ -244,11 +244,11 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     }
 
     // eslint-disable-next-line eqeqeq
-    private valueCompare = (valueListValue: { displayValue: any; realValue: any }): boolean => valueListValue.realValue == this.dataProviderID;
+    private valueCompare = (valueListValue: { displayValue: any; realValue: any }): boolean => valueListValue.realValue == this.dataProviderID();
 
     private dateValueCompare = (valueListValue: { displayValue: any; realValue: Date }): boolean => {
-        if (this.dataProviderID && valueListValue.realValue) {
-            return valueListValue.realValue.getTime() === this.dataProviderID.getTime();
+        if (this.dataProviderID() && valueListValue.realValue) {
+            return valueListValue.realValue.getTime() === this.dataProviderID().getTime();
         }
         return false;
     };

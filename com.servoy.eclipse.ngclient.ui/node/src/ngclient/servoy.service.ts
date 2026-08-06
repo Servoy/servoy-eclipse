@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
@@ -84,21 +84,25 @@ export class ServoyService {
     private resizeObservable$!: Observable<Event>;
     private resizeSubscription$!: Subscription;
 
-    constructor(private websocketService: WebsocketService,
-        private sabloService: SabloService,
-        private windowRefService: WindowRefService,
-        private utils: SvyUtilsService,
-        private sessionStorageService: SessionStorageService,
-        private localeService: LocaleService,
-        private clientFunctionService: ClientFunctionService,
-        private converterService: ConverterService<unknown>,
-        typesRegistry: TypesRegistry,
-        sabloDeferHelper: SabloDeferHelper,
-        logFactory: LoggerFactory,
-        viewportService: ViewportService,
-        specTypesService: SpecTypesService) {
+    private readonly websocketService = inject(WebsocketService);
+    private readonly sabloService = inject(SabloService);
+    private readonly windowRefService = inject(WindowRefService);
+    private readonly utils = inject(SvyUtilsService);
+    private readonly sessionStorageService = inject(SessionStorageService);
+    private readonly localeService = inject(LocaleService);
+    private readonly clientFunctionService = inject(ClientFunctionService);
+    private readonly converterService = inject(ConverterService<unknown>);
 
-        this.uiProperties = new UIProperties(sessionStorageService);
+    constructor() {
+        const typesRegistry = inject(TypesRegistry);
+        const sabloDeferHelper = inject(SabloDeferHelper);
+        const logFactory = inject(LoggerFactory);
+        const viewportService = inject(ViewportService);
+        const specTypesService = inject(SpecTypesService);
+        const converterService = this.converterService;
+        const sabloService = this.sabloService;
+
+        this.uiProperties = new UIProperties(this.sessionStorageService);
         this.uiBlockerService = new UIBlockerService(this);
 
         typesRegistry.registerGlobalType(DatasetType.TYPE_NAME, new DatasetType(typesRegistry, converterService));
@@ -115,7 +119,7 @@ export class ServoyService {
         typesRegistry.registerGlobalType(FoundsetRefType.TYPE_NAME, new FoundsetRefType());
         typesRegistry.registerGlobalType(FoundsetLinkedType.TYPE_NAME, new FoundsetLinkedType(sabloService, viewportService, logFactory));
         typesRegistry.registerGlobalType(FormcomponentType.TYPE_NAME, new FormcomponentType(converterService, typesRegistry));
-        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, this.sabloService, this.uiBlockerService));
+        typesRegistry.registerGlobalType(ComponentType.TYPE_NAME, new ComponentType(converterService, typesRegistry, logFactory, viewportService, sabloService, this.uiBlockerService));
 
         typesRegistry.registerGlobalType(ClientFunctionType.TYPE_NAME, new ClientFunctionType(this.windowRefService));
         typesRegistry.registerGlobalType(ServerFunctionType.TYPE_NAME, new ServerFunctionType(this, this.utils));

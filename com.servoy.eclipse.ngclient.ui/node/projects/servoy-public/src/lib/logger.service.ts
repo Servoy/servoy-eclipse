@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { WindowRefService } from './services/windowref.service';
 
@@ -111,9 +111,11 @@ export class LoggerFactory {
 
     private instances: {[k: string]: LoggerService} = {};
     private defaultLogConfiguration: LogConfiguration;
+    private windowRefService: WindowRefService;
 
-    constructor(private windowRefService: WindowRefService ) {
-        const win = windowRefService.nativeWindow as unknown as ServoyWindow;
+    constructor(windowRefService?: WindowRefService ) {
+        this.windowRefService = windowRefService ?? inject(WindowRefService);
+        const win = this.windowRefService.nativeWindow as unknown as ServoyWindow;
         win.logFactory = this;
         this.defaultLogConfiguration = win.svyLogConfiguration;
         if ( this.defaultLogConfiguration == null ) {

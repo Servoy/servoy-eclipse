@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
 import { Subscription, interval, Subject } from 'rxjs';
 import { ReconnectingWebSocket } from './io/reconnecting.websocket';
 import { WindowRefService } from '@servoy/public';
@@ -16,6 +16,12 @@ import { MobileBridge } from './io/mobilebridge';
 export class WebsocketService {
     public reconnectingEmitter = new Subject<boolean>();
 
+    private readonly windowRef = inject(WindowRefService);
+    private readonly converterService = inject(ConverterService<unknown>);
+    private readonly logFactory = inject(LoggerFactory);
+    private readonly loadingIndicatorService = inject(LoadingIndicatorService);
+    private readonly ngZone = inject(NgZone);
+
     private pathname!: string;
     private queryString!: string;
     private wsSession!: WebsocketSession;
@@ -23,11 +29,7 @@ export class WebsocketService {
     private connectionArguments: Record<string, any> = {};
     private lastServerMessageNumber: number | null = null;
 
-    constructor(private windowRef: WindowRefService,
-        private converterService: ConverterService<unknown>,
-        private logFactory: LoggerFactory,
-        private loadingIndicatorService: LoadingIndicatorService,
-        private ngZone: NgZone) {
+    constructor() {
     }
 
     public connect(context: string, args: string[], queryArgs?: Record<string,unknown>, websocketUri?: string): WebsocketSession {

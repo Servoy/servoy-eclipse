@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ContentChild, TemplateRef, ChangeDetectorRef, SimpleChanges, Renderer2, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Input, model, ContentChild, TemplateRef, ChangeDetectorRef, SimpleChanges, Renderer2, ChangeDetectionStrategy} from '@angular/core';
 
 import { ServoyBaseComponent } from '@servoy/public';
 
@@ -30,8 +30,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
     @Input() tabs!: Array<Tab>;
     @Input() transparent: any;
 
-    @Input() divLocation: any;
-    @Output() divLocationChange = new EventEmitter();
+    readonly divLocation = model<any>(undefined as any);
     @Input() divSize: any;
     @Input() pane1MinSize: any;
     @Input() pane2MinSize: any;
@@ -86,8 +85,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
     }
 
     onChange( location: any ) {
-        this.divLocation = location;
-        this.divLocationChange.emit(this.divLocation);
+        this.divLocation.set(location);
         if (this.onChangeMethodID) this.onChangeMethodID(-1, new Event('change'));
     }
 

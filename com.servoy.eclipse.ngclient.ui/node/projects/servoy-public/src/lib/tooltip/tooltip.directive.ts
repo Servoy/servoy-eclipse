@@ -1,4 +1,4 @@
-import { Directive, HostListener, Input, OnDestroy } from '@angular/core';
+import { Directive, HostListener, input, OnDestroy, inject } from '@angular/core';
 import { TooltipService } from './tooltip.service';
 import { HTMLTooltipDirective } from './tooltip-html.directive';
 import { ServoyPublicService } from '../services/servoy_public.service';
@@ -9,10 +9,13 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 })
 export class TooltipDirective extends HTMLTooltipDirective {
 
-    @Input('svyTooltip') override tooltipText: string | undefined;
+    override readonly tooltipText = input<string | undefined>(undefined, { alias: 'svyTooltip' });
 
-        constructor(tooltipService: TooltipService, private servoyService: ServoyPublicService) {
+    private servoyService: ServoyPublicService;
+
+    constructor(tooltipService?: TooltipService, servoyService?: ServoyPublicService) {
         super(tooltipService);
+        this.servoyService = servoyService ?? inject(ServoyPublicService);
     }
 
     protected getInitialDelay(): number {

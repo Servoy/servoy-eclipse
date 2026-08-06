@@ -1,4 +1,4 @@
-import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { I18NProvider } from '../i18n_provider.service';
 
@@ -52,7 +52,10 @@ export class FileUploadWindowComponent {
     isUploading = false;
     onCloseCallback!: () => void;
 
-    constructor(private http: HttpClient, i18nProvider: I18NProvider) {
+    private readonly http = inject(HttpClient);
+
+    constructor() {
+        const i18nProvider = inject(I18NProvider);
         i18nProvider.listenForI18NMessages(
             'servoy.filechooser.button.upload',
             'servoy.filechooser.upload.addFile',

@@ -1,4 +1,5 @@
-import { TestBed, inject , fakeAsync, flush, discardPeriodicTasks} from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 
 import { WebsocketService } from './websocket.service';
 
@@ -17,9 +18,9 @@ describe('WebsocketService', () => {
       (window as any)['Web' + 'Socket'] = WebSocketMock;
 
       windowRef =  {nativeWindow: {}};
-      const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi', 'updateServiceScopes']);
-      const converterService = jasmine.createSpyObj('ConverterService', ['convertFromServerToClient', 'convertFromClientToServer', 'convertClientObject']);
-      const loadingIndicatorService = jasmine.createSpyObj('SabloLoadingIndicator', ['showLoading', 'hideLoading', 'isShowing']);
+      const servicesService = { callServiceApi: vi.fn(), updateServiceScopes: vi.fn() } as any;
+      const converterService = { convertFromServerToClient: vi.fn(), convertFromClientToServer: vi.fn(), convertClientObject: vi.fn() } as any;
+      const loadingIndicatorService = { showLoading: vi.fn(), hideLoading: vi.fn(), isShowing: vi.fn() } as any;
       TestBed.configureTestingModule({
       providers: [WebsocketService,
                   {provide: WindowRefService, useFactory: () => windowRef},
@@ -33,16 +34,19 @@ describe('WebsocketService', () => {
       (window as any)['WebSocket'] = normalWebSocket;
   });
 
-  it('should be created', inject([WebsocketService], (service: WebsocketService) => {
+  it('should be created', () => {
+    const service = TestBed.inject(WebsocketService);
     expect(service).toBeTruthy();
-  }));
-  it('should be make a connection', inject([WebsocketService], fakeAsync((service: WebsocketService) => {
+  });
+  it('should be make a connection', () => {
+      vi.useFakeTimers();
+      const service = TestBed.inject(WebsocketService);
       windowRef.nativeWindow = { location: {protocol: 'http', host: 'localhost', pathname: '/'}};
      const session = service.connect('', [], {}, null as any);
-    flush(2);
+    vi.advanceTimersByTime(10);
      expect( session.isConnected()).toBeTruthy();
-     discardPeriodicTasks();
-    })));
+     vi.useRealTimers();
+    });
 });
 
 

@@ -1,4 +1,4 @@
-import { Inject, Injectable, SecurityContext, DOCUMENT } from '@angular/core';
+import { inject, Injectable, SecurityContext, DOCUMENT } from '@angular/core';
 
 import { ServoyPublicService, Callback, BaseCustomObject, TooltipService } from '@servoy/public';
 import { createPopper, VirtualElement } from '@popperjs/core';
@@ -96,7 +96,12 @@ export class PopupMenuService {
 		}
 	}
 
-	constructor(private domSanitizer: DomSanitizer, private servoyService: ServoyPublicService, @Inject(DOCUMENT) private doc: Document,private tooltipService: TooltipService) {
+	private readonly domSanitizer = inject(DomSanitizer);
+	private readonly servoyService = inject(ServoyPublicService);
+	private readonly doc = inject(DOCUMENT) as Document;
+	private readonly tooltipService = inject(TooltipService);
+
+	constructor() {
 
 	}
 

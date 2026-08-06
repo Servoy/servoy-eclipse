@@ -1,4 +1,4 @@
-import { Directive , Input, OnInit, HostListener} from '@angular/core';
+import { Directive, input, OnInit, HostListener, inject} from '@angular/core';
 import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
@@ -6,13 +6,15 @@ import { ServoyPublicService } from '../services/servoy_public.service';
     standalone: false
 })
 export class UploadDirective implements OnInit {
-    @Input() formname!: string;
-    @Input() componentName!: string;
+    readonly formname = input<string>(undefined as any);
+    readonly componentName = input<string>(undefined as any);
 
     private url!: string;
     private propertyName = 'dataProviderID';
+    private servoyService: ServoyPublicService;
 
-    constructor(private servoyService: ServoyPublicService) {
+    constructor(servoyService?: ServoyPublicService) {
+        this.servoyService = servoyService ?? inject(ServoyPublicService);
     }
 
     @HostListener('click',['$event']) click(e: Event) {
@@ -20,7 +22,7 @@ export class UploadDirective implements OnInit {
     }
 
     ngOnInit(): void {
-        this.url = this.servoyService.generateUploadUrl(this.formname, this.componentName, this.propertyName);
+        this.url = this.servoyService.generateUploadUrl(this.formname(), this.componentName(), this.propertyName);
     }
 
 }

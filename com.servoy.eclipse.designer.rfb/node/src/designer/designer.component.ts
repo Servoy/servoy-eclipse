@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService } from './services/editorsession.service';
 import { URLParserService } from 'src/designer/services/urlparser.service';
 
@@ -13,10 +13,9 @@ export class DesignerComponent implements OnInit {
 
     @ViewChild('contentArea', { static: false }) contentArea!: ElementRef<HTMLElement>;
 
-    constructor(public readonly editorSession: EditorSessionService, 
-                public urlParser: URLParserService, 
-                protected readonly renderer: Renderer2) {
-    }
+    public readonly editorSession = inject(EditorSessionService);
+    public urlParser = inject(URLParserService);
+    protected readonly renderer = inject(Renderer2);
 
     ngOnInit() {
         this.editorSession.connect();

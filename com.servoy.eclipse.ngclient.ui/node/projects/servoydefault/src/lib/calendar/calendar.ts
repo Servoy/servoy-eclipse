@@ -89,12 +89,12 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     attachFocusListeners(nativeElement: any) {
-        if (this.onFocusGainedMethodID != null) {
+        if (this.onFocusGainedMethodID() != null) {
             this.renderer.listen(nativeElement, 'focus', () => this.checkOnFocus());
             this.picker!.subscribe(Namespace.events.show, () => this.checkOnFocus());
         }
 
-        if (this.onFocusLostMethodID != null) {
+        if (this.onFocusLostMethodID() != null) {
             this.renderer.listen(nativeElement, 'blur', () => this.checkOnBlur());
             this.picker!.subscribe(Namespace.events.hide, () => this.checkOnBlur());
         }
@@ -111,11 +111,11 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             }
 
         if (changes.dataProviderID && this.picker) {
-            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID, undefined, this.config.localization) : undefined;
+            const value = (this.dataProviderID() instanceof Date) ? DateTime.convert(this.dataProviderID(), undefined, this.config.localization) : undefined;
             this.picker.dates.setValue(value);
         }
-        if (this.dataProviderID && !this.findmode) {
-            const value = (this.dataProviderID instanceof Date) ? DateTime.convert(this.dataProviderID, undefined, this.config.localization) : undefined;
+        if (this.dataProviderID() && !this.findmode()) {
+            const value = (this.dataProviderID() instanceof Date) ? DateTime.convert(this.dataProviderID(), undefined, this.config.localization) : undefined;
             this.config.viewDate = value ?? undefined;
        }
         if (changes.format)
@@ -155,22 +155,22 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
 
     public dateChanged(event: any) {
         if (event.type === 'change.td') {
-            if ((event.date && this.dataProviderID && event.date.getTime() === this.dataProviderID.getTime()) ||
-                (!event.date && !this.dataProviderID)) return;
-            this.dataProviderID = !event.date?null:event.date;
-        } else this.dataProviderID = null;
+            if ((event.date && this.dataProviderID() && event.date.getTime() === this.dataProviderID().getTime()) ||
+                (!event.date && !this.dataProviderID())) return;
+            this.dataProviderID.set(!event.date?null:event.date);
+        } else this.dataProviderID.set(null);
         super.pushUpdate();
     }
 
     public modelChange(event: any) {
-        if (this.findmode) {
-            this.dataProviderID = event;
+        if (this.findmode()) {
+            this.dataProviderID.set(event);
             super.pushUpdate();
         }
         else  if (event === undefined ||
             event.toString() === 'Invalid Date') {
                 // revert to old value
-                this.svyFormat.writeValue(this.dataProviderID);
+                this.svyFormat.writeValue(this.dataProviderID());
         }
     }
 
@@ -188,17 +188,17 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             (this.inputElementRef.nativeElement as HTMLInputElement).value='';
             this.picker = new TempusDominus(this.getNativeElement(), this.config);
             (this.inputElementRef.nativeElement as HTMLInputElement).value = currentValue;
-            this.picker.dates.formatInput =  (date: DateTime) => date?this.formattingService.format(date, this.format, false):'';
+            this.picker.dates.formatInput =  (date: DateTime) => date?this.formattingService.format(date, this.format(), false):'';
             this.picker.dates.parseInput =  (value: string) => {
-                const parsed = this.formattingService.parse(value?value.trim():null, this.format, true, this.dataProviderID, true);
+                const parsed = this.formattingService.parse(value?value.trim():null, this.format(), true, this.dataProviderID(), true);
                 if (parsed instanceof Date && !isNaN(parsed.getTime())) return  new DateTime(parsed);
                 return null as unknown as DateTime;
             };
             this.picker.subscribe(Namespace.events.change, (event) => this.dateChanged(event));
-            if (this.onFocusGainedMethodID != null) {
+            if (this.onFocusGainedMethodID() != null) {
                 this.picker.subscribe(Namespace.events.show, () => this.checkOnFocus());
             }
-            if (this.onFocusLostMethodID != null) {
+            if (this.onFocusLostMethodID() != null) {
                 this.picker.subscribe(Namespace.events.hide, () => this.checkOnBlur());
             }
         }
@@ -210,7 +210,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
             if (this.hasFocus && this.isBlur && (this.doc.activeElement!.parentElement !== this.getNativeElement())) {
                 this.hasFocus = false;
                 this.isBlur = false;
-                this.onFocusLostMethodID(new CustomEvent('blur'));
+                this.onFocusLostMethodID()(new CustomEvent('blur'));
             }
         });
     }
@@ -219,7 +219,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         this.isBlur = false;
         if (!this.hasFocus) {
             this.hasFocus = true;
-            this.onFocusGainedMethodID(new CustomEvent('focus'));
+            this.onFocusGainedMethodID()(new CustomEvent('focus'));
         }
     }
 

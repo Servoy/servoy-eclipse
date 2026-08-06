@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 import { ObjectType } from './converters/object_converter';
 import { DateType } from './converters/date_converter';
@@ -30,16 +30,18 @@ export class ConverterService<T> {
     public static CONVERSION_CL_SIDE_TYPE_KEY = '_T';
     public static VALUE_KEY = '_V';
 
-    private log!: LoggerService;
+    private readonly log: LoggerService;
     private lookedUpObjectType!: IType<any>;
+    private readonly typesRegistry = inject(TypesRegistry);
 
-    constructor(logFactory: LoggerFactory, private typesRegistry: TypesRegistry) {
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.log = logFactory.getLogger('ConverterService');
 
         const dateType = new DateType();
-        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, dateType);
-        typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, dateType);
-        typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(typesRegistry, this, logFactory)); // used for 'object' type as well as for the default conversions
+        this.typesRegistry.registerGlobalType(DateType.TYPE_NAME_SVY, dateType);
+        this.typesRegistry.registerGlobalType(DateType.TYPE_NAME_SABLO, dateType);
+        this.typesRegistry.registerGlobalType(ObjectType.TYPE_NAME, new ObjectType(this.typesRegistry, this, logFactory));
     }
 
     public static getCombinedPropertyNames(now: any, prev: any) {

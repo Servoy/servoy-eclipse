@@ -1,4 +1,5 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 
 import {WebsocketService} from '../sablo/websocket.service';
 import {SabloService} from '../sablo/sablo.service';
@@ -16,10 +17,10 @@ describe('FormService', () => {
   let converterService;
   let servoyService;
   beforeEach(() => {
-      websocketService = jasmine.createSpyObj('WebsocketService', {getSession: new Promise<any>((e)=>{})});
-      sabloService = jasmine.createSpyObj('SabloService', ['connect']);
-      converterService = jasmine.createSpyObj('SabloService', ['convertFromClientToServer']);
-      servoyService = jasmine.createSpyObj('ServoyService', ['setFindMode']);
+      websocketService = { getSession: vi.fn().mockReturnValue(Promise.resolve({ onMessageObject: vi.fn() })) } as any;
+      sabloService = { connect: vi.fn() } as any;
+      converterService = { convertFromClientToServer: vi.fn() } as any;
+      servoyService = { setFindMode: vi.fn() } as any;
     TestBed.configureTestingModule({
       providers: [FormService,
                           LoggerFactory,
@@ -32,10 +33,11 @@ describe('FormService', () => {
     });
   });
 
-  it('should be created', inject([FormService], (service: FormService) => {
+  it('should be created', () => {
+      const service = TestBed.inject(FormService);
       expect(service).toBeTruthy();
       expect(websocketService.getSession).toHaveBeenCalled();
-  }));
+  });
 });
 
 class WebsocketServiceMock {

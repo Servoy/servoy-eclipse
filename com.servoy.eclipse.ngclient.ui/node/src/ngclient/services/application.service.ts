@@ -1,4 +1,4 @@
-import { Injectable, Inject, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 
 
 import { ServoyService } from '../servoy.service';
@@ -21,19 +21,21 @@ import numbro from 'numbro';
 @Injectable()
 export class ApplicationService {
     private userProperties!: { [property: string]: any };
-    private log: LoggerService;
+    private readonly log: LoggerService;
     private minElectronVersion = '24.4.0';
 
-    constructor(private servoyService: ServoyService,
-        private localStorageService: LocalStorageService,
-        private localeService: LocaleService,
-        private windowRefService: WindowRefService,
-        private mainViewRefService: MainViewRefService,
-        private sabloService: SabloService,
-        @Inject(DOCUMENT) private doc: Document,
-        private bsWindowManager: BSWindowManager,
-        private serverData: ServerDataService,
-        logFactory: LoggerFactory) {
+    private readonly servoyService = inject(ServoyService);
+    private readonly localStorageService = inject(LocalStorageService);
+    private readonly localeService = inject(LocaleService);
+    private readonly windowRefService = inject(WindowRefService);
+    private readonly mainViewRefService = inject(MainViewRefService);
+    private readonly sabloService = inject(SabloService);
+    private readonly doc = inject(DOCUMENT) as Document;
+    private readonly bsWindowManager = inject(BSWindowManager);
+    private readonly serverData = inject(ServerDataService);
+
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.log = logFactory.getLogger('ApplicationService');
     }
 

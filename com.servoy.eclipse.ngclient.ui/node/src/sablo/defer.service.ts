@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Deferred, IDeferred } from '@servoy/public';
 
 import { LoggerService, LoggerFactory } from '@servoy/public';
@@ -9,9 +9,11 @@ import { SabloService } from './sablo.service';
 })
 export class SabloDeferHelper {
 
-    private log: LoggerService;
+    private readonly log: LoggerService;
+    private readonly sabloService = inject(SabloService);
 
-    constructor(logFactory: LoggerFactory, private sabloService: SabloService) {
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.log = logFactory.getLogger('SabloDeferHelper');
     }
 

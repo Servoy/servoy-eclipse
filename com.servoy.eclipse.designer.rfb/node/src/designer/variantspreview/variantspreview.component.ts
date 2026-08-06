@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, AfterViewInit, Input, ViewEncapsulation, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Renderer2, ViewChild, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -17,7 +17,7 @@ import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 })
 export class VariantsPreviewComponent implements AfterViewInit {
 
-    @Input() component!: PaletteComp;
+    component = input<PaletteComp>();
     @ViewChild('popover') popover!: NgbPopover;
 	@ViewChild('variantGlasspane') glasspane!: ElementRef; 
 	@ViewChild('variantContent') content!: ElementRef;
@@ -40,10 +40,15 @@ export class VariantsPreviewComponent implements AfterViewInit {
     scrollbarwidth = 32;
 	showVariantPopup = false;
 	
-    constructor(private sanitizer: DomSanitizer, private urlParser: URLParserService, protected readonly renderer: Renderer2,
-        private windowRef: WindowRefService, private popoverCfgRef: NgbPopoverConfig, private editorSession: EditorSessionService,
-		private editorContentService: EditorContentService) {
-	
+    private sanitizer = inject(DomSanitizer);
+    private urlParser = inject(URLParserService);
+    protected readonly renderer = inject(Renderer2);
+    private windowRef = inject(WindowRefService);
+    private popoverCfgRef = inject(NgbPopoverConfig);
+    private editorSession = inject(EditorSessionService);
+    private editorContentService = inject(EditorContentService);
+
+    constructor() {
 		this.editorSession.variantsTrigger.subscribe((value) => {
 			if (value.show == true) {
 				this.top = value.top!;
@@ -63,24 +68,24 @@ export class VariantsPreviewComponent implements AfterViewInit {
 
 		this.document = this.editorContentService.getDocument();
 
-		popoverCfgRef.autoClose = false;
-		popoverCfgRef.triggers = 'manual';
+		this.popoverCfgRef.autoClose = false;
+		this.popoverCfgRef.triggers = 'manual';
     }
 
     ngAfterViewInit() {
         this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/VariantsForm/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
 		this.windowRef.nativeWindow.addEventListener('message', (event) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+             
 			if (event.data.id === 'resizePopover') {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+                 
                 this.setPopoverSizeAndPosition(event.data.formWidth, event.data.formHeight);
                 
 				this.showPopover();
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+             
             } else if (event.data.id === 'onVariantMouseDown') {
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+				 
 				this.onVariantMouseDown(event.data.pageX, event.data.pageY);
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+			 
 			} else if (event.data.id === 'variantsReady') {
 				this.variantsIFrame = this.document.getElementById('VariantsForm') as HTMLIFrameElement;
 				this.variantsIFrame.contentWindow!.document.body.addEventListener('mouseup', this.onMouseUp);

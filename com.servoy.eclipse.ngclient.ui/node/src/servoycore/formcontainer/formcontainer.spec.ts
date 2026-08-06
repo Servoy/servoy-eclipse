@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyPublicModule } from '@servoy/public';
 import { ServoyTestingModule } from '../../testing/servoytesting.module';
@@ -10,11 +12,12 @@ describe('ServoyCoreFormContainer', () => {
   let component: ServoyCoreFormContainer;
   let fixture: ComponentFixture<ServoyCoreFormContainer>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [ ServoyCoreFormContainer ],
       imports: [ServoyTestingModule, ServoyPublicModule, NoopAnimationsModule],
-      providers: [ { provide: FormService, useValue: {getFormCacheByName: () => {} }} ]
+      providers: [ { provide: FormService, useValue: {getFormCacheByName: () => {} }} ],
+      schemas: [ NO_ERRORS_SCHEMA ]
     })
     .compileComponents();
   });
@@ -22,7 +25,7 @@ describe('ServoyCoreFormContainer', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyCoreFormContainer);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml','registerComponent','unRegisterComponent']);
+    component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     fixture.detectChanges();
   });
 

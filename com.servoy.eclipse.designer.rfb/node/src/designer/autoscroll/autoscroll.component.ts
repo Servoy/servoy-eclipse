@@ -1,5 +1,5 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, Input, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
@@ -14,7 +14,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 export class AutoscrollComponent implements OnInit, AfterViewInit {
 
     @ViewChild('autoscroll', {static: false}) autoscrollElement!: ElementRef<HTMLElement>;
-    @Input() placement!: string;
+    placement = input<string>();
 
     private scrollTarget: ISupportAutoscroll | null | undefined;
     private handler!: ReturnType<typeof setInterval>;
@@ -25,11 +25,9 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     private step = 0;
     private speed = 0;
 
-    constructor(protected readonly renderer: Renderer2, 
-        protected readonly editorSession: EditorSessionService, 
-        private editorContent: EditorContentService) {
-   
-    }
+    protected readonly renderer = inject(Renderer2);
+    protected readonly editorSession = inject(EditorSessionService);
+    private editorContent = inject(EditorContentService);
 
     ngOnInit() {
         this.editorSession.autoscrollBehavior.subscribe((scrollTarget: ISupportAutoscroll | null | undefined) => {
@@ -40,7 +38,7 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
                 this.setPosition();
             }
         });
-        switch (this.placement) {
+        switch (this.placement()) {
             case 'top':
             case 'left':
                 this.direction = -1;
@@ -53,11 +51,21 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.autoscrollElement.nativeElement.addEventListener('mouseenter', (event) => {this.onMouseEnter(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mouseleave', (event) => {this.onMouseLeave(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mouseup', (event) => {this.onMouseUp(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mousedown', (event) => {this.onMouseDown(event)})
-        this.autoscrollElement.nativeElement.addEventListener('mousemove', (event) => {this.onMouseMove(event)})
+        this.autoscrollElement.nativeElement.addEventListener('mouseenter', (event) => {
+this.onMouseEnter(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mouseleave', (event) => {
+this.onMouseLeave(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mouseup', (event) => {
+this.onMouseUp(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mousedown', (event) => {
+this.onMouseDown(event)
+})
+        this.autoscrollElement.nativeElement.addEventListener('mousemove', (event) => {
+this.onMouseMove(event)
+})
     }
 
     public onMouseEnter(event: MouseEvent) {
@@ -67,7 +75,7 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     public onMouseLeave(_event: MouseEvent) {
         if (this.scrollTarget && this.isAutoscrollActive) {
             this.stopAutoscroll();
@@ -90,7 +98,7 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
 
     onMouseMove(event: MouseEvent) {
         if (this.scrollTarget) {
-            switch (this.placement) {
+            switch (this.placement()) {
                 case 'top':
                 case 'bottom':
                     this.step = (this.mousePoint.y - event.pageY);
@@ -118,12 +126,12 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     }
 
     setPosition() {
-        if (this.placement == 'left') {
+        if (this.placement() == 'left') {
             const left =  this.editorContent.getDesignerElementById('palette').offsetWidth + 
                 this.editorContent.getDesignerElementById('palette').offsetLeft;
             this.renderer.setStyle(this.autoscrollElement.nativeElement, 'left', left + 'px');
         }
-        if (this.placement != 'top' && this.placement != 'bottom') {
+        if (this.placement() != 'top' && this.placement() != 'bottom') {
             const top = this.editorContent.getBodyElement().getElementsByClassName('top').item(0);
             const bottom = this.editorContent.getBodyElement().getElementsByClassName('bottom').item(0);
             const height = (bottom as HTMLElement).offsetTop - ((top as HTMLElement).offsetTop + (top as HTMLElement).offsetHeight) - 10;
@@ -134,7 +142,7 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     autoscroll() {
         if (this.scrollTarget) {
             if (this.speed < 15) this.speed++;
-            switch (this.placement) {
+            switch (this.placement()) {
                 case 'top':
                 case 'bottom':
                     this.scrollTarget.updateLocationCallback(0, this.speed * this.direction);
@@ -150,7 +158,9 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     startAutoScroll() {
         if (!this.isAutoscrollActive) {
             this.isAutoscrollActive = true;
-            this.handler = setInterval(() => {this.autoscroll()}, 50);
+            this.handler = setInterval(() => {
+this.autoscroll()
+}, 50);
         }
     }
 

@@ -1,4 +1,4 @@
-import { Injectable, TemplateRef } from '@angular/core';
+import { inject, Injectable, TemplateRef } from '@angular/core';
 import { EventLike, IComponentCache, IFormCache, JSEvent, ServoyPublicService, PopupForm, Locale, I18NListener } from '@servoy/public';
 import { SabloService } from '../sablo/sablo.service';
 import { FormService } from '../ngclient/form.service';
@@ -8,11 +8,13 @@ import { ApplicationService } from '../ngclient/services/application.service';
 
 @Injectable()
 export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
-    constructor(private sabloService: SabloService,
-        private utils: SvyUtilsService,
-        private localeService: LocaleService,
-        private applicationService: ApplicationService,
-        private formService: FormService) {
+    private readonly sabloService = inject(SabloService);
+    private readonly utils = inject(SvyUtilsService);
+    private readonly localeService = inject(LocaleService);
+    private readonly applicationService = inject(ApplicationService);
+    private readonly formService = inject(FormService);
+
+    constructor() {
         super();
     }
 

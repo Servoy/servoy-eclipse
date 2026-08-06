@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Renderer2, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -13,7 +13,7 @@ import { EditorContentService } from '../services/editorcontent.service';
 })
 export class VariantsContentComponent implements OnInit {
 
-    @Input() component!: PaletteComp;
+    component = input<PaletteComp>();
 
 	variantItemBeingDragged!: Node;
 	variantsIFrame!: HTMLIFrameElement;
@@ -23,15 +23,17 @@ export class VariantsContentComponent implements OnInit {
 
 	private variantsQueryHandler!: ReturnType<typeof setInterval>;
     
-    constructor(protected readonly renderer: Renderer2, private windowRef: WindowRefService, 
-                private editorSession: EditorSessionService, private editorContentService: EditorContentService) {
-	
+    protected readonly renderer = inject(Renderer2);
+    private windowRef = inject(WindowRefService);
+    private editorSession = inject(EditorSessionService);
+    private editorContentService = inject(EditorContentService);
+
+    constructor() {
 		this.editorSession.variantsTrigger.subscribe((value) => {
-			if (this.component == value.component) {
+			if (this.component() == value.component) {
                 this.activeVariant = true;
 				this.sendStylesToVariantsForm();
-			}
-			else {
+			} else {
                 this.activeVariant = false;
 			}
 		});
@@ -51,10 +53,9 @@ export class VariantsContentComponent implements OnInit {
 
     ngOnInit() {
 		this.windowRef.nativeWindow.addEventListener('message', (event) => {
-            //eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if ( this.activeVariant)
-            {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+             
+            if ( this.activeVariant) {
+                 
                 if (event.data.id === 'variantsReady') {
                     this.sendStylesToVariantsForm();
                 }
@@ -65,11 +66,11 @@ export class VariantsContentComponent implements OnInit {
     getVariantContentMargin() {
         //TODO: find a better way to do right alignment of variantscontent component
         //maybe using divs. For now adding this line due to time contraints
-        return this.component.name === 'bootstrapcomponents-button' ? '30px' : '37px';
+        return this.component()!.name === 'bootstrapcomponents-button' ? '30px' : '37px';
     }
 
 	sendStylesToVariantsForm() {
-		void this.editorSession.getVariantsForCategory<{variants: Array<Variant>}>(this.component.styleVariantCategory).then((result: unknown) => {			
+		void this.editorSession.getVariantsForCategory<{variants: Variant[]}>(this.component()!.styleVariantCategory).then((result: unknown) => {			
 			//specifying type like 'then((result: {variants: Array<Variant>)}' is leading to undefined variants ???
 			if (!this.variantsIFrame) {
 				this.variantsIFrame = this.editorContentService.getDocument().getElementById('VariantsForm') as HTMLIFrameElement;
@@ -77,9 +78,9 @@ export class VariantsContentComponent implements OnInit {
             this.variantsIFrame.contentWindow!.postMessage({ id: 'destroyVariants' }, '*');
 			const message = { 
 				id: 'createVariants', 
-				variants: result as Array<Variant>,
-				model: this.component.model, 
-				name: this.convertToJSName(this.component.name), 
+				variants: result as Variant[],
+				model: this.component()!.model, 
+				name: this.convertToJSName(this.component()!.name), 
 			};
 			this.variantsIFrame.contentWindow!.postMessage(message, '*');
 			if (this.variantsQueryHandler) {
@@ -91,7 +92,8 @@ export class VariantsContentComponent implements OnInit {
                     this.firstQuery = false;
                     return;
                 }
-                this.variantsIFrame.contentWindow!.postMessage({ id: 'sendVariantsSize' }, '*')}, 50);
+                this.variantsIFrame.contentWindow!.postMessage({ id: 'sendVariantsSize' }, '*')
+}, 50);
 		});
 	}
 		

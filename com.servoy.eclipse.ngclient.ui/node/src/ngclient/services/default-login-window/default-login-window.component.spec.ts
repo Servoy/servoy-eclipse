@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { LocalStorageService} from '@servoy/public';
 
@@ -11,17 +12,17 @@ describe('DefaultLoginWindowComponent', () => {
   let sabloService: any;
   let localStorageService: any;
   let ngbActiveModal: any;
-  beforeEach(waitForAsync(() => {
-      sabloService = jasmine.createSpyObj('SabloService',['callService']);
-      localStorageService = jasmine.createSpyObj('LocalStorageService',['set']);
-      ngbActiveModal = jasmine.createSpyObj('NgbActiveModal',['close']);
+  beforeEach(async () => {
+      sabloService = { callService: vi.fn() } as any;
+      localStorageService = { set: vi.fn() } as any;
+      ngbActiveModal = { close: vi.fn() } as any;
     TestBed.configureTestingModule({
       imports: [ FormsModule ],
       declarations: [ DefaultLoginWindowComponent ],
       providers: [ { provide: SabloService,useValue:sabloService }, { provide: LocalStorageService ,useValue:localStorageService }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DefaultLoginWindowComponent);
@@ -33,29 +34,30 @@ describe('DefaultLoginWindowComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should login', fakeAsync(() => {
+  it('should login', async () => {
       const loginData = { username: 'test', password: 'test', remember: true };
       const promise = Promise.resolve(loginData);
-      sabloService.callService.and.returnValue(promise);
+      sabloService.callService.mockReturnValue(promise);
       component.username = 'test';
       component.password = 'test';
       component.doLogin();
-      tick();
+      await promise;
       expect(sabloService.callService).toHaveBeenCalledWith( 'applicationServerService', 'login',loginData,false);
       expect(localStorageService.set).toHaveBeenCalledTimes(2);
       expect(component.message).toBeUndefined();
-    }));
+    });
 
-  it('should not login',  fakeAsync(() => {
+  it('should not login', async () => {
       const loginData = { username: 'test', password: 'test', remember: true };
       const promise = Promise.resolve(false);
-      sabloService.callService.and.returnValue(promise);
+      sabloService.callService.mockReturnValue(promise);
       component.username = 'test';
       component.password = 'test';
       component.doLogin();
-      tick();
+      await promise;
+      await Promise.resolve();
       expect(sabloService.callService).toHaveBeenCalledWith( 'applicationServerService', 'login',loginData,false);
       expect(ngbActiveModal.close).toHaveBeenCalledTimes(0);
      expect(component.message).toBe( 'Invalid username or password, try again');
-    }));
+    });
 });

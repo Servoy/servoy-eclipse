@@ -1,4 +1,5 @@
-import { TestBed, inject, tick, fakeAsync, flushMicrotasks } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 import { ConverterService, IChangeAwareValue } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { WindowRefService, IValuelist, SessionStorageService, LoggerFactory } from '@servoy/public';
@@ -64,18 +65,18 @@ describe('ValuelistConverter', () => {
                valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);
 
       expect( val ).toBeDefined();
-      expect( val.length ).toBe(3, 'valuelist length should be \'3\' ');
-      expect( val[0].displayValue).toBe( 'abbba', 'display value should be \'abbba\'' );
-      expect( val[0].realValue).toBe( 1, 'real value should be \'1\'' );
-      expect( val[2].displayValue).toBe( 'caaabbc', 'display value should be \'caaabbc\'' );
-      expect( val[2].realValue).toBe( 3, 'real value should be \'3\'' );
+      expect( val.length ).toBe(3);
+      expect( val[0].displayValue).toBe( 'abbba');
+      expect( val[0].realValue).toBe( 1);
+      expect( val[2].displayValue).toBe( 'caaabbc');
+      expect( val[2].realValue).toBe( 3);
   });
 
-  it( 'should get display value', fakeAsync(() => {
+  it( 'should get display value', async () => {
       const val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(),
                valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);
       expect( val ).toBeDefined();
-      expect( val.getDisplayValue).toBeDefined('should have \'getDisplayValue\' function');
+      expect( val.getDisplayValue).toBeDefined();
 
       let changeNotified = false;
       let triggeredSendToServer = false;
@@ -98,14 +99,14 @@ describe('ValuelistConverter', () => {
 
       let clientChange = converterService.convertFromClientToServer(val, valuelistType, val, propertyContext)[0];
 
-      expect(clientChange.getDisplayValue).toBe(4, 'value should be 4');
-      expect(displayValue).not.toBeDefined( 'display value should not be defined yet.' );
+      expect(clientChange.getDisplayValue).toBe(4);
+      expect(displayValue).not.toBeDefined();
 
       converterService.convertFromServerToClient({ handledID : { id: clientChange.id, value: true }, getDisplayValue : 'd' } as IValuelistTValueFromServer ,
             valuelistType , val, undefined as any, undefined as any, propertyContext);
-      flushMicrotasks();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
-      expect(displayValue).toBe( 'd', 'display value should be \'d\'' );
+      expect(displayValue).toBe( 'd');
 
       // should be resolved right away
       displayValue = null as any;
@@ -114,7 +115,7 @@ describe('ValuelistConverter', () => {
           displayValue = response;
       });
       checkNotifiedAndTriggeredAndClear(false, false);
-      expect(displayValue).toBe( 'd', 'display value should be \'d\'' );
+      expect(displayValue).toBe( 'd');
 
       const realValue = 5;
       let errorMessage: any;
@@ -126,67 +127,67 @@ describe('ValuelistConverter', () => {
       });
       checkNotifiedAndTriggeredAndClear(true, true);
       clientChange = converterService.convertFromClientToServer(val, valuelistType, val, propertyContext)[0];
-      expect(clientChange.getDisplayValue).toBe(5, 'value should be 4');
-      expect(display).not.toBeDefined( 'display value should not be defined yet.' );
-      expect(errorMessage).not.toBeDefined( 'error message should not be defined yet.' );
+      expect(clientChange.getDisplayValue).toBe(5);
+      expect(display).not.toBeDefined();
+      expect(errorMessage).not.toBeDefined();
 
       converterService.convertFromServerToClient({ handledID : { id: clientChange.id, value: true }, getDisplayValue: realValue } as IValuelistTValueFromServer,
             valuelistType , val, undefined as any, undefined as any, propertyContext);
-      flushMicrotasks();
+      await new Promise(resolve => setTimeout(resolve, 0));
 
-      expect(display).toBe(realValue, 'should just return the realvalue');
-      expect(errorMessage).not.toBeDefined('display value should not be defined' );
-  }) as any);
+      expect(display).toBe(realValue);
+      expect(errorMessage).not.toBeDefined();
+  });
 
-  it( 'should filter list', fakeAsync(() => {
+  it( 'should filter list', async () => {
       let val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(),
                valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);
       expect( val ).toBeDefined();
-      expect( val.length ).toBe(3, 'valuelist length should be \'3\' ');
-      expect( val.filterList).toBeDefined('should have \'filter\' function');
+      expect( val.length ).toBe(3);
+      expect( val.filterList).toBeDefined();
 
       let isFiltered: any;
       val.filterList('abb').subscribe((_val) => {
           isFiltered = true;
       });
-      expect(isFiltered).not.toBeDefined('filter promise should not be resolved yet.');
+      expect(isFiltered).not.toBeDefined();
 
       let convertedValueForServer = converterService.convertFromClientToServer(val, valuelistType, val, propertyContext)[0];
       expect(convertedValueForServer).toBeDefined();
-      expect(convertedValueForServer.filter).toBe('abb', 'valuelist filter should be \'abb\'');
-      expect(convertedValueForServer.id).toBe(1, 'valuelist filter defer id should be \'1\'');
-      expect(isFiltered).not.toBeDefined('filter promise should still not be resolved.');
+      expect(convertedValueForServer.filter).toBe('abb');
+      expect(convertedValueForServer.id).toBe(1);
+      expect(isFiltered).not.toBeDefined();
 
       // convert once more, should have no changes
       convertedValueForServer = converterService.convertFromClientToServer(val, valuelistType, val, propertyContext)[0];
-      expect(convertedValueForServer).toBe(null, 'convertedValueForServer should be \'null\' because there is no change on the valuelist');
+      expect(convertedValueForServer).toBe(null);
 
       // simulate answer from server
       val = converterService.convertFromServerToClient({ handledID: {id: 1, value: true},
                         values: [{displayValue: 'abbba', realValue: 1}, {displayValue: 'caaabbc', realValue: 3}] } as IValuelistTValueFromServer,
                     valuelistType , val, undefined as any, undefined as any, propertyContext);
-      tick(1); // a bit weird, but it seems we need to wait for the then function to be called..
-      expect(isFiltered).toBe(true, 'filter promise should be resolved.');
-      expect( val.length ).toBe(2, 'list is filtered, valuelist length should be \'2\' ');
-      expect( val[0].displayValue).toBe( 'abbba', 'display value should be \'abbba\'' );
-      expect( val[0].realValue).toBe( 1, 'real value should be \'1\'' );
+      await new Promise(resolve => setTimeout(resolve, 1));
+      expect(isFiltered).toBe(true);
+      expect( val.length ).toBe(2);
+      expect( val[0].displayValue).toBe( 'abbba');
+      expect( val[0].realValue).toBe( 1);
 
       isFiltered = undefined as any;
       val.filterList('xyz').subscribe((_val) => {
           isFiltered = true;
       });
-      expect(isFiltered).not.toBeDefined('filter promise should not be resolved yet.');
+      expect(isFiltered).not.toBeDefined();
 
       convertedValueForServer = converterService.convertFromClientToServer(val, valuelistType, val, propertyContext)[0];
-      expect(convertedValueForServer.filter).toBe('xyz', 'valuelist filter should be \'xyz\'');
-      expect(convertedValueForServer.id).toBe(2, 'valuelist filter defer id should be \'2\'');
-      expect(isFiltered).not.toBeDefined('filter promise should still not be resolved.');
+      expect(convertedValueForServer.filter).toBe('xyz');
+      expect(convertedValueForServer.id).toBe(2);
+      expect(isFiltered).not.toBeDefined();
 
       val = converterService.convertFromServerToClient({ handledID: {id: 2, value: true}, values: [] } as IValuelistTValueFromServer,
                     valuelistType , val, undefined as any, undefined as any, propertyContext);
-      tick(1);
-      expect( isFiltered ).toBe(true, 'filter promise should be resolved.');
-      expect( val.length ).toBe(0, 'list is filtered, valuelist length should be \'0\' ');
+      await new Promise(resolve => setTimeout(resolve, 1));
+      expect( isFiltered ).toBe(true);
+      expect( val.length ).toBe(0);
 
       isFiltered = undefined as any;
       val.filterList('x').subscribe((_val) => {
@@ -195,21 +196,21 @@ describe('ValuelistConverter', () => {
           isFiltered = false;
       });
       convertedValueForServer = converterService.convertFromClientToServer(val, valuelistType, val, propertyContext)[0];
-      expect(convertedValueForServer.filter).toBe('x', 'valuelist filter should be \'x\'');
-      expect(convertedValueForServer.id).toBe(3, 'valuelist filter defer id should be \'3\'');
+      expect(convertedValueForServer.filter).toBe('x');
+      expect(convertedValueForServer.id).toBe(3);
 
       // assume the server did not filter the valuelist
       val = converterService.convertFromServerToClient({ handledID: {id: 3, value: false} } as IValuelistTValueFromServer,
                     valuelistType , val, undefined as any, undefined as any, propertyContext);
-      tick(1);
-      expect(isFiltered).toBe(false, 'filter promise should be rejected.');
-  }) as any);
+      await new Promise(resolve => setTimeout(resolve, 1));
+      expect(isFiltered).toBe(false);
+  });
 
   it( 'should have real values', () => {
       const vl = createDefaultValuelist();
       vl.hasRealValues = true;
       const val: IValuelist = converterService.convertFromServerToClient(vl, valuelistType , undefined as any, undefined as any, undefined as any, propertyContext);;
 
-      expect( val.hasRealValues() ).toBe(true, 'valuelist should have real values');
+      expect( val.hasRealValues() ).toBe(true);
   });
 });

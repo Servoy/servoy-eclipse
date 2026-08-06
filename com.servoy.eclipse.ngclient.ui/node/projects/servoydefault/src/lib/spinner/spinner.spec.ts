@@ -1,7 +1,10 @@
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultSpinner } from './spinner';
-import { ServoyPublicTestingModule, IValuelist , FormattingService, ServoyApi, TooltipService} from '@servoy/public';
+import { IValuelist, FormattingService, ServoyApi, TooltipService, ServoyPublicService,
+         TooltipDirective, SabloTabseq } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 
@@ -27,15 +30,16 @@ describe('ServoyDefaultCheckGroup', () => {
   let buttonUp: any; let buttonDown: any;
   let servoyApi: any;
 
-  beforeEach(waitForAsync(() => {
-    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId','registerComponent','unRegisterComponent']);
+  beforeEach(async () => {
+    servoyApi = { getMarkupId: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultSpinner],
-      imports: [ServoyPublicTestingModule, FormsModule],
-      providers: [FormattingService, TooltipService]
+      declarations: [ServoyDefaultSpinner, TooltipDirective, SabloTabseq],
+      imports: [FormsModule],
+      providers: [FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultSpinner);
@@ -45,10 +49,10 @@ describe('ServoyDefaultCheckGroup', () => {
     buttonDown = fixture.debugElement.queryAll(By.css('button'))[1];
 
     component = fixture.componentInstance;
-    component.valuelistID = mockData;
-    component.enabled = true;
-    component.editable = true;
-    component.dataProviderID = 1;
+    fixture.componentRef.setInput('valuelistID', mockData);
+    fixture.componentRef.setInput('enabled', true);
+    fixture.componentRef.setInput('editable', true);
+    component.dataProviderID.set(1);
     fixture.detectChanges();
   });
 
@@ -56,14 +60,14 @@ describe('ServoyDefaultCheckGroup', () => {
     expect(component).toBeTruthy();
   });
 
-  xit('should click change value', () => {
+  it.skip('should click change value', () => {
     const input = fixture.debugElement.query(By.css('input')).nativeElement;
   });
 
 
 
   it('should got undefined dp if dp is not present in valuelist', () => {
-    component.dataProviderID = 'Salut';
+    component.dataProviderID.set('Salut');
     const selection = component.getSelectionFromDataprovider();
     fixture.detectChanges();
     expect(selection).toBeFalsy();
@@ -74,50 +78,60 @@ describe('ServoyDefaultCheckGroup', () => {
     expect(selection).toBe('Timisoara');
   });
 
-  it('should change dp when click the up button', fakeAsync( () => {
+  it('should change dp when click the up button', () => {
+    vi.useFakeTimers();
     buttonDown.nativeElement.click();
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     const selection = component.getSelectionFromDataprovider();
     expect(selection).toBe('Bucharest');
-  }));
+    vi.useRealTimers();
+  });
 
-  it('should getSelectionFromDP', fakeAsync(() => {
+  it('should getSelectionFromDP', () => {
+    vi.useFakeTimers();
     buttonUp.nativeElement.click();
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     const selection = component.getSelectionFromDataprovider();
     expect(selection).toBe('Amsterdam');
-  }));
+    vi.useRealTimers();
+  });
 
-  xit('should change dp when press the down button', fakeAsync( () => {
+  it.skip('should change dp when press the down button', () => {
+    vi.useFakeTimers();
     const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.focus();
     input.triggerEventHandler('keyup', { key: 'ArrowDown' });
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     const selection = component.getSelectionFromDataprovider();
     expect(selection).toBe('Bucharest');
-  }));
+    vi.useRealTimers();
+  });
 
-  xit('should change dp when press the up button', fakeAsync(() => {
+  it.skip('should change dp when press the up button', () => {
+    vi.useFakeTimers();
     const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.focus();
     input.triggerEventHandler('keyup', { key: 'ArrowUp' });
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     const selection = component.getSelectionFromDataprovider();
     expect(selection).toBe('Amsterdam');
-  }));
+    vi.useRealTimers();
+  });
 
-  xit('should change dp when scroll  ', fakeAsync(() => {
+  it.skip('should change dp when scroll  ', () => {
+    vi.useFakeTimers();
     const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.scroll();
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(0);
     const selection = component.getSelectionFromDataprovider();
     expect(selection).toBe('Amsterdam');
-  }));
+    vi.useRealTimers();
+  });
 
 
 });

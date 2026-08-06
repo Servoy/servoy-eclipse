@@ -37,7 +37,7 @@
 						</configuration>
 					</execution>
 
-					<!-- 2. Install karma and karma plugins -->
+					<!-- 2. npm install -->
 					<execution>
 						<id>npm install</id>
 						<phase>process-resources</phase>
@@ -49,7 +49,20 @@
 						</configuration>
 					</execution>
 
-					<!-- 3. npm run build -->
+					<!-- 3. npm run lint -->
+					<execution>
+						<id>npm run lint</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<skipTests>${maven.test.skip}</skipTests>
+							<arguments>run lint</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 4. npm run build -->
 					<execution>
 						<id>npm run build</id>
 						<phase>process-resources</phase>
@@ -59,6 +72,19 @@
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
 							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 5. Run vitest tests -->
+					<execution>
+						<id>angular vitest</id>
+						<phase>test</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<skipTests>${maven.test.skip}</skipTests>
+							<arguments>test</arguments>
 						</configuration>
 					</execution>
 				</executions>

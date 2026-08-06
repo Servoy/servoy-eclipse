@@ -1,4 +1,4 @@
-import { Component, Input,  Renderer2, ChangeDetectorRef, ChangeDetectionStrategy  } from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, input } from '@angular/core';
 
 import {ServoyDefaultBaseLabel} from  '../baselabel';
 
@@ -10,7 +10,7 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
 } )
 export class ServoyDefaultLabel extends ServoyDefaultBaseLabel<HTMLDivElement> {
 
-    @Input() labelFor: any;
+    readonly labelFor = input<any>(undefined);
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super(renderer, cdRef);

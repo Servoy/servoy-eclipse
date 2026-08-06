@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnChanges, SimpleChanges, EventEmitter, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, output, OnChanges, SimpleChanges, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { BGPane } from './bg_pane.component';
 @Component( {
@@ -11,11 +11,11 @@ import { BGPane } from './bg_pane.component';
 } )
 export class BGSplitter implements AfterContentInit , OnChanges {
 
-    @Input() orientation = 'vertical';
-    @Input() divSize: any;
-    @Input() divLocation: any;
+    readonly orientation = input('vertical');
+    readonly divSize = input<any>(undefined);
+    readonly divLocation = input<any>(undefined);
 
-    @Output() onDividerChange = new EventEmitter();
+    readonly onDividerChange = output<any>();
 
     private drag = false;
     private handler;
@@ -39,15 +39,15 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         if (changes['divSize']  && changes['divSize'].currentValue >= 0 ) {
             let styleName = 'width';
-            if (this.orientation === 'vertical') styleName = 'height';
+            if (this.orientation() === 'vertical') styleName = 'height';
             this.renderer.setStyle(this.handler,styleName, changes['divSize'].currentValue +'px');
-            this.adjustLocation(null, this.divLocation);
+            this.adjustLocation(null, this.divLocation());
         }
         if (changes['divLocation'] && changes['divLocation'].currentValue >= 0) {
             this.adjustLocation(null, changes['divLocation'].currentValue);
         }
         if (changes['orientation']) {
-            this.renderer.addClass( this.elementRef.nativeElement, this.orientation);
+            this.renderer.addClass( this.elementRef.nativeElement, this.orientation());
         }
     }
 
@@ -55,18 +55,17 @@ export class BGSplitter implements AfterContentInit , OnChanges {
         let index = 1;
         this.panes.forEach(( item ) => {
             item.index = index++;
-            if ( item.minSize === undefined ) item.minSize = 0;
         } );
         this.renderer.insertBefore( this.elementRef.nativeElement, this.handler, this.panes.last.element.nativeElement );
 
-        this.adjustLocation(null,this.divLocation);
+        this.adjustLocation(null,this.divLocation());
     }
 
     @HostListener( 'document:mouseup', ['$event'] )
     mouseup( event: any ) {
         if ( this.drag ) {
             let dividerLocation;
-            if(this.orientation === 'vertical' ) {
+            if(this.orientation() === 'vertical' ) {
                 dividerLocation = this.handler.style.top;
             } else {
                 dividerLocation = this.handler.style.left;
@@ -86,13 +85,13 @@ export class BGSplitter implements AfterContentInit , OnChanges {
         if (!this.panes || this.panes.length != 2) return;
         const bounds = this.elementRef.nativeElement.getBoundingClientRect();
         const pos = this.getPosition(bounds, event, wantedPosition);
-        if ( this.orientation === 'vertical' ) {
+        if ( this.orientation() === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos! < this.panes.first.minSize ) return;
-                if ( height - pos! < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize() ) return;
+                if ( height - pos! < this.panes.last.minSize() ) return;
             }
 
             this.renderer.setStyle( this.handler, 'top', pos + 'px' );
@@ -104,8 +103,8 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos! < this.panes.first.minSize ) return;
-                if ( width - pos! < this.panes.last.minSize ) return;
+                if ( pos! < this.panes.first.minSize() ) return;
+                if ( width - pos! < this.panes.last.minSize() ) return;
             }
 
             this.renderer.setStyle( this.handler, 'left', pos + 'px' );
@@ -115,7 +114,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     }
 
     private getPosition(bounds: any, event?: any, wantedPosition?: number) {
-        if ( this.orientation === 'vertical' ) {
+        if ( this.orientation() === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
             if ((wantedPosition! < 0 || wantedPosition === undefined) && !event) {
                 return height / 2;

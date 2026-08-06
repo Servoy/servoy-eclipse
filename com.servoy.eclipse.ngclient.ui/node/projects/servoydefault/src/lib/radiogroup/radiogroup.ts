@@ -38,11 +38,11 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
     }
 
     setSelectionFromDataprovider() {
-        this.value = this.dataProviderID;
-        if (this.valuelistID) {
-            for (let i = 0; i < this.valuelistID.length; i++) {
-                const item = this.valuelistID[i];
-                if ((item.realValue + '') === (this.dataProviderID + '')) {
+        this.value = this.dataProviderID();
+        if (this.valuelistID()) {
+            for (let i = 0; i < this.valuelistID().length; i++) {
+                const item = this.valuelistID()[i];
+                if ((item.realValue + '') === (this.dataProviderID() + '')) {
                     this.value = item.realValue;
                     break;
                 }
@@ -60,9 +60,9 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
 
     attachEventHandlers(element: any, index: any) {
         this.renderer.listen(element, 'click', (e) => {
-            if (!this.readOnly && this.enabled) {
+            if (!this.readOnly() && this.enabled()) {
                 this.itemClicked(e, index);
-                if (this.onActionMethodID) this.onActionMethodID(e);
+                if (this.onActionMethodID()) this.onActionMethodID()(e);
             }
         });
         super.attachEventHandlers(element, index);

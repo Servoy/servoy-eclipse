@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EditorContentComponent } from '../editorcontent/editorcontent.component';
 import { ToolbarComponent, ToolbarItem, TOOLBAR_CATEGORIES } from '../toolbar/toolbar.component';
 import { EditorSessionService } from './editorsession.service';
@@ -19,8 +19,7 @@ export class DesignSizeService {
 
     editor!: EditorContentComponent;
 
-    constructor(protected readonly editorSession: EditorSessionService) {
-    }
+    protected readonly editorSession = inject(EditorSessionService);
 
     setEditor(editor: EditorContentComponent) {
         this.editor = editor;
@@ -47,8 +46,7 @@ export class DesignSizeService {
                 if (this.lastClicked == 'Tablet') this.isPortrait = !this.isPortrait;
                 if (this.isPortrait) {
                     this.setSize('768px', '1024px');
-                }
-                else {
+                } else {
                     this.setSize('1024px', '768px');
                 }
                 this.lastClicked = 'Tablet';
@@ -63,8 +61,7 @@ export class DesignSizeService {
                 if (this.lastClicked == 'Phone') this.isPortrait = !this.isPortrait;
                 if (this.isPortrait) {
                     this.setSize('320px', '568px');
-                }
-                else {
+                } else {
                     this.setSize('568px', '320px');
                 }
                 this.lastClicked = 'Phone';

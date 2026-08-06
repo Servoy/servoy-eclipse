@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { IComponentCache } from './services/servoy_public.service';
 import { LoggerFactory, LoggerService } from './logger.service';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 export type CustomObjectTypeConstructor = (new() => ICustomObjectValue);
 
@@ -13,8 +13,8 @@ export class SpecTypesService {
     private log: LoggerService;
     private registeredCustomObjectTypes = new Map<string, CustomObjectTypeConstructor>();
 
-    constructor(logFactory: LoggerFactory) {
-        this.log = logFactory.getLogger('SpecTypesService');
+    constructor(logFactory?: LoggerFactory) {
+        this.log = (logFactory ?? inject(LoggerFactory)).getLogger('SpecTypesService');
     }
 
     /**

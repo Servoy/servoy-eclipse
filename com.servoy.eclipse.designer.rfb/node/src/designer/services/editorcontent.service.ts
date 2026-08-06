@@ -1,4 +1,4 @@
-import { Injectable, Inject, DOCUMENT } from '@angular/core';
+import { Injectable, inject, DOCUMENT } from '@angular/core';
 
 import { WindowRefService } from '@servoy/public';
 import { URLParserService } from '../services/urlparser.service';
@@ -10,16 +10,20 @@ export class EditorContentService {
     private contentElement!: HTMLElement;
     private glassPaneElement!: HTMLElement;
     private palette!: HTMLElement;
-    private afterInitCallbacks: Array<() => void> = new Array<() => void>();
-    private contentMessageListeners: Array<IContentMessageListener> = new Array<IContentMessageListener>();
+    private afterInitCallbacks: (() => void)[] = new Array<() => void>();
+    private contentMessageListeners: IContentMessageListener[] = new Array<IContentMessageListener>();
     private contentWasInit = false;
     
     private topAdjust!: number;
     private leftAdjust!: number;
-    
-    constructor(@Inject(DOCUMENT) private document: Document, private windowRefService: WindowRefService, private urlParser: URLParserService) {
-        windowRefService.nativeWindow.addEventListener('message', (event: MessageEvent<{ id: string, formname: string }>) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
+    private document = inject(DOCUMENT);
+    private windowRefService = inject(WindowRefService);
+    private urlParser = inject(URLParserService);
+
+    constructor() {
+        this.windowRefService.nativeWindow.addEventListener('message', (event: MessageEvent<{ id: string, formname: string }>) => {
+             
             if (event.data.id === 'afterContentInit') {
                 if (event.data.formname == this.urlParser.getFormName()) {
                     this.contentWasInit = true;
@@ -28,8 +32,7 @@ export class EditorContentService {
                     });
                     this.afterInitCallbacks.splice(0, this.afterInitCallbacks.length);
                 }
-            }
-            else if (!event.data.formname || event.data.formname == this.urlParser.getFormName()){
+            } else if (!event.data.formname || event.data.formname == this.urlParser.getFormName()){
                 this.contentMessageListeners.forEach(listener => listener.contentMessageReceived(event.data.id, event.data));
             }
 
@@ -41,12 +44,12 @@ export class EditorContentService {
         return this.frameElement.contentWindow!.document.querySelector("[svy-id='" + nodeid + "']") as HTMLElement;
     }
 
-    getAllContentElements(): Array<HTMLElement> {
+    getAllContentElements(): HTMLElement[] {
         this.initIFrame();
-        return Array.from(this.frameElement.contentWindow!.document.querySelectorAll("[svy-id]"));
+        return Array.from(this.frameElement.contentWindow!.document.querySelectorAll('[svy-id]'));
     }
 
-    querySelectorAllInContent(selector: string): Array<HTMLElement> {
+    querySelectorAllInContent(selector: string): HTMLElement[] {
         this.initIFrame();
         return Array.from(this.frameElement.contentWindow!.document.querySelectorAll(selector));
     }
@@ -118,7 +121,7 @@ export class EditorContentService {
         return this.document.querySelector(selector)!;
     }
 
-    querySelectorAll(selector: string): Array<HTMLElement> {
+    querySelectorAll(selector: string): HTMLElement[] {
         return Array.from(this.document.querySelectorAll(selector));
     }
 
@@ -139,8 +142,7 @@ export class EditorContentService {
     executeOnlyAfterInit(callback: () => void) {
         if (this.contentWasInit) {
             callback();
-        }
-        else {
+        } else {
             this.afterInitCallbacks.push(callback);
         }
     }
@@ -197,6 +199,6 @@ export class EditorContentService {
 
 export interface IContentMessageListener {
 
-    contentMessageReceived(id: string, data: { [key: string]: any }): void;
+    contentMessageReceived(id: string, data: Record<string, any>): void;
 
 }

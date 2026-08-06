@@ -1,10 +1,13 @@
-import { Injectable, Inject, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 
 import { WindowRefService } from '@servoy/public';
 
 @Injectable()
 export class ClientUtilsService {
-    constructor(private windowRef: WindowRefService, @Inject(DOCUMENT) private document: Document) {
+    private readonly windowRef = inject(WindowRefService);
+    private readonly document = inject(DOCUMENT) as Document;
+
+    constructor() {
     }
 
     public getBounds(component: string, selector: string): { x: number; y: number, width: number, height: number } {

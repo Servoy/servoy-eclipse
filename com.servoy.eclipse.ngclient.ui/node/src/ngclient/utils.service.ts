@@ -1,4 +1,4 @@
-import { Injectable, Inject, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT } from '@angular/core';
 
 import { EventLike, JSEvent, LoggerFactory, LoggerService } from '@servoy/public';
 import { FormService } from './form.service';
@@ -7,13 +7,13 @@ import { FormService } from './form.service';
   providedIn: 'root'
 })
 export class SvyUtilsService {
-    private log: LoggerService;
-    private doc: Document;
+    private readonly log: LoggerService;
+    private readonly doc = inject(DOCUMENT) as Document;
     private formService!: FormService;
 
-    constructor(@Inject(DOCUMENT) _doc: any, logFactory: LoggerFactory) {
+    constructor() {
+        const logFactory = inject(LoggerFactory);
         this.log = logFactory.getLogger('SvyUtilsService');
-        this.doc = _doc;
     }
 
     public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent | null {

@@ -1,4 +1,4 @@
-import { Component, Inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
 
 import { ServoyPublicService, PopupForm } from '@servoy/public';
 import { PopupFormService } from '../popupform.service';
@@ -17,7 +17,11 @@ export class ServoyFormPopupComponent {
     _width = 0;
     _height = 0;
 
-    constructor(@Inject(DOCUMENT) private doc: Document, private formService: ServoyPublicService, private popupFormService: PopupFormService) {
+    private readonly doc = inject(DOCUMENT) as Document;
+    private readonly formService = inject(ServoyPublicService);
+    private readonly popupFormService = inject(PopupFormService);
+
+    constructor() {
     }
 
     setPopupForm(popup: PopupForm) {

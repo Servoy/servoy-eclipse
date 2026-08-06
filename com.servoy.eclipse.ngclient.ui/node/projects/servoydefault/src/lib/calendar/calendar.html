@@ -4,7 +4,7 @@
      data-td-target-input='nearest'
      data-td-target-toggle='nearest'
      style='height:100%'
-      [svyTooltip]="toolTipText"
+      [svyTooltip]="toolTipText()"
      #element>
    <input
       [id]="servoyApi.getMarkupId() + 'input'"
@@ -12,14 +12,14 @@
      class='svy-calendar form-control form-control-sm input-sm svy-line-height-normal'
      style='height:100%'
      data-td-target='#datetimepicker1'
-      [ngModel]="dataProviderID"
+      [ngModel]="dataProviderID()"
       (ngModelChange)="modelChange($event)"
-      [svyFormat]="format"
+      [svyFormat]="format()"
       [svyStartEdit]="'dataProviderID'"
       [hostComponent]="this"
-      [sabloTabseq]="tabSeq"
-      [disabled]="!enabled"
-      [findmode]="findmode"
+      [sabloTabseq]="tabSeq()"
+      [disabled]="!enabled()"
+      [findmode]="findmode()"
       #inputElement/>
    <span
      tabindex='-1'
@@ -27,6 +27,6 @@
      style='height:100%'
      data-td-target='#datetimepicker1'
      data-td-toggle='datetimepicker'
-      [hidden]="readOnly || !enabled || findmode">
+      [hidden]="readOnly() || !enabled() || findmode()">
      <span class='fas fa-calendar' ></span></span>
  </div>

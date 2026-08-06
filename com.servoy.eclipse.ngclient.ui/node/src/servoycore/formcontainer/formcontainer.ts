@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Renderer2, TemplateRef, SimpleChanges, ChangeDetectionStrategy, input, contentChild } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, TemplateRef, SimpleChanges, ChangeDetectionStrategy, input, contentChild, inject } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 import { FormService } from '../../ngclient/form.service';
 import {
@@ -94,11 +94,12 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 	form2_visible = false;
 
 	private realContainedForm: any;
+	private readonly formService = inject(FormService);
 
 	private form1!: string;
 	private form2!: string;
 
-	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private formService: FormService) {
+	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
 		super(renderer, cdRef);
 	}
 

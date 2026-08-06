@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 
 import { ServicesService, ServiceProvider } from '../sablo/services.service';
 
@@ -27,20 +27,22 @@ import { TypesRegistry } from '../sablo/types_registry';
 @Injectable()
 export class AllServiceService implements ServiceProvider {
     [key: string]: any;
-    constructor( private services: ServicesService,
-        private $applicationService: ApplicationService,
-        private clientdesign: ClientDesignService,
-        private clientutils: ClientUtilsService,
-        private $windowService: WindowService,
-        private $sabloLoadingIndicator: LoadingIndicatorService,
-        private $sessionService: SessionService,
-        private $sabloService: SabloService,
-        private $typesRegistry: TypesRegistry,
-        // generated services start
-        // generated services end
-        private clientFunctionService: ClientFunctionService,
-    ) {
-        services.setServiceProvider( this );
+
+    private readonly services = inject(ServicesService);
+    private readonly $applicationService = inject(ApplicationService);
+    private readonly clientdesign = inject(ClientDesignService);
+    private readonly clientutils = inject(ClientUtilsService);
+    private readonly $windowService = inject(WindowService);
+    private readonly $sabloLoadingIndicator = inject(LoadingIndicatorService);
+    private readonly $sessionService = inject(SessionService);
+    private readonly $sabloService = inject(SabloService);
+    private readonly $typesRegistry = inject(TypesRegistry);
+    // generated services start
+    // generated services end
+    private readonly clientFunctionService = inject(ClientFunctionService);
+
+    constructor() {
+        this.services.setServiceProvider( this );
     }
     getService( name: string ) {
         return this[name];

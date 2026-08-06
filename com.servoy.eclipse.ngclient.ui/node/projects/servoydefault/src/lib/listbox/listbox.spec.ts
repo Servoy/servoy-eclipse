@@ -1,8 +1,11 @@
-import { ComponentFixture, TestBed, fakeAsync, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 
 import { ServoyDefaultListBox } from './listbox';
-import {  ServoyPublicTestingModule, IValuelist, FormattingService, TooltipService, ServoyApi} from '@servoy/public';
+import { IValuelist, FormattingService, TooltipService, ServoyApi, FormatFilterPipe,
+         TooltipDirective, SabloTabseq, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -28,17 +31,18 @@ describe('ServoyDefaultListBox', () => {
   let component: ServoyDefaultListBox;
   let fixture: ComponentFixture<ServoyDefaultListBox>;
   let debugEl: DebugElement;
-  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner','registerComponent','unRegisterComponent']);
+  const servoyApi: any = { getMarkupId: vi.fn(), isInDesigner: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultListBox],
-      imports: [ServoyPublicTestingModule, FormsModule],
-      providers: [FormattingService, TooltipService]
+      declarations: [ServoyDefaultListBox, TooltipDirective, SabloTabseq, FormatFilterPipe],
+      imports: [FormsModule],
+      providers: [FormattingService, TooltipService,
+                  { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.overrideComponent(ServoyDefaultListBox, {
@@ -54,9 +58,9 @@ describe('ServoyDefaultListBox', () => {
     debugEl = fixture.debugElement;
 
     // set some default values
-    component.valuelistID = mockDataValueList;
-    component.multiselectListbox = false;
-    component.dataProviderID = 1;
+    fixture.componentRef.setInput('valuelistID', mockDataValueList);
+    fixture.componentRef.setInput('multiselectListbox', false);
+    component.dataProviderID.set(1);
 
     fixture.detectChanges();
   });
@@ -66,7 +70,7 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('multiselect should be false by default', () => {
-    expect(component.multiselectListbox).toBeFalse();
+    expect(component.multiselectListbox()).toBe(false);
   });
 
   it('should show `Bucuresti Timisoara Cluj` as options', () => {
@@ -77,7 +81,7 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('should call update method', () => {
-    spyOn(component, 'pushUpdate');
+    vi.spyOn(component, 'pushUpdate');
     const select = debugEl.query(By.css('select')).nativeElement;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
@@ -85,9 +89,9 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('should call multiUpdate method', () => {
-    component.multiselectListbox = true;
+    fixture.componentRef.setInput('multiselectListbox', true);
     fixture.detectChanges();
-    spyOn(component, 'multiUpdate');
+    vi.spyOn(component, 'multiUpdate');
     const select = debugEl.query(By.css('select')).nativeElement;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
@@ -99,14 +103,14 @@ describe('ServoyDefaultListBox', () => {
     select.value = select.options[1].value;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(component.dataProviderID).toEqual(2);
+    expect(component.dataProviderID()).toEqual(2);
   });
 
   it('should test selectedValues', () => {
-    component.multiselectListbox = true;
-    component.dataProviderID = 'test1\ntest2';
+    fixture.componentRef.setInput('multiselectListbox', true);
+    component.dataProviderID.set('test1\ntest2');
         component.ngOnChanges({
-            dataProviderID: new SimpleChange(null, component.dataProviderID, true)
+            dataProviderID: new SimpleChange(null, component.dataProviderID(), true)
         });
     fixture.detectChanges();
     expect(component.selectedValues[0]).toEqual('test1');
@@ -114,15 +118,15 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('should call ngOnChanges', () => {
-      component.multiselectListbox = true;
-      spyOn(component, 'ngOnChanges');
+      fixture.componentRef.setInput('multiselectListbox', true);
+      vi.spyOn(component, 'ngOnChanges');
       component.ngOnChanges({dataProviderID: new SimpleChange(1, 2, false)});
       fixture.detectChanges();
       expect(component.ngOnChanges).toHaveBeenCalled();
   });
 
   it( 'should render markupid ', () => {
-    servoyApi.getMarkupId.and.returnValue( 'myid');
+    servoyApi.getMarkupId.mockReturnValue( 'myid');
     const select = debugEl.query(By.css('select')).nativeElement;
     fixture.detectChanges();
     expect(select.id).toBe('myid');

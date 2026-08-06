@@ -1,7 +1,10 @@
-import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
 
 import { ServoyDefaultAccordion } from './accordion';
-import { ServoyPublicTestingModule, WindowRefService, ServoyApi } from '@servoy/public'
+import { WindowRefService, ServoyApi, ServoyPublicService, SabloTabseq } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { By } from '@angular/platform-browser';
 import { Tab } from '../tabpanel/basetabpanel';
@@ -11,23 +14,24 @@ import { runOnPushChangeDetection}  from '../testingutils';
 describe('ServoyDefaultAccordion', () => {
     let component: ServoyDefaultAccordion;
     let fixture: ComponentFixture<ServoyDefaultAccordion>;
-    const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'trustAsHtml', 'registerComponent', 'unRegisterComponent']);
+    const servoyApi: any = { getMarkupId: vi.fn(), formWillShow: vi.fn(), hideForm: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
-    beforeEach(waitForAsync(() => {
+    beforeEach(async () => {
         TestBed.configureTestingModule({
-            declarations: [ServoyDefaultAccordion],
-            imports: [NgbModule, ServoyPublicTestingModule],
-            providers: [WindowRefService]
+            declarations: [ServoyDefaultAccordion, SabloTabseq],
+            imports: [NgbModule, CommonModule],
+            providers: [WindowRefService,
+                        { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
         })
             .compileComponents();
-    }));
+    });
 
     beforeEach(() => {
         fixture = TestBed.createComponent(ServoyDefaultAccordion);
         component = fixture.componentInstance;
         component.servoyApi = servoyApi;
-        servoyApi.formWillShow.and.returnValue(Promise.resolve(true));
-        servoyApi.hideForm.and.returnValue(Promise.resolve(true));
+        servoyApi.formWillShow.mockReturnValue(Promise.resolve(true));
+        servoyApi.hideForm.mockReturnValue(Promise.resolve(true));
         const tabs = [];
         let tab = new Tab();
         tab.name = 'tab1';
@@ -53,25 +57,26 @@ describe('ServoyDefaultAccordion', () => {
         expect(component).toBeDefined();
     });
     
-    it('should handle tabs', fakeAsync(() => {
-        component.onChangeMethodID = jasmine.createSpy('onChangeMethodID');
+    it('should handle tabs', async () => {
+        vi.useFakeTimers();
+        component.onChangeMethodID = vi.fn();
         let tabs = fixture.debugElement.queryAll((By.css('button')));
         expect(tabs.length).toBe(3);
         expect(tabs[0].nativeElement.textContent.trim()).toBe('tab1');
         expect(tabs[1].nativeElement.textContent.trim()).toBe('tab2');
         expect(tabs[2].nativeElement.textContent.trim()).toBe('tab3');
         tabs[1].triggerEventHandler('click', { target: tabs[1].nativeElement });
-        tick();
+        await vi.advanceTimersByTimeAsync(0);
         expect(component.onChangeMethodID).toHaveBeenCalled();
         expect(component.tabIndex).toBe(2);
 
         component.tabIndex = 1;
         component.svyOnChanges({ 'tabIndex': new SimpleChange(2, 1, false) });
-        tick();
+        await vi.advanceTimersByTimeAsync(0);
         expect(component.onChangeMethodID).toHaveBeenCalledTimes(2);
-        discardPeriodicTasks()
+        vi.useRealTimers();
         console.log("test")
-    }));
+    });
     
      it('should handle tabs edit', async () => {
         component.svyOnChanges({ 'tabs': new SimpleChange(null, component.tabs, true) });

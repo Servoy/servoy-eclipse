@@ -1,4 +1,4 @@
-import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable } from '@angular/core';
+import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable, inject } from '@angular/core';
 import { ServoyApi } from './servoy_api';
 
 /**
@@ -18,16 +18,21 @@ import { ServoyApi } from './servoy_api';
 export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
     @Input() name!: string;
     @Input() servoyApi!: ServoyApi;
-    @Input() servoyAttributes!: { [property: string]: string };
+    readonly servoyAttributes = input<{ [property: string]: string }>(undefined as any);
 
     @ViewChild('element', { static: false, read: ElementRef }) elementRef!: ElementRef<T>;
+
+    protected readonly renderer: Renderer2;
+    protected cdRef: ChangeDetectorRef;
 
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor: ComponentContributor;
     private initialized = false;
     private changes: SimpleChanges | null = null;
 
-    constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
+    constructor(renderer?: Renderer2, cdRef?: ChangeDetectorRef) {
+        this.renderer = renderer ?? inject(Renderer2);
+        this.cdRef = cdRef ?? inject(ChangeDetectorRef);
         this.componentContributor = new ComponentContributor();
     }
 
@@ -208,9 +213,9 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * @internal
      */
     protected addAttributes() {
-        if (!this.servoyAttributes) return;
-        for (const key of Object.keys(this.servoyAttributes)) {
-            this.renderer.setAttribute(this.getNativeElement(), key, this.servoyAttributes[key]);
+        if (!this.servoyAttributes()) return;
+        for (const key of Object.keys(this.servoyAttributes())) {
+            this.renderer.setAttribute(this.getNativeElement(), key, this.servoyAttributes()[key]);
         }
     }
 }

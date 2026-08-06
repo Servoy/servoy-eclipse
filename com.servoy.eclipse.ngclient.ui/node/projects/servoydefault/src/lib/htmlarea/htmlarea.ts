@@ -31,9 +31,9 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     }
 
     focus() {
-        if (this.onFocusGainedMethodID) {
+        if (this.onFocusGainedMethodID()) {
             if (this.mustExecuteOnFocus !== false) {
-                this.onFocusGainedMethodID(new CustomEvent('focus'));
+                this.onFocusGainedMethodID()(new CustomEvent('focus'));
             }
             this.mustExecuteOnFocus = true;
         }
@@ -41,19 +41,19 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     blur() {
         if (this.lastServerValueAsSeenByTinyMCEContent != this.tinyValue) {
-            this.dataProviderID = '<html><body>' + this.tinyValue ? this.tinyValue : '' + '</body></html>'
+            this.dataProviderID.set('<html><body>' + this.tinyValue ? this.tinyValue : '' + '</body></html>');
             this.pushUpdate();
         }
-        if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
+        if (this.onFocusLostMethodID()) this.onFocusLostMethodID()(new CustomEvent('blur'));
     }
 
     click({ event }: { event: MouseEvent }) {
-        if (this.onActionMethodID) this.onActionMethodID(new MouseEvent(event.type, event));
+        if (this.onActionMethodID()) this.onActionMethodID()(new MouseEvent(event.type, event));
     }
 
     contextMenu(event: any) {
-        if (this.onRightClickMethodID) {
-            this.onRightClickMethodID(new CustomEvent('contextmenu'));
+        if (this.onRightClickMethodID()) {
+            this.onRightClickMethodID()(new CustomEvent('contextmenu'));
             event.event.preventDefault();
         }
     }
@@ -105,7 +105,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
 
     svyOnInit() {
         super.svyOnInit();
-        this.tinyValue = this.dataProviderID;
+        this.tinyValue = this.dataProviderID();
     }
 
     svyOnChanges(changes: SimpleChanges) {
@@ -132,7 +132,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
                     case 'editable':
                     case 'readOnly':
                     case 'enabled':
-                        const editable = this.editable && !this.readOnly && this.enabled;
+                        const editable = this.editable() && !this.readOnly() && this.enabled();
                         if (this.getEditor()) {
                             if (editable) {
                                 this.getEditor().mode.set("design");
@@ -143,7 +143,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
                         }
                         break;
                     case 'dataProviderID':
-                        this.tinyValue = this.dataProviderID;
+                        this.tinyValue = this.dataProviderID();
                         this.lastServerValueAsSeenByTinyMCEContent = this.tinyValue;
                         break;
                 }
@@ -159,7 +159,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     public onInit({ event, editor }: any) {
         this.editor = editor;
         this.lastServerValueAsSeenByTinyMCEContent = editor.getContent();
-        const editable = this.editable && !this.readOnly && this.enabled;
+        const editable = this.editable() && !this.readOnly() && this.enabled();
         if (!editable) editor.mode.set('readonly')
     }
 
@@ -198,7 +198,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         this.getEditor().selection.setContent(text);
         const edContent = this.getEditor().getContent();
         if (this.lastServerValueAsSeenByTinyMCEContent != edContent) {
-            this.dataProviderID = '<html><body>' + edContent + '</body></html>';
+            this.dataProviderID.set('<html><body>' + edContent + '</body></html>');
             this.pushUpdate();
         }
     }

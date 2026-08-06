@@ -1,5 +1,6 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Directive, input } from '@angular/core';
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { MainComponent } from './main.component';
 import {ServoyService} from './servoy.service';
 import {AllServiceService} from './allservices.service';
@@ -13,15 +14,15 @@ import { ServoyTestingModule } from '../testing/servoytesting.module';
 import { ServoyPublicModule } from '@servoy/public';
 
 describe('MainComponent', () => {
-  const servicesService = jasmine.createSpyObj('ServoyService', ['connect','getSolutionSettings']);
-  servicesService.getSolutionSettings.and.returnValue({ 
+  const servicesService = { connect: vi.fn(), getSolutionSettings: vi.fn() } as any;
+  servicesService.getSolutionSettings.mockReturnValue({ 
     sessionProblem: null
 });
   const i18n: I18NListener = {
       messages: () =>i18n,
       destroy: () =>{}
   };
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       declarations: [
         MainComponent,MockFormComponent,MockDefaultNavigator,MockSessionView
@@ -39,14 +40,14 @@ describe('MainComponent', () => {
         { provide:LoadingIndicatorService, useValue: {}},
         { provide:ServerDataService, useValue: {init: ()=>{}}}]
     }).compileComponents();
-  }));
-  it('should create the main component', waitForAsync(() => {
+  });
+  it('should create the main component', async () => {
     const fixture = TestBed.createComponent(MainComponent);
     const app = fixture.debugElement.componentInstance;
     fixture.componentInstance.ngOnInit();
     expect(app).toBeTruthy();
     expect(servicesService.connect).toHaveBeenCalled();
-  }));
+  });
 });
 
 @Directive({

@@ -18,21 +18,29 @@ import { environment } from '../environments/environment';
 })
 export class FormService {
 
-	private formsCache: Map<string, FormCache>; // keeps form state (not actual angular components that are forms)
-	private formsCachePendingRunnables: Map<string, ((formCache: FormCache) => void)[]>; // in case code wants to execute to update formCache content before form cache is sent from server;
-	// this should normally not happen (use of 'formCachePendingRunnables') since SVY-19635 and we do print a warning message when it does...
+	private formsCache: Map<string, FormCache>;
+	private formsCachePendingRunnables: Map<string, ((formCache: FormCache) => void)[]>;
 
-	private log: LoggerService;
-	private formComponentCache: Map<string, IFormComponent | Deferred<any>>; // this refers to forms (angular components), not to servoy "form components"
+	private readonly log: LoggerService;
+	private formComponentCache: Map<string, IFormComponent | Deferred<any>>;
 	private ngUtilsFormStyleclasses!: Record<string, any>;
 
 	private isInDesigner = false;
     
     private injector = inject(Injector);
+
+    private readonly sabloService = inject(SabloService);
+    private readonly converterService = inject(ConverterService<unknown>);
+    private readonly servoyService = inject(ServoyService);
+    private readonly clientFunctionService = inject(ClientFunctionService);
+    private readonly typesRegistry = inject(TypesRegistry);
+    private readonly utils = inject(SvyUtilsService);
+    private readonly windowRefService = inject(WindowRefService);
     
-	constructor(private sabloService: SabloService, private converterService: ConverterService<unknown>, websocketService: WebsocketService, logFactory: LoggerFactory,
-		private servoyService: ServoyService, private clientFunctionService: ClientFunctionService, private typesRegistry: TypesRegistry, private utils: SvyUtilsService,
-		private windowRefService: WindowRefService) {
+	constructor() {
+	    const websocketService = inject(WebsocketService);
+	    const logFactory = inject(LoggerFactory);
+	    const servoyService = this.servoyService;
 
 		this.log = logFactory.getLogger('FormService');
 		this.formsCache = new Map();

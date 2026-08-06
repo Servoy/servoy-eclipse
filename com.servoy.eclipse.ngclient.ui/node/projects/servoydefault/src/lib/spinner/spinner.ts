@@ -60,16 +60,16 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
         this.renderer.listen(spinnerButtons[1], 'click', (e: any) => this.decrement());
 
         for (const i of Object.keys(spinnerButtons)) {
-            if (this.onActionMethodID)
-                this.renderer.listen((spinnerButtons as any)[i], 'click', (e: any) => this.onActionMethodID(e));
+            if (this.onActionMethodID())
+                this.renderer.listen((spinnerButtons as any)[i], 'click', (e: any) => this.onActionMethodID()(e));
 
-            if (this.onFocusLostMethodID)
-                this.renderer.listen((spinnerButtons as any)[i], 'blur', (e: any) => this.onFocusLostMethodID(e));
+            if (this.onFocusLostMethodID())
+                this.renderer.listen((spinnerButtons as any)[i], 'blur', (e: any) => this.onFocusLostMethodID()(e));
 
-            if (this.onFocusGainedMethodID)
+            if (this.onFocusGainedMethodID())
                 this.renderer.listen((spinnerButtons as any)[i], 'focus', ( e: any ) => {
                     if(this.mustExecuteOnFocus !== false) {
-                        this.onFocusGainedMethodID(e);
+                        this.onFocusGainedMethodID()(e);
                     }
                     this.mustExecuteOnFocus = true;
                 } );
@@ -104,40 +104,40 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
     }
 
     isDisabled() {
-        return this.enabled === false || this.editable === false;
+        return this.enabled() === false || this.editable() === false;
     }
 
     increment() {
-        if (this.valuelistID) {
-            this.counter = this.counter < this.valuelistID.length - 1 ? this.counter + 1 : 0;
-            this.dataProviderID = this.valuelistID[this.counter].realValue;
+        if (this.valuelistID()) {
+            this.counter = this.counter < this.valuelistID().length - 1 ? this.counter + 1 : 0;
+            this.dataProviderID.set(this.valuelistID()[this.counter].realValue);
         }
         this.pushUpdate();
     }
 
     decrement() {
-        if (this.valuelistID) {
-            this.counter = this.counter > 0 ? this.counter - 1 : this.valuelistID.length - 1;
-            this.dataProviderID = this.valuelistID[this.counter].realValue;
+        if (this.valuelistID()) {
+            this.counter = this.counter > 0 ? this.counter - 1 : this.valuelistID().length - 1;
+            this.dataProviderID.set(this.valuelistID()[this.counter].realValue);
         }
         this.pushUpdate();
     }
 
     getSelectionFromDataprovider() {
-        if (!this.dataProviderID) {
+        if (!this.dataProviderID()) {
             this.counter = 0;
             return undefined;
         }
 
-        for (let i = 0; i < this.valuelistID.length; i++) {
-            const item = this.valuelistID[i];
-            if (item && item.realValue && this.dataProviderID === item.realValue) {
+        for (let i = 0; i < this.valuelistID().length; i++) {
+            const item = this.valuelistID()[i];
+            if (item && item.realValue && this.dataProviderID() === item.realValue) {
                 let displayFormat;
                 let type;
-                if (this.format && this.format.display)
-                    displayFormat = this.format.display;
-                if (this.format && this.format.type)
-                    type = this.format.type;
+                if (this.format() && this.format().display)
+                    displayFormat = this.format().display;
+                if (this.format() && this.format().type)
+                    type = this.format().type;
                 this.counter = i;
                 return item.displayValue;
             }

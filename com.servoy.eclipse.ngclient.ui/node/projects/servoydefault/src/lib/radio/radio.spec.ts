@@ -1,26 +1,32 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, expect, beforeEach, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultRadio } from './radio';
+import { TooltipDirective, SabloTabseq, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicServiceTestingImpl } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
 
 describe('ImageLabelComponent', () => {
   let component: ServoyDefaultRadio;
   let fixture: ComponentFixture<ServoyDefaultRadio>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultRadio ]
+      declarations: [ServoyDefaultRadio, TooltipDirective, SabloTabseq],
+      imports: [FormsModule],
+      providers: [{ provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultRadio);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml','registerComponent','unRegisterComponent']);
+    component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     fixture.detectChanges();
   });
 
-  xit('should create', () => {
+  it.skip('should create', () => {
     expect(component).toBeTruthy();
   });
 });

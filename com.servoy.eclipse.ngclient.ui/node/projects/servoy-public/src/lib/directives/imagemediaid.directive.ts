@@ -1,4 +1,4 @@
-import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2, OnDestroy } from '@angular/core';
+import { Directive, input, SimpleChanges, OnChanges, ElementRef, Renderer2, OnDestroy, inject } from '@angular/core';
 import { ServoyBaseComponent } from '../basecomponent';
 import { IViewStateListener } from '../basecomponent';
 import { WindowRefService } from '../services/windowref.service';
@@ -9,17 +9,23 @@ import { WindowRefService } from '../services/windowref.service';
 })
 export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnDestroy {
 
-    @Input('svyImageMediaId') media!: any;
-    @Input() hostComponent!: ServoyBaseComponent<HTMLElement>;
+    readonly media = input<any>(undefined as any, { alias: 'svyImageMediaId' });
+    readonly hostComponent = input<ServoyBaseComponent<HTMLElement>>(undefined as any);
 
     private imgStyle: Map<string, any> | null = null;
     private rollOverImgStyle: Map<string, any> | null = null;
     private clearStyle: Map<string, any>;
+    private _elemRef: ElementRef<HTMLElement>;
+    private _renderer: Renderer2;
+    private windowRefService: WindowRefService;
 
     private resizeObserver!: ResizeObserver;
 
-    public constructor(private _elemRef: ElementRef<HTMLElement>, private _renderer: Renderer2, 
-        private windowRefService: WindowRefService) {
+    public constructor(elemRef?: ElementRef<HTMLElement>, renderer?: Renderer2, 
+        windowRefService?: WindowRefService) {
+        this._elemRef = elemRef ?? inject(ElementRef);
+        this._renderer = renderer ?? inject(Renderer2);
+        this.windowRefService = windowRefService ?? inject(WindowRefService);
         this.clearStyle = new Map();
         this.clearStyle.set('width', '0px');
         this.clearStyle.set('height', '0px');
@@ -28,7 +34,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['hostComponent']) {
-            this.hostComponent.addViewStateListener(this);
+            this.hostComponent().addViewStateListener(this);
         }
         if (changes['media']) {
              this.setImageStyle();
@@ -36,15 +42,15 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     }
 
     ngOnDestroy(): void {
-        if (this.hostComponent) {
-            this.hostComponent.removeViewStateListener(this);
-            if (this.resizeObserver) this.resizeObserver.unobserve(this.hostComponent.getNativeElement());
+        if (this.hostComponent()) {
+            this.hostComponent().removeViewStateListener(this);
+            if (this.resizeObserver) this.resizeObserver.unobserve(this.hostComponent().getNativeElement());
         }
     }
 
     afterViewInit() {
-        const nativeElement = this.hostComponent.getNativeElement();
-        const renderer = this.hostComponent.getRenderer();
+        const nativeElement = this.hostComponent().getNativeElement();
+        const renderer = this.hostComponent().getRenderer();
         renderer.listen(nativeElement, 'mouseenter', (e: any) => {
             if (this.rollOverImgStyle) {
                 this.setCSSStyle(this.rollOverImgStyle);
@@ -68,7 +74,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
     }
 
     private setImageStyle(): void {
-        if (this.media && (this.media.img || this.media.rollOverImg) || this.rollOverImgStyle || this.imgStyle) {
+        if (this.media() && (this.media().img || this.media().rollOverImg) || this.rollOverImgStyle || this.imgStyle) {
             const componentSize = {
                 width: (this._elemRef.nativeElement.parentNode!.parentNode as HTMLElement).clientWidth,
                 height: (this._elemRef.nativeElement.parentNode!.parentNode as HTMLElement).clientHeight
@@ -76,14 +82,14 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
             if (componentSize.height === 0 || componentSize.width === 0)
                 setTimeout(() => this.setImageStyle(), 100);
             else {
-                const mediaOptions = this.media.mediaOptions;
-                if (this.media.rollOverImg) {
-                    this.rollOverImgStyle = this.parseImageOptions(this.media.rollOverImg, mediaOptions, componentSize);
+                const mediaOptions = this.media().mediaOptions;
+                if (this.media().rollOverImg) {
+                    this.rollOverImgStyle = this.parseImageOptions(this.media().rollOverImg, mediaOptions, componentSize);
                 } else {
                     this.rollOverImgStyle = null;
                 }
-                if (this.media.img) {
-                    this.imgStyle = this.parseImageOptions(this.media.img, mediaOptions, componentSize);
+                if (this.media().img) {
+                    this.imgStyle = this.parseImageOptions(this.media().img, mediaOptions, componentSize);
                     this.setCSSStyle(this.imgStyle);
                 } else {
                     this.imgStyle = null;
