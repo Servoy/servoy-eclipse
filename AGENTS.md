@@ -150,6 +150,11 @@ When asked to create, update, or link Jira issues, load the instructions from `J
 - Follow existing code style and conventions for each language and module
 - Java: standard Eclipse plugin conventions, OSGi declarative services
 - TypeScript/Angular: follows Angular CLI conventions in `node/` subdirectories
+- **Angular sub-projects have their own `AGENTS.md`** — always read those when working on Angular code:
+  - `com.servoy.eclipse.ngclient.ui/node/AGENTS.md` — NG Client UI (TiNG)
+  - `com.servoy.eclipse.designer.rfb/node/AGENTS.md` — Form Designer (RFB)
+  - `com.servoy.eclipse.designer.wpm/node/AGENTS.md` — Web Package Manager (WPM)
+- **After every Angular code change:** run lint (`npm run lint`) and build, then tests if applicable. All three projects must pass lint with zero warnings before committing.
 - No hardcoded secrets, credentials, or proprietary information
 - All code must be compatible with open source licenses (except GPL)
 - **Commit messages:** When the code is mostly AI-generated, the commit subject line must end with `[ai]`
@@ -161,8 +166,8 @@ When asked to create, update, or link Jira issues, load the instructions from `J
 - **NG Client UI tests:** `com.servoy.eclipse.ngclient.ui.tests` (eclipse-test-plugin packaging)
 - **Designer tests:** `com.servoy.eclipse.designer.tests` â `TestCssValues`, `TestSnapCSSPosition` [JUnit]
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
-- **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
-- **WPM tests:** `com.servoy.eclipse.designer.wpm/node/src/test.ts`
+- **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/` → `npm test` (Vitest, 307 tests)
+- **WPM tests:** `com.servoy.eclipse.designer.wpm/node/` → `npm test` (Vitest, 94 tests)
 - **SVY-21118 jsType in signatures:** `j2db_documentation.tests` → `FunctionDocumentationTest` [Plugin JUnit] — tests that `getJSType()` is used in signature generation when set on a parameter
 - **SVY-21118 doc generator parsing:** `com.servoy.eclipse.docgenerator.tests` (in `docgenerator-ui` repo) → `DocumentedParameterDataTest` [Plugin JUnit, requires m2e in target] — tests that `{Object<String>}` in `@param` descriptions is extracted as jsType
 - **SVY-21257 WebComponent clone UUID:** `j2db_test` → `WebComponentCloneTest` [JUnit] — tests that `WebComponent.cloneObj()` regenerates UUIDs for custom type children (AG Grid columns)

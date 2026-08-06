@@ -5,7 +5,7 @@ implementation matches its spec and meets the project's quality bar.
 
 ## Input
 
-You receive a path to the spec file (e.g. `docs/SVY-21234-feature-name.spec.md`).
+You receive a path to the spec file (e.g. `docs/SVY-21300-wpm-search.spec.md`).
 
 ## Context isolation
 
@@ -21,7 +21,7 @@ every acceptance criterion.
 
 ### 2. Read project conventions
 
-Read `AGENTS.md` for code style, Angular conventions, and project structure.
+Read `AGENTS.md` in this project's root for architecture, conventions, and commands.
 
 ### 3. Get the diff
 
@@ -38,35 +38,39 @@ For each item in the **Implementation plan**, verify it was actually done.
 
 Work through every changed file:
 
-**Angular correctness**
-- [ ] No signal writes in methods/getters called from templates (NG0600)
-- [ ] `computed()` used for derived state displayed in templates
-- [ ] RxJS subscriptions properly cleaned up (ngOnDestroy, takeUntilDestroyed, async pipe)
-- [ ] No side effects in template expressions
-- [ ] Change detection not broken (no unnecessary manual trigger)
+**Correctness**
+- [ ] Logic matches the design in the spec
+- [ ] No race conditions on shared mutable state
+- [ ] No memory leaks (subscriptions cleaned up in `ngOnDestroy`)
+- [ ] Error paths handled — no silent failures
+- [ ] OnPush change detection handled (markForCheck in subscriptions)
 
-**TypeScript quality**
-- [ ] No `any` types unless unavoidable (check if a proper type exists)
-- [ ] Proper null/undefined handling
-- [ ] No unused imports or variables
-- [ ] Consistent use of `readonly` for signal properties
-
-**Component patterns**
-- [ ] Selector naming follows convention (`servoydefault-`, `servoycore-`, `svy-`)
-- [ ] Template syntax matches the file's existing style (`@if` vs `*ngIf`)
-- [ ] `standalone: false` used for NgModule components (unless module is being migrated)
-- [ ] Injection style matches the file (inject() vs constructor)
-
-**Style & conventions**
-- [ ] No code comments (unless explicitly requested)
-- [ ] Single quotes for strings
-- [ ] Consistent formatting (2-space indent, max 200 chars line length)
-- [ ] Follows patterns in neighboring files
+**TypeScript & Angular**
+- [ ] No `any` types without justification
+- [ ] Strict null checks handled
+- [ ] Components use correct lifecycle hooks
+- [ ] Services properly injected (no manual instantiation)
+- [ ] RxJS subscriptions cleaned up (no orphan subscriptions)
+- [ ] New components declared in `WpmModule`
+- [ ] `standalone: false` on all new components/directives/pipes
+- [ ] `ChangeDetectionStrategy.OnPush` on all components
 
 **Build & lint**
-- [ ] ESLint passes with zero warnings (`npm run lint`)
-- [ ] Application builds without errors
+- [ ] `npm run lint` → zero warnings
+- [ ] `npm run build` → successful production build
 - [ ] All existing tests still pass (`npm test`)
+- [ ] No unused imports
+
+**Style & conventions**
+- [ ] Single quotes used consistently
+- [ ] Arrow functions used (enforced by ESLint)
+- [ ] Component selector prefix is `app-` or `wpm-`
+- [ ] File naming follows conventions (`*.component.ts`, `*.service.ts`, etc.)
+
+**Architecture**
+- [ ] WebSocket communication goes through `WpmService` / `WebsocketService`
+- [ ] No standalone components (project uses NgModule architecture)
+- [ ] New dependencies are already in `package.json` (no undeclared deps)
 
 ### 6. Output
 
