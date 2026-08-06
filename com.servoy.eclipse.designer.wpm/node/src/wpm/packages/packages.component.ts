@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, ChangeDetectionStrategy, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.service';
@@ -19,7 +19,7 @@ import { MatCardContent } from '@angular/material/card';
 })
 export class PackagesComponent implements OnChanges {
 
-    @Input() packages!: Package[];
+    readonly packages = input.required<Package[]>();
     selectedPackage!: Package;
     descriptionExpanded = false;
 
@@ -27,8 +27,9 @@ export class PackagesComponent implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.packages && this.packages) {
-            this.packages.forEach(p => {
+        const packages = this.packages();
+        if (changes.packages && packages) {
+            packages.forEach(p => {
                 if (!p.selected) p.selected = p.releases[0].version;   
             });
         }

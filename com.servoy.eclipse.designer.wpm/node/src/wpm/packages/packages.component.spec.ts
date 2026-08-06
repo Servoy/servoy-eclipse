@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { signal } from '@angular/core';
 
 import { PackagesComponent } from './packages.component';
 import { Package } from '../websocket.service';
@@ -55,7 +56,7 @@ describe('PackagesComponent', () => {
     component = Object.create(PackagesComponent.prototype);
     (component as any).wpmService = wpmService;
     (component as any).dialog = dialog;
-    component.packages = [];
+    (component as any).packages = signal<Package[]>([]);
     component.selectedPackage = undefined as any;
     component.descriptionExpanded = false;
   });
@@ -63,7 +64,7 @@ describe('PackagesComponent', () => {
   describe('ngOnChanges', () => {
     it('should set default selected version for packages without one', () => {
       const pkg = createPackage({ selected: '' });
-      component.packages = [pkg];
+      (component as any).packages.set([pkg]);
       component.ngOnChanges({ packages: { currentValue: [pkg], previousValue: undefined, firstChange: true, isFirstChange: () => true } });
 
       expect(pkg.selected).toBe('2.0.0');
@@ -71,7 +72,7 @@ describe('PackagesComponent', () => {
 
     it('should not override existing selected version', () => {
       const pkg = createPackage({ selected: '1.5.0' });
-      component.packages = [pkg];
+      (component as any).packages.set([pkg]);
       component.ngOnChanges({ packages: { currentValue: [pkg], previousValue: undefined, firstChange: true, isFirstChange: () => true } });
 
       expect(pkg.selected).toBe('1.5.0');

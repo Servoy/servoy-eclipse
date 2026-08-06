@@ -6,7 +6,7 @@
     <th><div>In solution/module</div></th>
     <th><div>References</div></th>
   </tr>
-  @for (package of packages; track package) {
+  @for (package of packages(); track package) {
     <tr [ngClass]="isPackageSelected(package) ? 'wpm-package-selected' : ''">
       <td>
         <div class="wpm-clickable" matTooltip="{{ getDescriptionTooltip(package) }}" matTooltipDisabled="{{ !package.description }}" (click)="togglePackageSelection($event, package)" (keydown.enter)="togglePackageSelection($event, package)" tabindex="0">
