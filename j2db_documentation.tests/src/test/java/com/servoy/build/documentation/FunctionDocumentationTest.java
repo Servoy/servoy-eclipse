@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 
-@DisplayName("FunctionDocumentation")
 class FunctionDocumentationTest
 {
 	private FunctionDocumentation createFunction(String name, Class<?>[] argTypes)
@@ -26,7 +25,6 @@ class FunctionDocumentationTest
 	}
 
 	@Nested
-	@DisplayName("getJSTranslatedSignature with jsType")
 	class JSTypeInSignature
 	{
 		@Test
@@ -95,7 +93,6 @@ class FunctionDocumentationTest
 	}
 
 	@Nested
-	@DisplayName("getJSTranslatedSignature fallback to class-based type")
 	class FallbackToClassType
 	{
 		@ParameterizedTest
@@ -128,7 +125,6 @@ class FunctionDocumentationTest
 	}
 
 	@Nested
-	@DisplayName("getJSTranslatedSignature preserves other behaviors")
 	class PreservesOtherBehaviors
 	{
 		@Test

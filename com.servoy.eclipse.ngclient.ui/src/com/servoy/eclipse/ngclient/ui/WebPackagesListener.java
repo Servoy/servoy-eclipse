@@ -358,12 +358,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							imports.append(" } from '");
 							imports.append(service.getNG2Config().getPackageName());
 							imports.append("';\n");
-							// add it to the service declarations in the constructor
-							services.append("private ");
-							services.append(ClientService.convertToJSName(service.getName()));
-							services.append(": ");
-							services.append(serviceName);
-							services.append(",\n");
+						// add it to the service declarations as inject() field initializers
+						services.append("private readonly ");
+						services.append(ClientService.convertToJSName(service.getName()));
+						services.append(" = inject(");
+						services.append(serviceName);
+						services.append(");\n");
 							// add it to the providers (if it is not a module)
 							if (!"aggridservice".equals(service.getPackageName()) && moduleName == null)
 							{

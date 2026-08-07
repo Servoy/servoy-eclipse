@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
  * because loading SolutionExplorerListContentProvider triggers too many Eclipse
  * platform dependencies.
  */
-@DisplayName("SVY-21055: getParsedComment tooltip line breaks")
 class SolutionExplorerListContentProviderGetParsedCommentTest
 {
 
@@ -59,6 +58,7 @@ class SolutionExplorerListContentProviderGetParsedCommentTest
 		{
 			c = c.replaceAll("\n", "<br/>");
 			c = c.replaceAll("(?<!<br/>)(@param|@return|@example|@element)", "<br/>$1");
+			c = c.replaceAll("(<br/>)+(@param|@return|@example|@element)", "<br/>$2");
 		}
 
 		c = c.replaceAll(separator, "<br/>");
@@ -66,7 +66,6 @@ class SolutionExplorerListContentProviderGetParsedCommentTest
 	}
 
 	@Nested
-	@DisplayName("Component API methods (elementName != null)")
 	class ComponentApiMethods
 	{
 
@@ -159,7 +158,6 @@ class SolutionExplorerListContentProviderGetParsedCommentTest
 	}
 
 	@Nested
-	@DisplayName("Form/scope methods (elementName == null)")
 	class FormScopeMethods
 	{
 
@@ -202,7 +200,6 @@ class SolutionExplorerListContentProviderGetParsedCommentTest
 	}
 
 	@Nested
-	@DisplayName("Edge cases")
 	class EdgeCases
 	{
 
@@ -259,7 +256,6 @@ class SolutionExplorerListContentProviderGetParsedCommentTest
 	}
 
 	@Nested
-	@DisplayName("Real tabpanel_doc.js documentation")
 	class TabpanelDocTests
 	{
 

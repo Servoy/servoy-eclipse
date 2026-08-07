@@ -30,7 +30,8 @@
     "test_ngclientutils": "ng test @servoy/ngclientutils --no-watch",
     "test_ngclientutils:watch": "ng test @servoy/ngclientutils",
     "update": "ng update",
-    "lint": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng.js lint"
+    "lint": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng.js lint",
+    "lint:ci": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng.js lint --format checkstyle --output-file ../target/eslint-checkstyle.xml"
   },
   "private": true,
   "dependencies": {
@@ -73,6 +74,7 @@
     "@types/node": "26.1.2",
     "angular-eslint": "22.1.0",
     "eslint": "10.8.0",
+    "eslint-formatter-checkstyle": "^9.0.1",
     "eslint-plugin-only-warn": "1.2.1",
     "eslint-plugin-prefer-arrow": "1.2.3",
     "jsdom": "^30.0.1",

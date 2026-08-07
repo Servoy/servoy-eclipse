@@ -18,7 +18,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("WebPackagesListener.copyAngularLocales")
 class AngularLocalesCopyTest {
 
 	private Path tempDir;
@@ -41,7 +40,6 @@ class AngularLocalesCopyTest {
 	}
 
 	@Nested
-	@DisplayName("when locales are in parent node_modules (after dedup)")
 	class ParentNodeModules {
 
 		private File parentLocalesDir;
@@ -129,7 +127,6 @@ class AngularLocalesCopyTest {
 	}
 
 	@Nested
-	@DisplayName("when locales are only in local node_modules (no dedup)")
 	class LocalNodeModules {
 
 		@BeforeEach
@@ -153,7 +150,6 @@ class AngularLocalesCopyTest {
 	}
 
 	@Nested
-	@DisplayName("when no locale source directory exists")
 	class NoLocalesAvailable {
 
 		@Test
@@ -168,7 +164,6 @@ class AngularLocalesCopyTest {
 	}
 
 	@Nested
-	@DisplayName("destination directory creation")
 	class DestinationDirectoryCreation {
 
 		@Test

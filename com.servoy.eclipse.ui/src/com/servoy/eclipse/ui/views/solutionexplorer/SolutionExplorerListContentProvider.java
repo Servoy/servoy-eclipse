@@ -2207,6 +2207,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				c = c.replaceAll("\n", "<br/>");
 				c = c.replaceAll("(?<!<br/>)(@param|@return|@example|@element)", "<br/>$1");
+				c = c.replaceAll("(<br/>)+(@param|@return|@example|@element)", "<br/>$2");
 			}
 
 			c = c.replaceAll(separator, "<br/>");

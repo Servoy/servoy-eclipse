@@ -1,27 +1,35 @@
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, ChangeDetectionStrategy, input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Package } from '../websocket.service';
 import { WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.service';
+import { NgClass, NgStyle } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSelect, MatOption } from '@angular/material/select';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatCardContent } from '@angular/material/card';
 
 @Component({
     selector: 'app-packages',
     templateUrl: './packages.component.html',
     styleUrls: ['./packages.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgClass, MatTooltip, NgStyle, MatIcon, MatFormField, MatLabel, MatSelect, MatOption, MatIconButton, MatButton, MatProgressBar, MatCardContent]
 })
 export class PackagesComponent implements OnChanges {
+    wpmService = inject(WpmService);
+    dialog = inject(MatDialog);
 
-    @Input() packages!: Package[];
+
+    readonly packages = input.required<Package[]>();
     selectedPackage!: Package;
     descriptionExpanded = false;
 
-    constructor(public wpmService: WpmService, public dialog: MatDialog) {
-    }
-
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.packages && this.packages) {
-            this.packages.forEach(p => {
+        const packages = this.packages();
+        if (changes.packages && packages) {
+            packages.forEach(p => {
                 if (!p.selected) p.selected = p.releases[0].version;   
             });
         }
@@ -75,7 +83,7 @@ export class PackagesComponent implements OnChanges {
         return this.isPackageSelected(p) && this.descriptionExpanded;
     }
 
-    togglePackageSelection(event: MouseEvent, p: Package) {
+    togglePackageSelection(event: Event, p: Package) {
         if (this.isPackageSelected(p)) {
             this.descriptionExpanded = !this.descriptionExpanded;
             if (this.descriptionExpanded) this.descriptionExpanded = !!p.description; // allow expand only if it has a description
@@ -112,7 +120,9 @@ export class PackagesComponent implements OnChanges {
             const installedVersion = p.installed == 'unknown' ? '' : p.installed;
             return p.installing ?
                 (this.wpmService.versionCompare(p.selected, installedVersion) > 0 ? 'Upgrading the ' + packageType + '...' : 'Downgrading the ' + packageType + '...') :
-                (this.wpmService.versionCompare(p.selected, installedVersion) > 0 ? 'Upgrade the ' + packageType + ' to the selected release version.' : 'Downgrade the ' + packageType + ' to the selected release version.');
+                (this.wpmService.versionCompare(p.selected, installedVersion) > 0 ?
+                  'Upgrade the ' + packageType + ' to the selected release version.' :
+                  'Downgrade the ' + packageType + ' to the selected release version.');
         } else if (p.installing) {
             return 'Adding the ' + packageType + '...';
         } else {

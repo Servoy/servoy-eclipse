@@ -1,31 +1,32 @@
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import { MainComponent } from './main.component';
 
 describe('MainComponent', () => {
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        MainComponent
-      ],
-    }).compileComponents();
-  }));
+  let component: MainComponent;
+  let wpmService: Record<string, any>;
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(MainComponent);
-    const app = fixture.debugElement.componentInstance;
-    expect(app).toBeTruthy();
+  beforeEach(() => {
+    wpmService = {
+      isDarkTheme: vi.fn(() => false),
+      isContentAvailable: vi.fn(() => true),
+    };
+
+    component = Object.create(MainComponent.prototype);
+    (component as any).wpmService = wpmService;
   });
 
-  it(`should have as title 'wpm2'`, () => {
-    const fixture = TestBed.createComponent(MainComponent);
-    const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('wpm2');
+  describe('constructor behavior', () => {
+    it('should have wpmService injected', () => {
+      expect(component.wpmService).toBe(wpmService);
+    });
   });
 
-  it('should render title in a h1 tag', () => {
-    const fixture = TestBed.createComponent(MainComponent);
-    fixture.detectChanges();
-    const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to wpm2!');
+  describe('isContentAvailable', () => {
+    it('should delegate to wpmService', () => {
+      expect(component.isContentAvailable()).toBe(true);
+      wpmService.isContentAvailable.mockReturnValue(false);
+      expect(component.isContentAvailable()).toBe(false);
+    });
   });
 });

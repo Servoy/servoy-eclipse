@@ -75,6 +75,19 @@
 				<version>${tycho.version}</version>
 			</plugin>
 			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+						<usePhrasedFileName>false</usePhrasedFileName>
+						<usePhrasedTestSuiteClassName>false</usePhrasedTestSuiteClassName>
+						<usePhrasedTestCaseClassName>false</usePhrasedTestCaseClassName>
+						<usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
+					</statelessTestsetReporter>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
 				<version>3.0.0.s1</version>

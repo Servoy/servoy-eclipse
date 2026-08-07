@@ -56,8 +56,9 @@ Work through every changed file:
 - [ ] `standalone: false` on all new components/directives/pipes
 
 **Build & lint**
-- [ ] `npm run lint` → zero errors
+- [ ] `npm run lint` → zero warnings
 - [ ] `npm run build_debug_nowatch` → successful build
+- [ ] All existing tests still pass (`npm test`)
 - [ ] No unused imports
 
 **Style & conventions**

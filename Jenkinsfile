@@ -96,12 +96,22 @@ pipeline {
         always {
             script {
                 if (!params.WIPE_WORKSPACE) {
-                    // Karma unit testen archiveren
-                    junit allowEmptyResults: false, testResults: 'com.servoy.eclipse.ngclient.ui/target/*karma.xml'
+                    // Vitest unit test reports (ngclient.ui + designer.rfb)
+                    junit allowEmptyResults: true, testResults: '**/target/vitest-results.xml'
+                    
+                    // Tycho/Surefire Java test reports
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
+                    
+                    // ESLint reports (ngclient.ui + designer.rfb)
+                    recordIssues(
+                        tools: [esLint(pattern: '**/target/eslint-checkstyle.xml')],
+                        qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
+                        enabledForFailure: true
+                    )
                     
                     // HTML Publisher voor Coverage rapportages
                     publishHTML([
-                        allowMissing: false, 
+                        allowMissing: true, 
                         alwaysLinkToLastBuild: false, 
                         keepAll: true, 
                         reportDir: 'com.servoy.eclipse.ngclient.ui/target/coverage', 

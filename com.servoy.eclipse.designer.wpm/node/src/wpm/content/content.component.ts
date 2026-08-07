@@ -1,6 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Package } from '../websocket.service';
 import {WpmService, PACKAGE_TYPE_TO_TITLE_MAP, ALL_PACKAGE_TYPES} from '../wpm.service'
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { PackagesComponent } from '../packages/packages.component';
 
 export interface PackageList {
   title: string;
@@ -13,22 +15,22 @@ export interface PackageList {
     selector: 'app-content',
     templateUrl: './content.component.html',
     styleUrls: ['./content.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [MatTabGroup, MatTab, PackagesComponent]
 })
 export class ContentComponent implements OnInit {
+  wpmService = inject(WpmService);
+  private cdr = inject(ChangeDetectorRef);
+
 
   packageLists: PackageList[] = []
-
-  constructor(public wpmService: WpmService) { }
 
   ngOnInit() {
     this.wpmService.getPackages().subscribe(p => {
       const packageListIdx = this.getPackageListIdx(p.packageType);
       if(p.packages.length == 0) {
         if(packageListIdx != -1) this.packageLists.splice(packageListIdx, 1);
-      }
-      else {
+      } else {
         if(packageListIdx == -1) {
           const packageList =  {
             title: PACKAGE_TYPE_TO_TITLE_MAP[p.packageType],
@@ -37,13 +39,13 @@ export class ContentComponent implements OnInit {
             packages: p.packages
           }
           this.packageLists.splice(this.getPackageListInsertIdx(p.packageType), 0, packageList);
-        }
-        else {
+        } else {
           this.packageLists[packageListIdx].packages = p.packages;
           this.packageLists[packageListIdx].updateCount = this.getUpgradeCount(p.packages);
         }
       }
       this.wpmService.setPackageLists(this.packageLists);
+      this.cdr.markForCheck();
     });
   }
 
@@ -53,8 +55,7 @@ export class ContentComponent implements OnInit {
 
   getUpgradeCount(packages: Package[]): number {
     let count = 0;
-      for (let i = 0; i < packages.length; i++) {
-          const pckg = packages[i];
+      for (const pckg of packages) {
           if (pckg?.installed && pckg?.releases[0]?.version && this.wpmService.versionCompare(pckg?.installed, pckg?.releases[0]?.version) < 0) {
             count++;
           }

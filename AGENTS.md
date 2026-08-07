@@ -150,6 +150,11 @@ When asked to create, update, or link Jira issues, load the instructions from `J
 - Follow existing code style and conventions for each language and module
 - Java: standard Eclipse plugin conventions, OSGi declarative services
 - TypeScript/Angular: follows Angular CLI conventions in `node/` subdirectories
+- **Angular sub-projects have their own `AGENTS.md`** — always read those when working on Angular code:
+  - `com.servoy.eclipse.ngclient.ui/node/AGENTS.md` — NG Client UI (TiNG)
+  - `com.servoy.eclipse.designer.rfb/node/AGENTS.md` — Form Designer (RFB)
+  - `com.servoy.eclipse.designer.wpm/node/AGENTS.md` — Web Package Manager (WPM)
+- **After every Angular code change:** run lint (`npm run lint`) and build, then tests if applicable. All three projects must pass lint with zero warnings before committing.
 - No hardcoded secrets, credentials, or proprietary information
 - All code must be compatible with open source licenses (except GPL)
 - **Commit messages:** When the code is mostly AI-generated, the commit subject line must end with `[ai]`
@@ -161,14 +166,50 @@ When asked to create, update, or link Jira issues, load the instructions from `J
 - **NG Client UI tests:** `com.servoy.eclipse.ngclient.ui.tests` (eclipse-test-plugin packaging)
 - **Designer tests:** `com.servoy.eclipse.designer.tests` â `TestCssValues`, `TestSnapCSSPosition` [JUnit]
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
-- **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
-- **WPM tests:** `com.servoy.eclipse.designer.wpm/node/src/test.ts`
+- **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/` → `npm test` (Vitest, 307 tests)
+- **WPM tests:** `com.servoy.eclipse.designer.wpm/node/` → `npm test` (Vitest, 94 tests)
 - **SVY-21118 jsType in signatures:** `j2db_documentation.tests` → `FunctionDocumentationTest` [Plugin JUnit] — tests that `getJSType()` is used in signature generation when set on a parameter
 - **SVY-21118 doc generator parsing:** `com.servoy.eclipse.docgenerator.tests` (in `docgenerator-ui` repo) → `DocumentedParameterDataTest` [Plugin JUnit, requires m2e in target] — tests that `{Object<String>}` in `@param` descriptions is extracted as jsType
 - **SVY-21257 WebComponent clone UUID:** `j2db_test` → `WebComponentCloneTest` [JUnit] — tests that `WebComponent.cloneObj()` regenerates UUIDs for custom type children (AG Grid columns)
 - **SVY-21121 Console/AI view in perspective:** `com.servoy.eclipse.ui.tests` → `DesignPerspectiveTest` [Plugin JUnit] — tests that Console and Servoy AI views are added as visible views (not placeholders) in the bottom folder of the Servoy Design perspective
 - **SVY-21272 ClassCastException in hasChildren:** `com.servoy.eclipse.ui.tests` → `SolutionExplorerTreeContentProviderHasChildrenTest` [JUnit] — tests that `hasChildren()` does not throw ClassCastException when parent is a plain SimpleUserNode (e.g., RETURNTYPEPLACEHOLDER), and correctly returns false for UserNode with TABLE/INMEMORY_DATASOURCE/VIEW_FOUNDSET types
 - **SVY-21149 Dark theme icon existence:** `com.servoy.eclipse.ui.tests` → `ImageReplacementMapperDarkIconsTest` [JUnit] — tests that `darkicons/expandall-disabled.png` and `darkicons/expandall-disabled@2x.png` exist in `com.servoy.eclipse.ui.tweaks` and are valid PNGs with correct dimensions (16×16 and 32×32)
+
+## Troubleshooting: Angular Source Build Failures
+
+When the generated ngclient build (`target/<solution>/`) fails with errors like:
+- `NG8002: Can't bind to 'xxx' since it isn't a known property of 'div'`
+- `NG6002: 'XxxModule' does not appear to be an NgModule class`
+- `NG8004: No pipe found with name 'xxx'`
+
+And the errors only affect packages in `packages/` (source-included external packages), NOT `projects/` (workspace libraries):
+
+### Root cause: dependency version conflicts between packages
+
+Angular's compiler fails to process a module if ANY of its imported dependencies has a version conflict with other packages in the build. This cascades: the entire module becomes unresolvable, making all its exported directives/pipes invisible.
+
+### How to diagnose
+
+1. Check which package fails: the error mentions the component/module path
+2. Compare `package.json` dependency versions between the failing package and other packages that use the SAME library (e.g., `@ng-bootstrap/ng-bootstrap`, `@angular/cdk`, `ng-select2-component`)
+3. Use `npm ls <package-name>` in the target folder to check for duplicate/conflicting versions
+4. Key conflict pattern: one package requires `^21` and another requires `^20` of the same library → npm installs TWO versions → Angular compilation breaks
+
+### How to fix
+
+Align dependency versions across ALL package.json files:
+- `com.servoy.eclipse.ngclient.ui/node/projects/servoydefault/package.json`
+- `servoy-extra-components/components/projects/servoyextracomponents/package.json`
+- `servoy-bootstrap-components/.../package.json`
+- `servoy-nggrids/.../package.json`
+
+All packages must use the SAME major version for shared Angular ecosystem libraries (especially `@ng-bootstrap/ng-bootstrap`, `@angular/cdk`, `ng-select2-component`).
+
+### Example
+
+servoyextra had `@ng-bootstrap/ng-bootstrap: "^21"` while servoydefault still had `"^20"`. npm installed both versions, breaking Angular's compilation of the source-included package.
+
+---
 
 ## Dependencies
 

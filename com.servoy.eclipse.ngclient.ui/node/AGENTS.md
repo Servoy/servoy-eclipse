@@ -13,7 +13,7 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 | Framework | Angular 22 |
 | Language | TypeScript 6.0 |
 | Build tool | Angular CLI (`@angular/build:application`, esbuild-based) |
-| Test framework | Jasmine + Karma |
+| Test framework | Vitest 4.x (with jsdom environment) |
 | Linter | ESLint 10 (`@angular-eslint`) |
 | Package manager | npm (with `legacy-peer-deps=true`) |
 | License | GNU Affero General Public License |

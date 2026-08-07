@@ -1,8 +1,16 @@
-import { Component, OnInit, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { WpmService } from '../wpm.service';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import { ExtendedPackage, UpdatePackagesDialogComponent } from '../update-dialog/update-dialog.component';
 import { Package, Repository } from '../websocket.service';
+import { MatSelect, MatOption, MatFormField } from '@angular/material/select';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { NgStyle } from '@angular/common';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
 
 const ADD_REMOVE_TEXT = 'Add...';
 const SERVOY_DEFAULT= 'Servoy Default';
@@ -11,18 +19,19 @@ const SERVOY_DEFAULT= 'Servoy Default';
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [MatSelect, MatTooltip, MatOption, MatIconButton, MatIcon, NgStyle, MatButton]
 })
 export class HeaderComponent implements OnInit {
+  wpmService = inject(WpmService);
+  dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+
 
   repositories: string[] = [SERVOY_DEFAULT, ADD_REMOVE_TEXT];
   activeRepository: string = SERVOY_DEFAULT;
   packages: Package[] = [];
   isUpdateAllButtonDisabled = false;
-
-  constructor(public wpmService: WpmService, public dialog: MatDialog) {
-  }
 
   ngOnInit() {
 
@@ -39,6 +48,7 @@ export class HeaderComponent implements OnInit {
         this.activeRepository = newActiveRepository;
         this.wpmService.setNewSelectedRepository(this.activeRepository);
       }
+      this.cdr.markForCheck();
     });  
 
     this.wpmService.packageLists.subscribe(packageLists => {
@@ -61,6 +71,7 @@ export class HeaderComponent implements OnInit {
         });
       });
       this.updateStateForUpdateAllButton();
+      this.cdr.markForCheck();
     });
 
     this.wpmService.packageToBeRemoved.subscribe(pack => {
@@ -69,6 +80,7 @@ export class HeaderComponent implements OnInit {
           p.markedAsRemoved = true;
         }
       });
+      this.cdr.markForCheck();
     });
 
     this.updateStateForUpdateAllButton();
@@ -121,8 +133,7 @@ export class HeaderComponent implements OnInit {
   onActiveRepositoryChange() {
     if(this.activeRepository == ADD_REMOVE_TEXT) {
       this.showAddRepositoryDialog();
-    }
-    else {
+    } else {
       this.wpmService.setNewSelectedRepository(this.activeRepository);
     }
   }
@@ -137,11 +148,11 @@ export class HeaderComponent implements OnInit {
 
   showAddRepositoryDialog(): void {
     const dialogRef = this.dialog.open(AddRepositoryDialogComponent, {
-      data: <Repository> { name: '', url: ''}
+      data: { name: '', url: ''} as Repository
     });
   
     dialogRef.afterClosed().subscribe(result => {
-      const newRepo = <Repository>result;
+      const newRepo = result as Repository;
 
       if(newRepo) {
         if(newRepo.name == ADD_REMOVE_TEXT) {
@@ -160,12 +171,11 @@ export class HeaderComponent implements OnInit {
           }
         }
         this.wpmService.addNewRepository(newRepo);
-      }
-      else {
+      } else {
         this.activeRepository = SERVOY_DEFAULT;
         this.wpmService.setNewSelectedRepository(this.activeRepository);
       }
-    }, err => {
+    }, _err => {
       this.activeRepository = SERVOY_DEFAULT;
       this.wpmService.setNewSelectedRepository(this.activeRepository);
     });
@@ -174,7 +184,7 @@ export class HeaderComponent implements OnInit {
   showAddRepositoryErrorDialog(message: string) {
     this.dialog.open(ErrorDialogComponent, {
       data: message
-    }).afterClosed().subscribe(result => {
+    }).afterClosed().subscribe(_result => {
       this.showAddRepositoryDialog();
     })
   }
@@ -183,13 +193,13 @@ export class HeaderComponent implements OnInit {
 @Component({
     selector: 'wpm-add-repository-dialog',
     templateUrl: 'add-repository-dialog.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose]
 })
 export class AddRepositoryDialogComponent {
+  dialogRef = inject<MatDialogRef<AddRepositoryDialogComponent>>(MatDialogRef);
+  data = inject<Repository>(MAT_DIALOG_DATA);
 
-  constructor(
-    public dialogRef: MatDialogRef<AddRepositoryDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: Repository) {}
 
   onCancelClick(): void {
     this.dialogRef.close();
@@ -199,12 +209,13 @@ export class AddRepositoryDialogComponent {
 @Component({
     selector: 'wpm-error-dialog',
     templateUrl: 'error-dialog.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class ErrorDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ErrorDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: string) {}
+  dialogRef = inject<MatDialogRef<ErrorDialogComponent>>(MatDialogRef);
+  data = inject(MAT_DIALOG_DATA);
+
 
   onOkClick(): void {
     this.dialogRef.close();

@@ -23,7 +23,6 @@ import com.servoy.eclipse.ui.node.UserNodeType;
  * SolutionExplorerTreeContentProvider.hasChildren() lines 1993-1996 to verify
  * the fix works correctly.
  */
-@DisplayName("SVY-21272: hasChildren operator precedence fix")
 class SolutionExplorerTreeContentProviderHasChildrenTest {
 
 	/**
@@ -59,7 +58,6 @@ class SolutionExplorerTreeContentProviderHasChildrenTest {
 	}
 
 	@Nested
-	@DisplayName("When parent is a plain SimpleUserNode (not UserNode, not PlatformSimpleUserNode)")
 	class PlainSimpleUserNodeTests {
 
 		@Test
@@ -113,7 +111,6 @@ class SolutionExplorerTreeContentProviderHasChildrenTest {
 	}
 
 	@Nested
-	@DisplayName("When parent is a UserNode")
 	class UserNodeTests {
 
 		@Test

@@ -2808,6 +2808,17 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		final LinkedHashMap<UUID, IPersist> changedEditing = new LinkedHashMap<UUID, IPersist>();
 		final Set<IPersist> changedScriptElements = new HashSet<IPersist>();
 
+		// collect the set of file paths that actually changed on disk; used below to detect the case where a composite
+		// (e.g. a Form) is only flagged changed because a child script element (.js) was added/changed, while the
+		// composite's own file (e.g. .frm) did not change. In that case we must not overwrite the whole editing composite
+		// (which would discard unsaved editor changes on that composite), only update the changed script child.
+		final Set<String> changedFilePaths = new HashSet<String>();
+		final File solutionLocationDir = project.getLocation().toFile();
+		for (File changedFile : changedFiles)
+		{
+			changedFilePaths.add(changedFile.getAbsolutePath());
+		}
+
 		// store the deleted persists, else we loose them when updating editing solution
 		for (IPersist child : strayCats)
 		{
@@ -2827,10 +2838,31 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					// update working copy
 					try
 					{
-						IPersist editingPersist = servoyProject.updateEditingPersist(persist, SolutionSerializer.isCompositeWithItems(persist));
-						persist.clearChanged();
-						changed.put(persist.getUUID(), persist);
-						changedEditing.put(persist.getUUID(), editingPersist);
+						boolean compositeWithItems = SolutionSerializer.isCompositeWithItems(persist);
+						// If this is a composite (e.g. Form) that is flagged changed but its own file did not change on
+						// disk (only a child script element .js changed/was added), do NOT overwrite the whole editing
+						// composite - that would discard unsaved editor changes (e.g. a just-assigned onAction). The
+						// changed script child is handled separately as an IScriptElement below.
+						boolean ownFileChanged = true;
+						if (compositeWithItems)
+						{
+							String ownFilePath = new File(solutionLocationDir,
+								SolutionSerializer.getRelativeFilePath(persist, false)).getAbsolutePath();
+							ownFileChanged = changedFilePaths.contains(ownFilePath);
+						}
+						if (compositeWithItems && !ownFileChanged)
+						{
+							// only the child script element(s) changed; update just those into the editing solution
+							persist.clearChanged();
+							changed.put(persist.getUUID(), persist);
+						}
+						else
+						{
+							IPersist editingPersist = servoyProject.updateEditingPersist(persist, compositeWithItems);
+							persist.clearChanged();
+							changed.put(persist.getUUID(), persist);
+							changedEditing.put(persist.getUUID(), editingPersist);
+						}
 					}
 					catch (RepositoryException e)
 					{

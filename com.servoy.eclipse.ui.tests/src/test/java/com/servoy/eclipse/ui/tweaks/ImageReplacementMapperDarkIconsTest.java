@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
  * The bug was caused by a missing expandall-disabled.png in darkicons/, which led to
  * FileNotFoundException and cascading DecorationOverlayIcon errors during Ctrl+H search.
  */
-@DisplayName("SVY-21149: Dark theme icon files exist in ui.tweaks bundle")
 class ImageReplacementMapperDarkIconsTest
 {
 
@@ -41,7 +40,6 @@ class ImageReplacementMapperDarkIconsTest
 	}
 
 	@Nested
-	@DisplayName("expandall-disabled icons in darkicons/")
 	class ExpandAllDisabledIcons
 	{
 
@@ -77,7 +75,6 @@ class ImageReplacementMapperDarkIconsTest
 	}
 
 	@Nested
-	@DisplayName("parity between icons/ and darkicons/ for expandall variants")
 	class IconParityCheck
 	{
 

@@ -968,9 +968,9 @@ export class ContextMenuComponent implements OnInit {
 
 export class ContextmenuItem {
 
-	getIconStyle!: () => object | null | undefined;
+	getIconStyle: () => object | null | undefined = () => null;
 	shortcut!: string;
-	getItemClass!: () => string | undefined;
+	getItemClass: () => string | undefined = () => undefined;
 	subMenu!: ContextmenuItem[];
 
 	constructor(

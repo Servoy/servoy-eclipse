@@ -18,7 +18,6 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("DesignPerspective")
 public class DesignPerspectiveTest {
 
 	private static final String OPENCODE_VIEW_ID = "com.servoy.eclipse.opencode.OpenCodeView";

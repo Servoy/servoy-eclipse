@@ -58,7 +58,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<arguments>run lint</arguments>
+							<arguments>run lint:ci</arguments>
 						</configuration>
 					</execution>
 

@@ -12,11 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("NoOpNPMCommand")
 class NoOpNPMCommandTest
 {
 	@Nested
-	@DisplayName("runCommand")
 	class RunCommand
 	{
 		@Test
@@ -45,7 +43,6 @@ class NoOpNPMCommandTest
 	}
 
 	@Nested
-	@DisplayName("getExitCode")
 	class GetExitCode
 	{
 		@Test
@@ -67,7 +64,6 @@ class NoOpNPMCommandTest
 	}
 
 	@Nested
-	@DisplayName("IRunNPMCommand contract")
 	class IRunNPMCommandContract
 	{
 		@Test

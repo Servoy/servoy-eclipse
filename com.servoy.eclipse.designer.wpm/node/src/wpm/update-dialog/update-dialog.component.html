@@ -6,7 +6,7 @@
       <tr>
         <td class="column-fitwidth">
           <div class="align-left">
-            <img [src]="item.package.icon" class="md-avatar" />
+            <img [src]="item.package.icon" class="md-avatar" alt="{{ item.package.displayName }}" />
             <span> {{item.package.displayName}} </span>
           </div>
         </td>
@@ -18,7 +18,7 @@
       </tr>
     }
   </table>
-  @if (extendedData.length == 0) {
+  @if (extendedData.length === 0) {
     <h3 >There is no package available for update.</h3>
   }
 </div>
