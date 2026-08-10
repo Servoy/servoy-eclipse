@@ -519,7 +519,8 @@ public class Activator extends AbstractUIPlugin
 						}
 					}
 					// only show if first login or is not disabled from preferences
-					if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+					if (loginToken != null &&
+						(username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true"))))
 					{
 						boolean emptyWorkspace = ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0;
 						Display.getDefault().asyncExec(() -> {
