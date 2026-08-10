@@ -9,7 +9,6 @@
     "build": "ng build --configuration production",
     "build_debug": "ng build --watch",
     "build_debug_nowatch": "ng build --watch=false",
-    "preinstall": "cd ../../com.servoy.eclipse.ngclient.ui/node && npm run build_libs",
     "test": "ng test --no-watch",
     "test:watch": "ng test",
     "test:ui": "ng test --ui",

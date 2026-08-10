@@ -37,7 +37,21 @@
 						</configuration>
 					</execution>
 
-					<!-- 2. npm install -->
+					<!-- 2. Build servoy libraries (sablo, designer, public) -->
+					<execution>
+						<id>build servoy libs</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<skipTests>${maven.test.skip}</skipTests>
+							<workingDirectory>../../com.servoy.eclipse.ngclient.ui/node</workingDirectory>
+							<arguments>run build_libs</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 3. npm install -->
 					<execution>
 						<id>npm install</id>
 						<phase>process-resources</phase>
