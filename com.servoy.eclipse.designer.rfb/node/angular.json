@@ -82,8 +82,19 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
+            "tsConfig": "tsconfig.spec.json",
             "buildTarget": "servoy-designer:build",
             "runnerConfig": "vitest-base.config.ts"
+          }
+        },
+        "test-browser": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "servoy-designer:build",
+            "runnerConfig": "vitest-browser.config.ts",
+            "include": ["src/**/*.browser.spec.ts"],
+            "browsers": ["chromium"],
+            "headless": true
           }
         },
         "lint": {

@@ -87,6 +87,19 @@
 							<arguments>test</arguments>
 						</configuration>
 					</execution>
+
+					<!-- 6. Run browser integration tests -->
+					<execution>
+						<id>angular vitest browser</id>
+						<phase>test</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<skipTests>${maven.test.skip}</skipTests>
+							<arguments>run test:browser</arguments>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

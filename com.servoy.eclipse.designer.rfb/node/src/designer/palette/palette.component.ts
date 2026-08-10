@@ -4,13 +4,12 @@ import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
-import { WindowRefService } from '@servoy/public';
+import { WindowRefService, ServoyPublicModule } from '@servoy/public';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody } from '@ng-bootstrap/ng-bootstrap/accordion';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
-import { ServoyPublicModule } from '../../../../../com.servoy.eclipse.ngclient.ui/node/projects/servoy-public/src/lib/servoy_public.module';
 import { VariantsContentComponent } from '../variantscontent/variantscontent.component';
 import { KeyValuePipe } from '@angular/common';
 
