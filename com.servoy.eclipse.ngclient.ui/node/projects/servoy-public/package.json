@@ -6,6 +6,7 @@
     "@angular/core": "^22"
   },
   "dependencies": {
+    "bignumber.js": "^11.1",
     "luxon": "^3",
     "numbro": "^2.5",
     "tslib": "*"

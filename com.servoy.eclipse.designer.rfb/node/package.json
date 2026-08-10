@@ -35,9 +35,6 @@
     "@vitest/browser-playwright": "^4.1.10",
     "bignumber.js": "^11.1.5",
     "bootstrap": "5.3.8",
-    "luxon": "^3.7.2",
-    "numbro": "^2.5.0",
-    "playwright": "^1.62.1",
     "rxjs": "7.8.2",
     "tslib": "2.8.1"
   },
