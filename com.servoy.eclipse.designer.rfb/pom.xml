@@ -46,7 +46,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<workingDirectory>../../com.servoy.eclipse.ngclient.ui/node</workingDirectory>
+							<workingDirectory>${project.basedir}/../com.servoy.eclipse.ngclient.ui/node</workingDirectory>
 							<arguments>run build_libs</arguments>
 						</configuration>
 					</execution>
