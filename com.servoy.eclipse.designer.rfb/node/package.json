@@ -13,7 +13,8 @@
     "test": "ng test --no-watch",
     "test:watch": "ng test",
     "test:ui": "ng test --ui",
-    "test:browser": "ng run servoy-designer:test-browser",
+    "test:browser": "ng run servoy-designer:test-browser --no-watch",
+    "test:browser:watch": "ng run servoy-designer:test-browser",
     "lint": "ng lint",
     "lint:ci": "ng lint --format checkstyle --output-file ../target/eslint-checkstyle.xml"
   },
@@ -32,8 +33,6 @@
     "@servoy/designer": "file:../../com.servoy.eclipse.ngclient.ui/node/dist-designer/servoy-designer.tgz",
     "@servoy/public": "file:../../com.servoy.eclipse.ngclient.ui/node/dist-public/servoy-public.tgz",
     "@servoy/sablo": "file:../../com.servoy.eclipse.ngclient.ui/node/dist-sablo/servoy-sablo.tgz",
-    "@vitest/browser-playwright": "^4.1.10",
-    "bignumber.js": "^11.1.5",
     "bootstrap": "5.3.8",
     "rxjs": "7.8.2",
     "tslib": "2.8.1"
@@ -47,12 +46,14 @@
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "5.10.0",
     "@types/node": "26.1.2",
+    "@vitest/browser-playwright": "^4.1.10",
     "angular-eslint": "22.1.0",
     "eslint": "10.8.0",
     "eslint-formatter-checkstyle": "^9.0.1",
     "eslint-plugin-only-warn": "1.2.1",
     "eslint-plugin-prefer-arrow": "1.2.3",
     "jsdom": "^30.0.1",
+    "playwright": "^1.62.1",
     "typescript": "6.0.3",
     "typescript-eslint": "8.66.0",
     "vitest": "^4.1.10"
@@ -60,6 +61,7 @@
   "allowScripts": {
     "@parcel/watcher@2.6.0": true,
     "esbuild@0.28.1": true,
-    "lmdb@3.5.6": true
+    "lmdb@3.5.6": true,
+    "msgpackr-extract@3.0.4": true
   }
 }
