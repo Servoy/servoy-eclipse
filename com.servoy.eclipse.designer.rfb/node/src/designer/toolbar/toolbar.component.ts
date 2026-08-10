@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -120,6 +120,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
     protected designSize = inject(DesignSizeService);
     private readonly renderer = inject(Renderer2);
     private editorContentService = inject(EditorContentService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.createItems();
@@ -131,6 +132,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.editorSession.getSession().onopen(() => {
             this.setupItems();
             this.designSize.setupItems();
+            this.cdr.markForCheck();
         });
     }
 

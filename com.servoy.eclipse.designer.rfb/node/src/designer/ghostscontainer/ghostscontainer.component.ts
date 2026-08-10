@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, OnDestroy, ElementRef, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ElementRef, ChangeDetectionStrategy, inject, viewChild, signal } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { Point } from '../mouseselection/mouseselection.component';
@@ -24,7 +24,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     leftOffsetRelativeToSelectedGhost!: number;
     topOffsetRelativeToSelectedGhost!: number;
 
-    ghostContainers!: GhostContainer[];
+    readonly ghostContainers = signal<GhostContainer[]>([]);
     removeSelectionChangedListener!: () => void;
     mousedownpoint!: Point;
     draggingGhost!: Ghost;
@@ -86,8 +86,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
 
         if (id === 'redrawDecorators') {
-            if (this.ghostContainers) {
-                for (const ghostContainer of this.ghostContainers) {
+            const containers = this.ghostContainers();
+            if (containers.length) {
+                for (const ghostContainer of containers) {
                     for (const ghost of ghostContainer.ghosts) {
                         if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
                             this.renderGhosts();
@@ -247,7 +248,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
             }
         }
-        this.ghostContainers = ghostContainers;
+        this.ghostContainers.set(ghostContainers);
     }
 
     openContainedForm(ghost: Ghost) {
@@ -340,7 +341,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     this.editorSession.sendChanges(obj);
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-                    this.renderGhostsInternal(this.ghostContainers);
+                    this.renderGhostsInternal(this.ghostContainers());
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                     const changes: Record<string, any> = {};
@@ -463,8 +464,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             this.renderer.setStyle(this.draggingGhostComponent, 'top', this.partTopPosition + 'px');
                         } else if (this.isLowestPart) {
                             this.formHeight = this.partTopPosition;
-                            for (const _ghostContainer of this.ghostContainers) {
-                                this.ghostContainers[0].style.height = this.partTopPosition + 'px';
+                            const containers = this.ghostContainers();
+                            for (const _ghostContainer of containers) {
+                                containers[0].style.height = this.partTopPosition + 'px';
                             }
                             this.renderer.setStyle(this.editorContent, 'height', this.partTopPosition + 'px');
                             if (this.partTopPosition + this.ghostOffset > this.glasspane.offsetHeight) {
@@ -480,11 +482,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     selectionChanged(_ids: string[], _redrawDecorators?: boolean, designerChange?: boolean): void {
-        // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
-        // not sure how to detect when we really need to redraw
         if (designerChange) this.renderGhosts();
         else {
-            this.renderGhostsInternal(this.ghostContainers);
+            this.renderGhostsInternal(this.ghostContainers());
         }
     }
 
@@ -497,11 +497,12 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             return;
         } else if (!this.isLowestPart && this.partTopPosition >= this.bottomLimit) {
             return;
-        } //else partTopPosition > this.topLimit && (this.isLowestPart || partTopPosition <= bottomLimit)
+        }
         if (this.isLowestPart) {
             this.formHeight = this.partTopPosition;
-            for (const _ghostContainer of this.ghostContainers) {
-                this.ghostContainers[0].style.height = this.partTopPosition + 'px';
+            const containers = this.ghostContainers();
+            for (const _ghostContainer of containers) {
+                containers[0].style.height = this.partTopPosition + 'px';
             }
             this.renderer.setStyle(this.editorContent, 'height', this.partTopPosition + 'px');
             if (this.partTopPosition + this.ghostOffset > this.glasspane.offsetHeight) {

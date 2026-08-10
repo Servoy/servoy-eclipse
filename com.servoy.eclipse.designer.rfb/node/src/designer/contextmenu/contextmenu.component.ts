@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject, viewChild } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -42,6 +42,7 @@ export class ContextMenuComponent implements OnInit {
 	protected editorContentService = inject(EditorContentService);
 	protected urlParser = inject(URLParserService);
 	private windowRef = inject(WindowRefService);
+	private readonly cdr = inject(ChangeDetectorRef);
 
 	ngOnInit(): void {
 		void this.editorSession.getShortcuts().then((shortcuts: Record<string, string>) => {
@@ -246,6 +247,7 @@ export class ContextMenuComponent implements OnInit {
 	}
 
 	private show(event: MouseEvent) {
+		this.cdr.markForCheck();
 		this.element().nativeElement.style.display = 'block';
 		this.element().nativeElement.style.left = event.pageX + 'px';
 		this.element().nativeElement.style.top = event.pageY + 'px';

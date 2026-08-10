@@ -108,6 +108,7 @@ export class InlineEditComponent implements AfterViewInit {
                 if (event.key === 'Escape') {
                     this.elementRef().nativeElement.textContent = this.propertyValue;
                     this.showDirectEdit = false;
+                    this.cdRef.markForCheck();
                     this.editorSession.setInlineEditMode(false);
                     
                 }
@@ -151,6 +152,7 @@ export class InlineEditComponent implements AfterViewInit {
     
     handleDirectEdit(node: string, absolutePoint: { x: number; y: number; width: number, height: number }, directEditProperty: string, propertyValue: string) {
         this.showDirectEdit = true;
+        this.cdRef.markForCheck();
         
         this.addListeners();
         this.node = node;

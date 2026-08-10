@@ -55,7 +55,7 @@ describe('MouseSelectionComponent', () => {
     (component as any).designerUtilsService = designerUtilsService;
     (component as any).urlParser = urlParser;
     (component as any).renderer = { setStyle: vi.fn(), addClass: vi.fn(), removeClass: vi.fn(), setAttribute: vi.fn() };
-    (component as any).nodes = [];
+    (component as any).nodes = signal([]);
     (component as any).contentInit = true;
     (component as any).topAdjust = 20;
     (component as any).leftAdjust = 20;
@@ -193,17 +193,17 @@ describe('MouseSelectionComponent', () => {
       Object.defineProperty(mockEl, 'getBoundingClientRect', { value: () => ({ height: 50, width: 100, top: 10, left: 20 }) });
       editorContentService.getContentElement.mockReturnValue(mockEl);
       designerUtilsService.adjustElementRect.mockReturnValue({ height: 50, width: 100, top: 10, left: 20 });
-      (component as any).nodes = [{ svyid: 'node1', style: {} }];
+      (component as any).nodes.set([{ svyid: 'node1', style: {} }]);
       component.redrawDecorators();
-      expect((component as any).nodes[0].style.height).toBe('50px');
-      expect((component as any).nodes[0].style.width).toBe('100px');
+      expect((component as any).nodes()[0].style.height).toBe('50px');
+      expect((component as any).nodes()[0].style.width).toBe('100px');
     });
 
     it('should skip nodes not found in content', () => {
       editorContentService.getContentElement.mockReturnValue(undefined);
-      (component as any).nodes = [{ svyid: 'missing', style: {} }];
+      (component as any).nodes.set([{ svyid: 'missing', style: {} }]);
       component.redrawDecorators();
-      expect((component as any).nodes[0].style.height).toBeUndefined();
+      expect((component as any).nodes()[0].style.height).toBeUndefined();
     });
   });
 });

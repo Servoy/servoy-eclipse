@@ -1,7 +1,7 @@
 import {
   Component, OnInit, AfterViewInit, ElementRef, Renderer2,
   OnDestroy, Directive, ChangeDetectionStrategy, inject, input, forwardRef,
-  viewChild, viewChildren, effect
+  viewChild, viewChildren, effect, signal
 } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -24,7 +24,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     readonly lassoRef = viewChild.required<ElementRef<HTMLElement>>('lasso');
     readonly selectedRef = viewChildren<ElementRef<HTMLElement>>('selected');
 
-    nodes: SelectionNode[] = new Array<SelectionNode>();
+    readonly nodes = signal<SelectionNode[]>([]);
     contentInit = false;
     topAdjust!: number;
     leftAdjust!: number;
@@ -76,19 +76,23 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         });
     }
     redrawDecorators() {
-        if (this.nodes.length > 0) {
-            Array.from(this.nodes).forEach(selected => {
+        const currentNodes = this.nodes();
+        if (currentNodes.length > 0) {
+            this.nodes.set(currentNodes.map((selected: SelectionNode) => {
                 const node = this.editorContentService.getContentElement(selected.svyid);
-                if (!node) return;
+                if (!node) return selected;
                 const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
-                selected.style = {
-                    height: position.height + 'px',
-                    width: position.width + 'px',
-                    top: position.top + this.topAdjust + 'px',
-                    left: position.left + this.leftAdjust + 'px',
-                    display: 'block'
-                } as CSSStyleDeclaration;
-            });
+                return {
+                    ...selected,
+                    style: {
+                        height: position.height + 'px',
+                        width: position.width + 'px',
+                        top: position.top + this.topAdjust + 'px',
+                        left: position.left + this.leftAdjust + 'px',
+                        display: 'block'
+                    } as CSSStyleDeclaration
+                };
+            }));
         }
     }
 
@@ -140,10 +144,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         })
                     }
                 });
-                this.nodes = newNodes;
+                this.nodes.set(newNodes);
             });
         } else {
-            this.nodes = new Array<SelectionNode>();
+            this.nodes.set([]);
         }
     }
 
@@ -180,7 +184,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             }
         } else {
             //lasso select
-            this.nodes = [];
+            this.nodes.set([]);
             this.editorSession.setSelection([], this);
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
             const lassoRef = this.lassoRef();
@@ -260,7 +264,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     }
                 }
             });
-            this.nodes = newNodes;
+            this.nodes.set(newNodes);
             this.editorSession.setSelection(newSelection, this);
         } else {
             const point = { x: event.pageX, y: event.pageY };
@@ -315,16 +319,15 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     if (event.ctrlKey || event.metaKey) {
                         const index = selection.indexOf(id);
                         if (index >= 0) {
-                            this.nodes.splice(index, 1);
+                            const current = this.nodes();
+                            this.nodes.set([...current.slice(0, index), ...current.slice(index + 1)]);
                             selection.splice(index, 1);
                         } else {
-                            this.nodes.push(newNode);
+                            this.nodes.set([...this.nodes(), newNode]);
                             selection.push(id);
                         }
                     } else if (isNewSelection) {
-                        const newNodes = new Array<SelectionNode>();
-                        newNodes.push(newNode);
-                        this.nodes = newNodes;
+                        this.nodes.set([newNode]);
                         selection = [id];
                     }
                     this.editorSession.setSelection(selection, this);
@@ -341,7 +344,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         const rect1 = new DOMRect(
                             Math.min(position1.left, position2.left), Math.min(position1.top, position2.top),
                             Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top)
-                        )
+                         )
+                        const shiftNodes: SelectionNode[] = [];
                         Array.from(elements).forEach((node) => {
                             const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                             if (this.rectanglesIntersect(rect1, position, false)) {
@@ -366,11 +370,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                     isFCorLFC: this.isSelectionFCorLFC()
                                 };
                                 if (!selection.includes(id)) {
-                                    this.nodes.push(newNode);
+                                    shiftNodes.push(newNode);
                                     selection.push(id);
                                 }
                             }
                         });
+                        this.nodes.set([...this.nodes(), ...shiftNodes]);
                         this.editorSession.setSelection(selection, this);
                     }
                 }
@@ -382,7 +387,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
         if (event.button == 0 && event.timeStamp - this.lastTimestamp < 350) {
             // dblclick event; is not triggered by event
-            if (this.nodes && this.nodes.length > 0 && this.nodes[0].maxLevelDesign) {
+            const currentNodes = this.nodes();
+            if (currentNodes.length > 0 && currentNodes[0].maxLevelDesign) {
                 this.editorSession.executeAction('zoomIn');
             }
         }

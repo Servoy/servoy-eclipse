@@ -20,7 +20,7 @@ describe('InlineEditComponent', () => {
     (component as any).designerUtilsService = { getNode: vi.fn(), convertToAbsolutePoint: vi.fn((p: any) => p) };
     (component as any).doc = document;
     (component as any).renderer = { listen: vi.fn(), setProperty: vi.fn(), setStyle: vi.fn() };
-    (component as any).cdRef = { detectChanges: vi.fn() };
+    (component as any).cdRef = { detectChanges: vi.fn(), markForCheck: vi.fn() };
     const elementRefValue = { nativeElement: document.createElement('div') };
     (component as any).elementRef = () => elementRefValue;
     (component as any).showDirectEdit = false;

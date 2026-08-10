@@ -1,4 +1,4 @@
-@for (node of nodes; track node) {
+@for (node of nodes(); track node.svyid) {
   <div #selected class="decorationOverlay" [ngStyle]="node.style" [style.visibility]="checkIfNodeIsVisible(node) ? 'unset' : 'hidden'" [id]="node.svyid" [hidden]="editorSession.dragging()">
     <div class="knob t l decorator {{node.isResizable?.t && node.isResizable?.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'tl',direction:'nw',top:1,left:1,width:-1,height:-1}"></div>
     <div class="knob t decorator {{node.isResizable?.t ? '': 'hidden'}}" [resizeKnob]="{node, position:'t',direction:'n',top:1,left:0,width:0,height:-1}"></div>
@@ -8,7 +8,7 @@
     <div class="knob b decorator {{node.isResizable?.b ? '': 'hidden'}}" [resizeKnob]="{node, position:'b',direction:'s',top:0,left:0,width:0,height:1}"></div>
     <div class="knob b l decorator {{node.isResizable?.b && node.isResizable?.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'bl',direction:'sw',top:0,left:1,width:-1,height:1}"></div>
     <div class="knob l decorator {{node.isResizable?.l ? '': 'hidden'}}" [resizeKnob]="{node, position:'l',direction:'w',top:0,left:1,width:-1,height:0}"></div>
-    @if (nodes.length === 1 && node.isContainer && !node.maxLevelDesign && checkIfNodeIsVisible(node)) {
+    @if (nodes().length === 1 && node.isContainer && !node.maxLevelDesign && checkIfNodeIsVisible(node)) {
       <div class="menubar">
         @if (notInsideFormComponent(node)) {
           <span class="containerAction" (mousedown)="insertACopyAction($event, node, true)" style="background-image: url('designer/assets/images/insert_before.png')" title="Insert a {{node.containerName}} before"></span>
@@ -50,17 +50,17 @@
 </ul>
 </div>
 }
-@if (nodes.length === 1 && node.autowizardProperties && node.autowizardProperties.length === 1 && notInsideFormComponent(node)) {
+@if (nodes().length === 1 && node.autowizardProperties && node.autowizardProperties.length === 1 && notInsideFormComponent(node)) {
   <div class="menubar">
     <span class="containerAction" (mousedown)="openWizardAction($event, node.autowizardProperties[0])" style="margin-left:3px; margin-right: 10px;background-color: #E9720B;background-image: url('designer/assets/images/configure_in_menu.png')" title="Configure {{node.autowizardProperties[0]}}"></span>
   </div>
 }
-@if (nodes.length === 1 && node.isFCorLFC) {
+@if (nodes().length === 1 && node.isFCorLFC) {
   <div class="menubar" style="top: -19px; float: left;">
     <span class="containerAction" (mousedown)="updateMoveFCorLFC()" style="margin-left: 3px; margin-right: 10px; background-color: #0099FF; background-image: url('designer/assets/images/move_component.png')" title="Move component"></span>
   </div>
 }
-@if (nodes.length === 1 && node.autowizardProperties && node.autowizardProperties.length > 1) {
+@if (nodes().length === 1 && node.autowizardProperties && node.autowizardProperties.length > 1) {
   <div class="menubar" style="margin-top: -13px;" [positionMenu]="node">
     <span #menuOpen (mouseenter)="onEnter($event)">
       <i class="fas fa-gear fa-sm" style="color: #E9720B;"></i>

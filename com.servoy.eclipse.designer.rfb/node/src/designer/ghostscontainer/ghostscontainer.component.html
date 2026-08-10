@@ -1,4 +1,4 @@
-@for (container of ghostContainers; track container) {
+@for (container of ghostContainers(); track container) {
   <div #element class="ghostcontainer {{container.class}}"
     [ngStyle]="container.style">
     @if (container.propertyName) {
