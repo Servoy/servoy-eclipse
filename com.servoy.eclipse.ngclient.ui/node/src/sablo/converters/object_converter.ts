@@ -1,5 +1,5 @@
-import { IType, ITypesRegistryForSabloConverters, IPropertyContext } from '../../sablo/types_registry';
-import { ConverterService } from '../../sablo/converter.service';
+import { IType, ITypesRegistryForSabloConverters, IPropertyContext } from '../types_registry';
+import { ConverterService } from '../converter.service';
 import { DateType } from './date_converter';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 

@@ -1,4 +1,4 @@
-import { IType, IPropertyContext } from '../../sablo/types_registry';
+import { IType, IPropertyContext } from '../types_registry';
 
 import { DateTime } from 'luxon';
 

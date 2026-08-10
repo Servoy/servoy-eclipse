@@ -7,7 +7,6 @@ import { ConverterService } from './converter.service';
 import { LoggerService, LoggerFactory, RequestInfoPromise } from '@servoy/public';
 import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 import { IWebSocket, WebsocketCustomEvent } from './io/iwebsocket';
-import { environment as env} from '../environments/environment';
 import { MobileBridge } from './io/mobilebridge';
 
 @Injectable({
@@ -32,7 +31,7 @@ export class WebsocketService {
     constructor() {
     }
 
-    public connect(context: string, args: string[], queryArgs?: Record<string,unknown>, websocketUri?: string): WebsocketSession {
+    public connect(context: string, args: string[], queryArgs?: Record<string,unknown>, websocketUri?: string, mobile = false): WebsocketSession {
 
         this.connectionArguments = {
             context,
@@ -43,7 +42,7 @@ export class WebsocketService {
 
         this.ngZone.runOutsideAngular(() => {
             // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
-            const websocket = env.mobile? new MobileBridge(this.windowRef): new ReconnectingWebSocket((reconnectAttempt?:boolean) => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
+            const websocket = mobile? new MobileBridge(this.windowRef): new ReconnectingWebSocket((reconnectAttempt?:boolean) => this.generateURL(this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'], reconnectAttempt), this.logFactory);
             this.wsSession = new WebsocketSession(websocket, this, this.windowRef, this.converterService, this.loadingIndicatorService, this.ngZone, this.logFactory );
         });

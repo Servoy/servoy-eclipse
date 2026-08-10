@@ -2,9 +2,9 @@ import { inject, Injectable } from '@angular/core';
 
 import { ConverterService, instanceOfChangeAwareValue, ChangeListenerFunction } from './converter.service';
 import { LoggerService, LoggerFactory, RequestInfoPromise, Deferred } from '@servoy/public';
-import { TypesRegistry, IType, IWebObjectSpecification, IPropertyContextCreator, PushToServerUtils, PushToServerEnum } from '../sablo/types_registry';
-import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
-import { SabloService } from '../sablo/sablo.service';
+import { TypesRegistry, IType, IWebObjectSpecification, IPropertyContextCreator, PushToServerUtils, PushToServerEnum } from './types_registry';
+import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from './websocket.service';
+import { SabloService } from './sablo.service';
 import { ClientFunctionService } from './clientfunction.service';
 
 @Injectable({

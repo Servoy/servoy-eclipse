@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/lib-sablo",
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "types": [],
+    "paths": {
+      "../environments/environment": ["./projects/servoy-sablo/environment.ts"],
+      "@servoy/public": ["./dist-public"]
+    }
+  },
+  "angularCompilerOptions": {
+    "skipTemplateCodegen": true,
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    },
+    "strictMetadataEmit": true,
+    "enableResourceInlining": true
+  },
+  "include": [
+    "../../src/sablo/**/*.ts"
+  ],
+  "exclude": [
+    "../../src/sablo/**/*.spec.ts"
+  ]
+}

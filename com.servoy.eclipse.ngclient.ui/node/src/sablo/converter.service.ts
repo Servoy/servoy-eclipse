@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { LoggerService, LoggerFactory } from '@servoy/public';
 import { ObjectType } from './converters/object_converter';
 import { DateType } from './converters/date_converter';
-import { IType, IPropertyContext, TypesRegistry, IWebObjectFunction, PushToServerUtils } from '../sablo/types_registry';
+import { IType, IPropertyContext, TypesRegistry, IWebObjectFunction, PushToServerUtils } from './types_registry';
 
 class SwingModifiers {
     public static readonly SHIFT_MASK = 1;

@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist-sablo/",
+  "lib": {
+    "entryFile": "../../src/sablo/public-api.ts"
+  }
+}

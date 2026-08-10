@@ -43,4 +43,6 @@ Thumbs.db
 /node/
 /.angular/
 /dist-public/
+/dist-sablo/
+/dist-designer/
 /locales/

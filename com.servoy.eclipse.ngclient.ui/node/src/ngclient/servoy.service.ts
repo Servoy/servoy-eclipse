@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { environment } from '../environments/environment';
 
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
@@ -143,7 +144,7 @@ export class ServoyService {
         }
         
         const wsSession = this.sabloService.connect('/solution/' + this.solutionSettings.solutionName,
-            { solution: this.solutionSettings.solutionName, clienttype: 2 }, socketPrefix);
+            { solution: this.solutionSettings.solutionName, clienttype: 2 }, socketPrefix, environment.mobile);
         // TODO find mode and anchors handling (anchors should be handles completely at the server side,
         // css positioning should go over the line)
         wsSession.onMessageObject((msg: {clientnr?: number; windownr?: string}) => {

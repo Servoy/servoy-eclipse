@@ -1,6 +1,6 @@
 import { inject, Injectable, } from '@angular/core';
 import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale, RequestInfoPromise } from '@servoy/public';
-import { WebsocketService, WebsocketSession, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
+import { WebsocketService, WebsocketSession, wrapPromiseToPropagateCustomRequestInfoInternal } from './websocket.service';
 import { ConverterService } from './converter.service';
 
 @Injectable({
@@ -115,13 +115,13 @@ export class SabloService {
         }
     }
     
-    public connect(context: any, queryArgs: any, websocketUri: any): WebsocketSession {
+    public connect(context: any, queryArgs: any, websocketUri: any, mobile = false): WebsocketSession {
         const wsSessionArgs = {
             context,
             queryArgs,
             websocketUri
         };
-        this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr()!, this.getWindowName()!, this.getWindownr()!], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri);
+        this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr()!, this.getWindowName()!, this.getWindownr()!], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri, mobile);
 
         this.wsSession.onMessageObject((msg: any) => {
             // data got back from the server
