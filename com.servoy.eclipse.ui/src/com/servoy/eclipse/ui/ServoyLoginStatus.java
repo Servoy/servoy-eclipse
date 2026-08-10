@@ -19,6 +19,8 @@ package com.servoy.eclipse.ui;
 
 import java.net.URI;
 
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -48,6 +50,26 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 	public ServoyLoginStatus()
 	{
 		ServoyLoginDialog.addLoginListener(this);
+		ServoyLoginDialog.addCloudRestoredListener(() -> {
+			if (statusBtn != null && !statusBtn.isDisposed())
+			{
+				ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+				ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+				try
+				{
+					String username = node.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
+					if (username != null)
+					{
+						statusBtn.setImage(Activator.getDefault().loadImageFromBundle("windowicon.png"));
+						statusBtn.setToolTipText("Logged in as " + username);
+					}
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		});
 	}
 
 	/*
@@ -175,10 +197,15 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 	@Override
 	public void onLogin(String username)
 	{
-		if (username != null)
+		if (username != null && ServoyLoginDialog.isCloudReachable())
 		{
 			statusBtn.setImage(Activator.getDefault().loadImageFromBundle("windowicon.png"));
 			statusBtn.setToolTipText("Logged in as " + username);
+		}
+		else if (username != null && !ServoyLoginDialog.isCloudReachable())
+		{
+			statusBtn.setImage(Activator.getDefault().loadImageFromBundle("warning.png"));
+			statusBtn.setToolTipText("Cloud unavailable - logged in as " + username);
 		}
 		else
 		{
