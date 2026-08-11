@@ -1,4 +1,4 @@
-/*
+﻿/*
  This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2020 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -37,6 +38,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.util.Util;
@@ -90,6 +92,53 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		super(parentShell);
 	}
 
+	/**
+	 * Async login - calls onLogin consumer with the token (or null on failure).
+	 */
+	public void doLogin(Consumer<String> onLogin)
+	{
+		String username = null;
+		String password = null;
+
+		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+
+		ISecurePreferences node = preferences.node(SERVOY_LOGIN_STORE_KEY);
+		try
+		{
+			username = node.get(SERVOY_LOGIN_USERNAME, null);
+			password = node.get(SERVOY_LOGIN_PASSWORD, null);
+		}
+		catch (StorageException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+
+		boolean firstLogin = false;
+		if (username == null || password == null)
+		{
+			if (open() == OK)
+			{
+				firstLogin = true;
+				username = dlgUsername;
+				password = dlgPassword;
+			}
+		}
+
+		if (username != null && password != null)
+		{
+			LoginTokenResponse loginTokenResponse = getLoginToken(username, password);
+			handleLoginTokenResponse(loginTokenResponse, username, password, firstLogin, onLogin, node);
+		}
+		else
+		{
+			notifyLoginListener(null, null);
+			if (onLogin != null) onLogin.accept(null);
+		}
+	}
+
+	/**
+	 * Synchronous login - returns the login token or null.
+	 */
 	public String doLogin()
 	{
 		String username = null;
@@ -125,6 +174,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			LoginTokenResponse loginTokenResponse = getLoginToken(username, password);
 			if (loginTokenResponse.status == LoginTokenResponse.Status.OK)
 			{
+				cloudReachable = true;
 				loginToken = loginTokenResponse.response;
 				try
 				{
@@ -137,14 +187,98 @@ public class ServoyLoginDialog extends TitleAreaDialog
 					ServoyLog.logError(ex);
 				}
 			}
-			else if (firstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
+			else if (loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
 			{
 				clearSavedInfo();
 				this.lastStatus = loginTokenResponse.status;
-				this.errorMessage = loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR ? "Login failed, invalid credentials" : "Login failed";
-				doLogin();
+				this.errorMessage = "Login failed, invalid credentials";
+				loginToken = doLogin();
+			}
+			else
+			{
+				// Cloud unreachable (5xx, timeout, connection refused)
+				cloudReachable = false;
+				scheduleCloudRetry();
+				if (firstLogin)
+				{
+					try
+					{
+						node.put(SERVOY_LOGIN_USERNAME, username, true);
+						node.put(SERVOY_LOGIN_PASSWORD, password, true);
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+					showCloudUnavailableDialog();
+				}
+				else
+				{
+					ServoyLog.logInfo("Servoy Cloud unreachable during background refresh, continuing in degraded mode."); //$NON-NLS-1$
+				}
 			}
 		}
+		notifyLoginListener(username, loginToken);
+
+		return loginToken;
+	}
+
+	protected void handleLoginTokenResponse(LoginTokenResponse loginTokenResponse, String finalUsername, String finalPassword, boolean finalFirstLogin,
+		Consumer<String> onLogin, ISecurePreferences node)
+	{
+		if (loginTokenResponse.status == LoginTokenResponse.Status.OK)
+		{
+			cloudReachable = true;
+			String loginToken = loginTokenResponse.response;
+			try
+			{
+				node.put(SERVOY_LOGIN_USERNAME, finalUsername, true);
+				node.put(SERVOY_LOGIN_PASSWORD, finalPassword, true);
+				node.put(SERVOY_LOGIN_TOKEN, loginToken, true);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+			notifyLoginListener(finalUsername, loginToken);
+			if (onLogin != null) onLogin.accept(loginToken);
+		}
+		else if (loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
+		{
+			clearSavedInfo();
+			this.errorMessage = "Login failed, invalid credentials";
+			this.lastStatus = loginTokenResponse.status;
+
+			Display.getDefault().asyncExec(() -> doLogin(onLogin));
+		}
+		else
+		{
+			cloudReachable = false;
+			scheduleCloudRetry();
+			if (finalFirstLogin)
+			{
+				try
+				{
+					node.put(SERVOY_LOGIN_USERNAME, finalUsername, true);
+					node.put(SERVOY_LOGIN_PASSWORD, finalPassword, true);
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+				showCloudUnavailableDialog();
+			}
+			else
+			{
+				ServoyLog.logInfo("Servoy Cloud unreachable during background refresh, continuing in degraded mode."); //$NON-NLS-1$
+			}
+			notifyLoginListener(finalUsername, null);
+			if (onLogin != null) onLogin.accept(null);
+		}
+	}
+
+	private void notifyLoginListener(String username, String loginToken)
+	{
 		if (ServoyLoginDialog.servoyLoginListener != null)
 		{
 			try
@@ -156,8 +290,22 @@ public class ServoyLoginDialog extends TitleAreaDialog
 				ServoyLog.logError(ex);
 			}
 		}
+	}
 
-		return loginToken;
+	protected void showCloudUnavailableDialog()
+	{
+		Display.getDefault().asyncExec(() -> {
+			MessageDialog.openInformation(
+				Display.getDefault().getActiveShell(),
+				"Servoy Cloud is currently unreachable",
+				"You can continue working, but the following features require a cloud connection and are temporarily unavailable:\n\n" +
+					"\u2022 AI Assistant (Servoy Pilot)\n" +
+					"\u2022 Cloud-based printing\n" +
+					"\u2022 Start page / tutorials\n" +
+					"\u2022 NG Desktop export (cloud build)\n" +
+					"\u2022 Pipeline setup\n\n" +
+					"Your credentials have been saved. The connection will be retried automatically.");
+		});
 	}
 
 	private LoginTokenResponse getLoginToken(String username, String password)
@@ -425,6 +573,78 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	}
 
 	private static IServoyLoginListener servoyLoginListener;
+
+	private static volatile boolean cloudReachable = true;
+
+	private static volatile java.util.concurrent.ScheduledExecutorService retryExecutor;
+
+	public static boolean isCloudReachable()
+	{
+		return cloudReachable;
+	}
+
+	private static final java.util.concurrent.CopyOnWriteArrayList<Runnable> cloudRestoredListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	public static void addCloudRestoredListener(Runnable listener)
+	{
+		if (listener != null) cloudRestoredListeners.add(listener);
+	}
+
+	private static void notifyCloudRestored()
+	{
+		for (Runnable listener : cloudRestoredListeners)
+		{
+			try
+			{
+				Display.getDefault().asyncExec(listener);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
+	}
+
+	private static void scheduleCloudRetry()
+	{
+		if (retryExecutor != null) return;
+		retryExecutor = java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+			Thread t = new Thread(r, "ServoyCloudRetry"); //$NON-NLS-1$
+			t.setDaemon(true);
+			return t;
+		});
+		retryExecutor.scheduleWithFixedDelay(() -> {
+			if (cloudReachable)
+			{
+				java.util.concurrent.ScheduledExecutorService exec = retryExecutor;
+				retryExecutor = null;
+				if (exec != null) exec.shutdown();
+				return;
+			}
+			ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+			ISecurePreferences node = preferences.node(SERVOY_LOGIN_STORE_KEY);
+			try
+			{
+				String username = node.get(SERVOY_LOGIN_USERNAME, null);
+				String password = node.get(SERVOY_LOGIN_PASSWORD, null);
+				if (username != null && password != null)
+				{
+					LoginTokenResponse response = new ServoyLoginDialog(null).getLoginToken(username, password);
+					if (response.status == LoginTokenResponse.Status.OK)
+					{
+						cloudReachable = true;
+						node.put(SERVOY_LOGIN_TOKEN, response.response, true);
+						ServoyLog.logInfo("Servoy Cloud connection restored."); //$NON-NLS-1$
+						notifyCloudRestored();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logInfo("Servoy Cloud retry failed: " + ex.getMessage()); //$NON-NLS-1$
+			}
+		}, 5, 5, java.util.concurrent.TimeUnit.MINUTES);
+	}
 
 	public static void addLoginListener(IServoyLoginListener loginListener)
 	{

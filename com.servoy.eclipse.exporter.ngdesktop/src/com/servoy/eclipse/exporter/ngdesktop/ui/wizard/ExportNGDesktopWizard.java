@@ -114,6 +114,13 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 		exportSettings.put("login_token", loginToken);
 
+		if (!ServoyLoginDialog.isCloudReachable())
+		{
+			MessageDialog.openInformation(UIUtils.getActiveShell(), "NG Desktop Export",
+				"Servoy Cloud is currently unreachable. NG Desktop export requires a cloud connection and is temporarily unavailable.");
+			return false;
+		}
+
 		final boolean result[] = { false };
 
 		errorMsg.delete(0, errorMsg.length());
