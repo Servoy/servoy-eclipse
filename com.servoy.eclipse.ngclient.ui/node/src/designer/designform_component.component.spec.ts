@@ -134,6 +134,7 @@ describe('DesignFormComponent', () => {
   describe('onVariantsMouseDown', () => {
     let postMessageSpy: ReturnType<typeof vi.fn>;
     let elementFromPointSpy: ReturnType<typeof vi.fn>;
+    let originalElementFromPoint: typeof document.elementFromPoint;
 
     beforeEach(() => {
       postMessageSpy = vi.fn();
@@ -144,7 +145,12 @@ describe('DesignFormComponent', () => {
         nativeWindow: { parent: { postMessage: postMessageSpy } }
       };
 
-      vi.stubGlobal('document', { elementFromPoint: elementFromPointSpy });
+      originalElementFromPoint = document.elementFromPoint;
+      document.elementFromPoint = elementFromPointSpy as any;
+    });
+
+    afterEach(() => {
+      document.elementFromPoint = originalElementFromPoint;
     });
 
     it('should post onVariantMouseDown message with model size unchanged', () => {

@@ -70,6 +70,22 @@ All source lives under `src/wpm/`:
 - **Pattern:** `Object.create(Class.prototype)` with manual mock injection (matching RFB pattern)
 - Import test functions explicitly: `import { describe, it, expect, beforeEach, vi } from 'vitest';`
 
+### Critical: Global Mocking Rules
+
+- **NEVER** use `vi.stubGlobal('document', ...)` or `vi.stubGlobal('window', ...)` — this replaces the entire jsdom DOM and breaks ALL subsequent tests in the same fork/thread. The error manifests as `this.doc.querySelector is not a function` in Angular's renderer.
+- Instead, mock individual methods and restore them:
+  ```typescript
+  let originalMethod: typeof document.elementFromPoint;
+  beforeEach(() => {
+    originalMethod = document.elementFromPoint;
+    document.elementFromPoint = vi.fn() as any;
+  });
+  afterEach(() => {
+    document.elementFromPoint = originalMethod;
+  });
+  ```
+- Similarly, never replace `window.location`, `window.navigator` etc. via `stubGlobal` — use `vi.spyOn` or direct property assignment with restore.
+
 ## Commit Messages
 
 - When AI-generated: end subject with `[ai]`
