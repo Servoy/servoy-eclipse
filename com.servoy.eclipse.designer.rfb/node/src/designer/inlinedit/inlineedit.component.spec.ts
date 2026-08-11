@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { InlineEditComponent } from './inlineedit.component';
 
 describe('InlineEditComponent', () => {
@@ -11,7 +12,7 @@ describe('InlineEditComponent', () => {
       setInlineEditMode: vi.fn(),
       getSelection: vi.fn().mockReturnValue([]),
       isInlineEditMode: vi.fn().mockReturnValue(false),
-      registerCallback: { next: vi.fn() },
+      registerCallback: signal(null),
       getComponentPropertyWithTags: vi.fn().mockResolvedValue('')
     };
 
@@ -20,10 +21,9 @@ describe('InlineEditComponent', () => {
     (component as any).designerUtilsService = { getNode: vi.fn(), convertToAbsolutePoint: vi.fn((p: any) => p) };
     (component as any).doc = document;
     (component as any).renderer = { listen: vi.fn(), setProperty: vi.fn(), setStyle: vi.fn() };
-    (component as any).cdRef = { detectChanges: vi.fn(), markForCheck: vi.fn() };
     const elementRefValue = { nativeElement: document.createElement('div') };
     (component as any).elementRef = () => elementRefValue;
-    (component as any).showDirectEdit = false;
+    (component as any).showDirectEdit = signal(false);
     (component as any).node = '';
     (component as any).directEditProperty = '';
     (component as any).propertyValue = '';
@@ -64,17 +64,17 @@ describe('InlineEditComponent', () => {
     });
 
     it('should set showDirectEdit to false', () => {
-      (component as any).showDirectEdit = true;
+      (component as any).showDirectEdit.set(true);
       (component as any).elementRef().nativeElement.textContent = 'x';
       component.applyValue('n', 'p', 'x');
-      expect((component as any).showDirectEdit).toBe(false);
+      expect((component as any).showDirectEdit()).toBe(false);
     });
   });
 
   describe('handleDirectEdit', () => {
     it('should set showDirectEdit and position the element', () => {
       component.handleDirectEdit('node1', { x: 10, y: 20, width: 100, height: 30 }, 'text', 'hello');
-      expect((component as any).showDirectEdit).toBe(true);
+      expect((component as any).showDirectEdit()).toBe(true);
       expect((component as any).node).toBe('node1');
       expect((component as any).directEditProperty).toBe('text');
       expect((component as any).propertyValue).toBe('hello');

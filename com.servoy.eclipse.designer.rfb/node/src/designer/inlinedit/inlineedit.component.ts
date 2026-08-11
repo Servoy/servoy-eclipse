@@ -1,5 +1,5 @@
 
-import { AfterViewInit, Component, ElementRef, ChangeDetectorRef, Renderer2, DOCUMENT, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Renderer2, DOCUMENT, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorSessionService } from '../services/editorsession.service';
 
@@ -12,7 +12,7 @@ import { EditorSessionService } from '../services/editorsession.service';
 export class InlineEditComponent implements AfterViewInit {
 
     readonly elementRef = viewChild.required<ElementRef<HTMLElement>>('inlineedit');
-    showDirectEdit = false;
+    readonly showDirectEdit = signal(false);
     node!: string;
     directEditProperty!: string;
     propertyValue!: string;
@@ -28,7 +28,6 @@ export class InlineEditComponent implements AfterViewInit {
     private readonly designerUtilsService = inject(DesignerUtilsService);
     private doc = inject(DOCUMENT);
     protected readonly renderer = inject(Renderer2);
-    private readonly cdRef = inject(ChangeDetectorRef);
 
     ngAfterViewInit(): void {
         // if time between mouseup and mousedown is too much, browser won't trigger click/dblclick event; so we have to fake a double click
@@ -96,8 +95,7 @@ export class InlineEditComponent implements AfterViewInit {
                 this.editorSession.sendChanges(changes);
             }
         } 
-        this.showDirectEdit = false;
-        this.cdRef.detectChanges();
+        this.showDirectEdit.set(false);
         
         this.editorSession.setInlineEditMode(false);
     }
@@ -107,8 +105,7 @@ export class InlineEditComponent implements AfterViewInit {
             this.keyupListener = this.renderer.listen(this.elementRef().nativeElement, 'keyup', (event: KeyboardEvent) => {
                 if (event.key === 'Escape') {
                     this.elementRef().nativeElement.textContent = this.propertyValue;
-                    this.showDirectEdit = false;
-                    this.cdRef.markForCheck();
+                    this.showDirectEdit.set(false);
                     this.editorSession.setInlineEditMode(false);
                     
                 }
@@ -151,8 +148,7 @@ export class InlineEditComponent implements AfterViewInit {
     }
     
     handleDirectEdit(node: string, absolutePoint: { x: number; y: number; width: number, height: number }, directEditProperty: string, propertyValue: string) {
-        this.showDirectEdit = true;
-        this.cdRef.markForCheck();
+        this.showDirectEdit.set(true);
         
         this.addListeners();
         this.node = node;
