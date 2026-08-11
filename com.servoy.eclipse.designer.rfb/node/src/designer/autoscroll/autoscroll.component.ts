@@ -1,6 +1,5 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, OnInit, Renderer2, AfterViewInit, ElementRef, ChangeDetectionStrategy, DestroyRef, inject, input, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit, Renderer2, AfterViewInit, ElementRef, ChangeDetectionStrategy, effect, inject, input, viewChild } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { NgStyle } from '@angular/common';
@@ -30,10 +29,10 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     protected readonly renderer = inject(Renderer2);
     protected readonly editorSession = inject(EditorSessionService);
     private editorContent = inject(EditorContentService);
-    private readonly destroyRef = inject(DestroyRef);
 
-    ngOnInit() {
-        this.editorSession.autoscrollBehavior.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((scrollTarget: ISupportAutoscroll | null | undefined) => {
+    constructor() {
+        effect(() => {
+            const scrollTarget = this.editorSession.autoscrollTarget();
             this.scrollTarget = scrollTarget;
             this.editorSession.pointerEvents.set('none');
             if (scrollTarget) {
@@ -41,6 +40,9 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
                 this.setPosition();
             }
         });
+    }
+
+    ngOnInit() {
         switch (this.placement()) {
             case 'top':
             case 'left':

@@ -66,7 +66,7 @@ describe('MouseSelectionComponent (browser)', () => {
         { provide: EditorContentService, useValue: mockEditorContentService },
         { provide: URLParserService, useValue: { isAbsoluteFormLayout: () => true, isMarqueeSelectOuter: () => false } },
         { provide: DesignerUtilsService, useValue: { getNode: () => null, getNodeBasedOnSelectionFCorLFC: () => null, adjustElementRect: (_: any, r: any) => r } },
-        { provide: DynamicGuidesService, useValue: { snapDataListener: { subscribe: () => ({ unsubscribe: () => {} }) } } }
+        { provide: DynamicGuidesService, useValue: { snapData: signal(null) } }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

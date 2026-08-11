@@ -27,14 +27,13 @@ describe('ResizeKnobDirective', () => {
     directive = Object.create(ResizeKnobDirective.prototype);
     (directive as any).editorSession = editorSession;
     (directive as any).editorContentService = editorContentService;
-    (directive as any).guidesService = { snapDataListener: { subscribe: vi.fn() } };
+    (directive as any).guidesService = { snapData: signal(null) };
       (directive as any).resizeInfo = signal({ node: { style: {} }, direction: 'se', top: 0, left: 0, width: 1, height: 1 });
     (directive as any).topContentAreaAdjust = 20;
     (directive as any).leftContentAreaAdjust = 20;
     (directive as any).initialElementInfo = null;
     (directive as any).currentElementInfo = null;
     (directive as any).snapData = null;
-    (directive as any).subscription = { unsubscribe: vi.fn() };
   });
 
   describe('ElementInfo', () => {

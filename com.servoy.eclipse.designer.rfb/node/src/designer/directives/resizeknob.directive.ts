@@ -1,5 +1,4 @@
-import { AfterViewInit, Directive, HostListener, OnInit, DestroyRef, inject, input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Directive, HostListener, OnInit, effect, inject, input } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -7,7 +6,7 @@ import { DynamicGuidesService, SnapData } from '../services/dynamicguides.servic
 
 // eslint-disable-next-line @angular-eslint/directive-selector
 @Directive({ selector: '[resizeKnob]' })
-export class ResizeKnobDirective implements OnInit, AfterViewInit {
+export class ResizeKnobDirective implements OnInit {
 
     resizeInfo = input<ResizeInfo>(undefined!, { alias: 'resizeKnob' });
 
@@ -27,7 +26,13 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit {
     protected readonly editorSession = inject(EditorSessionService);
     private editorContentService = inject(EditorContentService);
     private guidesService = inject(DynamicGuidesService);
-    private readonly destroyRef = inject(DestroyRef);
+
+    constructor() {
+        effect(() => {
+            const value = this.guidesService.snapData();
+            if (value) this.snap(value);
+        });
+    }
 
     ngOnInit(): void {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
@@ -72,12 +77,6 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit {
             glasspane.style.width = `${finalWidth}px`;
             glasspane.style.height = `${finalHeight}px`;
         }
-    }
-
-    ngAfterViewInit(): void {
-        this.guidesService.snapDataListener.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: SnapData | null) => {
-            if (value) this.snap(value);
-        })
     }
 
     snap( data: SnapData): void {

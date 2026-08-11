@@ -1,7 +1,6 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { EditorContentService} from './editorcontent.service';
 import { EditorSessionService, IShowDynamicGuidesChangedListener } from './editorsession.service';
-import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { PersistIdentifier } from '@servoy/designer';
 
 @Injectable()
@@ -23,7 +22,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
     private element!: Element;
     private uuid!: string;
     
-    public snapDataListener: BehaviorSubject<SnapData | null>;
+    public readonly snapData = signal<SnapData | null>(null);
     private snapThreshold = 0;
     private equalDistanceThreshold = 0;
 	private equalSizeThreshold = 0;
@@ -40,7 +39,6 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 
     constructor() {
         this.editorSession.addDynamicGuidesChangedListener(this);
-        this.snapDataListener = new BehaviorSubject<SnapData | null>(null);
         this.editorContentService.executeOnlyAfterInit(() => {
             this.editorSession.getSnapThreshold().then((thresholds: any) => {
                 this.snapThreshold = thresholds.alignment;
@@ -147,7 +145,7 @@ export class DynamicGuidesService implements IShowDynamicGuidesChangedListener {
 this.snapToEndEnabled = !event.shiftKey;
 	  this.editorSession.setStatusBarText(statusText);
 	  if (!guidesEnabled) {
-		if (this.properties) this.snapDataListener.next(null);
+		if (this.properties) this.snapData.set(null);
 		return;
 	  } 
       const point = this.adjustPoint(event.pageX, event.pageY);
@@ -295,7 +293,7 @@ this.snapToEndEnabled = !event.shiftKey;
 	computeGuides(event: MouseEvent, point: { x: number, y: number }) {
 		if (this.isParentContainer(this.parentContainer) ) {
 			//disable for components within a form component or container
-			this.snapDataListener.next(null);
+			this.snapData.set(null);
 			return;
 		}
 		const resizing = this.editorSession.resizing() ? this.editorContentService.getGlassPane().style.cursor.split('-')[0] : null
@@ -314,7 +312,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		const uuid = this.element?.getAttribute('svy-id') ?? '';
         let rect = this.getDraggedElementRect(point, resizing!);
 		if (!rect) {
-			this.snapDataListener.next(null);
+			this.snapData.set(null);
 			return;
 		}
 
@@ -337,7 +335,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			if (verticalDist || horizontalDist) {
 				this.equalSize = true;
 				this.properties = properties;
-				this.snapDataListener.next(this.properties);
+				this.snapData.set(this.properties);
 				if (!this.initialPoint) {
 					this.initialPoint = point;
 					this.initialRectangle = rect;
@@ -379,7 +377,7 @@ this.snapToEndEnabled = !event.shiftKey;
 			this.initialPoint = point;
 			this.initialRectangle = rect;
 		}
-		this.snapDataListener.next(properties.guides!.length == 0 ? null : properties);
+		this.snapData.set(properties.guides!.length == 0 ? null : properties);
 	}
 
 	private checkSnapToSize(properties: SnapData, rect: DOMRect, overlapsX: DOMRect[], overlapsY: DOMRect[]) {

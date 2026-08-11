@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { signal } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 
 import { EditorSessionService } from './editorsession.service';
 
@@ -245,14 +244,14 @@ describe('EditorSessionService', () => {
         onMouseUp: vi.fn(),
         onMouseMove: vi.fn(),
       };
-      (service as any).autoscrollBehavior = new BehaviorSubject(null);
+      (service as any).autoscrollTarget = signal(null);
       service.registerAutoscroll(scrollComp);
       expect((service as any).lockAutoscrollId).toBe('lock-1');
     });
 
     it('registerAutoscroll should reject if lockId does not match', () => {
       (service as any).lockAutoscrollId = 'existing-lock';
-      (service as any).autoscrollBehavior = new BehaviorSubject(null);
+      (service as any).autoscrollTarget = signal(null);
       const scrollComp = {
         getAutoscrollLockId: vi.fn().mockReturnValue('different-lock'),
         updateLocationCallback: vi.fn(),
@@ -265,7 +264,7 @@ describe('EditorSessionService', () => {
 
     it('unregisterAutoscroll should clear lock when id matches', () => {
       (service as any).lockAutoscrollId = 'lock-1';
-      (service as any).autoscrollBehavior = new BehaviorSubject(null);
+      (service as any).autoscrollTarget = signal(null);
       const scrollComp = {
         getAutoscrollLockId: vi.fn().mockReturnValue('lock-1'),
         updateLocationCallback: vi.fn(),

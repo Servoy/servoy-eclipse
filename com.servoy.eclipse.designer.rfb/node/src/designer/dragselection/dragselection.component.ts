@@ -1,5 +1,4 @@
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from '../directives/resizeknob.directive';
@@ -47,7 +46,12 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
     private guidesService = inject(DynamicGuidesService);
     private readonly designerUtilsService = inject(DesignerUtilsService);
     private editorContentService = inject(EditorContentService);
-    private readonly destroyRef = inject(DestroyRef);
+
+    constructor() {
+        effect(() => {
+            this.snap(this.guidesService.snapData());
+        });
+    }
 
     ngOnInit(): void {
         this.contentArea = this.editorContentService.getContentArea();
@@ -68,10 +72,6 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
 
         this.scroll.x = this.contentArea.scrollLeft;
         this.scroll.y = this.contentArea.scrollTop;
-
-        this.guidesService.snapDataListener.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: SnapData | null) => {
-            this.snap(value);
-        })
     }
 
     private onKeyup(event: KeyboardEvent) {

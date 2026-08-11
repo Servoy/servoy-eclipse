@@ -10,7 +10,7 @@ describe('AutoscrollComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      autoscrollBehavior: { subscribe: vi.fn() },
+      autoscrollTarget: signal(null),
       pointerEvents: signal('none'),
     };
 

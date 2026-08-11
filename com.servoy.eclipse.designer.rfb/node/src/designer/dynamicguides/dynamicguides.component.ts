@@ -1,5 +1,4 @@
-import { Component, AfterViewInit, Renderer2, ElementRef, ChangeDetectionStrategy, DestroyRef, inject, input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, Renderer2, ElementRef, ChangeDetectionStrategy, effect, inject, input } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -12,7 +11,7 @@ import { DynamicGuidesService, Guide, SnapData } from '../services/dynamicguides
     styleUrls: ['./dynamicguides.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DynamicGuidesComponent implements AfterViewInit {
+export class DynamicGuidesComponent {
 
   guides = input<Guide[]>([]);
 
@@ -26,9 +25,12 @@ export class DynamicGuidesComponent implements AfterViewInit {
   private urlParser = inject(URLParserService);
   private editorContentService = inject(EditorContentService);
   private guidesService = inject(DynamicGuidesService);
-  private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
+      effect(() => {
+          const value = this.guidesService.snapData();
+          if (value) this.setGuides(value);
+      });
       this.editorContentService.executeOnlyAfterInit(() => {
         this.editorSession.getSnapThreshold().then((thresholds: any) => {
             if (thresholds.alignment > 0 || thresholds.distance > 0) {
@@ -37,12 +39,6 @@ export class DynamicGuidesComponent implements AfterViewInit {
             }
         });
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.guidesService.snapDataListener.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: SnapData | null) => {
-      if (value) this.setGuides(value);
-    })
   }
 
   private renderGuides() {

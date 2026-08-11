@@ -18,7 +18,7 @@ export class EditorSessionService implements ServiceProvider {
     private selectionChangedListeners = new Array<ISelectionChangedListener>();
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     private dynamicGuidesChangedListeners = new Array<IShowDynamicGuidesChangedListener>();
-    public autoscrollBehavior: BehaviorSubject<ISupportAutoscroll>;
+    public readonly autoscrollTarget = signal<ISupportAutoscroll | null>(null);
     public registerCallback = new BehaviorSubject<CallbackFunction>(null!);
     private allowedChildren: Record<string, string[]>  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: Record<string, string[]> = {};
@@ -54,7 +54,6 @@ export class EditorSessionService implements ServiceProvider {
 
     constructor() {
         this.services.setServiceProvider(this);
-        this.autoscrollBehavior = new BehaviorSubject<ISupportAutoscroll>(null!);
         this.editorContentService.executeOnlyAfterInit(() => {
             this.initialized();
         });
@@ -509,17 +508,13 @@ export class EditorSessionService implements ServiceProvider {
     registerAutoscroll(scrollComponent: ISupportAutoscroll) {
         if (this.lockAutoscrollId && scrollComponent.getAutoscrollLockId() !== this.lockAutoscrollId) return;
         this.lockAutoscrollId = scrollComponent.getAutoscrollLockId();
-        if (this.autoscrollBehavior == null) {
-            this.autoscrollBehavior = new BehaviorSubject(scrollComponent);
-        } else {
-            this.autoscrollBehavior.next(scrollComponent);
-        }
+        this.autoscrollTarget.set(scrollComponent);
     }
 
     unregisterAutoscroll(scrollComponent: ISupportAutoscroll) {
         if (this.lockAutoscrollId && this.lockAutoscrollId === scrollComponent.getAutoscrollLockId()) {
             this.lockAutoscrollId = '';
-            this.autoscrollBehavior.next(null!);
+            this.autoscrollTarget.set(null);
         }
     }
 

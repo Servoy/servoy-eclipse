@@ -1,5 +1,4 @@
-import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject, forwardRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, Pipe, PipeTransform, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, effect, inject, forwardRef } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
@@ -24,7 +23,7 @@ import { KeyValuePipe } from '@angular/common';
         VariantsContentComponent, KeyValuePipe, forwardRef(() => SearchTextPipe), forwardRef(() => SearchTextDeepPipe)
     ]
 })
-export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit {
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette {
 
     public searchText!: string;
     public activeIds!: string[];
@@ -50,9 +49,14 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     private windowRef = inject(WindowRefService);
     private guidesService = inject(DynamicGuidesService);
     private readonly cdr = inject(ChangeDetectorRef);
-    private readonly destroyRef = inject(DestroyRef);
 
     constructor() {
+        if (this.urlParser.isAbsoluteFormLayout()) {
+            effect(() => {
+                const value = this.guidesService.snapData();
+                if (value) this.snap(value);
+            });
+        }
         this.editorSession.setPaletteRefresher(this);
         this.refreshPalette();
         this.windowRef.nativeWindow.addEventListener('message', (event) => {
@@ -82,14 +86,6 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
         
         this.searchHistory = localStorage.getItem('searchHistory') ? JSON.parse(localStorage.getItem('searchHistory')!) : [];
-    }
-
-    ngAfterViewInit(): void {
-        if (this.urlParser.isAbsoluteFormLayout()) {
-            this.guidesService.snapDataListener.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: SnapData | null) => {
-                if (value) this.snap(value);
-            })
-        }
     }
 
     openPackageManager() {
