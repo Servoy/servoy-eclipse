@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { VariantsPreviewComponent } from './variantspreview.component';
 
 describe('VariantsPreviewComponent', () => {
@@ -8,9 +9,9 @@ describe('VariantsPreviewComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      variantsTrigger: { subscribe: vi.fn(), emit: vi.fn() },
-      variantsScroll: { subscribe: vi.fn() },
-      variantsPopup: { emit: vi.fn() }
+      variantsTrigger: signal(null),
+      variantsScroll: signal(null),
+      variantsPopup: signal(null)
     };
     editorContentService = {
       getDocument: vi.fn().mockReturnValue({
@@ -44,7 +45,7 @@ describe('VariantsPreviewComponent', () => {
       const popoverCtrl = { style: { top: '', left: '' } };
       (component as any).document.getElementById = vi.fn().mockReturnValue(popoverCtrl);
       component.hidePopover();
-      expect(editorSession.variantsPopup.emit).toHaveBeenCalledWith({ status: 'hidden' });
+      expect(editorSession.variantsPopup()).toEqual({ status: 'hidden' });
       expect((component as any).variantsIFrame.style.display).toBe('none');
       expect(popoverCtrl.style.top).toBe('-10000px');
     });
@@ -53,7 +54,7 @@ describe('VariantsPreviewComponent', () => {
   describe('showPopover', () => {
     it('should emit visible status and show iframe', () => {
       component.showPopover();
-      expect(editorSession.variantsPopup.emit).toHaveBeenCalledWith({ status: 'visible' });
+      expect(editorSession.variantsPopup()).toEqual({ status: 'visible' });
       expect((component as any).variantsIFrame.style.display).toBe('block');
     });
   });

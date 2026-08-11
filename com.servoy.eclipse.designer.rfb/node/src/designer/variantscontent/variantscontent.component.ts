@@ -1,6 +1,5 @@
 
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, inject, input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, effect, inject, input, untracked } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -32,26 +31,32 @@ export class VariantsContentComponent implements OnInit {
     private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
-		this.editorSession.variantsTrigger.pipe(takeUntilDestroyed()).subscribe((value) => {
-			if (this.component() == value.component) {
-                this.activeVariant = true;
-				this.sendStylesToVariantsForm();
-			} else {
-                this.activeVariant = false;
-			}
-			this.cdr.markForCheck();
+		effect(() => {
+			const value = this.editorSession.variantsTrigger();
+			if (value) untracked(() => {
+				if (this.component() == value.component) {
+					this.activeVariant = true;
+					this.sendStylesToVariantsForm();
+				} else {
+					this.activeVariant = false;
+				}
+				this.cdr.markForCheck();
+			});
 		});
-		this.editorSession.variantsPopup.pipe(takeUntilDestroyed()).subscribe((value) => {
-			if (value.status === 'visible') {
-				if (this.variantsQueryHandler) {
-					clearInterval(this.variantsQueryHandler);
+		effect(() => {
+			const value = this.editorSession.variantsPopup();
+			if (value) untracked(() => {
+				if (value.status === 'visible') {
+					if (this.variantsQueryHandler) {
+						clearInterval(this.variantsQueryHandler);
+					}
 				}
-			}
-			if (value.status === 'hidden') {
-				if (this.variantsIFrame) {
-					this.variantsIFrame.contentWindow!.postMessage({ id: 'destroyVariants'});
+				if (value.status === 'hidden') {
+					if (this.variantsIFrame) {
+						this.variantsIFrame.contentWindow!.postMessage({ id: 'destroyVariants'});
+					}
 				}
-			}
+			});
 		});
     }
 

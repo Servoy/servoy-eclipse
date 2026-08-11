@@ -35,7 +35,7 @@ This builds `@servoy/public`, `@servoy/sablo`, `@servoy/designer` as tgz package
 
 1. Run `npm run lint` — fix all errors
 2. Run `npm run build_debug_nowatch` — verify compilation
-3. If tests exist for the changed code, run `npm test`
+3. If tests exist for the changed code, run `npm test` and `npm run test:browser`
 
 ## Project Structure
 

@@ -1,5 +1,4 @@
-import { Component, Renderer2, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject, input, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, Renderer2, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -51,21 +50,27 @@ export class VariantsPreviewComponent implements AfterViewInit {
     private editorContentService = inject(EditorContentService);
 
     constructor() {
-		this.editorSession.variantsTrigger.pipe(takeUntilDestroyed()).subscribe((value) => {
-			if (value.show == true) {
-				this.top = value.top!;
-				this.left = value.left!;
-				this.showPopover();
-			} else if (value.show == false) {
-				this.hidePopover();
-			}
+		effect(() => {
+			const value = this.editorSession.variantsTrigger();
+			if (value) untracked(() => {
+				if (value.show == true) {
+					this.top = value.top!;
+					this.left = value.left!;
+					this.showPopover();
+				} else if (value.show == false) {
+					this.hidePopover();
+				}
+			});
 		});
 
-		this.editorSession.variantsScroll.pipe(takeUntilDestroyed()).subscribe((value) => {
-			if (this.isPopoverInitialized) {
-				const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
-				popoverCtrl.style.top = this.top - value.scrollPos + 'px';
-			}
+		effect(() => {
+			const value = this.editorSession.variantsScroll();
+			if (value) untracked(() => {
+				if (this.isPopoverInitialized) {
+					const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
+					popoverCtrl.style.top = this.top - value.scrollPos + 'px';
+				}
+			});
 		});
 
 		this.document = this.editorContentService.getDocument();
@@ -96,7 +101,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 				this.variantsIFrame.contentWindow!.document.body.addEventListener('mouseup', this.onMouseUp);
                 this.variantsIFrame.contentWindow!.document.body.addEventListener('mousemove', this.onMouseMove);
 			} else if (event.data.id === 'variantsEscapePressed') {
-				this.editorSession.variantsTrigger.emit({ show: false });
+				this.editorSession.variantsTrigger.set({ show: false });
 			}
         });
         if (!this.isPopoverInitialized) {
@@ -116,7 +121,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
     }
 
 	hidePopover() {
-		this.editorSession.variantsPopup.emit({status: 'hidden'});
+		this.editorSession.variantsPopup.set({status: 'hidden'});
         if (this.variantsIFrame) {
             this.variantsIFrame.style.display = 'none';
         }
@@ -126,7 +131,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 	}
 
 	showPopover() {
-		this.editorSession.variantsPopup.emit({status: 'visible'});
+		this.editorSession.variantsPopup.set({status: 'visible'});
 		this.variantsIFrame.style.display = 'block';
 	}
 

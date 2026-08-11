@@ -1,6 +1,5 @@
-import { inject, Injectable, EventEmitter, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { WebsocketSession, WebsocketService, ServicesService, ServiceProvider, TypesRegistry } from '@servoy/sablo';
-import { BehaviorSubject } from 'rxjs';
 import { URLParserService } from './urlparser.service';
 import { EditorContentService } from './editorcontent.service';
 
@@ -19,7 +18,7 @@ export class EditorSessionService implements ServiceProvider {
     private highlightChangedListeners = new Array<IShowHighlightChangedListener>();
     private dynamicGuidesChangedListeners = new Array<IShowDynamicGuidesChangedListener>();
     public readonly autoscrollTarget = signal<ISupportAutoscroll | null>(null);
-    public registerCallback = new BehaviorSubject<CallbackFunction>(null!);
+    public readonly registerCallback = signal<CallbackFunction | null>(null);
     private allowedChildren: Record<string, string[]>  = { 'servoycore.servoycore-responsivecontainer': ['component', 'servoycore.servoycore-responsivecontainer'] };
     private wizardProperties: Record<string, string[]> = {};
     private developerMenus: Record<string, any> = {};
@@ -41,9 +40,9 @@ export class EditorSessionService implements ServiceProvider {
     readonly sameSizeIndicator = signal(false);
     readonly anchoringIndicator = signal(false);
 
-    variantsTrigger = new EventEmitter<{show: boolean, top?: number, left?: number, component?: PaletteComp}>();
-    variantsScroll = new EventEmitter<{scrollPos: number}>();
-    variantsPopup = new EventEmitter<{status: string}>();
+    readonly variantsTrigger = signal<{show: boolean, top?: number, left?: number, component?: PaletteComp} | null>(null);
+    readonly variantsScroll = signal<{scrollPos: number} | null>(null);
+    readonly variantsPopup = signal<{status: string} | null>(null);
     paletteRefresher!: ISupportRefreshPalette;
 
     private websocketService = inject(WebsocketService);

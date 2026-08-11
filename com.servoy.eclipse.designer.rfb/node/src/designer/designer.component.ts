@@ -1,5 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, DestroyRef, inject, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject, untracked, viewChild } from '@angular/core';
 import { EditorSessionService } from './services/editorsession.service';
 import { URLParserService } from 'src/designer/services/urlparser.service';
 import { ToolbarComponent } from './toolbar/toolbar.component';
@@ -39,14 +38,19 @@ export class DesignerComponent implements OnInit {
     public readonly editorSession = inject(EditorSessionService);
     public urlParser = inject(URLParserService);
     protected readonly renderer = inject(Renderer2);
-    private readonly destroyRef = inject(DestroyRef);
+
+    constructor() {
+        effect(() => {
+            const value = this.editorSession.registerCallback();
+            if (value) untracked(() => {
+                const contentArea = this.contentArea();
+                if (contentArea) this.renderer.listen(contentArea.nativeElement, value.event, value.function);
+            });
+        });
+    }
 
     ngOnInit() {
         this.editorSession.connect();
-        this.editorSession.registerCallback.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
-            const contentArea = this.contentArea();
-            if (contentArea) this.renderer.listen(contentArea.nativeElement, value.event, value.function);
-        })
 
         this.renderer.listen('window', 'mouseup', (event: MouseEvent) => {
             if (event.button > 2) { // special mouse buttons are not allowed

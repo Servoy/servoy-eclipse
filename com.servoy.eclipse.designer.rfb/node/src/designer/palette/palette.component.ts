@@ -81,7 +81,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.editorContentService.getBodyElement().addEventListener('keyup', (event: KeyboardEvent) => {
             if (event.keyCode == 27) {
                 // esc key, close menu
-                this.editorSession.variantsTrigger.emit({ show: false });
+                this.editorSession.variantsTrigger.set({ show: false });
             }
         });
         
@@ -97,7 +97,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onPaletteScroll() {
-        this.editorSession.variantsScroll.emit({ scrollPos: this.editorContentService.getPallete().scrollTop });
+        this.editorSession.variantsScroll.set({ scrollPos: this.editorContentService.getPallete().scrollTop });
     }
     
     onFavoriteCLick(event: Event, component: PaletteComp) {
@@ -130,7 +130,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             variantBtn = variantBtn.parentElement as HTMLButtonElement;
         }
         if (variantBtn.tagName === 'BUTTON') { //clicked on the inner or button
-            this.editorSession.variantsTrigger.emit({ show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
+            this.editorSession.variantsTrigger.set({ show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
         } //else a very narrow margin (cca. 1 px) of this component was clicked and popup will be wrongly positioned
     }
 
@@ -197,7 +197,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             return; // it has a separate handler
         }
         event.stopPropagation();
-        this.editorSession.variantsTrigger.emit({ show: false });
+        this.editorSession.variantsTrigger.set({ show: false });
 
         let target = event.target as HTMLElement;
         if (target.localName === 'designer-variantscontent') {
@@ -358,7 +358,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (this.draggedVariant.element) {
             this.draggedVariant.element = null!;
             this.draggedVariant.variant = null!;
-            this.editorSession.variantsTrigger.emit({ show: false });
+            this.editorSession.variantsTrigger.set({ show: false });
         }
     }
 
@@ -481,11 +481,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         else
             layoutType = 'Responsive-Layout';
         this.activeIds = [];
-        this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: any) => {
+        this.http.get<Package[]>('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got) => {
             let packages: Package[]
             let propertyValues!: PaletteComp[];
             if (got[got.length - 1] && got[got.length - 1].propertyValues) {
-                propertyValues = got[got.length - 1].propertyValues;
+                propertyValues = got[got.length - 1].propertyValues!;
                 packages = got.slice(0, got.length - 1);
             } else {
                 packages = got;
