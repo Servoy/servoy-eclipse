@@ -16,9 +16,20 @@ This is the **Servoy Form Designer** frontend — an Angular SPA embedded in the
 |---------|---------|
 | `npm run lint` | Run ESLint — must pass with zero errors |
 | `npm run build_debug_nowatch` | Verify build compiles |
-| `npm test` | Run Vitest tests (no watch) |
+| `npm test` | Run Vitest unit tests (jsdom, no watch) |
 | `npm run test:watch` | Run Vitest in watch mode |
+| `npm run test:browser` | Run browser integration tests (Chromium via Playwright) |
 | `npm start` | Dev server on localhost:4200 |
+
+## Prerequisites (first time / after lib changes)
+
+Before `npm install` works, the shared libraries must be built:
+
+```bash
+cd ../../com.servoy.eclipse.ngclient.ui/node && npm run build_libs
+```
+
+This builds `@servoy/public`, `@servoy/sablo`, `@servoy/designer` as tgz packages. Only needed when their source changes. On Jenkins/Maven this is handled automatically.
 
 ## After Every Code Change
 
@@ -70,20 +81,32 @@ All source lives under `src/designer/`:
 
 | Import | Source |
 |--------|--------|
-| `@servoy/sablo` | `../../com.servoy.eclipse.ngclient.ui/node/src/sablo/public-api` |
-| `@servoy/public` | `../../com.servoy.eclipse.ngclient.ui/node/projects/servoy-public/src/public-api` |
-| `@servoy/designer` | `../../com.servoy.eclipse.ngclient.ui/node/src/designer/public-api` |
+| `@servoy/sablo` | Pre-built tgz from `ngclient.ui/node/dist-sablo/` |
+| `@servoy/public` | Pre-built tgz from `ngclient.ui/node/dist-public/` |
+| `@servoy/designer` | Pre-built tgz from `ngclient.ui/node/dist-designer/` |
+
+**Important:** These are installed as tgz packages (not source paths) to avoid duplicate `@angular/core` module instances. Never add tsconfig `paths` pointing to source in another Angular project.
 
 ## Testing
 
-- **Framework:** Vitest 4.x + jsdom
+- **Framework:** Vitest 4.x
 - **Builder:** `@angular/build:unit-test`
-- **Config:** `vitest-base.config.ts` (resolve aliases for ngclient.ui transitive deps)
-- **Test files:** Co-located as `*.spec.ts`
-- **Run:** `npm test` (no watch) or `npm run test:watch`
-- **Test count:** 307 tests across 28 spec files (all services, components, and directives)
-- **Pattern:** `Object.create(Class.prototype)` with manual mock injection (bypasses `inject()`)
-- **Existing tests:**
+- **Unit tests (jsdom):** `npm test` — fast, 299 tests, `*.spec.ts` files
+- **Browser tests (Chromium):** `npm run test:browser` — TestBed + real DOM, `*.browser.spec.ts` files
+- **Config:** `vitest-base.config.ts` (unit), `vitest-browser.config.ts` (browser)
+- **Test files:** Co-located as `*.spec.ts` (unit) or `*.browser.spec.ts` (integration)
+- **Unit test pattern:** `Object.create(Class.prototype)` with manual mock injection (bypasses `inject()`)
+- **Browser test pattern:** `TestBed.configureTestingModule` + `createComponent` with mocked providers
+
+### Zoneless Change Detection Testing
+
+This project uses `provideZonelessChangeDetection()`. When testing components:
+- Template-bound state **must** be a signal for Angular to detect changes from non-Angular contexts
+- `addEventListener` callbacks and service callbacks do NOT trigger change detection
+- Browser tests (`*.browser.spec.ts`) verify that DOM actually updates after signal changes
+- Use `fixture.detectChanges()` + `await fixture.whenStable()` after triggering state changes
+
+### Existing tests:
   - `src/designer/services/dynamicguides.service.spec.ts`
   - `src/designer/services/urlparser.service.spec.ts`
   - `src/designer/services/designerutils.service.spec.ts`
@@ -101,6 +124,7 @@ All source lives under `src/designer/`:
   - `src/designer/palette/palette.component.spec.ts`
   - `src/designer/contextmenu/contextmenu.component.spec.ts`
   - `src/designer/mouseselection/mouseselection.component.spec.ts`
+  - `src/designer/mouseselection/mouseselection.browser.spec.ts`
   - `src/designer/dragselection/dragselection.component.spec.ts`
   - `src/designer/dragselection-responsive/dragselection-responsive.component.spec.ts`
   - `src/designer/editorcontent/editorcontent.component.spec.ts`

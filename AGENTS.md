@@ -150,10 +150,12 @@ When asked to create, update, or link Jira issues, load the instructions from `J
 - Follow existing code style and conventions for each language and module
 - Java: standard Eclipse plugin conventions, OSGi declarative services
 - TypeScript/Angular: follows Angular CLI conventions in `node/` subdirectories
-- **Angular sub-projects have their own `AGENTS.md`** — always read those when working on Angular code:
+- **Angular sub-projects have their own `AGENTS.md`** — always read those first when working on Angular code for project-specific commands, conventions, and dependencies:
   - `com.servoy.eclipse.ngclient.ui/node/AGENTS.md` — NG Client UI (TiNG)
   - `com.servoy.eclipse.designer.rfb/node/AGENTS.md` — Form Designer (RFB)
   - `com.servoy.eclipse.designer.wpm/node/AGENTS.md` — Web Package Manager (WPM)
+- Each Angular sub-project has its own `opencode.json` with Angular CLI MCP configured — for Angular-specific guidance (best practices, API docs), open that sub-project directory directly.
+- **Cross-project Angular changes** (shared libraries, dependency wiring): work from this root directory. The Angular CLI MCP won't be available, but Eclipse MCP tools and git work across all projects.
 - **After every Angular code change:** run lint (`npm run lint`) and build, then tests if applicable. All three projects must pass lint with zero warnings before committing.
 - No hardcoded secrets, credentials, or proprietary information
 - All code must be compatible with open source licenses (except GPL)
@@ -208,6 +210,24 @@ All packages must use the SAME major version for shared Angular ecosystem librar
 ### Example
 
 servoyextra had `@ng-bootstrap/ng-bootstrap: "^21"` while servoydefault still had `"^20"`. npm installed both versions, breaking Angular's compilation of the source-included package.
+
+---
+
+## Shared Angular Libraries (@servoy/public, @servoy/sablo, @servoy/designer)
+
+The Angular sub-projects share code via pre-built library packages:
+
+- **Source:** `com.servoy.eclipse.ngclient.ui/node/` (sablo, designer, public)
+- **Build:** `cd com.servoy.eclipse.ngclient.ui/node && npm run build_libs`
+- **Output:** `dist-public/`, `dist-sablo/`, `dist-designer/` (each with a `.tgz` file)
+- **Consumed by:** `com.servoy.eclipse.designer.rfb/node/package.json` as `file:` references to tgz
+
+**Critical rules:**
+- NEVER use tsconfig `paths` pointing to source in another Angular project — this causes duplicate `@angular/core` module instances, breaking signals, TestBed, and runtime behavior
+- Use `npm pack` to create tgz files, then reference them with `file:path/to/package.tgz`
+- `file:` to a tgz works like a real npm registry install (peer deps resolve from consumer)
+- `file:` to a directory does NOT work (causes signal INPUT_SIGNAL_BRAND_WRITE_TYPE mismatch)
+- Maven build handles the lib build step automatically via frontend-maven-plugin
 
 ---
 
