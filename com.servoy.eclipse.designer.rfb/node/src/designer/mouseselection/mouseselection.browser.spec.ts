@@ -10,7 +10,6 @@ import { DynamicGuidesService } from '../services/dynamicguides.service';
 
 describe('MouseSelectionComponent (browser)', () => {
   let fixture: ComponentFixture<MouseSelectionComponent>;
-  let component: MouseSelectionComponent;
   let selectionChangedCallback: (selection: string[], redraw?: boolean) => void;
   let mockEditorContentService: any;
   let mockEditorSession: any;
@@ -72,7 +71,6 @@ describe('MouseSelectionComponent (browser)', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(MouseSelectionComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
