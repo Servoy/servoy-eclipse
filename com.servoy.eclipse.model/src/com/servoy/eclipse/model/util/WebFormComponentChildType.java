@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.ICommonWebComponent;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IFormElement;
@@ -70,7 +71,7 @@ import com.servoy.j2db.util.UUID;
  *
  * @author jcompagner
  */
-public class WebFormComponentChildType extends BaseComponent implements IBasicWebObject, IParentOverridable
+public class WebFormComponentChildType extends BaseComponent implements IBasicWebObject, IParentOverridable, ICommonWebComponent
 {
 
 	private final PropertyDescription propertyDescription;
