@@ -153,6 +153,14 @@ This project uses `provideZonelessChangeDetection()`. When testing components:
   - `src/designer/resizeeditorwidth/resizeeditorwidth.component.spec.ts`
   - `src/designer/directives/resizeknob.directive.spec.ts`
 
+### Debugging: Log First, Fix Later
+
+When facing unclear test failures (locally or on CI), **do NOT spend multiple rounds guessing root causes**. Instead:
+
+1. **Add diagnostic logging immediately** — log the state of the failing object (e.g. `typeof`, `constructor.name`, `Object.keys()`, `JSON.stringify`) at the point of failure
+2. **Run (or push and let CI run)** — get real data from the actual environment
+3. **Fix based on evidence** — one log statement that shows actual state is worth more than three speculative fixes
+
 ## Spec / Design Documents
 
 Feature specs live in `docs/` at the repository root:

@@ -66,6 +66,19 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 8. Run relevant tests: eclipse-ide_runClassTests or eclipse-pde_runJUnitPluginTestClass
 ```
 
+## Debugging CI-only Failures
+
+When tests or builds fail on CI (Jenkins) but work locally, **do NOT spend multiple rounds theorizing about root causes**. Instead:
+
+1. **Add diagnostic logging immediately** — log the state of the failing object/environment (e.g. `typeof`, `constructor.name`, `Object.keys()`, `JSON.stringify`) at the point of failure
+2. **Push and let CI run** — get real data from the actual environment
+3. **Analyze the output** — the diagnostics usually reveal the root cause in one CI round
+4. **Fix based on evidence** — not on theory
+
+Example: if `document.querySelector is not a function` on CI, don't guess why — log `typeof document`, `document.constructor.name`, `Object.keys(document)` in a setup file, push, and read the CI output. This approach saves 3-5 failed attempts.
+
+This same principle applies to **local debugging**: when facing unclear errors, add diagnostic logging FIRST and run — don't immediately attempt code/config fixes based on assumptions. One log statement that shows the actual state is worth more than three speculative fixes.
+
 ## Project Structure
 
 ### Core Plugins

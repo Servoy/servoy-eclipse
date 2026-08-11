@@ -86,6 +86,14 @@ All source lives under `src/wpm/`:
   ```
 - Similarly, never replace `window.location`, `window.navigator` etc. via `stubGlobal` — use `vi.spyOn` or direct property assignment with restore.
 
+### Debugging: Log First, Fix Later
+
+When facing unclear test failures (locally or on CI), **do NOT spend multiple rounds guessing root causes**. Instead:
+
+1. **Add diagnostic logging immediately** — log the state of the failing object (e.g. `typeof`, `constructor.name`, `Object.keys()`, `JSON.stringify`) at the point of failure
+2. **Run (or push and let CI run)** — get real data from the actual environment
+3. **Fix based on evidence** — one log statement that shows actual state is worth more than three speculative fixes
+
 ## Commit Messages
 
 - When AI-generated: end subject with `[ai]`
