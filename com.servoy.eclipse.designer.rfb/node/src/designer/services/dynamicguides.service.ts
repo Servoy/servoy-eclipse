@@ -178,6 +178,7 @@ this.snapToEndEnabled = !event.shiftKey;
 		this.initialPoint = null!;
 		this.initialRectangle = null!;
 		this.properties = null!;
+		this.snapData.set(null);
     }
     
     private isSnapInterval(uuid: any, coordinate: any, posMap: any) {

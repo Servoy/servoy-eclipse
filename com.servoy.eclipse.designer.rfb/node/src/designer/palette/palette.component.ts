@@ -1,4 +1,4 @@
-import { Component, Pipe, PipeTransform, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, effect, inject, forwardRef } from '@angular/core';
+import { Component, Pipe, PipeTransform, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, effect, inject, forwardRef, untracked } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
@@ -54,7 +54,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (this.urlParser.isAbsoluteFormLayout()) {
             effect(() => {
                 const value = this.guidesService.snapData();
-                if (value) this.snap(value);
+                if (value) untracked(() => this.snap(value));
             });
         }
         this.editorSession.setPaletteRefresher(this);

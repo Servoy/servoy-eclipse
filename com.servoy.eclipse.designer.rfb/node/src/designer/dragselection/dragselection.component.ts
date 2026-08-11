@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject, untracked } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from '../directives/resizeknob.directive';
@@ -49,7 +49,8 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
 
     constructor() {
         effect(() => {
-            this.snap(this.guidesService.snapData());
+            const value = this.guidesService.snapData();
+            untracked(() => this.snap(value));
         });
     }
 

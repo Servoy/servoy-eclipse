@@ -1,4 +1,4 @@
-import { Directive, HostListener, OnInit, effect, inject, input } from '@angular/core';
+import { Directive, HostListener, OnInit, effect, inject, input, untracked } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -30,7 +30,7 @@ export class ResizeKnobDirective implements OnInit {
     constructor() {
         effect(() => {
             const value = this.guidesService.snapData();
-            if (value) this.snap(value);
+            if (value) untracked(() => this.snap(value));
         });
     }
 

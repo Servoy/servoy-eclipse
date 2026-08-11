@@ -1,4 +1,4 @@
-import { Component, Renderer2, ElementRef, ChangeDetectionStrategy, effect, inject, input } from '@angular/core';
+import { Component, Renderer2, ElementRef, ChangeDetectionStrategy, effect, inject, input, untracked } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -29,7 +29,7 @@ export class DynamicGuidesComponent {
   constructor() {
       effect(() => {
           const value = this.guidesService.snapData();
-          if (value) this.setGuides(value);
+          if (value) untracked(() => this.setGuides(value));
       });
       this.editorContentService.executeOnlyAfterInit(() => {
         this.editorSession.getSnapThreshold().then((thresholds: any) => {
