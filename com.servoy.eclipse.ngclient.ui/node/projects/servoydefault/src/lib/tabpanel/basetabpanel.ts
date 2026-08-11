@@ -1,4 +1,4 @@
-import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef, output } from '@angular/core';
+import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Directive, inject } from '@angular/core';
 
 import { BaseCustomObject, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
@@ -35,14 +35,15 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
     protected selectedTab!: Tab;
 
+    private windowRefService = inject(WindowRefService);
     private waitingForServerVisibility: Record<string, any> = {};
     private lastSelectedTab!: Tab;
 
     protected log: LoggerService;
 
-    constructor(private windowRefService: WindowRefService, logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-        this.log = logFactory.getLogger('BaseTabpanel');
+    constructor() {
+        super();
+        this.log = inject(LoggerFactory).getLogger('BaseTabpanel');
     }
 
     ngOnInit() {

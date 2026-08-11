@@ -1,4 +1,4 @@
-import {Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, input} from '@angular/core';
+import {Component, SimpleChanges, ChangeDetectionStrategy, input} from '@angular/core';
 import {ServoyDefaultBaseComponent} from '../basecomponent';
 @Component({
     selector: 'servoydefault-rectangle',
@@ -11,10 +11,6 @@ export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivEl
     readonly roundedRadius = input<number>(undefined as any);
     readonly shapeType = input<number>(undefined as any);
     readonly size = input<{width: number; height: number}>(undefined as any);
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 
     svyOnChanges( changes: SimpleChanges ) {
 

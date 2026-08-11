@@ -1,4 +1,4 @@
-import { Component, SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { Component, SimpleChanges, ElementRef, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { FormattingService, ServoyPublicService, getFirstDayOfWeek } from '@servoy/public';
 
@@ -61,13 +61,10 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         }
     } as Options;
 
-    constructor(renderer: Renderer2,
-        cdRef: ChangeDetectorRef,
-        formattingService: FormattingService,
-        servoyService: ServoyPublicService,
-        @Inject(DOCUMENT) doc: Document,
-        logFactory: LoggerFactory) {
-        super(renderer, cdRef, formattingService, doc);
+    constructor() {
+        super();
+        const servoyService = inject(ServoyPublicService);
+        const logFactory = inject(LoggerFactory);
         this.config.localization!.locale = servoyService.getLocale();
         this.loadCalendarLocale(this.config.localization!.locale);
         this.log = logFactory.getLogger('default-calendar');

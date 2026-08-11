@@ -1,4 +1,4 @@
-import { Component, output, OnChanges, SimpleChanges, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, output, OnChanges, SimpleChanges, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy, input, inject } from '@angular/core';
 
 import { BGPane } from './bg_pane.component';
 @Component( {
@@ -19,6 +19,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
     private drag = false;
     private handler;
+    private readonly renderer = inject(Renderer2);
 
     @ContentChildren( BGPane )
     private panes!: QueryList<BGPane>;
@@ -26,7 +27,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     @ViewChild( 'element' , {static: true})
     private elementRef!: ElementRef;
 
-    constructor( private readonly renderer: Renderer2 ) {
+    constructor() {
         this.handler = this.renderer.createElement( 'div' );
         this.renderer.addClass( this.handler, 'split-handler' );
 

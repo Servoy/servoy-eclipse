@@ -1,6 +1,5 @@
 
-import { Component, Renderer2, output, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
-import { FormattingService } from '@servoy/public';
+import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
 
 @Component({
@@ -13,10 +12,6 @@ import { ServoyDefaultBaseChoice } from '../basechoice';
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 
     mainTabIndex: any;
-
-    constructor(renderer: Renderer2, formattingService: FormattingService, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     getFocusElement(): HTMLElement {
         let focusElement = super.getFocusElement();

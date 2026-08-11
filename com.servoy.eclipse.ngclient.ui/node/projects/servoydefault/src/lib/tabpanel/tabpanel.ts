@@ -1,8 +1,7 @@
-import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy,  ViewChild, ElementRef, output, AfterViewInit, OnDestroy, input} from '@angular/core';
+import { Component, ChangeDetectionStrategy, ViewChild, ElementRef, output, AfterViewInit, OnDestroy, input, inject} from '@angular/core';
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
-import { WindowRefService } from '@servoy/public';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
@@ -20,10 +19,6 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     height: any = '100%';
     
     private visibleTabIndex!: number;
-    
-    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
-        super( windowRefService, log, renderer, cdRef );
-    }
 
     onTabChange( event: NgbNavChangeEvent ) {
         // do prevent it by default, so that the server side can decide of the swich can happen.
@@ -127,8 +122,8 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
     observer!: MutationObserver;
     log: LoggerService;
 
-    constructor(logFactory: LoggerFactory) {
-        this.log = logFactory.getLogger('default-tabpanel');
+    constructor() {
+        this.log = inject(LoggerFactory).getLogger('default-tabpanel');
     }
 
     ngAfterViewInit(): void {

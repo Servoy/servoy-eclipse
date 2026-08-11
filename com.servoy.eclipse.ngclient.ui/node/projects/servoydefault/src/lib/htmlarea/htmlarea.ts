@@ -1,6 +1,6 @@
-import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { Component, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import { FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
+import { PropertyUtils, ServoyPublicService } from '@servoy/public';
 
 import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
@@ -25,10 +25,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     lastServerValueAsSeenByTinyMCEContent!: string;
     editor!: Editor;
     override mustExecuteOnFocus: boolean = true;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
-        super(renderer, cdRef, formattingService, doc);
-    }
+    protected servoyService = inject(ServoyPublicService);
 
     focus() {
         if (this.onFocusGainedMethodID()) {

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive, input } from '@angular/core';
+import { SimpleChanges, ElementRef, ViewChild, Directive, input } from '@angular/core';
 
 import { PropertyUtils } from '@servoy/public';
 
@@ -19,10 +19,6 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
     readonly verticalAlignment = input<number>(undefined as any);
 
     @ViewChild('child') child!: ElementRef;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 
     svyOnChanges(changes: SimpleChanges) {
         for (const property of Object.keys(changes)) {

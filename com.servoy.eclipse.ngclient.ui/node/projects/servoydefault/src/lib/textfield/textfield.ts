@@ -1,7 +1,5 @@
 
-import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
-
-import {FormattingService} from '@servoy/public';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import {ServoyDefaultBaseField} from '../basefield';
 
@@ -12,10 +10,6 @@ import {ServoyDefaultBaseField} from '../basefield';
     standalone: false
 } )
 export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElement> {
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef , formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     onModelChange(newValue: any) {
         if(newValue && typeof newValue.getTime === 'function' && isNaN(newValue.getTime())) {

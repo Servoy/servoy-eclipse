@@ -1,4 +1,4 @@
-import { Directive, input, ViewChild, ElementRef} from '@angular/core';
+import { Directive, input, ViewChild, ElementRef, inject} from '@angular/core';
 
 import { BGSplitter } from './bg_splitter.component';
 
@@ -16,7 +16,5 @@ export class BGPane{
 
     index: any;
 
-    constructor(public element: ElementRef) {
-
-    }
+    public element = inject(ElementRef);
 }

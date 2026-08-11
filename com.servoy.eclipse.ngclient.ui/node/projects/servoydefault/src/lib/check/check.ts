@@ -1,6 +1,5 @@
 
-import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, ViewChild, ElementRef, ChangeDetectionStrategy, Inject, DOCUMENT, input } from '@angular/core';
-import { FormattingService } from '@servoy/public';
+import { Component, Renderer2, SimpleChanges, ViewChild, ElementRef, ChangeDetectionStrategy, input } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
@@ -15,9 +14,6 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
     @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
 
     selected = false;
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);

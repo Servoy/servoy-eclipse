@@ -1,4 +1,4 @@
-import { SimpleChanges, Renderer2, Directive, ChangeDetectorRef, Inject, DOCUMENT, output, input } from '@angular/core';
+import { SimpleChanges, Directive, Inject, DOCUMENT, output, input, inject } from '@angular/core';
 
 import { PropertyUtils, FormattingService, IValuelist } from '@servoy/public';
 
@@ -26,9 +26,8 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
 
     mustExecuteOnFocus = true;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService, @Inject(DOCUMENT) protected doc: Document) {
-        super(renderer, cdRef);
-    }
+    public formattingService = inject(FormattingService);
+    protected doc = inject(DOCUMENT);
 
     svyOnInit() {
         super.svyOnInit();

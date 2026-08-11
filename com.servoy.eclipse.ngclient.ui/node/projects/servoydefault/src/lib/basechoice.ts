@@ -1,6 +1,5 @@
 
-import { Renderer2, ViewChild, ElementRef, SimpleChanges, Directive, ChangeDetectorRef, input, OnInit, Inject, DOCUMENT } from '@angular/core';
-import { FormattingService } from '@servoy/public';
+import { ViewChild, ElementRef, SimpleChanges, Directive, input, OnInit } from '@angular/core';
 import { ServoyDefaultBaseField } from './basefield';
 
 @Directive()
@@ -11,10 +10,6 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
 
     selection: any[] = [];
     allowNullinc = 0;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     svyOnInit() {
         super.svyOnInit();

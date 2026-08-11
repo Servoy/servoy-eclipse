@@ -1,8 +1,8 @@
-import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { Component, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
-import { FormattingService, ServoyPublicService } from '@servoy/public';
+import { ServoyPublicService } from '@servoy/public';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
 
@@ -20,11 +20,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 
 	currentValue: any;
 	showPopupOnFocusGain!: boolean;
-
-	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-		formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
-		super(renderer, cdRef, formattingService, doc);
-	}
+	protected servoyService = inject(ServoyPublicService);
 
 	@HostListener('keydown', ['$event'])
 	handleKeyDown(event: KeyboardEvent) {

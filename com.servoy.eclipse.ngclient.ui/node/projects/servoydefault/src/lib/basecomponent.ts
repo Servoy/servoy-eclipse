@@ -1,4 +1,4 @@
-import { SimpleChanges, Renderer2, ChangeDetectorRef, Directive, input, model } from '@angular/core';
+import { SimpleChanges, Directive, input, model } from '@angular/core';
 
 import { ServoyBaseComponent, PropertyUtils, Format } from '@servoy/public';
 
@@ -29,10 +29,6 @@ export class ServoyDefaultBaseComponent<T extends HTMLElement> extends ServoyBas
     readonly scrollbars = input<any>(undefined);
 
     timeoutID: number | null = null;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 
     svyOnInit() {
         super.svyOnInit();

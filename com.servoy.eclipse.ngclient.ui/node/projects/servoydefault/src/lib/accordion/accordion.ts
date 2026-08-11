@@ -1,8 +1,6 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { WindowRefService } from '@servoy/public';
+import { Component, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { BaseTabpanel,Tab } from '../tabpanel/basetabpanel';
-import { LoggerFactory } from '@servoy/public';
 
 @Component({
     selector: 'servoydefault-accordion',
@@ -13,10 +11,6 @@ import { LoggerFactory } from '@servoy/public';
 export class ServoyDefaultAccordion extends BaseTabpanel {
 
     panelHeight!: number;
-
-    constructor(windowRefService: WindowRefService , logFactory: LoggerFactory, renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
-        super( windowRefService, logFactory, renderer, cdRef);
-     }
 
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes['height']) {

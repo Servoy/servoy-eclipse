@@ -1,4 +1,4 @@
-import { Component,ChangeDetectorRef,Renderer2, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import {ServoyDefaultBaseLabel} from  '../baselabel';
 
@@ -9,9 +9,5 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
     standalone: false
 } )
 export class ServoyDefaultButton extends ServoyDefaultBaseLabel<HTMLButtonElement> {
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 }
 

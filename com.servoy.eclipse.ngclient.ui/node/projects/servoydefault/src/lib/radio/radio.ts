@@ -1,6 +1,5 @@
 
-import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT, input } from '@angular/core';
-import { FormattingService } from '@servoy/public';
+import { Component, Renderer2, ViewChild, ElementRef, SimpleChanges, ChangeDetectionStrategy, input } from '@angular/core';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -18,10 +17,6 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
 
     selected = false;
     private log!: LoggerService;
-
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super( renderer, cdRef, formattingService, doc );
-    }
 
     svyOnChanges( changes: SimpleChanges ) {
         this.setHorizontalAlignmentFlexbox( this.getNativeElement(), this.renderer, this.horizontalAlignment() );

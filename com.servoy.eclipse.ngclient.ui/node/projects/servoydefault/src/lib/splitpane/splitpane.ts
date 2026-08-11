@@ -1,4 +1,4 @@
-import { Component, Input, model, ContentChild, TemplateRef, ChangeDetectorRef, SimpleChanges, Renderer2, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Input, model, ContentChild, TemplateRef, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
 
 import { ServoyBaseComponent } from '@servoy/public';
 
@@ -42,10 +42,6 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
 
     private leftTab!: Tab;
     private rightTab!: Tab;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 
     svyOnInit() {
         if (this.resizeWeight == undefined) this.resizeWeight = 0;
