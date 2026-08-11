@@ -583,6 +583,28 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		return cloudReachable;
 	}
 
+	private static final java.util.concurrent.CopyOnWriteArrayList<Runnable> cloudRestoredListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+	public static void addCloudRestoredListener(Runnable listener)
+	{
+		if (listener != null) cloudRestoredListeners.add(listener);
+	}
+
+	private static void notifyCloudRestored()
+	{
+		for (Runnable listener : cloudRestoredListeners)
+		{
+			try
+			{
+				Display.getDefault().asyncExec(listener);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
+	}
+
 	private static void scheduleCloudRetry()
 	{
 		if (retryExecutor != null) return;
@@ -613,6 +635,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 						cloudReachable = true;
 						node.put(SERVOY_LOGIN_TOKEN, response.response, true);
 						ServoyLog.logInfo("Servoy Cloud connection restored."); //$NON-NLS-1$
+						notifyCloudRestored();
 					}
 				}
 			}
