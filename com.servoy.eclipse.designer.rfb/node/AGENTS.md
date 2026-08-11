@@ -148,3 +148,23 @@ Feature specs live in `docs/` at the repository root:
 - When AI-generated: end subject with `[ai]`
 - When related to Jira: include case number in subject
 - Example: `SVY-21129 implement dynamic guides resize snapping [ai]`
+
+## Angular 22 Modernization Status
+
+### Completed
+- Karma/Jasmine/Protractor → Vitest + Playwright
+- zone.js removed, `provideZonelessChangeDetection()` active
+- All components standalone (no NgModule)
+- Signal inputs/outputs/viewChildren migrated
+- OnPush change detection on all components
+- `importProvidersFrom` removed from main.ts
+- All RxJS subjects/emitters in services → signals (`snapData`, `autoscrollTarget`, `registerCallback`, `variantsTrigger`, `variantsScroll`, `variantsPopup`)
+- Simple components migrated to signal state: `InlineEditComponent`, `VariantsContentComponent`
+- ESLint flat config, esbuild builder
+
+### Remaining: Component State → Signals
+The following components still use `ChangeDetectorRef` + `markForCheck()` with mutable class fields read in templates. These are large components (700-1200 lines) where template state is built via heavily mutated arrays from `addEventListener` callbacks. Migration requires refactoring mutation patterns to build-then-set:
+
+- `contextmenu.component.ts` (989 lines) — `menuItems` array mutated via push/splice/filter in contextmenu handler
+- `palette.component.ts` (695 lines) — multiple template fields (`searchText`, `activeIds`, etc.)
+- `toolbar.component.ts` (1219 lines) — complex toolbar state

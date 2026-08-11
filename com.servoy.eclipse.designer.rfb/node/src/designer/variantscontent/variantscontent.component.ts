@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, effect, inject, input, untracked } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject, input, untracked } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -28,7 +28,6 @@ export class VariantsContentComponent implements OnInit {
     private windowRef = inject(WindowRefService);
     private editorSession = inject(EditorSessionService);
     private editorContentService = inject(EditorContentService);
-    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
 		effect(() => {
@@ -40,7 +39,6 @@ export class VariantsContentComponent implements OnInit {
 				} else {
 					this.activeVariant = false;
 				}
-				this.cdr.markForCheck();
 			});
 		});
 		effect(() => {
