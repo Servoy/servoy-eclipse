@@ -123,27 +123,32 @@ pipeline {
             }
         }
         
-        failure {
-            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Failed', adaptiveCards: true
+        changed {
+                script {
+                    def statusMap = [
+                        'SUCCESS' : 'Back to Normal',
+                        'FAILURE' : 'Failed',
+                        'UNSTABLE': 'Unstable',
+                        'ABORTED' : 'Aborted'
+                    ]
+                    
+                    def statusText = statusMap.get(currentBuild.currentResult, currentBuild.currentResult)
+        
+                    office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: statusText, adaptiveCards: true
+                }
         }
         
-        unstable {
-            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Unstable', adaptiveCards: true
+        success {
             script {
                 if (!params.WIPE_WORKSPACE) {
                     build job: 'build', wait: false
                 }
             }
         }
-        
-        fixed {
-            office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Back to Normal', adaptiveCards: true
-        }
-        
-        success {
+    
+        unstable {
             script {
                 if (!params.WIPE_WORKSPACE) {
-                    // Downstream project triggeren bij succes
                     build job: 'build', wait: false
                 }
             }
