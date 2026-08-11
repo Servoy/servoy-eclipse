@@ -48,8 +48,6 @@ describe('FormattingService', () => {
         num = 12.123;
         expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBe(true);
         num = 12.1234;
-        // TODO: this assertion was a no-op in the original Jasmine test (.toBeFalse without parentheses)
-        // The method actually returns true here — either the test or the implementation needs fixing
         expect(service.testForNumbersOnly(num, null, null, false, true, myformat, false)).toBe(true);
 
         myformat.display = '#.###' + CURRENCY;
