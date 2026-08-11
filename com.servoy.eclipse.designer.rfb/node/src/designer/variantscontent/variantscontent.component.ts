@@ -1,5 +1,6 @@
 
 import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, inject, input } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
@@ -31,7 +32,7 @@ export class VariantsContentComponent implements OnInit {
     private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
-		this.editorSession.variantsTrigger.subscribe((value) => {
+		this.editorSession.variantsTrigger.pipe(takeUntilDestroyed()).subscribe((value) => {
 			if (this.component() == value.component) {
                 this.activeVariant = true;
 				this.sendStylesToVariantsForm();
@@ -40,7 +41,7 @@ export class VariantsContentComponent implements OnInit {
 			}
 			this.cdr.markForCheck();
 		});
-		this.editorSession.variantsPopup.subscribe((value) => {
+		this.editorSession.variantsPopup.pipe(takeUntilDestroyed()).subscribe((value) => {
 			if (value.status === 'visible') {
 				if (this.variantsQueryHandler) {
 					clearInterval(this.variantsQueryHandler);

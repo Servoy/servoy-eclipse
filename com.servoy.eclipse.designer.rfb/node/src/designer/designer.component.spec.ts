@@ -26,6 +26,7 @@ describe('DesignerComponent', () => {
     (component as any).urlParser = urlParser;
     (component as any).renderer = renderer;
     (component as any).contentArea = () => undefined;
+    (component as any).destroyRef = { onDestroy: vi.fn() };
   });
 
   describe('ngOnInit', () => {

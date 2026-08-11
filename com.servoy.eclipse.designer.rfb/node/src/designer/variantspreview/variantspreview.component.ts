@@ -1,4 +1,5 @@
 import { Component, Renderer2, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject, input, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -50,7 +51,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
     private editorContentService = inject(EditorContentService);
 
     constructor() {
-		this.editorSession.variantsTrigger.subscribe((value) => {
+		this.editorSession.variantsTrigger.pipe(takeUntilDestroyed()).subscribe((value) => {
 			if (value.show == true) {
 				this.top = value.top!;
 				this.left = value.left!;
@@ -60,7 +61,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 			}
 		});
 
-		this.editorSession.variantsScroll.subscribe((value) => {
+		this.editorSession.variantsScroll.pipe(takeUntilDestroyed()).subscribe((value) => {
 			if (this.isPopoverInitialized) {
 				const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
 				popoverCtrl.style.top = this.top - value.scrollPos + 'px';

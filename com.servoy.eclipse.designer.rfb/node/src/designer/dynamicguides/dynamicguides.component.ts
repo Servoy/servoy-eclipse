@@ -1,9 +1,9 @@
-import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, AfterViewInit, Renderer2, ElementRef, ChangeDetectionStrategy, DestroyRef, inject, input } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, Guide, SnapData } from '../services/dynamicguides.service';
-import { Subscription } from 'rxjs';
 
 @Component({
     // eslint-disable-next-line @angular-eslint/component-selector
@@ -12,14 +12,13 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./dynamicguides.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
+export class DynamicGuidesComponent implements AfterViewInit {
 
   guides = input<Guide[]>([]);
 
   topAdjust: any;
   leftAdjust!: number;
   snapData!: { top: number, left: number, guideX?: number, guideY?: number, guides?: Guide[] } | null;
-  subscription!: Subscription;
 
   private el = inject(ElementRef);
   protected readonly editorSession = inject(EditorSessionService);
@@ -27,6 +26,7 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
   private urlParser = inject(URLParserService);
   private editorContentService = inject(EditorContentService);
   private guidesService = inject(DynamicGuidesService);
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
       this.editorContentService.executeOnlyAfterInit(() => {
@@ -40,7 +40,7 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
+    this.guidesService.snapDataListener.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: SnapData | null) => {
       if (value) this.setGuides(value);
     })
   }
@@ -69,10 +69,6 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
     for (let i = childNodes.length - 1; i >= 0; i--) {
       this.renderer.removeChild(this.el.nativeElement, childNodes[i]);
     }
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 
   onMouseUp(): void {

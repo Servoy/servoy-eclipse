@@ -1,4 +1,5 @@
-import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject, forwardRef } from '@angular/core';
+import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, DestroyRef, inject, forwardRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
@@ -6,7 +7,6 @@ import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { WindowRefService, ServoyPublicModule } from '@servoy/public';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
-import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody } from '@ng-bootstrap/ng-bootstrap/accordion';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
@@ -24,7 +24,7 @@ import { KeyValuePipe } from '@angular/common';
         VariantsContentComponent, KeyValuePipe, forwardRef(() => SearchTextPipe), forwardRef(() => SearchTextDeepPipe)
     ]
 })
-export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit {
 
     public searchText!: string;
     public activeIds!: string[];
@@ -34,7 +34,6 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
     snapData!: SnapData;
-    subscription!: Subscription;
 
     searchHistory: string[] = [];
     filteredSuggestions: string[] = [];
@@ -51,6 +50,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     private windowRef = inject(WindowRefService);
     private guidesService = inject(DynamicGuidesService);
     private readonly cdr = inject(ChangeDetectorRef);
+    private readonly destroyRef = inject(DestroyRef);
 
     constructor() {
         this.editorSession.setPaletteRefresher(this);
@@ -86,14 +86,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     ngAfterViewInit(): void {
         if (this.urlParser.isAbsoluteFormLayout()) {
-            this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
+            this.guidesService.snapDataListener.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: SnapData | null) => {
                 if (value) this.snap(value);
             })
         }
-    }
-
-    ngOnDestroy(): void {
-        if (this.subscription !== undefined) this.subscription.unsubscribe();
     }
 
     openPackageManager() {

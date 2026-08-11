@@ -1,13 +1,13 @@
-import { AfterViewInit, Directive, HostListener, OnDestroy, OnInit, inject, input } from '@angular/core';
+import { AfterViewInit, Directive, HostListener, OnInit, DestroyRef, inject, input } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
-import { Subscription } from 'rxjs';
 
 // eslint-disable-next-line @angular-eslint/directive-selector
 @Directive({ selector: '[resizeKnob]' })
-export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
+export class ResizeKnobDirective implements OnInit, AfterViewInit {
 
     resizeInfo = input<ResizeInfo>(undefined!, { alias: 'resizeKnob' });
 
@@ -23,11 +23,11 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     topContentAreaAdjust!: number;
     leftContentAreaAdjust!: number;
     snapData!: SnapData;
-    subscription!: Subscription;
 
     protected readonly editorSession = inject(EditorSessionService);
     private editorContentService = inject(EditorContentService);
     private guidesService = inject(DynamicGuidesService);
+    private readonly destroyRef = inject(DestroyRef);
 
     ngOnInit(): void {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
@@ -75,7 +75,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
-        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
+        this.guidesService.snapDataListener.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: SnapData | null) => {
             if (value) this.snap(value);
         })
     }
@@ -101,10 +101,6 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
                 }
             }
         }
-    }
-
-    ngOnDestroy(): void {
-        this.subscription.unsubscribe();
     }
 
     @HostListener('mousedown', ['$event'])
