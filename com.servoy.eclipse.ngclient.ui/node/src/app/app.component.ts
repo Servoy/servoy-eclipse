@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-root',
@@ -8,7 +8,4 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 })
 
 export class AppComponent {
-    constructor() {
-    }
-
 }

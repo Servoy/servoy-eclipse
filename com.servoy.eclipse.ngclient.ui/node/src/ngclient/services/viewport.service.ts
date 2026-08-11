@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ChangeType, IFoundset, LoggerService, ViewportChangeEvent, ViewportChangeListener } from '@servoy/public';
 import {
     ConverterService, ChangeAwareState, isChanged, instanceOfChangeAwareValue,
@@ -55,12 +55,8 @@ interface ExpandedViewportTypes {
 export class ViewportService {
 
     public static readonly ROW_ID_COL_KEY = '_svyRowId';
-    public static readonly ID_KEY = 'id'; // for requestID in case a defer is generated and a promise returned
+    public static readonly ID_KEY = 'id';
 
-    // this key/column should be stored as $foundsetTypeConstants.ROW_ID_COL_KEY in the actual row, but this key is sent from server when the foundset property is sending
-    // just a partial update, but some of the columns that did change are also pks so they do affect the pk hash; client uses this to distiguish between a full
-    // update of a row and a partial update of a row; so if update has $foundsetTypeConstants.ROW_ID_COL_KEY it will consider it to be a full update,
-    // and if it has either ROW_ID_COL_KEY_PARTIAL_UPDATE or no rowID then it is a partial update of a row (only some of the columns in that row have changed)
     private static readonly ROW_ID_COL_KEY_PARTIAL_UPDATE = '_svyRowId_p';
 
     private static NULL_AND_REJECT_PROP_CONTEXT: IPropertyContext = {
@@ -69,8 +65,9 @@ export class ViewportService {
         isInsideModel: true
     };
 
-    constructor(private converterService: ConverterService<unknown>,
-        private readonly typesRegistry: TypesRegistry, private sabloDeferHelper: SabloDeferHelper) { }
+    private converterService = inject(ConverterService<unknown>);
+    private readonly typesRegistry = inject(TypesRegistry);
+    private sabloDeferHelper = inject(SabloDeferHelper);
 
     /**
      * It will update the whole viewport. More precisely it will apply all server-to-client conversions directly on given viewPortUpdate param and return it.

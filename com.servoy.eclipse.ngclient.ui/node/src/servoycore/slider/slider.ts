@@ -1,4 +1,4 @@
-import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 
 
@@ -24,10 +24,6 @@ export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
     readonly dataProviderIDChange = output();
     
     _dataProviderID = signal<any>(undefined);
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 
     svyOnInit() {
         super.svyOnInit();

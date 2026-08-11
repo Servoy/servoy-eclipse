@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import {
   Component, TemplateRef, ElementRef, AfterViewInit, Renderer2,
-  ChangeDetectorRef, OnDestroy, Inject, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
+  ChangeDetectorRef, OnDestroy, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
   DOCUMENT,
   input,
-  viewChild, signal
+  viewChild, signal, inject
 } from '@angular/core';
 import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
 import { DesignFormComponent } from '../../designer/designform_component.component';
@@ -176,16 +176,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     // used for paging
     private waitingForLoad = false;
 
-    constructor(protected readonly renderer: Renderer2,
-        private formservice: FormService,
-        private servoyService: ServoyService,
-        private typesRegistry: TypesRegistry,
-        private converterService: ConverterService<unknown>,
-        cdRef: ChangeDetectorRef,
-        logFactory: LoggerFactory,
-        private _injector: Injector,
-        @Inject(DOCUMENT) private doc: Document) {
-        super(renderer, cdRef);
+    private formservice = inject(FormService);
+    private servoyService = inject(ServoyService);
+    private typesRegistry = inject(TypesRegistry);
+    private converterService = inject(ConverterService<unknown>);
+    private _injector = inject(Injector);
+    private doc = inject(DOCUMENT);
+
+    constructor() {
+        super();
         try {
             this.parent = this._injector.get<FormComponent>(FormComponent);
         } catch (e) {
@@ -195,7 +194,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (!this.parent) {
             this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
         }
-        this.log = logFactory.getLogger('ListFormComponent');
+        this.log = inject(LoggerFactory).getLogger('ListFormComponent');
     }
 
     handleKeyDown(event: any) {

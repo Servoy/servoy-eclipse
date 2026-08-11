@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Renderer2, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '@servoy/public';
 
 @Component({
@@ -12,8 +12,4 @@ export class ErrorBean extends ServoyBaseComponent<HTMLDivElement> {
 
     readonly error = input(undefined);
     readonly toolTipText = input<string>(undefined!);
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 }

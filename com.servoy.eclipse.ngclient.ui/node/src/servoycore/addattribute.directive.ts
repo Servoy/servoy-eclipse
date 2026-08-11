@@ -1,4 +1,4 @@
-import { Directive, ElementRef, OnChanges, SimpleChanges, Renderer2, Injector, input } from '@angular/core';
+import { Directive, ElementRef, OnChanges, SimpleChanges, Renderer2, Injector, input, inject } from '@angular/core';
 import { DesignFormComponent } from '../designer/designform_component.component';
 import { AbstractFormComponent, FormComponent } from '../ngclient/form/form_component.component';
 import { StructureCache } from '../ngclient/types';
@@ -15,16 +15,20 @@ export class AddAttributeDirective implements OnChanges {
 
     parent!: AbstractFormComponent;
 
-    constructor(private el: ElementRef, private renderer: Renderer2, private _injector: Injector) {
+    private el = inject(ElementRef);
+    private renderer = inject(Renderer2);
+
+    constructor() {
+        const injector = inject(Injector);
         try {
-            this.parent = this._injector.get<FormComponent>(FormComponent);
+            this.parent = injector.get<FormComponent>(FormComponent);
         }
         catch (e) {
             //ignore
         }
 
         if (!this.parent) {
-            this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
+            this.parent = injector.get<DesignFormComponent>(DesignFormComponent);
         }
     }
 

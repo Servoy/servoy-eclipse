@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { AgRendererComponent } from 'ag-grid-angular';
 import { ICellRendererParams, IAfterGuiAttachedParams } from 'ag-grid-community';
@@ -17,7 +17,7 @@ export class RowRenderer implements AgRendererComponent, AfterViewInit {
     foundsetRows!: any[];
     startIndex!: number;
 
-    constructor(private elementRef: ElementRef) {}
+    private elementRef = inject(ElementRef);
 
     registerCSTS(event: Event) {
         // Cast the event to CustomEvent to access the detail property

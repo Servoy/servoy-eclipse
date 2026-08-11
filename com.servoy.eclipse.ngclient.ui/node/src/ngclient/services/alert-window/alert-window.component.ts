@@ -12,8 +12,6 @@ export class AlertWindowComponent {
     readonly title = signal<string>(undefined!);
     readonly message = signal<string>(undefined!);
     onCloseCallback!: () => void;
-    constructor() {
-    }
 
     dismiss(): void {
       this.onCloseCallback();
