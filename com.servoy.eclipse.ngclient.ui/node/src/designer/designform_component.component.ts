@@ -416,11 +416,6 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
                 targetElement = targetElement.parentElement;
             }
         }
-        const targetHeight = Math.ceil(targetElement!.getBoundingClientRect().height); //height of the flex item
-        targetElement = targetElement!.firstElementChild;
-        //not adding 3 px then the text content is getting clipped after drop
-        const targetWidth = Math.ceil(targetElement!.getBoundingClientRect().width) + 3;
-
         let selectedVariant: StructureCache | undefined;
         if (variantId) {
             for (const variant of this.insertedVariants!) {
@@ -431,10 +426,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
             }
         }
         if (selectedVariant) {
-            const model = Object.assign({}, (selectedVariant.items![0] as ComponentCache).model);
-            model.size!.width = targetWidth;
-            model.size!.height = targetHeight;
-            this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: selectedVariant.items![0].model}, '*');
+            this.windowRefService.nativeWindow.parent.postMessage({ id: 'onVariantMouseDown', pageX: event.pageX, pageY: event.pageY, model: (selectedVariant.items![0] as ComponentCache).model}, '*');
         }
     }
 
