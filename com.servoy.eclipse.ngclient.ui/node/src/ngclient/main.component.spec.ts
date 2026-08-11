@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { DOCUMENT } from '@angular/common';
 import { Directive, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MainComponent } from './main.component';
@@ -38,7 +39,8 @@ describe('MainComponent', () => {
         } },
         { provide:WebsocketService, useValue: {} },
         { provide:LoadingIndicatorService, useValue: {}},
-        { provide:ServerDataService, useValue: {init: ()=>{}}}]
+        { provide:ServerDataService, useValue: {init: ()=>{}}},
+        { provide: DOCUMENT, useValue: document }]
     }).compileComponents();
   });
   it('should create the main component', async () => {
