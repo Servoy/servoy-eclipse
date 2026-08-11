@@ -38,6 +38,7 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 - **Use `eclipse-git` tools** (`gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitBranch`, etc.) instead of command-line git.
 - **After every `gitCommit`**, display the full commit message (subject line + body) in a formatted block so the user can verify the naming and content before moving on.
 - **Never push directly.** You may create commits, but never run `git push` until the user has explicitly reviewed and approved the commit(s). Always wait for user confirmation before pushing.
+- **Prefer new commits over `--amend`.** Only amend your own unpushed commits when explicitly asked. If in doubt, make a new commit — it's always safe.
 
 ### Running and Debugging
 - **Use `eclipse-runner` tools** for launching, debugging, and testing Java applications.
