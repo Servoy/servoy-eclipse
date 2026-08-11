@@ -51,7 +51,7 @@ export class ServoyCoreComponentsModule {
             ServerSideRowModelApiModule,
             RowApiModule,
             ScrollApiModule,
-            ValidationModule,
+            ValidationModule.with({ showOverlayOn: [] }),
             RenderApiModule]);
     }
 }
