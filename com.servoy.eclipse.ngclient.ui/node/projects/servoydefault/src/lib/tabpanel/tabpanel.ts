@@ -1,7 +1,6 @@
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoggerFactory, LoggerService, SabloTabseq, TooltipDirective, TrustAsHtmlPipe , HtmlFilterPipe } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
-import { NgTemplateOutlet } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, ViewChild, ElementRef, output, AfterViewInit, OnDestroy, input, inject} from '@angular/core';
 
@@ -68,7 +67,7 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
     templateUrl: './tabpanel.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule, FormsModule, HtmlFilterPipe, TooltipDirective, SabloTabseq, TrustAsHtmlPipe, NgbModule, NgTemplateOutlet, DefaultTabpanelActiveTabVisibilityListener]
+    imports: [CommonModule, FormsModule, HtmlFilterPipe, TooltipDirective, SabloTabseq, TrustAsHtmlPipe, NgbModule, DefaultTabpanelActiveTabVisibilityListener]
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
     

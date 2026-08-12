@@ -87,7 +87,7 @@ class TestHostComponent {
             </button>
         </div>`,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true
 })
 export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButtonElement> {
 
