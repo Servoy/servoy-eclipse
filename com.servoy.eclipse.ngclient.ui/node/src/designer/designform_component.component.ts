@@ -23,7 +23,7 @@ import { TypesRegistry} from '../sablo/types_registry';
 import { AddAttributeDirective } from '../servoycore/addattribute.directive';
 import { AllComponentsModule } from '../ngclient/allcomponents.module';
 import { AllServicesModules } from '../ngclient/allservices.service';
-import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
+import { SERVOYCORE_COMPONENTS } from '../servoycore/servoycore.components';
 import { ServoyCoreFormcomponentResponsiveCotainer } from '../servoycore/formcomponent-responsive-container/formcomponent-responsive-container';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
 
@@ -125,7 +125,7 @@ import { ListFormComponent } from '../servoycore/listformcomponent/listformcompo
         AddAttributeDirective,
         AllComponentsModule,
         AllServicesModules,
-        ServoyCoreComponentsModule,
+        ...SERVOYCORE_COMPONENTS,
         ServoyCoreFormcomponentResponsiveCotainer,
         ListFormComponent,
         FormComponent

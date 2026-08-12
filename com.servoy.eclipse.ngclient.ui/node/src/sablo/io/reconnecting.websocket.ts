@@ -226,11 +226,16 @@ export class ReconnectingWebSocket implements IWebSocket {
         };
     }
 
-    onmessage!: (message: WebsocketCustomEvent) => true | void;
-    onconnecting!: (evt: WebsocketCustomEvent) => void;
-    onclose!: (evt: WebsocketCustomEvent) => void;
-    onopen!: (evt: WebsocketCustomEvent) => void;
-    onerror!: (evt: WebsocketCustomEvent) => void;
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onmessage(_message: WebsocketCustomEvent): true | void {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onconnecting(_evt: WebsocketCustomEvent): void {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onclose(_evt: WebsocketCustomEvent): void {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onopen(_evt: WebsocketCustomEvent): void {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onerror(_evt: WebsocketCustomEvent): void {}
 
     /** The URL as resolved by the constructor, or a function to return the current url. This is always an absolute URL. Read only. */
     private getUrl(reconnectAttempt?: boolean): string {

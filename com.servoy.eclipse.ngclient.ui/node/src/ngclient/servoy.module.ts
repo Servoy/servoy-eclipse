@@ -19,14 +19,13 @@ import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import { DeveloperService } from './developer.service';
 import { AlertWindowComponent} from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
-import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 import { ServoyPublicService } from '@servoy/public';
+import { provideAgGrid } from '../servoycore/ag-grid-initializer';
 import { SERVOY_ROUTES } from './servoy.routes';
 
 @NgModule( {
     imports: [
         RouterModule.forChild(SERVOY_ROUTES),
-        ServoyCoreComponentsModule,
         MainComponent,
         FormComponent,
         DefaultLoginWindowComponent,
@@ -39,10 +38,10 @@ import { SERVOY_ROUTES } from './servoy.routes';
     ],
     providers: [UpperCasePipe, LowerCasePipe,
         ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
-        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }]
+        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
+        provideAgGrid()]
 } )
 export class ServoyModule {
     constructor(_developerService: DeveloperService) {
-        // the above developer service must just be loaded..
     }
  }

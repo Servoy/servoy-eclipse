@@ -7,17 +7,17 @@ import { ServoyPublicServiceDesignerImpl } from './servoy_public_designer_impl.s
 import { ServerDataService } from '../ngclient/services/serverdata.service';
 import { EditorContentService} from './editorcontent.service';
 import { BSWindowManager } from '../ngclient/services/bootstrap-window/bswindow_manager.service';
-import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
+import { provideAgGrid } from '../servoycore/ag-grid-initializer';
 import { DESIGNER_ROUTES } from './servoydesigner.routes';
 
 @NgModule({
   imports: [
     RouterModule.forChild(DESIGNER_ROUTES),
-    ServoyCoreComponentsModule,
     ServoyDesignerComponent,
     DesignFormComponent
   ],
   providers: [EditorContentService, BSWindowManager, ServerDataService, ServoyPublicServiceDesignerImpl,
-            { provide: ServoyPublicService, useExisting: ServoyPublicServiceDesignerImpl }]
+            { provide: ServoyPublicService, useExisting: ServoyPublicServiceDesignerImpl },
+            provideAgGrid()]
 })
 export class ServoyDesignerModule { }

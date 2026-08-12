@@ -82,19 +82,19 @@ class WebSocketMock {
 class TestReconnectingWebSocket extends ReconnectingWebSocket {
     public __latestEvent!: CustomEvent;
 
-    public onopen(event: any) {
+    override onopen(event: any) {
         this.__latestEvent = event;
     }
-    public onclose(event: any) {
+    override onclose(event: any) {
         this.__latestEvent = event;
     }
-    public onconnecting(event: any) {
+    override onconnecting(event: any) {
         this.__latestEvent = event;
     }
-    public onmessage(event: any) {
+    override onmessage(event: any) {
         this.__latestEvent = event;
     }
-    public onerror(event: any) {
+    override onerror(event: any) {
         this.__latestEvent = event;
     }
 }

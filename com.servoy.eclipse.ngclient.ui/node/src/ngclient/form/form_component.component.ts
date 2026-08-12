@@ -27,7 +27,7 @@ import { FormsModule } from '@angular/forms';
 import { AutosaveDirective } from '@servoy/public';
 import { AllComponentsModule } from '../allcomponents.module';
 import { AllServicesModules } from '../allservices.service';
-import { ServoyCoreComponentsModule } from '../../servoycore/servoycore.module';
+import { SERVOYCORE_COMPONENTS } from '../../servoycore/servoycore.components';
 import { ListFormComponent } from '../../servoycore/listformcomponent/listformcomponent';
 import { AbstractFormComponent } from './abstract_form_component.component';
 
@@ -111,7 +111,7 @@ export { AbstractFormComponent } from './abstract_form_component.component';
         AutosaveDirective,
         AllComponentsModule,
         AllServicesModules,
-        ServoyCoreComponentsModule,
+        ...SERVOYCORE_COMPONENTS,
         ListFormComponent
     ],
     providers: [{ provide: AbstractFormComponent, useExisting: forwardRef(() => FormComponent) }]
