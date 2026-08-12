@@ -34,8 +34,10 @@
     "test_ngclientutils": "ng test @servoy/ngclientutils --no-watch",
     "test_ngclientutils:watch": "ng test @servoy/ngclientutils",
     "update": "ng update",
-    "lint": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng.js lint",
-    "lint:ci": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng.js lint --format checkstyle --output-file ../target/eslint-checkstyle.xml"
+    "lint": "eslint \"src/**/*.ts\" --cache --cache-location .eslintcache",
+    "lint:slow": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng.js lint",
+    "lint:ci": "node --max-old-space-size=8192 ./node_modules/@angular/cli/bin/ng.js lint --format checkstyle --output-file ../target/eslint-checkstyle.xml",
+    "lint:fast": "eslint \"src/**/*.ts\" --cache --cache-location .eslintcache"
   },
   "private": true,
   "dependencies": {
