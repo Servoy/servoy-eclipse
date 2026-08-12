@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef, Renderer2, TemplateRef, SimpleChanges, ChangeDetectionStrategy, input, contentChild, inject } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { ServoyBaseComponent, ServoyPublicModule } from '@servoy/public';
+import { ServoyBaseComponent, TooltipDirective, SabloTabseq } from '@servoy/public';
 import { FormService } from '../../ngclient/form.service';
 import {
 	trigger,
@@ -73,7 +73,7 @@ import {
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [ServoyPublicModule, NgTemplateOutlet]
+	imports: [TooltipDirective, SabloTabseq, NgTemplateOutlet]
 })
 export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement> {
 

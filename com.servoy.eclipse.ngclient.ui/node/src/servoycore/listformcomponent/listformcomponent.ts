@@ -8,7 +8,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { AbstractFormComponent } from '../../ngclient/form/abstract_form_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
-import { ServoyBaseComponent, ServoyPublicModule } from '@servoy/public';
+import { ServoyBaseComponent, SabloTabseq } from '@servoy/public';
 import { FormComponentValue } from '../../ngclient/converters/formcomponent_converter';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
@@ -19,7 +19,6 @@ import { isEmpty } from 'lodash-es';
 import { ServoyApi } from '../../ngclient/servoy_api';
 import { GridOptions, IServerSideDatasource, IServerSideGetRowsParams } from 'ag-grid-community';
 import { RowRenderer } from './row-renderer.component';
-import { SabloTabseq } from '@servoy/public';
 import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
@@ -105,7 +104,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
     
     `,
     standalone: true,
-    imports: [ServoyPublicModule, NgTemplateOutlet, AddAttributeDirective, AgGridAngular]
+    imports: [SabloTabseq, NgTemplateOutlet, AddAttributeDirective, AgGridAngular]
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 

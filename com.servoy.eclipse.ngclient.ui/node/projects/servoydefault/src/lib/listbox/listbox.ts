@@ -1,4 +1,4 @@
-import { FormatFilterPipe, SabloTabseq, ServoyPublicModule, TooltipDirective } from '@servoy/public';
+import { FormatFilterPipe, SabloTabseq, TooltipDirective } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 

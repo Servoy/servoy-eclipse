@@ -4,7 +4,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { AgRendererComponent } from 'ag-grid-angular';
 import { ICellRendererParams, IAfterGuiAttachedParams } from 'ag-grid-community';
 import { ListFormComponent } from './listformcomponent';
-import { ServoyPublicModule } from '@servoy/public';
+import { SabloTabseq } from '@servoy/public';
 import { AddAttributeDirective } from '../addattribute.directive';
 
 @Component({
@@ -13,7 +13,7 @@ import { AddAttributeDirective } from '../addattribute.directive';
     host: { '(registerCSTS)': 'registerCSTS($event)' },
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: true,
-    imports: [ServoyPublicModule, NgTemplateOutlet, AddAttributeDirective]
+    imports: [SabloTabseq, NgTemplateOutlet, AddAttributeDirective]
 })
 export class RowRenderer implements AgRendererComponent, AfterViewInit {
 
