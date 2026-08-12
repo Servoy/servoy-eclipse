@@ -1,8 +1,6 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 
-
-const routes: Routes = [
+export const APP_ROUTES: Routes = [
   {
     path: 'designer/solution/:solutionname/form/:formname/clientnr/:clientnr',
     loadChildren: () => import('../designer/servoydesigner.module').then(m => m.ServoyDesignerModule)
@@ -12,12 +10,3 @@ const routes: Routes = [
     loadChildren: () => import('../ngclient/servoy.module').then(m => m.ServoyModule)
   }
 ];
-
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes)
-  ],
-  exports: [RouterModule],
-  providers: []
-})
-export class AppRoutingModule { }

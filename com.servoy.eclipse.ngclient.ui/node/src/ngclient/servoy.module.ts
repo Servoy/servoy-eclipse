@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { MainComponent } from './main.component';
 
@@ -15,16 +16,16 @@ import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loadi
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
-import {MainRoutingModule} from './main-routing.module';
 import { DeveloperService } from './developer.service';
 import { AlertWindowComponent} from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 import { ServoyPublicService } from '@servoy/public';
+import { SERVOY_ROUTES } from './servoy.routes';
 
 @NgModule( {
     imports: [
-        MainRoutingModule,
+        RouterModule.forChild(SERVOY_ROUTES),
         ServoyCoreComponentsModule,
         MainComponent,
         FormComponent,
@@ -38,8 +39,7 @@ import { ServoyPublicService } from '@servoy/public';
     ],
     providers: [UpperCasePipe, LowerCasePipe,
         ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
-        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
-    bootstrap: [MainComponent]
+        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }]
 } )
 export class ServoyModule {
     constructor(_developerService: DeveloperService) {
