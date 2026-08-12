@@ -14,8 +14,7 @@ describe('ServoyCoreFormContainer', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ServoyCoreFormContainer ],
-      imports: [ServoyTestingModule, ServoyPublicModule, NoopAnimationsModule],
+      imports: [ServoyCoreFormContainer, ServoyTestingModule, ServoyPublicModule, NoopAnimationsModule],
       providers: [ { provide: FormService, useValue: {getFormCacheByName: () => {} }} ],
       schemas: [ NO_ERRORS_SCHEMA ]
     })

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import {
   Component, TemplateRef, ElementRef, AfterViewInit, Renderer2,
   ChangeDetectorRef, OnDestroy, SimpleChange, ChangeDetectionStrategy, SimpleChanges, Injector,
@@ -6,10 +5,11 @@ import {
   input,
   viewChild, signal, inject
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
 import { DesignFormComponent } from '../../designer/designform_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
-import { ServoyBaseComponent } from '@servoy/public';
+import { ServoyBaseComponent, ServoyPublicModule } from '@servoy/public';
 import { FormComponentValue } from '../../ngclient/converters/formcomponent_converter';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
@@ -25,6 +25,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
 import { animate } from '@angular/animations';
+import { AddAttributeDirective } from '../addattribute.directive';
 
 const AGGRID_CACHE_BLOCK_SIZE = 50;
 const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
@@ -104,7 +105,8 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
         <!-- structure template generate end -->
     
     `,
-    standalone: false
+    standalone: true,
+    imports: [ServoyPublicModule, NgTemplateOutlet, AddAttributeDirective, AgGridAngular]
 })
 export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> implements AfterViewInit, OnDestroy, IApiExecutor {
 

@@ -5,7 +5,7 @@ import { StructureCache } from '../ngclient/types';
 
 @Directive({
     selector: '[svyContainerStyle]',
-    standalone: false
+    standalone: true
 })
 export class AddAttributeDirective implements OnChanges {
     readonly svyContainerStyle = input<any>(undefined);

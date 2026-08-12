@@ -1,12 +1,13 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '@servoy/public';
+import { ServoyBaseComponent, ServoyPublicModule } from '@servoy/public';
 
 @Component({
     selector: 'servoycore-errorbean',
     templateUrl: './error-bean.html',
     styles: ['.svy-errorbean { color: #a94442; }'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    standalone: true,
+    imports: [ServoyPublicModule]
 })
 export class ErrorBean extends ServoyBaseComponent<HTMLDivElement> {
 

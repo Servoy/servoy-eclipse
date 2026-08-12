@@ -14,8 +14,7 @@ describe('ServoyCoreSlider', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyCoreSlider],
-      imports: [ServoyTestingModule, ServoyPublicModule],
+      imports: [ServoyCoreSlider, ServoyTestingModule, ServoyPublicModule],
       providers: [TooltipService]
     })
     .compileComponents();

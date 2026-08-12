@@ -8,7 +8,7 @@ import { ServoyService } from '../../ngclient/servoy.service';
     selector: 'session-view',
     templateUrl: './session-view.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true
 })
 export class SessionView implements OnInit {
 

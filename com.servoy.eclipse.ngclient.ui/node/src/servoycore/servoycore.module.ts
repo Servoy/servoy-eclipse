@@ -15,6 +15,10 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
 
 @NgModule( {
     declarations: [
+    ],
+    imports: [CommonModule,
+        FormsModule,
+        ServoyPublicModule,
         DefaultNavigator,
         SessionView,
         ErrorBean,
@@ -22,10 +26,6 @@ import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-respo
         ServoyCoreFormContainer,
         AddAttributeDirective,
         ServoyCoreFormcomponentResponsiveCotainer
-    ],
-    imports: [CommonModule,
-        FormsModule,
-        ServoyPublicModule
     ],
     providers: [],
     bootstrap: [],

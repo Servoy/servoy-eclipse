@@ -11,8 +11,6 @@ import { AgGridModule } from 'ag-grid-angular';
 
 @NgModule( {
     declarations: [
-        ListFormComponent,
-        RowRenderer
     ],
     imports: [
         CommonModule,
@@ -21,7 +19,9 @@ import { AgGridModule } from 'ag-grid-angular';
         AllServicesModules,
         ServoyPublicModule,
         ServoyCoreComponentsModule,
-        AgGridModule
+        AgGridModule,
+        ListFormComponent,
+        RowRenderer
     ],
     exports: [
         CommonModule,

@@ -6,7 +6,7 @@ import { ServoyBaseComponent } from '@servoy/public';
     selector: 'servoycore-slider',
     templateUrl: './slider.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true
 } )
 export class ServoyCoreSlider extends ServoyBaseComponent<HTMLInputElement> {
     readonly onChangeMethodID = input<any>(undefined);
