@@ -226,20 +226,11 @@ export class ReconnectingWebSocket implements IWebSocket {
         };
     }
 
-    /**
-     * An event listener to be called when the WebSocket connection's readyState changes to OPEN;
-     * this indicates that the connection is ready to send and receive data.
-     */
-    public onopen(_event: WebsocketCustomEvent) { };
-    /** An event listener to be called when the WebSocket connection's readyState changes to CLOSED. */
-    public onclose(_event: WebsocketCustomEvent) { };
-    /** An event listener to be called when a connection begins being attempted. */
-    public onconnecting(_event: WebsocketCustomEvent) { };
-    /** An event listener to be called when a message is received from the server. */
-    public onmessage(_event: WebsocketCustomEvent) { };
-    /** An event listener to be called when an error occurs. */
-    public onerror(_event: WebsocketCustomEvent) { };
-
+    onmessage!: (message: WebsocketCustomEvent) => true | void;
+    onconnecting!: (evt: WebsocketCustomEvent) => void;
+    onclose!: (evt: WebsocketCustomEvent) => void;
+    onopen!: (evt: WebsocketCustomEvent) => void;
+    onerror!: (evt: WebsocketCustomEvent) => void;
 
     /** The URL as resolved by the constructor, or a function to return the current url. This is always an absolute URL. Read only. */
     private getUrl(reconnectAttempt?: boolean): string {
