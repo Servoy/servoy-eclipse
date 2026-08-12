@@ -225,7 +225,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 					String module = entry.getNg2Module();
 					String packageName = entry.getNpmPackageName();
-					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
+					if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
 						componentPackageSpecToReader.put(entry, packageReader);
@@ -247,7 +247,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 					String module = entry.getNg2Module();
 					String packageName = entry.getNpmPackageName();
-					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
+					if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
 						componentPackageSpecToReader.put(entry, packageReader);
@@ -489,23 +489,56 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					StringBuilder allComponentsModule = new StringBuilder(256);
 					allComponentsModule.append("import { NgModule } from '@angular/core';\n");
 					componentPackageSpecToReader.keySet().forEach(spec -> {
-						allComponentsModule.append("import { ");
-						allComponentsModule.append(spec.getNg2Module());
-						allComponentsModule.append(" } from '");
-						allComponentsModule.append(spec.getNpmPackageName());
-						allComponentsModule.append("';\n");
+						if (spec.hasStandaloneComponents())
+						{
+							allComponentsModule.append("import { ");
+							allComponentsModule.append(spec.getNg2Components());
+							allComponentsModule.append(" } from '");
+							allComponentsModule.append(spec.getNpmPackageName());
+							allComponentsModule.append("';\n");
+						}
+						else
+						{
+							allComponentsModule.append("import { ");
+							allComponentsModule.append(spec.getNg2Module());
+							allComponentsModule.append(" } from '");
+							allComponentsModule.append(spec.getNpmPackageName());
+							allComponentsModule.append("';\n");
+						}
 					});
 
 					allComponentsModule.append("@NgModule({\n imports: [\n");
 					componentPackageSpecToReader.keySet().forEach(spec -> {
-						allComponentsModule.append(spec.getNg2Module());
-						allComponentsModule.append(",\n");
+						if (spec.hasStandaloneComponents())
+						{
+							for (String component : spec.getNg2Components().split(","))
+							{
+								allComponentsModule.append(component.trim());
+								allComponentsModule.append(",\n");
+							}
+						}
+						else
+						{
+							allComponentsModule.append(spec.getNg2Module());
+							allComponentsModule.append(",\n");
+						}
 					});
 
 					allComponentsModule.append(" ],\n exports: [\n");
 					componentPackageSpecToReader.keySet().forEach(spec -> {
-						allComponentsModule.append(spec.getNg2Module());
-						allComponentsModule.append(",\n");
+						if (spec.hasStandaloneComponents())
+						{
+							for (String component : spec.getNg2Components().split(","))
+							{
+								allComponentsModule.append(component.trim());
+								allComponentsModule.append(",\n");
+							}
+						}
+						else
+						{
+							allComponentsModule.append(spec.getNg2Module());
+							allComponentsModule.append(",\n");
+						}
 					});
 					allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
 					String current = allComponentsModule.toString();

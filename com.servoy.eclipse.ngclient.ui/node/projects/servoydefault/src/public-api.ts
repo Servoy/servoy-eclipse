@@ -1,1 +1,24 @@
 export {ServoyDefaultBaseComponent} from './lib/basecomponent';
+
+export { ServoyDefaultTextField } from './lib/textfield/textfield';
+export { ServoyDefaultTextArea } from './lib/textarea/textarea';
+export { ServoyDefaultButton } from './lib/button/button';
+export { ServoyDefaultLabel } from './lib/label/label';
+export { ServoyDefaultTabpanel } from './lib/tabpanel/tabpanel';
+export { ServoyDefaultTablesspanel } from './lib/tabpanel/tablesspanel';
+export { ServoyDefaultAccordion } from './lib/accordion/accordion';
+export { ServoyDefaultSplitpane } from './lib/splitpane/splitpane';
+export { ServoyDefaultCalendar } from './lib/calendar/calendar';
+export { ServoyDefaultCombobox } from './lib/combobox/combobox';
+export { ServoyDefaultTypeahead } from './lib/typeahead/typeahead';
+export { ServoyDefaultCheckGroup } from './lib/checkgroup/checkgroup';
+export { ServoyDefaultRadio } from './lib/radio/radio';
+export { ServoyDefaultRadiogroup } from './lib/radiogroup/radiogroup';
+export { ServoyDefaultCheck } from './lib/check/check';
+export { ServoyDefaultPassword } from './lib/password/password';
+export { ServoyDefaultHtmlarea } from './lib/htmlarea/htmlarea';
+export { ServoyDefaultSpinner } from './lib/spinner/spinner';
+export { ServoyDefaultHTMLView } from './lib/htmlview/htmlview';
+export { ServoyDefaultListBox } from './lib/listbox/listbox';
+export { ServoyDefaultImageMedia } from './lib/imagemedia/imagemedia';
+export { ServoyDefaultRectangle } from './lib/rectangle/rectangle';
