@@ -52,7 +52,7 @@ module.exports = tseslint.config(
         'error',
         {
           type: 'element',
-          prefix: ['servoydefault', 'servoycore', 'svy', 'testcomponents'],
+          prefix: ['servoydefault', 'servoycore', 'svy', 'testcomponents', 'app', 'loading', 'servoy', 'session'],
           style: 'kebab-case',
         },
       ],
@@ -67,6 +67,7 @@ module.exports = tseslint.config(
       '@angular-eslint/use-lifecycle-interface': 'off',
       '@angular-eslint/prefer-standalone': 'off',
       '@angular-eslint/prefer-inject': 'off',
+      '@angular-eslint/prefer-on-push-component-change-detection': 'off', // TODO: re-enable when migrating to zoneless (Phase 7)
       '@typescript-eslint/consistent-type-definitions': 'error',
       '@typescript-eslint/dot-notation': 'off',
       '@typescript-eslint/explicit-member-accessibility': [
@@ -91,5 +92,11 @@ module.exports = tseslint.config(
       ...angular.configs.templateAccessibility,
     ],
     rules: {},
+  },
+  {
+    files: ['**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-empty-function': 'off',
+    },
   },
 );
