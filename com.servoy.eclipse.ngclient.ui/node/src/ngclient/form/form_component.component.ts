@@ -5,7 +5,6 @@ import {
   input,
   viewChild,
   signal,
-  CUSTOM_ELEMENTS_SCHEMA,
   forwardRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -30,7 +29,6 @@ import { AllComponentsModule } from '../allcomponents.module';
 import { AllServicesModules } from '../allservices.service';
 import { ServoyCoreComponentsModule } from '../../servoycore/servoycore.module';
 import { ListFormComponent } from '../../servoycore/listformcomponent/listformcomponent';
-import { RowRenderer } from '../../servoycore/listformcomponent/row-renderer.component';
 import { AbstractFormComponent } from './abstract_form_component.component';
 
 export { AbstractFormComponent } from './abstract_form_component.component';
@@ -99,22 +97,8 @@ export { AbstractFormComponent } from './abstract_form_component.component';
           }
         </ng-template>
         <!-- component template generate start -->
-        <ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>
-        <ng-template #servoycoreErrorbean let-callback="callback" let-state="state"><servoycore-errorbean  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [error]="state.model.error" [toolTipText]="state.model.toolTipText" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-errorbean></ng-template>
-        <ng-template #servoycoreFormcomponent let-callback="callback" let-state="state">@if (state.model.visible) {
-          <servoycore-formcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [styleClass]="state.model.styleClass" [width]="state.model.width" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-formcomponent>
-        }</ng-template>
-        <ng-template #servoycoreFormcontainer let-callback="callback" let-state="state">@if (state.model.visible) {
-          <servoycore-formcontainer  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [relationName]="state.model.relationName" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [waitForData]="state.model.waitForData" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'>@if (isFormAvailable(name)) {
-            <svy-form [name]="name"></svy-form>
-          }</ng-template></servoycore-formcontainer>
-        }</ng-template>
         <ng-template #servoycoreListformcomponent let-callback="callback" let-state="state">@if (state.model.visible) {
-          <servoycore-listformcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [foundset]="state.model.foundset" [pageLayout]="state.model.pageLayout" [paginationStyleClass]="state.model.paginationStyleClass" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent>
-        }</ng-template>
-        <ng-template #servoycoreNavigator let-callback="callback" let-state="state"><servoycore-navigator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [currentIndex]="state.model.currentIndex" [hasMore]="state.model.hasMore" [maxIndex]="state.model.maxIndex" [minIndex]="state.model.minIndex" [setSelectedIndex]="callback.getHandler(state,'setSelectedIndex')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-navigator></ng-template>
-        <ng-template #servoycoreSlider let-callback="callback" let-state="state">@if (state.model.visible) {
-          <servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [step]="state.model.step" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider>
+          <servoycore-listformcomponent  [containedForm]="state.model.containedForm" [foundset]="state.model.foundset" [pageLayout]="state.model.pageLayout" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent>
         }</ng-template>
         <!-- component template generate end -->
       `
@@ -128,10 +112,8 @@ export { AbstractFormComponent } from './abstract_form_component.component';
         AllComponentsModule,
         AllServicesModules,
         ServoyCoreComponentsModule,
-        ListFormComponent,
-        RowRenderer
+        ListFormComponent
     ],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
     providers: [{ provide: AbstractFormComponent, useExisting: forwardRef(() => FormComponent) }]
 })
 
@@ -148,11 +130,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     readonly formComponentResponsiveDiv = viewChild<TemplateRef<any>>('formComponentResponsiveDiv');
 
     // component viewchild template generate start
-    readonly servoycoreSlider = viewChild<TemplateRef<any>>('servoycoreSlider');
-    readonly servoycoreErrorbean = viewChild<TemplateRef<any>>('servoycoreErrorbean');
     readonly servoycoreListformcomponent = viewChild<TemplateRef<any>>('servoycoreListformcomponent');
-    readonly servoycoreFormcontainer = viewChild<TemplateRef<any>>('servoycoreFormcontainer');
-
     // component viewchild template generate end
 
     @Input() name!: string;

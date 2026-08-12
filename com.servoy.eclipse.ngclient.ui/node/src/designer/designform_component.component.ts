@@ -3,7 +3,6 @@ import {
   TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, ViewEncapsulation,
   HostListener,
   DOCUMENT,
-  CUSTOM_ELEMENTS_SCHEMA,
   forwardRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -27,7 +26,6 @@ import { AllServicesModules } from '../ngclient/allservices.service';
 import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 import { ServoyCoreFormcomponentResponsiveCotainer } from '../servoycore/formcomponent-responsive-container/formcomponent-responsive-container';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
-import { RowRenderer } from '../servoycore/listformcomponent/row-renderer.component';
 
 @Component({
      
@@ -115,15 +113,7 @@ import { RowRenderer } from '../servoycore/listformcomponent/row-renderer.compon
           }
         </ng-template>
         <!-- component template generate start -->
-        <ng-template #servoycoreDefaultLoadingIndicator let-callback="callback" let-state="state"><servoycore-defaultLoadingIndicator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [size]="state.model.size" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-defaultLoadingIndicator></ng-template>
-        <ng-template #servoycoreErrorbean let-callback="callback" let-state="state"><servoycore-errorbean  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [error]="state.model.error" [location]="state.model.location" [size]="state.model.size" [toolTipText]="state.model.toolTipText" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-errorbean></ng-template>
-        <ng-template #servoycoreFormcomponent let-callback="callback" let-state="state"><servoycore-formcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [size]="state.model.size" [styleClass]="state.model.styleClass" [width]="state.model.width" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-formcomponent></ng-template>
-        <ng-template #servoycoreFormcontainer let-callback="callback" let-state="state"><servoycore-formcontainer  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [height]="state.model.height" [location]="state.model.location" [relationName]="state.model.relationName" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [waitForData]="state.model.waitForData" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'>@if (isFormAvailable(name)) {
-          <svy-form [name]="name"></svy-form>
-        }</ng-template></servoycore-formcontainer></ng-template>
-        <ng-template #servoycoreListformcomponent let-callback="callback" let-state="state"><servoycore-listformcomponent  [servoyAttributes]="state.model.servoyAttributes" [containedForm]="state.model.containedForm" [cssPosition]="state.model.cssPosition" [foundset]="state.model.foundset" [location]="state.model.location" [pageLayout]="state.model.pageLayout" [paginationStyleClass]="state.model.paginationStyleClass" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent></ng-template>
-        <ng-template #servoycoreNavigator let-callback="callback" let-state="state"><servoycore-navigator  [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [currentIndex]="state.model.currentIndex" [hasMore]="state.model.hasMore" [location]="state.model.location" [maxIndex]="state.model.maxIndex" [minIndex]="state.model.minIndex" [size]="state.model.size" [setSelectedIndex]="callback.getHandler(state,'setSelectedIndex')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-navigator></ng-template>
-        <ng-template #servoycoreSlider let-callback="callback" let-state="state"><servoycore-slider  [animate]="state.model.animate" [servoyAttributes]="state.model.servoyAttributes" [cssPosition]="state.model.cssPosition" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="callback.datachange(state,'dataProviderID',$event, true)" [enabled]="state.model.enabled" [location]="state.model.location" [max]="state.model.max" [min]="state.model.min" [orientation]="state.model.orientation" [range]="state.model.range" [size]="state.model.size" [step]="state.model.step" [onChangeMethodID]="callback.getHandler(state,'onChangeMethodID')" [onCreateMethodID]="callback.getHandler(state,'onCreateMethodID')" [onSlideMethodID]="callback.getHandler(state,'onSlideMethodID')" [onStartMethodID]="callback.getHandler(state,'onStartMethodID')" [onStopMethodID]="callback.getHandler(state,'onStopMethodID')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-slider></ng-template>
+        <ng-template #servoycoreListformcomponent let-callback="callback" let-state="state"><servoycore-listformcomponent  [containedForm]="state.model.containedForm" [foundset]="state.model.foundset" [pageLayout]="state.model.pageLayout" [readOnly]="state.model.readOnly" [responsivePageSize]="state.model.responsivePageSize" [rowStyleClass]="state.model.rowStyleClass" [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider" [selectionClass]="state.model.selectionClass" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [onSelectionChanged]="callback.getHandler(state,'onSelectionChanged')" [servoyApi]="callback.getServoyApi(state)" [name]="state.name" #cmp></servoycore-listformcomponent></ng-template>
         <!-- component template generate end -->
       `
     /* eslint-enable max-len */
@@ -138,10 +128,8 @@ import { RowRenderer } from '../servoycore/listformcomponent/row-renderer.compon
         ServoyCoreComponentsModule,
         ServoyCoreFormcomponentResponsiveCotainer,
         ListFormComponent,
-        RowRenderer,
         FormComponent
     ],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
     providers: [{ provide: AbstractFormComponent, useExisting: forwardRef(() => DesignFormComponent) }]
 })
 
@@ -155,10 +143,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     readonly formComponentResponsiveDiv = viewChild<TemplateRef<any>>('formComponentResponsiveDiv');
 
     // component viewchild template generate start
-    readonly servoycoreSlider = viewChild<TemplateRef<any>>('servoycoreSlider');
-    readonly servoycoreErrorbean = viewChild<TemplateRef<any>>('servoycoreErrorbean');
     readonly servoycoreListformcomponent = viewChild<TemplateRef<any>>('servoycoreListformcomponent');
-    readonly servoycoreFormcontainer = viewChild<TemplateRef<any>>('servoycoreFormcontainer');
     // component viewchild template generate end
 
     @Input() name!: string;
