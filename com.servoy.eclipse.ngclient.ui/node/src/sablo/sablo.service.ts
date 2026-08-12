@@ -1,357 +1,367 @@
-import { inject, Injectable, } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { WindowRefService, SessionStorageService, Deferred, LoggerService, LoggerFactory, Locale, RequestInfoPromise } from '@servoy/public';
 import { WebsocketService, WebsocketSession, wrapPromiseToPropagateCustomRequestInfoInternal } from './websocket.service';
 import { ConverterService } from './converter.service';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root',
 })
 export class SabloService {
+  private locale: Locale | null = null;
+  private wsSession!: WebsocketSession;
+  private currentServiceCallCallbacks: (() => void)[] = [];
+  private currentServiceCallDone!: boolean;
+  private currentServiceCallWaiting = 0;
+  private currentServiceCallTimeouts!: any;
+  private readonly log: LoggerService;
+  private inLogCall = false;
 
-    private locale: Locale | null = null;
-    private wsSession!: WebsocketSession;
-    private currentServiceCallCallbacks: (() => void)[] = [];
-    private currentServiceCallDone!: boolean;
-    private currentServiceCallWaiting = 0;
-    private currentServiceCallTimeouts!: any;
-    private readonly log: LoggerService;
-    private inLogCall = false;
+  private expectFormToShowOnClientDeferr!: Deferred<void>;
+  private noOfFormsThatAreGoingToShow = 0;
 
-    private expectFormToShowOnClientDeferr!: Deferred<void>;
-    private noOfFormsThatAreGoingToShow = 0;
+  private readonly websocketService = inject(WebsocketService);
+  private readonly sessionStorage = inject(SessionStorageService);
+  private readonly windowRefService = inject(WindowRefService);
 
-    private readonly websocketService = inject(WebsocketService);
-    private readonly sessionStorage = inject(SessionStorageService);
-    private readonly windowRefService = inject(WindowRefService);
+  constructor() {
+    const logFactory = inject(LoggerFactory);
+    this.log = logFactory.getLogger('SabloService');
+    this.windowRefService.nativeWindow.window.addEventListener('beforeunload', () => {
+      this.sessionStorage.remove('svy_session_lock');
+    });
+    this.windowRefService.nativeWindow.window.addEventListener('pagehide', () => {
+      this.sessionStorage.remove('svy_session_lock');
+    });
 
-    constructor() {
-        const logFactory = inject(LoggerFactory);
-        this.log = logFactory.getLogger('SabloService');
-        this.windowRefService.nativeWindow.window.addEventListener('beforeunload', () => {
-            this.sessionStorage.remove('svy_session_lock');
-        });
-        this.windowRefService.nativeWindow.window.addEventListener('pagehide', () => {
-            this.sessionStorage.remove('svy_session_lock');
-        });
+    if (this.sessionStorage.has('svy_session_lock')) {
+      this.clearSabloInfo();
+      this.log.warn('Found a lock in session storage. The storage was cleared.');
+    }
 
-        if (this.sessionStorage.has('svy_session_lock')) {
-            this.clearSabloInfo();
-            this.log.warn('Found a lock in session storage. The storage was cleared.');
-        }
+    this.sessionStorage.set('svy_session_lock', '1');
 
-        this.sessionStorage.set('svy_session_lock', '1');
+    const oldLog = this.windowRefService.nativeWindow.window.console.log;
+    const oldInfo = this.windowRefService.nativeWindow.window.console.info;
+    const oldWarn = this.windowRefService.nativeWindow.window.console.warn;
+    const oldDebug = this.windowRefService.nativeWindow.window.console.debug;
+    const oldError = this.windowRefService.nativeWindow.window.console.error;
 
-        const oldLog = this.windowRefService.nativeWindow.window.console.log;
-        const oldInfo = this.windowRefService.nativeWindow.window.console.info;
-        const oldWarn = this.windowRefService.nativeWindow.window.console.warn
-        const oldDebug = this.windowRefService.nativeWindow.window.console.debug;
-        const oldError = this.windowRefService.nativeWindow.window.console.error;
+    const urlParams = new URLSearchParams(this.windowRefService.nativeWindow.window.location.search);
+    const wrapLogging = urlParams.get('wraplogging') !== 'false';
 
-        const urlParams = new URLSearchParams(this.windowRefService.nativeWindow.window.location.search);
-        const wrapLogging = urlParams.get('wraplogging') !== 'false';
+    const enableWrapping = () => {
+      this.windowRefService.nativeWindow.window.console.log = new Proxy(oldWarn, this.getProxyHandler('info', oldError));
+      this.windowRefService.nativeWindow.window.console.warn = new Proxy(oldWarn, this.getProxyHandler('warn', oldError));
+      this.windowRefService.nativeWindow.window.console.info = new Proxy(oldWarn, this.getProxyHandler('info', oldError));
+      this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler('debug', oldError));
+      this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler('error', oldError));
+    };
 
-        const enableWrapping = () => {
-            this.windowRefService.nativeWindow.window.console.log = new Proxy(oldWarn, this.getProxyHandler('info', oldError));
-            this.windowRefService.nativeWindow.window.console.warn = new Proxy(oldWarn, this.getProxyHandler('warn', oldError));
-            this.windowRefService.nativeWindow.window.console.info = new Proxy(oldWarn, this.getProxyHandler('info', oldError));
-            this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler('debug', oldError));
-            this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler('error', oldError));
-        };
+    const disableWrapping = () => {
+      this.windowRefService.nativeWindow.window.console.log = oldLog;
+      this.windowRefService.nativeWindow.window.console.info = oldInfo;
+      this.windowRefService.nativeWindow.window.console.warn = oldWarn;
+      this.windowRefService.nativeWindow.window.console.error = oldError;
+      this.windowRefService.nativeWindow.window.console.debug = oldDebug;
+    };
 
-        const disableWrapping = () => {
-            this.windowRefService.nativeWindow.window.console.log = oldLog;
-            this.windowRefService.nativeWindow.window.console.info = oldInfo;
-            this.windowRefService.nativeWindow.window.console.warn = oldWarn;
-            this.windowRefService.nativeWindow.window.console.error = oldError;
-            this.windowRefService.nativeWindow.window.console.debug = oldDebug;
-        };
+    if (wrapLogging) {
+      enableWrapping();
+    }
 
-        if (wrapLogging) {
-            enableWrapping();
-        }
+    this.windowRefService.nativeWindow.window.addEventListener('error', (err: ErrorEvent) => {
+      const msg = err.message + '\n' + err.filename + ':' + err.lineno + ':' + err.colno + '\n' + err.error;
+      oldError.apply(this.windowRefService.nativeWindow.window.console, [msg]);
+      if (this.wsSession) this.callService('consoleLogger', 'error', { message: msg }, true);
+      return false;
+    });
 
-        this.windowRefService.nativeWindow.window.addEventListener('error', (err: ErrorEvent) => {
-            const msg = err.message + '\n' + err.filename + ':' + err.lineno + ':' + err.colno + '\n' + err.error;
-            oldError.apply(this.windowRefService.nativeWindow.window.console, [msg]);
-            if (this.wsSession) this.callService('consoleLogger', 'error', { message: msg }, true);
-            return false;
-        });
+    (this.windowRefService.nativeWindow as any)['toggleSabloLogWrapping'] = (enable?: boolean) => {
+      const shouldEnable = enable !== undefined ? enable : this.windowRefService.nativeWindow.window.console.log === oldLog;
+      if (shouldEnable) {
+        enableWrapping();
+        oldInfo('log wrapping enabled');
+      } else {
+        disableWrapping();
+        oldInfo('log wrapping disabled');
+      }
+    };
+    if (wrapLogging) {
+      oldInfo('turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser, or add ?wraplogging=false to the URL');
+    } else {
+      oldInfo('log wrapping disabled via URL parameter. Enable by executing: toggleSabloLogWrapping(true) in the console of your browser');
+    }
+  }
 
-        (this.windowRefService.nativeWindow as any)['toggleSabloLogWrapping'] = (enable?: boolean) => {
-            const shouldEnable = enable !== undefined ? enable : this.windowRefService.nativeWindow.window.console.log === oldLog;
-            if (shouldEnable) {
-                enableWrapping();
-                oldInfo('log wrapping enabled');
-            } else {
-                disableWrapping();
-                oldInfo('log wrapping disabled');
+  private getProxyHandler(name: string, oldError: any): ProxyHandler<any> {
+    return {
+      apply: (target: Function, _thisArg: any, argumentsList: any[]) => {
+        target(...argumentsList);
+        try {
+          if (!this.inLogCall) {
+            this.inLogCall = true;
+            if ('error' === name) {
+              argumentsList = this.buildStackMessage(argumentsList);
             }
-        };
-        if (wrapLogging) {
-            oldInfo('turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser, or add ?wraplogging=false to the URL');
-        } else {
-            oldInfo('log wrapping disabled via URL parameter. Enable by executing: toggleSabloLogWrapping(true) in the console of your browser');
+            if (this.wsSession) this.callService('consoleLogger', name, { message: argumentsList ? argumentsList.join(' ') : '' }, true);
+          }
+        } catch (e) {
+          oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
+        } finally {
+          this.inLogCall = false;
         }
-    }
-    
-    private getProxyHandler(name: string, oldError: any): ProxyHandler<any> {
-        return {
-            apply: (target: Function, _thisArg: any, argumentsList: any[]) => {
-                target(...argumentsList);
-                try {
-                if (!this.inLogCall) {
-                    this.inLogCall = true;
-                    if ('error' === name) {
-                        argumentsList = this.buildStackMessage(argumentsList);
-                    }
-                    if (this.wsSession) this.callService('consoleLogger', name, { message:  (argumentsList ? argumentsList.join(' ') : '')  }, true);
-                }
-            } catch (e) {
-                oldError.apply(this.windowRefService.nativeWindow.window.console, [e]);
-            } finally {
-                this.inLogCall = false;
-            }
-            }   
-        }
-    }
-    
-    public connect(context: any, queryArgs: any, websocketUri: any, mobile = false): WebsocketSession {
-        const wsSessionArgs = {
-            context,
-            queryArgs,
-            websocketUri
-        };
-        this.wsSession = this.websocketService.connect(wsSessionArgs.context, [this.getClientnr()!, this.getWindowName()!, this.getWindownr()!], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri, mobile);
+      },
+    };
+  }
 
-        this.wsSession.onMessageObject((msg: any) => {
-            // data got back from the server
-            if (msg.clientnr) {
-                this.sessionStorage.set('clientnr', msg.clientnr);
-            }
-            if (msg.windownr) {
-                this.sessionStorage.set('windownr', msg.windownr);
-            }
-            if (msg.clientnr || msg.windownr) {
-                // update the arguments on the reconnection websocket.
-                this.websocketService.setConnectionPathArguments([this.getClientnr(), this.getWindowName(), this.getWindownr()]);
-            }
-        });
+  public connect(context: any, queryArgs: any, websocketUri: any, mobile = false): WebsocketSession {
+    const wsSessionArgs = {
+      context,
+      queryArgs,
+      websocketUri,
+    };
+    this.wsSession = this.websocketService.connect(
+      wsSessionArgs.context,
+      [this.getClientnr()!, this.getWindowName()!, this.getWindownr()!],
+      wsSessionArgs.queryArgs,
+      wsSessionArgs.websocketUri,
+      mobile,
+    );
 
-        return this.wsSession;
-    }
+    this.wsSession.onMessageObject((msg: any) => {
+      // data got back from the server
+      if (msg.clientnr) {
+        this.sessionStorage.set('clientnr', msg.clientnr);
+      }
+      if (msg.windownr) {
+        this.sessionStorage.set('windownr', msg.windownr);
+      }
+      if (msg.clientnr || msg.windownr) {
+        // update the arguments on the reconnection websocket.
+        this.websocketService.setConnectionPathArguments([this.getClientnr(), this.getWindowName(), this.getWindownr()]);
+      }
+    });
 
-    public createDeferredWSEvent(): { deferred: Deferred<unknown>; cmsgid: number } {
-        return this.wsSession.createDeferredEvent();
-    }
+    return this.wsSession;
+  }
 
-    public resolveDeferedEvent(cmsgid: number, argument: unknown, success: boolean) {
-        this.wsSession.resolveDeferedEvent(cmsgid, argument, success);
-    }
-    
-    /**
-     * SHOULD ONLY GET CALLED FROM SERVER-SIDE CODE via websocket!
-     * It is generic; it does not keep track of the form name because one form show might show multilple nested ones;
-     * and this method is currently called only for the main container switch form or a component (for example a tab panel) showing a form.
-     */
-    public expectFormToShowOnClient(expectAFormToShow: boolean) {
-        if (expectAFormToShow) {
-            this.noOfFormsThatAreGoingToShow++;
-            if (this.noOfFormsThatAreGoingToShow == 1) this.expectFormToShowOnClientDeferr = new Deferred();
-        } else {
-            this.noOfFormsThatAreGoingToShow--;
-            if (this.noOfFormsThatAreGoingToShow == 0) {
-                this.expectFormToShowOnClientDeferr.resolve();
-                this.expectFormToShowOnClientDeferr = undefined!;
-            }
-        }
-        // normally this.noOfFormsThatAreGoingToShow is either 0 or 1; it's 1 when server knows it will 'touch' a form that was/will be made visible;
-        // so server already scheduled telling the client to show that form but in an "invokeLater" with a high event execution level... the client-side
-        // code only needs to know this in case a server-to-client component sync API call happens meanwhile, so that it knows it should wait for the form show to arrive and for the
-        // form to be shown on clientt before trying to execute that sync call.
-    }
-    
-    /**
-     * If server is going to send a form show to client soon (it has scheduled an invokeLater with high event queue prio that will trigger a show/switch form
-     * either of the main form or inside a component that can show/hide forms), then this method gives you a way of waiting until that happens.
-     * 
-     * If isExpectingFormToShow() returns false, calling this method will give an exception.
-     */
-    public waitForPendingFormShowFromServer(): Promise<void>  {
-        return this.expectFormToShowOnClientDeferr.promise;
-    }
+  public createDeferredWSEvent(): { deferred: Deferred<unknown>; cmsgid: number } {
+    return this.wsSession.createDeferredEvent();
+  }
 
-    /**
-     * see doc of waitForPendingFormShowFromServer().
-     */
-    public isExpectingAFormToShowSoon() {
-        return !!this.expectFormToShowOnClientDeferr;
-    }
+  public resolveDeferedEvent(cmsgid: number, argument: unknown, success: boolean) {
+    this.wsSession.resolveDeferedEvent(cmsgid, argument, success);
+  }
 
-    public getClientnr() {
-        const sessionnr = this.sessionStorage.get('clientnr') as string;
-        if (sessionnr) {
-            return sessionnr;
-        }
-        return this.websocketService.getURLParameter('clientnr');
+  /**
+   * SHOULD ONLY GET CALLED FROM SERVER-SIDE CODE via websocket!
+   * It is generic; it does not keep track of the form name because one form show might show multilple nested ones;
+   * and this method is currently called only for the main container switch form or a component (for example a tab panel) showing a form.
+   */
+  public expectFormToShowOnClient(expectAFormToShow: boolean) {
+    if (expectAFormToShow) {
+      this.noOfFormsThatAreGoingToShow++;
+      if (this.noOfFormsThatAreGoingToShow == 1) this.expectFormToShowOnClientDeferr = new Deferred();
+    } else {
+      this.noOfFormsThatAreGoingToShow--;
+      if (this.noOfFormsThatAreGoingToShow == 0) {
+        this.expectFormToShowOnClientDeferr.resolve();
+        this.expectFormToShowOnClientDeferr = undefined!;
+      }
     }
+    // normally this.noOfFormsThatAreGoingToShow is either 0 or 1; it's 1 when server knows it will 'touch' a form that was/will be made visible;
+    // so server already scheduled telling the client to show that form but in an "invokeLater" with a high event execution level... the client-side
+    // code only needs to know this in case a server-to-client component sync API call happens meanwhile, so that it knows it should wait for the form show to arrive and for the
+    // form to be shown on clientt before trying to execute that sync call.
+  }
 
-    public getWindowName() {
-        return this.websocketService.getURLParameter('windowname');
+  /**
+   * If server is going to send a form show to client soon (it has scheduled an invokeLater with high event queue prio that will trigger a show/switch form
+   * either of the main form or inside a component that can show/hide forms), then this method gives you a way of waiting until that happens.
+   *
+   * If isExpectingFormToShow() returns false, calling this method will give an exception.
+   */
+  public waitForPendingFormShowFromServer(): Promise<void> {
+    return this.expectFormToShowOnClientDeferr.promise;
+  }
+
+  /**
+   * see doc of waitForPendingFormShowFromServer().
+   */
+  public isExpectingAFormToShowSoon() {
+    return !!this.expectFormToShowOnClientDeferr;
+  }
+
+  public getClientnr() {
+    const sessionnr = this.sessionStorage.get('clientnr') as string;
+    if (sessionnr) {
+      return sessionnr;
     }
+    return this.websocketService.getURLParameter('clientnr');
+  }
 
-    public getWindownr() {
-        return this.sessionStorage.get('windownr') as string;
+  public getWindowName() {
+    return this.websocketService.getURLParameter('windowname');
+  }
+
+  public getWindownr() {
+    return this.sessionStorage.get('windownr') as string;
+  }
+
+  public getWindowUrl(windowname: string) {
+    return 'index.html?windowname=' + encodeURIComponent(windowname) + '&clientnr=' + this.getClientnr();
+  }
+
+  public getLanguageAndCountryFromBrowser() {
+    let langAndCountry: string;
+    const browserLanguages = this.windowRefService.nativeWindow.navigator['languages'];
+    // this returns first one of the languages array if the browser supports this (Chrome and FF) else it falls back to language or userLanguage
+    // (IE, and IE seems to return the right one from there)
+    if (browserLanguages && browserLanguages.length > 0) {
+      langAndCountry = browserLanguages[0];
+      if (browserLanguages.length > 1 && langAndCountry.indexOf('-') === -1 && browserLanguages[1].indexOf(langAndCountry + '-') === 0) {
+        // if the first language in the list doesn't specify country, see if the following one is the same language but with a country specified
+        // (for example browser could give a list of "en", "en-GB", ...)
+        langAndCountry = browserLanguages[1];
+      }
+    } else {
+      langAndCountry = (this.windowRefService.nativeWindow.navigator.language || (this.windowRefService.nativeWindow.navigator as any)['userLanguage']) as string;
     }
-
-    public getWindowUrl(windowname: string) {
-        return 'index.html?windowname=' + encodeURIComponent(windowname) + '&clientnr=' + this.getClientnr();
+    // in some weird scenario in firefox is not set, default it to en
+    if (!langAndCountry) langAndCountry = 'en';
+    return langAndCountry;
+  }
+  public getLocale(): Locale {
+    if (!this.locale) {
+      const langAndCountry = this.getLanguageAndCountryFromBrowser();
+      const array = langAndCountry.split('-');
+      this.locale = { language: array[0], country: array[1], full: langAndCountry };
     }
+    return this.locale;
+  }
 
-    public getLanguageAndCountryFromBrowser() {
-        let langAndCountry: string;
-        const browserLanguages = this.windowRefService.nativeWindow.navigator['languages'];
-        // this returns first one of the languages array if the browser supports this (Chrome and FF) else it falls back to language or userLanguage
-        // (IE, and IE seems to return the right one from there)
-        if (browserLanguages && browserLanguages.length > 0) {
-            langAndCountry = browserLanguages[0];
-            if (browserLanguages.length > 1 && langAndCountry.indexOf('-') === -1
-                && browserLanguages[1].indexOf(langAndCountry + '-') === 0) {
-                // if the first language in the list doesn't specify country, see if the following one is the same language but with a country specified
-                // (for example browser could give a list of "en", "en-GB", ...)
-                langAndCountry = browserLanguages[1];
-            }
-        } else {
-            langAndCountry = (this.windowRefService.nativeWindow.navigator.language || (this.windowRefService.nativeWindow.navigator as any)['userLanguage']) as string;
-        }
-        // in some weird scenario in firefox is not set, default it to en
-        if (!langAndCountry) langAndCountry = 'en';
-        return langAndCountry;
+  public setLocale(loc: Locale) {
+    this.locale = loc;
+  }
+
+  /**
+   * IMPORTANT!
+   *
+   * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
+   * to it's own callers, it MUST wrap the new promise (returned by that then() for example) using wrapPromiseToPropagateCustomRequestInfoInternal() of websocket.service.ts.
+   *
+   * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
+   * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because
+   * that is where getCurrentRequestInfo() gets it from. And that is where special code - like foundset listeners also get the current request info from to
+   * return it back to the user (component/service code).  
+   */
+  public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
+    if (!this.wsSession) return undefined!; // in designer, designform_component.component.ts can for example call resolve form component - and that can end up in a service call (formLoaded); but that one doesn't have a wsSession; so avoid the error
+
+    const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
+    return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
+  }
+
+  public addToCurrentServiceCall(func: () => void) {
+    if (this.currentServiceCallWaiting === 0) {
+      // No service call currently running, call the function now
+      setTimeout(() => {
+        func();
+      });
+    } else {
+      this.currentServiceCallCallbacks.push(func);
     }
-    public getLocale(): Locale {
-        if (!this.locale) {
-            const langAndCountry = this.getLanguageAndCountryFromBrowser();
-            const array = langAndCountry.split('-');
-            this.locale = { language: array[0], country: array[1], full: langAndCountry };
-        }
-        return this.locale;
+  }
+
+  public sendServiceChangesJSON(serviceName: string, changes: any) {
+    this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
+  }
+
+  public addIncomingMessageHandlingDoneTask(func: () => any) {
+    if (this.wsSession) this.wsSession.addIncomingMessageHandlingDoneTask(func);
+    else {
+      // it can be undefined in form designer, as updates from server come via a different route and this.websocketService.connect() is called from a different place
+      this.websocketService.getSession().then((session) => session.addIncomingMessageHandlingDoneTask(func));
     }
+  }
 
-    public setLocale(loc: Locale) {
-        this.locale = loc;
+  public getCurrentRequestInfo(): any {
+    return this.websocketService.getCurrentRequestInfo();
+  }
+
+  private callServiceCallbacksWhenDone() {
+    if (this.currentServiceCallDone || --this.currentServiceCallWaiting === 0) {
+      this.currentServiceCallWaiting = 0;
+      this.currentServiceCallTimeouts.map((id: any) => clearTimeout(id));
+      const tmp = this.currentServiceCallCallbacks;
+      this.currentServiceCallCallbacks = [];
+      tmp.map((func: () => void) => {
+        func();
+      });
     }
+  }
 
-    /**
-     * IMPORTANT!
-     * 
-     * If the returned value is a promise and if the caller is INTERNAL code that chains more .then() or other methods and returns the new promise
-     * to it's own callers, it MUST wrap the new promise (returned by that then() for example) using wrapPromiseToPropagateCustomRequestInfoInternal() of websocket.service.ts.
-     * 
-     * This is so that the promise that ends up in (3rd party or our own) components and service code - that can then set .requestInfo on it - ends up to be
-     * propagated into the promise that this callService(...) registered in "deferredEvents"; that is where any user set .requestInfo has to end up, because
-     * that is where getCurrentRequestInfo() gets it from. And that is where special code - like foundset listeners also get the current request info from to
-     * return it back to the user (component/service code).   
-     */
-    public callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
-        if (!this.wsSession) return undefined!; // in designer, designform_component.component.ts can for example call resolve form component - and that can end up in a service call (formLoaded); but that one doesn't have a wsSession; so avoid the error
-
-        const promise = this.wsSession.callService<T>(serviceName, methodName, argsObject, async);
-        return async ? promise : this.waitForServiceCallbacks<T>(promise, [100, 200, 500, 1000, 3000, 5000]);
-    }
-
-    public addToCurrentServiceCall(func: () => void) {
-        if (this.currentServiceCallWaiting === 0) {
-            // No service call currently running, call the function now
-            setTimeout(() => {
-                func();
-            });
-        } else {
-            this.currentServiceCallCallbacks.push(func);
-        }
-    }
-
-    public sendServiceChangesJSON(serviceName: string, changes: any) {
-        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes });
-    }
-
-    public addIncomingMessageHandlingDoneTask(func: () => any) {
-        if (this.wsSession) this.wsSession.addIncomingMessageHandlingDoneTask(func);
-        else {
-            // it can be undefined in form designer, as updates from server come via a different route and this.websocketService.connect() is called from a different place 
-            this.websocketService.getSession().then((session) => session.addIncomingMessageHandlingDoneTask(func));
-        }
-    }
-
-    public getCurrentRequestInfo(): any {
-        return this.websocketService.getCurrentRequestInfo();
-    }
-
-    private callServiceCallbacksWhenDone() {
-        if (this.currentServiceCallDone || --this.currentServiceCallWaiting === 0) {
-            this.currentServiceCallWaiting = 0;
-            this.currentServiceCallTimeouts.map((id: any) => clearTimeout(id));
-            const tmp = this.currentServiceCallCallbacks;
-            this.currentServiceCallCallbacks = [];
-            tmp.map((func: () => void) => {
-                func();
-            });
-        }
+  private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): RequestInfoPromise<T> {
+    if (this.currentServiceCallWaiting > 0) {
+      // Already waiting
+      return promise;
     }
 
-    private waitForServiceCallbacks<T>(promise: Promise<T>, times: number[]): RequestInfoPromise<T> {
-        if (this.currentServiceCallWaiting > 0) {
-            // Already waiting
-            return promise;
-        }
+    this.currentServiceCallDone = false;
+    this.currentServiceCallWaiting = times.length;
+    this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
 
-        this.currentServiceCallDone = false;
-        this.currentServiceCallWaiting = times.length;
-        this.currentServiceCallTimeouts = times.map((t) => setTimeout(this.callServiceCallbacksWhenDone, t));
+    return wrapPromiseToPropagateCustomRequestInfoInternal(
+      promise,
+      promise.then(
+        (arg) => {
+          this.currentServiceCallDone = true;
+          return arg;
+        },
+        (arg) => {
+          this.currentServiceCallDone = true;
+          return Promise.reject(arg);
+        },
+      ),
+    );
+  }
 
-        return wrapPromiseToPropagateCustomRequestInfoInternal(promise, promise.then((arg) => {
-            this.currentServiceCallDone = true;
-            return arg;
-        }, (arg) => {
-            this.currentServiceCallDone = true;
-            return Promise.reject(arg);
-        }));
+  //    private getAPICallFunctions(call, formState) {
+  //        let funcThis: Record<string, () => any>;
+  //        if (call.viewIndex !== undefined) {
+  //            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if
+  //            // it wants to allow calling API on non-selected rows, but it is not used
+  //            funcThis = formState.api[call.bean][call.viewIndex];
+  //        } else if (call.propertyPath !== undefined) {
+  //            // handle nested components; the property path is an array of string or int keys going
+  //            // through the form's model starting with the root bean name, then it's properties (that could be nested)
+  //            // then maybe nested child properties and so on
+  //            let obj = formState.model;
+  //            for (const pp of call.propertyPath) obj = obj[pp];
+  //            funcThis = obj.api;
+  //        } else {
+  //            funcThis = formState.api[call.bean];
+  //        }
+  //        return funcThis;
+  //    }
+
+  private clearSabloInfo() {
+    this.sessionStorage.remove('windownr');
+    this.sessionStorage.remove('clientnr');
+  }
+
+  private buildStackMessage(msg: any[]): any[] {
+    const arr = [];
+    let error = msg[0] instanceof Error ? msg[0] : msg[1] instanceof Error ? msg[1] : null;
+    if (error === null) {
+      error = new Error();
+      arr.push(...msg);
     }
-
-    //    private getAPICallFunctions(call, formState) {
-    //        let funcThis: Record<string, () => any>;
-    //        if (call.viewIndex !== undefined) {
-    //            // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if
-    //            // it wants to allow calling API on non-selected rows, but it is not used
-    //            funcThis = formState.api[call.bean][call.viewIndex];
-    //        } else if (call.propertyPath !== undefined) {
-    //            // handle nested components; the property path is an array of string or int keys going
-    //            // through the form's model starting with the root bean name, then it's properties (that could be nested)
-    //            // then maybe nested child properties and so on
-    //            let obj = formState.model;
-    //            for (const pp of call.propertyPath) obj = obj[pp];
-    //            funcThis = obj.api;
-    //        } else {
-    //            funcThis = formState.api[call.bean];
-    //        }
-    //        return funcThis;
-    //    }
-
-    private clearSabloInfo() {
-        this.sessionStorage.remove('windownr');
-        this.sessionStorage.remove('clientnr');
+    let message = error.stack!;
+    if (message.startsWith('Error')) {
+      message = message.substring(5);
     }
-
-    private buildStackMessage(msg: any[]): any[] {
-        const arr = [];
-        let error = msg[0] instanceof Error? msg[0]: msg[1] instanceof Error?msg[1]:null;
-        if (error === null) { 
-            error = new Error();
-            arr.push(...msg);
-        }
-        let message = error.stack!;
-        if (message.startsWith('Error')) {
-            message = message.substring(5);
-        }
-        arr.push(message)
-        return arr;
-    }
+    arr.push(message);
+    return arr;
+  }
 }

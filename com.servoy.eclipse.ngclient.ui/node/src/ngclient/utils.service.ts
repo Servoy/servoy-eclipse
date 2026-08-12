@@ -4,130 +4,127 @@ import { EventLike, JSEvent, LoggerFactory, LoggerService } from '@servoy/public
 import { FormService } from './form.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SvyUtilsService {
-    private readonly log: LoggerService;
-    private readonly doc = inject(DOCUMENT) as Document;
-    private formService!: FormService;
+  private readonly log: LoggerService;
+  private readonly doc = inject(DOCUMENT) as Document;
+  private formService!: FormService;
 
-    constructor() {
-        const logFactory = inject(LoggerFactory);
-        this.log = logFactory.getLogger('SvyUtilsService');
+  constructor() {
+    const logFactory = inject(LoggerFactory);
+    this.log = logFactory.getLogger('SvyUtilsService');
+  }
+
+  public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent | null {
+    if (!event) {
+      if (contextFilter || contextFilterElement) return null;
+      this.log.error('event is undefined, returning default event');
+      return { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() };
+    }
+    const targetEl = event.target as Element;
+    let form: string | null | undefined;
+    let parent: Element | null = targetEl;
+    const targetElNameChain = [];
+    let contextMatch = false;
+    while (parent) {
+      form = parent.tagName.toLowerCase() === 'svy-form' ? parent.getAttribute('name') : undefined;
+      if (form) {
+        //global shortcut or context match
+        const shortcuthit = !contextFilter || (contextFilter && form === contextFilter);
+        if (!shortcuthit) break;
+        contextMatch = true;
+        break;
+      } else if (parent.tagName.toLowerCase() === 'body' && !contextFilter) {
+        contextMatch = true;
+        break;
+      }
+
+      if (parent.getAttribute('name')) targetElNameChain.push(parent.getAttribute('name'));
+      else if ((parent as any)['svyHostComponent'] && (parent as any)['svyHostComponent']['name']) {
+        targetElNameChain.push((parent as any)['svyHostComponent']['name']);
+      }
+      parent = parent.parentElement;
     }
 
-    public createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent | null {
-        if (!event) {
-            if (contextFilter || contextFilterElement) return null;
-            this.log.error('event is undefined, returning default event');
-            return { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() };
-        }
-        const targetEl = event.target as Element;
-        let form: string | null | undefined;
-        let parent: Element | null = targetEl;
-        const targetElNameChain = [];
-        let contextMatch = false;
-        while (parent) {
-            form = parent.tagName.toLowerCase() === 'svy-form' ? parent.getAttribute('name') : undefined;
-            if (form) {
-                //global shortcut or context match
-                const shortcuthit = !contextFilter || (contextFilter && form === contextFilter);
-                if (!shortcuthit)
-                    break;
-                contextMatch = true;
-                break;
-            } else if (parent.tagName.toLowerCase() === 'body' && !contextFilter) {
-                contextMatch = true;
-                break;
-            }
-
-            if ( parent.getAttribute( 'name' ) )
-                targetElNameChain.push( parent.getAttribute( 'name' ) );
-            else if ( (parent as any)['svyHostComponent'] && (parent as any)['svyHostComponent']['name'] ) {
-                targetElNameChain.push( (parent as any)['svyHostComponent']['name'] );
-            }
-            parent = parent.parentElement;
-        }
-
-        if (!form) {
-            // form not found, search for an active dialog
-            const dialog = this.doc.querySelector('.svy-dialog.window.active');
-            if (dialog) {
-                const formInDialog = dialog.querySelector('svy-form');
-                if (formInDialog) form = formInDialog.getAttribute('name');
-            }
-        }
-
-        if (!contextMatch)
-            return null;
-        const jsEvent: JSEvent = { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() } ;
-         
-        const modifiers = (event.altKey ? 8 : 0) | (event.shiftKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0);
-        jsEvent.modifiers = modifiers;
-        jsEvent.x = event['pageX'];//TODO check
-        jsEvent.y = event['pageY'];
-        jsEvent.formName = form ?? undefined;
-		if (event.detail) {
-			jsEvent.data = event.detail;
-		}
-        for (const chain of targetElNameChain) {
-            if (!this.formService || this.formService.getFormCacheByName(form!).getComponent(chain)) {
-                jsEvent['elementName'] = chain;
-                break;
-            }
-        }
-        if (contextFilterElement && (contextFilterElement !== jsEvent['elementName'])) {
-            return null;
-        }
-
-        return jsEvent;
+    if (!form) {
+      // form not found, search for an active dialog
+      const dialog = this.doc.querySelector('.svy-dialog.window.active');
+      if (dialog) {
+        const formInDialog = dialog.querySelector('svy-form');
+        if (formInDialog) form = formInDialog.getAttribute('name');
+      }
     }
 
-    /**
-     * JS implementation of the $.extend() jQuery method.
-     * Source: https://gomakethings.com/vanilla-javascript-version-of-jquery-extend/
-     */
-    public deepExtend(args: any[]) {
-        // Variables
-        const extended: Record<string, any> = {};
-        let deep = false;
-        let i = 0;
-        const length = args.length;
+    if (!contextMatch) return null;
+    const jsEvent: JSEvent = { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() };
 
-        // Check if a deep merge
-        if (Object.prototype.toString.call(args[0]) === '[object Boolean]') {
-            deep = args[0];
-            i++;
+    const modifiers = (event.altKey ? 8 : 0) | (event.shiftKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0);
+    jsEvent.modifiers = modifiers;
+    jsEvent.x = event['pageX']; //TODO check
+    jsEvent.y = event['pageY'];
+    jsEvent.formName = form ?? undefined;
+    if (event.detail) {
+      jsEvent.data = event.detail;
+    }
+    for (const chain of targetElNameChain) {
+      if (!this.formService || this.formService.getFormCacheByName(form!).getComponent(chain)) {
+        jsEvent['elementName'] = chain;
+        break;
+      }
+    }
+    if (contextFilterElement && contextFilterElement !== jsEvent['elementName']) {
+      return null;
+    }
+
+    return jsEvent;
+  }
+
+  /**
+   * JS implementation of the $.extend() jQuery method.
+   * Source: https://gomakethings.com/vanilla-javascript-version-of-jquery-extend/
+   */
+  public deepExtend(args: any[]) {
+    // Variables
+    const extended: Record<string, any> = {};
+    let deep = false;
+    let i = 0;
+    const length = args.length;
+
+    // Check if a deep merge
+    if (Object.prototype.toString.call(args[0]) === '[object Boolean]') {
+      deep = args[0];
+      i++;
+    }
+
+    // Merge the object into the extended object
+    const merge = (obj: any) => {
+      for (const prop in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+          // If deep merge and property is an object, merge properties
+          if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+            extended[prop] = this.deepExtend([true, extended[prop], obj[prop]]);
+          } else {
+            extended[prop] = obj[prop];
+          }
         }
-
-        // Merge the object into the extended object
-        const merge = (obj: any) => {
-            for (const prop in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-                    // If deep merge and property is an object, merge properties
-                    if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
-                        extended[prop] = this.deepExtend([true, extended[prop], obj[prop]]);
-                    } else {
-                        extended[prop] = obj[prop];
-                    }
-                }
-            }
-        };
-
-        // Loop through each object and conduct a merge
-        for (; i < length; i++) {
-            const obj = args[i];
-            merge(obj);
-        }
-
-        return extended;
+      }
     };
 
-    public getMainBody() {
-        return this.doc.getElementById('mainBody');
+    // Loop through each object and conduct a merge
+    for (; i < length; i++) {
+      const obj = args[i];
+      merge(obj);
     }
-    
-    public setFormService(formService: FormService){
-        this.formService = formService;
-    }
+
+    return extended;
+  }
+
+  public getMainBody() {
+    return this.doc.getElementById('mainBody');
+  }
+
+  public setFormService(formService: FormService) {
+    this.formService = formService;
+  }
 }

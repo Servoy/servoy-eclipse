@@ -7,7 +7,6 @@ import { ServoyPublicModule } from '@servoy/public';
 import { ServoyCoreSlider } from './slider';
 import { TooltipService } from '@servoy/public';
 
-
 describe('ServoyCoreSlider', () => {
   let component: ServoyCoreSlider;
   let fixture: ComponentFixture<ServoyCoreSlider>;
@@ -15,15 +14,14 @@ describe('ServoyCoreSlider', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [ServoyCoreSlider, ServoyTestingModule, ServoyPublicModule],
-      providers: [TooltipService]
-    })
-    .compileComponents();
+      providers: [TooltipService],
+    }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyCoreSlider);
     component = fixture.componentInstance;
-    component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
+    component.servoyApi = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     fixture.detectChanges();
   });
 

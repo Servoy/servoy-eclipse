@@ -17,31 +17,37 @@ import { ServerDataService } from './services/serverdata.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import { DeveloperService } from './developer.service';
-import { AlertWindowComponent} from './services/alert-window/alert-window.component';
+import { AlertWindowComponent } from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
 import { ServoyPublicService } from '@servoy/public';
 import { provideAgGrid } from '../servoycore/ag-grid-initializer';
 import { SERVOY_ROUTES } from './servoy.routes';
 
-@NgModule( {
-    imports: [
-        RouterModule.forChild(SERVOY_ROUTES),
-        MainComponent,
-        FormComponent,
-        DefaultLoginWindowComponent,
-        FileUploadWindowComponent,
-        DialogWindowComponent,
-        ServoyFormPopupComponent,
-        LoadingIndicatorComponent,
-        AlertWindowComponent,
-        MessageDialogWindowComponent
-    ],
-    providers: [UpperCasePipe, LowerCasePipe,
-        ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
-        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
-        provideAgGrid()]
-} )
+@NgModule({
+  imports: [
+    RouterModule.forChild(SERVOY_ROUTES),
+    MainComponent,
+    FormComponent,
+    DefaultLoginWindowComponent,
+    FileUploadWindowComponent,
+    DialogWindowComponent,
+    ServoyFormPopupComponent,
+    LoadingIndicatorComponent,
+    AlertWindowComponent,
+    MessageDialogWindowComponent,
+  ],
+  providers: [
+    UpperCasePipe,
+    LowerCasePipe,
+    ServerDataService,
+    BSWindowManager,
+    DatePipe,
+    DecimalPipe,
+    ServoyPublicServiceImpl,
+    { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
+    provideAgGrid(),
+  ],
+})
 export class ServoyModule {
-    constructor(_developerService: DeveloperService) {
-    }
- }
+  constructor(_developerService: DeveloperService) {}
+}

@@ -38,12 +38,7 @@ describe('DefaultLoginWindowComponent', () => {
     component.password = 'test';
     component.doLogin();
     await promise;
-    expect(sabloService.callService).toHaveBeenCalledWith(
-      'applicationServerService',
-      'login',
-      loginData,
-      false,
-    );
+    expect(sabloService.callService).toHaveBeenCalledWith('applicationServerService', 'login', loginData, false);
     expect(localStorageService.set).toHaveBeenCalledTimes(2);
     expect(component.message).toBeUndefined();
   });
@@ -56,12 +51,7 @@ describe('DefaultLoginWindowComponent', () => {
     component.doLogin();
     await promise;
     await Promise.resolve();
-    expect(sabloService.callService).toHaveBeenCalledWith(
-      'applicationServerService',
-      'login',
-      loginData,
-      false,
-    );
+    expect(sabloService.callService).toHaveBeenCalledWith('applicationServerService', 'login', loginData, false);
     expect(ngbActiveModal.close).toHaveBeenCalledTimes(0);
     expect(component.message).toBe('Invalid username or password, try again');
   });

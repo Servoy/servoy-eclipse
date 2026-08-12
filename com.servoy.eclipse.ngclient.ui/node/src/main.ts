@@ -13,10 +13,5 @@ if (environment.production) {
 }
 
 bootstrapApplication(AppComponent, {
-  providers: [
-    provideRouter(APP_ROUTES),
-    provideHttpClient(withInterceptorsFromDi()),
-    provideAnimations(),
-    provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true })
-  ]
-}).catch(err => console.log(err));
+  providers: [provideRouter(APP_ROUTES), provideHttpClient(withInterceptorsFromDi()), provideAnimations(), provideZoneChangeDetection({ eventCoalescing: true, runCoalescing: true })],
+}).catch((err) => console.log(err));

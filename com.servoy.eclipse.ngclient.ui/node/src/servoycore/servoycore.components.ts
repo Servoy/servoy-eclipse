@@ -6,12 +6,4 @@ import { ServoyCoreFormContainer } from './formcontainer/formcontainer';
 import { AddAttributeDirective } from './addattribute.directive';
 import { ServoyCoreFormcomponentResponsiveCotainer } from './formcomponent-responsive-container/formcomponent-responsive-container';
 
-export const SERVOYCORE_COMPONENTS = [
-    DefaultNavigator,
-    SessionView,
-    ErrorBean,
-    ServoyCoreSlider,
-    ServoyCoreFormContainer,
-    AddAttributeDirective,
-    ServoyCoreFormcomponentResponsiveCotainer
-] as const;
+export const SERVOYCORE_COMPONENTS = [DefaultNavigator, SessionView, ErrorBean, ServoyCoreSlider, ServoyCoreFormContainer, AddAttributeDirective, ServoyCoreFormcomponentResponsiveCotainer] as const;

@@ -9,10 +9,9 @@ import { FormsModule } from '@angular/forms';
   host: { '(document:keydown)': 'handleKeyboardEvent($event)' },
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
 })
 export class MessageDialogWindowComponent {
-
   readonly message = signal<string | undefined>(undefined);
   readonly styleClass = signal<string | undefined>(undefined);
   readonly values = signal<string[] | undefined>(undefined);
@@ -42,12 +41,12 @@ export class MessageDialogWindowComponent {
     const okButtonText = this.okButtonText();
     if (!okButtonText) this.okButtonText.set('OK');
     const buttonsText = this.buttonsText();
-    if(!buttonsText || !buttonsText.length) {
+    if (!buttonsText || !buttonsText.length) {
       this.buttonsText.set([okButtonText!]);
     }
     const styleClass = this.styleClass();
     const values = this.values();
-    if(values && values.length && (styleClass === 'type-input' || styleClass === 'type-select')) {
+    if (values && values.length && (styleClass === 'type-input' || styleClass === 'type-select')) {
       this.retValue = values[0];
     }
   }
@@ -83,12 +82,12 @@ export class MessageDialogWindowComponent {
   dismiss(value: string | null): void {
     const styleClass = this.styleClass();
     if (styleClass === 'type-input' || styleClass === 'type-select') {
-      if (value !==this.okButtonText()) {
-       this.retValue = null;
-     }
+      if (value !== this.okButtonText()) {
+        this.retValue = null;
+      }
     } else {
       this.retValue = value;
-    }    
+    }
     this.onCloseCallback(this.retValue);
   }
 

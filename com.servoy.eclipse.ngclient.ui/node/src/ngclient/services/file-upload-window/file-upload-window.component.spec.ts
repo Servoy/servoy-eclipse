@@ -19,11 +19,7 @@ describe('FileUploadWindowComponent', () => {
     i18nProvider.listenForI18NMessages.mockReturnValue(i18n);
     await TestBed.configureTestingModule({
       imports: [FileUploadWindowComponent],
-      providers: [
-        { provide: HttpClient },
-        { provide: HttpHandler },
-        { provide: I18NProvider, useValue: i18nProvider },
-      ],
+      providers: [{ provide: HttpClient }, { provide: HttpHandler }, { provide: I18NProvider, useValue: i18nProvider }],
     }).compileComponents();
   });
   beforeEach(() => {

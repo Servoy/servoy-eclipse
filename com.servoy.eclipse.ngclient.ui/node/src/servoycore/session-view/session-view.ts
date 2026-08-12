@@ -5,71 +5,68 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ServoyService } from '../../ngclient/servoy.service';
 
 @Component({
-    selector: 'session-view',
-    templateUrl: './session-view.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true
+  selector: 'session-view',
+  templateUrl: './session-view.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class SessionView implements OnInit {
+  private readonly http = inject(HttpClient);
+  readonly servoyService = inject(ServoyService);
+  private readonly sanitizer = inject(DomSanitizer);
+  protected readonly cdRef = inject(ChangeDetectorRef);
 
-    private readonly http = inject(HttpClient);
-    readonly servoyService = inject(ServoyService);
-    private readonly sanitizer = inject(DomSanitizer);
-    protected readonly cdRef = inject(ChangeDetectorRef);
+  constructor() {}
 
-    constructor() {
-    }
+  htmlString!: SafeHtml;
 
-    htmlString!: SafeHtml;
+  ngOnInit() {
+    const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
+    const headers = new HttpHeaders({
+      'Content-Type': 'text/plain',
+    });
+    const request = this.http
+      .get(sessionProblem.viewUrl, {
+        headers,
+        responseType: 'text',
+      })
+      .subscribe((res) => {
+        // Replace placeholders but keep scripts intact
+        const processedHtml = res.replace('{{redirectUrl}}', sessionProblem.redirectUrl!).replace('ng-href', 'href');
 
-    ngOnInit() {
-        const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
-        const headers = new HttpHeaders({
-            'Content-Type': 'text/plain',
-        });
-        const request = this.http.get(sessionProblem.viewUrl, {
-            headers,
-            responseType: 'text'
-        }).subscribe(res => {
-            // Replace placeholders but keep scripts intact
-            const processedHtml = res
-                .replace('{{redirectUrl}}', sessionProblem.redirectUrl!)
-                .replace('ng-href', 'href');
+        // Extract <script src>
+        const externalScriptRegex = /<script\b[^>]*src=["']([^"']+)["'][^>]*>\s*<\/script\s*>/gi;
 
-            // Extract <script src>
-            const externalScriptRegex = /<script\b[^>]*src=["']([^"']+)["'][^>]*>\s*<\/script\s*>/gi;
+        let safeHtml = processedHtml;
 
-            let safeHtml = processedHtml;
+        // Remove external scripts from HTML string; repeat until stable to avoid
+        // incomplete multi-character sanitization where new matches can appear.
+        let previousHtml: string;
+        do {
+          previousHtml = safeHtml;
+          safeHtml = safeHtml.replace(externalScriptRegex, '');
+        } while (safeHtml !== previousHtml);
 
-            // Remove external scripts from HTML string; repeat until stable to avoid
-            // incomplete multi-character sanitization where new matches can appear.
-            let previousHtml: string;
-            do {
-                previousHtml = safeHtml;
-                safeHtml = safeHtml.replace(externalScriptRegex, '');
-            } while (safeHtml !== previousHtml);
+        // Bind safe markup
+        this.htmlString = this.sanitizer.bypassSecurityTrustHtml(safeHtml);
+        this.cdRef.detectChanges();
 
-            // Bind safe markup
-            this.htmlString = this.sanitizer.bypassSecurityTrustHtml(safeHtml);
-            this.cdRef.detectChanges();
-
-            // Re-inject external scripts with nonce
-            let match;
-            while ((match = externalScriptRegex.exec(processedHtml)) !== null) {
-                const src = match[1];
-                const script = document.createElement('script');
-                script.setAttribute('nonce', sessionProblem.nonce!);
-                script.src = src;
-                if (/defer/i.test(match[0])) script.defer = true;
-                document.body.appendChild(script);
-            }
-        });
-
-        if (sessionProblem.redirectTimeout! >= 0) {
-            window.setTimeout(function() {
-                window.location.href = sessionProblem.redirectUrl!;
-            }, sessionProblem.redirectTimeout! * 1000);
+        // Re-inject external scripts with nonce
+        let match;
+        while ((match = externalScriptRegex.exec(processedHtml)) !== null) {
+          const src = match[1];
+          const script = document.createElement('script');
+          script.setAttribute('nonce', sessionProblem.nonce!);
+          script.src = src;
+          if (/defer/i.test(match[0])) script.defer = true;
+          document.body.appendChild(script);
         }
+      });
 
+    if (sessionProblem.redirectTimeout! >= 0) {
+      window.setTimeout(function () {
+        window.location.href = sessionProblem.redirectUrl!;
+      }, sessionProblem.redirectTimeout! * 1000);
     }
+  }
 }

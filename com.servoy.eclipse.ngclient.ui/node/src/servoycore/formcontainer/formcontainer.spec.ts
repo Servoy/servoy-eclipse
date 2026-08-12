@@ -15,16 +15,15 @@ describe('ServoyCoreFormContainer', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ServoyCoreFormContainer, ServoyTestingModule, ServoyPublicModule, NoopAnimationsModule],
-      providers: [ { provide: FormService, useValue: {getFormCacheByName: () => {} }} ],
-      schemas: [ NO_ERRORS_SCHEMA ]
-    })
-    .compileComponents();
+      providers: [{ provide: FormService, useValue: { getFormCacheByName: () => {} } }],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyCoreFormContainer);
     component = fixture.componentInstance;
-    component.servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
+    component.servoyApi = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     fixture.detectChanges();
   });
 

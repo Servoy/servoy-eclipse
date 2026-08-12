@@ -14,7 +14,7 @@ describe('DesignFormComponent', () => {
     (component as any).variantItemMargin = 10;
     (component as any).variantsLoaded = true;
     (component as any).windowRefService = {
-      nativeWindow: { parent: { parent: { parent: { postMessage: postMessageSpy } } } }
+      nativeWindow: { parent: { parent: { parent: { postMessage: postMessageSpy } } } },
     };
   });
 
@@ -22,14 +22,11 @@ describe('DesignFormComponent', () => {
     it('should measure variant elements and post sizes to parent window', () => {
       const variantChild = {
         clientLeft: 2,
-        getBoundingClientRect: () => ({ width: 120.4 })
+        getBoundingClientRect: () => ({ width: 120.4 }),
       };
-      const variantElements = [
-        { firstChild: { firstChild: variantChild } },
-        { firstChild: { firstChild: { clientLeft: 0, getBoundingClientRect: () => ({ width: 80 }) } } }
-      ];
+      const variantElements = [{ firstChild: { firstChild: variantChild } }, { firstChild: { firstChild: { clientLeft: 0, getBoundingClientRect: () => ({ width: 80 }) } } }];
       const container = {
-        getBoundingClientRect: () => ({ height: 200.7 })
+        getBoundingClientRect: () => ({ height: 200.7 }),
       };
       const containerParent = { getBoundingClientRect: container.getBoundingClientRect };
 
@@ -38,7 +35,7 @@ describe('DesignFormComponent', () => {
           if (cls === 'variant_item') return variantElements;
           if (cls === 'variants_container') return { item: () => ({ parentElement: containerParent }) };
           return [];
-        }
+        },
       };
 
       component.sendVariantSizes();
@@ -47,16 +44,16 @@ describe('DesignFormComponent', () => {
         {
           id: 'resizePopover',
           formWidth: Math.max(2 + Math.ceil(120.4) + 2 * 10, 0 + Math.ceil(80) + 2 * 10) + 2 * 2,
-          formHeight: Math.ceil(200.7) + 2 * 2
+          formHeight: Math.ceil(200.7) + 2 * 2,
         },
-        '*'
+        '*',
       );
     });
 
     it('should return early when variantsLoaded is false', () => {
       (component as any).variantsLoaded = false;
       (component as any).document = {
-        getElementsByClassName: () => [{ firstChild: { firstChild: { clientLeft: 0, getBoundingClientRect: () => ({ width: 50 }) } } }]
+        getElementsByClassName: () => [{ firstChild: { firstChild: { clientLeft: 0, getBoundingClientRect: () => ({ width: 50 }) } } }],
       };
 
       component.sendVariantSizes();
@@ -70,7 +67,7 @@ describe('DesignFormComponent', () => {
         getElementsByClassName: (cls: string) => {
           if (cls === 'variant_item') return [];
           return [];
-        }
+        },
       };
 
       component.sendVariantSizes();
@@ -81,10 +78,7 @@ describe('DesignFormComponent', () => {
     it('should compute formWidth from the widest variant child', () => {
       const narrowChild = { clientLeft: 0, getBoundingClientRect: () => ({ width: 50 }) };
       const wideChild = { clientLeft: 5, getBoundingClientRect: () => ({ width: 200 }) };
-      const variantElements = [
-        { firstChild: { firstChild: narrowChild } },
-        { firstChild: { firstChild: wideChild } }
-      ];
+      const variantElements = [{ firstChild: { firstChild: narrowChild } }, { firstChild: { firstChild: wideChild } }];
       const containerParent = { getBoundingClientRect: () => ({ height: 100 }) };
 
       (component as any).document = {
@@ -92,16 +86,13 @@ describe('DesignFormComponent', () => {
           if (cls === 'variant_item') return variantElements;
           if (cls === 'variants_container') return { item: () => ({ parentElement: containerParent }) };
           return [];
-        }
+        },
       };
 
       component.sendVariantSizes();
 
-      const expectedWidth = (5 + Math.ceil(200) + 2 * 10) + 2 * 2;
-      expect(postMessageSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ formWidth: expectedWidth }),
-        '*'
-      );
+      const expectedWidth = 5 + Math.ceil(200) + 2 * 10 + 2 * 2;
+      expect(postMessageSpy).toHaveBeenCalledWith(expect.objectContaining({ formWidth: expectedWidth }), '*');
     });
 
     it('should work independently of onVariantsMouseDown', () => {
@@ -114,7 +105,7 @@ describe('DesignFormComponent', () => {
           if (cls === 'variant_item') return variantElements;
           if (cls === 'variants_container') return { item: () => ({ parentElement: containerParent }) };
           return [];
-        }
+        },
       };
 
       component.sendVariantSizes();
@@ -123,10 +114,10 @@ describe('DesignFormComponent', () => {
       expect(postMessageSpy).toHaveBeenCalledWith(
         {
           id: 'resizePopover',
-          formWidth: (0 + Math.ceil(100) + 2 * 10) + 2 * 2,
-          formHeight: Math.ceil(50) + 2 * 2
+          formWidth: 0 + Math.ceil(100) + 2 * 10 + 2 * 2,
+          formHeight: Math.ceil(50) + 2 * 2,
         },
-        '*'
+        '*',
       );
     });
   });
@@ -142,7 +133,7 @@ describe('DesignFormComponent', () => {
 
       component = Object.create(DesignFormComponent.prototype);
       (component as any).windowRefService = {
-        nativeWindow: { parent: { postMessage: postMessageSpy } }
+        nativeWindow: { parent: { postMessage: postMessageSpy } },
       };
 
       originalElementFromPoint = document.elementFromPoint;
@@ -164,18 +155,15 @@ describe('DesignFormComponent', () => {
 
       const targetEl = {
         tagName: 'BUTTON',
-        attributes: { getNamedItem: (name: string) => name === 'svy-id' ? { nodeValue: 'var1' } : null },
-        parentElement: null
+        attributes: { getNamedItem: (name: string) => (name === 'svy-id' ? { nodeValue: 'var1' } : null) },
+        parentElement: null,
       };
       elementFromPointSpy.mockReturnValue(targetEl);
 
       const event = { pageX: 10, pageY: 20, stopPropagation: vi.fn() } as unknown as MouseEvent;
       component.onVariantsMouseDown(event);
 
-      expect(postMessageSpy).toHaveBeenCalledWith(
-        { id: 'onVariantMouseDown', pageX: 10, pageY: 20, model },
-        '*'
-      );
+      expect(postMessageSpy).toHaveBeenCalledWith({ id: 'onVariantMouseDown', pageX: 10, pageY: 20, model }, '*');
       expect(model.size.width).toBe(150);
       expect(model.size.height).toBe(80);
     });
@@ -191,8 +179,8 @@ describe('DesignFormComponent', () => {
 
       const targetEl = {
         tagName: 'SPAN',
-        attributes: { getNamedItem: (name: string) => name === 'svy-id' ? { nodeValue: 'v2' } : null },
-        parentElement: null
+        attributes: { getNamedItem: (name: string) => (name === 'svy-id' ? { nodeValue: 'v2' } : null) },
+        parentElement: null,
       };
       elementFromPointSpy.mockReturnValue(targetEl);
 
@@ -222,28 +210,25 @@ describe('DesignFormComponent', () => {
 
       const grandparent = {
         tagName: 'DIV',
-        attributes: { getNamedItem: (name: string) => name === 'svy-id' ? { nodeValue: 'deep-var' } : null },
-        parentElement: null
+        attributes: { getNamedItem: (name: string) => (name === 'svy-id' ? { nodeValue: 'deep-var' } : null) },
+        parentElement: null,
       };
       const parent = {
         tagName: 'SPAN',
         attributes: { getNamedItem: () => null },
-        parentElement: grandparent
+        parentElement: grandparent,
       };
       const target = {
         tagName: 'INPUT',
         attributes: { getNamedItem: () => null },
-        parentElement: parent
+        parentElement: parent,
       };
       elementFromPointSpy.mockReturnValue(target);
 
       const event = { pageX: 30, pageY: 40, stopPropagation: vi.fn() } as unknown as MouseEvent;
       component.onVariantsMouseDown(event);
 
-      expect(postMessageSpy).toHaveBeenCalledWith(
-        { id: 'onVariantMouseDown', pageX: 30, pageY: 40, model },
-        '*'
-      );
+      expect(postMessageSpy).toHaveBeenCalledWith({ id: 'onVariantMouseDown', pageX: 30, pageY: 40, model }, '*');
     });
 
     it('should do nothing when no variant matches the svy-id', () => {
@@ -254,8 +239,8 @@ describe('DesignFormComponent', () => {
 
       const targetEl = {
         tagName: 'BUTTON',
-        attributes: { getNamedItem: (name: string) => name === 'svy-id' ? { nodeValue: 'non-existing-id' } : null },
-        parentElement: null
+        attributes: { getNamedItem: (name: string) => (name === 'svy-id' ? { nodeValue: 'non-existing-id' } : null) },
+        parentElement: null,
       };
       elementFromPointSpy.mockReturnValue(targetEl);
 

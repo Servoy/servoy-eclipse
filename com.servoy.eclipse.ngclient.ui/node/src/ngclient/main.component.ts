@@ -21,18 +21,17 @@ import { FormComponent } from './form/form_component.component';
   templateUrl: './main.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
-  imports: [CommonModule, FormsModule, SabloTabseq, DefaultNavigator, SessionView, LoadingIndicatorComponent, FormComponent]
+  imports: [CommonModule, FormsModule, SabloTabseq, DefaultNavigator, SessionView, LoadingIndicatorComponent, FormComponent],
 })
-
 export class MainComponent implements OnInit, OnDestroy {
   title = 'Servoy NGClient';
   i18n_reconnecting_feedback!: string;
   formStyle: Record<string, string> = { position: 'absolute', top: '0px', bottom: '0px' };
   navigatorStyle: Record<string, string> = { position: 'absolute', top: '0px', bottom: '0px' };
-  
+
   incudeAutoFillHack = !this.isSafariBrowser();
 
-  private  listener: I18NListener | null = null;
+  private listener: I18NListener | null = null;
 
   private readonly servoyService = inject(ServoyService);
   private readonly i18nProvider = inject(I18NProvider);
@@ -50,7 +49,7 @@ export class MainComponent implements OnInit, OnDestroy {
     mainViewRefService.mainContainer = viewContainerRef;
     allService.init();
     serverData.init();
-    (this.windowRef.nativeWindow as any)['executeInlineScript'] = (formname: any, script: any, params: any) => this.servoyService.executeInlineScript(formname,script,params);
+    (this.windowRef.nativeWindow as any)['executeInlineScript'] = (formname: any, script: any, params: any) => this.servoyService.executeInlineScript(formname, script, params);
   }
 
   public get mainForm() {
@@ -63,9 +62,7 @@ export class MainComponent implements OnInit, OnDestroy {
   public get navigatorForm() {
     if (this.sessionProblem) return null;
     const navigatorForm = this.servoyService.getSolutionSettings().navigatorForm;
-    if (navigatorForm && navigatorForm.name &&
-        navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1)
-        return navigatorForm.name;
+    if (navigatorForm && navigatorForm.name && navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) return navigatorForm.name;
     return null;
   }
 
@@ -75,17 +72,16 @@ export class MainComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.listener!.destroy();
-    }
+  }
 
   public ngOnInit() {
-      this.listener = this.i18nProvider.listenForI18NMessages(
-              'servoy.ngclient.reconnecting').messages((val: any)=> {
-                this.i18n_reconnecting_feedback = val.get('servoy.ngclient.reconnecting');
-      });
+    this.listener = this.i18nProvider.listenForI18NMessages('servoy.ngclient.reconnecting').messages((val: any) => {
+      this.i18n_reconnecting_feedback = val.get('servoy.ngclient.reconnecting');
+    });
   }
 
   hasDefaultNavigator(): boolean {
-    const cache = this.mainForm? this.formservice.getFormCacheByName(this.mainForm.toString()): null;
+    const cache = this.mainForm ? this.formservice.getFormCacheByName(this.mainForm.toString()) : null;
     return cache != null && cache.getComponent('svy_default_navigator') != null;
   }
 
@@ -108,7 +104,7 @@ export class MainComponent implements OnInit, OnDestroy {
     this.formStyle[orientationVar2] = this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px';
     return this.formStyle;
   }
-  
+
   private isSafariBrowser(): boolean {
     const userAgent = navigator.userAgent.toLowerCase();
 

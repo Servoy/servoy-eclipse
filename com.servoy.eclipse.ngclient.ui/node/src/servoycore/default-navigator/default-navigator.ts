@@ -9,21 +9,19 @@ import { ComponentCache } from '../../ngclient/types';
   styleUrls: ['./default-navigator.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
-  imports: [FormsModule]
+  imports: [FormsModule],
 })
 export class DefaultNavigator {
-
   readonly name = input<string | null | undefined>(undefined);
   navigatorComponentCache!: any;
   sliderValue!: number;
 
   private readonly formservice = inject(FormService);
 
-  constructor() {
-  }
+  constructor() {}
 
   ngOnInit() {
-    this.navigatorComponentCache = this.formservice.getFormCacheByName( this.name()! ).getComponent('svy_default_navigator')! as ComponentCache;
+    this.navigatorComponentCache = this.formservice.getFormCacheByName(this.name()!).getComponent('svy_default_navigator')! as ComponentCache;
     this.sliderValue = -(this.navigatorComponentCache.model as any).currentIndex;
   }
 

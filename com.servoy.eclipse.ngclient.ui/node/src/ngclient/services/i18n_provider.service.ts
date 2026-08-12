@@ -5,103 +5,114 @@ import { wrapPromiseToPropagateCustomRequestInfoInternal } from '../../sablo/web
 import { Deferred, I18NListener, RequestInfoPromise } from '@servoy/public';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class  I18NProvider {
-    private cachedMessages: Record<string, any> = {};
+export class I18NProvider {
+  private cachedMessages: Record<string, any> = {};
 
-    private cachedPromises: Record<string, { promise?: Promise<any>; value?: any }> = {};
-    private defaultTranslations: Record<string, string> = {};
+  private cachedPromises: Record<string, { promise?: Promise<any>; value?: any }> = {};
+  private defaultTranslations: Record<string, string> = {};
 
-    private readonly listeners = new Set<Listener>();
+  private readonly listeners = new Set<Listener>();
 
-    private readonly sabloService = inject(SabloService);
+  private readonly sabloService = inject(SabloService);
 
-    constructor() {
+  constructor() {}
+
+  public addDefaultTranslations(translations: Record<string, string>) {
+    for (const key of Object.keys(translations)) {
+      this.defaultTranslations[key] = translations[key];
     }
+  }
+  public listenForI18NMessages(...keys: string[]): I18NListener {
+    return new Listener(keys, this, this.listeners);
+  }
 
-    public addDefaultTranslations(translations: Record<string, string>) {
-        for (const key of Object.keys(translations)) {
-            this.defaultTranslations[key] = translations[key];
-        }
-    }
-    public listenForI18NMessages(...keys: string[]): I18NListener {
-        return new Listener(keys, this, this.listeners);
-    }
-
-    /**
-     * Get the i18n messages for the given keys.
-     *
-     * @deprecated use listenForI18NMessages(...keys: string[]):I18NListener
-     */
-    public getI18NMessages(...keys: string[]): RequestInfoPromise<any> {
-        const retValue: Record<string, any> = {};
-        const serverKeys: Record<number, string> = {};
-        let serverKeysCounter = 0;
-        keys.forEach(key => {
-            if (this.cachedMessages[key] != null) {
-                retValue[key] = this.cachedMessages[key];
-            } else {
-                serverKeys[serverKeysCounter++] = key;
+  /**
+   * Get the i18n messages for the given keys.
+   *
+   * @deprecated use listenForI18NMessages(...keys: string[]):I18NListener
+   */
+  public getI18NMessages(...keys: string[]): RequestInfoPromise<any> {
+    const retValue: Record<string, any> = {};
+    const serverKeys: Record<number, string> = {};
+    let serverKeysCounter = 0;
+    keys.forEach((key) => {
+      if (this.cachedMessages[key] != null) {
+        retValue[key] = this.cachedMessages[key];
+      } else {
+        serverKeys[serverKeysCounter++] = key;
+      }
+    });
+    if (serverKeysCounter > 0) {
+      const promiseA = this.sabloService.callService('i18nService', 'getI18NMessages', serverKeys, false);
+      return wrapPromiseToPropagateCustomRequestInfoInternal(
+        promiseA,
+        promiseA.then(
+          (result: any) => {
+            for (const key of Object.keys(result)) {
+              this.cachedMessages[key] = result[key];
+              retValue[key] = result[key];
             }
-        });
-        if (serverKeysCounter > 0) {
-            const promiseA = this.sabloService.callService('i18nService', 'getI18NMessages', serverKeys, false);
-            return wrapPromiseToPropagateCustomRequestInfoInternal(promiseA, promiseA.then((result: any) => {
-                for (const key of Object.keys(result)) {
-                    this.cachedMessages[key] = result[key];
-                    retValue[key] = result[key];
-                }
-                return retValue;
-            }, (error: any) => Promise.reject(error)));
-        } else {
-            const defered = new Deferred<any>();
-            defered.resolve(retValue);
-            return defered.promise;
-        }
+            return retValue;
+          },
+          (error: any) => Promise.reject(error),
+        ),
+      );
+    } else {
+      const defered = new Deferred<any>();
+      defered.resolve(retValue);
+      return defered.promise;
     }
+  }
 
-    public flush() {
-        this.cachedMessages = {};
-        for (const key in this.cachedPromises) {
-            if (this.cachedPromises.hasOwnProperty(key) && this.cachedPromises[key].promise) {
-                (this.cachedPromises[key].promise as any)['reject'] = true;
-            }
-        }
-        this.cachedPromises = {};
-        this.listeners.forEach( (listener) => listener.getMessages());
+  public flush() {
+    this.cachedMessages = {};
+    for (const key in this.cachedPromises) {
+      if (this.cachedPromises.hasOwnProperty(key) && this.cachedPromises[key].promise) {
+        (this.cachedPromises[key].promise as any)['reject'] = true;
+      }
     }
+    this.cachedPromises = {};
+    this.listeners.forEach((listener) => listener.getMessages());
+  }
 }
 
 class Listener implements I18NListener {
-    private callback!:  (messages: Map<string,string>) => void;
+  private callback!: (messages: Map<string, string>) => void;
 
-    constructor(private keys: string[], private service: I18NProvider, private listeners: Set<Listener>) {
-        this.listeners.add(this);
-        this.getMessages();
-    }
+  constructor(
+    private keys: string[],
+    private service: I18NProvider,
+    private listeners: Set<Listener>,
+  ) {
+    this.listeners.add(this);
+    this.getMessages();
+  }
 
-    getMessages() {
-        this.service.getI18NMessages(...this.keys).then( (value: any) => {
-            const map = new Map<string, string>();
-            for (const key of Object.keys(value)) {
-                 map.set(key, value[key]);
-            }
-            this.postMessages(map);
+  getMessages() {
+    this.service
+      .getI18NMessages(...this.keys)
+      .then((value: any) => {
+        const map = new Map<string, string>();
+        for (const key of Object.keys(value)) {
+          map.set(key, value[key]);
         }
-        ).catch((value: any)=> console.log(value));
-    }
+        this.postMessages(map);
+      })
+      .catch((value: any) => console.log(value));
+  }
 
-    destroy(): void {
-        this.listeners.delete(this);
-    }
+  destroy(): void {
+    this.listeners.delete(this);
+  }
 
-    messages( callback: (messages: Map<string,string>) => void): I18NListener {
-        this.callback = callback;
-        return this;
-    }
+  messages(callback: (messages: Map<string, string>) => void): I18NListener {
+    this.callback = callback;
+    return this;
+  }
 
-    postMessages(messages: Map<string,string>) {
-        if (this.callback) this.callback(messages);
-    }
+  postMessages(messages: Map<string, string>) {
+    if (this.callback) this.callback(messages);
+  }
 }

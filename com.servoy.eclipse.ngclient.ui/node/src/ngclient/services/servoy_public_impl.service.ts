@@ -13,121 +13,130 @@ import { PopupFormService } from './popupform.service';
 
 @Injectable()
 export class ServoyPublicServiceImpl extends ServoyPublicService {
-    private readonly sabloService = inject(SabloService);
-    private readonly i18nProvider = inject(I18NProvider);
-    private readonly utils = inject(SvyUtilsService);
-    private readonly localeService = inject(LocaleService);
-    private readonly applicationService = inject(ApplicationService);
-    private readonly servoyService = inject(ServoyService);
-    private readonly formService = inject(FormService);
-    private readonly servicesService = inject(ServicesService);
-    private readonly popupFormService = inject(PopupFormService);
-    private readonly websocketService = inject(WebsocketService);
+  private readonly sabloService = inject(SabloService);
+  private readonly i18nProvider = inject(I18NProvider);
+  private readonly utils = inject(SvyUtilsService);
+  private readonly localeService = inject(LocaleService);
+  private readonly applicationService = inject(ApplicationService);
+  private readonly servoyService = inject(ServoyService);
+  private readonly formService = inject(FormService);
+  private readonly servicesService = inject(ServicesService);
+  private readonly popupFormService = inject(PopupFormService);
+  private readonly websocketService = inject(WebsocketService);
 
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 
-    executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
-        return this.servoyService.executeInlineScript(formname, script, params);
-    }
+  executeInlineScript<T>(formname: string, script: string, params: any[]): Promise<T> {
+    return this.servoyService.executeInlineScript(formname, script, params);
+  }
 
-    callServiceServerSideApi<T>(servicename: string, methodName: string, args: any[]): Promise<T> {
-        return this.servicesService.callServiceServerSideApi(servicename, methodName, args);
-    }
+  callServiceServerSideApi<T>(servicename: string, methodName: string, args: any[]): Promise<T> {
+    return this.servicesService.callServiceServerSideApi(servicename, methodName, args);
+  }
 
-    getI18NMessages(...keys: string[]): Promise<any> {
-        return this.i18nProvider.getI18NMessages(...keys);
-    }
+  getI18NMessages(...keys: string[]): Promise<any> {
+    return this.i18nProvider.getI18NMessages(...keys);
+  }
 
-    public listenForI18NMessages(...keys: string[]): I18NListener {
-        return this.i18nProvider.listenForI18NMessages(...keys);
-    }
+  public listenForI18NMessages(...keys: string[]): I18NListener {
+    return this.i18nProvider.listenForI18NMessages(...keys);
+  }
 
-    getClientnr(): string {
-        return this.sabloService.getClientnr()!;
-    }
+  getClientnr(): string {
+    return this.sabloService.getClientnr()!;
+  }
 
-    callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
-        return this.sabloService.callService(serviceName, methodName, argsObject, async);
-    }
+  callService<T>(serviceName: string, methodName: string, argsObject: any, async?: boolean): RequestInfoPromise<T> {
+    return this.sabloService.callService(serviceName, methodName, argsObject, async);
+  }
 
-    getLocale(): string {
-        return this.localeService.getLocale();
-    }
+  getLocale(): string {
+    return this.localeService.getLocale();
+  }
 
-    getAGGridLocale(): Record<string, string> {
-        return this.localeService.getAgGridLocale();
-    }
+  getAGGridLocale(): Record<string, string> {
+    return this.localeService.getAgGridLocale();
+  }
 
-    getLocaleObject(): Locale {
-        return this.sabloService.getLocale();
-    }
+  getLocaleObject(): Locale {
+    return this.sabloService.getLocale();
+  }
 
-    createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
-        return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement)!;
-    }
+  createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {
+    return this.utils.createJSEvent(event, eventType, contextFilter, contextFilterElement)!;
+  }
 
-    showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
-        this.applicationService.showFileOpenDialog(title, multiselect, acceptFilter, url);
-    }
+  showFileOpenDialog(title: string, multiselect: boolean, acceptFilter: string, url: string): void {
+    this.applicationService.showFileOpenDialog(title, multiselect, acceptFilter, url);
+  }
 
-    showMessageDialog(dialogTitle: string, dialogMessage: string, styleClass: string, values: string[], buttonsText: string[], inputType: string, defaultButtonIndex: number, okButtonText?:string): Promise<string> {
-        return this.applicationService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, buttonsText, inputType, defaultButtonIndex, okButtonText);
-    }
+  showMessageDialog(
+    dialogTitle: string,
+    dialogMessage: string,
+    styleClass: string,
+    values: string[],
+    buttonsText: string[],
+    inputType: string,
+    defaultButtonIndex: number,
+    okButtonText?: string,
+  ): Promise<string> {
+    return this.applicationService.showMessageDialog(dialogTitle, dialogMessage, styleClass, values, buttonsText, inputType, defaultButtonIndex, okButtonText);
+  }
 
-    generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
-        return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);
-    }
+  generateServiceUploadUrl(serviceName: string, apiFunctionName: string, tus?: boolean): string {
+    return this.applicationService.generateServiceUploadUrl(serviceName, apiFunctionName, tus);
+  }
 
-    generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string {
-        return this.applicationService.generateUploadUrl(formname, componentName, propertyName, tus);
-    }
+  generateUploadUrl(formname: string, componentName: string, propertyName: string, tus?: boolean): string {
+    return this.applicationService.generateUploadUrl(formname, componentName, propertyName, tus);
+  }
 
-    generateMediaDownloadUrl(media: string): string {
-        return this.applicationService.generateMediaDownloadUrl(media);
-    }
+  generateMediaDownloadUrl(media: string): string {
+    return this.applicationService.generateMediaDownloadUrl(media);
+  }
 
-    getUIProperty(key: string): any {
-        return this.applicationService.getUIProperty(key);
-    }
+  getUIProperty(key: string): any {
+    return this.applicationService.getUIProperty(key);
+  }
 
-    getFormCacheByName(containedForm: string): IFormCache {
-        return this.formService.getFormCacheByName(containedForm) as unknown as IFormCache;
-    }
+  getFormCacheByName(containedForm: string): IFormCache {
+    return this.formService.getFormCacheByName(containedForm) as unknown as IFormCache;
+  }
 
-    /** 
-     * @deprecated see interface jsDoc 
-     */
-    sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any) {
-        this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, propertyValue);
-    }
+  /**
+   * @deprecated see interface jsDoc
+   */
+  sendServiceChanges(serviceName: string, propertyName: string, propertyValue: any) {
+    this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, propertyValue);
+  }
 
-    sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: any, oldPropertyValue: any): void {
-        this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, oldPropertyValue);
-    }
+  sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: any, oldPropertyValue: any): void {
+    this.servicesService.sendServiceChangesWithValue(serviceName, propertyName, propertyValue, oldPropertyValue);
+  }
 
-    showForm(popup: PopupForm): void {
-        this.popupFormService.showForm(popup);
-    }
+  showForm(popup: PopupForm): void {
+    this.popupFormService.showForm(popup);
+  }
 
-    cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean|string): void {
-        this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer_or_name);
-    }
+  cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean | string): void {
+    this.popupFormService.cancelFormPopup(disableClearPopupFormCallToServer_or_name);
+  }
 
-    setFormStyleClasses(styleclasses: { property: string }): void {
-        this.formService.setFormStyleClasses(styleclasses);
-    }
+  setFormStyleClasses(styleclasses: { property: string }): void {
+    this.formService.setFormStyleClasses(styleclasses);
+  }
 
-    public isInTestingMode(): boolean {
-        return this.getUIProperty('servoy.ngclient.testingMode');
-    }
+  public isInTestingMode(): boolean {
+    return this.getUIProperty('servoy.ngclient.testingMode');
+  }
 
-    public getTemplateForFormComponentChild(formName: string, item: IComponentCache): TemplateRef<any> {
-        const formComponent: any = this.formService.getFormComponentInstance(formName);
-        if (formComponent && formComponent['getTemplateForLFC']) {
-            return formComponent['getTemplateForLFC'](item);
-        }
-        return null!;
+  public getTemplateForFormComponentChild(formName: string, item: IComponentCache): TemplateRef<any> {
+    const formComponent: any = this.formService.getFormComponentInstance(formName);
+    if (formComponent && formComponent['getTemplateForLFC']) {
+      return formComponent['getTemplateForLFC'](item);
     }
+    return null!;
+  }
 }
