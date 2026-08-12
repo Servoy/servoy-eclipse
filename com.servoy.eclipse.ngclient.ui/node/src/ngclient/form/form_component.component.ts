@@ -6,6 +6,7 @@ import {
   viewChild,
   signal
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, instanceOfApiExecutor, IFormComponent } from '../types';
 
@@ -19,7 +20,7 @@ import { FormService } from '../form.service';
 
 import { ConverterService } from '../../sablo/converter.service';
 import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
-import { fromEvent, debounceTime, Subscription } from 'rxjs';
+import { fromEvent, debounceTime } from 'rxjs';
 
 @Component({
     template: '',
@@ -252,7 +253,6 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     private handlerCache: { [property: string]: { [property: string]: (event: Event) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
-    private resizeSubscription$: Subscription;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
         private servoyService: ServoyService, logFactory: LoggerFactory,
@@ -264,7 +264,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         super(renderer);
         this.log = logFactory.getLogger('FormComponent');
         const resizeObservable$ = fromEvent(this.windowRefService.nativeWindow, 'resize')
-        this.resizeSubscription$ = resizeObservable$.pipe(debounceTime(500)).subscribe(evt => {
+        resizeObservable$.pipe(debounceTime(500), takeUntilDestroyed()).subscribe(evt => {
             this.onResize()
         });
     }
@@ -357,7 +357,6 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 
     ngOnDestroy() {
         this.formservice.destroy(this.name, true);
-        this.resizeSubscription$.unsubscribe();
     }
 
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
