@@ -1,6 +1,10 @@
 import { Component, inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SabloTabseq } from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
+import { DefaultNavigator } from '../../../servoycore/default-navigator/default-navigator';
+import { FormComponent } from '../../form/form_component.component';
 
 import { FormService } from '../../form.service';
 
@@ -9,7 +13,8 @@ import { FormService } from '../../form.service';
   templateUrl: './dialog-window.component.html',
   styleUrls: ['./dialog-window.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, SabloTabseq, DefaultNavigator, FormComponent]
 })
   export class DialogWindowComponent {
 

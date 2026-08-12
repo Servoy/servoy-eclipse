@@ -1,4 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LocalStorageService } from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
 
@@ -6,7 +8,8 @@ import { SabloService } from '../../../sablo/sablo.service';
     templateUrl: './default-login-window.component.html',
     styleUrls: ['./default-login-window.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule]
 })
 export class DefaultLoginWindowComponent {
 

@@ -6,8 +6,7 @@ import {
   viewChild, signal, inject
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
-import { DesignFormComponent } from '../../designer/designform_component.component';
+import { AbstractFormComponent } from '../../ngclient/form/abstract_form_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyBaseComponent, ServoyPublicModule } from '@servoy/public';
 import { FormComponentValue } from '../../ngclient/converters/formcomponent_converter';
@@ -187,15 +186,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     constructor() {
         super();
-        try {
-            this.parent = this._injector.get<FormComponent>(FormComponent);
-        } catch (e) {
-            //ignore
-        }
-
-        if (!this.parent) {
-            this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
-        }
+        this.parent = this._injector.get<AbstractFormComponent>(AbstractFormComponent);
         this.log = inject(LoggerFactory).getLogger('ListFormComponent');
     }
 
@@ -854,7 +845,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         ', but comp: ' + (uiComp == null ? ' is not found' : uiComp.name + ' doesnt implement IApiExecutor'));
                 }
             } else {
-                FormComponent.doCallApiOnComponent(uiComp, this.typesRegistry.getComponentSpecification(compModel.type),
+                AbstractFormComponent.doCallApiOnComponent(uiComp, this.typesRegistry.getComponentSpecification(compModel.type),
                     apiName, args, this.converterService, this.log, componentName);
             }
         } else {
@@ -874,7 +865,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getDesignNGClass(item: StructureCache): { [klass: string]: any } | null {
-       if (this.parent instanceof DesignFormComponent){
+       if (this.parent.isDesigner()){
           return this.parent.getNGClass(item);
        }
        return null;

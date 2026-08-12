@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Directive, input } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MainComponent } from './main.component';
 import {ServoyService} from './servoy.service';
 import {AllServiceService} from './allservices.service';
@@ -11,7 +13,6 @@ import { ServerDataService } from './services/serverdata.service';
 import { I18NProvider } from './services/i18n_provider.service';
 import { I18NListener } from '../../projects/servoy-public/src/lib/services/servoy_public.service';
 import { ServoyTestingModule } from '../testing/servoytesting.module';
-import { ServoyPublicModule } from '@servoy/public';
 
 describe('MainComponent', () => {
   const servicesService = { connect: vi.fn(), getSolutionSettings: vi.fn() } as any;
@@ -24,11 +25,8 @@ describe('MainComponent', () => {
   };
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [
-        MainComponent,MockFormComponent,MockDefaultNavigator,MockSessionView
-      ],
       imports: [
-        ServoyTestingModule, ServoyPublicModule
+        ServoyTestingModule
       ],
       providers:    [ {provide: ServoyService, useValue: servicesService },
         { provide:AllServiceService, useValue: {init: ()=>{}} },
@@ -39,6 +37,8 @@ describe('MainComponent', () => {
         { provide:WebsocketService, useValue: {} },
         { provide:LoadingIndicatorService, useValue: {}},
         { provide:ServerDataService, useValue: {init: ()=>{}}}]
+    }).overrideComponent(MainComponent, {
+      set: { imports: [CommonModule, FormsModule], schemas: [CUSTOM_ELEMENTS_SCHEMA] }
     }).compileComponents();
   });
   it('should create the main component', async () => {
@@ -49,25 +49,3 @@ describe('MainComponent', () => {
     expect(servicesService.connect).toHaveBeenCalled();
   });
 });
-
-@Directive({
-    selector: 'svy-form',
-    standalone: false
-})
-  class MockFormComponent{
-    public readonly name = input<string>(undefined as any);
-  }
-
-@Directive({
-    selector: 'svy-default-navigator',
-    standalone: false
-})
-  class MockDefaultNavigator{
-    public readonly name = input<string>(undefined as any);
-  }
-@Directive({
-    selector: 'session-view',
-    standalone: false
-})
-  class MockSessionView{
-  }

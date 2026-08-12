@@ -1,4 +1,4 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 
 import { MainComponent } from './main.component';
 
@@ -19,11 +19,13 @@ import {MainRoutingModule} from './main-routing.module';
 import { DeveloperService } from './developer.service';
 import { AlertWindowComponent} from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
-import { LFCModule } from './lfc.module';
+import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
 import { ServoyPublicService } from '@servoy/public';
 
 @NgModule( {
-    declarations: [
+    imports: [
+        MainRoutingModule,
+        ServoyCoreComponentsModule,
         MainComponent,
         FormComponent,
         DefaultLoginWindowComponent,
@@ -34,17 +36,10 @@ import { ServoyPublicService } from '@servoy/public';
         AlertWindowComponent,
         MessageDialogWindowComponent
     ],
-    imports: [
-        MainRoutingModule,
-        LFCModule
-    ],
     providers: [UpperCasePipe, LowerCasePipe,
         ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
         ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
-    bootstrap: [MainComponent],
-    schemas: [
-        CUSTOM_ELEMENTS_SCHEMA
-    ]
+    bootstrap: [MainComponent]
 } )
 export class ServoyModule {
     constructor(_developerService: DeveloperService) {

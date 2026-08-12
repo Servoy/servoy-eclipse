@@ -1,13 +1,16 @@
 import { Component, inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-import { ServoyPublicService, PopupForm } from '@servoy/public';
+import { ServoyPublicService, PopupForm, SabloTabseq } from '@servoy/public';
 import { PopupFormService } from '../popupform.service';
+import { FormComponent } from '../../form/form_component.component';
 
 @Component({
     selector: 'svy-popupform',
     templateUrl: './popupform.html',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, SabloTabseq, FormComponent]
 })
 export class ServoyFormPopupComponent {
 

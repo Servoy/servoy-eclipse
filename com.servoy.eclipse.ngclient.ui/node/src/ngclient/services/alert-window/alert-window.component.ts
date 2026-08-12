@@ -1,4 +1,5 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { I18NProvider } from '../i18n_provider.service';
 
 @Component({
@@ -6,7 +7,8 @@ import { I18NProvider } from '../i18n_provider.service';
     templateUrl: './alert-window.component.html',
     styleUrls: ['./alert-window.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule]
 })
 export class AlertWindowComponent {
     readonly title = signal<string>(undefined!);

@@ -2,8 +2,12 @@ import {
   Component, Input, OnDestroy, OnChanges, SimpleChanges, viewChild,
   TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, ViewEncapsulation,
   HostListener,
-  DOCUMENT
+  DOCUMENT,
+  CUSTOM_ELEMENTS_SCHEMA,
+  forwardRef
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { FormCache, StructureCache, FormComponentCache, ComponentCache, IFormComponent } from '../ngclient/types';
 
@@ -14,8 +18,16 @@ import { LoggerService, LoggerFactory, ServoyBaseComponent, WindowRefService } f
 import { ServoyApi } from '../ngclient/servoy_api';
 import { FormService } from '../ngclient/form.service';
 
-import { AbstractFormComponent } from '../ngclient/form/form_component.component';
+import { AbstractFormComponent } from '../ngclient/form/abstract_form_component.component';
+import { FormComponent } from '../ngclient/form/form_component.component';
 import { TypesRegistry} from '../sablo/types_registry';
+import { AddAttributeDirective } from '../servoycore/addattribute.directive';
+import { AllComponentsModule } from '../ngclient/allcomponents.module';
+import { AllServicesModules } from '../ngclient/allservices.service';
+import { ServoyCoreComponentsModule } from '../servoycore/servoycore.module';
+import { ServoyCoreFormcomponentResponsiveCotainer } from '../servoycore/formcomponent-responsive-container/formcomponent-responsive-container';
+import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
+import { RowRenderer } from '../servoycore/listformcomponent/row-renderer.component';
 
 @Component({
     // eslint-disable-next-line
@@ -116,7 +128,21 @@ import { TypesRegistry} from '../sablo/types_registry';
       `
     /* eslint-enable max-len */
     ,
-    standalone: false
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        AddAttributeDirective,
+        AllComponentsModule,
+        AllServicesModules,
+        ServoyCoreComponentsModule,
+        ServoyCoreFormcomponentResponsiveCotainer,
+        ListFormComponent,
+        RowRenderer,
+        FormComponent
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    providers: [{ provide: AbstractFormComponent, useExisting: forwardRef(() => DesignFormComponent) }]
 })
 
 export class DesignFormComponent extends AbstractFormComponent implements OnDestroy, OnChanges, IFormComponent {
@@ -557,7 +583,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return api;
     }
 
-    getNGClass(item: StructureCache): { [klass: string]: any } {
+    override isDesigner(): boolean {
+        return true;
+    }
+
+    override getNGClass(item: StructureCache): { [klass: string]: any } {
         const ngclass: Record<string, any> = {};
         if (!item.cssPositionContainer || item.getDepth() != 0) {
         	ngclass[item.attributes!.designclass] = this.showWireframe;

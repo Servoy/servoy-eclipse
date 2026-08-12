@@ -1,4 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
@@ -7,14 +9,19 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { LoadingIndicatorService } from '../sablo/util/loading-indicator/loading-indicator.service';
 import { ServerDataService } from './services/serverdata.service';
 import { I18NProvider } from './services/i18n_provider.service';
-import { I18NListener, MainViewRefService } from '@servoy/public';
+import { I18NListener, MainViewRefService, SabloTabseq } from '@servoy/public';
 import { WindowRefService } from '@servoy/public';
+import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
+import { SessionView } from '../servoycore/session-view/session-view';
+import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
+import { FormComponent } from './form/form_component.component';
 
 @Component({
   selector: 'svy-main',
   templateUrl: './main.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, FormsModule, SabloTabseq, DefaultNavigator, SessionView, LoadingIndicatorComponent, FormComponent]
 })
 
 export class MainComponent implements OnInit, OnDestroy {

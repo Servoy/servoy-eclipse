@@ -167,8 +167,8 @@ describe.skip('FormComponentComponentTest', () => {
         servoyService = { connect: vi.fn() } as any;
 
         TestBed.configureTestingModule({
-            declarations: [FormComponent, TestComponentsCustomComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean],
             imports: [
+                FormComponent, TestComponentsCustomComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean,
                 TestHostComponent, ServoyTestingModule, ServoyPublicModule
             ],
             providers: [
