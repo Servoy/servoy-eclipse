@@ -3,7 +3,7 @@ import {IPopupSupportComponent} from '../spectypes.service';
 
 @Directive({
     selector: '[svyTabFix]',
-    standalone: false
+    standalone: true
 })
 export class TabFixDirective {
     // this directive needs to be in a module because of listener priority, so i put it here

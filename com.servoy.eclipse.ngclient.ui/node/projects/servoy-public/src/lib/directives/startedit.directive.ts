@@ -4,7 +4,7 @@ import { ServoyBaseComponent } from '../basecomponent';
 
 @Directive({
     selector: '[svyStartEdit]',
-    standalone: false
+    standalone: true
 })
 export class StartEditDirective {
 

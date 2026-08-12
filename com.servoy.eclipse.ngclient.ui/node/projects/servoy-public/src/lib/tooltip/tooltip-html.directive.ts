@@ -9,7 +9,7 @@ import { TooltipService } from './tooltip.service';
  */
 @Directive({
     selector: '[htmlTooltip]',
-    standalone: false
+    standalone: true
 })
 export class HTMLTooltipDirective {
 

@@ -5,7 +5,7 @@ import { WindowRefService } from '../services/windowref.service';
 
 @Directive({
     selector: '[svyImageMediaId]',
-    standalone: false
+    standalone: true
 })
 export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnDestroy {
 

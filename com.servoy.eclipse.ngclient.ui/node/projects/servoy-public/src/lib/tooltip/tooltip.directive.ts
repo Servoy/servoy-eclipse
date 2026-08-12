@@ -5,7 +5,7 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
     selector: '[svyTooltip]',
-    standalone: false
+    standalone: true
 })
 export class TooltipDirective extends HTMLTooltipDirective {
 

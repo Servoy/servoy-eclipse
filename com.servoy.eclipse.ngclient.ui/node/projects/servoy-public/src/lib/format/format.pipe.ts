@@ -4,7 +4,7 @@ import { LoggerFactory, LoggerService } from '../logger.service';
 
 @Pipe( {
     name: 'formatFilter',
-    standalone: false
+    standalone: true
 } )
 export class FormatFilterPipe implements PipeTransform {
 

@@ -3,7 +3,7 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
     selector: '[svyUpload]',
-    standalone: false
+    standalone: true
 })
 export class UploadDirective implements OnInit {
     readonly formname = input<string>(undefined as any);

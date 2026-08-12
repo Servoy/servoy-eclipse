@@ -43,7 +43,7 @@ class NumberParser {
         useExisting: forwardRef(() => FormatDirective),
         multi: true
     }],
-    standalone: false
+    standalone: true
 })
 export class FormatDirective implements ControlValueAccessor, AfterViewInit, OnChanges {
     private static DATETIMEFORMAT: Format = { display: 'yyyy-MM-dd\'T\'HH:mm:ss', type: 'DATETIME' } as Format;
