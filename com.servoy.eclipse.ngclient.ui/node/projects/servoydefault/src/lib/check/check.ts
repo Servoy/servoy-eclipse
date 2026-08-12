@@ -1,3 +1,6 @@
+import { SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { Component, Renderer2, SimpleChanges, ElementRef, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
@@ -7,7 +10,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     templateUrl: './check.html',
     styleUrls: ['./check.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq]
 })
 export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
     override readonly horizontalAlignment = input<number>(undefined as any);

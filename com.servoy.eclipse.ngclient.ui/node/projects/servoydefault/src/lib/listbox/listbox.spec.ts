@@ -36,8 +36,7 @@ describe('ServoyDefaultListBox', () => {
   beforeEach(async () => {
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultListBox, TooltipDirective, SabloTabseq, FormatFilterPipe],
-      imports: [FormsModule],
+      imports: [ServoyDefaultListBox, TooltipDirective, SabloTabseq, FormatFilterPipe, FormsModule],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

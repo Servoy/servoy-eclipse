@@ -1,3 +1,8 @@
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { SabloTabseq } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { BaseTabpanel,Tab } from '../tabpanel/basetabpanel';
@@ -6,7 +11,8 @@ import { BaseTabpanel,Tab } from '../tabpanel/basetabpanel';
     selector: 'servoydefault-accordion',
     templateUrl: './accordion.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, SabloTabseq, NgbModule, NgTemplateOutlet]
 })
 export class ServoyDefaultAccordion extends BaseTabpanel {
 

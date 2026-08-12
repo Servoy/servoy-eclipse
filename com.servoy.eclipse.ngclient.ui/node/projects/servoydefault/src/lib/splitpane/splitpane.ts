@@ -1,14 +1,20 @@
+import { SabloTabseq, ServoyBaseComponent } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, Input, model, ContentChild, TemplateRef, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
 
-import { ServoyBaseComponent } from '@servoy/public';
 
 import { Tab } from '../tabpanel/basetabpanel';
+import { BGSplitter } from './bg_splitter/bg_splitter.component';
+import { BGPane } from './bg_splitter/bg_pane.component';
 
 @Component( {
     selector: 'servoydefault-splitpane',
     templateUrl: './splitpane.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, SabloTabseq, NgTemplateOutlet, BGSplitter, BGPane]
 } )
 export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> {
 

@@ -35,9 +35,7 @@ describe('ServoyDefaultCheckGroup', () => {
     mockData.hasRealValues = () => true;
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultCheckGroup, TooltipDirective, SabloTabseq,
-                     NotNullOrEmptyPipe, ChoiceElementDirective],
-      imports: [FormsModule],
+      imports: [ServoyDefaultCheckGroup, TooltipDirective, SabloTabseq, NotNullOrEmptyPipe, ChoiceElementDirective, FormsModule],
       providers: [NotNullOrEmptyPipe, FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

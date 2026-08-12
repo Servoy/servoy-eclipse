@@ -19,9 +19,8 @@ describe('ServoyDefaultRectangle', () => {
   beforeEach(async () => {
       servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
       TestBed.configureTestingModule({
-        declarations: [ServoyDefaultRectangle, TooltipDirective],
-        imports: [FormsModule],
-        providers: [FormattingService, TooltipService,
+        imports: [ServoyDefaultRectangle, TooltipDirective, FormsModule],
+      providers: [FormattingService, TooltipService,
                     { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
       })
       .compileComponents();

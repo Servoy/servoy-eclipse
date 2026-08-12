@@ -20,9 +20,8 @@ describe( 'ServoyDefaultTabpanel', () => {
         servoyApi.formWillShow.mockReturnValue( Promise.resolve( true ) );
         servoyApi.hideForm.mockReturnValue( Promise.resolve( true ) );
         TestBed.configureTestingModule( {
-            declarations: [ServoyDefaultTablesspanel, SabloTabseq],
-            imports: [NgbModule, CommonModule],
-            providers: [WindowRefService, LoggerFactory,
+            imports: [ServoyDefaultTablesspanel, SabloTabseq, NgbModule, CommonModule],
+      providers: [WindowRefService, LoggerFactory,
                         { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
         } ).compileComponents();
     } );

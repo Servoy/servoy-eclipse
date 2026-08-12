@@ -1,3 +1,6 @@
+import { ImageMediaIdDirective, SabloTabseq, TooltipDirective , UploadDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { Component, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
@@ -7,7 +10,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-imagemedia',
     templateUrl: './imagemedia.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, UploadDirective, TooltipDirective, SabloTabseq, ImageMediaIdDirective]
 })
 export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivElement> {
 

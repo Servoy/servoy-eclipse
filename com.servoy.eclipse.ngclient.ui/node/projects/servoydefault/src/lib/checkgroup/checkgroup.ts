@@ -1,13 +1,18 @@
+import { NotNullOrEmptyPipe, SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
+import { ChoiceElementDirective } from '../basechoice';
 
 @Component({
     selector: 'servoydefault-checkgroup',
     templateUrl: './checkgroup.html',
     styleUrls: ['./checkgroup.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, NotNullOrEmptyPipe, ChoiceElementDirective]
 })
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 

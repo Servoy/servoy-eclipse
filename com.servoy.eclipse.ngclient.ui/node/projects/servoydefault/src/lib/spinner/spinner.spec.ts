@@ -34,8 +34,7 @@ describe('ServoyDefaultCheckGroup', () => {
     servoyApi = { getMarkupId: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultSpinner, TooltipDirective, SabloTabseq],
-      imports: [FormsModule],
+      imports: [ServoyDefaultSpinner, TooltipDirective, SabloTabseq, FormsModule],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     }).compileComponents();

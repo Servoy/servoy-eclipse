@@ -35,9 +35,7 @@ describe('ServoyDefaultRadiogroup', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultRadiogroup, TooltipDirective, SabloTabseq,
-                     NotNullOrEmptyPipe, ChoiceElementDirective],
-      imports: [FormsModule],
+      imports: [ServoyDefaultRadiogroup, TooltipDirective, SabloTabseq, NotNullOrEmptyPipe, ChoiceElementDirective, FormsModule],
       providers: [NotNullOrEmptyPipe, FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

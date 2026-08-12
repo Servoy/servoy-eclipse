@@ -13,7 +13,7 @@ describe('ServoyDefaultSplitpane', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultSplitpane, SabloTabseq, BGSplitter, BGPane],
+      imports: [ServoyDefaultSplitpane, SabloTabseq, BGSplitter, BGPane],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

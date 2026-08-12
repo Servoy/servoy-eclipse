@@ -1,8 +1,11 @@
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { SabloTabseq, ServoyPublicService, StartEditDirective, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Component, SimpleChanges, HostListener, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
-import { ServoyPublicService } from '@servoy/public';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
 
@@ -10,7 +13,8 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/oper
 	selector: 'servoydefault-typeahead',
 	templateUrl: './typeahead.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, StartEditDirective, NgbModule]
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElement> {
 	readonly instance = viewChild.required<NgbTypeahead>('instance');

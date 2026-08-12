@@ -1,6 +1,8 @@
+import { LoggerFactory, LoggerService, SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { Component, Renderer2, ElementRef, SimpleChanges, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
-import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {
@@ -8,7 +10,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     templateUrl: './radio.html',
     styleUrls: ['./radio.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq]
 } )
 export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     override readonly horizontalAlignment = input<any>(undefined);

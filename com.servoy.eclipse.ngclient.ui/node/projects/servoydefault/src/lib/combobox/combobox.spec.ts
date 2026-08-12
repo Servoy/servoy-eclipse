@@ -23,10 +23,7 @@ describe('ComboboxComponent', () => {
 
 
     TestBed.configureTestingModule({
-        declarations: [ServoyDefaultCombobox, TooltipDirective, SabloTabseq,
-                       StartEditDirective, FormatDirective, FormatFilterPipe,
-                       EmptyValueFilterPipe],
-        imports: [NgbModule, FormsModule],
+      imports: [ServoyDefaultCombobox, TooltipDirective, SabloTabseq, StartEditDirective, FormatDirective, FormatFilterPipe, EmptyValueFilterPipe, NgbModule, FormsModule],
         providers: [FormattingService, TooltipService,
                     { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

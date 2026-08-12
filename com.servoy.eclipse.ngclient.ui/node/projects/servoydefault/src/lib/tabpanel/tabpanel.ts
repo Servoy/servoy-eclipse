@@ -1,17 +1,74 @@
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { LoggerFactory, LoggerService, SabloTabseq, TooltipDirective, TrustAsHtmlPipe , HtmlFilterPipe } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, ViewChild, ElementRef, output, AfterViewInit, OnDestroy, input, inject} from '@angular/core';
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
-import { LoggerFactory, LoggerService } from '@servoy/public';
 
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 
+
+@Component({
+    selector: 'default-tabpanel-active-tab-visibility-listener',
+    template: '<div #element></div>',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: true
+})
+export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit, OnDestroy {
+
+    readonly tab = input<Tab>(undefined as any);
+    readonly visibleTab = output<Tab>();
+
+    @ViewChild('element') elementRef!: ElementRef;
+
+    observer!: MutationObserver;
+    log: LoggerService;
+
+    constructor() {
+        this.log = inject(LoggerFactory).getLogger('default-tabpanel');
+    }
+
+    ngAfterViewInit(): void {
+        if (typeof MutationObserver !== 'undefined') {
+            const tabNode = this.elementRef.nativeElement.parentNode.parentNode;
+
+            this.observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class') {
+                        const oldValueA = mutation.oldValue ? mutation.oldValue.split(' ') : [];
+                        if (oldValueA.indexOf('active') === -1 && (mutation.target as any)['classList'].contains('active')) {
+                            this.visibleTab.emit(this.tab());
+                        }
+                    }
+                });
+            });
+
+            this.observer.observe(tabNode, {
+                attributes: true,
+                attributeOldValue: true
+            });
+        } else {
+            this.log.warn('MutationObserver not available, default-tabpanel may not work correctly.');
+            this.visibleTab.emit(this.tab());
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (this.observer) {
+            this.observer.disconnect();
+        }
+    }
+}
 
 @Component( {
     selector: 'servoydefault-tabpanel',
     templateUrl: './tabpanel.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, HtmlFilterPipe, TooltipDirective, SabloTabseq, TrustAsHtmlPipe, NgbModule, NgTemplateOutlet, DefaultTabpanelActiveTabVisibilityListener]
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
     
@@ -103,57 +160,5 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
 
     getForm(tab: Tab) {
         return this.visibleTabIndex === this.getTabIndex(tab) ? super.getForm(tab) : null;
-    }
-}
-
-@Component({
-    selector: 'default-tabpanel-active-tab-visibility-listener',
-    template: '<div #element></div>',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
-})
-export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit, OnDestroy {
-
-    readonly tab = input<Tab>(undefined as any);
-    readonly visibleTab = output<Tab>();
-
-    @ViewChild('element') elementRef!: ElementRef;
-
-    observer!: MutationObserver;
-    log: LoggerService;
-
-    constructor() {
-        this.log = inject(LoggerFactory).getLogger('default-tabpanel');
-    }
-
-    ngAfterViewInit(): void {
-        if (typeof MutationObserver !== 'undefined') {
-            const tabNode = this.elementRef.nativeElement.parentNode.parentNode;
-
-            this.observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'class') {
-                        const oldValueA = mutation.oldValue ? mutation.oldValue.split(' ') : [];
-                        if (oldValueA.indexOf('active') === -1 && (mutation.target as any)['classList'].contains('active')) {
-                            this.visibleTab.emit(this.tab());
-                        }
-                    }
-                });
-            });
-
-            this.observer.observe(tabNode, {
-                attributes: true,
-                attributeOldValue: true
-            });
-        } else {
-            this.log.warn('MutationObserver not available, default-tabpanel may not work correctly.');
-            this.visibleTab.emit(this.tab());
-        }
-    }
-
-    ngOnDestroy(): void {
-        if (this.observer) {
-            this.observer.disconnect();
-        }
     }
 }

@@ -18,7 +18,7 @@ describe('SvyButton', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultButton, TooltipDirective, SabloTabseq,
+      imports: [ServoyDefaultButton, TooltipDirective, SabloTabseq,
                      ImageMediaIdDirective, FormatFilterPipe, MnemonicletterFilterPipe,
                      TrustAsHtmlPipe],
       providers: [TooltipService, ComponentContributor, FormattingService,

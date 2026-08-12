@@ -1,6 +1,6 @@
 import { SimpleChanges, Directive, Inject, DOCUMENT, output, input, inject } from '@angular/core';
 
-import { PropertyUtils, FormattingService, IValuelist } from '@servoy/public';
+import { FormattingService, IValuelist, PropertyUtils } from '@servoy/public';
 
 import { ServoyDefaultBaseComponent } from './basecomponent';
 

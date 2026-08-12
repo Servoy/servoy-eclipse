@@ -8,7 +8,7 @@ import { BGSplitter } from './bg_splitter.component';
         '[class]': '"split-pane"+index',
         style: 'overflow:auto'
     },
-    standalone: false
+    standalone: true
 })
 export class BGPane{
 

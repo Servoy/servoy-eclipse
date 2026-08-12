@@ -28,9 +28,7 @@ describe('ServoyDefaultTextField', () => {
     
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultTextField, TooltipDirective, SabloTabseq,
-                     StartEditDirective, FormatDirective, DecimalkeyconverterDirective],
-      imports: [FormsModule],
+      imports: [ServoyDefaultTextField, TooltipDirective, SabloTabseq, StartEditDirective, FormatDirective, DecimalkeyconverterDirective, FormsModule],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

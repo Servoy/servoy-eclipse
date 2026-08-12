@@ -18,9 +18,8 @@ describe('ServoyDefaultAccordion', () => {
 
     beforeEach(async () => {
         TestBed.configureTestingModule({
-            declarations: [ServoyDefaultAccordion, SabloTabseq],
-            imports: [NgbModule, CommonModule],
-            providers: [WindowRefService,
+            imports: [ServoyDefaultAccordion, SabloTabseq, NgbModule, CommonModule],
+      providers: [WindowRefService,
                         { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
         })
             .compileComponents();

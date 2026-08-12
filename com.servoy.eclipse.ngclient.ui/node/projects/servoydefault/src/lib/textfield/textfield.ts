@@ -1,3 +1,6 @@
+import { DecimalkeyconverterDirective, FormatDirective, SabloTabseq, StartEditDirective, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
@@ -7,7 +10,8 @@ import {ServoyDefaultBaseField} from '../basefield';
     selector: 'servoydefault-textfield',
     templateUrl: './textfield.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, FormatDirective, DecimalkeyconverterDirective, StartEditDirective]
 } )
 export class ServoyDefaultTextField extends ServoyDefaultBaseField<HTMLInputElement> {
 

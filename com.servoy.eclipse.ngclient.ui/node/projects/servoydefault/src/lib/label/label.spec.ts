@@ -18,7 +18,7 @@ describe( 'SvLabel', () => {
 
     beforeEach( async () => {
         TestBed.configureTestingModule( {
-            declarations: [ServoyDefaultLabel, TooltipDirective, SabloTabseq,
+            imports: [ServoyDefaultLabel, TooltipDirective, SabloTabseq,
                            ImageMediaIdDirective, FormatFilterPipe, MnemonicletterFilterPipe,
                            TrustAsHtmlPipe],
             providers: [TooltipService, FormattingService, ComponentContributor,

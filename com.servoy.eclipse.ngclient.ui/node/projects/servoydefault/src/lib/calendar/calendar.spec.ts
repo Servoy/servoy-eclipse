@@ -18,9 +18,7 @@ describe('ServoyDefaultCalendar', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [ServoyDefaultCalendar, TooltipDirective, SabloTabseq,
-                           StartEditDirective, FormatDirective],
-            imports: [BrowserModule, FormsModule],
+      imports: [ServoyDefaultCalendar, TooltipDirective, SabloTabseq, StartEditDirective, FormatDirective, BrowserModule, FormsModule],
             providers: [Renderer2, FormattingService, TooltipService,
                         { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
         }).compileComponents();

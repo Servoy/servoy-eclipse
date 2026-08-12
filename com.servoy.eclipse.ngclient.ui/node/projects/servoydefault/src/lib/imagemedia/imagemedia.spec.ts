@@ -20,7 +20,7 @@ describe('ServoyDefaultImageMedia', () => {
     servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), getFormName: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
 
     TestBed.configureTestingModule({
-        declarations: [ServoyDefaultImageMedia, TooltipDirective, SabloTabseq,
+        imports: [ServoyDefaultImageMedia, TooltipDirective, SabloTabseq,
                        ImageMediaIdDirective, UploadDirective],
         providers: [FormattingService, TooltipService, {provide: ServoyApi, useValue: servoyApi},
                     { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }],

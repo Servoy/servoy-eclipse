@@ -1,6 +1,9 @@
+import { EditorModule } from '@tinymce/tinymce-angular';
+import { PropertyUtils, SabloTabseq, ServoyPublicService, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Component, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import { PropertyUtils, ServoyPublicService } from '@servoy/public';
 
 import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
@@ -8,7 +11,8 @@ import tinymce, { RawEditorOptions, Editor } from 'tinymce';
     selector: 'servoydefault-htmlarea',
     templateUrl: './htmlarea.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, EditorModule]
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 

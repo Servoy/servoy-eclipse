@@ -17,7 +17,7 @@ describe('ServoyDefaultHTMLView', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultHTMLView, TooltipDirective, SabloTabseq, TrustAsHtmlPipe],
+      imports: [ServoyDefaultHTMLView, TooltipDirective, SabloTabseq, TrustAsHtmlPipe],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

@@ -21,9 +21,8 @@ describe('PasswordComponent', () => {
   beforeEach(() => {
       servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
       TestBed.configureTestingModule({
-        declarations: [ServoyDefaultPassword, TooltipDirective, SabloTabseq],
-        imports: [FormsModule],
-        providers: [FormattingService, TooltipService,
+        imports: [ServoyDefaultPassword, TooltipDirective, SabloTabseq, FormsModule],
+      providers: [FormattingService, TooltipService,
                     { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
       })
       .compileComponents();

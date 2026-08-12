@@ -1,8 +1,7 @@
 import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Directive, inject } from '@angular/core';
 
-import { BaseCustomObject, ServoyBaseComponent, WindowRefService } from '@servoy/public';
+import { BaseCustomObject, LoggerFactory, LoggerService, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
-import { LoggerService, LoggerFactory } from '@servoy/public';
 
 @Directive()
 export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {

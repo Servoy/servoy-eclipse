@@ -1,6 +1,6 @@
 import { SimpleChanges, Directive, input, model } from '@angular/core';
 
-import { ServoyBaseComponent, PropertyUtils, Format } from '@servoy/public';
+import { Format, PropertyUtils, ServoyBaseComponent } from '@servoy/public';
 
 
 @Directive()

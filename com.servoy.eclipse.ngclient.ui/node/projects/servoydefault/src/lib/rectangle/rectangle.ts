@@ -1,10 +1,14 @@
+import { TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import {Component, SimpleChanges, ChangeDetectionStrategy, input} from '@angular/core';
 import {ServoyDefaultBaseComponent} from '../basecomponent';
 @Component({
     selector: 'servoydefault-rectangle',
     templateUrl: './rectangle.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective]
 })
 export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
     readonly lineSize = input<number>(undefined as any);

@@ -39,6 +39,13 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
 
 @NgModule({
   declarations: [
+  ],
+  imports: [
+    FormsModule,
+    CommonModule,
+    NgbModule,
+    ServoyPublicModule,
+    EditorModule,
     ServoyDefaultTextField,
     ServoyDefaultTextArea,
     ServoyDefaultButton,
@@ -65,13 +72,6 @@ import { EditorModule , TINYMCE_SCRIPT_SRC} from '@tinymce/tinymce-angular';
     ChoiceElementDirective,
     BGSplitter,
     BGPane
-  ],
-  imports: [
-    FormsModule,
-    CommonModule,
-    NgbModule,
-    ServoyPublicModule,
-    EditorModule
   ],
   exports: [
             ServoyDefaultTextField,

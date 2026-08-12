@@ -36,8 +36,7 @@ describe('TypeaheadComponent', () => {
     mockData.filterList = () => of(mockData);
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultTypeahead, TooltipDirective, SabloTabseq, StartEditDirective],
-      imports: [NgbModule, FormsModule],
+      imports: [ServoyDefaultTypeahead, TooltipDirective, SabloTabseq, StartEditDirective, NgbModule, FormsModule],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

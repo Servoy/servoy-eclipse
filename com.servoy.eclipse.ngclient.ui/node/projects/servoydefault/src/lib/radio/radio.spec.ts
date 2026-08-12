@@ -12,8 +12,7 @@ describe('ImageLabelComponent', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultRadio, TooltipDirective, SabloTabseq],
-      imports: [FormsModule],
+      imports: [ServoyDefaultRadio, TooltipDirective, SabloTabseq, FormsModule],
       providers: [{ provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })
     .compileComponents();

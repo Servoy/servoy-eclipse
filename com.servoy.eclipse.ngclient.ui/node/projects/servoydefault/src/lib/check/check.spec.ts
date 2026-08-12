@@ -16,8 +16,7 @@ describe('CheckComponent', () => {
   beforeEach(async () => {
   servoyApi =  { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultCheck, TooltipDirective, SabloTabseq],
-      imports: [FormsModule],
+      imports: [ServoyDefaultCheck, TooltipDirective, SabloTabseq, FormsModule],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

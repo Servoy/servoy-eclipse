@@ -1,3 +1,6 @@
+import { FormatFilterPipe, SabloTabseq, ServoyPublicModule, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { Component, SimpleChanges, ChangeDetectionStrategy, input } from '@angular/core';
 
@@ -7,7 +10,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-listbox',
     templateUrl: './listbox.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, FormatFilterPipe, SabloTabseq]
 } )
 export class ServoyDefaultListBox extends ServoyDefaultBaseField<HTMLSelectElement> {
     readonly multiselectListbox = input<any>(undefined);

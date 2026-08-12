@@ -1,20 +1,22 @@
+import { FormatDirective, FormattingService, getFirstDayOfWeek, LoggerFactory, LoggerService, SabloTabseq, ServoyPublicService, StartEditDirective, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Component, SimpleChanges, ElementRef, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 
-import { FormattingService, ServoyPublicService, getFirstDayOfWeek } from '@servoy/public';
 
 import { ServoyDefaultBaseField } from '../basefield';
 
 import { DateTime as LuxonDateTime } from 'luxon';
 
 
-import { FormatDirective, LoggerFactory, LoggerService } from '@servoy/public';
 import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dominus';
 
 @Component({
     selector: 'servoydefault-calendar',
     templateUrl: './calendar.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, FormatDirective, StartEditDirective]
 })
 export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement> {
 

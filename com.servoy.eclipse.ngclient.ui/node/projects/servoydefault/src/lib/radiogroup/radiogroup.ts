@@ -1,6 +1,9 @@
+import { NotNullOrEmptyPipe, PropertyUtils, SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
-import { PropertyUtils } from '@servoy/public';
+import { ChoiceElementDirective } from '../basechoice';
 
 
 @Component({
@@ -8,7 +11,8 @@ import { PropertyUtils } from '@servoy/public';
     templateUrl: './radiogroup.html',
     styleUrls: ['./radiogroup.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, NotNullOrEmptyPipe, ChoiceElementDirective]
 })
 export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
 

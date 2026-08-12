@@ -103,7 +103,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
 
 @Directive({
     selector: '[svyBaseChoiceElement]',
-    standalone: false
+    standalone: true
 })
 export class ChoiceElementDirective implements OnInit {
 

@@ -19,8 +19,7 @@ describe('ServoyDefaultTextArea', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultTextArea, TooltipDirective, SabloTabseq, StartEditDirective],
-      imports: [FormsModule],
+      imports: [ServoyDefaultTextArea, TooltipDirective, SabloTabseq, StartEditDirective, FormsModule],
       providers: [FormattingService, TooltipService,
                   { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
     })

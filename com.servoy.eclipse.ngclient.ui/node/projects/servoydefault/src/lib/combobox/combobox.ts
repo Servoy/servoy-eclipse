@@ -1,14 +1,18 @@
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FormatDirective, FormatFilterPipe, FormattingService, SabloTabseq, ServoyPublicService, StartEditDirective, TooltipDirective , EmptyValueFilterPipe } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 import { Component, SimpleChanges, HostListener, QueryList, ElementRef, ChangeDetectionStrategy, inject, viewChild, viewChildren } from '@angular/core';
 import { NgbDropdownItem, NgbTooltip, NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
-import { FormattingService, ServoyPublicService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
     selector: 'servoydefault-combobox',
     templateUrl: './combobox.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, EmptyValueFilterPipe, TooltipDirective, SabloTabseq, FormatFilterPipe, FormatDirective, StartEditDirective, NgbModule]
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 

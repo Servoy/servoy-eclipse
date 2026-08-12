@@ -29,9 +29,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         servoyApi.hideForm.mockReturnValue( Promise.resolve( true ) );
         servoyApi.trustAsHtml.mockReturnValue(  true );
         TestBed.configureTestingModule( {
-            declarations: [ServoyDefaultTabpanel, DefaultTabpanelActiveTabVisibilityListener,
-                           SabloTabseq, TooltipDirective, HtmlFilterPipe, TrustAsHtmlPipe],
-            imports: [NgbModule],
+      imports: [ServoyDefaultTabpanel, DefaultTabpanelActiveTabVisibilityListener, SabloTabseq, TooltipDirective, HtmlFilterPipe, TrustAsHtmlPipe, NgbModule],
             providers: [WindowRefService, LoggerFactory, TooltipService,
                         { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl }]
         } ).compileComponents();

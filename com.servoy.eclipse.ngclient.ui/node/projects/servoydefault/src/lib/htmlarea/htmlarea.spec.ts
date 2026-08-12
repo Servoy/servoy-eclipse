@@ -17,9 +17,8 @@ describe('HtmlareaComponent', () => {
     beforeEach(async () => {
 
     TestBed.configureTestingModule({
-    declarations: [ServoyDefaultHtmlarea, TooltipDirective, SabloTabseq],
-    imports: [FormsModule, EditorModule],
-    providers: [FormattingService, TooltipService,
+    imports: [ServoyDefaultHtmlarea, TooltipDirective, SabloTabseq, FormsModule, EditorModule],
+      providers: [FormattingService, TooltipService,
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
         { provide: ServoyPublicService, useClass: ServoyPublicServiceTestingImpl },
         provideHttpClient(withXhr(), withInterceptorsFromDi())]

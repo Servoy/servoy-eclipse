@@ -1,3 +1,6 @@
+import { SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Component, SimpleChanges, ElementRef, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -7,7 +10,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     templateUrl: './spinner.html',
     styleUrls: ['./spinner.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq]
 })
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 
