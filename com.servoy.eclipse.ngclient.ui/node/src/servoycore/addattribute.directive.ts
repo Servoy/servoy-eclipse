@@ -8,8 +8,8 @@ import { StructureCache } from '../ngclient/types';
 })
 export class AddAttributeDirective implements OnChanges {
     readonly svyContainerStyle = input<any>(undefined);
-    readonly svyContainerLayout = input<{ [property: string]: string } | undefined>(undefined);
-    readonly svyContainerClasses = input<Array<string>>(undefined!);
+    readonly svyContainerLayout = input<Record<string, string> | undefined>(undefined);
+    readonly svyContainerClasses = input<string[]>(undefined!);
     readonly svyContainerAttributes = input(undefined);
 
     parent!: AbstractFormComponent;
@@ -65,7 +65,7 @@ export class AddAttributeDirective implements OnChanges {
             const name = svyContainerStyle.attributes.name.split('.')[1];
             if (this.parent.cssstyles && this.parent.cssstyles[name]) {
                 const stylesMap = this.parent.cssstyles[name];
-                for (let k in stylesMap) {
+                for (const k in stylesMap) {
                     this.renderer.setStyle(this.el.nativeElement, k, stylesMap[k]);
                 }
             }

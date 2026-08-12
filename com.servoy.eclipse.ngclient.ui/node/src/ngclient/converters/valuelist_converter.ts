@@ -102,10 +102,10 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
     public diplayValueReq: { getDisplayValue: string; id: number } | undefined;
     public hasRealValues!: boolean;
 
-    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
+    deferred!: Record<string, { defer: Deferred<any>; timeoutId: any }>;
     timeoutRejectLogPrefix!: string;
 
-    init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } }, timeoutRejectLogPrefix: string) {
+    init(deferred: Record<string, { defer: Deferred<any>; timeoutId: any }>, timeoutRejectLogPrefix: string) {
         this.deferred = deferred;
         this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
     }
@@ -124,7 +124,7 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
 export class Valuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist, IChangeAwareValue, IUIDestroyAwareValue {
 
     constructor(private sabloDeferHelper: SabloDeferHelper, private realValueType: string,
-        private internalState: ValuelistState, values?: Array<{ displayValue: string; realValue: any }>) {
+        private internalState: ValuelistState, values?: { displayValue: string; realValue: any }[]) {
         super();
         if (values) this.push(...values);
         // see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
@@ -205,7 +205,7 @@ export class Valuelist extends Array<{ displayValue: string; realValue: any }> i
 
 /** This is exported just in order to be useful in unit tests. Otherwise it's an internal interface. Do not use. */
 export interface IValuelistTValueFromServer {
-    values?: Array<{ displayValue: any; realValue: any }>;
+    values?: { displayValue: any; realValue: any }[];
     vl?: Valuelist;
     valuelistid?: number;
     hasRealValues?: boolean;

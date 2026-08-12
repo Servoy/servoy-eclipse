@@ -23,7 +23,7 @@ export class WindowService {
     public static readonly WINDOW_TYPE_WINDOW = 2;
 
 
-    private instances: { [property: string]: SvyWindow } = {};
+    private instances: Record<string, SvyWindow> = {};
     private windowCounter: number;
     private windowsRestored = false;
     private dialogShown = false;
@@ -57,7 +57,7 @@ export class WindowService {
         this.renderer2 = rendererFactory.createRenderer(null, null);
         
         if (env.mobile && (this.windowRefService.nativeWindow as any)._formdata_) {
-			const formsData: Array<{[key: string]: any}> = (this.windowRefService.nativeWindow as any)._formdata_;
+			const formsData: Record<string, any>[] = (this.windowRefService.nativeWindow as any)._formdata_;
 			formsData.forEach(formData => {
 				for (const formName in formData) {
 					this.formService.createFormCache(formName, formData[formName], formName);
@@ -498,7 +498,7 @@ export class WindowService {
         this.servoyService.loaded().then(() => {
             const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
             if (sessionProblem && sessionProblem.viewUrl) {
-                sessionProblem.nonce = (this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes as any)['ngCspNonce']?.value;
+                sessionProblem.nonce = (this.windowRefService.nativeWindow.document.getElementsByTagName('app-root')[0].attributes as any)['ngCspNonce']?.value;
                 const name = sessionProblem.viewUrl.includes('/') ? sessionProblem.viewUrl.split('/')[1].split('.')[0] : sessionProblem.viewUrl.split('.')[0];
                 this.platformLocation.pushState(name, '', this.platformLocation.pathname + this.platformLocation.search + '#' + name);
             }
@@ -537,7 +537,7 @@ export class WindowService {
                 if (this.webSocketService.isConnected()) {
                     clearInterval(interval);
                     
-                    let windowsToRestore: any[] = [];
+                    const windowsToRestore: any[] = [];
                     let counter = 0; 
                     while (this.sessionStorageService.get('window' + counter)) {
                         windowsToRestore.push(this.sessionStorageService.get('window' + counter));

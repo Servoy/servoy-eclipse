@@ -130,8 +130,10 @@ export class FormService {
 							+ ', component ' + (componentCall.propertyPath ? componentCall.propertyPath.toString() : componentCall.bean))));
 
 						const cancelled: [boolean] = [false];
-						// eslint-disable-next-line @typescript-eslint/no-floating-promises
-						const thenPromise = deferredFCC.promise.then(() => { if (!cancelled[0]) return callItOnceClientFunctionsAreLoaded() });
+						 
+						const thenPromise = deferredFCC.promise.then(() => {
+ if (!cancelled[0]) return callItOnceClientFunctionsAreLoaded() 
+});
 
 						if (timeOutIfItDoesNotShowMS > 0) {
 							// it's either a sync call or a simple async (without wait until form loads) call, and the form ui was not yet loaded; but server said that forms will be made visible soon
@@ -252,7 +254,7 @@ export class FormService {
 		if (propertiesChangedButNotByRef.length > 0) triggerNgOnChangesWithSameRefDueToNestedPropUpdate(propertiesChangedButNotByRef);
 	}
 
-	public static pushEditingStarted(componentModel: { [property: string]: any }, propertyName: string,
+	public static pushEditingStarted(componentModel: Record<string, any>, propertyName: string,
 		sendStartEditFunc: (foundsetLinkedRowId: string, propertyNameToSend: string) => void) {
 
 		// detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server and trim down the last array index which identifies the row on client
@@ -268,7 +270,7 @@ export class FormService {
 		sendStartEditFunc(foundsetLinkedRowId, propertyNameToSend);
 	}
 
-	public static pushApplyDataprovider(componentModel: { [property: string]: any }, propertyName: string, propertyType: IType<any>,
+	public static pushApplyDataprovider(componentModel: Record<string, any>, propertyName: string, propertyType: IType<any>,
 		newValue: any, componentSpec: IWebObjectSpecification, converterService: ConverterService<unknown>, oldValue: any,
 		sendApplyDataproviderFunc: (foundsetLinkedRowId: string, propertyNameToSend: string, valueToSend: any) => void,
 		typesRegistry: TypesRegistry) {
@@ -323,7 +325,7 @@ export class FormService {
 		sendApplyDataproviderFunc(fslRowID!, propertyNameForServer, valueToSendToServer);
 	}
 
-	private static getFoundsetLinkedDPInfo(propertyName: string, componentModel: { [property: string]: any }): { propertyNameForServer: string; rowId?: string } {
+	private static getFoundsetLinkedDPInfo(propertyName: string, componentModel: Record<string, any>): { propertyNameForServer: string; rowId?: string } {
 		let propertyNameForServerAndRowID!: { propertyNameForServer: string; rowId?: string };
 
 		if ((propertyName.indexOf('.') > 0 || propertyName.indexOf('[') > 0) && propertyName.endsWith(']')) {
@@ -422,21 +424,21 @@ export class FormService {
             if (!environment.production) {
                 // some memory leak detection helpers
                 afterNgOnDestroyOfChildrenPotentialRunner = triggeredByFormNGOnDestroy ? this.rightAwayRunner : this.afterNextRenderIfFormUIIsStillPresentForFormRunner(formName);
-                debugLocatorStart = formName + ".";
+                debugLocatorStart = formName + '.';
             }
 
 			form.componentCache.forEach((comp) => {
 				Object.keys(comp.model).forEach((propertyName) => {
 					this.callOnDestroy(comp.model[propertyName],
                          afterNgOnDestroyOfChildrenPotentialRunner!,
-                         debugLocatorStart ? debugLocatorStart + (comp.name ? comp.name : "-form_prop-") + "." + propertyName : undefined);
+                         debugLocatorStart ? debugLocatorStart + (comp.name ? comp.name : '-form_prop-') + '.' + propertyName : undefined);
 				});
 			});
             form.formComponents.forEach((fcc) => {
                 Object.keys(fcc.model).forEach((propertyName) => {
                     this.callOnDestroy(fcc.model[propertyName],
                         afterNgOnDestroyOfChildrenPotentialRunner!,
-                        debugLocatorStart ? debugLocatorStart + fcc.name + "." + propertyName : undefined);
+                        debugLocatorStart ? debugLocatorStart + fcc.name + '.' + propertyName : undefined);
                 });
             });
 		}
@@ -478,11 +480,11 @@ export class FormService {
         // so maybe they should be moved to object_converter.ts somehow
         else if (Array.isArray(value)) {
 			value.forEach((elem, idx) => {
-				this.callOnDestroy(elem, afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + "[" + idx + "]" : undefined);
+				this.callOnDestroy(elem, afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '[' + idx + ']' : undefined);
 			});
 		} else if (typeof value === 'object') {
 			Object.keys(value).forEach((subKey) => {
-				this.callOnDestroy(value[subKey], afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + "." + subKey : undefined);
+				this.callOnDestroy(value[subKey], afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.' + subKey : undefined);
 			});
 		}
 	}
@@ -502,7 +504,7 @@ export class FormService {
 		this.clientFunctionService.waitForLoading().finally(() => {
 			this.formsCache.set(formName, formCache);
 
-			let pendingRunnablesForThisFormState = this.formsCachePendingRunnables.get(formName);
+			const pendingRunnablesForThisFormState = this.formsCachePendingRunnables.get(formName);
 			if (pendingRunnablesForThisFormState) {
 				// note that here we are already inside this.clientFunctionService.waitForLoading().finally, so the pending runnables do not need to do that themselves
 				pendingRunnablesForThisFormState.forEach(r => r(formCache));
@@ -532,20 +534,20 @@ export class FormService {
 		this.formsCache.delete(formName);
 
 		const previousValue = this.formComponentCache.get(formName);
-		if (previousValue instanceof Deferred) previousValue.reject("Form " + formName + " was destroyed on server. Rejecting and clearing client side form ui defer in order to avoid leaks.");
+		if (previousValue instanceof Deferred) previousValue.reject('Form ' + formName + ' was destroyed on server. Rejecting and clearing client side form ui defer in order to avoid leaks.');
 
 		this.formComponentCache.delete(formName);
 	}
 
 	public getLoadedFormState() {
-		const loadedState: { [s: string]: { url: string; attached: boolean } } = {};
+		const loadedState: Record<string, { url: string; attached: boolean }> = {};
 		for (const formName of Object.keys(this.formsCache)) {
 			loadedState[formName] = { url: this.formsCache.get(formName)!.url, attached: instanceOfFormComponent(this.formComponentCache.get(formName)) };
 		}
 		return loadedState;
 	}
 
-	public executeEvent(formName: string, componentName: string, handlerName: string, args: IArguments | Array<any>, async?: boolean): Promise<any> {
+	public executeEvent(formName: string, componentName: string, handlerName: string, args: IArguments | any[], async?: boolean): Promise<any> {
 		this.log.debug(this.log.buildMessage(() => (formName + ',' + componentName + ', executing: ' + handlerName + ' with values: ' + JSON.stringify(args))));
 
 		const handlerSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getHandler(handlerName);
@@ -640,7 +642,7 @@ export class FormService {
 		this.sabloService.callService('formService', 'gotoform', { formname });
 	}
 
-	public callComponentServerSideApi(formName: string, componentName: string, methodName: string, args: Array<any>): Promise<any> {
+	public callComponentServerSideApi(formName: string, componentName: string, methodName: string, args: any[]): Promise<any> {
 		// see if args and/or return value need client side conversions
 		const apiSpec = this.formsCache.get(formName)?.getComponentSpecification(componentName)?.getApiFunction(methodName);
 
@@ -666,14 +668,14 @@ export class FormService {
 		this.isInDesigner = true;
 	}
 
-	private createFormStyleSheet(formCss: { [key: string]: string }) {
+	private createFormStyleSheet(formCss: Record<string, string>) {
 		for (const formName of Object.keys(formCss)) {
 			const styleElementId = `form-style-${formName}`;
 			let styleElement = this.windowRefService.nativeWindow.document.getElementById(styleElementId) as HTMLStyleElement;
 
 			if (!styleElement) {
 				styleElement = this.windowRefService.nativeWindow.document.createElement('style');
-				styleElement.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName("app-root")[0].attributes['ngCspNonce' as any]?.value;
+				styleElement.nonce = this.windowRefService.nativeWindow.document.getElementsByTagName('app-root')[0].attributes['ngCspNonce' as any]?.value;
 				styleElement.id = styleElementId;
 				this.windowRefService.nativeWindow.document.head.appendChild(styleElement);
 			}
@@ -747,7 +749,7 @@ export class FormService {
 		if (this.isInDesigner) return; // form designer doesn't send stuff back to server (doesn't even have access to wsSession in SabloService to do that)
 
 		const formState = this.formsCache.get(formName)!;
-		let typeOfData = formState.getClientSideType(componentName, propertyName);
+		const typeOfData = formState.getClientSideType(componentName, propertyName);
 
 		FormService.pushApplyDataprovider(formState.getComponent(componentName)!.model, propertyName, typeOfData!,
 			newValue, formState.getComponentSpecification(componentName)!, this.converterService, oldValue,
@@ -763,7 +765,7 @@ export class FormService {
 			}, this.typesRegistry);
 	}
 
-	private formMessageHandler(formCache: FormCache, formName: string, msg: { forms: { [property: string]: { [property: string]: { [property: string]: unknown } } } }, servoyService: ServoyService) {
+	private formMessageHandler(formCache: FormCache, formName: string, msg: { forms: Record<string, Record<string, Record<string, unknown>>> }, servoyService: ServoyService) {
 		// if the form angular component is already created, update it's properties and use it as well; if not, just update models so form/component 'caches'
 		const fc = this.formComponentCache.get(formName);
 		let formComponent: IFormComponent | undefined;
@@ -829,7 +831,7 @@ export class FormService {
 				}
 				formCache.addLayoutContainer(structure);
 			} else if (elem.part === true) {
-				const part = new PartCache(elem.name, elem.classes, elem.layout as { [property: string]: string });
+				const part = new PartCache(elem.name, elem.classes, elem.layout as Record<string, string>);
 				this.walkOverChildren(elem.children!, formCache, part);
 				formCache.addPart(part);
 			} else {
@@ -839,8 +841,8 @@ export class FormService {
 
 				if (elem.formComponent && elem.formComponent.length > 0) {
 					// component that also has servoy-form-component properties
-					const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : [];
-					const layout: { [property: string]: string } = {};
+					const classes: string[] = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : [];
+					const layout: Record<string, string> = {};
 					if (!elem.responsive) {
 						// form component content is anchored layout
 
@@ -927,18 +929,18 @@ export class FormService {
 export interface ServerElement {
 	responsive: boolean,
 	part: boolean,
-	layout: boolean | { [property: string]: string },
-	position: { [property: string]: string },
-	model: { [property: string]: unknown, containedForm: { [property: string]: unknown }, styleClass: string, servoyAttributes: { [property: string]: string }, cssPosition: { [property: string]: string } },
-	styleclass: Array<string>,
-	classes: Array<string>
-	formComponent: Array<string>,
+	layout: boolean | Record<string, string>,
+	position: Record<string, string>,
+	model: { [property: string]: unknown, containedForm: Record<string, unknown>, styleClass: string, servoyAttributes: Record<string, string>, cssPosition: Record<string, string> },
+	styleclass: string[],
+	classes: string[]
+	formComponent: string[],
 	tagname: string,
-	attributes?: { [property: string]: string },
+	attributes?: Record<string, string>,
 	children?: ServerElement[],
 	cssPositionContainer?: boolean,
 	name: string,
 	specName: string,
 	elType: string,
-	handlers: Array<string>,
+	handlers: string[],
 }

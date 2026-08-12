@@ -11,7 +11,7 @@ export class CustomArrayTypeFactory implements ITypeFactory<CustomArrayValue<any
 
     public static readonly TYPE_FACTORY_NAME = 'JSON_arr';
 
-    private customArrayTypes: Map<IType<any>, Map<PushToServerEnum, CustomArrayType<any>>> = new Map(); // allows any keys, even undefined
+    private customArrayTypes = new Map<IType<any>, Map<PushToServerEnum, CustomArrayType<any>>>(); // allows any keys, even undefined
     private logger: LoggerService;
 
     constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
@@ -386,7 +386,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
         return this.staticElementType ? this.staticElementType : internalState.dynamicPropertyTypesHolder['' + idx];
     }
 
-    private initArrayValue(arrayToInitialize: Array<any>, contentVersion: number,
+    private initArrayValue(arrayToInitialize: any[], contentVersion: number,
                                 pushToServerCalculatedValue: PushToServerEnum, force?: boolean): CustomArrayValue<T> {
 
         let proxiedArray: CustomArrayValue<T>;
@@ -429,7 +429,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
             set: (underlyingArray: CustomArrayValue<T>, prop: any, v: any, receiver: any) => {
                 if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.set(underlyingArray, prop, v, receiver);
 
-                // eslint-disable-next-line radix
+                 
                 const i = Number.parseInt(prop);
                 if (Number.isInteger(i)) {
                     const dontPushNow = PushToServerUtils.combineWithChildStatic(internalState.calculatedPushToServerOfWholeProp, this.pushToServerForElements) === PushToServerEnum.ALLOW;
@@ -456,7 +456,7 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
             deleteProperty: (underlyingArray: CustomArrayValue<T>, prop: any) => {
                 if (softProxyRevoker.isProxyDisabled() || internalState.shouldIgnoreChangesBecauseFromOrToServerIsInProgress()) return Reflect.deleteProperty(underlyingArray, prop);
 
-                // eslint-disable-next-line radix
+                 
                 const i = Number.parseInt(prop);
                 if (Number.isInteger(i) && i < underlyingArray.length) {
                     // in JS, delete arr[4] for example will not modify the length of the array, just set it to undefined...
@@ -472,9 +472,9 @@ export class CustomArrayType<T> implements IType<CustomArrayValue<T>> {
 
 }
 
-export class ArrayState extends BaseCustomObjectState<number, Array<any>> {
+export class ArrayState extends BaseCustomObjectState<number, any[]> {
 
-    constructor(originalNonProxiedInstanceOfCustomObject: Array<any>, public readonly pushToServerForElements: PushToServerEnum) {
+    constructor(originalNonProxiedInstanceOfCustomObject: any[], public readonly pushToServerForElements: PushToServerEnum) {
         super(originalNonProxiedInstanceOfCustomObject);
     }
     
@@ -542,7 +542,7 @@ class CustomArrayValue<T> extends Array<T> implements ICustomArrayValue<T>, ICha
         // uiDestroy - call it on all nested properties that implement this interface
         if (this.length) {
             for (let c = 0; c < this.length; c++) {
-                let elem = this[c];
+                const elem = this[c];
                 if (instanceOfUIDestroyAwareValue(elem))
                     elem.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '[' + c + ']' : undefined);
             }

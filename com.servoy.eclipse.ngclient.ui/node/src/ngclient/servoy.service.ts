@@ -31,7 +31,7 @@ import { fromEvent,debounceTime, Observable, Subscription } from 'rxjs';
 import { ServerFunctionType } from './converters/serverfunction_converter';
 
 class UIProperties {
-    private uiProperties!: { [property: string]: any};
+    private uiProperties!: Record<string, any>;
 
     constructor(private sessionStorageService: SessionStorageService) {
     }
@@ -138,8 +138,7 @@ export class ServoyService {
         const recording = this.windowRefService.nativeWindow.location.search.indexOf('svy_record=true') > -1;
         if (recording) {
             socketPrefix = '/recording/websocket';
-        }
-        else if (this.windowRefService.nativeWindow.location.search.indexOf('svy_developer=true') > -1) {
+        } else if (this.windowRefService.nativeWindow.location.search.indexOf('svy_developer=true') > -1) {
             socketPrefix = '/developer/websocket';
         }
         

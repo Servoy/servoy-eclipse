@@ -30,7 +30,7 @@ import { ListFormComponent } from '../servoycore/listformcomponent/listformcompo
 import { RowRenderer } from '../servoycore/listformcomponent/row-renderer.component';
 
 @Component({
-    // eslint-disable-next-line
+     
     selector: 'svy-designform',
     changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrls: ['./designform.css'],
@@ -174,14 +174,14 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
     dragItem!: Element;
     isVariantForm!: boolean;
     variantsContainer!: StructureCache;
-    insertedVariants: Array<StructureCache> | null = null;
+    insertedVariants: StructureCache[] | null = null;
 
-    private servoyApiCache: { [property: string]: ServoyApi } = {};
+    private servoyApiCache: Record<string, ServoyApi> = {};
     private log: LoggerService;
     private designMode = false;
     private maxLevel = 3;
     private dropHighlight: string | null = null;
-    private dropHighlightIgnoredIds: Array<string> | null = null;
+    private dropHighlightIgnoredIds: string[] | null = null;
     private allowedChildren!: Record<string, any>;
     private variantContainerMargin = 2;
     private variantItemMargin = 10;
@@ -587,7 +587,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         return true;
     }
 
-    override getNGClass(item: StructureCache): { [klass: string]: any } {
+    override getNGClass(item: StructureCache): Record<string, any> {
         const ngclass: Record<string, any> = {};
         if (!item.cssPositionContainer || item.getDepth() != 0) {
         	ngclass[item.attributes!.designclass] = this.showWireframe;

@@ -45,13 +45,13 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     constructor() {         }
 
     ngOnInit() {
-        this.renderer.setStyle(this.doc.body, "overflow", "hidden");
-        let path: string = this.windowRef.nativeWindow.location.pathname;
-        let formStart = path.indexOf('/form/') + 6;
-        let formName = path.substring(formStart, path.indexOf('/', formStart));
-        this.variantsRequested = (formName == "VariantsForm");
+        this.renderer.setStyle(this.doc.body, 'overflow', 'hidden');
+        const path: string = this.windowRef.nativeWindow.location.pathname;
+        const formStart = path.indexOf('/form/') + 6;
+        const formName = path.substring(formStart, path.indexOf('/', formStart));
+        this.variantsRequested = (formName == 'VariantsForm');
         this.solutionName = path.substring(path.indexOf('/solution/') + 10, path.indexOf('/form/'));
-        let clientnr = path.substring(path.indexOf('/clientnr/') + 10);
+        const clientnr = path.substring(path.indexOf('/clientnr/') + 10);
         this.websocketService.setPathname('/rfb/angular/content/');
         this.wsSession = this.websocketService.connect('', [clientnr, formName, '1'], { solution: this.solutionName });
         if (this.variantsRequested) {
@@ -59,7 +59,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
             this.formService.createFormCache(formName, formState, null!);
             this.mainForm = formName;
         } else {
-            this.wsSession.callService("$editor", "getData", {
+            this.wsSession.callService('$editor', 'getData', {
                 form: formName,
                 solution: this.solutionName,
                 ng2: true
@@ -69,7 +69,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
                 this.mainForm = formName;
             });
         }
-        this.wsSession.callService("$editor", "getStyleSheets", {
+        this.wsSession.callService('$editor', 'getStyleSheets', {
             form: formName,
             solution: this.solutionName,
             ng2: true
@@ -134,7 +134,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
 
     contentRefresh() {
         if (this.mainForm === 'VariantsForm') return;
-        this.wsSession.callService("$editor", "getData", {
+        this.wsSession.callService('$editor', 'getData', {
             form: this.mainForm,
             solution: this.solutionName,
             ng2: true

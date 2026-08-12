@@ -160,7 +160,7 @@ describe( 'JSONArrayConverter', () => {
         });
 
     it( 'type should be created an array from server to client', () => {
-        const val: Array<string> = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
+        const val: string[] = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
                stringArrayType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
 
         expect( val ).toBeDefined();
@@ -171,7 +171,7 @@ describe( 'JSONArrayConverter', () => {
     } );
 
     it( 'updates from server to client', () => {
-        let val: Array<string> = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
+        let val: string[] = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
                stringArrayType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
 
         val = converterService.convertFromServerToClient({
@@ -197,7 +197,7 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
                stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<String>;
+        const val = arr as String[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         val[0] = 'test4';
@@ -220,7 +220,7 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
                stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(PushToServerEnum.ALLOW));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<String>;
+        const val = arr as String[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         val.splice( 1, 1 );
@@ -242,7 +242,7 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createDefaultStringArrayJSON(),
                stringArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(stringArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<String>;
+        const val = arr as String[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         val[3] = 'test4';
@@ -306,7 +306,7 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
                tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<Tab>;
+        const val = arr as Tab[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         expect( val ).toBeDefined();
@@ -331,7 +331,7 @@ describe( 'JSONArrayConverter', () => {
                 vEr: 1
             } as ICATGranularUpdatesFromServer, tabArrayWithShallowOnElementsType , arr, undefined as any, undefined as any, getParentPropertyContext(stringArrayPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<Tab>;
+        const val = arr as Tab[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         expect( val ).toBeDefined();
@@ -396,7 +396,7 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
                tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<Tab>;
+        const val = arr as Tab[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         val.splice( 1, 1 );
@@ -424,7 +424,7 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
                tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<Tab>;
+        const val = arr as Tab[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         const addedTab = new Tab();
@@ -453,7 +453,7 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
                tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        const val = arr as Array<Tab>;
+        const val = arr as Tab[];
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
         val[0].myvalue = 'test4';
@@ -482,12 +482,14 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
                tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        let val = arr as Array<Tab>;
+        let val = arr as Tab[];
         let changeListenerWasCalled = false;
-        valAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        valAsSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
-        const changesAndVal: [ICATFullArrayToServer, Array<Tab>] = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, undefined,
+        const changesAndVal: [ICATFullArrayToServer, Tab[]] = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, undefined,
             PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES);
         const changes = changesAndVal[0];
         
@@ -532,7 +534,9 @@ describe( 'JSONArrayConverter', () => {
         let valCaT = val as ICustomArrayValue<any>;
 
         let changeListenerWasCalled = false;
-        valAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        valAsSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         // simulate a send to server as argument to a handler, which should work even though it is a model value with push to server reject
         const changesAndVal: [ICOTFullObjectToServer, ICustomArrayValue<any>] = converterService.convertFromClientToServer(val, untypedObjectArrayWithREJECTOnElementsType, undefined,
@@ -559,14 +563,16 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
                tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        let val = arr as Array<Tab>;
+        let val = arr as Tab[];
         let changeListenerWasCalled = false;
-        valAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; }); // we ignore here the doNotPushNow arg of the listener so for this test 'shallow' and 'deep' have the same effect as 'allow', they do not to server send right away even if prop. requests that
+        valAsSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+}); // we ignore here the doNotPushNow arg of the listener so for this test 'shallow' and 'deep' have the same effect as 'allow', they do not to server send right away even if prop. requests that
 
         val[1] = { name: 'test2two', myvalue: 'test2two' };
 
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
-        const changesAndVal: [ICATFullArrayToServer, Array<Tab>] = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, undefined,
+        const changesAndVal: [ICATFullArrayToServer, Tab[]] = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, undefined,
             PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES);
         const changes = changesAndVal[0];
         
@@ -612,12 +618,14 @@ describe( 'JSONArrayConverter', () => {
         const arr = converterService.convertFromServerToClient(createArrayWithJSONObject(),
                tabArrayWithShallowOnElementsType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
         const valAsSeenInternally = arr as IChangeAwareValue;
-        let val = arr as Array<Tab>;
+        let val = arr as Tab[];
         let changeListenerWasCalled = false;
-        valAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        valAsSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
-        const changesAndVal: [ICATFullArrayToServer, Array<Tab>] = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, undefined,
+        const changesAndVal: [ICATFullArrayToServer, Tab[]] = converterService.convertFromClientToServer(val, tabArrayWithShallowOnElementsType, undefined,
             PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES);
         const changes = changesAndVal[0];
         
@@ -771,7 +779,7 @@ describe( 'JSONArrayConverter', () => {
         const val = arr as TabHolder;
         valAsSeenInternally.getInternalState().setChangeListener(() => {});
 
-        const tabs: Array<Tab> = [];
+        const tabs: Tab[] = [];
         tabs[0] = new Tab();
         tabs[0].name = 'test1';
         tabs[0].myvalue = 'test1';
@@ -1028,7 +1036,9 @@ describe( 'JSONArrayConverter', () => {
         
         let tabArray = val as Tab[];
         let changeListenerWasCalled = false;
-        (val as IChangeAwareValue).getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        (val as IChangeAwareValue).getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         expect(changeListenerWasCalled).toBe(false);
 
@@ -1049,10 +1059,10 @@ describe( 'JSONArrayConverter', () => {
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICATGranularUpdatesToServer, any] = converterService.convertFromClientToServer(tabArray, tabArrayWithShallowOnElementsType, tabArray,
              getParentPropertyContext(tabArrayWithShallowOnElementsPushToServer));
-        let changes = changesAndVal[0];
+        const changes = changesAndVal[0];
         
         tabArray = changesAndVal[1] as Tab[];
-        let tabArrayAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
+        const tabArrayAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
         
         expect(tabArrayAsSeenInternally.getInternalState().hasChangeListener()).toBe(true);
         expect(((tabArray[2] as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
@@ -1090,5 +1100,5 @@ class Tab {
 
 class TabHolder {
     name!: string;
-    tabs!: Array<Tab>;
+    tabs!: Tab[];
 }

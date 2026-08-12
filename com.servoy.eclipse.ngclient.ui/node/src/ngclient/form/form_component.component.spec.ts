@@ -91,7 +91,7 @@ class TestHostComponent {
 })
 export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButtonElement> {
 
-    readonly arrayOfCustomObjects = input<Array<SomeCustomObject>>(undefined as any);
+    readonly arrayOfCustomObjects = input<SomeCustomObject[]>(undefined as any);
 
     readonly divLocation = input<number>(undefined as any);
     readonly divLocationChange = output<number>();
@@ -141,8 +141,8 @@ interface ComponentModelContents { divLocation: number; arrayOfCustomObjects: IC
                                 },
                                 styleClass?: string,
                                 size?: {width: number, height: number},
-                                containers?: {  added: { [container: string]: string[] }; removed: { [container: string]: string[] } }, 
-                                cssstyles?: { [container: string]: { [classname: string]: string } }  };
+                                containers?: {  added: Record<string, string[]>; removed: Record<string, string[]> }, 
+                                cssstyles?: Record<string, Record<string, string>>  };
 
 /** we make use here of a full FormService and FormComponent as well in order to test a bit push-to-server settings and how it integrates with form/formService impl */
 describe.skip('FormComponentComponentTest', () => {

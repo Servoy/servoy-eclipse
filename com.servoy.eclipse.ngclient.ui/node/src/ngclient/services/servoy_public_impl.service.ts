@@ -32,7 +32,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         return this.servoyService.executeInlineScript(formname, script, params);
     }
 
-    callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
+    callServiceServerSideApi<T>(servicename: string, methodName: string, args: any[]): Promise<T> {
         return this.servicesService.callServiceServerSideApi(servicename, methodName, args);
     }
 
@@ -56,7 +56,7 @@ export class ServoyPublicServiceImpl extends ServoyPublicService {
         return this.localeService.getLocale();
     }
 
-    getAGGridLocale(): { [key: string]: string; } {
+    getAGGridLocale(): Record<string, string> {
         return this.localeService.getAgGridLocale();
     }
 

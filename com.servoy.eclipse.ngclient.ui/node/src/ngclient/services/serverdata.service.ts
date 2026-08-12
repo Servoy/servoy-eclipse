@@ -8,7 +8,7 @@ import { I18NProvider } from './i18n_provider.service';
 @Injectable()
 export class  ServerDataService {
 
-    private data: {pathName: string;querystring: string;ipaddr: string;hostaddr: string; orientation: number;defaultTranslations: {[key: string]: string}};
+    private data: {pathName: string;querystring: string;ipaddr: string;hostaddr: string; orientation: number;defaultTranslations: Record<string, string>};
     constructor() {
         const windowRefService = inject(WindowRefService);
         const websocketService = inject(WebsocketService);

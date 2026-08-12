@@ -25,7 +25,7 @@ export class SvyUtilsService {
         const targetEl = event.target as Element;
         let form: string | null | undefined;
         let parent: Element | null = targetEl;
-        const targetElNameChain = new Array();
+        const targetElNameChain = [];
         let contextMatch = false;
         while (parent) {
             form = parent.tagName.toLowerCase() === 'svy-form' ? parent.getAttribute('name') : undefined;
@@ -61,7 +61,7 @@ export class SvyUtilsService {
         if (!contextMatch)
             return null;
         const jsEvent: JSEvent = { svyType: 'JSEvent', eventType, timestamp: new Date().getTime() } ;
-        // eslint-disable-next-line no-bitwise
+         
         const modifiers = (event.altKey ? 8 : 0) | (event.shiftKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0);
         jsEvent.modifiers = modifiers;
         jsEvent.x = event['pageX'];//TODO check

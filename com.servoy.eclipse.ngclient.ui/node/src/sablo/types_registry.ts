@@ -184,8 +184,8 @@ export class TypesRegistry implements ITypesRegistryForTypeFactories, ITypesRegi
 
 }
 
-export interface ObjectOfWebObjectSpecification { [key: string]: IWebObjectSpecification }
-export interface ObjectOfIType { [key: string]: IType<any> }
+export type ObjectOfWebObjectSpecification = Record<string, IWebObjectSpecification>;
+export type ObjectOfIType = Record<string, IType<any>>;
 
 export class RootPropertyContextCreator implements IPropertyContextCreator {
 
@@ -200,7 +200,7 @@ export class RootPropertyContextCreator implements IPropertyContextCreator {
 export class ChildPropertyContextCreator implements IPropertyContextCreator {
 
     constructor(private readonly getProperty: IPropertyContextGetterMethod,
-            private readonly propertyDescriptions: { [propName: string]: IPropertyDescription },
+            private readonly propertyDescriptions: Record<string, IPropertyDescription>,
             private readonly computedParentPushToServer: PushToServerEnum,
             private readonly isInsideModel: boolean) {}
 
@@ -302,14 +302,14 @@ export class PushToServerUtils {
     }
 
     public static newChildPropertyContextCreator(getProperty: IPropertyContextGetterMethod,
-                propertyDescriptions: { [propName: string]: IPropertyDescription },
+                propertyDescriptions: Record<string, IPropertyDescription>,
                 computedParentPushToServer: PushToServerEnum, isInsideModel: boolean): IPropertyContextCreator {
         return new ChildPropertyContextCreator(getProperty, propertyDescriptions, computedParentPushToServer, isInsideModel);
     }
 
 }
 
-export interface ObjectOfITypeFactory { [key: string]: ITypeFactory<any> }
+export type ObjectOfITypeFactory = Record<string, ITypeFactory<any>>;
 
 class TypeFactoryRegistry implements ITypeFactoryRegistry {
 
@@ -325,9 +325,9 @@ class TypeFactoryRegistry implements ITypeFactoryRegistry {
 
 }
 
-export interface ObjectOfIPropertyDescription { [key: string]: IPropertyDescription }
-export interface ObjectOfIWebObjectFunctions { [key: string]: IWebObjectFunction }
-export interface ObjectOfIEventHandlerFunctions { [key: string]: IEventHandler }
+export type ObjectOfIPropertyDescription = Record<string, IPropertyDescription>;
+export type ObjectOfIWebObjectFunctions = Record<string, IWebObjectFunction>;
+export type ObjectOfIEventHandlerFunctions = Record<string, IEventHandler>;
 
 class PropertyDescription implements IPropertyDescription {
 
@@ -391,7 +391,7 @@ class WebObjectSpecification implements IWebObjectSpecification {
 
 }
 
-export interface ObjectOfITypeWithNumberKeys { [key: number]: IType<any> }
+export type ObjectOfITypeWithNumberKeys = Record<number, IType<any>>;
 
 class WebObjectFunction implements IWebObjectFunction {
 
@@ -430,9 +430,7 @@ class WebObjectApiFunction extends WebObjectFunction implements IApiFunction {
 
 }
 
-export interface IWebObjectTypesFromServer {
-    [specName: string]: IWebObjectSpecificationFromServer;
-}
+export type IWebObjectTypesFromServer = Record<string, IWebObjectSpecificationFromServer>;
 
 /** This type definition must match what the server sends; see org.sablo.specification.ClientSideTypeCache.buildClientSideTypesFor(WebObjectSpecification) javadoc and impl. */
 export interface IWebObjectSpecificationFromServer {
@@ -453,26 +451,18 @@ export interface IFactoryTypeDetails {
 }
 
 /** Any custom object types defined in the component/service .spec (by name, each containing the sub-properties defined in spec. for it) */
-export interface ICustomTypesFromServer {
-    [customTypeName: string]: IPropertiesFromServer;
-}
+export type ICustomTypesFromServer = Record<string, IPropertiesFromServer>;
 
 /**
  * So any properties that have client side conversions (by name or in case of factory types via a tuple / array of 2: factory name and factory param);
  * these tuples are used only when getting them from server, afterwards when the IProperties obj. is genearated from this, the specific type from that
  * factory is created and the value of the property type is changed from the tuple to the string that represents the created type.
  */
-export interface IPropertiesFromServer {
-    [propertyName: string]: IPropertyDescriptionFromServer;
-}
+export type IPropertiesFromServer = Record<string, IPropertyDescriptionFromServer>;
 
-interface IEventHandlersFromServer {
-    [name: string]: IEventHandlerFromServer;
-}
+type IEventHandlersFromServer = Record<string, IEventHandlerFromServer>;
 
-export interface IWebObjectFunctionsFromServer {
-    [name: string]: IWebObjectFunctionFromServer;
-}
+export type IWebObjectFunctionsFromServer = Record<string, IWebObjectFunctionFromServer>;
 
 interface IEventHandlerFromServer extends IWebObjectFunctionFromServer {
     /** "ignoreNGBlockDuplicateEvents" flag from spec. - if the handler is supposed to ignore the blocking of duplicates - when that is enabled via client or ui properties of component */
@@ -636,7 +626,7 @@ export interface IWebObjectSpecification {
     getPropertyPushToServer(propertyName: string): PushToServerEnum;
 
     /** this can return null if no property descriptions needed to be sent to client (no special client side type nor pushToServer) */
-    getPropertyDescriptions(): { [propertyName: string]: IPropertyDescription } | undefined;
+    getPropertyDescriptions(): Record<string, IPropertyDescription> | undefined;
     getHandler(handlerName: string): IEventHandler | undefined;
     getApiFunction(apiFunctionName: string): IApiFunction | undefined;
 

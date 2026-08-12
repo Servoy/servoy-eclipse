@@ -16,8 +16,8 @@ export class DatasetType implements IType<any> {
 		let datasetValue: any = serverJSONValue;
 
 		if (datasetValue) {
-			const columnTypesFromServer: { [columnIndex: string]: ITypeFromServer } = datasetValue[DatasetType.TYPES_KEY];
-			let columnTypes: { [columnIndex: string]: IType<any> };
+			const columnTypesFromServer: Record<string, ITypeFromServer> = datasetValue[DatasetType.TYPES_KEY];
+			let columnTypes: Record<string, IType<any>>;
 
 			datasetValue = datasetValue[DatasetType.VALUE_KEY];
 

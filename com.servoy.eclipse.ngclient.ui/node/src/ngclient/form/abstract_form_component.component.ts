@@ -14,9 +14,9 @@ import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_re
 })
 export abstract class AbstractFormComponent {
 
-    _containers!: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } };
-    _cssstyles!: { [container: string]: { [classname: string]: string } };
-    protected componentCache: { [property: string]: ServoyBaseComponent<any> } = {};
+    _containers!: { added: Record<string, string[]>; removed: Record<string, string[]> };
+    _cssstyles!: Record<string, Record<string, string>>;
+    protected componentCache: Record<string, ServoyBaseComponent<any>> = {};
 
     constructor(protected renderer: Renderer2) {
     }
@@ -26,7 +26,7 @@ export abstract class AbstractFormComponent {
     }
 
     @Input()
-    set containers(containers: { added: { [container: string]: string[] }; removed: { [container: string]: string[] } }) {
+    set containers(containers: { added: Record<string, string[]>; removed: Record<string, string[]> }) {
         if (!containers) return;
         for (const containername of Object.keys(containers.added)) {
             const container = this.getContainerByName(containername);
@@ -69,13 +69,13 @@ export abstract class AbstractFormComponent {
         this._containers = containers;
     }
 
-    // eslint-disable-next-line @typescript-eslint/member-ordering
+     
     get cssstyles() {
         return this._cssstyles;
     }
 
     @Input()
-    set cssstyles(cssStyles: { [container: string]: { [classname: string]: string } }) {
+    set cssstyles(cssStyles: Record<string, Record<string, string>>) {
         if (!cssStyles) return;
         this._cssstyles = cssStyles;
         for (const containername of Object.keys(cssStyles)) {
@@ -109,7 +109,7 @@ export abstract class AbstractFormComponent {
 
     abstract getContainerByName(containername: string): Element;
 
-    getNGClass(_item: StructureCache): { [klass: string]: any } | null {
+    getNGClass(_item: StructureCache): Record<string, any> | null {
         return null;
     }
 
@@ -135,8 +135,7 @@ export abstract class AbstractFormComponent {
                 log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
                 return null!;
             }
-        }
-        else {
+        } else {
             log.error(log.buildMessage(() => ('Trying to call api ' + apiName + ' while its component ' + compName + ' was not found,make sure component is present and visible.')));
             return null!;
         }

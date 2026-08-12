@@ -1,5 +1,5 @@
-import { WindowRefService } from "@servoy/public";
-import { IWebSocket, WebsocketCustomEvent } from "./iwebsocket";
+import { WindowRefService } from '@servoy/public';
+import { IWebSocket, WebsocketCustomEvent } from './iwebsocket';
 
 export class MobileBridge implements IWebSocket {
 
@@ -28,8 +28,7 @@ export class MobileBridge implements IWebSocket {
 			const e = new WebsocketCustomEvent('message');
 			e.data = 'p';
 			this.onmessage(e);
-		}
-        else {
+		} else {
             const iframe = this.windowRef.nativeWindow.document.getElementById('mobileclient');
             if (iframe) {
                 (iframe as any).contentWindow.postMessage(data);

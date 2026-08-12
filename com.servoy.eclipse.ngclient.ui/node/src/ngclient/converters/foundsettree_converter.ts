@@ -86,16 +86,16 @@ export class FoundsetTreeType implements IType<FoundsetTree> {
 
 class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
     public getChildrenReq?: { getChildren: string; id: number; level: number };
-    public updateSelectionReq?: {updateSelection: Array<string>};
+    public updateSelectionReq?: {updateSelection: string[]};
     public updateCheckboxValueReq?: {updateCheckboxValue: string; value: boolean};
-    public updateExpandedNodesReq?: { updateExpandedNodes: Array<string> };
+    public updateExpandedNodesReq?: { updateExpandedNodes: string[] };
     public newChildren: {key: any} | null = null;
     public newCheckedValues: {key: boolean} | null = null;
 
-    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: any } };
+    deferred!: Record<string, { defer: Deferred<any>; timeoutId: any }>;
     timeoutRejectLogPrefix!: string;
 
-    init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: any } }, timeoutRejectLogPrefix: string) {
+    init(deferred: Record<string, { defer: Deferred<any>; timeoutId: any }>, timeoutRejectLogPrefix: string) {
         this.deferred = deferred;
         this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
     }
@@ -117,7 +117,7 @@ class FoundsetTreeState extends ChangeAwareState implements IDeferedState {
 export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAwareValue, IUIDestroyAwareValue {
 
     constructor(private sabloDeferHelper: SabloDeferHelper,
-        private internalState: FoundsetTreeState, values?: Array<any>) {
+        private internalState: FoundsetTreeState, values?: any[]) {
         super();
         if (values) this.push(...values);
         // see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
@@ -149,7 +149,7 @@ export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAw
         return promise;
     }
 
-    updateSelection(idarray: Array<string>): void{
+    updateSelection(idarray: string[]): void{
         this.internalState.updateSelectionReq = {
             updateSelection: idarray,
         };
@@ -164,7 +164,7 @@ export class FoundsetTree extends Array<any> implements IFoundsetTree, IChangeAw
         this.internalState.notifyChangeListener();
     }
 
-    updateExpandedNodes(paths: Array<string>): void {
+    updateExpandedNodes(paths: string[]): void {
         this.internalState.updateExpandedNodesReq = {
             updateExpandedNodes: paths,
         };

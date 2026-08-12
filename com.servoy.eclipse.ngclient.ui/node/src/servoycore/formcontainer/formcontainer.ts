@@ -199,11 +199,11 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
 			}
 			if (formCache) {
 				const layout = formCache.parts[0]?.layout;
-				if (layout?.["overflow-x"]) {
-					styl["overflowX"] = layout["overflow-x"];
+				if (layout?.['overflow-x']) {
+					styl['overflowX'] = layout['overflow-x'];
 				}
-				if (layout?.["overflow-y"]) {
-					styl["overflowY"] = layout["overflow-y"];
+				if (layout?.['overflow-y']) {
+					styl['overflowY'] = layout['overflow-y'];
 				}
 			}
 		}

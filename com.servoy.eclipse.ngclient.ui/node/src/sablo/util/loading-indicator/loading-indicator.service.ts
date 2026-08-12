@@ -66,7 +66,7 @@ export class LoadingIndicatorService {
     }
 
     public setCustomLoadingIndicator(customLoadingIndicator: ICustomLoadingIndicator) {
-        // eslint-disable-next-line eqeqeq
+         
         if (customLoadingIndicator.hideLoading == undefined || customLoadingIndicator.showLoading == undefined) {
             this.log.warn(this.log.buildMessage(() => ('a custom loading indicator is defined but does not have the 2 functions: showLoading or hideLoading')));
        this.customLoadingIndicator = null!;

@@ -9,13 +9,13 @@ export class FormSettings {
 /** Cache for a Servoy form (data/model instances, no UI). Also keeps the component caches, Servoy form component caches etc. */
 export class FormCache implements IFormCache {
     public navigatorForm!: FormSettings;
-    public partComponentsCache: Array<ComponentCache | StructureCache | FormComponentCache>;
+    public partComponentsCache: (ComponentCache | StructureCache | FormComponentCache)[];
     public layoutContainersCache: Map<string, StructureCache>;
     public formComponents: Map<string, FormComponentCache>; // components (extends ComponentCache) that have servoy-form-component properties in them
     public componentCache: Map<string, ComponentCache>;
 
     private _mainStructure!: StructureCache;
-    private _parts: Array<PartCache>;
+    private _parts: PartCache[];
 
     constructor(readonly formname: string, 
                 public size: Dimension, 
@@ -32,7 +32,7 @@ export class FormCache implements IFormCache {
     get absolute(): boolean {
         return !this.responsive;
     }
-    get parts(): Array<PartCache> {
+    get parts(): PartCache[] {
         return this._parts;
     }
 
@@ -178,7 +178,7 @@ export interface IFormComponent extends IApiExecutor {
 }
 
 export interface IApiExecutor {
-    callApi(componentName: string, apiName: string, args: Array<unknown>, path?: string[]): unknown;
+    callApi(componentName: string, apiName: string, args: unknown[], path?: string[]): unknown;
 }
 
 export const instanceOfApiExecutor = (obj: unknown): obj is IApiExecutor =>
@@ -208,8 +208,8 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
                                 },
                                 styleClass?: string,
                                 size?: {width: number, height: number},
-                                containers?: {  added: { [container: string]: string[] }; removed: { [container: string]: string[] } }, 
-                                cssstyles?: { [container: string]: { [classname: string]: string } } };
+                                containers?: {  added: Record<string, string[]>; removed: Record<string, string[]> }, 
+                                cssstyles?: Record<string, Record<string, string>> };
 
     /** this is used as #ref inside form_component.component.ts and it has camel-case instead of dashes */
     public readonly type: string;
@@ -221,8 +221,8 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
     constructor(public readonly name: string,
         public readonly specName: string, // the directive name / component name (can be used to identify it's WebObjectSpecification)
         elType: string, // can be undefined in which case specName is used (this will only be defined in case of default tabless/accordion)
-        public readonly handlers: Array<string>,
-        public layout: { [property: string]: string },
+        public readonly handlers: string[],
+        public layout: Record<string, string>,
         public readonly typesRegistry: TypesRegistry) {
             this.type = ComponentCache.convertToJSName(elType ? elType : specName);
             this.model = {visible:true};
@@ -246,7 +246,7 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
         return webObjectSpecName;
     }
 
-    initForDesigner(initialModelProperties: { [property: string]: unknown }): ComponentCache {
+    initForDesigner(initialModelProperties: Record<string, unknown>): ComponentCache {
         // set initial model contents
         for (const key of Object.keys(initialModelProperties)) {
             this.model[key] = initialModelProperties[key];
@@ -254,7 +254,7 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
         return this;
     }
 	
-	initForDesignerIsVariant(initialModelProperties: { [property: string]: unknown }, isComponentVariant: boolean ): ComponentCache {
+	initForDesignerIsVariant(initialModelProperties: Record<string, unknown>, isComponentVariant: boolean ): ComponentCache {
 	      // set initial model contents
 	      for (const key of Object.keys(initialModelProperties)) {
 			if(isComponentVariant && key!='styleClass') this.model[key] = initialModelProperties[key];
@@ -262,7 +262,7 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 	      return this;
 	  }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     sendChanges(_propertyName: string, _newValue: unknown, _oldValue: unknown, _rowId?: string, _isDataprovider?: boolean) {
         // empty method with no impl for the designer (for example in LFC when the components are plain ComponentCache objects not the Subcass.)
     }
@@ -275,11 +275,11 @@ export class ComponentCache implements IComponentCache,IRepeaterIDProvider {
 
 export class StructureCache implements IRepeaterIDProvider{
     public parent!: StructureCache;
-    public model:  { [property: string]: unknown } = {};
+    public model:  Record<string, unknown> = {};
     public readonly rId = repeaterIdCounter++;
-    constructor(public readonly tagname: string, public classes: Array<string>, public attributes?: { [property: string]: string },
-        public readonly items: Array<StructureCache | ComponentCache | FormComponentCache> = [],
-        public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: { [property: string]: string }) {
+    constructor(public readonly tagname: string, public classes: string[], public attributes?: Record<string, string>,
+        public readonly items: (StructureCache | ComponentCache | FormComponentCache)[] = [],
+        public readonly id?: string, public readonly cssPositionContainer?: boolean, public layout?: Record<string, string>) {
     }
 
     addChild(child: StructureCache | ComponentCache | FormComponentCache, insertBefore?: StructureCache | ComponentCache): StructureCache | null {
@@ -336,9 +336,9 @@ export class PartCache implements IRepeaterIDProvider {
     public readonly rId = repeaterIdCounter++;
 
     constructor(public readonly name: string,
-        public readonly classes: Array<string>,
-        public layout: { [property: string]: string },
-        public readonly items: Array<ComponentCache | FormComponentCache | StructureCache> = []) {
+        public readonly classes: string[],
+        public layout: Record<string, string>,
+        public readonly items: (ComponentCache | FormComponentCache | StructureCache)[] = []) {
     }
 
     addChild(child: ComponentCache | FormComponentCache | StructureCache) {
@@ -353,15 +353,15 @@ export class PartCache implements IRepeaterIDProvider {
  * So it is a normal component that has servoy-form-component properties in it's .spec.
  */
 export class FormComponentCache extends ComponentCache {
-    public items: Array<StructureCache | ComponentCache | FormComponentCache> = [];
+    public items: (StructureCache | ComponentCache | FormComponentCache)[] = [];
 
     constructor(
         name: string,
         specName: string,
         elType: string,
-        handlers: Array<string>,
+        handlers: string[],
         public responsive: boolean,
-        layout: { [property: string]: string },
+        layout: Record<string, string>,
         public readonly formComponentProperties: FormComponentProperties,
         public readonly hasFoundset: boolean,
         typesRegistry: TypesRegistry) {
@@ -385,7 +385,7 @@ export class FormComponentCache extends ComponentCache {
         return false;
     }
 
-    initForDesigner(initialModelProperties: { [property: string]: unknown }): FormComponentCache {
+    initForDesigner(initialModelProperties: Record<string, unknown>): FormComponentCache {
         super.initForDesigner(initialModelProperties);
         return this;
     }
@@ -393,9 +393,9 @@ export class FormComponentCache extends ComponentCache {
 }
 
 export class FormComponentProperties {
-    constructor(public classes: Array<string>,
-        public layout: { [property: string]: string },
-        public readonly attributes: { [property: string]: string }) {
+    constructor(public classes: string[],
+        public layout: Record<string, string>,
+        public readonly attributes: Record<string, string>) {
     }
 }
 

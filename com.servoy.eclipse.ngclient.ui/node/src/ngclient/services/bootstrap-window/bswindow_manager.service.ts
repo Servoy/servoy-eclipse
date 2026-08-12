@@ -9,8 +9,8 @@ export class BSWindowManager {
 
     zIndexIncrement = 100;
     options: any;
-    windows: Array<BSWindow>;
-    modalStack: Array<BSWindow>;
+    windows: BSWindow[];
+    modalStack: BSWindow[];
     modalBackdropRemoverTimeout: any;
 
     private renderer: Renderer2;

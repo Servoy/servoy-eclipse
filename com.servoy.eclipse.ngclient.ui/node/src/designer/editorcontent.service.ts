@@ -31,8 +31,8 @@ export class EditorContentService {
         const formCache = this.formService.getFormCacheByName(this.designFormCallback.getFormName());
 
         const data = JSON.parse(updates);
-        const reorderLayoutContainers: Array<StructureCache> = new Array();
-        const orphanLayoutContainers: Array<StructureCache> = new Array();
+        const reorderLayoutContainers = new Array<StructureCache>();
+        const orphanLayoutContainers = new Array<StructureCache>();
         let renderGhosts = false;
         let redrawDecorators = false;
         let refresh = false;
@@ -153,7 +153,7 @@ export class EditorContentService {
             // have been added correctly or until there is nothing more to add in a valid parent - in which case we have an error (it should not happen)
             let numberOfParentsNotFound = data.ng2components.length;
             let previousNumberOfParentsNotFound = numberOfParentsNotFound; // check that each iteration we did succesfully treat at least 1 more ng2components array item
-            let handledArrayIndexes: boolean[] = [];
+            const handledArrayIndexes: boolean[] = [];
             handledArrayIndexes.length = data.ng2components.length;
             handledArrayIndexes.fill(false, 0, data.ng2components.length);
             
@@ -182,10 +182,10 @@ export class EditorContentService {
                                 reorderPartComponents = true;
                             }
                             if ((elem.specName === 'servoycore-formcomponent' || elem.specName === 'servoycore-listformcomponent') && !elem.responsive) {
-                                const layout: { [property: string]: string } = {};
+                                const layout: Record<string, string> = {};
                                 this.fillLayout(elem, formCache, layout);
                                 (component as FormComponentCache).formComponentProperties.layout = layout;
-                                (component as FormComponentCache).formComponentProperties.classes = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
+                                (component as FormComponentCache).formComponentProperties.classes = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : [];
                             }
                         } else if (formCache.getFormComponent(elem.name) == null) {
                             const parentUUID = data.childParentMap[elem.name] ? data.childParentMap[elem.name].uuid : undefined;
@@ -216,8 +216,8 @@ export class EditorContentService {
                                 }
             
                                 if (elem.specName === 'servoycore-formcomponent' || elem.specName === 'servoycore-listformcomponent') {
-                                    const classes: Array<string> = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : new Array();
-                                    const layout: { [property: string]: string } = {};
+                                    const classes: string[] = elem.model.styleClass ? elem.model.styleClass.trim().split(' ') : [];
+                                    const layout: Record<string, string> = {};
                                     this.fillLayout(elem, formCache, layout);
                                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout, elem.model.servoyAttributes);
                                     const fcc = new FormComponentCache(elem.name, elem.specName, undefined!, elem.handlers, elem.responsive, elem.position?elem.position:elem.model.cssPosition,
@@ -238,7 +238,7 @@ export class EditorContentService {
                                         // I hope these layout containers are ordered correctly - so they can all be recreated with the correct parent; so always all parent layouts before all child layouts
                                         const container = new DesignStructureCache(elem.tagname, elem.styleclass, elem.attributes, [], elem.cssPositionContainer, elem.position);
                                         formCache.addLayoutContainer(container);
-                                        let layoutId = (container.id ? container.id : container.hiddenId) as any;
+                                        const layoutId = (container.id ? container.id : container.hiddenId) as any;
                                         const parentUUID = data.childParentMap[layoutId] ? data.childParentMap[layoutId].uuid : undefined;
                                         if (parentUUID && parentUUID !== fcc.name) {
 			                                // else parent is a layout container from inside the fcc; we rely here on the fact that "data?.formComponentContainers?.[elem.name]"
@@ -247,12 +247,10 @@ export class EditorContentService {
                                             if (parent) {
                                                 parent.addChild(container);
                                                 if (parent.items.length > 1) this.sortChildren(parent.items);
-                                            }
-                                            else this.logger.error(this.logger.buildMessage(() => 
+                                            } else this.logger.error(this.logger.buildMessage(() => 
                                                            ('Cannot find parent layout container (' + parentUUID + ') for a layout container ('
                                                             +  container.id + ') when updates were received in editor. Incorrect order?')));
-                                        }
-                                        else {
+                                        } else {
 			                                // parent is null or the form component component itself, so it is the child of the fcc directly.
                                             fcc.addChild(container);
 											if (fcc.items.length > 1) this.sortChildren(fcc.items);
@@ -346,7 +344,7 @@ export class EditorContentService {
                 // string style suffix
                 const style = data.parts[name];
                 name = name.substring(0,name.length-5);
-                let partCache = formCache.getPart(name);
+                const partCache = formCache.getPart(name);
                 if (partCache) {
                     partCache.layout = JSON.parse(style);
                     refresh = true;
@@ -493,7 +491,7 @@ export class EditorContentService {
         return this.findStructureCache([...formCache.layoutContainersCache.values()], id);
     }
     
-    private findStructureCache(items: Array<StructureCache | ComponentCache | FormComponentCache>, id: string): StructureCache | undefined {
+    private findStructureCache(items: (StructureCache | ComponentCache | FormComponentCache)[], id: string): StructureCache | undefined {
         for(const item of items) {
             if (item instanceof StructureCache) {
                 if (item.id == id || (item instanceof DesignStructureCache && item.hiddenId == id)) {
@@ -539,7 +537,7 @@ export class EditorContentService {
         }
     }
 
-    private sortChildren(items: Array<StructureCache | ComponentCache | FormComponentCache>) {
+    private sortChildren(items: (StructureCache | ComponentCache | FormComponentCache)[]) {
         if (items) {
             items.sort((comp1: any, comp2: any): number => {
                 const priocomp1 = comp1 instanceof StructureCache ? parseInt(comp1.attributes!['svy-priority'], 10) : parseInt(comp1.model.servoyAttributes['svy-priority'], 10);
@@ -554,7 +552,7 @@ export class EditorContentService {
         }
     }
 
-    private fillLayout(elem: any, formCache: FormCache, layout: { [property: string]: string }) {
+    private fillLayout(elem: any, formCache: FormCache, layout: Record<string, string>) {
         if (!elem.responsive) {
             // form component content is anchored layout
             const continingFormIsResponsive = !formCache.absolute;
@@ -592,9 +590,9 @@ class DesignStructureCache extends StructureCache {
     /** in case it's a layout container nested inside a form component container, that one is not given an svy-id so that it can't be selected clientside; but we do need it's id for nesting */
     public readonly hiddenId?: string;
     
-    constructor(tagname: string, classes: Array<string>, attributes?: { [property: string]: string },
-        items?: Array<StructureCache | ComponentCache | FormComponentCache>,
-        cssPositionContainer?: boolean, layout?: { [property: string]: string }) {
+    constructor(tagname: string, classes: string[], attributes?: Record<string, string>,
+        items?: (StructureCache | ComponentCache | FormComponentCache)[],
+        cssPositionContainer?: boolean, layout?: Record<string, string>) {
 
         super(tagname, classes, attributes, items, attributes ? attributes['svy-id'] : null!, cssPositionContainer, layout);
         this.hiddenId = attributes?.['svy-id-hidden'];

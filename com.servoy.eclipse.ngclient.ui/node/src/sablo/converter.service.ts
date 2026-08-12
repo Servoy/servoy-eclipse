@@ -65,7 +65,7 @@ export class ConverterService<T> {
             typeOfData: IType<unknown> | undefined,
             currentClientData: unknown,
             /* some types decide at runtime the type needed on client - for example dataprovider type could send date, and we will store that info here: */
-            dynamicPropertyTypesHolder: { [nameOrIndex: string]: IType<unknown> },
+            dynamicPropertyTypesHolder: Record<string, IType<unknown>>,
             keyForDynamicTypes: string,
             propertyContext: IPropertyContext): T {
 
@@ -330,7 +330,7 @@ export interface CASBackup {
 
 export class ChangeAwareState {
     
-    public static INTERNAL_STATE_MEMBER_NAME = "__internalState";
+    public static INTERNAL_STATE_MEMBER_NAME = '__internalState';
 
     private allChanged = false;
 

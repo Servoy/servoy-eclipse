@@ -14,13 +14,13 @@ import { FileUploadWindowComponent } from './file-upload-window/file-upload-wind
 import { MessageDialogWindowComponent } from './message-dialog-window/message-dialog-window.component';
 import { LocaleService } from '../locale.service';
 import { ServerDataService } from './serverdata.service';
-import { AlertWindowComponent } from "./alert-window/alert-window.component";
+import { AlertWindowComponent } from './alert-window/alert-window.component';
 
 import numbro from 'numbro';
 
 @Injectable()
 export class ApplicationService {
-    private userProperties!: { [property: string]: any };
+    private userProperties!: Record<string, any>;
     private readonly log: LoggerService;
     private minElectronVersion = '24.4.0';
 
@@ -102,7 +102,7 @@ export class ApplicationService {
 
     }
 
-    public setUIProperties(properties: { [property: string]: string }) {
+    public setUIProperties(properties: Record<string, string>) {
         for (const key of Object.keys(properties)) {
             this.setUIProperty(key, properties[key]);
         }
@@ -180,8 +180,7 @@ export class ApplicationService {
                     this.doc.body.appendChild(a);
                     a.click();
                     this.doc.body.removeChild(a);
-                }
-                else {
+                } else {
                     this.windowRefService.nativeWindow.open(url, target, targetOptions);
 
                 }
@@ -212,8 +211,8 @@ export class ApplicationService {
     }
 
     private compareVersions(v1: string, v2: string): number {
-        let v1tokens = v1.split('.').map(Number);
-        let v2tokens = v2.split('.').map(Number);
+        const v1tokens = v1.split('.').map(Number);
+        const v2tokens = v2.split('.').map(Number);
 
         for (let i = 0; i < v1tokens.length; ++i) {
             if (v1tokens[i] > v2tokens[i]) {

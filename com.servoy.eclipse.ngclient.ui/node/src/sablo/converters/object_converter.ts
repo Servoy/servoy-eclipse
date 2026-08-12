@@ -37,8 +37,8 @@ export class ObjectType implements IType<any> {
 	}
 
     fromClientToServer(newClientData: any, oldClientData: any, propertyContext: IPropertyContext): [any, any] {
-        let [valueToSend, newValueRef, cyclicDepError] =  this.fromClientToServerInternal(newClientData, oldClientData, propertyContext, new Set(), false);
-        if (cyclicDepError) this.log.error("Value that will be sent to server (with nested cyclic refs set to null): " + JSON.stringify(valueToSend));
+        const [valueToSend, newValueRef, cyclicDepError] =  this.fromClientToServerInternal(newClientData, oldClientData, propertyContext, new Set(), false);
+        if (cyclicDepError) this.log.error('Value that will be sent to server (with nested cyclic refs set to null): ' + JSON.stringify(valueToSend));
 
         return [valueToSend, newValueRef];
     }
@@ -67,7 +67,7 @@ export class ObjectType implements IType<any> {
                 alreadyProcessedNestingValues.add(newClientData);
                 
     			let isChanged = false;
-    			let newRetVal: Record<string, any> = {};
+    			const newRetVal: Record<string, any> = {};
     			for (const i in newClientData) { // works for both arrays (indexes) and objects (keys) in JS
     				const oldEl = newClientData[i];
     				const newEl = this.fromClientToServerInternal(oldEl, oldClientData ? oldClientData[i] : undefined, propertyContext, alreadyProcessedNestingValues, cyclicDepError);

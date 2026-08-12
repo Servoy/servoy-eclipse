@@ -36,7 +36,7 @@ import { AbstractFormComponent } from './abstract_form_component.component';
 export { AbstractFormComponent } from './abstract_form_component.component';
 
 @Component({
-    // eslint-disable-next-line
+     
     selector: 'svy-form',
     changeDetection: ChangeDetectionStrategy.OnPush,
     /* eslint-disable max-len */
@@ -167,8 +167,8 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
     absolutFormPosition: Record<string, any> = {};
     detectingChanges = false;
 
-    private handlerCache: { [property: string]: { [property: string]: (event: Event) => void } } = {};
-    private servoyApiCache: { [property: string]: ServoyApi } = {};
+    private handlerCache: Record<string, Record<string, (event: Event) => void>> = {};
+    private servoyApiCache: Record<string, ServoyApi> = {};
     private log: LoggerService;
 
     constructor(private formservice: FormService, private sabloService: SabloService,
@@ -195,12 +195,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
         const oldDetect = this.detectingChanges;
         try {
             if (this.detectingChanges) {
-                this.log.warn("Nested detectChanges call in form: " + this.name);
+                this.log.warn('Nested detectChanges call in form: ' + this.name);
             }
             this.detectingChanges = true;
             this.changeHandler.detectChanges();
-        }
-        finally {
+        } finally {
             this.detectingChanges = oldDetect;
         }
     }
@@ -408,7 +407,7 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
 				if (this.formservice.getFormCache(this)){
 					this.formservice.sendChanges(this.name, '', 'size', value, oldValue, false);
 				}else{
-					this.log.warn("onResize called on form visible in browser but missing from cache: " + this.name);
+					this.log.warn('onResize called on form visible in browser but missing from cache: ' + this.name);
 				}
             }
         }

@@ -10,7 +10,7 @@ export class SabloService {
 
     private locale: Locale | null = null;
     private wsSession!: WebsocketSession;
-    private currentServiceCallCallbacks: Array<() => void> = [];
+    private currentServiceCallCallbacks: (() => void)[] = [];
     private currentServiceCallDone!: boolean;
     private currentServiceCallWaiting = 0;
     private currentServiceCallTimeouts!: any;
@@ -18,7 +18,7 @@ export class SabloService {
     private inLogCall = false;
 
     private expectFormToShowOnClientDeferr!: Deferred<void>;
-    private noOfFormsThatAreGoingToShow: number = 0;
+    private noOfFormsThatAreGoingToShow = 0;
 
     private readonly websocketService = inject(WebsocketService);
     private readonly sessionStorage = inject(SessionStorageService);
@@ -51,11 +51,11 @@ export class SabloService {
         const wrapLogging = urlParams.get('wraplogging') !== 'false';
 
         const enableWrapping = () => {
-            this.windowRefService.nativeWindow.window.console.log = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
-            this.windowRefService.nativeWindow.window.console.warn = new Proxy(oldWarn, this.getProxyHandler("warn", oldError));
-            this.windowRefService.nativeWindow.window.console.info = new Proxy(oldWarn, this.getProxyHandler("info", oldError));
-            this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler("debug", oldError));
-            this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler("error", oldError));
+            this.windowRefService.nativeWindow.window.console.log = new Proxy(oldWarn, this.getProxyHandler('info', oldError));
+            this.windowRefService.nativeWindow.window.console.warn = new Proxy(oldWarn, this.getProxyHandler('warn', oldError));
+            this.windowRefService.nativeWindow.window.console.info = new Proxy(oldWarn, this.getProxyHandler('info', oldError));
+            this.windowRefService.nativeWindow.window.console.debug = new Proxy(oldWarn, this.getProxyHandler('debug', oldError));
+            this.windowRefService.nativeWindow.window.console.error = new Proxy(oldError, this.getProxyHandler('error', oldError));
         };
 
         const disableWrapping = () => {
@@ -70,7 +70,7 @@ export class SabloService {
             enableWrapping();
         }
 
-        this.windowRefService.nativeWindow.window.addEventListener("error", (err: ErrorEvent) => {
+        this.windowRefService.nativeWindow.window.addEventListener('error', (err: ErrorEvent) => {
             const msg = err.message + '\n' + err.filename + ':' + err.lineno + ':' + err.colno + '\n' + err.error;
             oldError.apply(this.windowRefService.nativeWindow.window.console, [msg]);
             if (this.wsSession) this.callService('consoleLogger', 'error', { message: msg }, true);
@@ -81,22 +81,22 @@ export class SabloService {
             const shouldEnable = enable !== undefined ? enable : this.windowRefService.nativeWindow.window.console.log === oldLog;
             if (shouldEnable) {
                 enableWrapping();
-                oldInfo("log wrapping enabled");
+                oldInfo('log wrapping enabled');
             } else {
                 disableWrapping();
-                oldInfo("log wrapping disabled");
+                oldInfo('log wrapping disabled');
             }
         };
         if (wrapLogging) {
-            oldInfo("turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser, or add ?wraplogging=false to the URL");
+            oldInfo('turn off the logger overrides by executing: toggleSabloLogWrapping() in the console of your browser, or add ?wraplogging=false to the URL');
         } else {
-            oldInfo("log wrapping disabled via URL parameter. Enable by executing: toggleSabloLogWrapping(true) in the console of your browser");
+            oldInfo('log wrapping disabled via URL parameter. Enable by executing: toggleSabloLogWrapping(true) in the console of your browser');
         }
     }
     
     private getProxyHandler(name: string, oldError: any): ProxyHandler<any> {
         return {
-            apply: (target: Function, _thisArg: any, argumentsList: Array<any>) => {
+            apply: (target: Function, _thisArg: any, argumentsList: any[]) => {
                 target(...argumentsList);
                 try {
                 if (!this.inLogCall) {
@@ -340,8 +340,8 @@ export class SabloService {
         this.sessionStorage.remove('clientnr');
     }
 
-    private buildStackMessage(msg: any[]): Array<any> {
-        const arr = new Array();
+    private buildStackMessage(msg: any[]): any[] {
+        const arr = [];
         let error = msg[0] instanceof Error? msg[0]: msg[1] instanceof Error?msg[1]:null;
         if (error === null) { 
             error = new Error();

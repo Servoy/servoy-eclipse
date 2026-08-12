@@ -11,7 +11,7 @@ export class PersistIdentifier {
          * something like ["D9884DBA_C5E7_4395_A934_52030EB8F1F0", "containedForm", "button_1"] if it's a persist from inside a
          * form component container or ["Z9884DBA_C5E7_4395_A934_52030EB8F1F0"] for a simple persist
          */
-        public persistUUIDAndFCPropAndComponentPath: Array<string>,
+        public persistUUIDAndFCPropAndComponentPath: string[],
         
         /** in case it wants to identify a "ghost" (form editor) persist that might be inside form components) */
         public customTypeOrComponentTypePropertyUUIDInsidePersist: string) {}
@@ -28,8 +28,8 @@ export class PersistIdentifier {
             // const GHOST_IDENTIFIER_INSIDE_COMPONENT = 'g';
             // const COMPONENT_LOCATOR_KEY = 'p';
 
-            const parsed = JSON.parse(jsonContent) as { p: string | Array<string>, g: string };
-            const componentLocator: string | Array<string> = parsed.p;
+            const parsed = JSON.parse(jsonContent) as { p: string | string[], g: string };
+            const componentLocator: string | string[] = parsed.p;
             const ghostIdentifierInsideComp: string = parsed.g;
 
             if (typeof componentLocator === 'string')
@@ -38,7 +38,7 @@ export class PersistIdentifier {
             // if componentLocator is not a String, it can only be a JSONArray of Strings
             return new PersistIdentifier(componentLocator, ghostIdentifierInsideComp);
         } else if (firstChar == '[') {
-            return new PersistIdentifier(JSON.parse(jsonContent) as Array<string>, undefined!);
+            return new PersistIdentifier(JSON.parse(jsonContent) as string[], undefined!);
         } else return new PersistIdentifier([ jsonContent ], undefined!);
     }
     

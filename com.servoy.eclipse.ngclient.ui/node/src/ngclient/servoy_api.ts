@@ -33,7 +33,7 @@ export class ServoyApi extends Api {
         this.formservice.sendChanges(this.formname, this.item.name, propertyName, value, null, true);
     }
 
-    public callServerSideApi( methodName: string, args: Array<any> ) {
+    public callServerSideApi( methodName: string, args: any[] ) {
         return this.formservice.callComponentServerSideApi(this.formname, this.item.name, methodName, args);
     }
 

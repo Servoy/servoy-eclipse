@@ -261,7 +261,9 @@ describe('JSONObjectConverter', () => {
         let tab = val as Tab;
 
         let changeListenerWasCalled = false;
-        tabAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        tabAsSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICOTFullObjectToServer, Tab] = converterService.convertFromClientToServer(tab, oneTabType, undefined,
@@ -295,7 +297,9 @@ describe('JSONObjectConverter', () => {
         let valCoT = val as ICustomObjectValue;
 
         let changeListenerWasCalled = false;
-        valAsSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        valAsSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         // simulate a send to server as argument to a handler, which should work even though it is a model value with push to server reject
         const changesAndVal: [ICOTFullObjectToServer, ICustomObjectValue] = converterService.convertFromClientToServer(val, untypedObjectWithREJECTOnSubpropType, undefined,
@@ -333,10 +337,12 @@ describe('JSONObjectConverter', () => {
         // simulate that it is set into the model and sent to server
         const sendToServerResult = converterService.convertFromClientToServer(tabHolder, tabHolderType, undefined, getParentPropertyContext(tabHolderPushToServer));
         tabHolder = sendToServerResult[1]; // it has been converted into a Proxy of original object
-        let tabHolderSeenInternally = sendToServerResult[1] as IChangeAwareValue;
+        const tabHolderSeenInternally = sendToServerResult[1] as IChangeAwareValue;
 
         let changeListenerWasCalled = false;
-        tabHolderSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        tabHolderSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         tabElement = new Tab();
         tabElement.name = 'test11';
@@ -358,7 +364,7 @@ describe('JSONObjectConverter', () => {
         expect( fullTabChange.vEr ).toBe( 0 );
         expect( fullTabChange.v.name ).toBe( 'test');
         expect( fullTabChange.v.myvalue ).toBe( 'test');
-        let fullTabArrayChange: ICATFullArrayToServer = changes.v.tabs;
+        const fullTabArrayChange: ICATFullArrayToServer = changes.v.tabs;
         expect( fullTabArrayChange.vEr ).toBe( 0 );
         expect( fullTabArrayChange.v.length ).toBe( 1);
         fullTabChange = fullTabArrayChange.v[0];
@@ -399,10 +405,12 @@ describe('JSONObjectConverter', () => {
         // simulate that it is set into the model and sent to server
         const sendToServerResult = converterService.convertFromClientToServer(tabHolder, tabHolderType, undefined, getParentPropertyContext(tabHolderPushToServer));
         tabHolder = sendToServerResult[1]; // it has been converted into a Proxy of original object
-        let tabHolderSeenInternally = sendToServerResult[1] as IChangeAwareValue;
+        const tabHolderSeenInternally = sendToServerResult[1] as IChangeAwareValue;
 
         let changeListenerWasCalled = false;
-        tabHolderSeenInternally.getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        tabHolderSeenInternally.getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         // simulate a send to server as argument to a handler for this obj (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICOTFullObjectToServer, TabHolder] = converterService.convertFromClientToServer(tabHolder, tabHolderType, undefined,
@@ -417,7 +425,7 @@ describe('JSONObjectConverter', () => {
         expect( fullTabChange.vEr ).toBe( 0 );
         expect( fullTabChange.v.name ).toBe( 'test');
         expect( fullTabChange.v.myvalue ).toBe( 'test');
-        let fullTabArrayChange: ICATFullArrayToServer = changes.v.tabs;
+        const fullTabArrayChange: ICATFullArrayToServer = changes.v.tabs;
         expect( fullTabArrayChange.vEr ).toBe( 0 );
         expect( fullTabArrayChange.v.length ).toBe( 1);
         fullTabChange = fullTabArrayChange.v[0];
@@ -1028,7 +1036,7 @@ describe('JSONObjectConverter', () => {
     } );
 
     it('legacy TabDeprecated created from server with correct instance, with old api available', () => {
-        specTypesService.registerType("Tab", TabDeprecated);
+        specTypesService.registerType('Tab', TabDeprecated);
         
         const val = converterService.convertFromServerToClient(createTabJSON(),
                oneTabType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(oneTabPushToServer));
@@ -1037,7 +1045,7 @@ describe('JSONObjectConverter', () => {
         const tab = val as TabDeprecated;
         
         for (const k in tab)
-            if (k === "constructor" || k === "get2ConcattedProps") expect.fail("'" + k + "' should not be an enumerable property!");
+            if (k === 'constructor' || k === 'get2ConcattedProps') expect.fail("'" + k + "' should not be an enumerable property!");
         
         expect(tab).toBeDefined();
         expect(tab.name).toBe('test');
@@ -1048,7 +1056,7 @@ describe('JSONObjectConverter', () => {
         expect(tab.getWatchedProperties).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().getChangedKeys().add('isCollapsed')).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().markAllChanged).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
-        tab.getStateHolder().setPropertyAndHandleChanges(tab, "myvalue", "myvalue", "test101");
+        tab.getStateHolder().setPropertyAndHandleChanges(tab, 'myvalue', 'myvalue', 'test101');
         expect(tab.myvalue).toBe('test101');
 
         expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true);
@@ -1059,8 +1067,8 @@ describe('JSONObjectConverter', () => {
         const tabNewImpl = val as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
         
-        expect(tab.get2ConcattedProps()).toEqual("test - test101");
-        specTypesService.registerType("Tab", undefined as any);
+        expect(tab.get2ConcattedProps()).toEqual('test - test101');
+        specTypesService.registerType('Tab', undefined as any);
     });
 
     it('legacy TabDeprecated that was not registered with specTypesService, created from server should include deprecated BaseCustomObject, with old api available', () => {
@@ -1079,7 +1087,7 @@ describe('JSONObjectConverter', () => {
         expect(tab.getWatchedProperties).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().getChangedKeys().add('isCollapsed')).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
         expect(tab.getStateHolder().markAllChanged).toBeTruthy(); // deprecated stuff that does nothing - it just has to not err. out
-        tab.getStateHolder().setPropertyAndHandleChanges(tab, "myvalue", "myvalue", "test101");
+        tab.getStateHolder().setPropertyAndHandleChanges(tab, 'myvalue', 'myvalue', 'test101');
         expect(tab.myvalue).toBe('test101');
 
         expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true);
@@ -1094,7 +1102,7 @@ describe('JSONObjectConverter', () => {
     });
 
     it('legacy TabDeprecated created from client with correct instance, should get new impl. as well after send to server', () => {
-        specTypesService.registerType("Tab", TabDeprecated);
+        specTypesService.registerType('Tab', TabDeprecated);
         let tab = new TabDeprecated();
         
         tab.name = 'test';
@@ -1108,12 +1116,12 @@ describe('JSONObjectConverter', () => {
 
         const tabNewImpl = tab as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
-        expect(tab.get2ConcattedProps()).toEqual("test - test");
-        specTypesService.registerType("Tab", undefined as any);
+        expect(tab.get2ConcattedProps()).toEqual('test - test');
+        specTypesService.registerType('Tab', undefined as any);
     });
 
     it('new Tab created from server with correct instance, with new api available but not old api', () => {
-        specTypesService.registerCustomObjectType("Tab", Tab);
+        specTypesService.registerCustomObjectType('Tab', Tab);
         
         const val = converterService.convertFromServerToClient(createTabJSON(),
                oneTabType , undefined as any, undefined as any, undefined as any, getParentPropertyContext(oneTabPushToServer));
@@ -1135,15 +1143,15 @@ describe('JSONObjectConverter', () => {
         const tabNewImpl = tab as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
 
-        tabNewImpl.markSubPropertyAsHavingDeepChanges!("myvalue"); // we are faking it - actually it doesn't have any changes
+        tabNewImpl.markSubPropertyAsHavingDeepChanges!('myvalue'); // we are faking it - actually it doesn't have any changes
         expect(tabAsSeenInternally.getInternalState().hasChanges()).toBe(true);
 
-        expect(tab.get2ConcattedProps()).toEqual("test - test");
-        specTypesService.registerCustomObjectType("Tab", undefined as any);
+        expect(tab.get2ConcattedProps()).toEqual('test - test');
+        specTypesService.registerCustomObjectType('Tab', undefined as any);
     });
 
     it('new Tab created from client with correct instance, should get new impl. as well after send to server', () => {
-        specTypesService.registerCustomObjectType("Tab", Tab);
+        specTypesService.registerCustomObjectType('Tab', Tab);
         let tab = new Tab();
         
         tab.name = 'test';
@@ -1157,8 +1165,8 @@ describe('JSONObjectConverter', () => {
 
         const tabNewImpl = tab as ICustomObjectValue;
         expect(tabNewImpl.markSubPropertyAsHavingDeepChanges).toBeTruthy();
-        expect(tab.get2ConcattedProps()).toEqual("test - test");
-        specTypesService.registerCustomObjectType("Tab", undefined as any);
+        expect(tab.get2ConcattedProps()).toEqual('test - test');
+        specTypesService.registerCustomObjectType('Tab', undefined as any);
     });
 
     it( 'when an already smart value (received as return value from an server side api call for example) is assigned into the model into a new location and sent to server, it should still work - have a correct change listener etc.', () => {
@@ -1170,7 +1178,9 @@ describe('JSONObjectConverter', () => {
         
         let tabHolder = val as TabHolder;
         let changeListenerWasCalled = false;
-        (val as IChangeAwareValue).getInternalState().setChangeListener(() => { changeListenerWasCalled = true; });
+        (val as IChangeAwareValue).getInternalState().setChangeListener(() => {
+ changeListenerWasCalled = true; 
+});
 
         expect(changeListenerWasCalled).toBe(false);
 
@@ -1193,10 +1203,10 @@ describe('JSONObjectConverter', () => {
         // simulate a send to server as argument to a handler for this array (oldVal undefined) - to make sure it doesn't messup it's state if it's also a model prop. (it used getParentPropertyContext above which is for a model prop)
         const changesAndVal: [ICOTGranularUpdatesToServer, any] = converterService.convertFromClientToServer(tabHolder, tabHolderType, tabHolder,
              getParentPropertyContext(tabHolderPushToServer));
-        let changes = changesAndVal[0];
+        const changes = changesAndVal[0];
         
         tabHolder = changesAndVal[1] as TabHolder;
-        let tabHolderAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
+        const tabHolderAsSeenInternally = changesAndVal[1] as IChangeAwareValue;
         
         expect(tabHolderAsSeenInternally.getInternalState().hasChangeListener()).toBe(true);
         expect(((tabHolder.tabs as any) as IChangeAwareValue).getInternalState().hasChangeListener()).toBe(true);
@@ -1241,7 +1251,7 @@ class Tab implements ICustomObjectValue {
     rejectString!: string;
 
     get2ConcattedProps() {
-        return this.name + " - " + this.myvalue;
+        return this.name + ' - ' + this.myvalue;
     }
 
 }
@@ -1253,7 +1263,7 @@ class TabDeprecated extends BaseCustomObject { // test deprecated scenario as we
     rejectString!: string;
 
     get2ConcattedProps() {
-        return this.name + " - " + this.myvalue;
+        return this.name + ' - ' + this.myvalue;
     }
 
 }

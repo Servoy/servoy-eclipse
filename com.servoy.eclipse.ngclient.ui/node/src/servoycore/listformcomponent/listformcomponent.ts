@@ -168,9 +168,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     cache!: FormComponentCache;
     removeListenerFunction!: (() => void) | null;
-    private componentCache: Array<{ [property: string]: ServoyBaseComponent<any> }> = [];
+    private componentCache: Record<string, ServoyBaseComponent<any>>[] = [];
     private log: LoggerService;
-    private rowItems!: Array<IChildComponentPropertyValue | FormComponentCache>;
+    private rowItems!: (IChildComponentPropertyValue | FormComponentCache)[];
 
     private designerViewportRows = [{} as ViewPortRow];
 
@@ -365,8 +365,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         return;
                     } else if (event.fullValueChanged) {
                         this._foundset.set(event.fullValueChanged.newValue);
-                        if (this._foundset()!.serverSize > 0 && this.numberOfCells > 0 && this.page * this.numberOfCells >= this._foundset()!.serverSize)
-                        {
+                        if (this._foundset()!.serverSize > 0 && this.numberOfCells > 0 && this.page * this.numberOfCells >= this._foundset()!.serverSize) {
                             this.page = Math.floor((this._foundset()!.serverSize - 1) / this.numberOfCells);
                         }
                         this.calculateCells();
@@ -469,11 +468,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                         agGrid.api.refreshServerSide({ purge: true });
                         const foundset = this._foundset()!;
                         agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
-                    }
-                    else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex){
+                    } else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex){
 						agGrid.api.refreshCells();	
-					}
-					else {
+					} else {
 						agGrid.api.refreshServerSide({ purge: true });	
 					}
                 }
@@ -499,14 +496,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }        
     }
 
-    private calculateNumberOfColumns(): number
-    {
+    private calculateNumberOfColumns(): number {
         const parentWidth = this.element()!.nativeElement.offsetWidth;
         let width = this.containedForm()!.formWidth;
         const containedFormMargin = this.containedFormMargin();
         if(containedFormMargin) {
-            let left = parseInt(containedFormMargin.paddingLeft, 10);
-            let right = parseInt(containedFormMargin.paddingRight, 10);
+            const left = parseInt(containedFormMargin.paddingLeft, 10);
+            const right = parseInt(containedFormMargin.paddingRight, 10);
             width += (left + right);
         }
         return (this.pageLayout() === 'listview') || parentWidth < width ? 1 : Math.floor(parentWidth / width);
@@ -574,7 +570,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
     
     private deleteDescriptorAndKeepSimpleValue(obj: any, propName: string) {
-        let oldVal = (Object.getOwnPropertyDescriptor(obj, propName)!.get as any as ICellValuePropGetter).getStoredBasePropValue();
+        const oldVal = (Object.getOwnPropertyDescriptor(obj, propName)!.get as any as ICellValuePropGetter).getStoredBasePropValue();
         delete obj[propName]; // delete the descriptor with getter/setter for this prop
         obj[propName] = oldVal; // keep the value, but as a simple value, not as property descriptor with getter/setter - to be used if the form is made visible again
     }
@@ -589,7 +585,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getStyleClasses(): string[] {
-        const classes: Array<string> = new Array();
+        const classes = new Array<string>();
         const styleClass = this.styleClass();
         if (styleClass) {
             classes.push(styleClass);
@@ -641,7 +637,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return this.containedForm()!.formWidth + 'px';
     }
 
-    getRowItems(): Array<IChildComponentPropertyValue | FormComponentCache> {
+    getRowItems(): (IChildComponentPropertyValue | FormComponentCache)[] {
         return this.rowItems;
     }
 
@@ -674,7 +670,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return this.parent.getTemplateForLFC(item);
     }
 
-    findElement(items: Array<StructureCache | ComponentCache | FormComponentCache>, item: ComponentCache): IChildComponentPropertyValue | null {
+    findElement(items: (StructureCache | ComponentCache | FormComponentCache)[], item: ComponentCache): IChildComponentPropertyValue | null {
         for (const elem of items) {
             if (elem['name'] === item.name) {
                 return (elem as unknown) as IChildComponentPropertyValue;
@@ -715,7 +711,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
         if (!cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate) { // declare it only once for all rows in ComponentValue - so it can be used by component_converter.ts
             cm.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate = (propertiesChangedButNotByRef: { propertyName: string; newPropertyValue: any }[], relativeRowIndex: number) => {
-                const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: ({ [property: string]: ServoyBaseComponent<any> }), componentModel: any) => {
+                const triggerNgOnChangeForThisComponentInGivenRow = (rowObject: (Record<string, ServoyBaseComponent<any>>), componentModel: any) => {
                     const ui = rowObject[cm.name];
                     if (ui) {
                         const changes: Record<string, any> = {};
@@ -755,7 +751,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         const idx = rowIndex;
         
 		let elementReadOnly = rowItem.model.readOnly;
-        let getterForReadOnly = function get() {
+        const getterForReadOnly = function get() {
             let rowReadOnly = false;
             const rowEditableDataprovider = thisLFC.rowEditableDataprovider();
             if (rowEditableDataprovider && rowEditableDataprovider.length > idx) {
@@ -775,7 +771,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         // TODO: 'enabledDataProvider' and 'visibleDataProvider' should not be in the model - on the server side
         // they should be evaluated for each row and added to the model as regular 'enabled' and 'visible' properties
         let elementEnabled = rowItem.model.enabled;
-        let getterForEnabled = function get(this: any) {
+        const getterForEnabled = function get(this: any) {
             const rowEnableDataprovider = thisLFC.rowEnableDataprovider();
             if (rowEnableDataprovider && rowEnableDataprovider.length > idx) {
                 return rowEnableDataprovider[idx];
@@ -795,7 +791,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         });
         
         let elementVisible = rowItem.model.visible;
-        let getterForVisible = function get(this: any) {
+        const getterForVisible = function get(this: any) {
             if(this.visibleDataProvider !== undefined) {
                 return this.visibleDataProvider;
             }
@@ -864,7 +860,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return cell.api;
     }
 
-    getDesignNGClass(item: StructureCache): { [klass: string]: any } | null {
+    getDesignNGClass(item: StructureCache): Record<string, any> | null {
        if (this.parent.isDesigner()){
           return this.parent.getNGClass(item);
        }

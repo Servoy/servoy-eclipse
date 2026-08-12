@@ -11,11 +11,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
 
     public static readonly TYPE_FACTORY_NAME = 'JSON_obj';
 
-    private customTypesBySpecName: {
-        [webObjectSpecName: string]: {
-            [customTypeName: string]: CustomObjectType;
-        };
-    } = {};
+    private customTypesBySpecName: Record<string, Record<string, CustomObjectType>> = {};
     private readonly logger: LoggerService;
 
     constructor(private readonly typesRegistry: ITypesRegistryForTypeFactories,
@@ -57,7 +53,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
         // set the sub-properties of each CustomObjectType to the correct IType
         for (const customTypeName of Object.keys(details)) {
             const customTypeDetails = details[customTypeName];
-            const properties: { [propName: string]: IPropertyDescription } = {};
+            const properties: Record<string, IPropertyDescription> = {};
             for (const propertyName of Object.keys(customTypeDetails)) {
                 properties[propertyName] = this.typesRegistry.processPropertyDescriptionFromServer(customTypeDetails[propertyName], webObjectSpecName)!;
             }
@@ -79,7 +75,7 @@ class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDes
     // avoid iteration/enumeration/public access to/on it
     __internalState!: CustomObjectState; // ChangeAwareState.INTERNAL_STATE_MEMBER_NAME === "__internalState"
 
-    initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: { [propName: string]: IPropertyDescription }) {
+    initialize(contentVersion: number, calculatedPushToServerOfWholeProp: PushToServerEnum, propertyDescriptions: Record<string, IPropertyDescription>) {
         Object.defineProperty(this, ChangeAwareState.INTERNAL_STATE_MEMBER_NAME, {
             configurable: true,
             enumerable: false,
@@ -115,7 +111,7 @@ class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDes
     public uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner?: (f: () => void) => void, debugLocator?: string): void {
         // uiDestroy - call it on all nested properties that implement this interface
         for (const c of Object.keys(this)) {
-            let subPropValue = this[c];
+            const subPropValue = this[c];
             if (instanceOfUIDestroyAwareValue(subPropValue))
                 subPropValue.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.' + c : undefined);
         }
@@ -126,7 +122,7 @@ class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDes
 /** This is exported just in order to be useful in unit tests. Otherwise it's an internal json array converter interface. Do not use externally otherwise. */
 export class CustomObjectType implements IType<CustomObjectValue> {
 
-    private propertyDescriptions!: { [propName: string]: IPropertyDescription };
+    private propertyDescriptions!: Record<string, IPropertyDescription>;
     
     private static customObjectValuePrototypeWithDeprecated: any;
     static {
@@ -141,7 +137,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
 
     // this will always get called once with a non-null param before the CustomObjectType is used for conversions;
     // it can't be given in constructor as types might depend on each other and they are all created before being 'linked'; see factory code above
-    setPropertyDescriptions(propertyDescriptions: { [propertyName: string]: IPropertyDescription } ): void {
+    setPropertyDescriptions(propertyDescriptions: Record<string, IPropertyDescription> ): void {
         this.propertyDescriptions = propertyDescriptions;
     }
 
@@ -462,7 +458,7 @@ export class CustomObjectType implements IType<CustomObjectValue> {
             // this setPrototypeOf seems to be faster then creating a new CustomObjectValue and copying all elements over to it
             // and it is better then having just an interface for CustomObjectValue and adding via Object.defineProperties(...) all (deprecated or valid)
             // methods of that interface, because a lot more stuff is typed/checked at compile-time this way then the latter (with which it is comparable in performance)
-            let protoOfObj = Object.getPrototypeOf(objectToInitialize);
+            const protoOfObj = Object.getPrototypeOf(objectToInitialize);
             
             // if it doesn't yet extend our custom object behavior do integrate that into the prototype chain 
             if (protoOfObj !== CustomObjectValue.prototype && protoOfObj.constructor !== CustomObjectValue.prototype.constructor) { // so check if CustomObjectValue or a clone  is already there / either directly or as a clone (that has the same constructor)
@@ -654,7 +650,7 @@ export abstract class BaseCustomObjectState<KeyT extends number | string, VT> ex
 
 class CustomObjectState extends BaseCustomObjectState<any, any> {
 
-    constructor(originalNonProxiedInstanceOfCustomObject: any, public readonly propertyDescriptions: { [propName: string]: IPropertyDescription }) {
+    constructor(originalNonProxiedInstanceOfCustomObject: any, public readonly propertyDescriptions: Record<string, IPropertyDescription>) {
         super(originalNonProxiedInstanceOfCustomObject);
     }
 

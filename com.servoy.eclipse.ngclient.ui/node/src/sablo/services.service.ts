@@ -30,7 +30,7 @@ export class ServicesService {
             handleServiceApisWithApplyFirst: (serviceApisJSON: any, previousResponseValue: any): any => {
                 // services calls; first process the once with the flag 'apply_first'
                 let responseValue: any = previousResponseValue;
-                for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
+                for (const serviceCall of serviceApisJSON as ApiCallFromServer[]) {
                     if (serviceCall['pre_data_service_call']) {
                         // responseValue keeps last services call return value
                         responseValue = this.callServiceApi(serviceCall, previousResponseValue); // this handles arg type conversions and return value type conversion as well
@@ -50,7 +50,7 @@ export class ServicesService {
                 const def = new Deferred();
                 this.clientFunctionService.waitForLoading().finally(() => {
                     let responseValue: any = previousResponseValue;
-                    for (const serviceCall of serviceApisJSON as Array<ApiCallFromServer>) {
+                    for (const serviceCall of serviceApisJSON as ApiCallFromServer[]) {
                         if (!serviceCall['pre_data_service_call']) {
                             // responseValue keeps last services call return value
                             responseValue = this.callServiceApi(serviceCall, previousResponseValue); // this handles arg type conversions and return value type conversion as well
@@ -102,8 +102,7 @@ export class ServicesService {
         } else {
             if (serviceInstance) {
                 this.log.error('trying to call a service api ' + serviceCall.call + ' for service ' + serviceCall.name + ' but the api function was not found!');
-            }
-            else {
+            } else {
                 this.log.error('trying to call a service api ' + serviceCall.call + ' for service ' + serviceCall.name + ' but the service (' + serviceInstance + ') was not found!');
             }
         }
@@ -193,7 +192,7 @@ export class ServicesService {
      * If a service defines a server side scripting file in it's .spec ("serverscript" key), the client side of the service can call server-side apis defined
      * on that scope.
      */
-    public callServiceServerSideApi<T>(serviceName: string, methodName: string, args: Array<any>): RequestInfoPromise<T> {
+    public callServiceServerSideApi<T>(serviceName: string, methodName: string, args: any[]): RequestInfoPromise<T> {
         const apiSpec = this.typesRegistry.getServiceSpecification(serviceName)?.getApiFunction(methodName);
 
         // convert args as needed

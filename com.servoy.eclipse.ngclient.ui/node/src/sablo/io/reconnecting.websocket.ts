@@ -47,7 +47,7 @@ export class ReconnectingWebSocket implements IWebSocket {
     private readyState: number = WebSocket.CONNECTING;
     private log: LoggerService;
 
-    constructor(url: string | UrlFunction, logFactory: LoggerFactory, options?: { [property: string]: string | number | boolean }) {
+    constructor(url: string | UrlFunction, logFactory: LoggerFactory, options?: Record<string, string | number | boolean>) {
         this.log = logFactory.getLogger('ReconnectingWebSocket');
         // enable this to have debug log level
         // this.log.logLevel = LogLevel.DEBUG;

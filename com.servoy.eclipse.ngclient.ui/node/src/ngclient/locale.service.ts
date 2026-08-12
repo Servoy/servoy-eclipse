@@ -18,7 +18,7 @@ export class LocaleService {
     private loadedLocale!: Deferred<any>;
 
     private readonly localeMap: Record<string, string> = { en: 'en-US' };
-    private agGridLocale!: { [key: string]: string; };
+    private agGridLocale!: Record<string, string>;
     private readonly log: LoggerService;
 
     private readonly sabloService = inject(SabloService);
@@ -43,7 +43,7 @@ export class LocaleService {
         return this.sabloService.getLocale();;
     }
 
-    public getAgGridLocale(): { [key: string]: string; } {
+    public getAgGridLocale(): Record<string, string> {
         return this.agGridLocale;
     }
 
@@ -76,7 +76,7 @@ export class LocaleService {
             Promise.all(allPromises).then((results: any[]) => {
                 const [numbroResp, localeModule] = results;
                 this.agGridLocale = localeModule[localeConstName];
-                if(!this.agGridLocale) this.agGridLocale = localeModule[`AG_GRID_LOCALE_EN`];
+                if(!this.agGridLocale) this.agGridLocale = localeModule['AG_GRID_LOCALE_EN'];
                 this.loadedLocale.resolve(localeId)
             }).catch(() => this.loadedLocale.resolve(localeId));
 
@@ -172,8 +172,7 @@ export class LocaleService {
                 const index = localeId.indexOf('-');
                 if (index > 0 && tryOnlyLanguage) {
                     return this.setNumbroLocale(localeId.split('-')[0], false);
-                }
-                else if (index < 0) {
+                } else if (index < 0) {
                     return this.setNumbroLocale(this.makeFullLocale(localeId), false);
                 }
                 break;

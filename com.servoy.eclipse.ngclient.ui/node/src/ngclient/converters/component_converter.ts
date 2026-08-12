@@ -67,8 +67,8 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
 
     api: any;
     foundsetConfig?: {
-        recordBasedProperties?: Array<string>;
-        apiCallTypes?: Array<any>;
+        recordBasedProperties?: string[];
+        apiCallTypes?: any[];
     };
 
     /** @deprecated legacy - tableview forms; not used anymore I think */
@@ -77,7 +77,7 @@ export class ChildComponentPropertyValue extends ComponentCache implements IChan
     headerIndex?: number;
 
     /** this is the true cell viewport which is already composed inside IChildComponentPropertyValue of shared (non foundset dependent) part and row specific (foundset dependent props) part */
-    modelViewport!: { [property: string]: any }[];
+    modelViewport!: Record<string, any>[];
 
     /**
      * This function has to be set/provided by the ng2 component that uses this child "component" typed property, because
@@ -512,18 +512,18 @@ class ComponentTypeInternalState extends FoundsetViewportState implements ISomeP
         // uiDestroy - call it on all properties from the viewport that implement this interface
         // both model and modelViewport (that has model in it - as a prototype) properties need to be checked
         
-        let modelKeys = Object.keys(this.componentValue.model);
+        const modelKeys = Object.keys(this.componentValue.model);
         modelKeys.forEach((key) => {
-            let v = this.componentValue.model[key];
+            const v = this.componentValue.model[key];
             if (instanceOfUIDestroyAwareValue(v))
                 v.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.model.' + key : undefined);
         });
-        let modelKeySet = new Set(modelKeys);
+        const modelKeySet = new Set(modelKeys);
         
         this.componentValue.modelViewport.forEach((row, rowIdx) => {
-            for (let key of Object.keys(row)) {
+            for (const key of Object.keys(row)) {
                 if (!modelKeySet.has(key)) { // only check properties that are not in model as those are shared and already checked above
-                    let v = row[key];
+                    const v = row[key];
                     if (instanceOfUIDestroyAwareValue(v))
                         v.uiDestroyed(afterNgOnDestroyOfChildrenPotentialRunner, debugLocator ? debugLocator + '.modelViewport.rows[' + rowIdx + '].' + key : undefined);
                 }
@@ -542,17 +542,17 @@ interface IServerSentData {
     componentDirectiveName?: string;
     /** usually undefined, except for default tabless panel and accordion (which share tabpanel .spec file but have different client side component names) */
     elType?: string,
-    handlers?: Array<string>;
+    handlers?: string[];
     forFoundset?: string;
     model?: Record<string, any>;
     model_vp?: any[];
     _T?: ConversionInfoFromServerForViewport;
     foundsetConfig?: {
-        recordBasedProperties?: Array<string>;
-        apiCallTypes?: Array<any>;
+        recordBasedProperties?: string[];
+        apiCallTypes?: any[];
     };
 
-    position?: { [property: string]: string }; // AngularFormGenerator.writePosition(...)
+    position?: Record<string, string>; // AngularFormGenerator.writePosition(...)
 
     /** @deprecated legacy - tableview forms; not used anymore I think */
     componentIndex?: number;

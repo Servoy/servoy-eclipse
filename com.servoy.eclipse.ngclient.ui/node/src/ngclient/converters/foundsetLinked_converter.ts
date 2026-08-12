@@ -260,7 +260,7 @@ class SingleValueState implements IUIDestroyAwareValue {
         sabloService.addIncomingMessageHandlingDoneTask(() => { // do it after all incomming properties have been converted so we are sure to have the forFoundset prop. ready
             const fs: IFoundset = iS.forFoundset();
             if (fs) {
-                let cl = ((event: FoundsetChangeEvent) => {
+                const cl = ((event: FoundsetChangeEvent) => {
                     if (event.viewPortSizeChanged || event.fullValueChanged) {
                         this.checkFoundsetSizeAndRegenerateIfNeeded();
                     }
@@ -307,7 +307,7 @@ class SingleValueState implements IUIDestroyAwareValue {
     }
 
     /** This builds (from the single value from server) a viewport-from-server-equivalent to be used with viewportService code  */
-    generateWholeViewportFromOneValue(singleValue: any, vpSize: number | undefined | null, conversionInfoFromServer: string): Array<any> {
+    generateWholeViewportFromOneValue(singleValue: any, vpSize: number | undefined | null, conversionInfoFromServer: string): any[] {
         // this gets called for values that are not actually record linked, and we 'fake' a viewport containing the same value on each row in the array
         if (vpSize === undefined || vpSize === null) vpSize = 0;
         this.viewPortSize = vpSize;
@@ -323,7 +323,7 @@ class SingleValueState implements IUIDestroyAwareValue {
     }
 
     /** This re-builds based on previously stored singleValue (from the single value from server) a viewport-from-server-equivalent to be used with viewportService code. */
-    regenerateWholeViewportDueToSizeChange(vpSize: number): Array<any> {
+    regenerateWholeViewportDueToSizeChange(vpSize: number): any[] {
         this.viewPortSize = vpSize;
         return this.generateWholeViewportFromOneValueInternal();
     }

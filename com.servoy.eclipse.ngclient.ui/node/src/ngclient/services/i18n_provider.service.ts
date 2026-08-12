@@ -10,17 +10,17 @@ import { Deferred, I18NListener, RequestInfoPromise } from '@servoy/public';
 export class  I18NProvider {
     private cachedMessages: Record<string, any> = {};
 
-    private cachedPromises: { [s: string]: { promise?: Promise<any>; value?: any } } = {};
+    private cachedPromises: Record<string, { promise?: Promise<any>; value?: any }> = {};
     private defaultTranslations: Record<string, string> = {};
 
-    private readonly listeners: Set<Listener> = new Set();
+    private readonly listeners = new Set<Listener>();
 
     private readonly sabloService = inject(SabloService);
 
     constructor() {
     }
 
-    public addDefaultTranslations(translations: {[key: string]: string}) {
+    public addDefaultTranslations(translations: Record<string, string>) {
         for (const key of Object.keys(translations)) {
             this.defaultTranslations[key] = translations[key];
         }

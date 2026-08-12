@@ -7,7 +7,7 @@ import { EventLike } from '@servoy/public';
 @Injectable()
 export class ClientDesignService {
 
-    currentForms: { [key: string]: DragResize | undefined } = {};
+    currentForms: Record<string, DragResize | undefined> = {};
 
     private readonly sabloService = inject(SabloService);
     private readonly utils = inject(SvyUtilsService);
@@ -16,7 +16,7 @@ export class ClientDesignService {
     constructor() {
     }
 
-    public setFormInDesign(formname: string, names: Array<string>) {
+    public setFormInDesign(formname: string, names: string[]) {
         let dragresize = this.currentForms[formname];
         if (dragresize) return true;
 
@@ -28,11 +28,10 @@ export class ClientDesignService {
         this.currentForms[formname] = dragresize;
         //if(designChangeListener) designChangeListener(formname, true);
         const selectElement = (elm: any) => {
-            if (elm.classList.contains('svy-wrapper'))
-            {
+            if (elm.classList.contains('svy-wrapper')) {
                 elm = elm.firstChild;
-                let name = elm.getAttribute("name");
-                if (! name) name = elm.getAttribute("ng-reflect-name");
+                let name = elm.getAttribute('name');
+                if (! name) name = elm.getAttribute('ng-reflect-name');
                 if (name) {
                     return names.indexOf(name) != -1;
                 }
@@ -42,23 +41,23 @@ export class ClientDesignService {
         dragresize.isElement = selectElement;
         dragresize.isHandle = selectElement;
         dragresize.ondragfocus = (e) => {
-            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondrag")!;
-            this.sabloService.callService("clientdesign", "onselect", { element: jsevent.elementName, formname: formname, event: jsevent }).then((result: any) => {
+            const jsevent = this.utils.createJSEvent(e as unknown as EventLike, 'ondrag')!;
+            this.sabloService.callService('clientdesign', 'onselect', { element: jsevent.elementName, formname: formname, event: jsevent }).then((result: any) => {
                 if (!result) dragresize.deselect(true);
                 else if (dragresize.resizeHandleSet) dragresize.resizeHandleSet(dragresize.element!, true);
             });
         };
         dragresize.ondragend = (isResize, e) => {
-            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondrop")!;
+            const jsevent = this.utils.createJSEvent(e as unknown as EventLike, 'ondrop')!;
             const domRect = dragresize.element!.getBoundingClientRect();
-            if (isResize) this.sabloService.callService("clientdesign", "onresize", {
+            if (isResize) this.sabloService.callService('clientdesign', 'onresize', {
                 element: jsevent.elementName,
                 location: { x: domRect.left, y: domRect.top },
                 size: { width: domRect.width, height: domRect.height },
                 formname: formname,
                 event: jsevent
             })
-            else this.sabloService.callService("clientdesign", "ondrop", {
+            else this.sabloService.callService('clientdesign', 'ondrop', {
                 element: jsevent.elementName,
                 location: { x: domRect.left, y: domRect.top },
                 size: { width: domRect.width, height: domRect.height },
@@ -67,16 +66,16 @@ export class ClientDesignService {
             })
         };
         dragresize.ondragstart = (e) => {
-            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondrag")!;
-            this.sabloService.callService("clientdesign", "ondrag", { element: jsevent.elementName, formname: formname, event: jsevent })
+            const jsevent = this.utils.createJSEvent(e as unknown as EventLike, 'ondrag')!;
+            this.sabloService.callService('clientdesign', 'ondrag', { element: jsevent.elementName, formname: formname, event: jsevent })
         };
         dragresize.ondoubleclick = (e) => {
-            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "ondoubleclick")!;
-            this.sabloService.callService("clientdesign", "ondoubleclick", { element: jsevent.elementName, formname: formname, event: jsevent })
+            const jsevent = this.utils.createJSEvent(e as unknown as EventLike, 'ondoubleclick')!;
+            this.sabloService.callService('clientdesign', 'ondoubleclick', { element: jsevent.elementName, formname: formname, event: jsevent })
         };
         dragresize.onrightclick = (e) => {
-            var jsevent = this.utils.createJSEvent(e as unknown as EventLike, "onrightclick")!;
-            this.sabloService.callService("clientdesign", "onrightclick", { element: jsevent.elementName, formname: formname, event: jsevent })
+            const jsevent = this.utils.createJSEvent(e as unknown as EventLike, 'onrightclick')!;
+            this.sabloService.callService('clientdesign', 'onrightclick', { element: jsevent.elementName, formname: formname, event: jsevent })
         };
 
         dragresize.apply(x);
@@ -102,7 +101,7 @@ export class ClientDesignService {
         designChangeListener = designChangeListenerCallback;    
     },*/
 
-    recreateUI(formname: string, names: Array<string>) {
+    recreateUI(formname: string, names: string[]) {
         const dragresize = this.currentForms[formname];
         if (dragresize) {
             dragresize.destroy();
@@ -149,7 +148,7 @@ class DragResize {
     rightClickHandler!: (e: MouseEvent) => void;
 
     startDragging = false;
-    _i : number = 1;
+    _i  = 1;
      // *** DRAG/RESIZE CODE ***
     constructor(myName: string) {
         this.myName = myName;
@@ -261,7 +260,7 @@ class DragResize {
         // We also initialise the resize boxes, and drag parameters like mouse position etc.
         if (!document.getElementById || !this.enabled) return true;
 
-        let elm = <HTMLElement>e.target,
+        let elm = e.target as HTMLElement,
             newElement = null,
             newHandle = null,
             hRE = new RegExp(this.myName + '-([trmbl]{2})', '');
@@ -269,8 +268,10 @@ class DragResize {
         while (elm) {
             // Loop up the DOM looking for matching elements. Remember one if found.
             if (!newHandle && (hRE.test(elm.className) || this.isHandle(elm))) newHandle = elm;
-            if (this.isElement(elm)) { newElement = elm; break }
-            elm = <HTMLElement>elm.parentNode;
+            if (this.isElement(elm)) {
+ newElement = elm; break 
+}
+            elm = elm.parentNode as HTMLElement;
             if (elm == this.node) break;
         }
 
@@ -298,8 +299,8 @@ class DragResize {
         this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop;
         // Record the relative mouse movement, in case we're dragging.
         // Add any previously stored & ignored offset to the calculations.
-        var diffX = this.mouseX - this.lastMouseX + this.mOffX;
-        var diffY = this.mouseY - this.lastMouseY + this.mOffY;
+        let diffX = this.mouseX - this.lastMouseX + this.mOffX;
+        let diffY = this.mouseY - this.lastMouseY + this.mOffY;
         this.mOffX = this.mOffY = 0;
         // Update last processed mouse positions.
         this.lastMouseX = this.mouseX;
@@ -310,12 +311,11 @@ class DragResize {
 
         // If included in the script, run the resize handle drag routine.
         // Let it create an object representing the drag offsets.
-        var isResize = false;
+        let isResize = false;
         if (this.resizeHandleDrag && this.resizeHandleDrag(diffX, diffY)) {
             isResize = true;
             this.startDragging = true;
-        }
-        else {
+        } else {
             if (!this.startDragging && this.handle && this.ondragstart && (diffX != 0 || diffY != 0)) {
                 this.ondragstart(e);
                 this.startDragging = true;
@@ -324,7 +324,7 @@ class DragResize {
             // If the resize drag handler isn't set or returns fase (to indicate the drag was
             // not on a resize handle), we must be dragging the whole element, so move that.
             // Bounds check left-right...
-            var dX = diffX, dY = diffY;
+            const dX = diffX, dY = diffY;
             if (this.elmX + dX < this.minLeft) this.mOffX = (dX - (diffX = this.minLeft - this.elmX));
             else if (this.elmX + this.elmW + dX > this.maxLeft) this.mOffX = (dX - (diffX = this.maxLeft - this.elmX - this.elmW));
             // ...and up-down.
@@ -342,7 +342,7 @@ class DragResize {
 
         // Evil, dirty, hackish Opera select-as-you-drag fix.
         if ((window as any)['opera'] && document.documentElement) {
-            var oDF = document.getElementById('op-drag-fix');
+            let oDF = document.getElementById('op-drag-fix');
             if (!oDF) {
                 oDF = document.createElement('input');
                 oDF.id = 'op-drag-fix';
@@ -388,7 +388,7 @@ class DragResize {
         if (!elm['_handle_tr']) {
             for (var h = 0; h < this.handles.length; h++) {
                 // Create 4 news divs, assign each a generic + specific class.
-                var hDiv = document.createElement('div');
+                const hDiv = document.createElement('div');
                 hDiv.className = this.myName + ' ' + this.myName + '-' + this.handles[h];
                 elm['_handle_' + this.handles[h]] = elm.appendChild(hDiv);
             }
@@ -406,13 +406,13 @@ class DragResize {
         // drag is from a resize handle created above; if so, it changes the stored
         // elm* dimensions and mOffX/Y.
 
-        var hClass = this.handle && this.handle.className &&
+        const hClass = this.handle && this.handle.className &&
             this.handle.className.match(new RegExp(this.myName + '-([tmblr]{2})')) ? RegExp.$1 : '';
 
         // If the hClass is one of the resize handles, resize one or two dimensions.
         // Bounds checking is the hard bit -- basically for each edge, check that the
         // element doesn't go under minimum size, and doesn't go beyond its boundary.
-        var dY = diffY, dX = diffX, processed = false;
+        let dY = diffY, dX = diffX, processed = false;
         if (hClass.indexOf('t') >= 0) {
             if (this.elmH - dY < this.minHeight) this.mOffY = (dY - (diffY = this.elmH - this.minHeight));
             else if (this.elmY + dY < this.minTop) this.mOffY = (dY - (diffY = this.minTop - this.elmY));

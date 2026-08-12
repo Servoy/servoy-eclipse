@@ -23,7 +23,7 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
             resolve(null);
         })
     }
-    callServiceServerSideApi<T>(servicename: string, methodName: string, args: Array<any>): Promise<T> {
+    callServiceServerSideApi<T>(servicename: string, methodName: string, args: any[]): Promise<T> {
         return new Promise<any>(resolve => {
             resolve(null);
         });
@@ -49,7 +49,7 @@ export class ServoyPublicServiceDesignerImpl extends ServoyPublicService {
     getLocaleObject(): Locale {
         return this.localeService.getLocaleObject();
     }
-    getAGGridLocale(): { [key: string]: string; } {
+    getAGGridLocale(): Record<string, string> {
         return this.localeService.getAgGridLocale();
     }
     createJSEvent(event: EventLike, eventType: string, contextFilter?: string, contextFilterElement?: any): JSEvent {

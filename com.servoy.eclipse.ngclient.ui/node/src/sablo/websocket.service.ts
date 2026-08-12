@@ -183,7 +183,7 @@ export class WebsocketService {
     }
 }
 
-export type MessageObjectHandler = (msg: {[k: string]: unknown}) => Promise<any> | void;
+export type MessageObjectHandler = (msg: Record<string, unknown>) => Promise<any> | void;
 
 export interface ServicesHandler {
     handleServiceApisWithApplyFirst(serviceApisJSON: any, previousResponseValue: any): any;
@@ -195,15 +195,15 @@ export class WebsocketSession {
     private connected = 'INITIAL';
     private heartbeatMonitor: Subscription | null = null;
     private lastHeartbeat!: number;
-    private onOpenHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
-    private onErrorHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
-    private onCloseHandlers: Array<(evt: WebsocketCustomEvent) => void> = new Array();
-    private onMessageObjectHandlers: Array<MessageObjectHandler> = new Array();
+    private onOpenHandlers = new Array<(evt: WebsocketCustomEvent) => void>();
+    private onErrorHandlers = new Array<(evt: WebsocketCustomEvent) => void>();
+    private onCloseHandlers = new Array<(evt: WebsocketCustomEvent) => void>();
+    private onMessageObjectHandlers = new Array<MessageObjectHandler>();
     private servicesHandler: ServicesHandler | undefined = undefined;
 
-    private functionsToExecuteAfterIncommingMessageWasHandled: Array<() => void> | undefined = undefined;
+    private functionsToExecuteAfterIncommingMessageWasHandled: (() => void)[] | undefined = undefined;
 
-    private deferredEvents: Array<Deferred<any>> = new Array();
+    private deferredEvents = new Array<Deferred<any>>();
 
     private pendingMessages: string[] | undefined = undefined;
 
@@ -661,7 +661,7 @@ export class SabloUtils {
 
 export const wrapPromiseToPropagateCustomRequestInfoInternal = (originalPromise: RequestInfoPromise<any>,
     spawnedPromise: RequestInfoPromise<any>): RequestInfoPromise<any> => {
-        return Object.defineProperty(spawnedPromise, "requestInfo", {
+        return Object.defineProperty(spawnedPromise, 'requestInfo', {
             set(value) {
                 originalPromise.requestInfo = value;
             }

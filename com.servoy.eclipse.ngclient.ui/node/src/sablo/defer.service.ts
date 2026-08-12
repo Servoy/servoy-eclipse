@@ -79,7 +79,7 @@ export class SabloDeferHelper {
 }
 
 export interface IDeferedState {
-    deferred: { [key: string]: { defer: IDeferred<any>; timeoutId: any } };
+    deferred: Record<string, { defer: IDeferred<any>; timeoutId: any }>;
     timeoutRejectLogPrefix: string;
-    init(deferred: { [key: string]: { defer: IDeferred<any>; timeoutId: any } }, timeoutRejectLogPrefix: string): void;
+    init(deferred: Record<string, { defer: IDeferred<any>; timeoutId: any }>, timeoutRejectLogPrefix: string): void;
 }

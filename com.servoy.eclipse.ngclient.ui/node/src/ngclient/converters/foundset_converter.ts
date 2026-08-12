@@ -282,7 +282,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
      * sort string of the foundset, the same as the one used in scripting for
      * foundset.sort and foundset.getCurrentSort. Example: 'orderid asc'.
      */
-    public sortColumns: string = '';
+    public sortColumns = '';
 
     /**
      * the multiselect mode of the server's foundset; if this is false,
@@ -302,7 +302,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
      * viewport to load records at index serverSize-1 or greater will load more
      * records in the foundset)
      */
-    public hasMoreRows: boolean = false;
+    public hasMoreRows = false;
 
     /**
      * columnFormats is only present if you specify
@@ -491,7 +491,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
                         possibleWarnMessage += '  {';
                         let sep = '';
                         row._cache.forEach((v: any, k: any) => {
-                            possibleWarnMessage += sep + k + ": " + ((typeof(v == 'object') ? v.constructor?.name : v))
+                            possibleWarnMessage += sep + k + ': ' + ((typeof(v == 'object') ? v.constructor?.name : v))
                             sep = ', ';
                         });
                         possibleWarnMessage += '}\n';
@@ -506,7 +506,7 @@ export class FoundsetValue implements IChangeAwareValue, IFoundset, IUIDestroyAw
 
 class FoundsetTypeInternalState extends FoundsetViewportState implements IDeferedState {
 
-    deferred!: { [key: string]: { defer: Deferred<any>; timeoutId: number } };
+    deferred!: Record<string, { defer: Deferred<any>; timeoutId: number }>;
     timeoutRejectLogPrefix!: string;
     selectionUpdateDefer!: Deferred<any>;
     propertyContextCreator!: IPropertyContextCreatorForRow;
@@ -526,7 +526,7 @@ class FoundsetTypeInternalState extends FoundsetViewportState implements IDefere
         this.sabloDeferHelper.initInternalStateForDeferring(this, 'svy foundset * ');
     }
 
-    init(deferred: { [key: string]: { defer: Deferred<any>; timeoutId: number } }, timeoutRejectLogPrefix: string) {
+    init(deferred: Record<string, { defer: Deferred<any>; timeoutId: number }>, timeoutRejectLogPrefix: string) {
         this.deferred = deferred;
         this.timeoutRejectLogPrefix = timeoutRejectLogPrefix;
     }

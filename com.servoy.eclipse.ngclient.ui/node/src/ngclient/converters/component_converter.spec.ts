@@ -55,7 +55,7 @@ describe('ComponentConverter', () => {
         // here we feed in the client side equivalent some (imaginary test) servoy .spec file
         // so we can play a bit with push to server settings in tests
         typesRegistry.addComponentClientSideSpecs({
-            "test-datalabel": {
+            'test-datalabel': {
                 p: {
                     nonRecDepProp: { s: 2 }, // shallow push to server
                     recDepProp: { s: 2 }, // shallow push to server
@@ -69,12 +69,12 @@ describe('ComponentConverter', () => {
                 undefined as any, undefined as any, undefined as any, propertyContextWithReject);
 
         propertyContextWithReject = {
-            getProperty: (_propertyName) => _propertyName === "myfoundset" ? fsProp : undefined,
+            getProperty: (_propertyName) => _propertyName === 'myfoundset' ? fsProp : undefined,
             getPushToServerCalculatedValue: () => PushToServerEnum.REJECT,
             isInsideModel: true
         };
         propertyContextWithAllow = {
-            getProperty: (_propertyName) => _propertyName === "myfoundset" ? fsProp : undefined,
+            getProperty: (_propertyName) => _propertyName === 'myfoundset' ? fsProp : undefined,
             getPushToServerCalculatedValue: () => PushToServerEnum.ALLOW,
             isInsideModel: true
         };
@@ -83,42 +83,43 @@ describe('ComponentConverter', () => {
     // as property types reuse parts of JSON that comes from server, return a new instance each time to avoid meddling between separate tests due to this
     const initialChildComponentServerValue = () => {
         return {
-        "forFoundset": "myfoundset",
-        "componentDirectiveName": "test-datalabel",
-        "name": "listformcomponentcontainer_1$containedForm$datalabel_1",
-        "position": {
-            "left": "20px",
-            "top": "10px",
-            "width": "80px",
-            "height": "30px"
+        'forFoundset': 'myfoundset',
+        'componentDirectiveName': 'test-datalabel',
+        'name': 'listformcomponentcontainer_1$containedForm$datalabel_1',
+        'position': {
+            'left': '20px',
+            'top': '10px',
+            'width': '80px',
+            'height': '30px'
         },
-        "model": {
-            "nonRecDepProp": "Hello there!",
+        'model': {
+            'nonRecDepProp': 'Hello there!',
         },
-        "handlers": {},
-        "foundsetConfig": {
-            "recordBasedProperties": [
-                "recDepProp"
+        'handlers': {},
+        'foundsetConfig': {
+            'recordBasedProperties': [
+                'recDepProp'
             ]
         },
-        "model_vp": [
+        'model_vp': [
             {
-                "recDepProp": 10248
+                'recDepProp': 10248
             },
             {
-                "recDepProp": 10255
+                'recDepProp': 10255
             },
             {
-                "recDepProp": 10256
+                'recDepProp': 10256
             },
             {
-                "recDepProp": 10257
+                'recDepProp': 10257
             },
             {
-                "recDepProp": 10259
+                'recDepProp': 10259
             }
         ]
-    }};
+    }
+};
 
     // as property types reuse parts of JSON that comes from server, return a new instance each time to avoid meddling between separate tests due to this
     const createDefaultFoundset = () => {
@@ -169,12 +170,12 @@ describe('ComponentConverter', () => {
         });
         expect(getAndClearNotified()).toEqual(false);
 
-        expect(comp.model.nonRecDepProp).toBe("Hello there!");
+        expect(comp.model.nonRecDepProp).toBe('Hello there!');
         expect(comp.modelViewport.length).toBe(5);
         expect(comp.modelViewport[0].recDepProp).toBe(10248);
-        expect(comp.modelViewport[0].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[0].nonRecDepProp).toBe('Hello there!');
         expect(comp.modelViewport[1].recDepProp).toBe(10255);
-        expect(comp.modelViewport[1].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[1].nonRecDepProp).toBe('Hello there!');
     });
 
     it('Should send property changes to server when asked to do so (api call on ChildComponentPropertyValue) for root properties by the component that uses the child component property', () => {
@@ -192,7 +193,7 @@ describe('ComponentConverter', () => {
         comp.modelViewport[1].recDepProp = 101011;
         expect(getAndClearNotified()).toEqual(false);
 
-        comp.sendChanges("recDepProp", 101010, 10255, "5.ANATR;_1", false);
+        comp.sendChanges('recDepProp', 101010, 10255, '5.ANATR;_1', false);
         expect(getAndClearNotified()).toEqual(true);
         expect(comp.getInternalState().hasChanges()).toEqual(true);
         expect(converterService.convertFromClientToServer(comp, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, propertyContextWithAllow)[0]).toEqual(
@@ -203,11 +204,11 @@ describe('ComponentConverter', () => {
 
         // comp.modelViewport[1].nonRecDepProp = "new value 1"; // only child component emits would do this assignment but by the list from component's (or other parent comp) call to ChildComponentPropertyValue.sendChanges()
 
-        comp.sendChanges("nonRecDepProp", "new value 1", "Hello there!", "5.ANATR;_1", false);
+        comp.sendChanges('nonRecDepProp', 'new value 1', 'Hello there!', '5.ANATR;_1', false);
         expect(getAndClearNotified()).toEqual(true);
         expect(comp.getInternalState().hasChanges()).toEqual(true);
         expect(converterService.convertFromClientToServer(comp, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, propertyContextWithAllow)[0]).toEqual(
-            [{ viewportDataChanged: { _svyRowId: '5.ANATR;_1', dp: 'nonRecDepProp', value: "new value 1" } }]
+            [{ viewportDataChanged: { _svyRowId: '5.ANATR;_1', dp: 'nonRecDepProp', value: 'new value 1' } }]
         );
         expect(getAndClearNotified()).toEqual(false);
         expect(comp.getInternalState().hasChanges()).toEqual(false);
@@ -247,7 +248,7 @@ describe('ComponentConverter', () => {
                 model_vp_ch:
                 [
                     {
-                        rows: [{ "recDepProp": 191919 }],
+                        rows: [{ 'recDepProp': 191919 }],
                         startIndex: 0,
                         endIndex: 0,
                         type: 1
@@ -256,14 +257,14 @@ describe('ComponentConverter', () => {
             }
         }, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, undefined as any, undefined as any, propertyContextWithAllow);
 
-        expect(comp.model.nonRecDepProp).toBe("Hello there!");
+        expect(comp.model.nonRecDepProp).toBe('Hello there!');
         expect(comp.modelViewport.length).toBe(6);
         expect(comp.modelViewport[0].recDepProp).toBe(191919);
-        expect(comp.modelViewport[0].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[0].nonRecDepProp).toBe('Hello there!');
         expect(comp.modelViewport[1].recDepProp).toBe(10248);
-        expect(comp.modelViewport[1].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[1].nonRecDepProp).toBe('Hello there!');
         expect(comp.modelViewport[2].recDepProp).toBe(10255);
-        expect(comp.modelViewport[2].nonRecDepProp).toBe("Hello there!");
+        expect(comp.modelViewport[2].nonRecDepProp).toBe('Hello there!');
     });
 
 });

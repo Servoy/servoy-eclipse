@@ -29,9 +29,7 @@ export interface RowUpdate {
 }
 
 /** if it is a multiple column viewport (like for foundset properties or component properties) */
-interface MultipleColumnsConversionInfoFromServer {
-    [columnName: string]: SingleColumnConversionInfoFromServer;
-};
+type MultipleColumnsConversionInfoFromServer = Record<string, SingleColumnConversionInfoFromServer>;;
 
 interface SingleColumnConversionInfoFromServer {
     '_T'?: string | null; // column level type (fallback at column level in case cell type was not defined); not present
@@ -45,9 +43,7 @@ type ColumnCellConversionInfoFromServer = [
 
 
 /** this is what the viewport keeps in internal state for easy type access of cells after expanding the ConversionInfoFromServerForViewport that it gets from the server */
-interface ExpandedViewportTypes {
-    [rowIdx: number]: IType<any> | { [columnName: string]: IType<any> };
-}
+type ExpandedViewportTypes = Record<number, IType<any> | Record<string, IType<any>>>;
 
 @Injectable({
     providedIn: 'root'
@@ -460,7 +456,7 @@ export class ViewportService {
     /**
      * @param types can be one IType<?>  or an object of IType<?> for each column on that row.
      */
-    private updateRowTypes(idx: number, internalState: FoundsetViewportState, types: IType<any> | { [colName: string]: IType<any> }) {
+    private updateRowTypes(idx: number, internalState: FoundsetViewportState, types: IType<any> | Record<string, IType<any>>) {
         if (internalState.viewportTypes === undefined) {
             internalState.viewportTypes = {};
         }
@@ -625,7 +621,7 @@ export class ViewportService {
             set: (underlyingViewport: T, prop: any, v: any, receiver: any) => {
                 if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.set(underlyingViewport, prop, v, receiver);
 
-                // eslint-disable-next-line radix
+                 
                 const i = Number.parseInt(prop);
                 if (Number.isInteger(i)) {
                     if (i < underlyingViewport.length) {
@@ -640,7 +636,7 @@ export class ViewportService {
             deleteProperty: (underlyingViewport: T, prop: any) => {
                 if (softProxyRevoker.isProxyDisabled() || internalState.ignoreChanges) return Reflect.deleteProperty(underlyingViewport, prop);
 
-                // eslint-disable-next-line radix
+                 
                 const i = Number.parseInt(prop);
                 if (Number.isInteger(i) && i < underlyingViewport.length) {
                     changeHandlerForWholeViewportProxy.setPropertyAndHandleChanges(underlyingViewport, i, undefined); // 1 element deleted
@@ -706,14 +702,14 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
     changeListeners: ViewportChangeListener[] = [];
 
     viewportTypes!: ExpandedViewportTypes;
-    unwatchData!: { [idx: number]: Array<() => void> };
+    unwatchData!: Record<number, (() => void)[]>;
 
-    requests: Array<any> = [];
+    requests: any[] = [];
 
     ignoreChanges = true;
 
     viewportLevelProxyRevokerFunc?: () => void; // this can be just a boolean I think; we never call it, we just check if it's there or not
-    rowLevelProxyStates?: Array<RowProxyState>;
+    rowLevelProxyStates?: RowProxyState[];
     /** just a value that is cached here for foundset type viewports - so we don't need to search for it each time it's needed */
     needsRowProxies!: boolean;
 
@@ -764,7 +760,7 @@ export abstract class FoundsetViewportState extends ChangeAwareState implements 
             afterNgOnDestroyOfChildrenPotentialRunner!(() => {
                 if (this.changeListeners?.length) {
                     let possibleLeaksFound = false;
-                    for (let chL of this.changeListeners) {
+                    for (const chL of this.changeListeners) {
                         if (!instanceOfIInternalReferenceBetweenPropertyImpls(chL)) {
                             possibleLeaksFound = true;
                             break;

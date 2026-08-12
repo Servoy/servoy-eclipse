@@ -13,7 +13,7 @@ const resizeConstants = { NORTH, SOUTH, EAST, WEST };
 
 export class BSWindow {
 
-    resizeAnchorClasses: {[key: number]: string} = {
+    resizeAnchorClasses: Record<number, string> = {
         1: 'ns-resize', // NORTH
         2: 'ns-resize', // SOUTH
         4: 'ew-resize', // EAST

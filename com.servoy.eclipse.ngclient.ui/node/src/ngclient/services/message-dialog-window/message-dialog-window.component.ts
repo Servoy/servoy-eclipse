@@ -21,9 +21,9 @@ export class MessageDialogWindowComponent {
   readonly defaultButtonIndex = signal<number | undefined>(undefined);
   readonly okButtonText = signal<string>('OK');
 
-  readonly inputfield = viewChild<ElementRef>("inputfield");
-  readonly buttons = viewChild<ElementRef>("buttons");
-  readonly svyMessageDialog = viewChild<ElementRef>("svyMessageDialog");
+  readonly inputfield = viewChild<ElementRef>('inputfield');
+  readonly buttons = viewChild<ElementRef>('buttons');
+  readonly svyMessageDialog = viewChild<ElementRef>('svyMessageDialog');
 
   retValue: string | null = null;
   onCloseCallback!: (r: string | null) => void;
