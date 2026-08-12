@@ -58,12 +58,21 @@ public class ComponentTemplateGenerator
 	 */
 	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(ITiNGExportModel model)
 	{
+		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
+		Map<String, PackageSpecification<WebObjectSpecification>> packageSpecs = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications();
+		return generateHTMLTemplate(specs, packageSpecs, model);
+	}
+
+	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(
+		WebObjectSpecification[] specs,
+		Map<String, ? extends PackageSpecification< ? >> packageSpecs,
+		ITiNGExportModel model)
+	{
 		StringBuilder template = new StringBuilder();
 		StringBuilder viewChild = new StringBuilder();
 
 		template.append("<!-- component template generate start -->\n");
 		viewChild.append("// component viewchild template generate start\n");
-		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		Arrays.sort(specs, new Comparator<WebObjectSpecification>()
 		{
 			@Override
@@ -85,7 +94,7 @@ public class ComponentTemplateGenerator
 				String packageName = spec.getPackageName();
 				if (!ng2Compatible.containsKey(packageName))
 				{
-					PackageSpecification packageSpecification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications().get(packageName);
+					PackageSpecification< ? > packageSpecification = packageSpecs.get(packageName);
 					if (packageSpecification != null)
 					{
 						Boolean isNG2Compatible = Boolean.FALSE;
