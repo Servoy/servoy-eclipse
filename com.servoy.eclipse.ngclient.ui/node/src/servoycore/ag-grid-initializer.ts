@@ -7,7 +7,7 @@ const AG_GRID_LICENSE_KEY = 'Using_this_{AG_Grid}_Enterprise_key_{AG-093974}_in_
 
 let agGridInitialized = false;
 
-function initializeAgGrid(): void {
+const initializeAgGrid = (): void => {
     if (agGridInitialized) return;
     agGridInitialized = true;
     LicenseManager.setLicenseKey(AG_GRID_LICENSE_KEY);
@@ -22,10 +22,8 @@ function initializeAgGrid(): void {
         ValidationModule.with({ showOverlayOn: [] }),
         RenderApiModule
     ]);
-}
+};
 
-export function provideAgGrid(): EnvironmentProviders {
-    return makeEnvironmentProviders([
-        { provide: APP_INITIALIZER, useValue: initializeAgGrid, multi: true }
-    ]);
-}
+export const provideAgGrid = (): EnvironmentProviders => makeEnvironmentProviders([
+    { provide: APP_INITIALIZER, useValue: initializeAgGrid, multi: true }
+]);

@@ -1,7 +1,6 @@
 import {
   Component, Input, OnDestroy, OnChanges, SimpleChanges, viewChild,
   TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, ViewEncapsulation,
-  HostListener,
   DOCUMENT,
   forwardRef
 } from '@angular/core';

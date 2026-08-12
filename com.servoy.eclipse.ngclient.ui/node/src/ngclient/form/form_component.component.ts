@@ -1,6 +1,6 @@
 import {
   Component, Input, OnDestroy, OnChanges, SimpleChanges,
-  TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, SimpleChange, Inject, AfterViewInit, AfterViewChecked,
+  TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, AfterViewInit, AfterViewChecked,
   DOCUMENT,
   input,
   viewChild,
@@ -20,7 +20,7 @@ import { ServoyApi } from '../servoy_api';
 import { FormService } from '../form.service';
 
 import { ConverterService } from '../../sablo/converter.service';
-import { IWebObjectSpecification, PushToServerUtils } from '../../sablo/types_registry';
+import { IWebObjectSpecification } from '../../sablo/types_registry';
 import { fromEvent, debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

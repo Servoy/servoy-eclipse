@@ -129,7 +129,7 @@ export abstract class AbstractFormComponent {
             const proto = Object.getPrototypeOf(comp);
             if (proto[apiName]) {
                 return Promise.resolve(proto[apiName].apply(comp, args)).then((ret) =>
-                    converterService.convertFromClientToServer(ret, callSpec?.returnType!, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
+                    converterService.convertFromClientToServer(ret, callSpec?.returnType ?? undefined!, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0]
                 );
             } else {
                 log.error(log.buildMessage(() => ('Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.')));
