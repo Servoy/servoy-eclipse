@@ -265,13 +265,17 @@ Full spec: `../../docs/angular22-modernization-remaining.spec.md`
 - **inject() migration:** Done for servoydefault (29 files) and src/ (8 files). Remaining are plain classes (not Angular DI).
 - **takeUntilDestroyed():** Done — tooltip-html.directive, form_component.component
 - **Signal queries (local):** Done — basechoice, baselabel, check, radio, spinner, calendar, combobox, typeahead, bg_splitter
+- **Standalone components:** 100% — all directives, pipes, and components converted to `standalone: true`
+- **bootstrapApplication():** Done — `AppModule` removed, app bootstraps with `bootstrapApplication()` + `provideRouter()`
+- **Routing modules removed:** `AppRoutingModule`, `MainRoutingModule`, `ServoyDesignerRoutingModule` replaced with plain `Routes` arrays
+- **AbstractFormComponent extraction:** Extracted to own file (`abstract_form_component.component.ts`), injected via `forwardRef` providers pattern
 
-### Architecturally Blocked (requires full redesign in Phase 6)
+### Architecturally Blocked (requires full redesign)
 - **@Input()/@Output() → signals:** Tied to `ngOnChanges` → `svyOnChanges(SimpleChanges)` pattern. Requires replacing entire change detection model with `effect()`/`computed()`.
 - **basecomponent.ts `elementRef`:** Used as `this.elementRef` in 100+ subclasses + external packages. Cannot convert to signal without updating all consumers.
 - **basetabpanel.ts `templateRef`:** Used in templates of subclasses (accordion, tabpanel, tablesspanel, splitpane).
 - **servoydesigner.component.ts:** Setter-based ViewChild, complex.
 
 ### Remaining Phases
-- **Phase 6 — Standalone Migration:** Convert 26 `standalone: false` → `standalone: true`, remove 15 NgModules, convert to `bootstrapApplication()`. This is the big architectural change where the blocked items above get resolved together.
+- **Phase 6b — NgModule removal:** Remove remaining barrel NgModules (servoycore.module, servoydefault.module, servoy_public.module, servoy.module, servoydesigner.module, lfc.module, allcomponents.module, dialog.module, windowservice.module). These currently serve only as re-export groupings; all components already have their own imports.
 - **Phase 7 — Zoneless:** Remove zone.js, switch to `provideZonelessChangeDetection()`, eliminate all `ChangeDetectorRef` usage.
