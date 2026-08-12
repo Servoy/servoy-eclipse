@@ -95,10 +95,9 @@ Carry the relevant git-history findings from the triage report into the spec und
 "Git history" design section. If a prior change has a spec in `docs/`, read it to
 understand constraints.
 
-
 ### 6. Write the spec file
 
-**File location:** `docs/<KEY>-<slug>.spec.md`
+**File location:** `docs/<KEY>-<slug>.spec.md` — relative to the **git repository root**, NOT an Eclipse project folder. Use the `write` tool with an absolute path to the repo root's `docs/` directory, or use `eclipse-coder_createFile` on the root project (e.g. `Servoy-Copilot`). Never create this file inside a bundle project.
 The slug is 3–5 words from the summary, lowercase, hyphen-separated.
 Example: `docs/SVY-21080-embedded-opencode.spec.md`
 
