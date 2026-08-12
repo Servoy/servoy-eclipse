@@ -1,4 +1,4 @@
-import { Component, SimpleChanges, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, SimpleChanges, ElementRef, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 
 
@@ -11,7 +11,7 @@ import { ServoyDefaultBaseField } from '../basefield';
 })
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('child', { static: false }) child!: ElementRef<HTMLInputElement>;
+    readonly child = viewChild<ElementRef<HTMLInputElement>>('child');
 
     selection: any;
     private counter = 0;
@@ -28,7 +28,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
     }
 
     getFocusElement(): HTMLElement {
-        return this.child.nativeElement;
+        return this.child()!.nativeElement;
     }
 
     svyOnChanges(changes: SimpleChanges) {

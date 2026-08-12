@@ -48,6 +48,6 @@ describe('SvyButton', () => {
     servoyApi.trustAsHtml.mockReturnValue( true );
     component.dataProviderID.set('<div class="myclass" onclick="javascript:test()">hallo</div>');
     runOnPushChangeDetection(fixture);
-    expect( component.child.nativeElement.children[1].innerHTML ).toBe(component.dataProviderID());
+    expect( component.child()!.nativeElement.children[1].innerHTML ).toBe(component.dataProviderID());
   });
 });

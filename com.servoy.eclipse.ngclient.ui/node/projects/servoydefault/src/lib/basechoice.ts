@@ -1,12 +1,12 @@
 
-import { ViewChild, ElementRef, SimpleChanges, Directive, input, OnInit } from '@angular/core';
+import { ElementRef, SimpleChanges, Directive, input, OnInit, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from './basefield';
 
 @Directive()
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
+    readonly input = viewChild<ElementRef<HTMLInputElement>>('input');
 
     selection: any[] = [];
     allowNullinc = 0;
@@ -21,7 +21,7 @@ export abstract class ServoyDefaultBaseChoice extends ServoyDefaultBaseField<HTM
     }
 
     getFocusElement(): HTMLElement {
-        return this.input != null ? this.input.nativeElement : null!;
+        return this.input() != null ? this.input()!.nativeElement : null!;
     }
 
     svyOnChanges(changes: SimpleChanges) {

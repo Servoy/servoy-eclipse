@@ -1,5 +1,5 @@
 
-import { Component, SimpleChanges, ViewChild, HostListener, QueryList, ElementRef, ViewChildren, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, SimpleChanges, HostListener, QueryList, ElementRef, ChangeDetectionStrategy, inject, viewChild, viewChildren } from '@angular/core';
 import { NgbDropdownItem, NgbTooltip, NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService, ServoyPublicService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
@@ -12,10 +12,10 @@ import { ServoyDefaultBaseField } from '../basefield';
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputElement> {
 
-    @ViewChildren(NgbDropdownItem) menuItems!: QueryList<NgbDropdownItem>;
-    @ViewChild('input') input!: ElementRef<HTMLButtonElement>;
-    @ViewChild(NgbDropdown) comboboxDropdown!: NgbDropdown;
-    @ViewChild('tooltip') tooltip!: NgbTooltip;
+    readonly menuItems = viewChildren(NgbDropdownItem);
+    readonly input = viewChild<ElementRef<HTMLButtonElement>>('input');
+    readonly comboboxDropdown = viewChild.required(NgbDropdown);
+    readonly tooltip = viewChild<NgbTooltip>('tooltip');
 
     formattedValue: any;
     valueComparator!: (value: { displayValue: any; realValue: any }) => boolean;
@@ -37,8 +37,8 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         this.lastSelectValue = null;
         this.firstItemFound = false;
         if (this.isPrintableChar(event.key)) {
-            if (document.activeElement === this.getFocusElement() && !this.comboboxDropdown.isOpen()) {
-                this.comboboxDropdown.open();
+            if (document.activeElement === this.getFocusElement() && !this.comboboxDropdown().isOpen()) {
+                this.comboboxDropdown().open();
             }
             if (event.key !== 'Backspace') this.keyboardSelectValue = (this.keyboardSelectValue ? this.keyboardSelectValue : '') + event.key;
             else this.keyboardSelectValue = this.keyboardSelectValue ? this.keyboardSelectValue.slice(0, -1) : '';
@@ -67,22 +67,22 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             this.showPopupOnFocusGain = showPopup;
         }
         super.svyOnInit();
-        this.tooltip.autoClose = false;
+        this.tooltip()!.autoClose = false;
     }
 
     refreshTooltip() {
-        if (!this.tooltip.isOpen()) {
-            this.tooltip.open();
+        if (!this.tooltip()!.isOpen()) {
+            this.tooltip()!.open();
         }
     }
 
     handleTooltip(event: KeyboardEvent) {
-        this.tooltip.autoClose = false;
-        this.tooltip.ngbTooltip = 'This is the CHANGED text';
-        if (this.tooltip.isOpen()) {
-            this.tooltip.close();
+        this.tooltip()!.autoClose = false;
+        this.tooltip()!.ngbTooltip = 'This is the CHANGED text';
+        if (this.tooltip()!.isOpen()) {
+            this.tooltip()!.close();
         } else {
-            this.tooltip.open();
+            this.tooltip()!.open();
         }
     }
 
@@ -106,19 +106,19 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     }
 
     getDropDownWidth() {
-        return this.input?.nativeElement?.clientWidth;
+        return this.input()?.nativeElement?.clientWidth;
     }
 
     getFocusElement() {
-        return this.input.nativeElement;
+        return this.input()!.nativeElement;
     }
 
     attachFocusListeners(nativeElement: HTMLElement) {
         if (this.onFocusGainedMethodID() || this.showPopupOnFocusGain)
             this.renderer.listen(nativeElement, 'focus', (e) => {
                 if (this.onFocusGainedMethodID() && !this.skipFocus && this.mustExecuteOnFocus) this.onFocusGainedMethodID()(e);
-                if (!this.skipFocus && this.showPopupOnFocusGain && !this.comboboxDropdown.isOpen()) {
-                    this.comboboxDropdown.open();
+                if (!this.skipFocus && this.showPopupOnFocusGain && !this.comboboxDropdown().isOpen()) {
+                    this.comboboxDropdown().open();
                 }
                 this.skipFocus = false;
                 this.mustExecuteOnFocus = true;
@@ -132,7 +132,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         super.requestFocus(mustExecuteOnFocusGainedMethod);
         if (this.showPopupOnFocusGain) {
-            this.comboboxDropdown.open();
+            this.comboboxDropdown().open();
         }
     }
 
@@ -141,7 +141,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         this.skipFocus = true;
         if (state) {
             setTimeout(() => {
-                const item = this.menuItems.find((element) => element.nativeElement.classList.contains('active'));
+                const item = this.menuItems().find((element) => element.nativeElement.classList.contains('active'));
                 if (item) {
                     item.nativeElement.focus();
                 }
@@ -226,7 +226,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
 
     scrollToFirstMatchingItem() {
         if (this.openState && this.lastSelectValue) {
-            for (const item of this.menuItems) {
+            for (const item of this.menuItems()) {
                 if (item.nativeElement.innerText.toLowerCase().indexOf(this.lastSelectValue.toLowerCase()) >= 0 && !this.firstItemFound) {
                     this.firstItemFound = true;
                     item.nativeElement.focus();
@@ -238,7 +238,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     private closeTooltip() {
         this.keyboardSelectValue = null;
         this.lastSelectValue = null;
-        this.tooltip.close();
+        this.tooltip()!.close();
     }
 
     // eslint-disable-next-line eqeqeq

@@ -1,5 +1,5 @@
 
-import { Component, Renderer2, SimpleChanges, ViewChild, ElementRef, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ElementRef, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
@@ -11,7 +11,7 @@ import { ServoyDefaultBaseField } from '../basefield';
 })
 export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
     override readonly horizontalAlignment = input<number>(undefined as any);
-    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
+    readonly input = viewChild<ElementRef<HTMLInputElement>>('input');
 
     selected = false;
 
@@ -30,7 +30,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
     }
     
     getFocusElement() {
-        return this.input.nativeElement;
+        return this.input()!.nativeElement;
     }
 
     public setHorizontalAlignmentFlexbox(element: any, renderer: Renderer2, halign: number) {

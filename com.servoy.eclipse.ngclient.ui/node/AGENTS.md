@@ -251,3 +251,27 @@ ngclient2 (main application)
 - **`legacy-peer-deps=true`:** Required due to Angular 21 peer dependency conflicts. Always use this flag when installing.
 - **Zone.js:** The app still uses Zone.js for change detection. Don't introduce zoneless patterns unless the project migrates.
 - **SVG as text:** SVG files are loaded as text strings (configured in `angular.json` loader section). Import them as strings, not as image URLs.
+
+---
+
+## 11. Angular 22 Modernization Status
+
+Full spec: `../../docs/angular22-modernization-remaining.spec.md`
+
+### Completed
+- **Template control flow:** 100% — all templates use `@if`/`@for`/`@switch`
+- **Karma removal:** 100% — Vitest 4 with jsdom, forks pool
+- **Polyfills cleanup:** 100% — only zone.js remains
+- **inject() migration:** Done for servoydefault (29 files) and src/ (8 files). Remaining are plain classes (not Angular DI).
+- **takeUntilDestroyed():** Done — tooltip-html.directive, form_component.component
+- **Signal queries (local):** Done — basechoice, baselabel, check, radio, spinner, calendar, combobox, typeahead, bg_splitter
+
+### Architecturally Blocked (requires full redesign in Phase 6)
+- **@Input()/@Output() → signals:** Tied to `ngOnChanges` → `svyOnChanges(SimpleChanges)` pattern. Requires replacing entire change detection model with `effect()`/`computed()`.
+- **basecomponent.ts `elementRef`:** Used as `this.elementRef` in 100+ subclasses + external packages. Cannot convert to signal without updating all consumers.
+- **basetabpanel.ts `templateRef`:** Used in templates of subclasses (accordion, tabpanel, tablesspanel, splitpane).
+- **servoydesigner.component.ts:** Setter-based ViewChild, complex.
+
+### Remaining Phases
+- **Phase 6 — Standalone Migration:** Convert 26 `standalone: false` → `standalone: true`, remove 15 NgModules, convert to `bootstrapApplication()`. This is the big architectural change where the blocked items above get resolved together.
+- **Phase 7 — Zoneless:** Remove zone.js, switch to `provideZonelessChangeDetection()`, eliminate all `ChangeDetectorRef` usage.

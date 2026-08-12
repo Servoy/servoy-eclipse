@@ -1,5 +1,5 @@
 
-import { Component, Renderer2, ViewChild, ElementRef, SimpleChanges, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, Renderer2, ElementRef, SimpleChanges, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -13,7 +13,7 @@ import { ServoyDefaultBaseField } from '../basefield';
 export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     override readonly horizontalAlignment = input<any>(undefined);
 
-    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
+    readonly input = viewChild<ElementRef<HTMLInputElement>>('input');
 
     selected = false;
     private log!: LoggerService;
@@ -24,13 +24,13 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
         if (changes.dataProviderID) {
 			setTimeout(()=>{
 				this.setSelectionFromDataprovider();
-				this.input.nativeElement.checked = this.selected;
+				this.input()!.nativeElement.checked = this.selected;
 			});
 		}
     }
 
     getFocusElement() {
-        return this.input.nativeElement;
+        return this.input()!.nativeElement;
     }
 
     public setHorizontalAlignmentFlexbox( element: any, renderer: Renderer2, halign: any ) {

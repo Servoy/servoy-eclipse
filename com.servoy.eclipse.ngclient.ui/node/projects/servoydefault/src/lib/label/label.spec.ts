@@ -49,13 +49,13 @@ describe( 'SvLabel', () => {
         servoyApi.trustAsHtml.mockReturnValue( true );
         component.dataProviderID.set('<div class="myclass" onclick="javascript:test()">hallo</div>');
          runOnPushChangeDetection(fixture);
-        expect( component.child.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID() );
+        expect( component.child()!.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID() );
     } );
     it( 'should not render html', () => {
         servoyApi.trustAsHtml.mockReturnValue( false );
         component.dataProviderID.set('<div class="myclass" onclick="javascript:test()">hallo</div>');
          runOnPushChangeDetection(fixture);
-        expect( component.child.nativeElement.children[1].innerHTML ).toBe( '<div class="myclass">hallo</div>' );
+        expect( component.child()!.nativeElement.children[1].innerHTML ).toBe( '<div class="myclass">hallo</div>' );
     } );
 
     it( 'should render markupid ', () => {
@@ -72,7 +72,7 @@ describe( 'SvLabel', () => {
         });
          runOnPushChangeDetection(fixture);
 
-        expect( component.child.nativeElement.children[1].innerHTML ).toBe('<u>l</u>abel');
+        expect( component.child()!.nativeElement.children[1].innerHTML ).toBe('<u>l</u>abel');
         expect(element.getAttribute('accesskey')).toBe(component.mnemonic());
     } );
 

@@ -1,4 +1,4 @@
-import { Component, SimpleChanges, ElementRef, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, SimpleChanges, ElementRef, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 
 import { FormattingService, ServoyPublicService, getFirstDayOfWeek } from '@servoy/public';
 
@@ -18,9 +18,9 @@ import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dom
 })
 export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('inputElement') inputElementRef!: ElementRef;
+    readonly inputElementRef = viewChild<ElementRef>('inputElement');
     
-    @ViewChild(FormatDirective) svyFormat!: FormatDirective;
+    readonly svyFormat = viewChild(FormatDirective);
 
     private log: LoggerService;
     private picker: TempusDominus | null = null;
@@ -147,7 +147,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 }
             }
         if (changes.size)
-            this.renderer.setStyle(this.inputElementRef.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
+            this.renderer.setStyle(this.inputElementRef()!.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
     }
 
     public dateChanged(event: any) {
@@ -167,24 +167,24 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         else  if (event === undefined ||
             event.toString() === 'Invalid Date') {
                 // revert to old value
-                this.svyFormat.writeValue(this.dataProviderID());
+                this.svyFormat()!.writeValue(this.dataProviderID());
         }
     }
 
     public getNativeChild(): any {
-        return this.inputElementRef.nativeElement;
+        return this.inputElementRef()!.nativeElement;
     }
 
     getFocusElement(): any {
-        return this.inputElementRef.nativeElement;
+        return this.inputElementRef()!.nativeElement;
     }
 
     private initializePicker() {
         if (!this.picker) {
-            const currentValue = (this.inputElementRef.nativeElement as HTMLInputElement).value;
-            (this.inputElementRef.nativeElement as HTMLInputElement).value='';
+            const currentValue = (this.inputElementRef()!.nativeElement as HTMLInputElement).value;
+            (this.inputElementRef()!.nativeElement as HTMLInputElement).value='';
             this.picker = new TempusDominus(this.getNativeElement(), this.config);
-            (this.inputElementRef.nativeElement as HTMLInputElement).value = currentValue;
+            (this.inputElementRef()!.nativeElement as HTMLInputElement).value = currentValue;
             this.picker.dates.formatInput =  (date: DateTime) => date?this.formattingService.format(date, this.format(), false):'';
             this.picker.dates.parseInput =  (value: string) => {
                 const parsed = this.formattingService.parse(value?value.trim():null, this.format(), true, this.dataProviderID(), true);

@@ -1,4 +1,4 @@
-import { Component, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, SimpleChanges, HostListener, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
@@ -13,8 +13,7 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/oper
 	standalone: false
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElement> {
-	// this is a hack so that this can be none static access because this references in this component to a conditional template
-	@ViewChild('instance', { static: true }) instance!: NgbTypeahead;
+	readonly instance = viewChild.required<NgbTypeahead>('instance');
 	focus$ = new Subject<string>();
 	click$ = new Subject<string>();
 
@@ -36,7 +35,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 			setTimeout(this.onFocus);
 		});
 		// add custom class to the popup, needed by ng-grids (ag-grid) so it can be used in form editors (popups)
-		this.instance.popupClass = 'ag-custom-component-popup';
+		this.instance().popupClass = 'ag-custom-component-popup';
 		this.showPopupOnFocusGain = this.servoyApi.getClientProperty('TypeAhead.showPopupOnFocusGain');
 		if (this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) {
 			this.showPopupOnFocusGain = this.servoyService.getUIProperty('TypeAhead.showPopupOnFocusGain');
@@ -44,7 +43,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 	}
 
 	onFocus = () => {
-		const popup = this.doc.getElementById(this.instance.popupId);
+		const popup = this.doc.getElementById(this.instance().popupId);
 		if (popup) {
 			popup.style.width = this.getFocusElement().clientWidth + 'px';
 		}
@@ -62,12 +61,12 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 	}
 
 	scroll() {
-		if (!this.instance.isPopupOpen()) {
+		if (!this.instance().isPopupOpen()) {
 			return;
 		}
 
 		setTimeout(() => {
-			const popup = this.doc.getElementById(this.instance.popupId);
+			const popup = this.doc.getElementById(this.instance().popupId);
 			const activeElements = popup!.getElementsByClassName('active');
 			if (activeElements.length === 1) {
 				const elem = activeElements[0] as HTMLElement;
@@ -82,7 +81,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 	svyOnChanges(changes: SimpleChanges) {
 		super.svyOnChanges(changes);
 		if (changes.enabled || changes.findmode) {
-			this.instance.setDisabledState(!this.enabled() && !this.findmode());
+			this.instance().setDisabledState(!this.enabled() && !this.findmode());
 		}
 		if (changes.format || changes.findmode) {
 			if (this.format() && this.format().maxLength) {
@@ -92,7 +91,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 					this.renderer.removeAttribute(this.elementRef.nativeElement, 'maxlength');
 				}
 			}
-			if (this.valuelistID()) this.instance.writeValue(this.dataProviderID());
+			if (this.valuelistID()) this.instance().writeValue(this.dataProviderID());
 		}
 		if (changes.dataProviderID) {
 			this.currentValue = changes.dataProviderID.currentValue;
@@ -101,7 +100,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 
 	values = (text$: Observable<string>) => {
 		const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
-		const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
+		const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance().isPopupOpen()));
 		const inputFocus$ = this.focus$;
 
 		return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(switchMap(term => (this.valuelistID().filterList(term))));
@@ -161,7 +160,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 					this.valuelistID().getDisplayValue(result).subscribe(val => {
 						if (val) {
 							this.realToDisplay.set(result, val);
-							this.instance.writeValue(result);
+							this.instance().writeValue(result);
 						}
 					});
 					display = this.realToDisplay.get(result); // in case the getDisplayValue above runs sync, before this return happen (uses of() not from())

@@ -69,7 +69,7 @@ describe('TypeaheadComponent', () => {
   });
 
   it('should set initial dropdown closed', () => {
-    expect(component.instance.isPopupOpen()).toBeFalsy();
+    expect(component.instance().isPopupOpen()).toBeFalsy();
   });
 
   it('should open dropdown on container click', () => {
@@ -78,7 +78,7 @@ describe('TypeaheadComponent', () => {
     component.click$.next('');
     vi.advanceTimersByTime(100);
     fixture.detectChanges();
-    expect(component.instance.isPopupOpen()).toBeTruthy();
+    expect(component.instance().isPopupOpen()).toBeTruthy();
     vi.useRealTimers();
   });
 
@@ -89,7 +89,7 @@ describe('TypeaheadComponent', () => {
     component.focus$.next('');
     vi.advanceTimersByTime(100);
     fixture.detectChanges();
-    expect(component.instance.isPopupOpen()).toBeTruthy();
+    expect(component.instance().isPopupOpen()).toBeTruthy();
     vi.useRealTimers();
   });
 

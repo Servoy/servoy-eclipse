@@ -1,4 +1,4 @@
-import { SimpleChanges, ElementRef, ViewChild, Directive, input } from '@angular/core';
+import { SimpleChanges, ElementRef, Directive, input, viewChild } from '@angular/core';
 
 import { PropertyUtils } from '@servoy/public';
 
@@ -18,7 +18,7 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
     readonly textRotation = input<number>(undefined as any);
     readonly verticalAlignment = input<number>(undefined as any);
 
-    @ViewChild('child') child!: ElementRef;
+    readonly child = viewChild<ElementRef>('child');
 
     svyOnChanges(changes: SimpleChanges) {
         for (const property of Object.keys(changes)) {
@@ -71,13 +71,13 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
 
     private setVerticalAlignment(): void {
             if (this.verticalAlignment() === 1) {
-                this.renderer.setStyle(this.child.nativeElement, 'top', '0px');
+                this.renderer.setStyle(this.child()!.nativeElement, 'top', '0px');
             } else if (this.verticalAlignment() === 3) {
-                this.renderer.setStyle(this.child.nativeElement, 'top', '100%');
-                this.renderer.setStyle(this.child.nativeElement, 'transform', 'translateY(-100%)');
+                this.renderer.setStyle(this.child()!.nativeElement, 'top', '100%');
+                this.renderer.setStyle(this.child()!.nativeElement, 'transform', 'translateY(-100%)');
             } else {
-                this.renderer.setStyle(this.child.nativeElement, 'top', '50%');
-                this.renderer.setStyle(this.child.nativeElement, 'transform', 'translateY(-50%)');
+                this.renderer.setStyle(this.child()!.nativeElement, 'top', '50%');
+                this.renderer.setStyle(this.child()!.nativeElement, 'transform', 'translateY(-50%)');
             }
         }
 }

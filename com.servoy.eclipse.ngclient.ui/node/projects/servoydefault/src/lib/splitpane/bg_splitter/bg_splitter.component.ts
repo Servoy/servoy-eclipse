@@ -1,4 +1,4 @@
-import { Component, output, OnChanges, SimpleChanges, HostListener, AfterContentInit, ContentChildren, QueryList, Renderer2, ViewEncapsulation, ViewChild, ElementRef, ChangeDetectionStrategy, input, inject } from '@angular/core';
+import { Component, output, OnChanges, SimpleChanges, HostListener, AfterContentInit, QueryList, Renderer2, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, input, inject, viewChild, contentChildren } from '@angular/core';
 
 import { BGPane } from './bg_pane.component';
 @Component( {
@@ -21,11 +21,9 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     private handler;
     private readonly renderer = inject(Renderer2);
 
-    @ContentChildren( BGPane )
-    private panes!: QueryList<BGPane>;
+    private readonly panes = contentChildren(BGPane);
 
-    @ViewChild( 'element' , {static: true})
-    private elementRef!: ElementRef;
+    private readonly elementRef = viewChild.required<ElementRef>('element');
 
     constructor() {
         this.handler = this.renderer.createElement( 'div' );
@@ -48,16 +46,16 @@ export class BGSplitter implements AfterContentInit , OnChanges {
             this.adjustLocation(null, changes['divLocation'].currentValue);
         }
         if (changes['orientation']) {
-            this.renderer.addClass( this.elementRef.nativeElement, this.orientation());
+            this.renderer.addClass( this.elementRef().nativeElement, this.orientation());
         }
     }
 
     ngAfterContentInit() {
         let index = 1;
-        this.panes.forEach(( item ) => {
+        this.panes().forEach(( item ) => {
             item.index = index++;
         } );
-        this.renderer.insertBefore( this.elementRef.nativeElement, this.handler, this.panes.last.element.nativeElement );
+        this.renderer.insertBefore( this.elementRef().nativeElement, this.handler, this.panes()[this.panes().length - 1].element.nativeElement );
 
         this.adjustLocation(null,this.divLocation());
     }
@@ -83,34 +81,34 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     }
 
     private adjustLocation(event?: any, wantedPosition?: any) {
-        if (!this.panes || this.panes.length != 2) return;
-        const bounds = this.elementRef.nativeElement.getBoundingClientRect();
+        if (!this.panes() || this.panes().length != 2) return;
+        const bounds = this.elementRef().nativeElement.getBoundingClientRect();
         const pos = this.getPosition(bounds, event, wantedPosition);
         if ( this.orientation() === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos! < this.panes.first.minSize() ) return;
-                if ( height - pos! < this.panes.last.minSize() ) return;
+                if ( pos! < this.panes()[0].minSize() ) return;
+                if ( height - pos! < this.panes()[this.panes().length - 1].minSize() ) return;
             }
 
             this.renderer.setStyle( this.handler, 'top', pos + 'px' );
-            this.renderer.setStyle( this.panes.first.element.nativeElement, 'height', pos + 'px' );
-            this.renderer.setStyle( this.panes.last.element.nativeElement, 'top', (pos + this.handler.offsetHeight) + 'px' );
+            this.renderer.setStyle( this.panes()[0].element.nativeElement, 'height', pos + 'px' );
+            this.renderer.setStyle( this.panes()[this.panes().length - 1].element.nativeElement, 'top', (pos + this.handler.offsetHeight) + 'px' );
 
         } else {
             const width = bounds.right - bounds.left;
 
             // only check for minSize if it is adjusting because of mousemove
             if(event) {
-                if ( pos! < this.panes.first.minSize() ) return;
-                if ( width - pos! < this.panes.last.minSize() ) return;
+                if ( pos! < this.panes()[0].minSize() ) return;
+                if ( width - pos! < this.panes()[this.panes().length - 1].minSize() ) return;
             }
 
             this.renderer.setStyle( this.handler, 'left', pos + 'px' );
-            this.renderer.setStyle( this.panes.first.element.nativeElement, 'width', pos + 'px' );
-            this.renderer.setStyle( this.panes.last.element.nativeElement, 'left',  (pos + this.handler.offsetWidth) + 'px' );
+            this.renderer.setStyle( this.panes()[0].element.nativeElement, 'width', pos + 'px' );
+            this.renderer.setStyle( this.panes()[this.panes().length - 1].element.nativeElement, 'left',  (pos + this.handler.offsetWidth) + 'px' );
         }
     }
 
