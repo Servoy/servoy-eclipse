@@ -946,7 +946,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				template.append(
 					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				template.append(
-					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>\n</");
+					"@for (item of state.items; track item) {<ng-template [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>}\n</");
 				template.append(pair.getRight());
 				template.append(">\n</ng-template>\n");
 
@@ -958,7 +958,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				templateLFC.append(
 					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				templateLFC.append(
-					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>\n</");
+					"@for (item of state.items; track item) {<ng-template [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>}\n</");
 				templateLFC.append(pair.getRight());
 				templateLFC.append(">\n</ng-template>\n");
 

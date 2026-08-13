@@ -89,6 +89,7 @@ public class ComponentTemplateGenerator
 			{
 				continue; // special case for some old core components, shouldn't be generated
 			}
+			if (spec.isDeprecated()) continue;
 			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
 				String packageName = spec.getPackageName();
