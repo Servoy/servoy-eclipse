@@ -264,6 +264,10 @@ After installing the new `@servoy/public`, run `npm run build`. The compiler wil
 - Callbacks where `this` refers to a different object
 - **Shadowed fields**: Some components defined their own `elementRef!: ElementRef` or `name!: string` to override the base class (often as a workaround for ViewChild timing). These must be REMOVED after migration — the base class now provides these as readonly signals. The compiler reports `TS2416` (incompatible override) or `TS2540` (cannot assign to read-only). Remove the shadow field and replace any custom `viewChild` + effect pattern with the base class `elementRef()` directly.
 - **Initialization timing**: With `viewChild()`, `elementRef()` returns undefined until after view init. If `svyOnInit()` calls methods that access `elementRef()` or other not-yet-initialized objects (like canvas/chart instances), add null guards: `if (this.elementRef() && this.myObject) { ... }`
+- **Optional chaining on elementRef**: Code using `this.elementRef?.nativeElement` must become `this.elementRef()?.nativeElement` — don't forget the `()` before `?.`
+- **getNativeElement() overrides**: If a component overrides `getNativeElement()` with `this.elementRef()!.nativeElement.firstChild`, it can crash during `ngOnDestroy` when elementRef is already undefined. Use optional chaining: `this.elementRef()?.nativeElement?.firstChild`
+- **Indirect signal access on other instances**: Not just `this.servoyApi` but also references to signals on OTHER component instances need `()`. E.g. `this.ngGrid.servoyApi.` → `this.ngGrid.servoyApi().` and `this.dataGrid.servoyApi.` → `this.dataGrid.servoyApi().`
+- **`this.name` as function argument**: When `this.name` is passed to a function expecting `string`, the compiler reports `InputSignal<string> is not assignable to string`. Fix: `this.name()`
 
 **Approach:** Always use the compiler. Do NOT do blind regex replacements across all files. The compiler knows exactly which `this.name` is the signal and which is a local property.
 
