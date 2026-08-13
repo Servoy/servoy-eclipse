@@ -153,6 +153,7 @@ public class ComponentTemplateGenerator
 		{
 			String name = pd.getName();
 			if (pd.isInternal()) continue;
+			if (Boolean.TRUE.equals(pd.getTag("serveronly"))) continue;
 			if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
 			{
 				name = "servoyAttributes";
