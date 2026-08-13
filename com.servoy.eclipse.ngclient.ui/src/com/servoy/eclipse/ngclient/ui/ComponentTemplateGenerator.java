@@ -152,7 +152,7 @@ public class ComponentTemplateGenerator
 		for (PropertyDescription pd : specProperties)
 		{
 			String name = pd.getName();
-			if (pd.isInternal()) continue;
+			if (pd.isServerOnly()) continue;
 			if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
 			{
 				name = "servoyAttributes";
