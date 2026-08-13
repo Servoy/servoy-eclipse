@@ -17,6 +17,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.j2db.server.ngclient.DefaultComponentPropertiesProvider;
+import com.servoy.j2db.server.ngclient.property.types.Types;
 import com.servoy.j2db.util.Pair;
 
 class ComponentTemplateGeneratorTest
@@ -29,6 +30,15 @@ class ComponentTemplateGeneratorTest
 		"Entry-Point: projects/testpkg\n" +
 		"\n" +
 		"Name: button/button.spec\n" +
+		"Web-Component: True\n" +
+		"\n" +
+		"Name: formcomponent/formcomponent.spec\n" +
+		"Web-Component: True\n" +
+		"\n" +
+		"Name: navigator/navigator.spec\n" +
+		"Web-Component: True\n" +
+		"\n" +
+		"Name: portal/portal.spec\n" +
 		"Web-Component: True\n";
 
 	private static final String BUTTON_SPEC = "{\n" +
@@ -40,8 +50,6 @@ class ComponentTemplateGeneratorTest
 		"  \"model\": {\n" +
 		"    \"text\": { \"type\": \"tagstring\", \"initialValue\": \"button\" },\n" +
 		"    \"enabled\": { \"type\": \"enabled\", \"blockingOn\": false, \"default\": true },\n" +
-		"    \"size\": { \"type\": \"dimension\", \"default\": {\"width\":80, \"height\":20}, \"pushToServer\": \"deep\" },\n" +
-		"    \"location\": { \"type\": \"point\", \"pushToServer\": \"deep\" },\n" +
 		"    \"visible\": \"visible\",\n" +
 		"    \"styleClass\": { \"type\": \"styleclass\", \"tags\": { \"scope\": \"design\" } },\n" +
 		"    \"dataProviderID\": { \"type\": \"dataprovider\", \"pushToServer\": \"allow\" }\n" +
@@ -53,21 +61,6 @@ class ComponentTemplateGeneratorTest
 		"  },\n" +
 		"  \"api\": {}\n" +
 		"}";
-
-	private static final String FORMCOMPONENT_MANIFEST = "Manifest-Version: 1.0\n" +
-		"Bundle-Name: Servoy Core\n" +
-		"Bundle-SymbolicName: servoycore\n" +
-		"NPM-PackageName: @servoy/core\n" +
-		"NG2-Components: FormComponent\n" +
-		"\n" +
-		"Name: formcomponent/formcomponent.spec\n" +
-		"Web-Component: True\n" +
-		"\n" +
-		"Name: navigator/navigator.spec\n" +
-		"Web-Component: True\n" +
-		"\n" +
-		"Name: portal/portal.spec\n" +
-		"Web-Component: True\n";
 
 	private static final String FORMCOMPONENT_SPEC = "{\n" +
 		"  \"name\": \"servoycore-formcomponent\",\n" +
@@ -105,17 +98,16 @@ class ComponentTemplateGeneratorTest
 	@BeforeAll
 	static void setUp()
 	{
-		HashMap<String, String> buttonComponents = new HashMap<>();
-		buttonComponents.put("button/button.spec", BUTTON_SPEC);
-		IPackageReader buttonReader = new InMemPackageReader(MANIFEST, buttonComponents);
+		Types.getTypesInstance().registerTypes();
 
-		HashMap<String, String> coreComponents = new HashMap<>();
-		coreComponents.put("formcomponent/formcomponent.spec", FORMCOMPONENT_SPEC);
-		coreComponents.put("navigator/navigator.spec", NAVIGATOR_SPEC);
-		coreComponents.put("portal/portal.spec", PORTAL_SPEC);
-		IPackageReader coreReader = new InMemPackageReader(FORMCOMPONENT_MANIFEST, coreComponents);
+		HashMap<String, String> components = new HashMap<>();
+		components.put("button/button.spec", BUTTON_SPEC);
+		components.put("formcomponent/formcomponent.spec", FORMCOMPONENT_SPEC);
+		components.put("navigator/navigator.spec", NAVIGATOR_SPEC);
+		components.put("portal/portal.spec", PORTAL_SPEC);
+		IPackageReader reader = new InMemPackageReader(MANIFEST, components);
 
-		WebComponentSpecProvider.init(new IPackageReader[] { buttonReader, coreReader }, new DefaultComponentPropertiesProvider());
+		WebComponentSpecProvider.init(new IPackageReader[] { reader }, DefaultComponentPropertiesProvider.instance);
 	}
 
 	@AfterAll
