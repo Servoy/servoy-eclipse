@@ -132,15 +132,20 @@ class ComponentTemplateGeneratorTest
 	@Test
 	void internalPropertiesNotInOutput()
 	{
+		java.util.HashMap<String, org.sablo.specification.PropertyDescription> testProps = new java.util.HashMap<>();
+		DefaultComponentPropertiesProvider.instance.addDefaultComponentProperties(testProps);
+		StringBuilder diag = new StringBuilder("Provider added: ");
+		testProps.forEach((k, v) -> diag.append(k).append("(serveronly=").append(v.isServerOnly()).append(",tags=").append(v.getTag("serveronly")).append(") "));
+
 		ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
 		Pair<StringBuilder, StringBuilder> result = generator.generateHTMLTemplate(null);
 		String template = result.getLeft().toString();
 
-		assertFalse(template.contains("[location]=\""));
-		assertFalse(template.contains("[size]=\""));
-		assertFalse(template.contains("[cssPosition]=\""));
-		assertFalse(template.contains("[anchors]=\""));
-		assertFalse(template.contains("[formIndex]=\""));
+		assertFalse(template.contains("[location]=\""), diag.toString());
+		assertFalse(template.contains("[size]=\""), diag.toString());
+		assertFalse(template.contains("[cssPosition]=\""), "cssPosition in template. " + diag.toString()+  ", template: " + template);
+		assertFalse(template.contains("[anchors]=\""), diag.toString());
+		assertFalse(template.contains("[formIndex]=\""), diag.toString());
 	}
 
 	@Test
