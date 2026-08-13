@@ -226,7 +226,16 @@ Commit: `convert to standalone components [ai]`
 
 Before converting component signals, update `@servoy/public` to the latest version that has signal-based base class properties (`name`, `servoyApi`, `elementRef`).
 
-If working against a local development build:
+```bash
+npm install @servoy/public@latest --legacy-peer-deps
+```
+
+Verify the installed version has signal-based base class:
+```bash
+grep "InputSignal" node_modules/@servoy/public/types/servoy-public.d.ts | head -3
+```
+
+If the latest npm version doesn't have the signal changes yet (ask the user), install from a local tgz build:
 ```bash
 npm pack <path-to-ngclient.ui/node/dist-public> --pack-destination .
 npm install ./servoy-public-<version>.tgz --legacy-peer-deps --force
