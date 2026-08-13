@@ -222,6 +222,51 @@ Commit: `convert to standalone components [ai]`
 
 ## Phase 5 — Signal Inputs & OnPush
 
+### Update @servoy/public to latest
+
+Before converting component signals, update `@servoy/public` to the latest version that has signal-based base class properties (`name`, `servoyApi`, `elementRef`).
+
+If working against a local development build:
+```bash
+npm pack <path-to-ngclient.ui/node/dist-public> --pack-destination .
+npm install ./servoy-public-<version>.tgz --legacy-peer-deps --force
+```
+
+The `--force` is required because npm caches `file:` references by version string, not content.
+
+### Fix base class signal changes (compiler-driven approach)
+
+After installing the new `@servoy/public`, run `npm run build`. The compiler will report all errors. Fix them using these patterns:
+
+**TypeScript files (.ts):**
+| Error | Fix |
+|-------|-----|
+| `Property 'x' does not exist on type 'InputSignal<ServoyApi>'` | `this.servoyApi.x()` → `this.servoyApi().x()` |
+| `Property 'nativeElement' does not exist on type 'Signal<ElementRef\|undefined>'` | `this.elementRef.nativeElement` → `this.elementRef()!.nativeElement` |
+| `This condition will always return true since 'Signal<...>' is always defined` | `if (this.elementRef)` → `if (this.elementRef())` |
+
+**Template files (.html):**
+| Error | Fix |
+|-------|-----|
+| `Property 'getMarkupId' does not exist on type 'InputSignal<ServoyApi>'` | `servoyApi.getMarkupId()` → `servoyApi().getMarkupId()` |
+| `Type 'InputSignal<string>' is not assignable to type 'string'` | `[prop]='name'` → `[prop]='name()'` |
+
+**Test files (.spec.ts):**
+| Error | Fix |
+|-------|-----|
+| `Cannot assign to 'servoyApi' because it is a read-only property` | `component.servoyApi = x` → `fixture.componentRef.setInput('servoyApi', x)` |
+| `Cannot assign to 'name' because it is a read-only property` | `component.name = x` → `fixture.componentRef.setInput('name', x)` |
+| Mock object passed to method expecting ServoyBaseComponent | `{ name: 'x' }` → `{ name: () => 'x' }` |
+
+**Watch out for:**
+- Inner classes with their own `name: string` or `servoyApi` fields — do NOT change those
+- Components that shadow base class with their own `@Input() name` — leave those as-is
+- Callbacks where `this` refers to a different object
+- **Shadowed fields**: Some components defined their own `elementRef!: ElementRef` or `name!: string` to override the base class (often as a workaround for ViewChild timing). These must be REMOVED after migration — the base class now provides these as readonly signals. The compiler reports `TS2416` (incompatible override) or `TS2540` (cannot assign to read-only). Remove the shadow field and replace any custom `viewChild` + effect pattern with the base class `elementRef()` directly.
+- **Initialization timing**: With `viewChild()`, `elementRef()` returns undefined until after view init. If `svyOnInit()` calls methods that access `elementRef()` or other not-yet-initialized objects (like canvas/chart instances), add null guards: `if (this.elementRef() && this.myObject) { ... }`
+
+**Approach:** Always use the compiler. Do NOT do blind regex replacements across all files. The compiler knows exactly which `this.name` is the signal and which is a local property.
+
 ### Convert @Input/@Output to signals
 
 For each component:
