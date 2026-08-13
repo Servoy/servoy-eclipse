@@ -272,6 +272,8 @@ Full spec: `../../docs/angular22-modernization-remaining.spec.md`
 
 ### Architecturally Blocked (requires full redesign)
 - **@Input()/@Output() → signals:** Tied to `ngOnChanges` → `svyOnChanges(SimpleChanges)` pattern. Requires replacing entire change detection model with `effect()`/`computed()`.
+
+**Note:** Angular 22 signal inputs DO still trigger `ngOnChanges` (backward compatible). So migrating `@Input()` to `input()` does NOT break the `svyOnChanges` pattern. The migration to `effect()` is optional for cleaner code but not required for correctness.
 - **basecomponent.ts `elementRef`:** Used as `this.elementRef` in 100+ subclasses + external packages. Cannot convert to signal without updating all consumers.
 - **basetabpanel.ts `templateRef`:** Used in templates of subclasses (accordion, tabpanel, tablesspanel, splitpane).
 - **servoydesigner.component.ts:** Setter-based ViewChild, complex.

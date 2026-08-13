@@ -280,6 +280,16 @@ After installing the new `@servoy/public`, run `npm run build`. The compiler wil
 
 **Approach:** Always use the compiler. Do NOT do blind regex replacements across all files. The compiler knows exactly which `this.name` is the signal and which is a local property.
 
+**Important: signal inputs and ngOnChanges compatibility**
+
+Angular 22 signal inputs DO still trigger `ngOnChanges` and appear in `SimpleChanges`. This is officially documented at angular.dev:
+> "While you should prefer computed and effect when working with signal-based inputs, the ngOnChanges method does include value changes for signal-based inputs."
+
+This means:
+- The `svyOnChanges(SimpleChanges)` pattern continues to work for signal inputs
+- You do NOT need to replace svyOnChanges with effect() just because inputs became signals
+- Components can gradually migrate to effect() for cleaner code, but it's not required for correctness
+
 ### Convert @Input/@Output to signals
 
 For each component:
