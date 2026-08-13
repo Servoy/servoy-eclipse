@@ -25,11 +25,11 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
             const change = changes[property];
             switch (property) {
                 case 'rolloverCursor':
-                    this.renderer.setStyle(this.elementRef.nativeElement, 'cursor', change.currentValue === 12 ? 'pointer' : 'default');
+                    this.renderer.setStyle(this.elementRef()!.nativeElement, 'cursor', change.currentValue === 12 ? 'pointer' : 'default');
                     break;
                 case 'mnemonic':
-                    if (change.currentValue) this.renderer.setAttribute(this.elementRef.nativeElement, 'accesskey', change.currentValue);
-                    else this.renderer.removeAttribute(this.elementRef.nativeElement, 'accesskey');
+                    if (change.currentValue) this.renderer.setAttribute(this.elementRef()!.nativeElement, 'accesskey', change.currentValue);
+                    else this.renderer.removeAttribute(this.elementRef()!.nativeElement, 'accesskey');
                     break;
                 case 'textRotation':
                     if (change.currentValue) PropertyUtils.setRotation(this.getNativeElement(), this.renderer, change.currentValue);
@@ -63,7 +63,7 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
             }
         }
         if (this.onDoubleClickMethodID()) {
-            this.renderer.listen(this.elementRef.nativeElement, 'dblclick', (e) => {
+            this.renderer.listen(this.elementRef()!.nativeElement, 'dblclick', (e) => {
                 this.onDoubleClickMethodID()(e);
             });
         }

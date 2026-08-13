@@ -86,7 +86,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         }
 
         // element level configuration
-        let configuration = this.servoyApi.getClientProperty('config');
+        let configuration = this.servoyApi().getClientProperty('config');
         if (configuration) {
             if (typeof configuration === 'string') {
                 try {

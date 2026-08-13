@@ -63,7 +63,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
     }
 
     svyOnInit() {
-        let showPopup = this.servoyApi.getClientProperty('Combobox.showPopupOnFocusGain');
+        let showPopup = this.servoyApi().getClientProperty('Combobox.showPopupOnFocusGain');
         if (showPopup === null || showPopup === undefined) {
             showPopup = this.servoyService.getUIProperty('Combobox.showPopupOnFocusGain');
         }
@@ -152,7 +152,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
             });
         } else {
             this.closeTooltip();
-            const nativeElementBtn = this.elementRef.nativeElement.firstElementChild;
+            const nativeElementBtn = this.elementRef()!.nativeElement.firstElementChild;
             if (this.doc.activeElement !== nativeElementBtn) {
                 const event = new Event('blur');
                 nativeElementBtn!.dispatchEvent(event);

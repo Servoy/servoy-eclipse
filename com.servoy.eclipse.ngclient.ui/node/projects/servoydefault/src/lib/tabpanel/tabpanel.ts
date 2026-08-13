@@ -32,7 +32,7 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
 
     ngAfterViewInit(): void {
         if (typeof MutationObserver !== 'undefined') {
-            const tabNode = this.elementRef.nativeElement.parentNode.parentNode;
+            const tabNode = this.elementRef()!.nativeElement.parentNode.parentNode;
 
             this.observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
@@ -83,7 +83,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     
     getContainerStyle(element: HTMLElement) : { [property: string]: any }{
         this.updateNavpane(element);
-        if (this.servoyApi.isInAbsoluteLayout()) {
+        if (this.servoyApi().isInAbsoluteLayout()) {
             const tabs = element.querySelector('ul');
             let calcHeight = tabs!.clientHeight;
             const clientRects = tabs!.getClientRects();

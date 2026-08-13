@@ -58,8 +58,8 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     onDataChangeCallback(event: any, returnval: any) {
         const stringValue = (typeof returnval === 'string' || returnval instanceof String);
         if (returnval === false || stringValue) {
-            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-valid');
-            this.renderer.addClass(this.elementRef.nativeElement, 'ng-invalid');
+            this.renderer.removeClass(this.elementRef()!.nativeElement, 'ng-valid');
+            this.renderer.addClass(this.elementRef()!.nativeElement, 'ng-invalid');
             if (stringValue) {
                 if (this.storedTooltip === false) {
                     this.storedTooltip = this.toolTipText();
@@ -67,8 +67,8 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
                 this.toolTipText.set('' + returnval.toString());
             }
         } else {
-            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');
-            this.renderer.addClass(this.elementRef.nativeElement, 'ng-valid');
+            this.renderer.removeClass(this.elementRef()!.nativeElement, 'ng-invalid');
+            this.renderer.addClass(this.elementRef()!.nativeElement, 'ng-valid');
             if (this.storedTooltip !== false) this.toolTipText.set(this.storedTooltip);
             this.storedTooltip = false;
         }

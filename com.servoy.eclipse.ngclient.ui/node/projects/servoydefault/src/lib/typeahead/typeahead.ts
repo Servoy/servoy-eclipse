@@ -40,7 +40,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 		});
 		// add custom class to the popup, needed by ng-grids (ag-grid) so it can be used in form editors (popups)
 		this.instance().popupClass = 'ag-custom-component-popup';
-		this.showPopupOnFocusGain = this.servoyApi.getClientProperty('TypeAhead.showPopupOnFocusGain');
+		this.showPopupOnFocusGain = this.servoyApi().getClientProperty('TypeAhead.showPopupOnFocusGain');
 		if (this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) {
 			this.showPopupOnFocusGain = this.servoyService.getUIProperty('TypeAhead.showPopupOnFocusGain');
 		}
@@ -90,9 +90,9 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 		if (changes.format || changes.findmode) {
 			if (this.format() && this.format().maxLength) {
 				if (!this.findmode()) {
-					this.renderer.setAttribute(this.elementRef.nativeElement, 'maxlength', this.format().maxLength + '');
+					this.renderer.setAttribute(this.elementRef()!.nativeElement, 'maxlength', this.format().maxLength + '');
 				} else {
-					this.renderer.removeAttribute(this.elementRef.nativeElement, 'maxlength');
+					this.renderer.removeAttribute(this.elementRef()!.nativeElement, 'maxlength');
 				}
 			}
 			if (this.valuelistID()) this.instance().writeValue(this.dataProviderID());
@@ -114,9 +114,9 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 		if (!this.dataProviderID() && (!this.isEditable() || this.findmode())) {
 			// data was changed, need to restore the value from UI
 			if (this.findmode() || !this.valuelistID()) {
-				this.dataProviderID.set(this.elementRef.nativeElement.value);
+				this.dataProviderID.set(this.elementRef()!.nativeElement.value);
 			} else {
-				if (this.elementRef.nativeElement.value === this.valuelistID()[0]?.displayValue) {
+				if (this.elementRef()!.nativeElement.value === this.valuelistID()[0]?.displayValue) {
 					this.dataProviderID.set(this.valuelistID()[0]?.realValue);
 					this.currentValue = this.dataProviderID();
 					super.pushUpdate();

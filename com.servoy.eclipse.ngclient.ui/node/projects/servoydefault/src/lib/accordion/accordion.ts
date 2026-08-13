@@ -33,8 +33,8 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
         
         let totalHeight = 0;
         let wrapper = null;
-        if (this.elementRef) {
-            wrapper = this.elementRef.nativeElement.closest('.svy-wrapper');
+        if (this.elementRef()) {
+            wrapper = this.elementRef()!.nativeElement.closest('.svy-wrapper');
         }
         if (wrapper) {
             totalHeight = (wrapper as HTMLElement).offsetHeight;

@@ -22,9 +22,9 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
 		for (const property of Object.keys(changes)) {
             switch (property) {
                 case 'scrollbars':
-					this.elementRef.nativeElement.classList.remove('horizontaldirection');
+					this.elementRef()!.nativeElement.classList.remove('horizontaldirection');
                     if (changes.scrollbars.currentValue === 36) {
-						this.elementRef.nativeElement.classList.add('horizontaldirection');
+						this.elementRef()!.nativeElement.classList.add('horizontaldirection');
 					}
                     break;
             }

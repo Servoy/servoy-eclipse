@@ -46,7 +46,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
             this.adjustLocation(null, changes['divLocation'].currentValue);
         }
         if (changes['orientation']) {
-            this.renderer.addClass( this.elementRef().nativeElement, this.orientation());
+            this.renderer.addClass( this.elementRef()!.nativeElement, this.orientation());
         }
     }
 
@@ -55,7 +55,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
         this.panes().forEach(( item ) => {
             item.index = index++;
         } );
-        this.renderer.insertBefore( this.elementRef().nativeElement, this.handler, this.panes()[this.panes().length - 1].element.nativeElement );
+        this.renderer.insertBefore( this.elementRef()!.nativeElement, this.handler, this.panes()[this.panes().length - 1].element.nativeElement );
 
         this.adjustLocation(null,this.divLocation());
     }
@@ -82,7 +82,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
 
     private adjustLocation(event?: any, wantedPosition?: any) {
         if (!this.panes() || this.panes().length != 2) return;
-        const bounds = this.elementRef().nativeElement.getBoundingClientRect();
+        const bounds = this.elementRef()!.nativeElement.getBoundingClientRect();
         const pos = this.getPosition(bounds, event, wantedPosition);
         if ( this.orientation() === 'vertical' ) {
             const height = bounds.bottom - bounds.top;
