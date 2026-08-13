@@ -22,19 +22,13 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
 
     readonly elementRef = viewChild<ElementRef<T>>('element');
 
-    protected readonly renderer: Renderer2;
-    protected cdRef: ChangeDetectorRef;
+    protected readonly renderer = inject(Renderer2);
+    protected readonly cdRef = inject(ChangeDetectorRef);
 
     private viewStateListeners: Set<IViewStateListener> = new Set();
-    private componentContributor: ComponentContributor;
+    private componentContributor = new ComponentContributor();
     private initialized = false;
     private changes: SimpleChanges | null = null;
-
-    constructor(renderer?: Renderer2, cdRef?: ChangeDetectorRef) {
-        this.renderer = renderer ?? inject(Renderer2);
-        this.cdRef = cdRef ?? inject(ChangeDetectorRef);
-        this.componentContributor = new ComponentContributor();
-    }
 
     /**
      *  final method, do not override use {@link #svyOnInit} for this
