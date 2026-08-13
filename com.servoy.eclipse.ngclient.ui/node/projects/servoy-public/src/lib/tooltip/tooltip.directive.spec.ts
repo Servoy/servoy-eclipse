@@ -148,7 +148,7 @@ describe('Directive: Tooltip', () => {
     });
 
     it('should destroy on onDestroy', () => {
-      directiveInstance.ngOnDestroy();
+      (directiveInstance as any).ngOnDestroy?.();
       assertTooltipInstance(directiveInstance, false);
     });
   });
