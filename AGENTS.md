@@ -49,6 +49,12 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 - **Use `eclipse-pde_runJUnitPluginTests`** or `eclipse-pde_runJUnitPluginTestClass` for plugin integration tests.
 - Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`
 
+### Refactoring
+- **Use `eclipse-coder_refactorRenameJavaType`** to rename classes, interfaces, enums, or records — this updates all references across the workspace.
+- **Use `eclipse-coder_refactorRenamePackage`** to rename packages — updates all package declarations and references.
+- **Use `eclipse-coder_refactorMoveJavaType`** to move types between packages.
+- **For method, field, and variable renames:** use `eclipse-ide_findReferences` first to find all usages, then apply the rename consistently. Prefer Eclipse refactor tools over manual find-and-replace to ensure all references are updated correctly.
+
 ### Other Tools
 - **Use `eclipse-ide_formatFile`** or `eclipse-coder_formatFile` to format Java files after editing.
 - **Use `eclipse-context`** tools for workspace context, file history, and cached resources.
