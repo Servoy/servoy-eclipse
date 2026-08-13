@@ -83,7 +83,7 @@ describe('ListFormComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ListFormComponent);
     component = fixture.componentInstance;
-    component.servoyApi = mockServoyApi;
+    fixture.componentRef.setInput('servoyApi', mockServoyApi);
     component._foundset.set(mockFoundset);
     component.numberOfCells = 5;
     component.page = 0;
@@ -327,13 +327,13 @@ describe('ListFormComponent', () => {
 
   describe('registerComponent / unRegisterComponent', () => {
     it('should register a component at the given row index', () => {
-      const mockComp = { name: 'btn1' } as any;
+      const mockComp = { name: () => 'btn1' } as any;
       component.registerComponent(mockComp, 0);
       expect((component as any).componentCache[0]['btn1']).toBe(mockComp);
     });
 
     it('should unregister a component', () => {
-      const mockComp = { name: 'btn1' } as any;
+      const mockComp = { name: () => 'btn1' } as any;
       component.registerComponent(mockComp, 0);
       component.unRegisterComponent(mockComp, 0);
       expect((component as any).componentCache[0]).toBeUndefined();

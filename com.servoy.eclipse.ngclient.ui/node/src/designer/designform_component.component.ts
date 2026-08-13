@@ -621,11 +621,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
   }
 
   registerComponent(component: ServoyBaseComponent<any>): void {
-    this.componentCache[component.name] = component;
+    this.componentCache[component.name()] = component;
   }
 
   unRegisterComponent(component: ServoyBaseComponent<any>): void {
-    delete this.componentCache[component.name];
+    delete this.componentCache[component.name()];
   }
 
   getServoyApi(item: ComponentCache) {

@@ -14,6 +14,7 @@ import {
   input,
   viewChild,
   signal,
+  Signal,
   inject,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -108,7 +109,7 @@ const AGGRID_MAX_BLOCKS_IN_CACHE = 2;
           </div>
         </div>
       }
-      @if (servoyApi.isInDesigner() && (!cache || !containedForm())) {
+      @if (servoyApi().isInDesigner() && (!cache || !containedForm())) {
         <div class="svy-listformcomponent-designer-placeholder"></div>
       }
     </div>
@@ -197,7 +198,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
   readonly sabloTabseqDirective = viewChild('aggrid', { read: SabloTabseq });
 
   _foundset = signal<IFoundset | undefined>(undefined);
-  override elementRef!: ElementRef<HTMLDivElement>;
+  override elementRef!: Signal<ElementRef<any> | undefined>;
 
   // TODO: remove this when switching completely to scrollable LFC
   useScrolling = false;
@@ -320,14 +321,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
     this._foundset.set(this.foundset());
 
-    this.cache = this.parent.getFormCache().getFormComponent(this.name)!;
+    this.cache = this.parent.getFormCache().getFormComponent(this.name())!;
 
-    if (this.servoyApi.isInDesigner()) {
+    if (this.servoyApi().isInDesigner()) {
       return;
     }
 
     this.useScrolling = true;
-    let pagingMode = this.servoyApi.getClientProperty('ListFormComponent.pagingMode');
+    let pagingMode = this.servoyApi().getClientProperty('ListFormComponent.pagingMode');
     if (pagingMode === null || pagingMode === undefined) {
       pagingMode = this.servoyService.getUIProperties().getUIProperty('ListFormComponent.pagingMode');
     }
@@ -362,7 +363,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             return false;
           },
         },
-        columnDefs: [{ cellRenderer: 'row-renderer', autoHeight: !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight()! < 0 ? false : true }],
+        columnDefs: [{ cellRenderer: 'row-renderer', autoHeight: !this.servoyApi().isInAbsoluteLayout() && this.responsiveHeight()! < 0 ? false : true }],
         rowModelType: 'serverSide',
         cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
         infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
@@ -563,12 +564,12 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
   }
 
   ngAfterViewInit() {
-    this.elementRef = this.element()!;
+    this.elementRef = this.element!;
     super.ngAfterViewInit();
     this.calculateCells();
     if (this.useScrolling) {
       this.agGrid()!.api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
-      if (!this.servoyApi.isInAbsoluteLayout()) {
+      if (!this.servoyApi().isInAbsoluteLayout()) {
         this.resizeObserver = new ResizeObserver((entries) => {
           const newWidth = entries[0].contentRect.width;
           if (newWidth !== this.previousWidth) {
@@ -631,7 +632,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
   getViewportRows(): ViewPortRow[] {
     // this method is only used in the old - non-scrolling version
-    if (this.servoyApi.isInDesigner()) {
+    if (this.servoyApi().isInDesigner()) {
       return this.designerViewportRows;
     }
     if (this.numberOfCells === 0) return [];
@@ -668,7 +669,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
   }
 
   onRowRendererAfterViewInit(elementRef: ElementRef): void {
-    if (!this.rowHeightMeasured && !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight()! < 0) {
+    if (!this.rowHeightMeasured && !this.servoyApi().isInAbsoluteLayout() && this.responsiveHeight()! < 0) {
       this.rowHeightMeasured = true;
       requestAnimationFrame(() => {
         const contentEl = elementRef.nativeElement.querySelector(':first-child');
@@ -745,7 +746,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
     let cm: IChildComponentPropertyValue = null!;
     if (item instanceof ComponentCache) {
-      if (this.servoyApi.isInDesigner()) {
+      if (this.servoyApi().isInDesigner()) {
         cm = this.findElement(this.cache.items, item) as IChildComponentPropertyValue;
       } else {
         cm = this.getRowItems().find((elem) => elem.name === item.name) as IChildComponentPropertyValue;
@@ -932,7 +933,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
   getServoyApi(cell: Cell) {
     if (cell.api == null) {
-      cell.api = new ListFormComponentServoyApi(cell, this.servoyApi.getFormName(), this.containedForm()!.absoluteLayout, this.formservice, this.servoyService, this, this.servoyApi.isInDesigner());
+      cell.api = new ListFormComponentServoyApi(cell, this.servoyApi().getFormName(), this.containedForm()!.absoluteLayout, this.formservice, this.servoyService, this, this.servoyApi().isInDesigner());
     }
     return cell.api;
   }
@@ -954,17 +955,17 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
   calculateCells() {
     // if it is still loading then don't calculate it right now again.
     if (this.waitingForLoad) return;
-    if (this.servoyApi.isInDesigner()) {
+    if (this.servoyApi().isInDesigner()) {
       this.numberOfCells = 1;
       return;
     }
 
     if (!this.useScrolling) {
       const containedForm = this.containedForm();
-      this.numberOfCells = this.servoyApi.isInAbsoluteLayout() && containedForm && containedForm.absoluteLayout ? 0 : this.responsivePageSize()!;
+      this.numberOfCells = this.servoyApi().isInAbsoluteLayout() && containedForm && containedForm.absoluteLayout ? 0 : this.responsivePageSize()!;
       if (this.numberOfCells <= 0) {
         const containedFormValue = this.containedForm();
-        if (this.servoyApi.isInAbsoluteLayout() && containedFormValue && containedFormValue.absoluteLayout) {
+        if (this.servoyApi().isInAbsoluteLayout() && containedFormValue && containedFormValue.absoluteLayout) {
           const parentWidth = this.element()!.nativeElement.offsetWidth;
           const parentHeight = this.element()!.nativeElement.offsetHeight;
           const height = containedFormValue.formHeight;
@@ -975,8 +976,8 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
           // always just render 1
           if (this.numberOfCells < 1) this.numberOfCells = 1;
         } else {
-          if (!this.servoyApi.isInAbsoluteLayout()) {
-            this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi.getFormName());
+          if (!this.servoyApi().isInAbsoluteLayout()) {
+            this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because it is used in a responsive form ' + this.servoyApi().getFormName());
           } else if (containedFormValue && !containedFormValue.absoluteLayout) {
             this.log.error('ListFormComponent ' + this.name + ' should have the responsivePageSize property set because its containedForm is a responsive form');
           }
@@ -1050,13 +1051,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
       rowComponents = {};
       this.componentCache[rowIndex] = rowComponents;
     }
-    rowComponents[component.name] = component;
+    rowComponents[component.name()] = component;
   }
 
   unRegisterComponent(component: ServoyBaseComponent<any>, rowIndex: number): void {
     const rowComponents = this.componentCache[rowIndex];
     if (rowComponents) {
-      delete rowComponents[component.name];
+      delete rowComponents[component.name()];
       if (isEmpty(rowComponents)) {
         delete this.componentCache[rowIndex];
       }
@@ -1075,7 +1076,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
       '--ag-header-height': 48,
       '--ag-list-item-height': 24,
     };
-    if (this.servoyApi.isInAbsoluteLayout() || this.responsiveHeight()! < 1) {
+    if (this.servoyApi().isInAbsoluteLayout() || this.responsiveHeight()! < 1) {
       aggridStyle['height'] = '100%';
     } else {
       aggridStyle['height'] = this.responsiveHeight()! + 'px';

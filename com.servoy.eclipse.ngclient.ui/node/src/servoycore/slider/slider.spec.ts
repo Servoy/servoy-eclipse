@@ -21,7 +21,7 @@ describe('ServoyCoreSlider', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyCoreSlider);
     component = fixture.componentInstance;
-    component.servoyApi = { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any;
+    fixture.componentRef.setInput('servoyApi', { getMarkupId: vi.fn(), trustAsHtml: vi.fn(), registerComponent: vi.fn(), unRegisterComponent: vi.fn() } as any);
     fixture.detectChanges();
   });
 

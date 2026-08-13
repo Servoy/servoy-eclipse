@@ -67,7 +67,7 @@ class TestHostComponent {
 
 @Component({
   selector: 'testcomponents-custom-component',
-  template: ` <div [id]="servoyApi.getMarkupId()" #element>
+  template: ` <div [id]="servoyApi().getMarkupId()" #element>
     <button type="button" (click)="click1()" class="button1">
       {{ divLocation() }}
     </button>

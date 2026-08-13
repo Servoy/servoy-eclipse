@@ -369,11 +369,11 @@ export class FormComponent extends AbstractFormComponent implements OnDestroy, O
   }
 
   registerComponent(component: ServoyBaseComponent<any>): void {
-    this.componentCache[component.name] = component;
+    this.componentCache[component.name()] = component;
   }
 
   unRegisterComponent(component: ServoyBaseComponent<any>): void {
-    delete this.componentCache[component.name];
+    delete this.componentCache[component.name()];
   }
 
   getServoyApi(item: ComponentCache) {
