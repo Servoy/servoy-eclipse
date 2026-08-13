@@ -331,11 +331,20 @@ Report findings — don't force zoneless if the runtime (Servoy TiNG) isn't read
 
 ## Phase 7 — Final Verification
 
-1. `npm run build` — clean production build
-2. `npx ng lint` — zero warnings (or only accepted ones)
+Before starting any phase, capture a **lint baseline** so you know which warnings are pre-existing vs introduced by the migration:
+```bash
+npx ng lint 2>&1 | tail -5   # note the warning count
+```
+
+After completing all phases, verify:
+
+1. `npm run build` — clean production build, zero errors
+2. `npx ng lint` — warning count must be equal to or lower than baseline (zero is the target)
 3. `npm run test` — all tests pass
 4. Spec alignment scan — no properties without @Input/serveronly
 5. MANIFEST.MF has correct NG2-Components and Entry-Point
+
+If lint warnings increased, fix them before committing. The goal is zero lint warnings at all times.
 
 ---
 
