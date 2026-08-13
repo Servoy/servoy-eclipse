@@ -53,7 +53,7 @@ export abstract class ServoyApi {
     public abstract isInAbsoluteLayout(): boolean;
 
     /**
-      * Returns the markupid that this component can use for itself, can be used like this in the template:  [id]="servoyApi.getMarkupId()"
+      * Returns the markupid that this component can use for itself, can be used like this in the template:  [id]="servoyApi().getMarkupId()"
       */
     public abstract getMarkupId(): string;
 
