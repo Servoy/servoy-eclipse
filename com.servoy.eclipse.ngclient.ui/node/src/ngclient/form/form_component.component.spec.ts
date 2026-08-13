@@ -90,7 +90,7 @@ export class TestComponentsCustomComponent extends ServoyBaseComponent<HTMLButto
   _divLocation = signal<number>(undefined as any);
 
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-    super(renderer, cdRef);
+    super();
   }
 
   //    svyOnInit() {

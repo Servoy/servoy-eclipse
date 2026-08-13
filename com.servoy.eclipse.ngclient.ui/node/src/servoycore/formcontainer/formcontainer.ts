@@ -80,7 +80,7 @@ export class ServoyCoreFormContainer extends ServoyBaseComponent<HTMLDivElement>
   private form2!: string;
 
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-    super(renderer, cdRef);
+    super();
   }
 
   svyOnChanges(changes: SimpleChanges) {
