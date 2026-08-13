@@ -54,10 +54,6 @@ After modifying each Java file:
 4. If quick fixes are available: `eclipse-ide_executeQuickFix`
 5. Fix any blocking Spotbugs issues (two highest severity levels)
 
-**For component spec files:** if you add or modify model properties, verify that:
-- Every property has a corresponding `@Input` (signal input) in the Angular component, OR is tagged `"serveronly": true`
-- Do NOT add `size` or `location` to specs — these are handled automatically by the framework as internal properties
-
 **Zero compilation errors must remain when you finish.**
 
 ### 5. Verify diff cleanliness
