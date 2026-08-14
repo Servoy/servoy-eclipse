@@ -216,6 +216,11 @@ public class FormSpecRunner
 		int effectiveTimeout = timeoutSeconds > 0 ? timeoutSeconds : DEFAULT_TIMEOUT_SECONDS;
 		try
 		{
+			if (formName == null || formName.isBlank())
+			{
+				return "Error: Form name must not be null or empty.";
+			}
+
 			ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
 			if (activeProject == null)
 			{
