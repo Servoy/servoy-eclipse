@@ -418,4 +418,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.jface"
          version="3.39.0.v20260122-1511"/>
 
+   <plugin
+         id="com.servoy.eclipse.cypress"
+         version="2026.3.2.qualifier"/>
+
 </feature>
