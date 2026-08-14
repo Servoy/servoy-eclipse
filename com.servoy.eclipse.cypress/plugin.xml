@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension point="org.eclipse.core.runtime.applications" id="cypressFormTestRunner">
+      <application>
+         <run class="com.servoy.eclipse.cypress.headless.CypressFormTestRunner"/>
+      </application>
+   </extension>
+
+   <!-- Cypress Form Test commands -->
+   <extension point="org.eclipse.ui.commands">
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Run Cypress form test for the selected form"
+            id="com.servoy.eclipse.cypress.commands.runCypressFormTest"
+            name="Run Cypress Form Test">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Run all Cypress form tests in the solution"
+            id="com.servoy.eclipse.cypress.commands.runAllCypressFormTests"
+            name="Run All Cypress Form Tests">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Run Cypress E2E tests for the active solution"
+            id="com.servoy.eclipse.cypress.commands.runAllE2ETests"
+            name="Run Solution E2E Tests">
+      </command>
+   </extension>
+
+   <!-- Cypress Form Test handlers -->
+   <extension point="org.eclipse.ui.handlers">
+      <handler
+            class="com.servoy.eclipse.cypress.actions.RunCypressFormTestHandler"
+            commandId="com.servoy.eclipse.cypress.commands.runCypressFormTest">
+      </handler>
+      <handler
+            class="com.servoy.eclipse.cypress.actions.RunAllCypressFormTestsHandler"
+            commandId="com.servoy.eclipse.cypress.commands.runAllCypressFormTests">
+      </handler>
+      <handler
+            class="com.servoy.eclipse.cypress.actions.RunAllE2ETestsCommandHandler"
+            commandId="com.servoy.eclipse.cypress.commands.runAllE2ETests">
+      </handler>
+   </extension>
+
+   <!-- Cypress Form Test menu contributions -->
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+         <command
+               commandId="com.servoy.eclipse.cypress.commands.runCypressFormTest"
+               label="Run Cypress Form Test"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="com.servoy.eclipse.cypress.selectionIsCypressFormTestTarget">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="com.servoy.eclipse.cypress.commands.runAllCypressFormTests"
+               label="Run All Cypress Form Tests"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="com.servoy.eclipse.cypress.selectionIsCypressSolutionTestTarget">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="com.servoy.eclipse.cypress.commands.runAllE2ETests"
+               label="Run Solution E2E Tests"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="com.servoy.eclipse.cypress.selectionIsCypressSolutionTestTarget">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:com.servoy.eclipse.designer.rfb.popup?before=additions">
+         <command
+               commandId="com.servoy.eclipse.cypress.commands.runCypressFormTest"
+               label="Run Cypress Form Test"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeEditorInput">
+                  <and>
+                     <instanceof
+                           value="com.servoy.eclipse.core.resource.PersistEditorInput">
+                     </instanceof>
+                     <test
+                           property="com.servoy.eclipse.cypress.cypressTestExists"
+                           value="true">
+                     </test>
+                  </and>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+   <!-- Adapter factory for Cypress test targets -->
+   <extension point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="com.servoy.eclipse.ui.node.SimpleUserNode"
+            class="com.servoy.eclipse.cypress.actions.CypressTestAdapterFactory">
+         <adapter
+               type="com.servoy.eclipse.cypress.actions.CypressFormTestTarget">
+         </adapter>
+      </factory>
+   </extension>
+
+   <!-- Core expressions for Cypress test visibility -->
+   <extension point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="com.servoy.eclipse.cypress.selectionIsCypressFormTestTarget">
+         <with
+               variable="selection">
+            <iterate
+                  ifEmpty="false">
+               <adapt
+                     type="com.servoy.eclipse.cypress.actions.CypressFormTestTarget">
+                  <test
+                        property="com.servoy.eclipse.cypress.isSingleFormTest"
+                        value="true">
+                  </test>
+               </adapt>
+            </iterate>
+            <count
+                  value="1">
+            </count>
+         </with>
+      </definition>
+      <definition
+            id="com.servoy.eclipse.cypress.selectionIsCypressSolutionTestTarget">
+         <with
+               variable="selection">
+            <iterate
+                  ifEmpty="false">
+               <adapt
+                     type="com.servoy.eclipse.cypress.actions.CypressFormTestTarget">
+                  <test
+                        property="com.servoy.eclipse.cypress.isSolutionLevelTest"
+                        value="true">
+                  </test>
+               </adapt>
+            </iterate>
+            <count
+                  value="1">
+            </count>
+         </with>
+      </definition>
+   </extension>
+
+   <!-- Property tester for Cypress test target type -->
+   <extension point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="com.servoy.eclipse.cypress.actions.CypressTestPropertyTester"
+            id="com.servoy.eclipse.cypress.cypressTestPropertyTester"
+            namespace="com.servoy.eclipse.cypress"
+            properties="isSingleFormTest,isSolutionLevelTest"
+            type="com.servoy.eclipse.cypress.actions.CypressFormTestTarget">
+      </propertyTester>
+      <propertyTester
+            class="com.servoy.eclipse.cypress.actions.CypressEditorInputPropertyTester"
+            id="com.servoy.eclipse.cypress.cypressEditorInputPropertyTester"
+            namespace="com.servoy.eclipse.cypress"
+            properties="cypressTestExists"
+            type="com.servoy.eclipse.core.resource.PersistEditorInput">
+      </propertyTester>
+   </extension>
+
+   <!-- Cypress Test Results view -->
+   <extension point="org.eclipse.ui.views">
+      <category
+            id="com.servoy.eclipse.cypress.views.category"
+            name="Servoy">
+      </category>
+      <view
+            category="com.servoy.eclipse.cypress.views.category"
+            class="com.servoy.eclipse.cypress.views.CypressTestResultsView"
+            id="com.servoy.eclipse.cypress.views.cypressTestResults"
+            name="Cypress Test Results">
+      </view>
+   </extension>
+
+   <!-- Cypress Test Results view in Servoy perspective -->
+   <extension point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.perspective">
+         <view
+               id="com.servoy.eclipse.cypress.views.cypressTestResults"
+               minimized="false"
+               ratio="0.5"
+               relationship="stack"
+               relative="org.eclipse.ui.console.ConsoleView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+
+</plugin>
