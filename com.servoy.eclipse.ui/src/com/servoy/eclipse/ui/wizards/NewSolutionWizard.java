@@ -447,6 +447,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
 			progressService.run(true, false, importSolutionsRunnable);
 			progressService.run(true, false, solutionActivationRunnable);
+			progressService.run(true, false, createGitInitRunnable(solutionName));
 		}
 		catch (Exception e)
 		{
@@ -922,6 +923,74 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName())).isValid())
 			.findAny()
 			.orElse(null);
+	}
+
+	private IRunnableWithProgress createGitInitRunnable(String newSolutionName)
+	{
+		return monitor -> {
+			monitor.beginTask("Initializing Git repository", 1);
+			try
+			{
+				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(newSolutionName);
+				if (!project.exists() || !project.isOpen())
+				{
+					monitor.done();
+					return;
+				}
+
+				java.io.File workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
+				java.io.File gitDir = new java.io.File(workspaceRoot, ".git");
+
+				if (gitDir.exists())
+				{
+					org.eclipse.egit.core.RepositoryUtil.INSTANCE.getRepositories();
+					org.eclipse.jgit.lib.Repository repo = org.eclipse.jgit.storage.file.FileRepositoryBuilder.create(gitDir);
+					org.eclipse.egit.core.op.ConnectProviderOperation connectOp = new org.eclipse.egit.core.op.ConnectProviderOperation(project, repo.getDirectory());
+					connectOp.execute(new org.eclipse.core.runtime.NullProgressMonitor());
+					repo.close();
+				}
+				else
+				{
+					try (org.eclipse.jgit.api.Git git = org.eclipse.jgit.api.Git.init().setDirectory(workspaceRoot).call())
+					{
+						org.eclipse.jgit.lib.Repository repo = git.getRepository();
+
+						java.io.File gitignoreFile = new java.io.File(workspaceRoot, ".gitignore");
+						if (!gitignoreFile.exists())
+						{
+							java.nio.file.Files.write(gitignoreFile.toPath(),
+								".metadata/\n*.class\n*.jar\n.settings/\nnode_modules/\n.opencode/\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+						}
+
+						IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+						for (IProject p : allProjects)
+						{
+							if (p.isOpen())
+							{
+								try
+								{
+									org.eclipse.egit.core.op.ConnectProviderOperation connectOp = new org.eclipse.egit.core.op.ConnectProviderOperation(p, repo.getDirectory());
+									connectOp.execute(new org.eclipse.core.runtime.NullProgressMonitor());
+								}
+								catch (Exception e)
+								{
+									// non-fatal
+								}
+							}
+						}
+
+						git.add().addFilepattern(".").call();
+						git.commit().setMessage("Initial commit").call();
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Git init after new solution wizard failed", e);
+			}
+			monitor.worked(1);
+			monitor.done();
+		};
 	}
 
 	public static class SolutionPackageInstallInfo
