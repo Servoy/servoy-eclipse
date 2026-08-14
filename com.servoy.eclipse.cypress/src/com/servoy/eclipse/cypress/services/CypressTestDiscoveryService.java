@@ -35,7 +35,14 @@ public class CypressTestDiscoveryService {
 		if (testsDir == null || !Files.isDirectory(testsDir)) {
 			return false;
 		}
-		return Files.exists(testsDir.resolve(formName + SPEC_CY_EXTENSION));
+		if (Files.exists(testsDir.resolve(formName + SPEC_CY_EXTENSION))) {
+			return true;
+		}
+		try (Stream<Path> files = Files.list(testsDir)) {
+			return files.anyMatch(p -> p.getFileName().toString().endsWith("." + formName + SPEC_CY_EXTENSION));
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	public boolean hasE2ETest(String formName) {
