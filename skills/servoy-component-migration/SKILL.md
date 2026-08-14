@@ -313,6 +313,26 @@ changeDetection: ChangeDetectionStrategy.OnPush
 
 Replace `this.cdRef.detectChanges()` / `this.cdRef.markForCheck()` with proper signal reactivity. If a value changes that the template observes, use a `signal()` or `computed()`.
 
+### Remove constructor parameters to ServoyBaseComponent
+
+`ServoyBaseComponent` no longer requires `Renderer2` or `ChangeDetectorRef` in its constructor (parameters are optional in the current release and will be removed entirely in the next). Remove them from subclass constructors:
+
+**Before:**
+```typescript
+constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+    super(renderer, cdRef);
+}
+```
+
+**After:** Remove the constructor entirely (if it only calls `super`). If the component has no other constructor logic, Angular will use the default inherited constructor.
+
+If the component still needs `Renderer2` for its own DOM operations, use `inject()`:
+```typescript
+private readonly renderer = inject(Renderer2);
+```
+
+This is required for zoneless readiness — injecting `ChangeDetectorRef` prevents zoneless operation.
+
 ### Spec property alignment check
 
 After signal migration, verify:
