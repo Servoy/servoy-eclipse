@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -19,12 +18,9 @@ import org.eclipse.e4.core.di.annotations.Creatable;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.startup.FormPreviewNGClient;
 import com.servoy.eclipse.ngclient.ui.Activator;
-import com.servoy.j2db.ClientState;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.server.dataprocessing.ClientHost;
-import com.servoy.j2db.server.dataprocessing.ClientProxy;
-import com.servoy.j2db.server.main.ApplicationServer;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -39,7 +35,6 @@ public class FormSpecRunner
 	private static final String MCP_PLUGIN_DIR = "com.servoy.eclipse.developer.mcp";
 	private static final String CYPRESS_DIR = "cypress";
 	private static final int DEFAULT_TIMEOUT_SECONDS = 60;
-	private static final String FORMPREVIEW_USER_UID = "formpreview_user";
 
 	private final FormSpecGenerator specGenerator = new FormSpecGenerator();
 	private volatile Process activeProcess;
@@ -59,20 +54,7 @@ public class FormSpecRunner
 
 	private void shutdownFormPreviewClients() {
 		try {
-			if (!ApplicationServerRegistry.exists()) return;
-			ApplicationServer as = (ApplicationServer)ApplicationServerRegistry.get();
-			ClientHost clientHost = as.getClientHost();
-			if (clientHost == null) return;
-			Map<String, ClientProxy> clients = clientHost.getClients();
-			List<ClientProxy> snapshot = new ArrayList<>(clients.values());
-			for (ClientProxy cp : snapshot) {
-				if (FORMPREVIEW_USER_UID.equals(cp.getClientInfo().getUserUid())) {
-					ClientState clientState = cp.getClientState();
-					if (clientState != null) {
-						clientState.shutDown(true);
-					}
-				}
-			}
+			FormPreviewNGClient.shutdownExisting();
 		} catch (Exception e) {
 			ServoyLog.logWarning("shutdownFormPreviewClients: " + e.getMessage(), e);
 		}
