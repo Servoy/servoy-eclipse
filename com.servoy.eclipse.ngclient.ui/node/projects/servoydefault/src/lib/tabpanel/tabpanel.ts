@@ -2,7 +2,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { LoggerFactory, LoggerService, SabloTabseq, TooltipDirective, TrustAsHtmlPipe , HtmlFilterPipe } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, ViewChild, ElementRef, output, AfterViewInit, OnDestroy, input, inject} from '@angular/core';
+import { Component, ChangeDetectionStrategy, viewChild, ElementRef, output, AfterViewInit, OnDestroy, input, inject} from '@angular/core';
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
@@ -21,7 +21,7 @@ export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit
     readonly tab = input<Tab>(undefined as any);
     readonly visibleTab = output<Tab>();
 
-    @ViewChild('element') elementRef!: ElementRef;
+    readonly elementRef = viewChild<ElementRef>('element');
 
     observer!: MutationObserver;
     log: LoggerService;
