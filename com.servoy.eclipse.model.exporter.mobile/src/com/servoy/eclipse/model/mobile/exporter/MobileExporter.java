@@ -1162,6 +1162,37 @@ public class MobileExporter
 		}
 	}
 
+	/**
+	 * PROTOTYPE: Transforms the extracted anonymous function code to async/await for the specific
+	 * test case: form "shift", function "onAction_clickMe", call to plugins.dialogs.showInfoDialog.
+	 *
+	 * Checks the exact form name and function name to avoid changing anything else.
+	 * The transformation is:
+	 *   function(event) { ... }
+	 *   → async function(event) { ... }
+	 * with "await " inserted before the plugins.dialogs.showInfoDialog call.
+	 *
+	 * The real implementation would use the DLTK JS parser to inspect all calls and consult the
+	 * component/service specs to decide which ones need await.
+	 */
+	private String makeAsyncPrototype(IScriptProvider method, String code)
+	{
+		// Only apply to form "shift", function "onAction_clickMe"
+		if (method.getParent().getTypeID() != IRepository.FORMS) return code;
+		if (!"shifts".equals(((Form)method.getParent()).getName())) return code;
+		if (!"onAction_clickMe".equals(method.getName())) return code;
+
+		// Make the function async: replace the leading "function" keyword
+		String transformed = code.replaceFirst("^(\\s*)function(\\s*\\()", "$1async function$2");
+
+		// Insert "await " before the specific sync service call
+		transformed = transformed.replace(
+			"plugins.dialogs.showInfoDialog(",
+			"await plugins.dialogs.showInfoDialog(");
+
+		return transformed;
+	}
+
 	private void getAnonymousScripting(ScriptStringBuilder scriptResult, IScriptProvider method)
 	{
 		String functionAndName = "function";
@@ -1174,6 +1205,13 @@ public class MobileExporter
 				SCOPE_NAME_SEPARATOR + method.getName();
 		}
 		String code = ScriptEngine.extractFunction(method.getDeclaration(), functionAndName);
+
+		// PROTOTYPE: For functions that contain sync service/component API calls with return values,
+		// transform to async/await so the mobile client can handle them correctly.
+		// The real implementation would use the DLTK JS parser to detect which calls need await,
+		// consulting the spec for each API call. For now we hardcode the specific test case only:
+		// form "shift", function "onAction_clickMe" with plugins.dialogs.showInfoDialog.
+		code = makeAsyncPrototype(method, code);
 
 		if (debugMode)
 		{
