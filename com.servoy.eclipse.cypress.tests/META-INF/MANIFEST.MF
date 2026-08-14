@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy Cypress Testing Tests
+Bundle-SymbolicName: com.servoy.eclipse.cypress.tests
+Bundle-Version: 2026.3.2.qualifier
+Fragment-Host: com.servoy.eclipse.cypress;bundle-version="2026.3.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Automatic-Module-Name: com.servoy.eclipse.cypress.tests
+Require-Bundle: junit-jupiter-api,
+ junit-platform-suite-engine,
+ org.junit
+Import-Package: org.junit.jupiter.api,
+ org.junit.jupiter.api.function,
+ org.junit.jupiter.params,
+ org.junit.jupiter.params.provider,
+ org.junit;version="4.0.0",
+ org.junit.rules;version="4.0.0",
+ org.junit.runner;version="4.0.0",
+ org.junit.runners;version="4.0.0"
