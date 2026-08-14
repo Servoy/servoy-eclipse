@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -17,8 +18,13 @@ import org.eclipse.e4.core.di.annotations.Creatable;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.Activator;
+import com.servoy.j2db.ClientState;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.server.dataprocessing.ClientHost;
+import com.servoy.j2db.server.dataprocessing.ClientProxy;
+import com.servoy.j2db.server.main.ApplicationServer;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -33,6 +39,7 @@ public class FormSpecRunner
 	private static final String MCP_PLUGIN_DIR = "com.servoy.eclipse.developer.mcp";
 	private static final String CYPRESS_DIR = "cypress";
 	private static final int DEFAULT_TIMEOUT_SECONDS = 60;
+	private static final String FORMPREVIEW_USER_UID = "formpreview_user";
 
 	private final FormSpecGenerator specGenerator = new FormSpecGenerator();
 	private volatile Process activeProcess;
@@ -47,6 +54,27 @@ public class FormSpecRunner
 		Process p = activeProcess;
 		if (p != null && p.isAlive()) {
 			p.destroyForcibly();
+		}
+	}
+
+	private void shutdownFormPreviewClients() {
+		try {
+			if (!ApplicationServerRegistry.exists()) return;
+			ApplicationServer as = (ApplicationServer)ApplicationServerRegistry.get();
+			ClientHost clientHost = as.getClientHost();
+			if (clientHost == null) return;
+			Map<String, ClientProxy> clients = clientHost.getClients();
+			List<ClientProxy> snapshot = new ArrayList<>(clients.values());
+			for (ClientProxy cp : snapshot) {
+				if (FORMPREVIEW_USER_UID.equals(cp.getClientInfo().getUserUid())) {
+					ClientState clientState = cp.getClientState();
+					if (clientState != null) {
+						clientState.shutDown(true);
+					}
+				}
+			}
+		} catch (Exception e) {
+			ServoyLog.logWarning("shutdownFormPreviewClients: " + e.getMessage(), e);
 		}
 	}
 
@@ -212,7 +240,8 @@ public class FormSpecRunner
 				return "Error: No active Servoy project.";
 			}
 
-			Path specFilePath = specGenerator.getSpecFilePath(formName);
+			String solutionName = activeProject.getSolution().getName();
+			Path specFilePath = specGenerator.findExistingSpecFile(formName, solutionName);
 			if (specFilePath == null || !Files.exists(specFilePath))
 			{
 				return "Error: Spec file not found: jenkins-custom/e2e-test-scripts/cypress/cy-form/" + formName +
@@ -312,6 +341,10 @@ public class FormSpecRunner
 			String prependPath = scriptsNodeModulesBin.toString();
 			if (nodePath != null) prependPath = nodePath.getParent() + File.pathSeparator + prependPath;
 			pb.environment().put("PATH", prependPath + File.pathSeparator + (existingPath != null ? existingPath : ""));
+
+			shutdownFormPreviewClients();
+			try
+			{
 			Process process = pb.start();
 			activeProcess = process;
 
@@ -343,6 +376,11 @@ public class FormSpecRunner
 			{
 				rawOutput = preserveArtifacts(rawOutput, formName);
 				return "**Form Spec Results: " + formName + "**\n\nSome tests failed:\n\n" + rawOutput;
+			}
+			}
+			finally
+			{
+				shutdownFormPreviewClients();
 			}
 		}
 		catch (Exception e)

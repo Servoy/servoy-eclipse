@@ -47,12 +47,13 @@ public class FormSpecGenerator {
 			Files.createDirectories(testsDir);
 			Files.createDirectories(setupDir);
 
-			Path cySpecPath = testsDir.resolve(formName + SPEC_CY_EXTENSION);
-			Path setupSpecPath = setupDir.resolve(formName + SPEC_JS_EXTENSION);
+			String solutionName = activeProject.getSolution().getName();
+			Path cySpecPath = testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
+			Path setupSpecPath = setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
 
 			if (Files.exists(cySpecPath) && Files.exists(setupSpecPath)) {
-				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + formName + SPEC_CY_EXTENSION
-						+ " and " + FORM_SETUP_RELATIVE_DIR + "/" + formName + SPEC_JS_EXTENSION;
+				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_CY_EXTENSION
+						+ " and " + FORM_SETUP_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_JS_EXTENSION;
 			}
 
 			String frmContent = new String(Files.readAllBytes(frmFile.getLocation().toFile().toPath()),
@@ -65,16 +66,16 @@ public class FormSpecGenerator {
 			if (!Files.exists(cySpecPath)) {
 				String cyContent = generateCypressSpecContent(metadata);
 				Files.writeString(cySpecPath, cyContent, StandardCharsets.UTF_8);
-				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(formName)
-						.append(SPEC_CY_EXTENSION).append(" (").append(metadata.namedElements.size())
+				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(solutionName).append(".")
+						.append(formName).append(SPEC_CY_EXTENSION).append(" (").append(metadata.namedElements.size())
 						.append(" element assertions)\n");
 			}
 
 			if (!Files.exists(setupSpecPath)) {
 				String setupContent = generateSetupContent(metadata);
 				Files.writeString(setupSpecPath, setupContent, StandardCharsets.UTF_8);
-				result.append("Created: ").append(FORM_SETUP_RELATIVE_DIR).append("/").append(formName)
-						.append(SPEC_JS_EXTENSION).append(" (setUp/tearDown for data setup)");
+				result.append("Created: ").append(FORM_SETUP_RELATIVE_DIR).append("/").append(solutionName).append(".")
+						.append(formName).append(SPEC_JS_EXTENSION).append(" (setUp/tearDown for data setup)");
 			}
 
 			return result.toString().trim();
@@ -129,6 +130,69 @@ public class FormSpecGenerator {
 	public Path getFormSpecDir() {
 		try {
 			return resolveFormSpecDir();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public boolean specExists(String formName, String solutionName) {
+		try {
+			Path testsDir = resolveFormSpecDir();
+			Path setupDir = resolveFormSetupDir();
+			return Files.exists(testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION))
+					&& Files.exists(setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION));
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public Path getSpecFilePath(String formName, String solutionName) {
+		try {
+			Path testsDir = resolveFormSpecDir();
+			return testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public Path getSetupFilePath(String formName, String solutionName) {
+		try {
+			Path setupDir = resolveFormSetupDir();
+			return setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public Path findExistingSpecFile(String formName, String solutionName) {
+		try {
+			Path testsDir = resolveFormSpecDir();
+			Path prefixed = testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
+			if (Files.exists(prefixed)) {
+				return prefixed;
+			}
+			Path legacy = testsDir.resolve(formName + SPEC_CY_EXTENSION);
+			if (Files.exists(legacy)) {
+				return legacy;
+			}
+			return null;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public Path findExistingSetupFile(String formName, String solutionName) {
+		try {
+			Path setupDir = resolveFormSetupDir();
+			Path prefixed = setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
+			if (Files.exists(prefixed)) {
+				return prefixed;
+			}
+			Path legacy = setupDir.resolve(formName + SPEC_JS_EXTENSION);
+			if (Files.exists(legacy)) {
+				return legacy;
+			}
+			return null;
 		} catch (Exception e) {
 			return null;
 		}
