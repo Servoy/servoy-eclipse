@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import {ShortcutService, Shortcut} from './window_service/shortcut.service';
 import {WindowPluginService, PopupMenuShowCommand} from './window_service/window.service';
 import {PopupMenuService, MenuItem, Popup} from './window_service/popupmenu.service';
-import { ServoyPublicModule, PopupForm, SpecTypesService } from '@servoy/public';
+import { PopupForm, SpecTypesService } from '@servoy/public';
 
 @NgModule({
     declarations: [],
-    imports: [CommonModule, ServoyPublicModule],
+    imports: [CommonModule],
     providers: [WindowPluginService, ShortcutService, PopupMenuService]
 })
 export class WindowServiceModule {

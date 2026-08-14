@@ -125,6 +125,31 @@ Tests live next to the source file they test:
 - Use `fixture.detectChanges()` to trigger Angular change detection
 - Verify no runtime errors (like NG0600) by asserting `detectChanges()` doesn't throw
 
+### Critical: Global Mocking Rules
+
+- **NEVER** use `vi.stubGlobal('document', ...)` or `vi.stubGlobal('window', ...)` — this replaces the entire jsdom DOM and breaks ALL subsequent tests in the same fork/thread. The error manifests as `this.doc.querySelector is not a function` in Angular's renderer.
+- Instead, mock individual methods and restore them:
+  ```typescript
+  let originalMethod: typeof document.elementFromPoint;
+  beforeEach(() => {
+    originalMethod = document.elementFromPoint;
+    document.elementFromPoint = vi.fn() as any;
+  });
+  afterEach(() => {
+    document.elementFromPoint = originalMethod;
+  });
+  ```
+- Similarly, never replace `window.location`, `window.navigator` etc. via `stubGlobal` — use `vi.spyOn` or direct property assignment with restore.
+- The `vitest-setup.ts` contains a diagnostic that detects a corrupted document and logs details. If you see `[vitest-setup] FATAL: document.querySelector is not a function` in CI, look for `vi.stubGlobal('document', ...)` in recently added/modified spec files.
+
+### Debugging: Log First, Fix Later
+
+When facing unclear test failures (locally or on CI), **do NOT spend multiple rounds guessing root causes**. Instead:
+
+1. **Add diagnostic logging immediately** — log the state of the failing object (e.g. `typeof`, `constructor.name`, `Object.keys()`, `JSON.stringify`) at the point of failure
+2. **Run (or push and let CI run)** — get real data from the actual environment
+3. **Fix based on evidence** — one log statement that shows actual state is worth more than three speculative fixes
+
 ---
 
 ## 5. Linting
@@ -226,3 +251,33 @@ ngclient2 (main application)
 - **`legacy-peer-deps=true`:** Required due to Angular 21 peer dependency conflicts. Always use this flag when installing.
 - **Zone.js:** The app still uses Zone.js for change detection. Don't introduce zoneless patterns unless the project migrates.
 - **SVG as text:** SVG files are loaded as text strings (configured in `angular.json` loader section). Import them as strings, not as image URLs.
+
+---
+
+## 11. Angular 22 Modernization Status
+
+Full spec: `../../docs/angular22-modernization-remaining.spec.md`
+
+### Completed
+- **Template control flow:** 100% — all templates use `@if`/`@for`/`@switch`
+- **Karma removal:** 100% — Vitest 4 with jsdom, forks pool
+- **Polyfills cleanup:** 100% — only zone.js remains
+- **inject() migration:** Done for servoydefault (29 files) and src/ (8 files). Remaining are plain classes (not Angular DI).
+- **takeUntilDestroyed():** Done — tooltip-html.directive, form_component.component
+- **Signal queries (local):** Done — basechoice, baselabel, check, radio, spinner, calendar, combobox, typeahead, bg_splitter
+- **Standalone components:** 100% — all directives, pipes, and components converted to `standalone: true`
+- **bootstrapApplication():** Done — `AppModule` removed, app bootstraps with `bootstrapApplication()` + `provideRouter()`
+- **Routing modules removed:** `AppRoutingModule`, `MainRoutingModule`, `ServoyDesignerRoutingModule` replaced with plain `Routes` arrays
+- **AbstractFormComponent extraction:** Extracted to own file (`abstract_form_component.component.ts`), injected via `forwardRef` providers pattern
+
+### Architecturally Blocked (requires full redesign)
+- **@Input()/@Output() → signals:** Tied to `ngOnChanges` → `svyOnChanges(SimpleChanges)` pattern. Requires replacing entire change detection model with `effect()`/`computed()`.
+
+**Note:** Angular 22 signal inputs DO still trigger `ngOnChanges` (backward compatible). So migrating `@Input()` to `input()` does NOT break the `svyOnChanges` pattern. The migration to `effect()` is optional for cleaner code but not required for correctness.
+- **basecomponent.ts `elementRef`:** Used as `this.elementRef` in 100+ subclasses + external packages. Cannot convert to signal without updating all consumers.
+- **basetabpanel.ts `templateRef`:** Used in templates of subclasses (accordion, tabpanel, tablesspanel, splitpane).
+- **servoydesigner.component.ts:** Setter-based ViewChild, complex.
+
+### Remaining Phases
+- **Phase 6b — NgModule removal:** Remove remaining barrel NgModules (servoycore.module, servoydefault.module, servoy_public.module, servoy.module, servoydesigner.module, lfc.module, allcomponents.module, dialog.module, windowservice.module). These currently serve only as re-export groupings; all components already have their own imports.
+- **Phase 7 — Zoneless:** Remove zone.js, switch to `provideZonelessChangeDetection()`, eliminate all `ChangeDetectorRef` usage.

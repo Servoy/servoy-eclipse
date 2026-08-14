@@ -1,6 +1,9 @@
-import { Component, OnInit, SimpleChanges, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { NotNullOrEmptyPipe, PropertyUtils, SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
-import { FormattingService, PropertyUtils } from '@servoy/public';
+import { ChoiceElementDirective } from '../basechoice';
 
 
 @Component({
@@ -8,22 +11,20 @@ import { FormattingService, PropertyUtils } from '@servoy/public';
     templateUrl: './radiogroup.html',
     styleUrls: ['./radiogroup.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, NotNullOrEmptyPipe, ChoiceElementDirective]
 })
 export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice {
 
     value: any;
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
     
     svyOnChanges(changes: SimpleChanges) {
 		for (const property of Object.keys(changes)) {
             switch (property) {
                 case 'scrollbars':
-					this.elementRef.nativeElement.classList.remove('horizontaldirection');
+					this.elementRef()!.nativeElement.classList.remove('horizontaldirection');
                     if (changes.scrollbars.currentValue === 36) {
-						this.elementRef.nativeElement.classList.add('horizontaldirection');
+						this.elementRef()!.nativeElement.classList.add('horizontaldirection');
 					}
                     break;
             }

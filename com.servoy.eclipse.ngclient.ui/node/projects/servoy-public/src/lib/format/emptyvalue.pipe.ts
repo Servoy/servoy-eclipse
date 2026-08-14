@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe( {
     name: 'emptyValue',
-    standalone: false
+    standalone: true
 } )
 export class EmptyValueFilterPipe implements PipeTransform {
 

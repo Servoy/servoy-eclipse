@@ -6,10 +6,10 @@ import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'dragselection-responsive',
     templateUrl: './dragselection-responsive.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscroll { // ISupportAutoscroll
     allowedChildren: any;
@@ -49,7 +49,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     }
 
     onMouseDown(event: MouseEvent) {
-        if (this.editorSession.getState().dragging || event.buttons !== 1) return; //prevent dnd when dragging from palette
+        if (this.editorSession.dragging() || event.buttons !== 1) return; //prevent dnd when dragging from palette
         this.dragNode = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC()!;
       	if (this.dragNode === null) {
 			  this.dragNode = this.designerUtilsService.getNode(event)!;
@@ -106,7 +106,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
 
     onMouseMove(event: MouseEvent) {
         if (!this.dragStartEvent || event.buttons !== 1 || !this.dragNode) return;
-        if (!this.editorSession.getState().dragging) {
+        if (!this.editorSession.dragging()) {
             if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                 this.editorSession.setDragging( true );
                 this.dragCopy = event.ctrlKey || event.metaKey;
@@ -121,7 +121,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                     });
                     this.dropHighlight = this.dragItem.layoutName!;
                 }
-                this.editorSession.getState().drop_highlight = this.dragItem.componentType!;
+                this.editorSession.drop_highlight.set(this.dragItem.componentType!);
             } else return;
         }
 
@@ -152,7 +152,8 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
                //this.canDrop.beforeChild = this.designerUtilsService.getNextElementSibling(this.canDrop);
                return; //preview position not changed, return here
             }
-            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentElement?.closest('[svy-id]') && this.canDrop.beforeChild === this.designerUtilsService.getNextElementSibling(this.dragNode)) {
+            if (this.canDrop.dropAllowed && this.canDrop.dropTarget === this.dragNode.parentElement?.closest('[svy-id]')
+                && this.canDrop.beforeChild === this.designerUtilsService.getNextElementSibling(this.dragNode)) {
                 return; //preview position not changed, return here
             }
             if (this.canDrop.dropAllowed) {
@@ -170,7 +171,7 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
     }
 
     onMouseUp(event: MouseEvent) {
-        if (this.dragStartEvent !== null && this.dragNode && this.editorSession.getState().dragging && this.canDrop.dropAllowed) {
+        if (this.dragStartEvent !== null && this.dragNode && this.editorSession.dragging() && this.canDrop.dropAllowed) {
             const components: any[] = [];
             
             if (!this.canDrop.beforeChild && !this.canDrop.append) {

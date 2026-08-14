@@ -1,25 +1,23 @@
-import { Component, AfterViewInit, Renderer2, OnDestroy, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, Renderer2, ElementRef, ChangeDetectionStrategy, effect, inject, input, untracked } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, Guide, SnapData } from '../services/dynamicguides.service';
-import { Subscription } from 'rxjs';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'dynamic-guides',
     templateUrl: './dynamicguides.component.html',
     styleUrls: ['./dynamicguides.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
+export class DynamicGuidesComponent {
 
   guides = input<Guide[]>([]);
 
   topAdjust: any;
   leftAdjust!: number;
   snapData!: { top: number, left: number, guideX?: number, guideY?: number, guides?: Guide[] } | null;
-  subscription!: Subscription;
 
   private el = inject(ElementRef);
   protected readonly editorSession = inject(EditorSessionService);
@@ -29,6 +27,10 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
   private guidesService = inject(DynamicGuidesService);
 
   constructor() {
+      effect(() => {
+          const value = this.guidesService.snapData();
+          if (value) untracked(() => this.setGuides(value));
+      });
       this.editorContentService.executeOnlyAfterInit(() => {
         this.editorSession.getSnapThreshold().then((thresholds: any) => {
             if (thresholds.alignment > 0 || thresholds.distance > 0) {
@@ -37,12 +39,6 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
             }
         });
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
-      if (value) this.setGuides(value);
-    })
   }
 
   private renderGuides() {
@@ -71,10 +67,6 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
   onMouseUp(): void {
     this.snapData = null;
     this.clearGuides();
@@ -82,7 +74,7 @@ export class DynamicGuidesComponent implements AfterViewInit, OnDestroy {
 
   private setGuides(data: SnapData) {
 	this.clearGuides();
-    if (!this.editorSession.getState().dragging && !this.editorSession.getState().resizing) {
+    if (!this.editorSession.dragging() && !this.editorSession.resizing()) {
       return;
     }
     this.snapData = data;

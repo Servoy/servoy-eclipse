@@ -1,8 +1,11 @@
-import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges, HostListener, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { SabloTabseq, ServoyPublicService, StartEditDirective, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, SimpleChanges, HostListener, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { Observable, merge, Subject, of } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
-import { FormattingService, ServoyPublicService } from '@servoy/public';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
 
@@ -10,21 +13,17 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/oper
 	selector: 'servoydefault-typeahead',
 	templateUrl: './typeahead.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, StartEditDirective, NgbModule]
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElement> {
-	// this is a hack so that this can be none static access because this references in this component to a conditional template
-	@ViewChild('instance', { static: true }) instance!: NgbTypeahead;
+	readonly instance = viewChild.required<NgbTypeahead>('instance');
 	focus$ = new Subject<string>();
 	click$ = new Subject<string>();
 
 	currentValue: any;
 	showPopupOnFocusGain!: boolean;
-
-	constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-		formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
-		super(renderer, cdRef, formattingService, doc);
-	}
+	protected servoyService = inject(ServoyPublicService);
 
 	@HostListener('keydown', ['$event'])
 	handleKeyDown(event: KeyboardEvent) {
@@ -40,15 +39,15 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 			setTimeout(this.onFocus);
 		});
 		// add custom class to the popup, needed by ng-grids (ag-grid) so it can be used in form editors (popups)
-		this.instance.popupClass = 'ag-custom-component-popup';
-		this.showPopupOnFocusGain = this.servoyApi.getClientProperty('TypeAhead.showPopupOnFocusGain');
+		this.instance().popupClass = 'ag-custom-component-popup';
+		this.showPopupOnFocusGain = this.servoyApi().getClientProperty('TypeAhead.showPopupOnFocusGain');
 		if (this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) {
 			this.showPopupOnFocusGain = this.servoyService.getUIProperty('TypeAhead.showPopupOnFocusGain');
 		}
 	}
 
 	onFocus = () => {
-		const popup = this.doc.getElementById(this.instance.popupId);
+		const popup = this.doc.getElementById(this.instance().popupId);
 		if (popup) {
 			popup.style.width = this.getFocusElement().clientWidth + 'px';
 		}
@@ -66,12 +65,12 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 	}
 
 	scroll() {
-		if (!this.instance.isPopupOpen()) {
+		if (!this.instance().isPopupOpen()) {
 			return;
 		}
 
 		setTimeout(() => {
-			const popup = this.doc.getElementById(this.instance.popupId);
+			const popup = this.doc.getElementById(this.instance().popupId);
 			const activeElements = popup!.getElementsByClassName('active');
 			if (activeElements.length === 1) {
 				const elem = activeElements[0] as HTMLElement;
@@ -86,17 +85,17 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 	svyOnChanges(changes: SimpleChanges) {
 		super.svyOnChanges(changes);
 		if (changes.enabled || changes.findmode) {
-			this.instance.setDisabledState(!this.enabled() && !this.findmode());
+			this.instance().setDisabledState(!this.enabled() && !this.findmode());
 		}
 		if (changes.format || changes.findmode) {
 			if (this.format() && this.format().maxLength) {
 				if (!this.findmode()) {
-					this.renderer.setAttribute(this.elementRef.nativeElement, 'maxlength', this.format().maxLength + '');
+					this.renderer.setAttribute(this.elementRef()!.nativeElement, 'maxlength', this.format().maxLength + '');
 				} else {
-					this.renderer.removeAttribute(this.elementRef.nativeElement, 'maxlength');
+					this.renderer.removeAttribute(this.elementRef()!.nativeElement, 'maxlength');
 				}
 			}
-			if (this.valuelistID()) this.instance.writeValue(this.dataProviderID());
+			if (this.valuelistID()) this.instance().writeValue(this.dataProviderID());
 		}
 		if (changes.dataProviderID) {
 			this.currentValue = changes.dataProviderID.currentValue;
@@ -105,7 +104,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 
 	values = (text$: Observable<string>) => {
 		const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
-		const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
+		const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance().isPopupOpen()));
 		const inputFocus$ = this.focus$;
 
 		return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(switchMap(term => (this.valuelistID().filterList(term))));
@@ -115,9 +114,9 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 		if (!this.dataProviderID() && (!this.isEditable() || this.findmode())) {
 			// data was changed, need to restore the value from UI
 			if (this.findmode() || !this.valuelistID()) {
-				this.dataProviderID.set(this.elementRef.nativeElement.value);
+				this.dataProviderID.set(this.elementRef()!.nativeElement.value);
 			} else {
-				if (this.elementRef.nativeElement.value === this.valuelistID()[0]?.displayValue) {
+				if (this.elementRef()!.nativeElement.value === this.valuelistID()[0]?.displayValue) {
 					this.dataProviderID.set(this.valuelistID()[0]?.realValue);
 					this.currentValue = this.dataProviderID();
 					super.pushUpdate();
@@ -165,7 +164,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 					this.valuelistID().getDisplayValue(result).subscribe(val => {
 						if (val) {
 							this.realToDisplay.set(result, val);
-							this.instance.writeValue(result);
+							this.instance().writeValue(result);
 						}
 					});
 					display = this.realToDisplay.get(result); // in case the getDisplayValue above runs sync, before this return happen (uses of() not from())

@@ -1,4 +1,6 @@
 import { Component, ElementRef, viewChild, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'servoycore-message-dialog-window',
@@ -6,10 +8,10 @@ import { Component, ElementRef, viewChild, signal, ChangeDetectionStrategy } fro
   styleUrls: ['./message-dialog-window.component.css'],
   host: { '(document:keydown)': 'handleKeyboardEvent($event)' },
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class MessageDialogWindowComponent {
-
   readonly message = signal<string | undefined>(undefined);
   readonly styleClass = signal<string | undefined>(undefined);
   readonly values = signal<string[] | undefined>(undefined);
@@ -18,9 +20,9 @@ export class MessageDialogWindowComponent {
   readonly defaultButtonIndex = signal<number | undefined>(undefined);
   readonly okButtonText = signal<string>('OK');
 
-  readonly inputfield = viewChild<ElementRef>("inputfield");
-  readonly buttons = viewChild<ElementRef>("buttons");
-  readonly svyMessageDialog = viewChild<ElementRef>("svyMessageDialog");
+  readonly inputfield = viewChild<ElementRef>('inputfield');
+  readonly buttons = viewChild<ElementRef>('buttons');
+  readonly svyMessageDialog = viewChild<ElementRef>('svyMessageDialog');
 
   retValue: string | null = null;
   onCloseCallback!: (r: string | null) => void;
@@ -39,12 +41,12 @@ export class MessageDialogWindowComponent {
     const okButtonText = this.okButtonText();
     if (!okButtonText) this.okButtonText.set('OK');
     const buttonsText = this.buttonsText();
-    if(!buttonsText || !buttonsText.length) {
+    if (!buttonsText || !buttonsText.length) {
       this.buttonsText.set([okButtonText!]);
     }
     const styleClass = this.styleClass();
     const values = this.values();
-    if(values && values.length && (styleClass === 'type-input' || styleClass === 'type-select')) {
+    if (values && values.length && (styleClass === 'type-input' || styleClass === 'type-select')) {
       this.retValue = values[0];
     }
   }
@@ -80,12 +82,12 @@ export class MessageDialogWindowComponent {
   dismiss(value: string | null): void {
     const styleClass = this.styleClass();
     if (styleClass === 'type-input' || styleClass === 'type-select') {
-      if (value !==this.okButtonText()) {
-       this.retValue = null;
-     }
+      if (value !== this.okButtonText()) {
+        this.retValue = null;
+      }
     } else {
       this.retValue = value;
-    }    
+    }
     this.onCloseCallback(this.retValue);
   }
 

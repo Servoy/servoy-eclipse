@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, SimpleChanges, Renderer2, ElementRef, ViewChild, Directive, input } from '@angular/core';
+import { SimpleChanges, ElementRef, Directive, input, viewChild } from '@angular/core';
 
 import { PropertyUtils } from '@servoy/public';
 
@@ -18,22 +18,18 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
     readonly textRotation = input<number>(undefined as any);
     readonly verticalAlignment = input<number>(undefined as any);
 
-    @ViewChild('child') child!: ElementRef;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
+    readonly child = viewChild<ElementRef>('child');
 
     svyOnChanges(changes: SimpleChanges) {
         for (const property of Object.keys(changes)) {
             const change = changes[property];
             switch (property) {
                 case 'rolloverCursor':
-                    this.renderer.setStyle(this.elementRef.nativeElement, 'cursor', change.currentValue === 12 ? 'pointer' : 'default');
+                    this.renderer.setStyle(this.elementRef()!.nativeElement, 'cursor', change.currentValue === 12 ? 'pointer' : 'default');
                     break;
                 case 'mnemonic':
-                    if (change.currentValue) this.renderer.setAttribute(this.elementRef.nativeElement, 'accesskey', change.currentValue);
-                    else this.renderer.removeAttribute(this.elementRef.nativeElement, 'accesskey');
+                    if (change.currentValue) this.renderer.setAttribute(this.elementRef()!.nativeElement, 'accesskey', change.currentValue);
+                    else this.renderer.removeAttribute(this.elementRef()!.nativeElement, 'accesskey');
                     break;
                 case 'textRotation':
                     if (change.currentValue) PropertyUtils.setRotation(this.getNativeElement(), this.renderer, change.currentValue);
@@ -67,7 +63,7 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
             }
         }
         if (this.onDoubleClickMethodID()) {
-            this.renderer.listen(this.elementRef.nativeElement, 'dblclick', (e) => {
+            this.renderer.listen(this.elementRef()!.nativeElement, 'dblclick', (e) => {
                 this.onDoubleClickMethodID()(e);
             });
         }
@@ -75,13 +71,13 @@ export class ServoyDefaultBaseLabel<T extends HTMLElement> extends ServoyDefault
 
     private setVerticalAlignment(): void {
             if (this.verticalAlignment() === 1) {
-                this.renderer.setStyle(this.child.nativeElement, 'top', '0px');
+                this.renderer.setStyle(this.child()!.nativeElement, 'top', '0px');
             } else if (this.verticalAlignment() === 3) {
-                this.renderer.setStyle(this.child.nativeElement, 'top', '100%');
-                this.renderer.setStyle(this.child.nativeElement, 'transform', 'translateY(-100%)');
+                this.renderer.setStyle(this.child()!.nativeElement, 'top', '100%');
+                this.renderer.setStyle(this.child()!.nativeElement, 'transform', 'translateY(-100%)');
             } else {
-                this.renderer.setStyle(this.child.nativeElement, 'top', '50%');
-                this.renderer.setStyle(this.child.nativeElement, 'transform', 'translateY(-50%)');
+                this.renderer.setStyle(this.child()!.nativeElement, 'top', '50%');
+                this.renderer.setStyle(this.child()!.nativeElement, 'transform', 'translateY(-50%)');
             }
         }
 }

@@ -1,8 +1,7 @@
-import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef, output } from '@angular/core';
+import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Directive, inject } from '@angular/core';
 
-import { BaseCustomObject, ServoyBaseComponent, WindowRefService } from '@servoy/public';
+import { BaseCustomObject, LoggerFactory, LoggerService, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
-import { LoggerService, LoggerFactory } from '@servoy/public';
 
 @Directive()
 export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
@@ -35,14 +34,15 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
     protected selectedTab!: Tab;
 
+    private windowRefService = inject(WindowRefService);
     private waitingForServerVisibility: Record<string, any> = {};
     private lastSelectedTab!: Tab;
 
     protected log: LoggerService;
 
-    constructor(private windowRefService: WindowRefService, logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-        this.log = logFactory.getLogger('BaseTabpanel');
+    constructor() {
+        super();
+        this.log = inject(LoggerFactory).getLogger('BaseTabpanel');
     }
 
     ngOnInit() {
@@ -108,7 +108,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                     this.waitingForServerVisibility[formInWait] = true;
                     const currentSelectedTab = this.selectedTab;
                     this.lastSelectedTab = tab;
-                    const promise = this.servoyApi.hideForm(this.selectedTab.containsFormId, undefined, undefined, tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1);
+                    const promise = this.servoyApi().hideForm(this.selectedTab.containsFormId, undefined, undefined, tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1);
                     this.log.debug(this.log.buildMessage(() => ('svy * Will hide previously selected form (tab): ' + this.selectedTab.containsFormId)));
                     promise.then((ok) => {
                         this.log.debug(this.log.buildMessage(() => ('svy * Previously selected form (tab) hide completed with \'' + ok + '\': ' + this.selectedTab.containsFormId)));
@@ -118,7 +118,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                             this.log.debug(this.log.buildMessage(() => ('svy * Tab \'' + tab.containsFormId + '\': no longer active, ignore making it visible')));
                             // it could be that the server was sending the correct state in the mean time already at the same time
                             // we try to hide it. just call show again to be sure.
-                            if (currentSelectedTab === this.selectedTab) this.servoyApi.formWillShow(this.selectedTab.containsFormId, this.selectedTab.relationName,
+                            if (currentSelectedTab === this.selectedTab) this.servoyApi().formWillShow(this.selectedTab.containsFormId, this.selectedTab.relationName,
                                     this.getTabIndex(this.selectedTab) - 1);
                             return;
                         }
@@ -148,7 +148,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     
     protected setFormVisible(tab: Tab, event: any, callShow: boolean) {
         if (callShow && tab.containsFormId)
-            this.servoyApi.formWillShow(tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1).finally(() => this.cdRef.markForCheck());
+            this.servoyApi().formWillShow(tab.containsFormId, tab.relationName, this.getTabIndex(tab) - 1).finally(() => this.cdRef.markForCheck());
         this.log.debug(this.log.buildMessage(() => ('svy * selectedTab = \'' + tab.containsFormId + '\' -- ' + new Date().getTime())));
         const oldSelected = this.selectedTab;
         this.selectedTab = tab;
@@ -204,7 +204,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
     private initTabID() {
         for (let i = 0; i < this.tabs.length; i++) {
-            this.tabs[i]._id = this.servoyApi.getMarkupId() + '_tab_' + i;
+            this.tabs[i]._id = this.servoyApi().getMarkupId() + '_tab_' + i;
         }
     }
 }

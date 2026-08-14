@@ -5,7 +5,7 @@ import { NumberSymbol } from '@angular/common';
 
 @Directive({
     selector: '[svyDecimalKeyConverter]',
-    standalone: false
+    standalone: true
 })
 export class DecimalkeyconverterDirective {
 

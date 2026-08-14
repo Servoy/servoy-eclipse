@@ -1,55 +1,57 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 
 import { AgRendererComponent } from 'ag-grid-angular';
 import { ICellRendererParams, IAfterGuiAttachedParams } from 'ag-grid-community';
 import { ListFormComponent } from './listformcomponent';
+import { SabloTabseq } from '@servoy/public';
+import { AddAttributeDirective } from '../addattribute.directive';
 
 @Component({
-    selector: 'svy-row-renderer-component',
-    templateUrl: './row-renderer.component.html',
-    host: { '(registerCSTS)': 'registerCSTS($event)' },
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+  selector: 'svy-row-renderer-component',
+  templateUrl: './row-renderer.component.html',
+  host: { '(registerCSTS)': 'registerCSTS($event)' },
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
+  imports: [SabloTabseq, NgTemplateOutlet, AddAttributeDirective],
 })
 export class RowRenderer implements AgRendererComponent, AfterViewInit {
+  lfc!: ListFormComponent;
+  foundsetRows!: any[];
+  startIndex!: number;
 
-    lfc!: ListFormComponent;
-    foundsetRows!: any[];
-    startIndex!: number;
+  private elementRef = inject(ElementRef);
 
-    constructor(private elementRef: ElementRef) {}
+  registerCSTS(event: Event) {
+    // Cast the event to CustomEvent to access the detail property
+    const customEvent = event as CustomEvent;
+    const newEvent = new CustomEvent('registerCSTS', {
+      bubbles: true,
+      detail: customEvent.detail,
+    });
+    this.lfc.element()!.nativeElement.children[0].dispatchEvent(newEvent);
+  }
 
-    registerCSTS(event: Event) {
-        // Cast the event to CustomEvent to access the detail property
-        const customEvent = event as CustomEvent;
-        const newEvent = new CustomEvent('registerCSTS', {
-            bubbles: true,
-            detail: customEvent.detail
-        });
-        this.lfc.element()!.nativeElement.children[0].dispatchEvent(newEvent);
-    }
+  refresh(params: ICellRendererParams): boolean {
+    // nop
+    return true;
+  }
 
-    refresh(params: ICellRendererParams): boolean {
-        // nop
-        return true;
-    }
+  agInit(params: ICellRendererParams): void {
+    this.lfc = params.context['componentParent'];
+    this.foundsetRows = params.data;
+    this.startIndex = (params.node.rowIndex! - this.lfc._foundset()!.viewPort.startIndex) * this.lfc.numberOfColumns;
+  }
 
-    agInit(params: ICellRendererParams): void {
-        this.lfc = params.context['componentParent'];
-        this.foundsetRows = params.data;
-        this.startIndex =(params.node.rowIndex! - this.lfc._foundset()!.viewPort.startIndex) * this.lfc.numberOfColumns;
+  ngAfterViewInit(): void {
+    this.lfc.onRowRendererAfterViewInit(this.elementRef);
+  }
 
-    }
+  afterGuiAttached?(params?: IAfterGuiAttachedParams): void {
+    // nop
+  }
 
-    ngAfterViewInit(): void {
-        this.lfc.onRowRendererAfterViewInit(this.elementRef);
-    }
-
-    afterGuiAttached?(params?: IAfterGuiAttachedParams): void {
-        // nop
-    }
-
-    getFoundsetRowIndex(i: number): number {
-        return this.startIndex + i;
-    }
+  getFoundsetRowIndex(i: number): number {
+    return this.startIndex + i;
+  }
 }

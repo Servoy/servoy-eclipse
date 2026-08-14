@@ -17,21 +17,20 @@ import { PopupFormService } from '../ngclient/services/popupform.service';
 
 class TestDeferred implements IDeferred<any> {
   promise: Promise<any> = {
-      then: (_value) => null as any, catch: (_err) => null as any,
-      finally:() => null as any,
-      [Symbol.toStringTag]: ''
+    then: (_value) => null as any,
+    catch: (_err) => null as any,
+    finally: () => null as any,
+    [Symbol.toStringTag]: '',
   };
-  reject(_reason: any) {
-  }
-  resolve(_value: any) {
-  }
+  reject(_reason: any) {}
+  resolve(_value: any) {}
 }
 
 @Injectable()
 class TestSabloDeferHelper extends SabloDeferHelper {
   public getNewDeferId(state: IDeferedState) {
-      state.deferred['1'] = { defer: new TestDeferred(), timeoutId: 1 };
-      return 1;
+    state.deferred['1'] = { defer: new TestDeferred(), timeoutId: 1 };
+    return 1;
   }
 }
 
@@ -44,31 +43,23 @@ export class TestWebsocketService extends WebsocketService {
   private _ngZone = inject(NgZone);
 
   connect(): WebsocketSession {
-      return new WebsocketSession({} as ReconnectingWebSocket, this,
-        this._windowRef, this._converterService, this._loadingIndicatorService, this._ngZone, this._logFactory );
+    return new WebsocketSession({} as ReconnectingWebSocket, this, this._windowRef, this._converterService, this._loadingIndicatorService, this._ngZone, this._logFactory);
   }
-  disconnect() {
-  }
+  disconnect() {}
 }
 
 @Injectable()
 export class TestSabloService extends SabloService {
-        constructor() {
-            super();
-            inject(SessionStorageService).remove('svy_session_lock');
-        }
+  constructor() {
+    super();
+    inject(SessionStorageService).remove('svy_session_lock');
+  }
 }
 
 @NgModule({
-  declarations: [
-
-  ],
-  imports: [
-  ],
-  exports: [
-
-
-  ],
+  declarations: [],
+  imports: [],
+  exports: [],
   providers: [
     { provide: SabloDeferHelper, useClass: TestSabloDeferHelper },
     { provide: WebsocketService, useClass: TestWebsocketService },
@@ -76,11 +67,13 @@ export class TestSabloService extends SabloService {
     { provide: FormService, useValue: {} },
     { provide: ApplicationService, useValue: {} },
     { provide: ServoyService, useValue: {} },
-    ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
-    LocaleService, I18NProvider, SvyUtilsService,PopupFormService
-             ],
-  schemas: [
-
-  ]
+    ServoyPublicServiceImpl,
+    { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
+    LocaleService,
+    I18NProvider,
+    SvyUtilsService,
+    PopupFormService,
+  ],
+  schemas: [],
 })
-export class ServoyTestingModule { }
+export class ServoyTestingModule {}

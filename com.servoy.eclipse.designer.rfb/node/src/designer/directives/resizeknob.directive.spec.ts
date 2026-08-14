@@ -9,7 +9,7 @@ describe('ResizeKnobDirective', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ resizing: false }),
+      resizing: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       sendChanges: vi.fn()
     };
@@ -27,14 +27,13 @@ describe('ResizeKnobDirective', () => {
     directive = Object.create(ResizeKnobDirective.prototype);
     (directive as any).editorSession = editorSession;
     (directive as any).editorContentService = editorContentService;
-    (directive as any).guidesService = { snapDataListener: { subscribe: vi.fn() } };
+    (directive as any).guidesService = { snapData: signal(null) };
       (directive as any).resizeInfo = signal({ node: { style: {} }, direction: 'se', top: 0, left: 0, width: 1, height: 1 });
     (directive as any).topContentAreaAdjust = 20;
     (directive as any).leftContentAreaAdjust = 20;
     (directive as any).initialElementInfo = null;
     (directive as any).currentElementInfo = null;
     (directive as any).snapData = null;
-    (directive as any).subscription = { unsubscribe: vi.fn() };
   });
 
   describe('ElementInfo', () => {
@@ -54,7 +53,7 @@ describe('ResizeKnobDirective', () => {
 
   describe('snap', () => {
     it('should apply snap data to element when resizing with single selection', () => {
-      editorSession.getState.mockReturnValue({ resizing: true });
+      editorSession.resizing.set(true);
       const el = document.createElement('div');
       el.style.position = 'absolute';
       const elementInfo = { x: 50, y: 50, element: el };
@@ -71,7 +70,7 @@ describe('ResizeKnobDirective', () => {
     });
 
     it('should not apply snap when not resizing', () => {
-      editorSession.getState.mockReturnValue({ resizing: false });
+      editorSession.resizing.set(false);
       (directive as any).currentElementInfo = new Map();
       directive.snap({ left: 30, top: 40, width: 200, height: 100 } as any);
       expect((directive as any).snapData).toBeNull();

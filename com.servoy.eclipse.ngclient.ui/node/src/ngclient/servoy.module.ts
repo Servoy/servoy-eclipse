@@ -1,4 +1,5 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { MainComponent } from './main.component';
 
@@ -15,39 +16,38 @@ import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loadi
 import { ServerDataService } from './services/serverdata.service';
 import { BSWindowManager } from './services/bootstrap-window/bswindow_manager.service';
 import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
-import {MainRoutingModule} from './main-routing.module';
 import { DeveloperService } from './developer.service';
-import { AlertWindowComponent} from './services/alert-window/alert-window.component';
+import { AlertWindowComponent } from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
-import { LFCModule } from './lfc.module';
 import { ServoyPublicService } from '@servoy/public';
+import { provideAgGrid } from '../servoycore/ag-grid-initializer';
+import { SERVOY_ROUTES } from './servoy.routes';
 
-@NgModule( {
-    declarations: [
-        MainComponent,
-        FormComponent,
-        DefaultLoginWindowComponent,
-        FileUploadWindowComponent,
-        DialogWindowComponent,
-        ServoyFormPopupComponent,
-        LoadingIndicatorComponent,
-        AlertWindowComponent,
-        MessageDialogWindowComponent
-    ],
-    imports: [
-        MainRoutingModule,
-        LFCModule
-    ],
-    providers: [UpperCasePipe, LowerCasePipe,
-        ServerDataService, BSWindowManager, DatePipe, DecimalPipe,
-        ServoyPublicServiceImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl }],
-    bootstrap: [MainComponent],
-    schemas: [
-        CUSTOM_ELEMENTS_SCHEMA
-    ]
-} )
+@NgModule({
+  imports: [
+    RouterModule.forChild(SERVOY_ROUTES),
+    MainComponent,
+    FormComponent,
+    DefaultLoginWindowComponent,
+    FileUploadWindowComponent,
+    DialogWindowComponent,
+    ServoyFormPopupComponent,
+    LoadingIndicatorComponent,
+    AlertWindowComponent,
+    MessageDialogWindowComponent,
+  ],
+  providers: [
+    UpperCasePipe,
+    LowerCasePipe,
+    ServerDataService,
+    BSWindowManager,
+    DatePipe,
+    DecimalPipe,
+    ServoyPublicServiceImpl,
+    { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
+    provideAgGrid(),
+  ],
+})
 export class ServoyModule {
-    constructor(_developerService: DeveloperService) {
-        // the above developer service must just be loaded..
-    }
- }
+  constructor(_developerService: DeveloperService) {}
+}

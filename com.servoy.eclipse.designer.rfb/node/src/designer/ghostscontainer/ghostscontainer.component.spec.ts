@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { GhostsContainerComponent, GHOST_TYPES } from './ghostscontainer.component';
 
 describe('GhostsContainerComponent', () => {
@@ -8,10 +9,11 @@ describe('GhostsContainerComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false, ghosthandle: false }),
+      dragging: signal(false),
+      ghosthandle: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       setSelection: vi.fn(),
-      addSelectionChangedListener: vi.fn().mockReturnValue(() => {}),
+      addSelectionChangedListener: vi.fn().mockReturnValue(() => undefined),
       getGhostComponents: vi.fn().mockResolvedValue({ ghostContainers: [] }),
       sendChanges: vi.fn(),
       openContainedForm: vi.fn(),
@@ -40,7 +42,7 @@ describe('GhostsContainerComponent', () => {
     (component as any).ghostContainers = null;
     (component as any).ghostOffset = 20;
     (component as any).draggingGhost = null;
-    (component as any).elementRef = { nativeElement: { classList: { value: 'ghostcontainer' } } };
+    (component as any).elementRef = () => ({ nativeElement: { classList: { value: 'ghostcontainer' } } });
     (component as any).formWidth = 800;
     (component as any).formHeight = 600;
     (component as any).partTopPosition = 0;
@@ -57,27 +59,27 @@ describe('GhostsContainerComponent', () => {
 
   describe('contentMessageReceived', () => {
     it('should call renderGhosts on renderGhosts message', () => {
-      const spy = vi.spyOn(component, 'renderGhosts').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'renderGhosts').mockImplementation(() => undefined);
       component.contentMessageReceived('renderGhosts', { property: '' });
       expect(spy).toHaveBeenCalled();
     });
 
     it('should update formWidth/formHeight on updateFormSize', () => {
-      vi.spyOn(component, 'renderGhosts').mockImplementation(() => {});
+      vi.spyOn(component, 'renderGhosts').mockImplementation(() => undefined);
       component.contentMessageReceived('updateFormSize', { property: '', width: 1024, height: 768 });
       expect((component as any).formWidth).toBe(1024);
       expect((component as any).formHeight).toBe(768);
     });
 
     it('should call hideShowGhosts with hidden on hideGhostContainer', () => {
-      const spy = vi.spyOn(component, 'hideShowGhosts').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'hideShowGhosts').mockImplementation(() => undefined);
       component.contentMessageReceived('hideGhostContainer', { property: '' });
       expect(spy).toHaveBeenCalledWith('hidden');
     });
 
     it('should call hideShowGhosts with visible on other messages', () => {
-      const spy = vi.spyOn(component, 'hideShowGhosts').mockImplementation(() => {});
-      vi.spyOn(component, 'renderGhosts').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'hideShowGhosts').mockImplementation(() => undefined);
+      vi.spyOn(component, 'renderGhosts').mockImplementation(() => undefined);
       component.contentMessageReceived('renderGhosts', { property: '' });
       expect(spy).toHaveBeenCalledWith('visible');
     });
@@ -85,7 +87,7 @@ describe('GhostsContainerComponent', () => {
 
   describe('selectionChanged', () => {
     it('should call renderGhosts on designerChange', () => {
-      const spy = vi.spyOn(component, 'renderGhosts').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'renderGhosts').mockImplementation(() => undefined);
       component.selectionChanged(['id1'], false, true);
       expect(spy).toHaveBeenCalled();
     });
@@ -107,7 +109,7 @@ describe('GhostsContainerComponent', () => {
 
   describe('hideShowGhosts', () => {
     it('should not throw when elementRef is undefined', () => {
-      (component as any).elementRef = undefined;
+      (component as any).elementRef = () => undefined;
       expect(() => component.hideShowGhosts('visible')).not.toThrow();
     });
   });

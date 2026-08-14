@@ -1,6 +1,9 @@
-import { Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { EditorModule } from '@tinymce/tinymce-angular';
+import { PropertyUtils, SabloTabseq, ServoyPublicService, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import { FormattingService, PropertyUtils, ServoyPublicService } from '@servoy/public';
 
 import tinymce, { RawEditorOptions, Editor } from 'tinymce';
 
@@ -8,7 +11,8 @@ import tinymce, { RawEditorOptions, Editor } from 'tinymce';
     selector: 'servoydefault-htmlarea',
     templateUrl: './htmlarea.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, EditorModule]
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement> {
 
@@ -25,10 +29,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
     lastServerValueAsSeenByTinyMCEContent!: string;
     editor!: Editor;
     override mustExecuteOnFocus: boolean = true;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document, protected servoyService: ServoyPublicService) {
-        super(renderer, cdRef, formattingService, doc);
-    }
+    protected servoyService = inject(ServoyPublicService);
 
     focus() {
         if (this.onFocusGainedMethodID()) {
@@ -85,7 +86,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField<HTMLDivElement
         }
 
         // element level configuration
-        let configuration = this.servoyApi.getClientProperty('config');
+        let configuration = this.servoyApi().getClientProperty('config');
         if (configuration) {
             if (typeof configuration === 'string') {
                 try {

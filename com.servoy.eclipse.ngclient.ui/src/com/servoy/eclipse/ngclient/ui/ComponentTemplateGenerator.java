@@ -58,12 +58,21 @@ public class ComponentTemplateGenerator
 	 */
 	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(ITiNGExportModel model)
 	{
+		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
+		Map<String, PackageSpecification<WebObjectSpecification>> packageSpecs = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications();
+		return generateHTMLTemplate(specs, packageSpecs, model);
+	}
+
+	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(
+		WebObjectSpecification[] specs,
+		Map<String, ? extends PackageSpecification< ? >> packageSpecs,
+		ITiNGExportModel model)
+	{
 		StringBuilder template = new StringBuilder();
 		StringBuilder viewChild = new StringBuilder();
 
 		template.append("<!-- component template generate start -->\n");
 		viewChild.append("// component viewchild template generate start\n");
-		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		Arrays.sort(specs, new Comparator<WebObjectSpecification>()
 		{
 			@Override
@@ -75,12 +84,18 @@ public class ComponentTemplateGenerator
 		Map<String, Boolean> ng2Compatible = new HashMap<String, Boolean>();
 		for (WebObjectSpecification spec : specs)
 		{
+			if (spec.getName().equals("servoycore-formcomponent") || spec.getName().equals("servoycore-navigator") ||
+				spec.getName().equals("servoycore-portal"))
+			{
+				continue; // special case for some old core components, shouldn't be generated
+			}
+			if (spec.isDeprecated()) continue;
 			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
 				String packageName = spec.getPackageName();
 				if (!ng2Compatible.containsKey(packageName))
 				{
-					PackageSpecification packageSpecification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications().get(packageName);
+					PackageSpecification< ? > packageSpecification = packageSpecs.get(packageName);
 					if (packageSpecification != null)
 					{
 						Boolean isNG2Compatible = Boolean.FALSE;
@@ -138,7 +153,7 @@ public class ComponentTemplateGenerator
 		for (PropertyDescription pd : specProperties)
 		{
 			String name = pd.getName();
-			if (name.equals("anchors") || name.equals("formIndex") || name.equals("size") || name.equals("location")) continue;
+			if (pd.isServerOnly()) continue;
 			if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
 			{
 				name = "servoyAttributes";

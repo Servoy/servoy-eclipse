@@ -60,7 +60,13 @@ describe('HighlightComponent', () => {
 
     it('should add highlight_element class to all elements when showHighlight is true', () => {
       const node1 = {
-        parentElement: { classList: { contains: vi.fn().mockReturnValue(false) }, parentElement: { classList: { contains: vi.fn().mockReturnValue(false) }, parentElement: { classList: { contains: vi.fn().mockReturnValue(false) } } } },
+        parentElement: {
+          classList: { contains: vi.fn().mockReturnValue(false) },
+          parentElement: {
+            classList: { contains: vi.fn().mockReturnValue(false) },
+            parentElement: { classList: { contains: vi.fn().mockReturnValue(false) } }
+          }
+        },
       };
       editorContentService.getAllContentElements.mockReturnValue([node1]);
       component.highlightChanged(true);
@@ -69,7 +75,13 @@ describe('HighlightComponent', () => {
 
     it('should remove highlight_element class from all elements when showHighlight is false', () => {
       const node1 = {
-        parentElement: { classList: { contains: vi.fn().mockReturnValue(false) }, parentElement: { classList: { contains: vi.fn().mockReturnValue(false) }, parentElement: { classList: { contains: vi.fn().mockReturnValue(false) } } } },
+        parentElement: {
+          classList: { contains: vi.fn().mockReturnValue(false) },
+          parentElement: {
+            classList: { contains: vi.fn().mockReturnValue(false) },
+            parentElement: { classList: { contains: vi.fn().mockReturnValue(false) } }
+          }
+        },
       };
       editorContentService.getAllContentElements.mockReturnValue([node1]);
       component.highlightChanged(false);

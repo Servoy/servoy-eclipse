@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { Point } from './../mouseselection/mouseselection.component';
@@ -7,11 +7,10 @@ import { Point } from './../mouseselection/mouseselection.component';
     selector: 'designer-resizeeditorwidth',
     templateUrl: './resizeeditorwidth.component.html',
     styleUrls: ['./resizeeditorwidth.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
-    @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
+    readonly elementRef = viewChild.required<ElementRef<HTMLElement>>('element');
 
     private currentPosition = 0;
     private widthLimit = 5;
@@ -29,7 +28,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
     private editorContentService = inject(EditorContentService);
 
     ngOnInit() {
-        this.elementRef.nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
+        this.elementRef().nativeElement.addEventListener('mousedown', (event: MouseEvent) => {
             event.stopPropagation();
             this.draggingEvent = event;
             this.editorContentService.getDocument().addEventListener('mousemove', (event) =>this.onMouseMove(event));
@@ -57,7 +56,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
             this.widthOffset = this.ghostContainers[0].offsetLeft + partWidth; //offset relative to glasspane
             
             this.mousePoint = { x: event.pageX, y: event.pageY };
-            this.editorSession.getState().dragging = true;
+            this.editorSession.dragging.set(true);
             this.editorSession.registerAutoscroll(this);
         });
     }
@@ -100,7 +99,7 @@ export class ResizeEditorWidthComponent implements OnInit, ISupportAutoscroll {
             this.glasspane.style.width = Math.max(this.currentPosition + this.widthOffset, this.ghostsRight) + 'px';
             this.editorSession.sendChanges(changes);
             
-            this.editorSession.getState().dragging = false;   
+            this.editorSession.dragging.set(false);   
             this.editorSession.unregisterAutoscroll(this);
             this.draggingEvent = null;
         }

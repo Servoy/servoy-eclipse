@@ -1,4 +1,7 @@
-import { Component,ChangeDetectorRef,Renderer2, ChangeDetectionStrategy } from '@angular/core';
+import { FormatFilterPipe, ImageMediaIdDirective, MnemonicletterFilterPipe, SabloTabseq, TooltipDirective, TrustAsHtmlPipe } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import {ServoyDefaultBaseLabel} from  '../baselabel';
 
@@ -6,12 +9,9 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
     selector: 'servoydefault-button',
     templateUrl: './button.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, FormatFilterPipe, MnemonicletterFilterPipe, TrustAsHtmlPipe, ImageMediaIdDirective]
 } )
 export class ServoyDefaultButton extends ServoyDefaultBaseLabel<HTMLButtonElement> {
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 }
 

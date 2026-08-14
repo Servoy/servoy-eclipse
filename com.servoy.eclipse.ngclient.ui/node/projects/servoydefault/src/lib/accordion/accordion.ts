@@ -1,22 +1,21 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { WindowRefService } from '@servoy/public';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { SabloTabseq } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { BaseTabpanel,Tab } from '../tabpanel/basetabpanel';
-import { LoggerFactory } from '@servoy/public';
 
 @Component({
     selector: 'servoydefault-accordion',
     templateUrl: './accordion.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, SabloTabseq, NgbModule]
 })
 export class ServoyDefaultAccordion extends BaseTabpanel {
 
     panelHeight!: number;
-
-    constructor(windowRefService: WindowRefService , logFactory: LoggerFactory, renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
-        super( windowRefService, logFactory, renderer, cdRef);
-     }
 
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes['height']) {
@@ -34,8 +33,8 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
         
         let totalHeight = 0;
         let wrapper = null;
-        if (this.elementRef) {
-            wrapper = this.elementRef.nativeElement.closest('.svy-wrapper');
+        if (this.elementRef()) {
+            wrapper = this.elementRef()!.nativeElement.closest('.svy-wrapper');
         }
         if (wrapper) {
             totalHeight = (wrapper as HTMLElement).offsetHeight;

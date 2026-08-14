@@ -1,24 +1,30 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, Renderer2, QueryList, ViewChildren, OnDestroy, Directive, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import {
+  Component, OnInit, AfterViewInit, ElementRef, Renderer2,
+  OnDestroy, Directive, ChangeDetectionStrategy, inject, input, forwardRef,
+  viewChild, viewChildren, effect, signal
+} from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
-import { Subscription } from 'rxjs';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
+import { ResizeKnobDirective } from '../directives/resizeknob.directive';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'selection-decorators',
     templateUrl: './mouseselection.component.html',
     styleUrls: ['./mouseselection.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgStyle, ResizeKnobDirective, forwardRef(() => PositionMenuDirective)]
 })
 // this should include lasso and all selection logic from mouseselection.js and dragselection.js
 export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectionChangedListener, OnDestroy, IContentMessageListener {
 
-    @ViewChild('lasso', { static: false }) lassoRef!: ElementRef<HTMLElement>;
-    @ViewChildren('selected') selectedRef!: QueryList<ElementRef<HTMLElement>>;
+    readonly lassoRef = viewChild.required<ElementRef<HTMLElement>>('lasso');
+    readonly selectedRef = viewChildren<ElementRef<HTMLElement>>('selected');
 
-    nodes: SelectionNode[] = new Array<SelectionNode>();
+    readonly nodes = signal<SelectionNode[]>([]);
     contentInit = false;
     topAdjust!: number;
     leftAdjust!: number;
@@ -29,8 +35,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 
     mousedownpoint!: Point;
     fieldLocation!: Point;
-    selectedRefSubscription!: Subscription;
-    editorStateSubscription!: Subscription;
     removeSelectionChangedListener!: () => void;
 
     public readonly editorSession = inject(EditorSessionService);
@@ -42,6 +46,12 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     constructor() {
         this.editorContentService.addContentMessageListener(this);
         this.removeSelectionChangedListener = this.editorSession.addSelectionChangedListener(this);
+        effect(() => {
+            this.selectedRef();
+            if (this.editorSession.showWireframe()) {
+                this.applyWireframe();
+            }
+        });
     }
 
     ngOnInit(): void {
@@ -52,8 +62,6 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     ngOnDestroy(): void {
-        if (this.selectedRefSubscription !== undefined) this.selectedRefSubscription.unsubscribe();
-        this.editorStateSubscription.unsubscribe();
         this.removeSelectionChangedListener();
         this.editorContentService.removeContentMessageListener(this);
     }
@@ -66,38 +74,25 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 				this.createNodes(this.editorSession.getSelection());
 			}, 50);
         });
-
-        this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
-            if (id === 'showWireframe') {
-                Array.from(this.selectedRef).forEach((selectedNode) => {
-                    if (!this.editorSession.getState().showWireframe) {
-                        this.renderer.removeClass(selectedNode.nativeElement, 'showWireframe');
-                    }
-                });
-
-                this.editorContentService.executeOnlyAfterInit(() => {
-                    this.redrawDecorators();
-                    if (this.editorSession.getState().showWireframe) {
-                        this.applyWireframe();
-                    }
-                });
-            }
-        });
     }
     redrawDecorators() {
-        if (this.nodes.length > 0) {
-            Array.from(this.nodes).forEach(selected => {
+        const currentNodes = this.nodes();
+        if (currentNodes.length > 0) {
+            this.nodes.set(currentNodes.map((selected: SelectionNode) => {
                 const node = this.editorContentService.getContentElement(selected.svyid);
-                if (!node) return;
+                if (!node) return selected;
                 const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
-                selected.style = {
-                    height: position.height + 'px',
-                    width: position.width + 'px',
-                    top: position.top + this.topAdjust + 'px',
-                    left: position.left + this.leftAdjust + 'px',
-                    display: 'block'
-                } as CSSStyleDeclaration;
-            });
+                return {
+                    ...selected,
+                    style: {
+                        height: position.height + 'px',
+                        width: position.width + 'px',
+                        top: position.top + this.topAdjust + 'px',
+                        left: position.left + this.leftAdjust + 'px',
+                        display: 'block'
+                    } as CSSStyleDeclaration
+                };
+            }));
         }
     }
 
@@ -105,11 +100,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         if (this.contentInit) {
             this.createNodes(selection);
         }
-        //fix this
         if (redrawDecorators) {
-            //     setTimeout(() => {
             this.redrawDecorators();
-            //     }, 400);
         }
     }
 
@@ -141,7 +133,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         const layoutName = node.getAttribute('svy-layoutname');
                         newNodes.push({
                             style: style,
-                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer')
+                            ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                             svyid: node.getAttribute('svy-id')!,
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
@@ -151,10 +144,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                         })
                     }
                 });
-                this.nodes = newNodes;
+                this.nodes.set(newNodes);
             });
         } else {
-            this.nodes = new Array<SelectionNode>();
+            this.nodes.set([]);
         }
     }
 
@@ -169,7 +162,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     private onMouseDown(event: MouseEvent) {
 		this.mouseDownEvent = event;
         this.fieldLocation = { x: event.pageX, y: event.pageY };
-        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
+        if (this.editorSession.dragging() || this.editorSession.ghosthandle()) return;
         let found;
         if (this.moveFCorLFC) {
 			found = this.designerUtilsService.getNodeBasedOnSelectionFCorLFC();
@@ -191,13 +184,14 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
             }
         } else {
             //lasso select
-            this.nodes = [];
+            this.nodes.set([]);
             this.editorSession.setSelection([], this);
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'width', '0px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'height', '0px');
+            const lassoRef = this.lassoRef();
+            this.renderer.setStyle(lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'width', '0px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'height', '0px');
 
             if (event.button !== 2) {
                 this.lassostarted = true;
@@ -213,10 +207,13 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 		}
         if (this.fieldLocation && this.fieldLocation.x == event.pageX && this.fieldLocation.y == event.pageY) {
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
-            this.editorSession.updateFieldPositioner({ x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust, y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust });
+            this.editorSession.updateFieldPositioner({
+                x: event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect?.left - this.leftAdjust,
+                y: event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect?.top - this.topAdjust
+            });
         }
         this.fieldLocation = null!;
-        if (this.editorSession.getState().dragging || this.editorSession.getState().ghosthandle) return;
+        if (this.editorSession.dragging() || this.editorSession.ghosthandle()) return;
         if (event.button == 2 && this.editorSession.getSelection().length > 1) {
             //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
             const node = this.designerUtilsService.getNode(event);
@@ -236,7 +233,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     const position =  this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                     const iframeLeft = this.editorContentService.getLeftPositionIframe();
                     const iframeTop = this.editorContentService.getTopPositionIframe();
-                    const rect1 = new DOMRect(Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y), Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y))
+                    const rect1 = new DOMRect(
+                        Math.min(event.pageX, this.mousedownpoint.x), Math.min(event.pageY, this.mousedownpoint.y),
+                        Math.abs(event.pageX - this.mousedownpoint.x), Math.abs(event.pageY - this.mousedownpoint.y)
+                    )
                     const rect2 = new DOMRect(position.x + iframeLeft, position.y + iframeTop, position.width, position.height);
 					const compFullInside = this.urlParser.isMarqueeSelectOuter();
 					if (this.rectanglesIntersect(rect1, rect2, compFullInside)) {
@@ -250,7 +250,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                 display: 'block'
                             } as CSSStyleDeclaration,
                             svyid: node.getAttribute('svy-id')!,
-                            isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isResizable: this.urlParser.isAbsoluteFormLayout()
+                                && !node.parentElement!.closest('.svy-responsivecontainer')
+                                ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                             isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                             maxLevelDesign: node.classList.contains('maxLevelDesign'),
                             containerName: layoutName!,
@@ -262,7 +264,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     }
                 }
             });
-            this.nodes = newNodes;
+            this.nodes.set(newNodes);
             this.editorSession.setSelection(newSelection, this);
         } else {
             const point = { x: event.pageX, y: event.pageY };
@@ -304,7 +306,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                             left: position.left + this.leftAdjust + 'px',
                             display: 'block'
                         } as CSSStyleDeclaration,
-                        isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                        isResizable: this.urlParser.isAbsoluteFormLayout()
+                            && !node.parentElement!.closest('.svy-responsivecontainer')
+                            ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                         svyid: node.getAttribute('svy-id')!,
                         isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                         maxLevelDesign: node.classList.contains('maxLevelDesign'),
@@ -315,22 +319,18 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     if (event.ctrlKey || event.metaKey) {
                         const index = selection.indexOf(id);
                         if (index >= 0) {
-                            this.nodes.splice(index, 1);
+                            const current = this.nodes();
+                            this.nodes.set([...current.slice(0, index), ...current.slice(index + 1)]);
                             selection.splice(index, 1);
                         } else {
-                            this.nodes.push(newNode);
+                            this.nodes.set([...this.nodes(), newNode]);
                             selection.push(id);
                         }
                     } else if (isNewSelection) {
-                        const newNodes = new Array<SelectionNode>();
-                        newNodes.push(newNode);
-                        this.nodes = newNodes;
+                        this.nodes.set([newNode]);
                         selection = [id];
                     }
                     this.editorSession.setSelection(selection, this);
-                    this.selectedRefSubscription = this.selectedRef.changes.subscribe(() => {
-                        this.applyWireframe();
-                    })
                     return node;
                 }
             });
@@ -341,7 +341,11 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                     const element = this.editorContentService.getContentElement(selection[0]);
                     if (element) {
                         const position2 =  this.designerUtilsService.adjustElementRect(element, element.getBoundingClientRect());
-                        const rect1 = new DOMRect(Math.min(position1.left, position2.left), Math.min(position1.top, position2.top), Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top))
+                        const rect1 = new DOMRect(
+                            Math.min(position1.left, position2.left), Math.min(position1.top, position2.top),
+                            Math.abs(position1.left - position2.left), Math.abs(position1.top - position2.top)
+                         )
+                        const shiftNodes: SelectionNode[] = [];
                         Array.from(elements).forEach((node) => {
                             const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
                             if (this.rectanglesIntersect(rect1, position, false)) {
@@ -355,7 +359,9 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                         left: position.left + this.leftAdjust + 'px',
                                         display: 'block'
                                     } as CSSStyleDeclaration,
-                                    isResizable: this.urlParser.isAbsoluteFormLayout() && !node.parentElement!.closest('.svy-responsivecontainer') ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
+                            isResizable: this.urlParser.isAbsoluteFormLayout()
+                                && !node.parentElement!.closest('.svy-responsivecontainer')
+                                ? { t: true, l: true, b: true, r: true } : { t: false, l: false, b: false, r: false },
                                     svyid: node.getAttribute('svy-id')!,
                                     isContainer: layoutName != null && !node.closest('.svy-responsivecontainer'),
                                     maxLevelDesign: node.classList.contains('maxLevelDesign'),
@@ -364,26 +370,25 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                                     isFCorLFC: this.isSelectionFCorLFC()
                                 };
                                 if (!selection.includes(id)) {
-                                    this.nodes.push(newNode);
+                                    shiftNodes.push(newNode);
                                     selection.push(id);
                                 }
                             }
                         });
+                        this.nodes.set([...this.nodes(), ...shiftNodes]);
                         this.editorSession.setSelection(selection, this);
-                        this.selectedRefSubscription = this.selectedRef.changes.subscribe(() => {
-                            this.applyWireframe();
-                        })
                     }
                 }
             }
         }
         this.lassostarted = false;
-        this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'none');
+        this.renderer.setStyle(this.lassoRef().nativeElement, 'display', 'none');
         this.applyWireframe();
 
         if (event.button == 0 && event.timeStamp - this.lastTimestamp < 350) {
             // dblclick event; is not triggered by event
-            if (this.nodes && this.nodes.length > 0 && this.nodes[0].maxLevelDesign) {
+            const currentNodes = this.nodes();
+            if (currentNodes.length > 0 && currentNodes[0].maxLevelDesign) {
                 this.editorSession.executeAction('zoomIn');
             }
         }
@@ -391,7 +396,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
     private applyWireframe() {
-        Array.from(this.selectedRef).forEach((selectedNode) => {
+        this.selectedRef().forEach((selectedNode) => {
             this.applyWireframeForNode(selectedNode);
         });
     }
@@ -400,9 +405,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         const node = this.editorContentService.getContentElement(selectedNode.nativeElement.getAttribute('id')!);
         if (node === undefined) return;
         const position = node.getBoundingClientRect();
-        if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer') && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
+        if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer')
+            && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
             this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title')!);
-            if (this.editorSession.getState().showWireframe) {
+            if (this.editorSession.showWireframe()) {
                 this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
             }
             selectedNode.nativeElement.style.setProperty('--svyBackgroundColor', window.getComputedStyle(node).backgroundColor);
@@ -423,24 +429,25 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
 	}
 
     private onMouseMove(event: MouseEvent) {
-        if (this.editorSession.getState().dragging) return;
+        if (this.editorSession.dragging()) return;
         if (this.lassostarted) {
             const contentRect = this.editorContentService.getContentArea().getBoundingClientRect();
+            const lassoRef = this.lassoRef();
             if (event.pageX < this.mousedownpoint.x) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect.left + 'px');
+                this.renderer.setStyle(lassoRef.nativeElement, 'left', event.pageX + this.editorContentService.getContentArea().scrollLeft - contentRect.left + 'px');
             }
             if (event.pageY < this.mousedownpoint.y) {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect.top + 'px');
+                this.renderer.setStyle(lassoRef.nativeElement, 'top', event.pageY + this.editorContentService.getContentArea().scrollTop - contentRect.top + 'px');
             }
-            if (this.lassoRef.nativeElement.style.display === 'none') {
-                this.renderer.setStyle(this.lassoRef.nativeElement, 'display', 'block');
+            if (lassoRef.nativeElement.style.display === 'none') {
+                this.renderer.setStyle(lassoRef.nativeElement, 'display', 'block');
             }
             const currentWidth = event.pageX - this.mousedownpoint.x;
             const currentHeight = event.pageY - this.mousedownpoint.y;
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
-            this.renderer.setStyle(this.lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'width', Math.abs(currentWidth) + 'px');
+            this.renderer.setStyle(lassoRef.nativeElement, 'height', Math.abs(currentHeight) + 'px');
         }
-        if (this.editorSession.getState().resizing) {
+        if (this.editorSession.resizing()) {
 			this.redrawDecorators();
 		}
     }
@@ -524,10 +531,8 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
     }
 
 }
-@Directive({
-    selector: '[positionMenu]',
-    standalone: false
-})
+// eslint-disable-next-line @angular-eslint/directive-selector
+@Directive({ selector: '[positionMenu]' })
 export class PositionMenuDirective implements OnInit {
     selectionNode = input<SelectionNode>(undefined!, { alias: 'positionMenu' });
 

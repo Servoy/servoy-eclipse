@@ -1,4 +1,4 @@
-import { Component, Renderer2, ViewChild, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, Renderer2, AfterViewInit, ViewEncapsulation, ElementRef, ChangeDetectionStrategy, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
@@ -6,21 +6,22 @@ import { EditorSessionService, PaletteComp } from '../services/editorsession.ser
 import { EditorContentService } from '../services/editorcontent.service';
 import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 import { NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPopover as NgbPopover_1 } from '@ng-bootstrap/ng-bootstrap/popover';
 
 @Component({
     selector: 'designer-variantspreview',
     templateUrl: './variantspreview.component.html',
     styleUrls: ['./variantspreview.component.css'],
     encapsulation: ViewEncapsulation.Emulated,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgbPopover_1]
 })
 export class VariantsPreviewComponent implements AfterViewInit {
 
     component = input<PaletteComp>();
-    @ViewChild('popover') popover!: NgbPopover;
-	@ViewChild('variantGlasspane') glasspane!: ElementRef; 
-	@ViewChild('variantContent') content!: ElementRef;
+    readonly popover = viewChild.required<NgbPopover>('popover');
+	readonly glasspane = viewChild.required<ElementRef>('variantGlasspane'); 
+	readonly content = viewChild.required<ElementRef>('variantContent');
 
     clientURL!: SafeResourceUrl;
     margin = 16; //ng-popover margin
@@ -49,21 +50,27 @@ export class VariantsPreviewComponent implements AfterViewInit {
     private editorContentService = inject(EditorContentService);
 
     constructor() {
-		this.editorSession.variantsTrigger.subscribe((value) => {
-			if (value.show == true) {
-				this.top = value.top!;
-				this.left = value.left!;
-				this.showPopover();
-			} else if (value.show == false) {
-				this.hidePopover();
-			}
+		effect(() => {
+			const value = this.editorSession.variantsTrigger();
+			if (value) untracked(() => {
+				if (value.show == true) {
+					this.top = value.top!;
+					this.left = value.left!;
+					this.showPopover();
+				} else if (value.show == false) {
+					this.hidePopover();
+				}
+			});
 		});
 
-		this.editorSession.variantsScroll.subscribe((value) => {
-			if (this.isPopoverInitialized) {
-				const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
-				popoverCtrl.style.top = this.top - value.scrollPos + 'px';
-			}
+		effect(() => {
+			const value = this.editorSession.variantsScroll();
+			if (value) untracked(() => {
+				if (this.isPopoverInitialized) {
+					const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
+					popoverCtrl.style.top = this.top - value.scrollPos + 'px';
+				}
+			});
 		});
 
 		this.document = this.editorContentService.getDocument();
@@ -73,7 +80,10 @@ export class VariantsPreviewComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/VariantsForm/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
+        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl(
+            'http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName()
+            + '/form/VariantsForm/clientnr/' + this.urlParser.getContentClientNr() + '/index.html'
+        );
 		this.windowRef.nativeWindow.addEventListener('message', (event) => {
              
 			if (event.data.id === 'resizePopover') {
@@ -91,7 +101,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
 				this.variantsIFrame.contentWindow!.document.body.addEventListener('mouseup', this.onMouseUp);
                 this.variantsIFrame.contentWindow!.document.body.addEventListener('mousemove', this.onMouseMove);
 			} else if (event.data.id === 'variantsEscapePressed') {
-				this.editorSession.variantsTrigger.emit({ show: false });
+				this.editorSession.variantsTrigger.set({ show: false });
 			}
         });
         if (!this.isPopoverInitialized) {
@@ -101,7 +111,7 @@ export class VariantsPreviewComponent implements AfterViewInit {
     }
 
     initPopover() {
-        this.popover.open({ popOv: this.popover, clientURL: this.clientURL});
+        this.popover().open({ popOv: this.popover(), clientURL: this.clientURL});
         this.top = -1000;
         this.left = -1000;
         //need to create the form prior to correctly rendering variants in designer
@@ -111,15 +121,17 @@ export class VariantsPreviewComponent implements AfterViewInit {
     }
 
 	hidePopover() {
-		this.editorSession.variantsPopup.emit({status: 'hidden'});
-        this.variantsIFrame && (this.variantsIFrame.style.display = 'none');
+		this.editorSession.variantsPopup.set({status: 'hidden'});
+        if (this.variantsIFrame) {
+            this.variantsIFrame.style.display = 'none';
+        }
         const popoverCtrl = this.document.getElementById('VariantsCtrl')!;
         popoverCtrl.style.top = this.popupParkingPosition;
         popoverCtrl.style.left = this.popupParkingPosition;	
 	}
 
 	showPopover() {
-		this.editorSession.variantsPopup.emit({status: 'visible'});
+		this.editorSession.variantsPopup.set({status: 'visible'});
 		this.variantsIFrame.style.display = 'block';
 	}
 

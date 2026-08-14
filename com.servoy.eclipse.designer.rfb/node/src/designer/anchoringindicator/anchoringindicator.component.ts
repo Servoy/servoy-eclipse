@@ -1,5 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, effect } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
 import { SameSizeIndicator } from '../samesizeindicator/samesizeindicator.component';
@@ -9,10 +8,9 @@ import { URLParserService } from '../services/urlparser.service';
     selector: 'designer-anchoring-indicator',
     templateUrl: './anchoringindicator.component.html',
     styleUrls: ['./anchoringindicator.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, ISelectionChangedListener, IContentMessageListener {
+export class AnchoringIndicatorComponent implements OnDestroy, ISelectionChangedListener, IContentMessageListener {
     TOP_LEFT_IMAGE = 'designer/assets/images/anchoringtopleft.png';
     TOP_RIGHT_IMAGE = 'designer/assets/images/anchoringtopright.png';
     BOTTOM_LEFT_IMAGE = 'designer/assets/images/anchoringbottomleft.png';
@@ -23,8 +21,6 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     TOP_RIGHT_BOTTOM_IMAGE = 'designer/assets/images/anchoringtoprightbottom.png';
     TOP_RIGHT_LEFT_BOTTOM_IMAGE = 'designer/assets/images/anchoringtoprightleftbottom.png';
 
-    anchoringIndicator!: boolean;
-    editorStateSubscription!: Subscription;
     indicator!: SameSizeIndicator | null;
     
     protected readonly editorSession = inject(EditorSessionService);
@@ -34,26 +30,21 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
     constructor() {
         this.editorSession.addSelectionChangedListener(this);
         this.editorContentService.addContentMessageListener(this);
-    }
-
-    ngAfterViewInit(): void {
-        this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
-            if (id === 'anchoringIndicator') {
-                this.anchoringIndicator = this.editorSession.getState().anchoringIndicator;
-                if (!this.anchoringIndicator) this.indicator = null;
-            }
-            if (id == 'dragging'){
-                if (this.editorSession.getState().dragging){
-                    this.indicator = null;
-                } else{
-                    this.selectionChanged(this.editorSession.getSelection());
-                }
+        effect(() => {
+            const anchoringOn = this.editorSession.anchoringIndicator();
+            if (!anchoringOn) this.indicator = null;
+        });
+        effect(() => {
+            const dragging = this.editorSession.dragging();
+            if (dragging) {
+                this.indicator = null;
+            } else {
+                this.selectionChanged(this.editorSession.getSelection());
             }
         });
     }
 
     ngOnDestroy(): void {
-        this.editorStateSubscription.unsubscribe();
         this.editorContentService.removeContentMessageListener(this);
     }
 
@@ -65,7 +56,7 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
 
     selectionChanged(selection: string[]): void {
         this.indicator = null;
-        if (this.anchoringIndicator && selection && selection.length == 1) {
+        if (this.editorSession.anchoringIndicator() && selection && selection.length == 1) {
             this.editorContentService.executeOnlyAfterInit(() => {
                 const element = this.editorContentService.getContentElement(selection[0])
                 if (element) {
@@ -133,7 +124,11 @@ export class AnchoringIndicatorComponent implements AfterViewInit, OnDestroy, IS
                             }
                         }
                     }
-                    this.indicator = new SameSizeIndicator(image, this.editorContentService.getGlasspaneTopDistance() + (wrapperRect ? wrapperRect.top : elementRect.top) + 1, (wrapperRect ? wrapperRect.left : elementRect.left) + this.editorContentService.getGlasspaneLeftDistance() + (wrapperRect ? wrapperRect.width : elementRect.width) + 2);
+                    this.indicator = new SameSizeIndicator(
+                        image,
+                        this.editorContentService.getGlasspaneTopDistance() + (wrapperRect ? wrapperRect.top : elementRect.top) + 1,
+                        (wrapperRect ? wrapperRect.left : elementRect.left) + this.editorContentService.getGlasspaneLeftDistance() + (wrapperRect ? wrapperRect.width : elementRect.width) + 2
+                    );
                 }
             });
         }

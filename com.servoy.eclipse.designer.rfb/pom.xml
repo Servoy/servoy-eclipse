@@ -37,7 +37,21 @@
 						</configuration>
 					</execution>
 
-					<!-- 2. npm install -->
+					<!-- 2. Build servoy libraries (sablo, designer, public) -->
+					<execution>
+						<id>build servoy libs</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<skipTests>${maven.test.skip}</skipTests>
+							<workingDirectory>${project.basedir}/../com.servoy.eclipse.ngclient.ui/node</workingDirectory>
+							<arguments>run build_libs</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 3. npm install -->
 					<execution>
 						<id>npm install</id>
 						<phase>process-resources</phase>
@@ -85,6 +99,19 @@
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
 							<arguments>test</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 6. Run browser integration tests -->
+					<execution>
+						<id>angular vitest browser</id>
+						<phase>test</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<skipTests>${maven.test.skip}</skipTests>
+							<arguments>run test:browser</arguments>
 						</configuration>
 					</execution>
 				</executions>

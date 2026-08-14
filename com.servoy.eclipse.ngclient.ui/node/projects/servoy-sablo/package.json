@@ -1,0 +1,13 @@
+{
+  "name": "@servoy/sablo",
+  "version": "2026.9.1",
+  "peerDependencies": {
+    "@angular/common": "^22",
+    "@angular/core": "^22",
+    "@servoy/public": "*"
+  },
+  "dependencies": {
+    "tslib": "*"
+  },
+  "license": "MIT"
+}

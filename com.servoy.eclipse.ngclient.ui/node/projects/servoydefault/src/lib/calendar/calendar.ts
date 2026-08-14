@@ -1,26 +1,28 @@
-import { Component, SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { FormatDirective, FormattingService, getFirstDayOfWeek, LoggerFactory, LoggerService, SabloTabseq, ServoyPublicService, StartEditDirective, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, SimpleChanges, ElementRef, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 
-import { FormattingService, ServoyPublicService, getFirstDayOfWeek } from '@servoy/public';
 
 import { ServoyDefaultBaseField } from '../basefield';
 
 import { DateTime as LuxonDateTime } from 'luxon';
 
 
-import { FormatDirective, LoggerFactory, LoggerService } from '@servoy/public';
 import { TempusDominus, DateTime, Namespace, Options} from '@eonasdan/tempus-dominus';
 
 @Component({
     selector: 'servoydefault-calendar',
     templateUrl: './calendar.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, FormatDirective, StartEditDirective]
 })
 export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('inputElement') inputElementRef!: ElementRef;
+    readonly inputElementRef = viewChild<ElementRef>('inputElement');
     
-    @ViewChild(FormatDirective) svyFormat!: FormatDirective;
+    readonly svyFormat = viewChild(FormatDirective);
 
     private log: LoggerService;
     private picker: TempusDominus | null = null;
@@ -61,13 +63,10 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         }
     } as Options;
 
-    constructor(renderer: Renderer2,
-        cdRef: ChangeDetectorRef,
-        formattingService: FormattingService,
-        servoyService: ServoyPublicService,
-        @Inject(DOCUMENT) doc: Document,
-        logFactory: LoggerFactory) {
-        super(renderer, cdRef, formattingService, doc);
+    constructor() {
+        super();
+        const servoyService = inject(ServoyPublicService);
+        const logFactory = inject(LoggerFactory);
         this.config.localization!.locale = servoyService.getLocale();
         this.loadCalendarLocale(this.config.localization!.locale);
         this.log = logFactory.getLogger('default-calendar');
@@ -150,7 +149,7 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
                 }
             }
         if (changes.size)
-            this.renderer.setStyle(this.inputElementRef.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
+            this.renderer.setStyle(this.inputElementRef()!.nativeElement, 'height', changes.size.currentValue['height'] + 'px');
     }
 
     public dateChanged(event: any) {
@@ -170,24 +169,24 @@ export class ServoyDefaultCalendar extends ServoyDefaultBaseField<HTMLDivElement
         else  if (event === undefined ||
             event.toString() === 'Invalid Date') {
                 // revert to old value
-                this.svyFormat.writeValue(this.dataProviderID());
+                this.svyFormat()!.writeValue(this.dataProviderID());
         }
     }
 
     public getNativeChild(): any {
-        return this.inputElementRef.nativeElement;
+        return this.inputElementRef()!.nativeElement;
     }
 
     getFocusElement(): any {
-        return this.inputElementRef.nativeElement;
+        return this.inputElementRef()!.nativeElement;
     }
 
     private initializePicker() {
         if (!this.picker) {
-            const currentValue = (this.inputElementRef.nativeElement as HTMLInputElement).value;
-            (this.inputElementRef.nativeElement as HTMLInputElement).value='';
+            const currentValue = (this.inputElementRef()!.nativeElement as HTMLInputElement).value;
+            (this.inputElementRef()!.nativeElement as HTMLInputElement).value='';
             this.picker = new TempusDominus(this.getNativeElement(), this.config);
-            (this.inputElementRef.nativeElement as HTMLInputElement).value = currentValue;
+            (this.inputElementRef()!.nativeElement as HTMLInputElement).value = currentValue;
             this.picker.dates.formatInput =  (date: DateTime) => date?this.formattingService.format(date, this.format(), false):'';
             this.picker.dates.parseInput =  (value: string) => {
                 const parsed = this.formattingService.parse(value?value.trim():null, this.format(), true, this.dataProviderID(), true);

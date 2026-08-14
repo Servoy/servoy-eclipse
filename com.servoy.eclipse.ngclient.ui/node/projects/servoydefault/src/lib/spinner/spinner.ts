@@ -1,6 +1,8 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ElementRef, ViewChild, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
+import { SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, SimpleChanges, ElementRef, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
-import { FormattingService } from '@servoy/public';
 
 
 @Component({
@@ -8,17 +10,15 @@ import { FormattingService } from '@servoy/public';
     templateUrl: './spinner.html',
     styleUrls: ['./spinner.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq]
 })
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement> {
 
-    @ViewChild('child', { static: false }) child!: ElementRef<HTMLInputElement>;
+    readonly child = viewChild<ElementRef<HTMLInputElement>>('child');
 
     selection: any;
     private counter = 0;
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     svyOnInit() {
         this.selection = this.getSelectionFromDataprovider();
@@ -32,7 +32,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField<HTMLDivElement>
     }
 
     getFocusElement(): HTMLElement {
-        return this.child.nativeElement;
+        return this.child()!.nativeElement;
     }
 
     svyOnChanges(changes: SimpleChanges) {

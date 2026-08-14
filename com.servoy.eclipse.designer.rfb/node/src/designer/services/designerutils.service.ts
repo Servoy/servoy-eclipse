@@ -60,7 +60,10 @@ export class DesignerUtilsService {
         return point;
     }
 
-    getDropNode(absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string, event: MouseEvent, componentName?: string, skipNodeId?: string, dragNode?: HTMLElement): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
+    getDropNode(
+        absoluteLayout: boolean, type: string, topContainer: boolean, layoutName: string,
+        event: MouseEvent, componentName?: string, skipNodeId?: string, dragNode?: HTMLElement
+    ): { dropAllowed: boolean, dropTarget?: Element, beforeChild?: Element, append?: boolean } {
         let dropTarget!: Element;
         if (type == 'layout' || ((type == 'component' || type === 'jsmenu') && !absoluteLayout)) {
             const realName = layoutName ? layoutName : 'component';
@@ -319,7 +322,7 @@ export class DesignerUtilsService {
 	}
 
     isTopContainer(layoutName: string) {
-        const packages = this.editorSession.getState().packages;
+        const packages = this.editorSession.packages();
         for (const pkg of packages) {
             if (pkg.components[0] && pkg.components[0].componentType === 'layout') {
                 for (const comp of pkg.components) {

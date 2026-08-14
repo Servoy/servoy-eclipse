@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { ContextMenuComponent, ContextmenuItem } from './contextmenu.component';
 
 describe('ContextMenuComponent', () => {
@@ -9,7 +10,7 @@ describe('ContextMenuComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ packages: [] }),
+      packages: signal([]),
       getSelection: vi.fn().mockReturnValue([]),
       setSelection: vi.fn(),
       executeAction: vi.fn(),

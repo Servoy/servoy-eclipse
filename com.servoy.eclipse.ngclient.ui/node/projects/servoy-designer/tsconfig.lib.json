@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/lib-designer",
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "types": []
+  },
+  "angularCompilerOptions": {
+    "skipTemplateCodegen": true,
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    },
+    "strictMetadataEmit": true,
+    "enableResourceInlining": true
+  },
+  "include": [
+    "../../src/designer/**/*.ts"
+  ],
+  "exclude": [
+    "../../src/designer/**/*.spec.ts"
+  ]
+}

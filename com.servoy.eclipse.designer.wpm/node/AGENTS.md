@@ -50,7 +50,9 @@ All source lives under `src/wpm/`:
 - Bootstrap via `bootstrapApplication()` in `main.ts` (no NgModule)
 - Single quotes enforced
 - Arrow functions preferred
-- No `any` types without justification
+- **No `any` types without justification** — use proper types, generics, or `unknown` with type narrowing
+- **No `$any()` casts in templates** — fix the method signature instead (e.g. `MouseEvent` → `Event` when handling both click and keydown)
+- **No `as any` casts unless unavoidable** — prefer type guards, generics, or widening the parameter type
 
 ## Linting
 
@@ -67,6 +69,30 @@ All source lives under `src/wpm/`:
 - **Run:** `npm test` (no watch) or `npm run test:watch`
 - **Pattern:** `Object.create(Class.prototype)` with manual mock injection (matching RFB pattern)
 - Import test functions explicitly: `import { describe, it, expect, beforeEach, vi } from 'vitest';`
+
+### Critical: Global Mocking Rules
+
+- **NEVER** use `vi.stubGlobal('document', ...)` or `vi.stubGlobal('window', ...)` — this replaces the entire jsdom DOM and breaks ALL subsequent tests in the same fork/thread. The error manifests as `this.doc.querySelector is not a function` in Angular's renderer.
+- Instead, mock individual methods and restore them:
+  ```typescript
+  let originalMethod: typeof document.elementFromPoint;
+  beforeEach(() => {
+    originalMethod = document.elementFromPoint;
+    document.elementFromPoint = vi.fn() as any;
+  });
+  afterEach(() => {
+    document.elementFromPoint = originalMethod;
+  });
+  ```
+- Similarly, never replace `window.location`, `window.navigator` etc. via `stubGlobal` — use `vi.spyOn` or direct property assignment with restore.
+
+### Debugging: Log First, Fix Later
+
+When facing unclear test failures (locally or on CI), **do NOT spend multiple rounds guessing root causes**. Instead:
+
+1. **Add diagnostic logging immediately** — log the state of the failing object (e.g. `typeof`, `constructor.name`, `Object.keys()`, `JSON.stringify`) at the point of failure
+2. **Run (or push and let CI run)** — get real data from the actual environment
+3. **Fix based on evidence** — one log statement that shows actual state is worth more than three speculative fixes
 
 ## Commit Messages
 

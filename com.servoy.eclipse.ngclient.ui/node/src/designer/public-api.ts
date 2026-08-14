@@ -1,1 +1,1 @@
-export { PersistIdentifier }  from './persistidentifier';
+export { PersistIdentifier } from './persistidentifier';

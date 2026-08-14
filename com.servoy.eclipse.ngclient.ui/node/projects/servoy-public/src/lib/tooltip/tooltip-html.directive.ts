@@ -1,6 +1,6 @@
-import { Directive, HostListener, input, OnDestroy, inject } from '@angular/core';
+import { Directive, HostListener, input, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TooltipService } from './tooltip.service';
-import { Subscription } from 'rxjs';
 
 
 /**
@@ -9,20 +9,19 @@ import { Subscription } from 'rxjs';
  */
 @Directive({
     selector: '[htmlTooltip]',
-    standalone: false
+    standalone: true
 })
-export class HTMLTooltipDirective implements OnDestroy {
+export class HTMLTooltipDirective {
 
     readonly tooltipText = input<string | undefined>(undefined, { alias: 'htmlTooltip' });
     readonly tooltipInitialDelay = input<number | undefined>(undefined);
     readonly tooltipDismissDelay = input<number | undefined>(undefined);
     isActive = false;
     
-    private unsubscribeIsTooltipActive: Subscription;
     protected tooltipService = inject(TooltipService);
 
     constructor() {
-        this.unsubscribeIsTooltipActive = this.tooltipService.isTooltipActive.subscribe(a => {
+        this.tooltipService.isTooltipActive.pipe(takeUntilDestroyed()).subscribe(a => {
             this.isActive = a;
         });
     }
@@ -59,10 +58,5 @@ export class HTMLTooltipDirective implements OnDestroy {
     @HostListener('contextmenu')
     onContextMenu(): void {
         this.tooltipService.hideTooltip();
-    }
-
-    ngOnDestroy(): void {
-        this.tooltipService.hideTooltip();
-        this.unsubscribeIsTooltipActive.unsubscribe();
     }
 }

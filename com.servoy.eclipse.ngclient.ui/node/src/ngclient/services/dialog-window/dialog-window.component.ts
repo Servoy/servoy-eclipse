@@ -1,6 +1,10 @@
 import { Component, inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SabloTabseq } from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
+import { DefaultNavigator } from '../../../servoycore/default-navigator/default-navigator';
+import { FormComponent } from '../../form/form_component.component';
 
 import { FormService } from '../../form.service';
 
@@ -9,111 +13,108 @@ import { FormService } from '../../form.service';
   templateUrl: './dialog-window.component.html',
   styleUrls: ['./dialog-window.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, SabloTabseq, DefaultNavigator, FormComponent],
 })
-  export class DialogWindowComponent {
+export class DialogWindowComponent {
+  window!: SvyWindow;
+  firstTimeFocus = true;
 
-    window!: SvyWindow;
-    firstTimeFocus = true;
+  private readonly sabloService = inject(SabloService);
+  private readonly formservice = inject(FormService);
+  private readonly doc = inject(DOCUMENT) as Document;
 
-    private readonly sabloService = inject(SabloService);
-    private readonly formservice = inject(FormService);
-    private readonly doc = inject(DOCUMENT) as Document;
+  constructor() {}
 
-    constructor() {
-    }
+  setWindow(window: SvyWindow) {
+    this.window = window;
+  }
 
-    setWindow(window: SvyWindow) {
-      this.window = window;
-    }
+  getFormName(): string | null {
+    const name = this.window.form ? this.window.form.name : undefined;
+    if (name && this.formservice.hasFormCacheEntry(name)) return name;
+    return null;
+  }
 
-    getFormName(): string | null {
-        const name =  this.window.form ? this.window.form.name : undefined;
-        if (name && this.formservice.hasFormCacheEntry(name))
-            return name;
-        return null;
-    }
+  getNavigatorFormName(): string | null {
+    const name =
+      this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1 ? this.window.navigatorForm.name : null;
+    if (name && this.formservice.hasFormCacheEntry(name)) return name;
+    return null;
+  }
 
-    getNavigatorFormName(): string | null {
-        const name = (this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) ?
-                this.window.navigatorForm.name : null;
-        if (name && this.formservice.hasFormCacheEntry(name))
-            return name;
-        return null;
-    }
+  hasDefaultNavigator(): boolean {
+    return !!(this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') >= 0);
+  }
 
-    hasDefaultNavigator(): boolean{
-        return !!(this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') >= 0);
-    }
+  isUndecorated(): boolean {
+    return this.window.undecorated || this.window.opacity < 1;
+  }
 
-    isUndecorated(): boolean {
-      return this.window.undecorated || ( this.window.opacity < 1 );
-    }
+  getOpacity(): number {
+    return this.window.opacity;
+  }
 
-    getOpacity(): number {
-      return this.window.opacity;
-    }
+  getTitle(): string {
+    return this.window.title;
+  }
 
-    getTitle(): string {
-      return this.window.title;
-    }
+  getBackgroundColor(): string | null {
+    return this.window.transparent ? 'transparent' : null;
+  }
 
-    getBackgroundColor(): string | null {
-      return this.window.transparent ? 'transparent' : null;
-    }
+  getCSSClassName() {
+    return this.window.cssClassName;
+  }
 
-    getCSSClassName() {
-      return this.window.cssClassName;
-    }
+  cancel() {
+    this.sabloService.callService('$windowService', 'windowClosing', { window: this.window.name }, false);
+  }
 
-    cancel() {
-      this.sabloService.callService( '$windowService', 'windowClosing', { window: this.window.name }, false );
-    }
-
-    firstElementFocused(event: Event) {
-      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart')!.getAttribute('tabindex')!, 10);
-      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop')!.getAttribute('tabindex')!, 10);
-      if (this.firstTimeFocus === true) {						
-        for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
-          const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
-          // if there is no focusable element in the window, then newTarget == e.target,
-          // do a check here to avoid focus cycling
-          if(this.isElementVisibleAndNotDisabled(newTarget) && (event.target != newTarget)) {
-            newTarget.focus();
-            this.firstTimeFocus = false;
-            break;
-          }
-        }
-      } else {
-        for(let i = lastTabIndex - 1; i > firstTabIndex; i--) {
-          const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
-          // if there is no focusable element in the window, then newTarget == e.target,
-          // do a check here to avoid focus cycling
-          if(this.isElementVisibleAndNotDisabled(newTarget) && (event.target != newTarget)) {
-            newTarget.focus();
-            this.firstTimeFocus = false;
-            break;
-          }
-        }
-      }
-    }
-
-    lastElementFocused(event: Event) {
-      const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart')!.getAttribute('tabindex')!, 10);
-      const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop')!.getAttribute('tabindex')!, 10);
-      for(let i = firstTabIndex + 1; i < lastTabIndex; i++) {
-        const newTarget: any = this.doc.querySelector('[tabindex=\'' + i + '\']');
+  firstElementFocused(event: Event) {
+    const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart')!.getAttribute('tabindex')!, 10);
+    const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop')!.getAttribute('tabindex')!, 10);
+    if (this.firstTimeFocus === true) {
+      for (let i = firstTabIndex + 1; i < lastTabIndex; i++) {
+        const newTarget: any = this.doc.querySelector("[tabindex='" + i + "']");
         // if there is no focusable element in the window, then newTarget == e.target,
         // do a check here to avoid focus cycling
-        if(this.isElementVisibleAndNotDisabled(newTarget) && (event.target != newTarget)) {
+        if (this.isElementVisibleAndNotDisabled(newTarget) && event.target != newTarget) {
+          newTarget.focus();
+          this.firstTimeFocus = false;
+          break;
+        }
+      }
+    } else {
+      for (let i = lastTabIndex - 1; i > firstTabIndex; i--) {
+        const newTarget: any = this.doc.querySelector("[tabindex='" + i + "']");
+        // if there is no focusable element in the window, then newTarget == e.target,
+        // do a check here to avoid focus cycling
+        if (this.isElementVisibleAndNotDisabled(newTarget) && event.target != newTarget) {
           newTarget.focus();
           this.firstTimeFocus = false;
           break;
         }
       }
     }
+  }
 
-    isElementVisibleAndNotDisabled(element: any): boolean {
-      return (element.offsetWidth > 0 || element.offsetHeight > 0) && !element.disabled;
+  lastElementFocused(event: Event) {
+    const firstTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStart')!.getAttribute('tabindex')!, 10);
+    const lastTabIndex = parseInt(this.doc.getElementById(this.window.name + '_tabStop')!.getAttribute('tabindex')!, 10);
+    for (let i = firstTabIndex + 1; i < lastTabIndex; i++) {
+      const newTarget: any = this.doc.querySelector("[tabindex='" + i + "']");
+      // if there is no focusable element in the window, then newTarget == e.target,
+      // do a check here to avoid focus cycling
+      if (this.isElementVisibleAndNotDisabled(newTarget) && event.target != newTarget) {
+        newTarget.focus();
+        this.firstTimeFocus = false;
+        break;
+      }
     }
   }
+
+  isElementVisibleAndNotDisabled(element: any): boolean {
+    return (element.offsetWidth > 0 || element.offsetHeight > 0) && !element.disabled;
+  }
+}

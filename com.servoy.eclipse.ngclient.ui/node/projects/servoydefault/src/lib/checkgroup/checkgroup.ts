@@ -1,22 +1,22 @@
+import { NotNullOrEmptyPipe, SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
-import { Component, Renderer2, output, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
-import { FormattingService } from '@servoy/public';
+import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyDefaultBaseChoice } from '../basechoice';
+import { ChoiceElementDirective } from '../basechoice';
 
 @Component({
     selector: 'servoydefault-checkgroup',
     templateUrl: './checkgroup.html',
     styleUrls: ['./checkgroup.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, NotNullOrEmptyPipe, ChoiceElementDirective]
 })
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice {
 
     mainTabIndex: any;
-
-    constructor(renderer: Renderer2, formattingService: FormattingService, cdRef: ChangeDetectorRef, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     getFocusElement(): HTMLElement {
         let focusElement = super.getFocusElement();

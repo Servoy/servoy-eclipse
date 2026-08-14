@@ -1,19 +1,20 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, OnInit, Renderer2, AfterViewInit, ViewChild, ElementRef, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, OnInit, Renderer2, AfterViewInit, ElementRef, ChangeDetectionStrategy, effect, inject, input, viewChild } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
 
 @Component({
     selector: 'designer-autoscroll',
     templateUrl: './autoscroll.component.html',
     styleUrls: ['./autoscroll.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgStyle]
 })
 
 export class AutoscrollComponent implements OnInit, AfterViewInit {
 
-    @ViewChild('autoscroll', {static: false}) autoscrollElement!: ElementRef<HTMLElement>;
+    readonly autoscrollElement = viewChild.required<ElementRef<HTMLElement>>('autoscroll');
     placement = input<string>();
 
     private scrollTarget: ISupportAutoscroll | null | undefined;
@@ -29,15 +30,19 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     protected readonly editorSession = inject(EditorSessionService);
     private editorContent = inject(EditorContentService);
 
-    ngOnInit() {
-        this.editorSession.autoscrollBehavior.subscribe((scrollTarget: ISupportAutoscroll | null | undefined) => {
+    constructor() {
+        effect(() => {
+            const scrollTarget = this.editorSession.autoscrollTarget();
             this.scrollTarget = scrollTarget;
-            this.editorSession.getState().pointerEvents = 'none';
+            this.editorSession.pointerEvents.set('none');
             if (scrollTarget) {
-                this.editorSession.getState().pointerEvents = 'all';
+                this.editorSession.pointerEvents.set('all');
                 this.setPosition();
             }
         });
+    }
+
+    ngOnInit() {
         switch (this.placement()) {
             case 'top':
             case 'left':
@@ -51,19 +56,19 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.autoscrollElement.nativeElement.addEventListener('mouseenter', (event) => {
+        this.autoscrollElement().nativeElement.addEventListener('mouseenter', (event) => {
 this.onMouseEnter(event)
 })
-        this.autoscrollElement.nativeElement.addEventListener('mouseleave', (event) => {
+        this.autoscrollElement().nativeElement.addEventListener('mouseleave', (event) => {
 this.onMouseLeave(event)
 })
-        this.autoscrollElement.nativeElement.addEventListener('mouseup', (event) => {
+        this.autoscrollElement().nativeElement.addEventListener('mouseup', (event) => {
 this.onMouseUp(event)
 })
-        this.autoscrollElement.nativeElement.addEventListener('mousedown', (event) => {
+        this.autoscrollElement().nativeElement.addEventListener('mousedown', (event) => {
 this.onMouseDown(event)
 })
-        this.autoscrollElement.nativeElement.addEventListener('mousemove', (event) => {
+        this.autoscrollElement().nativeElement.addEventListener('mousemove', (event) => {
 this.onMouseMove(event)
 })
     }
@@ -126,16 +131,17 @@ this.onMouseMove(event)
     }
 
     setPosition() {
+        const autoscrollElement = this.autoscrollElement();
         if (this.placement() == 'left') {
             const left =  this.editorContent.getDesignerElementById('palette').offsetWidth + 
                 this.editorContent.getDesignerElementById('palette').offsetLeft;
-            this.renderer.setStyle(this.autoscrollElement.nativeElement, 'left', left + 'px');
+            this.renderer.setStyle(autoscrollElement.nativeElement, 'left', left + 'px');
         }
         if (this.placement() != 'top' && this.placement() != 'bottom') {
             const top = this.editorContent.getBodyElement().getElementsByClassName('top').item(0);
             const bottom = this.editorContent.getBodyElement().getElementsByClassName('bottom').item(0);
             const height = (bottom as HTMLElement).offsetTop - ((top as HTMLElement).offsetTop + (top as HTMLElement).offsetHeight) - 10;
-            this.renderer.setStyle(this.autoscrollElement.nativeElement, 'height', height + 'px');
+            this.renderer.setStyle(autoscrollElement.nativeElement, 'height', height + 'px');
         }
     }
 

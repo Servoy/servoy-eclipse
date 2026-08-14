@@ -6,45 +6,43 @@ import { ServoyService } from '../servoy.service';
 import { I18NProvider } from './i18n_provider.service';
 
 @Injectable()
-export class  ServerDataService {
+export class ServerDataService {
+  private data: { pathName: string; querystring: string; ipaddr: string; hostaddr: string; orientation: number; defaultTranslations: Record<string, string> };
+  constructor() {
+    const windowRefService = inject(WindowRefService);
+    const websocketService = inject(WebsocketService);
+    const sabloService = inject(SabloService);
+    const servoyService = inject(ServoyService);
+    const i18NProvider = inject(I18NProvider);
+    this.data = (windowRefService.nativeWindow as any)['svyData'];
+    if (this.data.querystring) websocketService.setQueryString(this.data.querystring);
+    if (this.data.pathName) websocketService.setPathname(this.data.pathName);
 
-    private data: {pathName: string;querystring: string;ipaddr: string;hostaddr: string; orientation: number;defaultTranslations: {[key: string]: string}};
-    constructor() {
-        const windowRefService = inject(WindowRefService);
-        const websocketService = inject(WebsocketService);
-        const sabloService = inject(SabloService);
-        const servoyService = inject(ServoyService);
-        const i18NProvider = inject(I18NProvider);
-        this.data = (windowRefService.nativeWindow as any)['svyData'];
-        if (this.data.querystring) websocketService.setQueryString(this.data.querystring);
-        if (this.data.pathName) websocketService.setPathname(this.data.pathName);
-
-        const orientation = this.data.orientation;
-        if (orientation === 2) {
-            servoyService.getSolutionSettings().ltrOrientation = false;
-        } else if (orientation === 3) {
-            const language = sabloService.getLocale().language;
-            if (language === 'iw' || language === 'ar' ||language === 'fa' ||language === 'ur') {
-                servoyService.getSolutionSettings().ltrOrientation = false;
-            } else {
-                servoyService.getSolutionSettings().ltrOrientation = true;
-            }
-        } else {
-            servoyService.getSolutionSettings().ltrOrientation = true;
-        }
-        if (this.data.defaultTranslations) i18NProvider.addDefaultTranslations(this.data.defaultTranslations);
+    const orientation = this.data.orientation;
+    if (orientation === 2) {
+      servoyService.getSolutionSettings().ltrOrientation = false;
+    } else if (orientation === 3) {
+      const language = sabloService.getLocale().language;
+      if (language === 'iw' || language === 'ar' || language === 'fa' || language === 'ur') {
+        servoyService.getSolutionSettings().ltrOrientation = false;
+      } else {
+        servoyService.getSolutionSettings().ltrOrientation = true;
+      }
+    } else {
+      servoyService.getSolutionSettings().ltrOrientation = true;
     }
+    if (this.data.defaultTranslations) i18NProvider.addDefaultTranslations(this.data.defaultTranslations);
+  }
 
-    init() {
-        // just here is it can be called on.
-    }
+  init() {
+    // just here is it can be called on.
+  }
 
+  public getIPAdress(): string {
+    return this.data.ipaddr;
+  }
 
-    public getIPAdress(): string {
-        return this.data.ipaddr;
-    }
-
-    public getHostAdress(): string {
-        return this.data.hostaddr;
-    }
+  public getHostAdress(): string {
+    return this.data.hostaddr;
+  }
 }

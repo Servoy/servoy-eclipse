@@ -4,7 +4,7 @@ import {PropertyUtils} from '../utils/property_utils';
 
 @Pipe( {
     name: 'mnemonicletterFilter',
-    standalone: false
+    standalone: true
 } )
 export class MnemonicletterFilterPipe implements PipeTransform {
     transform( input: string, letter: string): string{
@@ -14,7 +14,7 @@ export class MnemonicletterFilterPipe implements PipeTransform {
 }
 @Pipe({
     name: 'notNullOrEmpty',
-    standalone: false
+    standalone: true
 })
 export class NotNullOrEmptyPipe implements PipeTransform {
   transform(value: any[], _args?: any): any {
@@ -27,7 +27,7 @@ export class NotNullOrEmptyPipe implements PipeTransform {
 
 @Pipe( {
     name: 'htmlFilter',
-    standalone: false
+    standalone: true
 } )
 export class HtmlFilterPipe implements PipeTransform {
     transform( input: string): string{
@@ -40,7 +40,7 @@ export class HtmlFilterPipe implements PipeTransform {
 
 @Pipe( {
     name: 'trustAsHtml',
-    standalone: false
+    standalone: true
 } )
 export class TrustAsHtmlPipe implements PipeTransform {
     private domSanitizer: DomSanitizer;

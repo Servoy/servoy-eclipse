@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BehaviorSubject } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { DesignerComponent } from './designer.component';
 
@@ -12,7 +12,7 @@ describe('DesignerComponent', () => {
   beforeEach(() => {
     editorSession = {
       connect: vi.fn(),
-      registerCallback: new BehaviorSubject({ event: '', function: () => {} }),
+      registerCallback: signal(null),
     };
     urlParser = {
       isAbsoluteFormLayout: vi.fn().mockReturnValue(true),
@@ -25,6 +25,7 @@ describe('DesignerComponent', () => {
     (component as any).editorSession = editorSession;
     (component as any).urlParser = urlParser;
     (component as any).renderer = renderer;
+    (component as any).contentArea = () => undefined;
   });
 
   describe('ngOnInit', () => {
@@ -33,17 +34,9 @@ describe('DesignerComponent', () => {
       expect(editorSession.connect).toHaveBeenCalled();
     });
 
-    it('should subscribe to registerCallback', () => {
+    it('should register window mouseup listener', () => {
       component.ngOnInit();
       expect(renderer.listen).toHaveBeenCalledWith('window', 'mouseup', expect.any(Function));
-    });
-
-    it('should register callback listener on contentArea when available', () => {
-      const nativeElement = document.createElement('div');
-      (component as any).contentArea = { nativeElement };
-      component.ngOnInit();
-      editorSession.registerCallback.next({ event: 'click', function: () => {} });
-      expect(renderer.listen).toHaveBeenCalledWith(nativeElement, 'click', expect.any(Function));
     });
 
     it('should block mouse buttons > 2 on window mouseup', () => {

@@ -1,19 +1,18 @@
-import { Component, OnInit, Renderer2, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject, untracked } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from '../directives/resizeknob.directive';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
-import { Subscription } from 'rxjs';
 
 @Component({
+    // eslint-disable-next-line @angular-eslint/component-selector
     selector: 'dragselection',
     templateUrl: './dragselection.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDestroy {
+export class DragselectionComponent implements OnInit, ISupportAutoscroll {
     frameRect!: { x?: number; y?: number; top?: number; left?: number };
     leftContentAreaAdjust!: number;
     topContentAreaAdjust!: number;
@@ -40,7 +39,6 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     mousedownpoint = { x: 0, y: 0 };
     mouseOffset = { top: 0, left: 0 };
     snapData: SnapData | null = null;
-    subscription!: Subscription;
 
     protected readonly editorSession = inject(EditorSessionService);
     protected readonly renderer = inject(Renderer2);
@@ -48,6 +46,13 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
     private guidesService = inject(DynamicGuidesService);
     private readonly designerUtilsService = inject(DesignerUtilsService);
     private editorContentService = inject(EditorContentService);
+
+    constructor() {
+        effect(() => {
+            const value = this.guidesService.snapData();
+            untracked(() => this.snap(value));
+        });
+    }
 
     ngOnInit(): void {
         this.contentArea = this.editorContentService.getContentArea();
@@ -68,14 +73,6 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
 
         this.scroll.x = this.contentArea.scrollLeft;
         this.scroll.y = this.contentArea.scrollTop;
-
-        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
-            this.snap(value);
-        })
-    }
-
-    ngOnDestroy(): void {
-        this.subscription.unsubscribe();
     }
 
     private onKeyup(event: KeyboardEvent) {
@@ -178,7 +175,7 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll, OnDes
         if (!this.dragStartEvent || this.snapData) {
             return;
         }
-        if (!this.editorSession.getState().dragging) {
+        if (!this.editorSession.dragging()) {
             if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                 this.editorSession.setDragging(true);
             } else return;

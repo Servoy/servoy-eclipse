@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { DragselectionComponent } from './dragselection.component';
 
 describe('DragselectionComponent', () => {
@@ -8,7 +9,7 @@ describe('DragselectionComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false }),
+      dragging: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       setDragging: vi.fn(),
       sendChanges: vi.fn(),
@@ -36,7 +37,7 @@ describe('DragselectionComponent', () => {
     (component as any).editorContentService = editorContentService;
     (component as any).renderer = { setStyle: vi.fn(), setAttribute: vi.fn(), appendChild: vi.fn(), removeChild: vi.fn() };
     (component as any).urlParser = { isAbsoluteFormLayout: vi.fn().mockReturnValue(true) };
-    (component as any).guidesService = { snapDataListener: { subscribe: vi.fn() } };
+    (component as any).guidesService = { snapData: signal(null) };
     (component as any).designerUtilsService = { getNode: vi.fn(), getNodeBasedOnSelectionFCorLFC: vi.fn().mockReturnValue(null) };
     (component as any).selectionToDrag = null;
     (component as any).currentElementsInfo = null;

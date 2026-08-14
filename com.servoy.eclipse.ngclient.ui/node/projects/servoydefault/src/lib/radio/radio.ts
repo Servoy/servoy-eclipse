@@ -1,7 +1,8 @@
+import { LoggerFactory, LoggerService, SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
-import { Renderer2, Component, ViewChild, ElementRef, ChangeDetectorRef, SimpleChanges, ChangeDetectionStrategy, Inject, DOCUMENT, input } from '@angular/core';
-import { FormattingService } from '@servoy/public';
-import { LoggerFactory, LoggerService } from '@servoy/public';
+import { Component, Renderer2, ElementRef, SimpleChanges, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {
@@ -9,19 +10,16 @@ import { ServoyDefaultBaseField } from '../basefield';
     templateUrl: './radio.html',
     styleUrls: ['./radio.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq]
 } )
 export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement> {
     override readonly horizontalAlignment = input<any>(undefined);
 
-    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
+    readonly input = viewChild<ElementRef<HTMLInputElement>>('input');
 
     selected = false;
     private log!: LoggerService;
-
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super( renderer, cdRef, formattingService, doc );
-    }
 
     svyOnChanges( changes: SimpleChanges ) {
         this.setHorizontalAlignmentFlexbox( this.getNativeElement(), this.renderer, this.horizontalAlignment() );
@@ -29,13 +27,13 @@ export class ServoyDefaultRadio extends ServoyDefaultBaseField<HTMLInputElement>
         if (changes.dataProviderID) {
 			setTimeout(()=>{
 				this.setSelectionFromDataprovider();
-				this.input.nativeElement.checked = this.selected;
+				this.input()!.nativeElement.checked = this.selected;
 			});
 		}
     }
 
     getFocusElement() {
-        return this.input.nativeElement;
+        return this.input()!.nativeElement;
     }
 
     public setHorizontalAlignmentFlexbox( element: any, renderer: Renderer2, halign: any ) {

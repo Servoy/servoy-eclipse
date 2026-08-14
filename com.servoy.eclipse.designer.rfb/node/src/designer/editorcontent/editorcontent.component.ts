@@ -1,17 +1,20 @@
-import { Component, OnInit, Renderer2, ViewChild, ElementRef, AfterViewInit, HostListener, OnDestroy, ChangeDetectionStrategy, inject, input, output } from '@angular/core';
+import { Component, OnInit, Renderer2, ElementRef, AfterViewInit, HostListener, OnDestroy, ChangeDetectionStrategy, inject, input, output, viewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { KeyboardLayoutDirective } from '../directives/keyboardlayout.directive';
+import { NgStyle } from '@angular/common';
+
 
 @Component({
     selector: 'designer-editorcontent',
     templateUrl: './editorcontent.component.html',
     styleUrls: ['./editorcontent.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [KeyboardLayoutDirective, NgStyle]
 })
 export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {
 
@@ -25,7 +28,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     lastHeight!: string;
 
     clientURL!: SafeResourceUrl;
-    @ViewChild('element', { static: true }) elementRef!: ElementRef<HTMLElement>;
+    readonly elementRef = viewChild.required<ElementRef<HTMLElement>>('element');
     
     styleVariantPreview = input<boolean>();
     previewReady = output<{previewReady: boolean}>();
@@ -44,7 +47,10 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     }
 
     ngOnInit() {
-        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl('http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName() + '/form/' + this.urlParser.getFormName() + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html');
+        this.clientURL = this.sanitizer.bypassSecurityTrustResourceUrl(
+            'http://' + this.windowRef.nativeWindow.location.host + '/designer/solution/' + this.urlParser.getSolutionName()
+            + '/form/' + this.urlParser.getFormName() + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html'
+        );
         if (this.urlParser.isAbsoluteFormLayout()) {
             this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
             this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
@@ -119,8 +125,8 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             let paletteHeight = '100%';
             if (!this.lastHeight || this.lastHeight == 'auto' || this.contentSizeFull) {
                 const newHeight = this.editorContentService.getContentBodyElement().clientHeight + 30;
-                if (newHeight > this.elementRef.nativeElement.clientHeight) {
-                    this.renderer.setStyle(this.elementRef.nativeElement, 'height', newHeight + 'px');
+                if (newHeight > this.elementRef().nativeElement.clientHeight) {
+                    this.renderer.setStyle(this.elementRef().nativeElement, 'height', newHeight + 'px');
                     paletteHeight = newHeight + 'px';
                 }
             }
@@ -166,7 +172,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
 
     getFormInitialWidth(): string {
         if (!this.initialWidth) {
-            this.initialWidth = Math.round(this.elementRef.nativeElement.getBoundingClientRect().width) + 'px';
+            this.initialWidth = Math.round(this.elementRef().nativeElement.getBoundingClientRect().width) + 'px';
         }
         return this.initialWidth;
     }

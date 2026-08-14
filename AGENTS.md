@@ -38,6 +38,7 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 - **Use `eclipse-git` tools** (`gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitBranch`, etc.) instead of command-line git.
 - **After every `gitCommit`**, display the full commit message (subject line + body) in a formatted block so the user can verify the naming and content before moving on.
 - **Never push directly.** You may create commits, but never run `git push` until the user has explicitly reviewed and approved the commit(s). Always wait for user confirmation before pushing.
+- **Prefer new commits over `--amend`.** Only amend your own unpushed commits when explicitly asked. If in doubt, make a new commit — it's always safe.
 
 ### Running and Debugging
 - **Use `eclipse-runner` tools** for launching, debugging, and testing Java applications.
@@ -47,6 +48,12 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 - **Use `eclipse-ide_runAllTests`**, `eclipse-ide_runClassTests`, or `eclipse-ide_runTestMethod` for running JUnit tests.
 - **Use `eclipse-pde_runJUnitPluginTests`** or `eclipse-pde_runJUnitPluginTestClass` for plugin integration tests.
 - Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`
+
+### Refactoring
+- **Use `eclipse-coder_refactorRenameJavaType`** to rename classes, interfaces, enums, or records — this updates all references across the workspace.
+- **Use `eclipse-coder_refactorRenamePackage`** to rename packages — updates all package declarations and references.
+- **Use `eclipse-coder_refactorMoveJavaType`** to move types between packages.
+- **For method, field, and variable renames:** use `eclipse-ide_findReferences` first to find all usages, then apply the rename consistently. Prefer Eclipse refactor tools over manual find-and-replace to ensure all references are updated correctly.
 
 ### Other Tools
 - **Use `eclipse-ide_formatFile`** or `eclipse-coder_formatFile` to format Java files after editing.
@@ -65,6 +72,19 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 7. If errors remain: fix manually and repeat from step 5
 8. Run relevant tests: eclipse-ide_runClassTests or eclipse-pde_runJUnitPluginTestClass
 ```
+
+## Debugging CI-only Failures
+
+When tests or builds fail on CI (Jenkins) but work locally, **do NOT spend multiple rounds theorizing about root causes**. Instead:
+
+1. **Add diagnostic logging immediately** — log the state of the failing object/environment (e.g. `typeof`, `constructor.name`, `Object.keys()`, `JSON.stringify`) at the point of failure
+2. **Push and let CI run** — get real data from the actual environment
+3. **Analyze the output** — the diagnostics usually reveal the root cause in one CI round
+4. **Fix based on evidence** — not on theory
+
+Example: if `document.querySelector is not a function` on CI, don't guess why — log `typeof document`, `document.constructor.name`, `Object.keys(document)` in a setup file, push, and read the CI output. This approach saves 3-5 failed attempts.
+
+This same principle applies to **local debugging**: when facing unclear errors, add diagnostic logging FIRST and run — don't immediately attempt code/config fixes based on assumptions. One log statement that shows the actual state is worth more than three speculative fixes.
 
 ## Project Structure
 
@@ -150,10 +170,12 @@ When asked to create, update, or link Jira issues, load the instructions from `J
 - Follow existing code style and conventions for each language and module
 - Java: standard Eclipse plugin conventions, OSGi declarative services
 - TypeScript/Angular: follows Angular CLI conventions in `node/` subdirectories
-- **Angular sub-projects have their own `AGENTS.md`** — always read those when working on Angular code:
+- **Angular sub-projects have their own `AGENTS.md`** — always read those first when working on Angular code for project-specific commands, conventions, and dependencies:
   - `com.servoy.eclipse.ngclient.ui/node/AGENTS.md` — NG Client UI (TiNG)
   - `com.servoy.eclipse.designer.rfb/node/AGENTS.md` — Form Designer (RFB)
   - `com.servoy.eclipse.designer.wpm/node/AGENTS.md` — Web Package Manager (WPM)
+- Each Angular sub-project has its own `opencode.json` with Angular CLI MCP configured — for Angular-specific guidance (best practices, API docs), open that sub-project directory directly.
+- **Cross-project Angular changes** (shared libraries, dependency wiring): work from this root directory. The Angular CLI MCP won't be available, but Eclipse MCP tools and git work across all projects.
 - **After every Angular code change:** run lint (`npm run lint`) and build, then tests if applicable. All three projects must pass lint with zero warnings before committing.
 - No hardcoded secrets, credentials, or proprietary information
 - All code must be compatible with open source licenses (except GPL)
@@ -208,6 +230,24 @@ All packages must use the SAME major version for shared Angular ecosystem librar
 ### Example
 
 servoyextra had `@ng-bootstrap/ng-bootstrap: "^21"` while servoydefault still had `"^20"`. npm installed both versions, breaking Angular's compilation of the source-included package.
+
+---
+
+## Shared Angular Libraries (@servoy/public, @servoy/sablo, @servoy/designer)
+
+The Angular sub-projects share code via pre-built library packages:
+
+- **Source:** `com.servoy.eclipse.ngclient.ui/node/` (sablo, designer, public)
+- **Build:** `cd com.servoy.eclipse.ngclient.ui/node && npm run build_libs`
+- **Output:** `dist-public/`, `dist-sablo/`, `dist-designer/` (each with a `.tgz` file)
+- **Consumed by:** `com.servoy.eclipse.designer.rfb/node/package.json` as `file:` references to tgz
+
+**Critical rules:**
+- NEVER use tsconfig `paths` pointing to source in another Angular project — this causes duplicate `@angular/core` module instances, breaking signals, TestBed, and runtime behavior
+- Use `npm pack` to create tgz files, then reference them with `file:path/to/package.tgz`
+- `file:` to a tgz works like a real npm registry install (peer deps resolve from consumer)
+- `file:` to a directory does NOT work (causes signal INPUT_SIGNAL_BRAND_WRITE_TYPE mismatch)
+- Maven build handles the lib build step automatically via frontend-maven-plugin
 
 ---
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BehaviorSubject } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { SameSizeIndicatorComponent } from './samesizeindicator.component';
 
@@ -7,18 +7,17 @@ describe('SameSizeIndicatorComponent', () => {
   let component: SameSizeIndicatorComponent;
   let editorSession: any;
   let editorContentService: any;
-  let stateListener: BehaviorSubject<string>;
 
   beforeEach(() => {
-    stateListener = new BehaviorSubject<string>('');
     editorSession = {
       addSelectionChangedListener: vi.fn(),
-      stateListener,
-      getState: vi.fn().mockReturnValue({ sameSizeIndicator: false, dragging: false }),
+      sameSizeIndicator: signal(false),
+      dragging: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
     };
     editorContentService = {
       addContentMessageListener: vi.fn(),
+      removeContentMessageListener: vi.fn(),
       executeOnlyAfterInit: vi.fn((cb: () => void) => cb()),
       getContentElement: vi.fn(),
       getAllContentElements: vi.fn().mockReturnValue([]),
@@ -29,46 +28,7 @@ describe('SameSizeIndicatorComponent', () => {
     component = Object.create(SameSizeIndicatorComponent.prototype);
     (component as any).editorSession = editorSession;
     (component as any).editorContentService = editorContentService;
-    component.sameSizeIndicator = false;
     component.indicators = [];
-  });
-
-  describe('ngAfterViewInit', () => {
-    it('should subscribe to stateListener', () => {
-      component.ngAfterViewInit();
-      expect(component.editorStateSubscription).toBeDefined();
-    });
-
-    it('should update sameSizeIndicator when state emits sameSizeIndicator', () => {
-      editorSession.getState.mockReturnValue({ sameSizeIndicator: true });
-      component.ngAfterViewInit();
-      stateListener.next('sameSizeIndicator');
-      expect(component.sameSizeIndicator).toBe(true);
-    });
-
-    it('should clear indicators when sameSizeIndicator is turned off', () => {
-      component.indicators = [{ url: 'x', top: 0, left: 0 }] as any;
-      editorSession.getState.mockReturnValue({ sameSizeIndicator: false });
-      component.ngAfterViewInit();
-      stateListener.next('sameSizeIndicator');
-      expect(component.indicators).toEqual([]);
-    });
-
-    it('should null indicators when dragging starts', () => {
-      editorSession.getState.mockReturnValue({ dragging: true });
-      component.ngAfterViewInit();
-      stateListener.next('dragging');
-      expect(component.indicators).toBeNull();
-    });
-
-    it('should call selectionChanged when dragging stops', () => {
-      editorSession.getState.mockReturnValue({ dragging: false });
-      editorSession.getSelection.mockReturnValue(['uuid-1']);
-      const spy = vi.spyOn(component, 'selectionChanged');
-      component.ngAfterViewInit();
-      stateListener.next('dragging');
-      expect(spy).toHaveBeenCalledWith(['uuid-1']);
-    });
   });
 
   describe('contentMessageReceived', () => {
@@ -88,25 +48,25 @@ describe('SameSizeIndicatorComponent', () => {
 
   describe('selectionChanged', () => {
     it('should clear indicators when sameSizeIndicator is off', () => {
-      component.sameSizeIndicator = false;
+      editorSession.sameSizeIndicator.set(false);
       component.selectionChanged(['uuid-1']);
       expect(component.indicators).toEqual([]);
     });
 
     it('should clear indicators when selection has multiple items', () => {
-      component.sameSizeIndicator = true;
+      editorSession.sameSizeIndicator.set(true);
       component.selectionChanged(['uuid-1', 'uuid-2']);
       expect(component.indicators).toEqual([]);
     });
 
     it('should clear indicators when selection is empty', () => {
-      component.sameSizeIndicator = true;
+      editorSession.sameSizeIndicator.set(true);
       component.selectionChanged([]);
       expect(component.indicators).toEqual([]);
     });
 
     it('should find same-width elements and create indicators', () => {
-      component.sameSizeIndicator = true;
+      editorSession.sameSizeIndicator.set(true);
       const selectedElement = createMockElement(10, 20, 100, 50, false);
       const sameWidthElement = createMockElement(10, 80, 100, 30, false);
       const differentElement = createMockElement(10, 140, 200, 70, false);
@@ -120,7 +80,7 @@ describe('SameSizeIndicatorComponent', () => {
     });
 
     it('should find same-height elements and create indicators', () => {
-      component.sameSizeIndicator = true;
+      editorSession.sameSizeIndicator.set(true);
       const selectedElement = createMockElement(10, 20, 80, 50, false);
       const sameHeightElement = createMockElement(100, 20, 120, 50, false);
       const differentElement = createMockElement(200, 20, 120, 30, false);
@@ -134,7 +94,7 @@ describe('SameSizeIndicatorComponent', () => {
     });
 
     it('should skip elements inside responsive containers', () => {
-      component.sameSizeIndicator = true;
+      editorSession.sameSizeIndicator.set(true);
       const selectedElement = createMockElement(10, 20, 100, 50, false);
       const responsiveElement = createMockElement(10, 80, 100, 50, true);
 
@@ -147,7 +107,7 @@ describe('SameSizeIndicatorComponent', () => {
     });
 
     it('should not create indicators for elements smaller than 5px', () => {
-      component.sameSizeIndicator = true;
+      editorSession.sameSizeIndicator.set(true);
       const selectedElement = createMockElement(10, 20, 3, 3, false);
       const matchElement = createMockElement(50, 20, 3, 3, false);
 
@@ -161,16 +121,14 @@ describe('SameSizeIndicatorComponent', () => {
   });
 
   describe('ngOnDestroy', () => {
-    it('should unsubscribe', () => {
-      component.ngAfterViewInit();
-      const spy = vi.spyOn(component.editorStateSubscription, 'unsubscribe');
+    it('should remove content message listener', () => {
       component.ngOnDestroy();
-      expect(spy).toHaveBeenCalled();
+      expect(editorContentService.removeContentMessageListener).toHaveBeenCalledWith(component);
     });
   });
 });
 
-function createMockElement(left: number, top: number, width: number, height: number, inResponsive: boolean) {
+const createMockElement = (left: number, top: number, width: number, height: number, inResponsive: boolean) => {
   const parentElement = {
     closest: (selector: string) => inResponsive && selector === '.svy-responsivecontainer' ? {} : null,
     classList: { contains: () => false },
@@ -181,4 +139,4 @@ function createMockElement(left: number, top: number, width: number, height: num
     classList: { contains: () => false },
     parentElement,
   } as any;
-}
+};

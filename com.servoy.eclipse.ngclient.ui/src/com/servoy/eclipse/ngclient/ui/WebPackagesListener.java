@@ -25,6 +25,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,6 +107,66 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		NG1MAPPING.put("@servoy/ngclientutils", "servoy_ng_only_services");
 		NG1MAPPING.put("@servoy/dialogs", "servoydefaultservices");
 		NG1MAPPING.put("@servoy/servoydefault", "servoydefault");
+	}
+
+	public static String generateAllComponentsModuleContent(Collection<PackageSpecification< ? >> packages)
+	{
+		StringBuilder allComponentsModule = new StringBuilder(256);
+		allComponentsModule.append("import { NgModule } from '@angular/core';\n");
+		packages.forEach(spec -> {
+			if (spec.hasStandaloneComponents())
+			{
+				allComponentsModule.append("import { ");
+				allComponentsModule.append(spec.getNg2Components());
+				allComponentsModule.append(" } from '");
+				allComponentsModule.append(spec.getNpmPackageName());
+				allComponentsModule.append("';\n");
+			}
+			else if (spec.getNg2Module() != null)
+			{
+				allComponentsModule.append("import { ");
+				allComponentsModule.append(spec.getNg2Module());
+				allComponentsModule.append(" } from '");
+				allComponentsModule.append(spec.getNpmPackageName());
+				allComponentsModule.append("';\n");
+			}
+		});
+
+		allComponentsModule.append("@NgModule({\n imports: [\n");
+		packages.forEach(spec -> {
+			if (spec.hasStandaloneComponents())
+			{
+				for (String component : spec.getNg2Components().split(","))
+				{
+					allComponentsModule.append(component.trim());
+					allComponentsModule.append(",\n");
+				}
+			}
+			else if (spec.getNg2Module() != null)
+			{
+				allComponentsModule.append(spec.getNg2Module());
+				allComponentsModule.append(",\n");
+			}
+		});
+
+		allComponentsModule.append(" ],\n exports: [\n");
+		packages.forEach(spec -> {
+			if (spec.hasStandaloneComponents())
+			{
+				for (String component : spec.getNg2Components().split(","))
+				{
+					allComponentsModule.append(component.trim());
+					allComponentsModule.append(",\n");
+				}
+			}
+			else if (spec.getNg2Module() != null)
+			{
+				allComponentsModule.append(spec.getNg2Module());
+				allComponentsModule.append(",\n");
+			}
+		});
+		allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
+		return allComponentsModule.toString();
 	}
 
 	/**
@@ -225,7 +286,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 					String module = entry.getNg2Module();
 					String packageName = entry.getNpmPackageName();
-					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
+					if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
 						componentPackageSpecToReader.put(entry, packageReader);
@@ -247,7 +308,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 					String module = entry.getNg2Module();
 					String packageName = entry.getNpmPackageName();
-					if (!Utils.stringIsEmpty(module) && !Utils.stringIsEmpty(packageName))
+					if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
 					{
 						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
 						componentPackageSpecToReader.put(entry, packageReader);
@@ -486,29 +547,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 
 					// generate the all components.module.ts
-					StringBuilder allComponentsModule = new StringBuilder(256);
-					allComponentsModule.append("import { NgModule } from '@angular/core';\n");
-					componentPackageSpecToReader.keySet().forEach(spec -> {
-						allComponentsModule.append("import { ");
-						allComponentsModule.append(spec.getNg2Module());
-						allComponentsModule.append(" } from '");
-						allComponentsModule.append(spec.getNpmPackageName());
-						allComponentsModule.append("';\n");
-					});
-
-					allComponentsModule.append("@NgModule({\n imports: [\n");
-					componentPackageSpecToReader.keySet().forEach(spec -> {
-						allComponentsModule.append(spec.getNg2Module());
-						allComponentsModule.append(",\n");
-					});
-
-					allComponentsModule.append(" ],\n exports: [\n");
-					componentPackageSpecToReader.keySet().forEach(spec -> {
-						allComponentsModule.append(spec.getNg2Module());
-						allComponentsModule.append(",\n");
-					});
-					allComponentsModule.append(" ]\n})\nexport class AllComponentsModule { }\n");
-					String current = allComponentsModule.toString();
+					String current = generateAllComponentsModuleContent(componentPackageSpecToReader.keySet());
 					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), "UTF-8");
 
 					if (!current.equals(content))
@@ -907,7 +946,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				template.append(
 					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				template.append(
-					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>\n</");
+					"@for (item of state.items; track item) {<ng-template [ngTemplateOutlet]=\"getTemplate(item)\" [ngTemplateOutletContext]=\"{ state:item, callback:this}\"></ng-template>}\n</");
 				template.append(pair.getRight());
 				template.append(">\n</ng-template>\n");
 
@@ -919,7 +958,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				templateLFC.append(
 					" [svyContainerStyle]=\"state\" [svyContainerClasses]=\"state.classes\" [svyContainerAttributes]=\"state.attributes\"  class=\"svy-layoutcontainer\">\n");
 				templateLFC.append(
-					"<ng-template *ngFor=\"let item of state.items\" [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>\n</");
+					"@for (item of state.items; track item) {<ng-template [ngTemplateOutlet]=\"getRowItemTemplate(item)\" [ngTemplateOutletContext]=\"{ state:getRowItemState(item, row, i), callback:this, row:row, i:i}\"></ng-template>}\n</");
 				templateLFC.append(pair.getRight());
 				templateLFC.append(">\n</ng-template>\n");
 

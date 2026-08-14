@@ -1,27 +1,29 @@
 {
-    "type": "chrome",
-    "request": "launch",
-    "name": "Debug karma tests",
-    "url": "http://localhost:9876/",
-    "webRoot": "${workspaceFolder}",
-    "runtimeArgs": [
-      "--headless"
-    ],
-    "sourceMaps": true,
-    "sourceMapPathOverrides": {
-      "webpack:/*": "${webRoot}/*",
-      "/./*": "${webRoot}/*",
-      "/src/*": "${webRoot}/*",
-      "/*": "*",
-      "/./~/*": "${webRoot}/node_modules/*"
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Vitest tests",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["run", "--reporter=verbose"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "test"
+      }
     },
-    "port": 9223,
-    "configurations": [
-        {
-            "type": "pwa-chrome",
-            "name": "http://localhost:9876/?id=50842561",
-            "request": "launch",
-            "url": "http://localhost:9876/?id=50842561"
-        }
-    ]
-  }
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Vitest current file",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["run", "${relativeFile}", "--reporter=verbose"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "test"
+      }
+    }
+  ]
+}

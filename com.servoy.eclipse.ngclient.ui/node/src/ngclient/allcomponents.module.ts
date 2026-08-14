@@ -5,10 +5,7 @@ import { NgModule } from '@angular/core';
  * This will list all the component modules that can or will be used in a solution.
  */
 @NgModule({
-
-  imports: [
-    ],
-  exports: [
-  ]
+  imports: [],
+  exports: [],
 })
-export class AllComponentsModule { }
+export class AllComponentsModule {}

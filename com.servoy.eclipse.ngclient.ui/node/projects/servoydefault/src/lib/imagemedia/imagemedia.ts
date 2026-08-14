@@ -1,7 +1,8 @@
+import { ImageMediaIdDirective, SabloTabseq, TooltipDirective , UploadDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ChangeDetectionStrategy, Inject, DOCUMENT } from '@angular/core';
-
-import { FormattingService } from '@servoy/public';
+import { Component, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { ServoyDefaultBaseField } from '../basefield';
 
@@ -9,7 +10,8 @@ import { ServoyDefaultBaseField } from '../basefield';
     selector: 'servoydefault-imagemedia',
     templateUrl: './imagemedia.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, UploadDirective, TooltipDirective, SabloTabseq, ImageMediaIdDirective]
 })
 export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivElement> {
 
@@ -19,11 +21,6 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
 
     imageURL = ServoyDefaultImageMedia.EMPTY;
     increment = 0;
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-        formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     deleteMedia(): void {
         this.dataProviderID.set(null);

@@ -1,15 +1,16 @@
 
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject, input, untracked } from '@angular/core';
 import { WindowRefService } from '@servoy/public';
 import { EditorSessionService, PaletteComp, Variant } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
 
 @Component({
     selector: 'designer-variantscontent',
     templateUrl: './variantscontent.component.html',
     styleUrls: ['./variantscontent.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgStyle]
 })
 export class VariantsContentComponent implements OnInit {
 
@@ -29,25 +30,31 @@ export class VariantsContentComponent implements OnInit {
     private editorContentService = inject(EditorContentService);
 
     constructor() {
-		this.editorSession.variantsTrigger.subscribe((value) => {
-			if (this.component() == value.component) {
-                this.activeVariant = true;
-				this.sendStylesToVariantsForm();
-			} else {
-                this.activeVariant = false;
-			}
+		effect(() => {
+			const value = this.editorSession.variantsTrigger();
+			if (value) untracked(() => {
+				if (this.component() == value.component) {
+					this.activeVariant = true;
+					this.sendStylesToVariantsForm();
+				} else {
+					this.activeVariant = false;
+				}
+			});
 		});
-		this.editorSession.variantsPopup.subscribe((value) => {
-			if (value.status === 'visible') {
-				if (this.variantsQueryHandler) {
-					clearInterval(this.variantsQueryHandler);
+		effect(() => {
+			const value = this.editorSession.variantsPopup();
+			if (value) untracked(() => {
+				if (value.status === 'visible') {
+					if (this.variantsQueryHandler) {
+						clearInterval(this.variantsQueryHandler);
+					}
 				}
-			}
-			if (value.status === 'hidden') {
-				if (this.variantsIFrame) {
-					this.variantsIFrame.contentWindow!.postMessage({ id: 'destroyVariants'});
+				if (value.status === 'hidden') {
+					if (this.variantsIFrame) {
+						this.variantsIFrame.contentWindow!.postMessage({ id: 'destroyVariants'});
+					}
 				}
-			}
+			});
 		});
     }
 

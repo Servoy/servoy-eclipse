@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { ResizeEditorWidthComponent } from './resizeeditorwidth.component';
 
 describe('ResizeEditorWidthComponent', () => {
@@ -7,7 +8,7 @@ describe('ResizeEditorWidthComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false }),
+      dragging: signal(false),
       sendChanges: vi.fn(),
       registerAutoscroll: vi.fn(),
       unregisterAutoscroll: vi.fn()
@@ -96,7 +97,7 @@ describe('ResizeEditorWidthComponent', () => {
           changes[id] = { width: this.currentPosition };
           this.glasspane.style.width = Math.max(this.currentPosition + this.widthOffset, this.ghostsRight) + 'px';
           this.editorSession.sendChanges(changes);
-          this.editorSession.getState().dragging = false;
+          this.editorSession.dragging.set(false);
           this.editorSession.unregisterAutoscroll(this);
           this.draggingEvent = null;
         }
@@ -138,7 +139,7 @@ describe('ResizeEditorWidthComponent', () => {
           changes[id] = { width: this.currentPosition };
           this.glasspane.style.width = Math.max(this.currentPosition + this.widthOffset, this.ghostsRight) + 'px';
           this.editorSession.sendChanges(changes);
-          this.editorSession.getState().dragging = false;
+          this.editorSession.dragging.set(false);
           this.editorSession.unregisterAutoscroll(this);
           this.draggingEvent = null;
         }

@@ -1,6 +1,8 @@
+import { SabloTabseq, TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
-import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, ViewChild, ElementRef, ChangeDetectionStrategy, Inject, DOCUMENT, input } from '@angular/core';
-import { FormattingService } from '@servoy/public';
+import { Component, Renderer2, SimpleChanges, ElementRef, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
@@ -8,16 +10,14 @@ import { ServoyDefaultBaseField } from '../basefield';
     templateUrl: './check.html',
     styleUrls: ['./check.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq]
 })
 export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement> {
     override readonly horizontalAlignment = input<number>(undefined as any);
-    @ViewChild('input', { static: false }) input!: ElementRef<HTMLInputElement>;
+    readonly input = viewChild<ElementRef<HTMLInputElement>>('input');
 
     selected = false;
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService, @Inject(DOCUMENT) doc: Document) {
-        super(renderer, cdRef, formattingService, doc);
-    }
 
     svyOnChanges(changes: SimpleChanges) {
         super.svyOnChanges(changes);
@@ -34,7 +34,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseField<HTMLInputElement>
     }
     
     getFocusElement() {
-        return this.input.nativeElement;
+        return this.input()!.nativeElement;
     }
 
     public setHorizontalAlignmentFlexbox(element: any, renderer: Renderer2, halign: number) {

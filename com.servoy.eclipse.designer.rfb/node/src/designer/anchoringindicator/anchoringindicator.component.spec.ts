@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BehaviorSubject } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { AnchoringIndicatorComponent } from './anchoringindicator.component';
 
@@ -8,14 +8,12 @@ describe('AnchoringIndicatorComponent', () => {
   let editorSession: any;
   let editorContentService: any;
   let urlParser: any;
-  let stateListener: BehaviorSubject<string>;
 
   beforeEach(() => {
-    stateListener = new BehaviorSubject<string>('');
     editorSession = {
       addSelectionChangedListener: vi.fn(),
-      stateListener,
-      getState: vi.fn().mockReturnValue({ anchoringIndicator: false, dragging: false }),
+      anchoringIndicator: signal(false),
+      dragging: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
     };
     editorContentService = {
@@ -34,38 +32,7 @@ describe('AnchoringIndicatorComponent', () => {
     (component as any).editorSession = editorSession;
     (component as any).editorContentService = editorContentService;
     (component as any).urlParser = urlParser;
-    component.anchoringIndicator = false;
     component.indicator = null;
-  });
-
-  describe('ngAfterViewInit', () => {
-    it('should subscribe to stateListener', () => {
-      component.ngAfterViewInit();
-      expect(component.editorStateSubscription).toBeDefined();
-    });
-
-    it('should update anchoringIndicator on state change', () => {
-      editorSession.getState.mockReturnValue({ anchoringIndicator: true });
-      component.ngAfterViewInit();
-      stateListener.next('anchoringIndicator');
-      expect(component.anchoringIndicator).toBe(true);
-    });
-
-    it('should clear indicator when anchoringIndicator turns off', () => {
-      component.indicator = { url: 'x', top: 0, left: 0 } as any;
-      editorSession.getState.mockReturnValue({ anchoringIndicator: false });
-      component.ngAfterViewInit();
-      stateListener.next('anchoringIndicator');
-      expect(component.indicator).toBeNull();
-    });
-
-    it('should null indicator when dragging starts', () => {
-      component.indicator = { url: 'x', top: 0, left: 0 } as any;
-      editorSession.getState.mockReturnValue({ dragging: true });
-      component.ngAfterViewInit();
-      stateListener.next('dragging');
-      expect(component.indicator).toBeNull();
-    });
   });
 
   describe('contentMessageReceived', () => {
@@ -92,7 +59,7 @@ describe('AnchoringIndicatorComponent', () => {
     });
 
     beforeEach(() => {
-      component.anchoringIndicator = true;
+      editorSession.anchoringIndicator.set(true);
       urlParser.isCSSPositionFormLayout.mockReturnValue(false);
     });
 
@@ -160,7 +127,7 @@ describe('AnchoringIndicatorComponent', () => {
 
   describe('selectionChanged — CSS position layout', () => {
     beforeEach(() => {
-      component.anchoringIndicator = true;
+      editorSession.anchoringIndicator.set(true);
       urlParser.isCSSPositionFormLayout.mockReturnValue(true);
     });
 
@@ -208,19 +175,19 @@ describe('AnchoringIndicatorComponent', () => {
 
   describe('selectionChanged — edge cases', () => {
     it('should clear indicator when anchoringIndicator is off', () => {
-      component.anchoringIndicator = false;
+      editorSession.anchoringIndicator.set(false);
       component.selectionChanged(['uuid-1']);
       expect(component.indicator).toBeNull();
     });
 
     it('should clear indicator when selection has multiple items', () => {
-      component.anchoringIndicator = true;
+      editorSession.anchoringIndicator.set(true);
       component.selectionChanged(['uuid-1', 'uuid-2']);
       expect(component.indicator).toBeNull();
     });
 
     it('should clear indicator when element is in responsive container', () => {
-      component.anchoringIndicator = true;
+      editorSession.anchoringIndicator.set(true);
       const element = {
         getBoundingClientRect: () => new DOMRect(0, 0, 100, 50),
         getAttribute: () => null,
@@ -234,11 +201,8 @@ describe('AnchoringIndicatorComponent', () => {
   });
 
   describe('ngOnDestroy', () => {
-    it('should unsubscribe and remove listener', () => {
-      component.ngAfterViewInit();
-      const spy = vi.spyOn(component.editorStateSubscription, 'unsubscribe');
+    it('should remove content message listener', () => {
       component.ngOnDestroy();
-      expect(spy).toHaveBeenCalled();
       expect(editorContentService.removeContentMessageListener).toHaveBeenCalledWith(component);
     });
   });

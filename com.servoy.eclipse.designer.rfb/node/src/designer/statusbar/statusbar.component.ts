@@ -1,29 +1,12 @@
-import { Component, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { EditorSessionService } from '../services/editorsession.service';
 
 @Component({
     selector: 'designer-status-bar',
     templateUrl: './statusbar.component.html',
     styleUrls: ['./statusbar.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StatusBarComponent implements AfterViewInit, OnDestroy {
-    statusText = '';
-    editorStateSubscription!: Subscription;
-
+export class StatusBarComponent {
     protected readonly editorSession = inject(EditorSessionService);
-
-    ngAfterViewInit(): void {
-        this.editorStateSubscription = this.editorSession.stateListener.subscribe(id => {
-            if (id === 'statusText') {
-                this.statusText = this.editorSession.getState().statusText;
-            }
-        });
-    }
-
-    ngOnDestroy(): void {
-        this.editorStateSubscription.unsubscribe();
-    }
 }

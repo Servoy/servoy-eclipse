@@ -1,51 +1,27 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BehaviorSubject } from 'rxjs';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { signal } from '@angular/core';
 
 import { StatusBarComponent } from './statusbar.component';
 
 describe('StatusBarComponent', () => {
   let component: StatusBarComponent;
-  let stateListener: BehaviorSubject<string>;
   let editorSession: any;
 
   beforeEach(() => {
-    stateListener = new BehaviorSubject<string>('');
     editorSession = {
-      stateListener,
-      getState: vi.fn().mockReturnValue({ statusText: '' }),
+      statusText: signal(''),
     };
 
     component = Object.create(StatusBarComponent.prototype);
     (component as any).editorSession = editorSession;
-    component.statusText = '';
   });
 
-  describe('ngAfterViewInit', () => {
-    it('should subscribe to stateListener', () => {
-      component.ngAfterViewInit();
-      expect(component.editorStateSubscription).toBeDefined();
-    });
-
-    it('should update statusText when stateListener emits "statusText"', () => {
-      editorSession.getState.mockReturnValue({ statusText: 'Button [myBtn]' });
-      component.ngAfterViewInit();
-      stateListener.next('statusText');
-      expect(component.statusText).toBe('Button [myBtn]');
-    });
-
-    it('should not update statusText for other state changes', () => {
-      component.ngAfterViewInit();
-      stateListener.next('dragging');
-      expect(component.statusText).toBe('');
-    });
+  it('should read statusText from editorSession signal', () => {
+    expect(editorSession.statusText()).toBe('');
   });
 
-  describe('ngOnDestroy', () => {
-    it('should unsubscribe from stateListener', () => {
-      component.ngAfterViewInit();
-      const spy = vi.spyOn(component.editorStateSubscription, 'unsubscribe');
-      component.ngOnDestroy();
-      expect(spy).toHaveBeenCalled();
-    });
+  it('should reflect updated statusText', () => {
+    editorSession.statusText.set('Button [myBtn]');
+    expect(editorSession.statusText()).toBe('Button [myBtn]');
   });
 });

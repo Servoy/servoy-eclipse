@@ -1,9 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject, viewChild } from '@angular/core';
 import { GHOST_TYPES } from '../ghostscontainer/ghostscontainer.component';
 import { EditorSessionService, PaletteComp } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { URLParserService } from '../services/urlparser.service';
 import { WindowRefService } from '@servoy/public';
+import { NgClass, NgStyle } from '@angular/common';
 
 export enum SHORTCUT_IDS {
 	SET_TAB_SEQUENCE_ID = 'com.servoy.eclipse.designer.rfb.settabseq',
@@ -22,15 +23,15 @@ export enum SHORTCUT_IDS {
 	OPEN_FORM_HIERARCHY_ID = 'com.servoy.eclipse.ui.OpenFormHierarchyAction'
 }
 @Component({
-	selector: 'designer-contextmenu',
-	templateUrl: './contextmenu.component.html',
-	styleUrls: ['./contextmenu.component.css'],
-	changeDetection: ChangeDetectionStrategy.Eager,
-	standalone: false
+    selector: 'designer-contextmenu',
+    templateUrl: './contextmenu.component.html',
+    styleUrls: ['./contextmenu.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgClass, NgStyle]
 })
 export class ContextMenuComponent implements OnInit {
 
-	@ViewChild('element') element!: ElementRef<HTMLElement>;
+	readonly element = viewChild.required<ElementRef<HTMLElement>>('element');
 
 	menuItems!: ContextmenuItem[];
 
@@ -41,6 +42,7 @@ export class ContextMenuComponent implements OnInit {
 	protected editorContentService = inject(EditorContentService);
 	protected urlParser = inject(URLParserService);
 	private windowRef = inject(WindowRefService);
+	private readonly cdr = inject(ChangeDetectorRef);
 
 	ngOnInit(): void {
 		void this.editorSession.getShortcuts().then((shortcuts: Record<string, string>) => {
@@ -223,11 +225,11 @@ export class ContextMenuComponent implements OnInit {
 					this.menuItems.push(cypressEntry);
 				}
 				this.show(event);
-				this.adjustMenuPosition(this.element.nativeElement);
+				this.adjustMenuPosition(this.element().nativeElement);
 			}).catch(() => {
 				// If the backend call fails, still show the menu without the Cypress item
 				this.show(event);
-				this.adjustMenuPosition(this.element.nativeElement);
+				this.adjustMenuPosition(this.element().nativeElement);
 			});
 		});
 		// for some reason click event is not always triggered
@@ -245,11 +247,12 @@ export class ContextMenuComponent implements OnInit {
 	}
 
 	private show(event: MouseEvent) {
-		this.element.nativeElement.style.display = 'block';
-		this.element.nativeElement.style.left = event.pageX + 'px';
-		this.element.nativeElement.style.top = event.pageY + 'px';
+		this.cdr.markForCheck();
+		this.element().nativeElement.style.display = 'block';
+		this.element().nativeElement.style.left = event.pageX + 'px';
+		this.element().nativeElement.style.top = event.pageY + 'px';
 		this.windowRef.nativeWindow.navigator.clipboard.read().then(content => {
-			const node = this.element.nativeElement.querySelector('.svypaste');
+			const node = this.element().nativeElement.querySelector('.svypaste');
 			if (node) {
 				if (!content || content.length == 0 || content[0].types.indexOf('text/plain') < 0) {
 					node.classList.add('disabled');
@@ -262,7 +265,7 @@ export class ContextMenuComponent implements OnInit {
 	}
 
 	private hide() {
-		this.element.nativeElement.style.display = 'none';
+		this.element().nativeElement.style.display = 'none';
 	}
 
 	public adjustMenuPosition(nativeElement?: HTMLElement) {
@@ -306,8 +309,8 @@ export class ContextMenuComponent implements OnInit {
 				left = maxLeft;
 			}
 
-			this.element.nativeElement.style.left = left + 'px';
-			this.element.nativeElement.style.top = top + 'px';
+			this.element().nativeElement.style.left = left + 'px';
+			this.element().nativeElement.style.top = top + 'px';
 		} else {
 			const submenu = this.editorContentService.querySelector('.dropdown-submenu:hover');
 			if (submenu) {
@@ -323,11 +326,11 @@ export class ContextMenuComponent implements OnInit {
 					menu.style.top = '';
 				}
 				//the submenu can only be displayed on the right or left side of the contextmenu
-				if (this.element.nativeElement.offsetWidth + this.getElementOffset(this.element.nativeElement).left + menu.offsetWidth > viewport.right) {
+				if (this.element().nativeElement.offsetWidth + this.getElementOffset(this.element().nativeElement).left + menu.offsetWidth > viewport.right) {
 					//+5 to make it overlap the menu a bit
 					menu.style.left = -1 * menu.offsetWidth + 5 + 'px';
 				} else {
-					menu.style.left = this.element.nativeElement.offsetWidth - 5 + 'px';
+					menu.style.left = this.element().nativeElement.offsetWidth - 5 + 'px';
 				}
 			}
 		}
@@ -928,7 +931,7 @@ export class ContextMenuComponent implements OnInit {
 	}
 
 	private getDisplayName(componentName: string): string {
-		const packages = this.editorSession.getState().packages;
+		const packages = this.editorSession.packages();
 		if (packages && packages.length) {
 			const packageAndComponent = componentName.split('.');
 			if (componentName == 'component' || packageAndComponent[1] == '*') return 'Component [...]';

@@ -1,6 +1,6 @@
-import { SimpleChanges, Renderer2, Directive, ChangeDetectorRef, Inject, DOCUMENT, output, input } from '@angular/core';
+import { SimpleChanges, Directive, Inject, DOCUMENT, output, input, inject } from '@angular/core';
 
-import { PropertyUtils, FormattingService, IValuelist } from '@servoy/public';
+import { FormattingService, IValuelist, PropertyUtils } from '@servoy/public';
 
 import { ServoyDefaultBaseComponent } from './basecomponent';
 
@@ -26,9 +26,8 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
 
     mustExecuteOnFocus = true;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService, @Inject(DOCUMENT) protected doc: Document) {
-        super(renderer, cdRef);
-    }
+    public formattingService = inject(FormattingService);
+    protected doc = inject(DOCUMENT);
 
     svyOnInit() {
         super.svyOnInit();
@@ -59,8 +58,8 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
     onDataChangeCallback(event: any, returnval: any) {
         const stringValue = (typeof returnval === 'string' || returnval instanceof String);
         if (returnval === false || stringValue) {
-            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-valid');
-            this.renderer.addClass(this.elementRef.nativeElement, 'ng-invalid');
+            this.renderer.removeClass(this.elementRef()!.nativeElement, 'ng-valid');
+            this.renderer.addClass(this.elementRef()!.nativeElement, 'ng-invalid');
             if (stringValue) {
                 if (this.storedTooltip === false) {
                     this.storedTooltip = this.toolTipText();
@@ -68,8 +67,8 @@ export class ServoyDefaultBaseField<T extends HTMLElement> extends ServoyDefault
                 this.toolTipText.set('' + returnval.toString());
             }
         } else {
-            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');
-            this.renderer.addClass(this.elementRef.nativeElement, 'ng-valid');
+            this.renderer.removeClass(this.elementRef()!.nativeElement, 'ng-invalid');
+            this.renderer.addClass(this.elementRef()!.nativeElement, 'ng-valid');
             if (this.storedTooltip !== false) this.toolTipText.set(this.storedTooltip);
             this.storedTooltip = false;
         }

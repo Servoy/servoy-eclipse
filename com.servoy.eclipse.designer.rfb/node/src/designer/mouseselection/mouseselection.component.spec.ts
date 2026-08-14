@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { MouseSelectionComponent } from './mouseselection.component';
 
 describe('MouseSelectionComponent', () => {
@@ -10,18 +11,20 @@ describe('MouseSelectionComponent', () => {
 
   beforeEach(() => {
     editorSession = {
-      getState: vi.fn().mockReturnValue({ dragging: false, ghosthandle: false, showWireframe: false, resizing: false }),
+      dragging: signal(false),
+      ghosthandle: signal(false),
+      showWireframe: signal(false),
+      resizing: signal(false),
       getSelection: vi.fn().mockReturnValue([]),
       setSelection: vi.fn(),
       requestSelection: vi.fn().mockResolvedValue(undefined),
-      addSelectionChangedListener: vi.fn().mockReturnValue(() => {}),
+      addSelectionChangedListener: vi.fn().mockReturnValue(() => undefined),
       updateFieldPositioner: vi.fn(),
       executeAction: vi.fn(),
       keyPressed: vi.fn(),
       openConfigurator: vi.fn(),
       createComponent: vi.fn(),
       getWizardProperties: vi.fn().mockReturnValue(null),
-      stateListener: { subscribe: vi.fn() },
       updateSelection: vi.fn()
     };
     editorContentService = {
@@ -46,12 +49,13 @@ describe('MouseSelectionComponent', () => {
     };
 
     component = Object.create(MouseSelectionComponent.prototype);
+    (component as any).cdr = { markForCheck: vi.fn() };
     (component as any).editorSession = editorSession;
     (component as any).editorContentService = editorContentService;
     (component as any).designerUtilsService = designerUtilsService;
     (component as any).urlParser = urlParser;
     (component as any).renderer = { setStyle: vi.fn(), addClass: vi.fn(), removeClass: vi.fn(), setAttribute: vi.fn() };
-    (component as any).nodes = [];
+    (component as any).nodes = signal([]);
     (component as any).contentInit = true;
     (component as any).topAdjust = 20;
     (component as any).leftAdjust = 20;
@@ -91,14 +95,14 @@ describe('MouseSelectionComponent', () => {
 
   describe('selectionChanged', () => {
     it('should call createNodes when contentInit is true', () => {
-      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => {});
+      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => undefined);
       component.selectionChanged(['id1']);
       expect(spy).toHaveBeenCalledWith(['id1']);
     });
 
     it('should not call createNodes when contentInit is false', () => {
       (component as any).contentInit = false;
-      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => {});
+      const spy = vi.spyOn(component as any, 'createNodes' as any).mockImplementation(() => undefined);
       component.selectionChanged(['id1']);
       expect(spy).not.toHaveBeenCalled();
     });
@@ -106,7 +110,7 @@ describe('MouseSelectionComponent', () => {
 
   describe('contentMessageReceived', () => {
     it('should call selectionChanged on redrawDecorators message', () => {
-      const spy = vi.spyOn(component, 'selectionChanged').mockImplementation(() => {});
+      const spy = vi.spyOn(component, 'selectionChanged').mockImplementation(() => undefined);
       editorSession.getSelection.mockReturnValue(['abc']);
       component.contentMessageReceived('redrawDecorators', { property: '' });
       expect(spy).toHaveBeenCalledWith(['abc'], true);
@@ -189,17 +193,17 @@ describe('MouseSelectionComponent', () => {
       Object.defineProperty(mockEl, 'getBoundingClientRect', { value: () => ({ height: 50, width: 100, top: 10, left: 20 }) });
       editorContentService.getContentElement.mockReturnValue(mockEl);
       designerUtilsService.adjustElementRect.mockReturnValue({ height: 50, width: 100, top: 10, left: 20 });
-      (component as any).nodes = [{ svyid: 'node1', style: {} }];
+      (component as any).nodes.set([{ svyid: 'node1', style: {} }]);
       component.redrawDecorators();
-      expect((component as any).nodes[0].style.height).toBe('50px');
-      expect((component as any).nodes[0].style.width).toBe('100px');
+      expect((component as any).nodes()[0].style.height).toBe('50px');
+      expect((component as any).nodes()[0].style.width).toBe('100px');
     });
 
     it('should skip nodes not found in content', () => {
       editorContentService.getContentElement.mockReturnValue(undefined);
-      (component as any).nodes = [{ svyid: 'missing', style: {} }];
+      (component as any).nodes.set([{ svyid: 'missing', style: {} }]);
       component.redrawDecorators();
-      expect((component as any).nodes[0].style.height).toBeUndefined();
+      expect((component as any).nodes()[0].style.height).toBeUndefined();
     });
   });
 });

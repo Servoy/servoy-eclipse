@@ -1,21 +1,29 @@
-import { Component, Pipe, PipeTransform, Renderer2, AfterViewInit, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Pipe, PipeTransform, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, effect, inject, forwardRef, untracked } from '@angular/core';
 import { EditorSessionService, Package, PaletteComp, ISupportAutoscroll, ISupportRefreshPalette } from '../services/editorsession.service';
 import { HttpClient } from '@angular/common/http';
 import { URLParserService } from '../services/urlparser.service';
 import { DesignerUtilsService } from '../services/designerutils.service';
 import { EditorContentService } from '../services/editorcontent.service';
-import { WindowRefService } from '@servoy/public';
+import { WindowRefService, ServoyPublicModule } from '@servoy/public';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
-import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody } from '@ng-bootstrap/ng-bootstrap/accordion';
+import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
+import { VariantsContentComponent } from '../variantscontent/variantscontent.component';
+import { KeyValuePipe } from '@angular/common';
 
 @Component({
     selector: 'designer-palette',
     templateUrl: './palette.component.html',
     styleUrls: ['./palette.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        FormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle,
+        NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ServoyPublicModule,
+        VariantsContentComponent, KeyValuePipe, forwardRef(() => SearchTextPipe), forwardRef(() => SearchTextDeepPipe)
+    ]
 })
-export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette, AfterViewInit, OnDestroy {
+export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPalette {
 
     public searchText!: string;
     public activeIds!: string[];
@@ -25,7 +33,6 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     draggedVariant: DraggedVariant = {};
     isDraggedVariant = false;
     snapData!: SnapData;
-    subscription!: Subscription;
 
     searchHistory: string[] = [];
     filteredSuggestions: string[] = [];
@@ -41,8 +48,15 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     private editorContentService = inject(EditorContentService);
     private windowRef = inject(WindowRefService);
     private guidesService = inject(DynamicGuidesService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     constructor() {
+        if (this.urlParser.isAbsoluteFormLayout()) {
+            effect(() => {
+                const value = this.guidesService.snapData();
+                if (value) untracked(() => this.snap(value));
+            });
+        }
         this.editorSession.setPaletteRefresher(this);
         this.refreshPalette();
         this.windowRef.nativeWindow.addEventListener('message', (event) => {
@@ -67,23 +81,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.editorContentService.getBodyElement().addEventListener('keyup', (event: KeyboardEvent) => {
             if (event.keyCode == 27) {
                 // esc key, close menu
-                this.editorSession.variantsTrigger.emit({ show: false });
+                this.editorSession.variantsTrigger.set({ show: false });
             }
         });
         
         this.searchHistory = localStorage.getItem('searchHistory') ? JSON.parse(localStorage.getItem('searchHistory')!) : [];
-    }
-
-    ngAfterViewInit(): void {
-        if (this.urlParser.isAbsoluteFormLayout()) {
-            this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
-                if (value) this.snap(value);
-            })
-        }
-    }
-
-    ngOnDestroy(): void {
-        if (this.subscription !== undefined) this.subscription.unsubscribe();
     }
 
     openPackageManager() {
@@ -95,10 +97,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     onPaletteScroll() {
-        this.editorSession.variantsScroll.emit({ scrollPos: this.editorContentService.getPallete().scrollTop });
+        this.editorSession.variantsScroll.set({ scrollPos: this.editorContentService.getPallete().scrollTop });
     }
     
-    onFavoriteCLick(event: MouseEvent, component: PaletteComp) {
+    onFavoriteCLick(event: Event, component: PaletteComp) {
         event.stopPropagation();
         this.editorSession.updateFavoritesComponents(component);
     }
@@ -128,7 +130,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             variantBtn = variantBtn.parentElement as HTMLButtonElement;
         }
         if (variantBtn.tagName === 'BUTTON') { //clicked on the inner or button
-            this.editorSession.variantsTrigger.emit({ show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
+            this.editorSession.variantsTrigger.set({ show: true, top: variantBtn.offsetTop, left: variantBtn.offsetLeft, component: component });
         } //else a very narrow margin (cca. 1 px) of this component was clicked and popup will be wrongly positioned
     }
 
@@ -158,7 +160,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.dragItem.model = model;
 
         this.canDrop = { dropAllowed: false };
-        this.editorSession.getState().dragging = true;
+        this.editorSession.dragging.set(true);
         this.editorContentService.sendMessageToIframe({
             id: 'createElement',
             name: this.convertToJSName(this.dragItem.elementName!),
@@ -184,12 +186,18 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         }
     }
 
-    onMouseDown(event: MouseEvent, elementName: string, packageName: string, model: Record<string, unknown>, ghost: PaletteComp, propertyName?: string, propertyValue?: Record<string, string>, componentType?: string, topContainer?: boolean, layoutName?: string, attributes?: Record<string, string>, children?: [Record<string, string>]) {
-        if (event.target && ((event.target as Element).getAttribute('name') === 'variants' || (event.target as Element).getAttribute('name') === 'favIcon') || (event.target as HTMLElement).id === 'chevron') {
+    onMouseDown(
+        event: MouseEvent, elementName: string, packageName: string, model: Record<string, unknown>,
+        ghost: PaletteComp, propertyName?: string, propertyValue?: Record<string, string>,
+        componentType?: string, topContainer?: boolean, layoutName?: string,
+        attributes?: Record<string, string>, children?: [Record<string, string>]
+    ) {
+        if (event.target && ((event.target as Element).getAttribute('name') === 'variants'
+            || (event.target as Element).getAttribute('name') === 'favIcon') || (event.target as HTMLElement).id === 'chevron') {
             return; // it has a separate handler
         }
         event.stopPropagation();
-        this.editorSession.variantsTrigger.emit({ show: false });
+        this.editorSession.variantsTrigger.set({ show: false });
 
         let target = event.target as HTMLElement;
         if (target.localName === 'designer-variantscontent') {
@@ -223,7 +231,10 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         this.canDrop = { dropAllowed: false };
         if (!ghost) {
             this.editorSession.setDragging(true);
-            this.editorContentService.sendMessageToIframe({ id: 'createElement', name: this.convertToJSName(elementName), model: model, type: componentType, attributes: attributes, children: children });
+            this.editorContentService.sendMessageToIframe({
+                id: 'createElement', name: this.convertToJSName(elementName), model: model,
+                type: componentType, attributes: attributes, children: children
+            });
         }
 
         this.editorSession.registerAutoscroll(this);
@@ -234,7 +245,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             return; // it has a separate handler
         }
         if (this.canDrop && !this.canDrop.dropTarget) {
-            this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!, event, this.dragItem.elementName!);
+            this.canDrop = this.designerUtilsService.getDropNode(
+                this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!,
+                this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!,
+                event, this.dragItem.elementName!
+            );
         }
         if (this.dragItem.paletteItemBeingDragged) {
             this.editorSession.setDragging(false);
@@ -343,13 +358,15 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (this.draggedVariant.element) {
             this.draggedVariant.element = null!;
             this.draggedVariant.variant = null!;
-            this.editorSession.variantsTrigger.emit({ show: false });
+            this.editorSession.variantsTrigger.set({ show: false });
         }
     }
 
     onMouseMove = (event: MouseEvent) => {
         const paletteRect: DOMRect = this.editorContentService.getPallete().getBoundingClientRect();
-        if (event.pageX >= paletteRect.width && event.pageX >= this.editorContentService.getLeftPositionIframe() && event.pageY >= this.editorContentService.getTopPositionIframe() && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
+        if (event.pageX >= paletteRect.width && event.pageX >= this.editorContentService.getLeftPositionIframe()
+            && event.pageY >= this.editorContentService.getTopPositionIframe()
+            && this.dragItem.paletteItemBeingDragged && this.dragItem.contentItemBeingDragged) {
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'opacity', '0');
             this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'opacity', '1');
         }
@@ -361,10 +378,20 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'left', event.pageX + 'px');
             this.renderer.setStyle(this.dragItem.paletteItemBeingDragged, 'top', event.pageY + 'px');
             if (this.dragItem.contentItemBeingDragged) {
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'left', event.pageX - this.editorContentService.getLeftPositionIframe() + 'px');
-                this.renderer.setStyle(this.dragItem.contentItemBeingDragged, 'top', event.pageY - this.editorContentService.getTopPositionIframe() + 'px');
+                this.renderer.setStyle(
+                    this.dragItem.contentItemBeingDragged, 'left',
+                    event.pageX - this.editorContentService.getLeftPositionIframe() + 'px'
+                );
+                this.renderer.setStyle(
+                    this.dragItem.contentItemBeingDragged, 'top',
+                    event.pageY - this.editorContentService.getTopPositionIframe() + 'px'
+                );
 
-                this.canDrop = this.designerUtilsService.getDropNode(this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!, this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!, event, this.dragItem.elementName!);
+            this.canDrop = this.designerUtilsService.getDropNode(
+                this.urlParser.isAbsoluteFormLayout(), this.dragItem.componentType!, this.dragItem.topContainer!,
+                this.dragItem.layoutName ? this.dragItem.packageName + '.' + this.dragItem.layoutName : this.dragItem.layoutName!,
+                event, this.dragItem.elementName!
+            );
 
                 if (!this.canDrop.dropAllowed) {
                     this.editorContentService.getGlassPane().style.cursor = 'not-allowed';
@@ -435,7 +462,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 
     getPackages(): Package[] {
-        return this.editorSession.getState().packages;
+        return this.editorSession.packages();
     }
 
     updateLocationCallback(changeX: number, changeY: number) {
@@ -454,11 +481,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         else
             layoutType = 'Responsive-Layout';
         this.activeIds = [];
-        this.http.get('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got: any) => {
+        this.http.get<Package[]>('/designer/palette?layout=' + layoutType + '&formName=' + this.urlParser.getFormName()).subscribe((got) => {
             let packages: Package[]
             let propertyValues!: PaletteComp[];
             if (got[got.length - 1] && got[got.length - 1].propertyValues) {
-                propertyValues = got[got.length - 1].propertyValues;
+                propertyValues = got[got.length - 1].propertyValues!;
                 packages = got.slice(0, got.length - 1);
             } else {
                 packages = got;
@@ -490,7 +517,8 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
                     }
                 }
             }
-            this.editorSession.getState().packages = packages;
+            this.editorSession.packages.set(packages);
+            this.cdr.markForCheck();
         });
     }
 
@@ -557,7 +585,9 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
 
     closeSuggestions(): void {
         if (!this.keepSuggestionsOpen) {
-            this.searchText && this.addToHistory(this.searchText);
+            if (this.searchText) {
+                this.addToHistory(this.searchText);
+            }
             this.showSuggestions = false;
         }
     }
@@ -589,10 +619,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     }
 }
 
-@Pipe({
-    name: 'searchTextFilter',
-    standalone: false
-})
+@Pipe({ name: 'searchTextFilter' })
 export class SearchTextPipe implements PipeTransform {
     transform(items: PaletteComp[], text: string): PaletteComp[] {
         let sortedItems = items;
@@ -610,10 +637,7 @@ export class SearchTextPipe implements PipeTransform {
     }
 }
 
-@Pipe({
-    name: 'searchTextFilterDeep',
-    standalone: false
-})
+@Pipe({ name: 'searchTextFilterDeep' })
 export class SearchTextDeepPipe implements PipeTransform {
     transform(items: Package[], text: string): Package[] {
         if (items)

@@ -1,19 +1,22 @@
-import { Component, OnInit, Renderer2, OnDestroy, ViewChild, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, OnDestroy, ElementRef, ChangeDetectionStrategy, inject, viewChild, signal } from '@angular/core';
 import { EditorSessionService, ISelectionChangedListener, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { Point } from '../mouseselection/mouseselection.component';
 import { EditorContentService, IContentMessageListener } from '../services/editorcontent.service';
+import { NgStyle } from '@angular/common';
+import { ResizeEditorWidthComponent } from '../resizeeditorwidth/resizeeditorwidth.component';
+import { ResizeEditorHeightComponent } from '../resizeeditorheight/resizeeditorheight.component';
 
 @Component({
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgStyle, ResizeEditorWidthComponent, ResizeEditorHeightComponent]
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 
-    @ViewChild('element', { static: false }) elementRef!: ElementRef<Element>;
+    readonly elementRef = viewChild.required<ElementRef<Element>>('element');
 
     ghostOffset = 20;
     containerLeftOffset!: number;
@@ -21,7 +24,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     leftOffsetRelativeToSelectedGhost!: number;
     topOffsetRelativeToSelectedGhost!: number;
 
-    ghostContainers!: GhostContainer[];
+    readonly ghostContainers = signal<GhostContainer[]>([]);
     removeSelectionChangedListener!: () => void;
     mousedownpoint!: Point;
     draggingGhost!: Ghost;
@@ -83,8 +86,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
 
         if (id === 'redrawDecorators') {
-            if (this.ghostContainers) {
-                for (const ghostContainer of this.ghostContainers) {
+            const containers = this.ghostContainers();
+            if (containers.length) {
+                for (const ghostContainer of containers) {
                     for (const ghost of ghostContainer.ghosts) {
                         if (this.editorSession.getSelection().indexOf(ghost.uuid) >= 0) {
                             this.renderGhosts();
@@ -106,8 +110,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     hideShowGhosts(visibility: string) {
-        if (this.elementRef) {
-            const ghostsContainer = document.querySelectorAll(`.${this.elementRef.nativeElement.classList.value}`);
+        const elementRef = this.elementRef();
+        if (elementRef) {
+            const ghostsContainer = document.querySelectorAll(`.${elementRef.nativeElement.classList.value}`);
             Array.from(ghostsContainer).slice(1).forEach((item: any) => {
                 item.style.visibility = visibility;
                 item.querySelectorAll('.ghost').forEach((ghost: any) => ghost.style.visibility = visibility);
@@ -243,7 +248,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                 }
             }
         }
-        this.ghostContainers = ghostContainers;
+        this.ghostContainers.set(ghostContainers);
     }
 
     openContainedForm(ghost: Ghost) {
@@ -265,7 +270,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         } else {
             if (event.button == 2 && selection.indexOf(ghost.uuid) >= 0) {
                 //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
-                this.editorSession.getState().ghosthandle = true;
+                this.editorSession.ghosthandle.set(true);
                 return;
             } else if (this.editorSession.getSelection().indexOf(ghost.uuid) == -1 || ghost.type != GHOST_TYPES.GHOST_TYPE_COMPONENT) {
                 this.editorSession.setSelection([ghost.uuid]);
@@ -273,7 +278,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 
         }
         if (event.button == 0) {
-            this.editorSession.getState().dragging = true;
+            this.editorSession.dragging.set(true);
             this.mousedownpoint = { x: event.pageX, y: event.pageY };
             this.draggingGhost = ghost;
             this.draggingInGhostContainer = ghostContainer;
@@ -325,7 +330,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     onMouseUp(event: MouseEvent) {
-        this.editorSession.getState().ghosthandle = false;
+        this.editorSession.ghosthandle.set(false);
         if (this.draggingGhost) {
             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
@@ -336,7 +341,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                     this.editorSession.sendChanges(obj);
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-                    this.renderGhostsInternal(this.ghostContainers);
+                    this.renderGhostsInternal(this.ghostContainers());
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_PART) {
                     const changes: Record<string, any> = {};
@@ -360,7 +365,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             }
             // this is just to re-render the decorators
             this.editorSession.updateSelection(this.editorSession.getSelection(), true);
-            this.editorSession.getState().dragging = false;
+            this.editorSession.dragging.set(false);
             this.editorSession.unregisterAutoscroll(this);
         }
         if (this.draggingClone) {
@@ -459,8 +464,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
                             this.renderer.setStyle(this.draggingGhostComponent, 'top', this.partTopPosition + 'px');
                         } else if (this.isLowestPart) {
                             this.formHeight = this.partTopPosition;
-                            for (const _ghostContainer of this.ghostContainers) {
-                                this.ghostContainers[0].style.height = this.partTopPosition + 'px';
+                            const containers = this.ghostContainers();
+                            for (const _ghostContainer of containers) {
+                                containers[0].style.height = this.partTopPosition + 'px';
                             }
                             this.renderer.setStyle(this.editorContent, 'height', this.partTopPosition + 'px');
                             if (this.partTopPosition + this.ghostOffset > this.glasspane.offsetHeight) {
@@ -476,11 +482,9 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     }
 
     selectionChanged(_ids: string[], _redrawDecorators?: boolean, designerChange?: boolean): void {
-        // this is an overkill but sometimes we need the server side data for the ghosts (for example when element was dragged out of form bounds and is shown as ghost)
-        // not sure how to detect when we really need to redraw
         if (designerChange) this.renderGhosts();
         else {
-            this.renderGhostsInternal(this.ghostContainers);
+            this.renderGhostsInternal(this.ghostContainers());
         }
     }
 
@@ -493,11 +497,12 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             return;
         } else if (!this.isLowestPart && this.partTopPosition >= this.bottomLimit) {
             return;
-        } //else partTopPosition > this.topLimit && (this.isLowestPart || partTopPosition <= bottomLimit)
+        }
         if (this.isLowestPart) {
             this.formHeight = this.partTopPosition;
-            for (const _ghostContainer of this.ghostContainers) {
-                this.ghostContainers[0].style.height = this.partTopPosition + 'px';
+            const containers = this.ghostContainers();
+            for (const _ghostContainer of containers) {
+                containers[0].style.height = this.partTopPosition + 'px';
             }
             this.renderer.setStyle(this.editorContent, 'height', this.partTopPosition + 'px');
             if (this.partTopPosition + this.ghostOffset > this.glasspane.offsetHeight) {

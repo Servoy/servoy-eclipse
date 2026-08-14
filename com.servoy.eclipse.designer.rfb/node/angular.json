@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "cli": {
-    "analytics": "b95d82b9-103d-40e2-85eb-51106c6d437f",
+    "analytics": false,
     "schematicCollections": [
       "@angular-eslint/schematics"
     ]
@@ -28,9 +28,7 @@
               "browser": ""
             },
             "index": "src/index.html",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
@@ -49,12 +47,6 @@
           },
           "configurations": {
             "production": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -90,8 +82,19 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
+            "tsConfig": "tsconfig.spec.json",
             "buildTarget": "servoy-designer:build",
             "runnerConfig": "vitest-base.config.ts"
+          }
+        },
+        "test-browser": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "servoy-designer:build",
+            "runnerConfig": "vitest-browser.config.ts",
+            "include": ["src/**/*.browser.spec.ts"],
+            "browsers": ["chromium"],
+            "headless": true
           }
         },
         "lint": {
@@ -112,30 +115,6 @@
     },
     "@angular-eslint/schematics:library": {
       "setParserOptionsProject": true
-    },
-    "@schematics/angular:component": {
-      "type": "component"
-    },
-    "@schematics/angular:directive": {
-      "type": "directive"
-    },
-    "@schematics/angular:service": {
-      "type": "service"
-    },
-    "@schematics/angular:guard": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:interceptor": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:module": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:pipe": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:resolver": {
-      "typeSeparator": "."
     }
   }
 }

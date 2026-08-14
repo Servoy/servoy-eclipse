@@ -116,6 +116,23 @@ public class SetupPipelineDetailsPage extends WizardPage
 			}
 		});
 
+		if (loginTokenForJson[0] == null)
+		{
+			Composite container = new Composite(parent, SWT.NONE);
+			container.setLayout(new GridLayout(1, false));
+			Label msgLabel = new Label(container, SWT.WRAP);
+			if (!ServoyLoginDialog.isCloudReachable())
+			{
+				msgLabel.setText("Servoy Cloud is currently unreachable. Pipeline setup requires a cloud connection and is temporarily unavailable.");
+			}
+			else
+			{
+				msgLabel.setText("Login is required to set up a pipeline.");
+			}
+			setControl(container);
+			return;
+		}
+
 		try
 		{
 			String url = CROWD + loginTokenForJson[0]; // Append token to the URL

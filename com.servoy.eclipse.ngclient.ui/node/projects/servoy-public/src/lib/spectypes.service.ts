@@ -603,19 +603,19 @@ export interface IFoundset extends IFoundsetFieldsOnly {
      * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]._svyRowId)
      * and gives a Record reference, an object
      * which can be resolved server side to the exact Record via the 'record' property type;
-     * for example if you call a handler or a servoyapi.callServerSideApi(...) and want
+     * for example if you call a handler or a servoyApi().callServerSideApi(...) and want
      * to give it a Record as parameter and you have the rowID and foundset in your code,
-     * you can use this method. E.g: servoyapi.callServerSideApi("doSomethingWithRecord",
+     * you can use this method. E.g: servoyApi().callServerSideApi("doSomethingWithRecord",
      *                     [this.myFoundsetProperty.getRecordRefByRowID(clickedRowId)]);
      *
      * NOTE: if in your component you know the whole row (so myFoundsetProp.viewPort.rows[idx])
      * already - not just the rowID - that you want to send you can just give that directly to the
      * handler/serverSideApi; you do not need to use this method in that case. E.g:
      * // if you have the index inside the viewport
-     * servoyapi.callServerSideApi("doSomethingWithRecord",
+     * servoyApi().callServerSideApi("doSomethingWithRecord",
      *           [this.myFoundsetProperty.viewPort.rows[clickedRowIdx]]);
      * // or if you have the row directly
-     * servoyapi.callServerSideApi("doSomethingWithRecord", [clickedRow]);
+     * servoyApi().callServerSideApi("doSomethingWithRecord", [clickedRow]);
      *
      * This method has been added in Servoy 8.3.
      */

@@ -1,15 +1,12 @@
-import { AfterViewInit, Directive, HostListener, OnDestroy, OnInit, inject, input } from '@angular/core';
+import { Directive, HostListener, OnInit, effect, inject, input, untracked } from '@angular/core';
 import { SelectionNode } from '../mouseselection/mouseselection.component';
 import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
-import { Subscription } from 'rxjs';
 
-@Directive({
-    selector: '[resizeKnob]',
-    standalone: false
-})
-export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
+// eslint-disable-next-line @angular-eslint/directive-selector
+@Directive({ selector: '[resizeKnob]' })
+export class ResizeKnobDirective implements OnInit {
 
     resizeInfo = input<ResizeInfo>(undefined!, { alias: 'resizeKnob' });
 
@@ -25,11 +22,17 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
     topContentAreaAdjust!: number;
     leftContentAreaAdjust!: number;
     snapData!: SnapData;
-    subscription!: Subscription;
 
     protected readonly editorSession = inject(EditorSessionService);
     private editorContentService = inject(EditorContentService);
     private guidesService = inject(DynamicGuidesService);
+
+    constructor() {
+        effect(() => {
+            const value = this.guidesService.snapData();
+            if (value) untracked(() => this.snap(value));
+        });
+    }
 
     ngOnInit(): void {
         const computedStyle = window.getComputedStyle(this.editorContentService.getContentArea(), null)
@@ -76,14 +79,8 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    ngAfterViewInit(): void {
-        this.subscription = this.guidesService.snapDataListener.subscribe((value: SnapData | null) => {
-            if (value) this.snap(value);
-        })
-    }
-
     snap( data: SnapData): void {
-        if (this.currentElementInfo && this.editorSession.getState().resizing) {
+        if (this.currentElementInfo && this.editorSession.resizing()) {
             this.snapData = data;
             if (this.initialElementInfo.size == 1 && (this.snapData?.width || this.snapData?.height)) {
                 const elementInfo = this.initialElementInfo.values().next().value!;
@@ -105,10 +102,6 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    ngOnDestroy(): void {
-        this.subscription.unsubscribe();
-    }
-
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
         if(event.button == 0) {
@@ -121,7 +114,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
             };
 
             this.cleanResizeState();
-            this.editorSession.getState().resizing = true;
+            this.editorSession.resizing.set(true);
 
             const selection = this.editorSession.getSelection();
             if (selection && selection.length > 0) {
@@ -188,7 +181,7 @@ export class ResizeKnobDirective implements OnInit, AfterViewInit, OnDestroy {
         this.editorContentService.getContentArea().removeEventListener('mouseup', this.contentAreaMouseUp);
         this.editorContentService.getContentArea().removeEventListener('mouseleave', this.contentAreaMouseLeave);
         this.editorContentService.getContentArea().removeEventListener('keydown', this.contentAreaKeyDown);
-        this.editorSession.getState().resizing = false;
+        this.editorSession.resizing.set(false);
     }
 
     private setCursorStyle(style: string) {

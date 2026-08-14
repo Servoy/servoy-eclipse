@@ -1,4 +1,4 @@
-import { OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable, inject } from '@angular/core';
+import { OnInit, AfterViewInit, OnChanges, SimpleChanges, input, Renderer2, ElementRef, viewChild, Directive, ChangeDetectorRef, OnDestroy, Injectable, inject } from '@angular/core';
 import { ServoyApi } from './servoy_api';
 
 /**
@@ -16,32 +16,26 @@ import { ServoyApi } from './servoy_api';
 @Directive()
 // eslint-disable-next-line
 export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit, OnInit, OnChanges, OnDestroy {
-    @Input() name!: string;
-    @Input() servoyApi!: ServoyApi;
+    readonly name = input<string>(undefined as any);
+    readonly servoyApi = input<ServoyApi>(undefined as any);
     readonly servoyAttributes = input<{ [property: string]: string }>(undefined as any);
 
-    @ViewChild('element', { static: false, read: ElementRef }) elementRef!: ElementRef<T>;
+    readonly elementRef = viewChild<ElementRef<T>>('element');
 
-    protected readonly renderer: Renderer2;
-    protected cdRef: ChangeDetectorRef;
+    protected readonly renderer = inject(Renderer2);
+    protected readonly cdRef = inject(ChangeDetectorRef);
 
     private viewStateListeners: Set<IViewStateListener> = new Set();
-    private componentContributor: ComponentContributor;
+    private componentContributor = new ComponentContributor();
     private initialized = false;
     private changes: SimpleChanges | null = null;
-
-    constructor(renderer?: Renderer2, cdRef?: ChangeDetectorRef) {
-        this.renderer = renderer ?? inject(Renderer2);
-        this.cdRef = cdRef ?? inject(ChangeDetectorRef);
-        this.componentContributor = new ComponentContributor();
-    }
 
     /**
      *  final method, do not override use {@link #svyOnInit} for this
      */
     ngOnInit() {
         this.initializeComponent();
-        this.servoyApi.registerComponent(this);
+        this.servoyApi().registerComponent(this);
     }
 
     /**
@@ -49,12 +43,11 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      */
     ngAfterViewInit() {
         this.initializeComponent();
-        if (this.elementRef && this.changes) {
+        if (this.elementRef() && this.changes) {
             this.svyOnChanges(this.changes);
             this.changes = null;
         }
-        if (!this.elementRef) {
-            // using logger would be better, but that would break all extends..
+        if (!this.elementRef()) {
             console.log('component should have #element it its template for correct initalization for targetting the main div');
             console.log(this);
         }
@@ -66,7 +59,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      */
     ngOnChanges(changes: SimpleChanges) {
         this.initializeComponent();
-        if (!this.elementRef) {
+        if (!this.elementRef()) {
             if (this.changes == null) {
                 this.changes = changes;
             } else {
@@ -92,7 +85,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * make sure you call super.ngOnDestroy()
      */
     ngOnDestroy() {
-        this.servoyApi.unRegisterComponent(this);
+        this.servoyApi().unRegisterComponent(this);
         if (this.getNativeElement()) (this.getNativeElement() as any)['svyHostComponent'] = null;
     }
 
@@ -138,14 +131,14 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * this should return the main native element (like the first div) which is marked as #element in the main div.
      */
     public getNativeElement(): T {
-        return this.elementRef ? this.elementRef.nativeElement : null!;
+        return this.elementRef() ? this.elementRef()!.nativeElement : null!;
     }
 
     /**
      * sub classes can return a different native child then the default main element.
      */
     public getNativeChild(): HTMLElement {
-        return this.elementRef.nativeElement;
+        return this.elementRef()!.nativeElement;
     }
 
     /**
@@ -203,7 +196,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * @internal
      */
     protected initializeComponent() {
-        if (!this.initialized && this.elementRef) {
+        if (!this.initialized && this.elementRef()) {
             this.initialized = true;
             this.svyOnInit();
         }

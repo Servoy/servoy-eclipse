@@ -5,7 +5,7 @@
 	 #element>
 	<input type="radio"
 	     ngModel	
-    	 [id]="servoyApi.getMarkupId()"
+    	 [id]="servoyApi().getMarkupId()"
 		 [disabled]="!enabled() || !editable()"
 		 [sabloTabseq]="tabSeq()"
          #input />

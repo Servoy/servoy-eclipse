@@ -3,7 +3,7 @@ import { ServoyPublicService } from '../services/servoy_public.service';
 
 @Directive({
     selector: '[svyAutosave]',
-    standalone: false
+    standalone: true
 })
 export class AutosaveDirective {
 

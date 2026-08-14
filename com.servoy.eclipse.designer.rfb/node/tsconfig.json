@@ -1,5 +1,4 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
@@ -7,27 +6,13 @@
     "esModuleInterop": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "declaration": false,
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
     "module": "es2020",
-    "paths": {
-      "@servoy/sablo": [
-        "../../com.servoy.eclipse.ngclient.ui/node/src/sablo/public-api"
-      ],
-      "@servoy/public": [
-        "../../com.servoy.eclipse.ngclient.ui/node/projects/servoy-public/src/public-api"
-      ],
-	  "@servoy/designer": [
-	          "../../com.servoy.eclipse.ngclient.ui/node/src/designer/public-api"
-	  ],
-      "@angular/*": [
-        "./node_modules/@angular/*"
-      ]
-    },
     "useDefineForClassFields": false,
+    "skipLibCheck": true,
     "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {

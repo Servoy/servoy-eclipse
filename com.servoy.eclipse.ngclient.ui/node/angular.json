@@ -197,6 +197,36 @@
         }
       }
     },
+    "@servoy/sablo": {
+      "projectType": "library",
+      "root": "projects/servoy-sablo",
+      "sourceRoot": "src/sablo",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "tsConfig": "projects/servoy-sablo/tsconfig.lib.json",
+            "project": "projects/servoy-sablo/ng-package.json"
+          }
+        }
+      }
+    },
+    "@servoy/designer": {
+      "projectType": "library",
+      "root": "projects/servoy-designer",
+      "sourceRoot": "src/designer",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "tsConfig": "projects/servoy-designer/tsconfig.lib.json",
+            "project": "projects/servoy-designer/ng-package.json"
+          }
+        }
+      }
+    },
     "@servoy/ngclientutils": {
       "projectType": "library",
       "root": "projects/ngclientutils",

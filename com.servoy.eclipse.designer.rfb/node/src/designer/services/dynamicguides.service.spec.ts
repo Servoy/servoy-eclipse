@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 
 import { DynamicGuidesService, SnapData } from './dynamicguides.service';
 
@@ -7,7 +8,7 @@ describe('DynamicGuidesService — SVY-21129', () => {
 
     let service: DynamicGuidesService;
     let editorContent: Record<string, ReturnType<typeof vi.fn>>;
-    let editorSession: Record<string, ReturnType<typeof vi.fn>>;
+    let editorSession: any;
 
     beforeEach(() => {
         editorContent = {
@@ -22,7 +23,9 @@ describe('DynamicGuidesService — SVY-21129', () => {
 
         editorSession = {
             addDynamicGuidesChangedListener: vi.fn(),
-            getState: vi.fn().mockReturnValue({ resizing: true, dragging: false }),
+            resizing: signal(true),
+            dragging: signal(false),
+            packages: signal([]),
             getSnapThreshold: vi.fn(),
             getSelection: vi.fn().mockReturnValue([]),
             setStatusBarText: vi.fn()

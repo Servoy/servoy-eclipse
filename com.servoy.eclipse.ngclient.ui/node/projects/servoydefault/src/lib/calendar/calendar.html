@@ -1,13 +1,13 @@
  <div
      class='input-group date svy-calendar-container input-sm'
-      [id]="servoyApi.getMarkupId()"
+      [id]="servoyApi().getMarkupId()"
      data-td-target-input='nearest'
      data-td-target-toggle='nearest'
      style='height:100%'
       [svyTooltip]="toolTipText()"
      #element>
    <input
-      [id]="servoyApi.getMarkupId() + 'input'"
+      [id]="servoyApi().getMarkupId() + 'input'"
      type='text'
      class='svy-calendar form-control form-control-sm input-sm svy-line-height-normal'
      style='height:100%'

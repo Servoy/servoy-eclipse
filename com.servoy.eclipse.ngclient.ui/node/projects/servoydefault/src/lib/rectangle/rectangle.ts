@@ -1,20 +1,20 @@
-import {Component, ChangeDetectorRef, Renderer2, SimpleChanges, ChangeDetectionStrategy, input} from '@angular/core';
+import { TooltipDirective } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import {Component, SimpleChanges, ChangeDetectionStrategy, input} from '@angular/core';
 import {ServoyDefaultBaseComponent} from '../basecomponent';
 @Component({
     selector: 'servoydefault-rectangle',
     templateUrl: './rectangle.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective]
 })
 export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent<HTMLDivElement> {
     readonly lineSize = input<number>(undefined as any);
     readonly roundedRadius = input<number>(undefined as any);
     readonly shapeType = input<number>(undefined as any);
     readonly size = input<{width: number; height: number}>(undefined as any);
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        super(renderer, cdRef);
-    }
 
     svyOnChanges( changes: SimpleChanges ) {
 

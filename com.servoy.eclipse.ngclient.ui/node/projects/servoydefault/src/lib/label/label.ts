@@ -1,4 +1,7 @@
-import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, input } from '@angular/core';
+import { FormatFilterPipe, ImageMediaIdDirective, MnemonicletterFilterPipe, SabloTabseq, TooltipDirective, TrustAsHtmlPipe } from '@servoy/public';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 
 import {ServoyDefaultBaseLabel} from  '../baselabel';
 
@@ -6,14 +9,11 @@ import {ServoyDefaultBaseLabel} from  '../baselabel';
     selector: 'servoydefault-label',
     templateUrl: './label.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, TooltipDirective, SabloTabseq, FormatFilterPipe, MnemonicletterFilterPipe, TrustAsHtmlPipe, ImageMediaIdDirective]
 } )
 export class ServoyDefaultLabel extends ServoyDefaultBaseLabel<HTMLDivElement> {
 
     readonly labelFor = input<any>(undefined);
-
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef ) {
-        super(renderer, cdRef);
-    }
 }
 
