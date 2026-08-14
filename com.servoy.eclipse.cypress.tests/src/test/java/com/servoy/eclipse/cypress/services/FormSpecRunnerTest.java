@@ -51,7 +51,7 @@ public class FormSpecRunnerTest
 	}
 
 	@Test
-	public void testFormSpecRunner_runFormCypressTests_headlessParam() throws NoSuchMethodException
+	public void testFormSpecRunner_runFormCypressTestsHasHeadlessParam() throws NoSuchMethodException
 	{
 		Method m = FormSpecRunner.class.getMethod("runFormCypressTests", String.class, boolean.class);
 		assertEquals("Second param should be boolean for headless",
