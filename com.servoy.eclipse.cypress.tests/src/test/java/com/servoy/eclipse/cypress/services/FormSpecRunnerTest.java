@@ -34,6 +34,23 @@ public class FormSpecRunnerTest
 	}
 
 	@Test
+	public void testFormSpecRunner_runFormCypressTests_noActiveProject()
+	{
+		FormSpecRunner runner = new FormSpecRunner();
+		try
+		{
+			String result = runner.runFormCypressTests("nonExistentForm", true);
+			assertNotNull(result);
+			assertTrue("Should return error when no active project",
+				result.contains("Error"));
+		}
+		catch (Throwable e)
+		{
+			assertNotNull("Expected error in plain JUnit (no workspace)", e);
+		}
+	}
+
+	@Test
 	public void testFormSpecRunner_runFormCypressTestsHasHeadlessParam() throws NoSuchMethodException
 	{
 		Method m = FormSpecRunner.class.getMethod("runFormCypressTests", String.class, boolean.class);
