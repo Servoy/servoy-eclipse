@@ -74,18 +74,16 @@ public class FormSpecRunnerShutdownTest
 	}
 
 	@Test
-	public void testFormPreviewUserUidConstant() throws Exception
+	public void testFormPreviewNGClientHasShutdownExistingMethod() throws Exception
 	{
-		java.lang.reflect.Field field = FormSpecRunner.class.getDeclaredField("FORMPREVIEW_USER_UID");
-		field.setAccessible(true);
-		assertNotNull("FORMPREVIEW_USER_UID constant must exist", field);
-		assertTrue("FORMPREVIEW_USER_UID must be static",
-			java.lang.reflect.Modifier.isStatic(field.getModifiers()));
-		assertTrue("FORMPREVIEW_USER_UID must be final",
-			java.lang.reflect.Modifier.isFinal(field.getModifiers()));
-		Object value = field.get(null);
-		assertTrue("FORMPREVIEW_USER_UID must be 'formpreview_user'",
-			"formpreview_user".equals(value));
+		Method method = com.servoy.eclipse.ngclient.startup.FormPreviewNGClient.class.getDeclaredMethod("shutdownExisting");
+		assertNotNull("FormPreviewNGClient must have shutdownExisting method", method);
+		assertTrue("shutdownExisting must be public",
+			java.lang.reflect.Modifier.isPublic(method.getModifiers()));
+		assertTrue("shutdownExisting must be static",
+			java.lang.reflect.Modifier.isStatic(method.getModifiers()));
+		assertTrue("shutdownExisting must return void",
+			method.getReturnType() == void.class);
 	}
 
 	@Test
