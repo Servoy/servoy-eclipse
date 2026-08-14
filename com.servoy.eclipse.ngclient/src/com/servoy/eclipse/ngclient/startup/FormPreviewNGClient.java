@@ -23,6 +23,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.NGClient;
 import com.servoy.j2db.server.ngclient.NGFormManager;
+import com.servoy.j2db.util.Debug;
 
 /**
  * A lightweight NG client for form preview/testing purposes.
@@ -42,12 +43,32 @@ import com.servoy.j2db.server.ngclient.NGFormManager;
 public class FormPreviewNGClient extends NGClient
 {
 	private static volatile String pendingTargetFormName;
+	private static volatile FormPreviewNGClient instance;
 	private final String targetFormName;
 
 	public FormPreviewNGClient(INGClientWebsocketSession wsSession, IDesignerCallback designerCallback, String targetFormName) throws Exception
 	{
 		super(wsSession, designerCallback);
 		this.targetFormName = targetFormName;
+		if (instance != null && !instance.isShutDown())
+		{
+			Debug.warn("Shutting down existing FormPreviewNGClient before creating a new one");
+			instance.shutDown(true);
+		}
+		instance = this;
+	}
+
+	/**
+	 * Shuts down the currently active FormPreviewNGClient instance, if any.
+	 * Follows the same pattern as DebugClientHandler.createDebugNGClient().
+	 */
+	public static synchronized void shutdownExisting()
+	{
+		if (instance != null && !instance.isShutDown())
+		{
+			instance.shutDown(true);
+		}
+		instance = null;
 	}
 
 	public static void setPendingTargetFormName(String formName)
