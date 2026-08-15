@@ -1,7 +1,7 @@
 import { SabloTabseq, ServoyBaseComponent } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Component, Input, model, ContentChild, TemplateRef, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Input, model, input, ContentChild, TemplateRef, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
 
 
 import { Tab } from '../tabpanel/basetabpanel';
@@ -17,23 +17,23 @@ import { BGPane } from './bg_splitter/bg_pane.component';
 } )
 export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> {
 
-    @Input() onChangeMethodID: any;
+    readonly onChangeMethodID = input<any>(undefined);
 
-    @Input() background: any;
-    @Input() borderType: any;
-    @Input() enabled: any;
-    @Input() fontType: any;
-    @Input() foreground: any;
-    @Input() horizontalAlignment: any;
-    @Input() location: any;
-    @Input() readOnly: any;
-    @Input() selectedTabColor: any;
-    @Input() size: any;
-    @Input() styleClass: any;
-    @Input() tabOrientation: any;
-    @Input() tabSeq: any;
-    @Input() tabs!: Array<Tab>;
-    @Input() transparent: any;
+    readonly background = input<any>(undefined);
+    readonly borderType = input<any>(undefined);
+    readonly enabled = input<any>(undefined);
+    readonly fontType = input<any>(undefined);
+    readonly foreground = input<any>(undefined);
+    readonly horizontalAlignment = input<any>(undefined);
+    readonly location = input<any>(undefined);
+    readonly readOnly = input<any>(undefined);
+    readonly selectedTabColor = input<any>(undefined);
+    readonly size = input<any>(undefined);
+    readonly styleClass = input<any>(undefined);
+    readonly tabOrientation = input<any>(undefined);
+    readonly tabSeq = input<any>(undefined);
+    readonly tabs = input<Array<Tab>>(undefined!);
+    readonly transparent = input<any>(undefined);
 
     readonly divLocation = model<any>(undefined as any);
     @Input() divSize: any;
@@ -58,8 +58,8 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
 
     svyOnChanges(changes: SimpleChanges) {
         if(changes['tabs']) {
-            this.leftTab = this.tabSwitch(this.leftTab, (this.tabs ? this.tabs[0] : null) as Tab, 0);
-            this.rightTab = this.tabSwitch(this.rightTab, (this.tabs ? this.tabs[1] : null) as Tab, 1);
+            this.leftTab = this.tabSwitch(this.leftTab, (this.tabs() ? this.tabs()[0] : null) as Tab, 0);
+            this.rightTab = this.tabSwitch(this.rightTab, (this.tabs() ? this.tabs()[1] : null) as Tab, 1);
         }
         super.svyOnChanges(changes);
         if (changes) {
@@ -87,7 +87,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
 
     onChange( location: any ) {
         this.divLocation.set(location);
-        if (this.onChangeMethodID) this.onChangeMethodID(-1, new Event('change'));
+        if (this.onChangeMethodID()) this.onChangeMethodID()(-1, new Event('change'));
     }
 
     getRightTab() {
