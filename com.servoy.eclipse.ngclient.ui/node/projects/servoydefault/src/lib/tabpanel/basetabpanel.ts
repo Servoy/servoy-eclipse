@@ -1,4 +1,4 @@
-import { ContentChild, TemplateRef, SimpleChanges, Directive, inject, input, model } from '@angular/core';
+import { ContentChild, TemplateRef, SimpleChanges, Directive, inject, input, model, contentChild } from '@angular/core';
 
 import { BaseCustomObject, LoggerFactory, LoggerService, ServoyBaseComponent, WindowRefService } from '@servoy/public';
 
@@ -26,8 +26,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
     readonly tabIndex = model<any>(undefined);
 
-    @ContentChild(TemplateRef, { static: true })
-    templateRef!: TemplateRef<any>;
+    readonly templateRef = contentChild(TemplateRef);
 
     public selectedTabID!: string;
 

@@ -1,7 +1,7 @@
 import { SabloTabseq, ServoyBaseComponent } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Component, Input, model, input, ContentChild, TemplateRef, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Input, model, input, contentChild, TemplateRef, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
 
 
 import { Tab } from '../tabpanel/basetabpanel';
@@ -42,8 +42,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
     @Input() resizeWeight: any;
 
 
-    @ContentChild( TemplateRef, {static: true} )
-    templateRef!: TemplateRef<any>;
+    readonly templateRef = contentChild(TemplateRef);
 
     private leftTab!: Tab;
     private rightTab!: Tab;

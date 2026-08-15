@@ -14,7 +14,7 @@
         </a>
         <ng-template ngbNavContent>
           <default-tabpanel-active-tab-visibility-listener [tab]="tab" (visibleTab)="onVisibleTab(tab)"></default-tabpanel-active-tab-visibility-listener>
-          <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}">
+          <ng-template [ngTemplateOutlet]="templateRef()" [ngTemplateOutletContext]="{name:getForm(tab)}">
           </ng-template>
         </ng-template>
       </li>

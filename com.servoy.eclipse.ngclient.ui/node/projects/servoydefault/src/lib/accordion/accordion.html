@@ -8,7 +8,7 @@
       </div>
       <div ngbAccordionCollapse>
         <div  ngbAccordionBody style="position: relative;overflow: auto;top: 0px;bottom: 0px;left: 0px;right: 0px;" [style.height.px]="panelHeight">
-          <ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
+          <ng-template [ngTemplateOutlet]="templateRef()" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
         </div>
       </div>
     </div>
