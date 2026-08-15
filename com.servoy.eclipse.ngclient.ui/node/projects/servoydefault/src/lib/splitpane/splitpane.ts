@@ -36,10 +36,10 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent<HTMLDivElement> 
     readonly transparent = input<any>(undefined);
 
     readonly divLocation = model<any>(undefined as any);
-    readonly divSize = input<any>(5);
-    readonly pane1MinSize = input<any>(30);
-    readonly pane2MinSize = input<any>(30);
-    readonly resizeWeight = input<any>(0);
+    readonly divSize = input(5, { transform: (v: any) => v ?? 5 });
+    readonly pane1MinSize = input(30, { transform: (v: any) => v ?? 30 });
+    readonly pane2MinSize = input(30, { transform: (v: any) => v ?? 30 });
+    readonly resizeWeight = input(0, { transform: (v: any) => v ?? 0 });
 
 
     readonly templateRef = contentChild(TemplateRef);

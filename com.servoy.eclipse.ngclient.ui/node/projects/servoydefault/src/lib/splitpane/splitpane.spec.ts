@@ -86,3 +86,65 @@ describe('ServoyDefaultSplitpane', () => {
         expect(panes.length).toBe(2);
     });
 });
+
+describe('ServoyDefaultSplitpane - default values', () => {
+    let fixture: ComponentFixture<ServoyDefaultSplitpane>;
+    let component: ServoyDefaultSplitpane;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [ServoyDefaultSplitpane],
+            providers: [
+                { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn() } },
+                { provide: FormattingService, useValue: {} },
+                { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },
+                { provide: WindowRefService, useValue: { nativeWindow: window } },
+            ],
+        });
+        fixture = TestBed.createComponent(ServoyDefaultSplitpane);
+        component = fixture.componentInstance;
+        fixture.componentRef.setInput('servoyApi', createMockServoyApi());
+        fixture.componentRef.setInput('name', 'testSplit');
+        fixture.componentRef.setInput('tabs', []);
+    });
+
+    it('should have default divSize of 5 when not set', () => {
+        expect(component.divSize()).toBe(5);
+    });
+
+    it('should have default pane1MinSize of 30 when not set', () => {
+        expect(component.pane1MinSize()).toBe(30);
+    });
+
+    it('should have default pane2MinSize of 30 when not set', () => {
+        expect(component.pane2MinSize()).toBe(30);
+    });
+
+    it('should have default resizeWeight of 0 when not set', () => {
+        expect(component.resizeWeight()).toBe(0);
+    });
+
+    it('should keep defaults when undefined is explicitly pushed', () => {
+        fixture.componentRef.setInput('divSize', undefined);
+        fixture.componentRef.setInput('pane1MinSize', undefined);
+        fixture.componentRef.setInput('pane2MinSize', undefined);
+        fixture.componentRef.setInput('resizeWeight', undefined);
+        fixture.detectChanges();
+        expect(component.divSize()).toBe(5);
+        expect(component.pane1MinSize()).toBe(30);
+        expect(component.pane2MinSize()).toBe(30);
+        expect(component.resizeWeight()).toBe(0);
+    });
+
+    it('should use provided values when set', () => {
+        fixture.componentRef.setInput('divSize', 10);
+        fixture.componentRef.setInput('pane1MinSize', 50);
+        fixture.componentRef.setInput('pane2MinSize', 60);
+        fixture.componentRef.setInput('resizeWeight', 0.5);
+        fixture.detectChanges();
+        expect(component.divSize()).toBe(10);
+        expect(component.pane1MinSize()).toBe(50);
+        expect(component.pane2MinSize()).toBe(60);
+        expect(component.resizeWeight()).toBe(0.5);
+    });
+});
