@@ -197,6 +197,10 @@ Use `find_examples` when working with newer Angular features (signal inputs, mod
 
 - **No signal writes in getters/methods called from templates** — use `computed` signals instead
 - **Change detection:** App uses `provideZonelessChangeDetection()`. Components use `OnPush` (default in Angular 22). Use signals or `markForCheck()` to notify Angular of state changes in async callbacks (setTimeout, Promises, WebSocket messages).
+- **Signal inputs with defaults:** Servoy form templates bind ALL model properties (`[prop]="model.prop"`). If the server never sends a value, the expression evaluates to `undefined`, overriding `input(30)`. Use a transform to preserve defaults:
+  ```typescript
+  readonly pane1MinSize = input(30, { transform: (v: any) => v ?? 30 });
+  ```
 - **RxJS:** unsubscribe in `ngOnDestroy` or use `takeUntilDestroyed()` / `async` pipe
 - **Template syntax:** use `@if`, `@for`, `@switch` (new control flow) — all templates have been migrated
 
