@@ -108,6 +108,31 @@ After reaching Angular 22, remove:
 - `@angular/compiler` (if no JIT usage — AOT is default)
 - Any other deprecated packages flagged by `ng update`
 
+### esbuild: Node.js globals polyfill
+
+Angular 22 uses the `@angular/build:application` builder (esbuild-based) instead of the old webpack-based builder. **esbuild does NOT polyfill Node.js globals** (`global`, `process`, `Buffer`) that webpack provided automatically.
+
+**Detection:** After a successful build, check if any dependency uses CommonJS libraries that reference `global`:
+```bash
+grep -r "global\b" node_modules/<suspect-package>/ --include="*.js" -l | head -5
+```
+
+Known problematic libraries: `dragula`, `custom-event`, `crossvent`, any package using `global` as a fallback for `window`.
+
+**Fix:** Create a side-effect polyfill file in the component that imports the problematic library:
+```typescript
+// global-polyfill.ts
+(window as any).global = window;
+```
+
+Import it BEFORE the problematic library (ESM evaluates side-effect imports in order):
+```typescript
+import './global-polyfill';
+import jKanban from "@servoy/jkanban"; // ← this pulls in dragula → global
+```
+
+**Important:** Do NOT add this to the core TiNG polyfills.ts — the component that uses the library is responsible for its own polyfills.
+
 ---
 
 ## Phase 2 — ESLint Migration
