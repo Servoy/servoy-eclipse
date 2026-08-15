@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Component, TemplateRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { Subject } from 'rxjs';
 import { signal } from '@angular/core';
 import { ServoyPublicService, FormattingService, TooltipService, ServoyApi, WindowRefService } from '@servoy/public';
@@ -53,7 +53,7 @@ class TestTabpanelHostComponent {
 @Component({
     selector: 'test-tablesspanel-host',
     template: `
-        <servoydefault-tablesspanel [servoyApi]="servoyApi" [name]="'testTablesspanel'" [tabs]="tabs" [tabIndex]="1">
+        <servoydefault-tablesspanel [servoyApi]="servoyApi" [name]="'testTablesspanel'" [tabs]="tabs" [tabIndex]="tabIndex">
             <ng-template let-name="name">
                 <div class="form-placeholder">{{name}}</div>
             </ng-template>
@@ -65,6 +65,7 @@ class TestTabpanelHostComponent {
 class TestTablesspanelHostComponent {
     servoyApi = createMockServoyApi();
     tabs = createTabs();
+    tabIndex = 1;
 }
 
 const defaultProviders = [
@@ -104,6 +105,7 @@ describe('ServoyDefaultTabpanel', () => {
 
 describe('ServoyDefaultTablesspanel', () => {
     let fixture: ComponentFixture<TestTablesspanelHostComponent>;
+    let component: ServoyDefaultTablesspanel;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -111,15 +113,37 @@ describe('ServoyDefaultTablesspanel', () => {
             providers: defaultProviders,
         });
         fixture = TestBed.createComponent(TestTablesspanelHostComponent);
+        fixture.detectChanges();
+        component = fixture.debugElement.children[0].componentInstance;
     });
 
     it('should create and render without template errors', () => {
-        expect(() => fixture.detectChanges()).not.toThrow();
+        expect(component).toBeTruthy();
     });
 
     it('should have the svy-tablesspanel class', () => {
-        fixture.detectChanges();
         const panel = fixture.nativeElement.querySelector('.svy-tablesspanel');
         expect(panel).toBeTruthy();
+    });
+
+    it('should select first tab by default when tabIndex is 1', () => {
+        expect(component.getSelectedTab()).toBeTruthy();
+        expect(component.getSelectedTab().containsFormId).toBe('form1');
+    });
+
+    it('should return form name from getForm()', () => {
+        expect(component.getForm()).toBe('form1');
+    });
+
+    it('should return correct tab index', () => {
+        const tab = component.getSelectedTab();
+        expect(component.getTabIndex(tab)).toBe(1);
+    });
+
+    it('should switch tabs via select()', async () => {
+        const tabs = fixture.componentInstance.tabs;
+        component.select(tabs[1]);
+        await fixture.whenStable();
+        expect(component.getSelectedTab().containsFormId).toBe('form2');
     });
 });
