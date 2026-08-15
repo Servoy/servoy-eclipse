@@ -143,7 +143,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
         if (tab.disabled === true) {
             return;
         }
-        this.select(this.tabs[tabIndexClicked]);
+        this.select(this.tabs()[tabIndexClicked]);
     }
 
     ngOnDestroy(): void {

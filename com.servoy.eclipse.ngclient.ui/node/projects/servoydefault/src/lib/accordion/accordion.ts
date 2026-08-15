@@ -39,15 +39,15 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
         if (wrapper) {
             totalHeight = (wrapper as HTMLElement).offsetHeight;
         }
-        if (this.tabs) {
-            totalHeight = totalHeight - 40 * this.tabs.length;
+        if (this.tabs()) {
+            totalHeight = totalHeight - 40 * this.tabs().length;
         }
         this.panelHeight = totalHeight;
     }
 
     selectTabAt( selectionIndex: number ) {
-        if ( selectionIndex >= 0 && selectionIndex < this.tabs.length ) {
-            let tabToSelect = this.tabs[selectionIndex];
+        if ( selectionIndex >= 0 && selectionIndex < this.tabs().length ) {
+            let tabToSelect = this.tabs()[selectionIndex];
             if ( tabToSelect.disabled == true ) {
                 return;
             }
@@ -62,6 +62,6 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
     }
 
     tabClicked(tab: Tab,tabIndexClicked: number, event: any){
-        this.select( this.tabs[tabIndexClicked] );
+        this.select( this.tabs()[tabIndexClicked] );
     }
 }
