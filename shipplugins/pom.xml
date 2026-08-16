@@ -7,7 +7,7 @@
     <packaging>eclipse-repository</packaging>
     <properties>
         <tycho.version>2.6.0</tycho.version>
-        <log4j-version>2.19.0</log4j-version>
+        <log4j-version>2.25.3</log4j-version>
         <eclipse.url>https://download.eclipse.org/eclipse/updates/4.25/</eclipse.url>
     </properties>
     <repositories>
