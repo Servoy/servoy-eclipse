@@ -9,22 +9,22 @@
   @if ((this.websocketService.reconnectingEmitter | async)) {
     <div class="svy-reconnecting" >{{i18n_reconnecting_feedback}}</div>
   }
-  @if (hasDefaultNavigator() || navigatorForm != null) {
+  @if (hasDefaultNavigator() || navigatorForm() != null) {
     <div class="svy-main-window-navigator-container"  [style]="getNavigatorStyle()">
       @if (hasDefaultNavigator()) {
-        <svy-default-navigator [name]="mainForm!"></svy-default-navigator>
+        <svy-default-navigator [name]="mainForm()!"></svy-default-navigator>
       }
-      @if (navigatorForm != null) {
-        <svy-form [name]="navigatorForm!"></svy-form>
+      @if (navigatorForm() != null) {
+        <svy-form [name]="navigatorForm()!"></svy-form>
       }
     </div>
   }
-  @if (mainForm != null) {
+  @if (mainForm() != null) {
     <div id="mainForm" class="svy-main-window-container" autoscroll="true" [style]="getFormStyle()"  [sabloTabseq]="1" [sabloTabseqConfig]="{container: true, reservedGap: 5000}">
-      <svy-form [name]="mainForm!"></svy-form>
+      <svy-form [name]="mainForm()!"></svy-form>
     </div>
   }
-  @if (sessionProblem != null) {
+  @if (sessionProblem() != null) {
     <session-view></session-view>
   }
   @if ((this.loadingIndicatorService.showLoadingIndicator | async)) {

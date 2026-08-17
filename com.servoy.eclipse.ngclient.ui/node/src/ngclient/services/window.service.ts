@@ -470,8 +470,8 @@ export class WindowService {
 
       if (this.servoyService.getSolutionSettings().windowName === name) {
         // main window form switch
-        this.servoyService.getSolutionSettings().mainForm = form;
-        this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
+        this.servoyService.getSolutionSettings().mainForm.set(form);
+        this.servoyService.getSolutionSettings().navigatorForm.set(navigatorForm);
         if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false && !isLoginForm) {
           // this navigationId is angular router maybe in the future we need to have a look to just use that to set the navigation states to the forms.
           const state = this.platformLocation.getState() as Record<string, any>;
@@ -492,7 +492,7 @@ export class WindowService {
 
   public switchToSessionProblemPage() {
     this.servoyService.loaded().then(() => {
-      const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
+      const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem();
       if (sessionProblem && sessionProblem.viewUrl) {
         sessionProblem.nonce = (this.windowRefService.nativeWindow.document.getElementsByTagName('app-root')[0].attributes as any)['ngCspNonce']?.value;
         const name = sessionProblem.viewUrl.includes('/') ? sessionProblem.viewUrl.split('/')[1].split('.')[0] : sessionProblem.viewUrl.split('.')[0];

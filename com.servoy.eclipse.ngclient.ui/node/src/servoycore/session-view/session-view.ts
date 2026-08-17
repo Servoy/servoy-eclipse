@@ -21,7 +21,7 @@ export class SessionView implements OnInit {
   htmlString!: SafeHtml;
 
   ngOnInit() {
-    const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem;
+    const sessionProblem = this.servoyService.getSolutionSettings().sessionProblem();
     const headers = new HttpHeaders({
       'Content-Type': 'text/plain',
     });
