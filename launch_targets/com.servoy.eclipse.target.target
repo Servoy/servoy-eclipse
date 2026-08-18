@@ -500,18 +500,18 @@
                 <dependency>
                     <groupId>org.hibernate.orm</groupId>
                     <artifactId>hibernate-core</artifactId>
-                    <version>7.4.0-SERVOY3</version>
+                    <version>7.4.5.Servoy1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
-		            <groupId>org.hibernate.orm</groupId>
-		            <artifactId>hibernate-vector</artifactId>
-                    <version>7.4.0-SERVOY3</version>
-        		</dependency>  
+		    <groupId>org.hibernate.orm</groupId>
+		    <artifactId>hibernate-vector</artifactId>
+                    <version>7.4.5.Servoy1</version>
+        	</dependency>  
                 <dependency>
-                  <groupId>org.hibernate.orm</groupId>
-                  <artifactId>hibernate-community-dialects</artifactId>
-                    <version>7.4.0-SERVOY3</version>
+                    <groupId>org.hibernate.orm</groupId>
+                    <artifactId>hibernate-community-dialects</artifactId>
+                    <version>7.4.5.Servoy1</version>
                 </dependency>
                 <dependency>
                     <groupId>org.hibernate.models</groupId>
