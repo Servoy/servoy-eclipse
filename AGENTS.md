@@ -284,3 +284,12 @@ Key external dependencies (from target platform):
 - Equo Chromium/CEF (embedded browser)
 - Auth0 JWT
 - Servoy DLTK (custom fork)
+
+## Shared Memory (`.assistai/memory.json`)
+
+The file `.assistai/memory.json` is a **shared knowledge base** persisted via the `memory_remember` tool. It contains cross-session learnings, patterns, and architectural decisions discovered during development.
+
+- **Always commit this file** when it changes — it is shared across developers and sessions via git
+- It is NOT internal tooling state — it is deliberately accumulated project knowledge
+- Use `memory_listMemories` at the start of a session to load relevant context
+- Use `memory_remember` to persist new learnings that should survive across sessions
