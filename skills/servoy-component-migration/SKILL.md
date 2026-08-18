@@ -235,11 +235,11 @@ export class MyComponentsModule {}
 ### Servoy integration: NG2-Components
 
 Update the package MANIFEST.MF:
-1. Add `NG2-Components: Component1,Component2,...` listing all Angular component class names
+1. **Replace** `NG2-Module: <ModuleName>` with `NG2-Components: Component1,Component2,...` listing all Angular component class names
 2. Add `Entry-Point: projects/<package-name>` pointing to the Angular library
 3. Ensure `NPM-PackageName: @scope/package` is set
 
-The ComponentTemplateGenerator uses these to determine which packages to include in the generated template.
+**Important:** After converting to standalone, the old `NG2-Module` attribute is no longer valid — standalone components are registered individually, not via a module. If `NG2-Module` is still present, **remove it** and add `NG2-Components` instead. The `ComponentTemplateGenerator` uses `NG2-Components` to determine which packages to include in the generated template.
 
 Commit: `convert to standalone components [ai]`
 
@@ -362,7 +362,17 @@ This is required for zoneless readiness — injecting `ChangeDetectorRef` preven
 
 After signal migration, verify:
 - Every spec model property has a matching `input()` or `model()` signal, OR is tagged `"serveronly": true`
-- No `size` or `location` in specs (handled by framework)
+- No `size` or `location` as runtime properties in specs (these are NOT component inputs)
+- **If a spec has a `size` property that is NOT used as an `@Input`/`input()` in the Angular component**, it must be converted to `designsize` — a server-only property that provides the default dimensions in the form designer:
+  ```json
+  "designsize": {
+    "type": "dimension",
+    "tags": {"serveronly": true},
+    "default": {"width": 80, "height": 30}
+  }
+  ```
+  Keep the same default values that the old `size` property had.
+  **Never simply remove `size` without adding `designsize`** — this breaks the designer's drag-and-drop sizing.
 - Deprecated specs don't need Angular components
 
 Commit: `migrate to signal inputs and OnPush [ai]`

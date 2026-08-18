@@ -38,6 +38,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -64,6 +65,7 @@ import com.servoy.eclipse.ui.property.PersistPropertyHandler;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
@@ -687,9 +689,11 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static Dimension getDimensionFromSpec(WebObjectSpecification webComponentDescription)
 	{
 		Dimension dimension = new Dimension(100, 100);
-		if (webComponentDescription.getProperty("size") != null)
+		PropertyDescription pd = webComponentDescription.getProperty(IContentSpecConstants.PROPERTY_DESIGN_SIZE);
+		if (pd == null) pd = webComponentDescription.getProperty("size");
+		if (pd != null)
 		{
-			Object defaultValue = webComponentDescription.getProperty("size").getDefaultValue();
+			Object defaultValue = pd.getDefaultValue();
 			if (defaultValue instanceof JSONObject)
 			{
 				try

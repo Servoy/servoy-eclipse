@@ -83,6 +83,7 @@ import com.servoy.j2db.persistence.IAnchorConstants;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
@@ -440,7 +441,8 @@ public class ElementFactory
 				CSSPositionUtils.setLocation(webComponent, location == null ? 0 : location.x, location == null ? 0 : location.y);
 				int width = 80;
 				int height = 80;
-				PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+				PropertyDescription description = spec.getProperty(IContentSpecConstants.PROPERTY_DESIGN_SIZE);
+				if (description == null) description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 				if (description != null && description.getDefaultValue() instanceof JSONObject)
 				{
 					width = ((JSONObject)description.getDefaultValue()).optInt("width", 80);
