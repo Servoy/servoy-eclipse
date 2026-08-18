@@ -363,11 +363,11 @@ This is required for zoneless readiness — injecting `ChangeDetectorRef` preven
 After signal migration, verify:
 - Every spec model property has a matching `input()` or `model()` signal, OR is tagged `"serveronly": true`
 - No `size` or `location` as runtime properties in specs (these are NOT component inputs)
-- **If a spec has a `size` property that is NOT used as an `@Input`/`input()` in the Angular component**, it must be converted to `designsize` — a server-only property that provides the default dimensions in the form designer:
+- **If a spec has a `size` property that is NOT used as an `@Input`/`input()` in the Angular component**, it must be converted to `designsize` — a server-only private property that provides the default dimensions in the form designer:
   ```json
   "designsize": {
     "type": "dimension",
-    "tags": {"serveronly": true},
+    "tags": {"serveronly": true, "scope": "private"},
     "default": {"width": 80, "height": 30}
   }
   ```
