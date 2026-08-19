@@ -202,7 +202,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.tomcat"
-         version="11.0.22"/>
+         version="11.0.25"/>
 
    <plugin
          id="sablo"
