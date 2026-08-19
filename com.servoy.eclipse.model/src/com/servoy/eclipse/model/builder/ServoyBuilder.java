@@ -564,6 +564,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> VALUELIST_DATAPROVIDER_TYPE_MISMATCH = new Pair<String, ProblemSeverity>(
 		"valuelistDataproviderTypeMismatch", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_DB_NO_DATAPROVIDERS = new Pair<String, ProblemSeverity>("valuelistDBNoDataproviders",
+		ProblemSeverity.ERROR);
 	// styles
 	public final static Pair<String, ProblemSeverity> STYLE_NOT_FOUND = new Pair<String, ProblemSeverity>("styleNotFound", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> STYLE_CLASS_NO_STYLE = new Pair<String, ProblemSeverity>("styleClassNoStyle", ProblemSeverity.WARNING);
