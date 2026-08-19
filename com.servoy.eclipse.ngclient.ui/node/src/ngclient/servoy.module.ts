@@ -19,7 +19,7 @@ import { ServoyPublicServiceImpl } from './services/servoy_public_impl.service';
 import { DeveloperService } from './developer.service';
 import { AlertWindowComponent } from './services/alert-window/alert-window.component';
 import { MessageDialogWindowComponent } from './services/message-dialog-window/message-dialog-window.component';
-import { ServoyPublicService } from '@servoy/public';
+import { ServoyPublicService, TooltipService, FormattingService, ComponentContributor } from '@servoy/public';
 import { provideAgGrid } from '../servoycore/ag-grid-initializer';
 import { SERVOY_ROUTES } from './servoy.routes';
 
@@ -45,6 +45,9 @@ import { SERVOY_ROUTES } from './servoy.routes';
     DecimalPipe,
     ServoyPublicServiceImpl,
     { provide: ServoyPublicService, useExisting: ServoyPublicServiceImpl },
+    TooltipService,
+    FormattingService,
+    ComponentContributor,
     provideAgGrid(),
   ],
 })
