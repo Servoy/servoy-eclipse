@@ -312,6 +312,20 @@ public class ServoyValuelistBuilder
 				}
 				if (table != null)
 				{
+					if ((vl.getDataProviderID1() == null || "".equals(vl.getDataProviderID1())) &&
+						(vl.getDataProviderID2() == null || "".equals(vl.getDataProviderID2())) &&
+						(vl.getDataProviderID3() == null || "".equals(vl.getDataProviderID3())))
+					{
+						String customSeverity = ServoyBuilder.getSeverity(ServoyBuilder.VALUELIST_DB_NO_DATAPROVIDERS.getLeft(),
+							ServoyBuilder.VALUELIST_DB_NO_DATAPROVIDERS.getRight().name(), vl);
+						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+						{
+							ServoyMarker mk = MarkerMessages.ValuelistDBNoDataproviders.fill(vl.getName());
+							problems.add(new Problem(mk.getType(),
+								ServoyBuilder.getTranslatedSeverity(customSeverity, ServoyBuilder.VALUELIST_DB_NO_DATAPROVIDERS.getRight()),
+								mk.getText()));
+						}
+					}
 					if (vl.getDataProviderID1() != null && !"".equals(vl.getDataProviderID1()))
 					{
 						Column column = table.getColumn(vl.getDataProviderID1());
