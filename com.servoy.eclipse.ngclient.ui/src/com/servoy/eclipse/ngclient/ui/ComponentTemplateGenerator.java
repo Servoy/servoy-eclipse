@@ -153,7 +153,10 @@ public class ComponentTemplateGenerator
 		for (PropertyDescription pd : specProperties)
 		{
 			String name = pd.getName();
-			if (pd.isServerOnly()) continue;
+			// skip template is a special cssPosition property, if the component doesn't have the
+			// property itself then we can't add it as a template input property, but it is also not
+			// a serverside property only, because we do need to send it. (and then it is picked up by the system)
+			if (pd.isServerOnly() || pd.hasTag("skiptemplate")) continue;
 			if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
 			{
 				name = "servoyAttributes";
