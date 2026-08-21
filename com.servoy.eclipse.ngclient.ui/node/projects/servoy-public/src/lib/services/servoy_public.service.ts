@@ -122,6 +122,7 @@ export interface IFormCache {
     absolute: boolean;
     size: {width: number; height: number};
     getComponent(name: string): IComponentCache;
+    getBodyPartLayout?(): { [property: string]: string };
 }
 
 /**
