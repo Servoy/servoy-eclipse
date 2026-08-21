@@ -1,6 +1,6 @@
 import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef } from '@angular/core';
 
-import { BaseCustomObject, ServoyBaseComponent, WindowRefService } from '@servoy/public';
+import { BaseCustomObject, ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
 
 import { LoggerService, LoggerFactory } from '@servoy/public';
 
@@ -40,7 +40,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 
     protected log: LoggerService;
 
-    constructor(private windowRefService: WindowRefService, logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef) {
+    constructor(private windowRefService: WindowRefService, logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef, protected servoyPublicService?: ServoyPublicService) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('BaseTabpanel');
     }
@@ -76,6 +76,29 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 		}
 		return '';
 	}
+
+    applyOverflowFromForm(containerStyle: { [property: string]: any }) {
+        const formName = this.getForm();
+        if (formName && this.servoyPublicService) {
+            const formCache = this.servoyPublicService.getFormCacheByName(formName);
+            if (formCache) {
+                const layout = formCache.getBodyPartLayout ? formCache.getBodyPartLayout() : null;
+                if (layout?.['overflow-x']) {
+                    containerStyle['overflowX'] = layout['overflow-x'];
+                } else {
+                    delete containerStyle['overflowX'];
+                }
+                if (layout?.['overflow-y']) {
+                    containerStyle['overflowY'] = layout['overflow-y'];
+                } else {
+                    delete containerStyle['overflowY'];
+                }
+                if (layout?.['overflow-x'] || layout?.['overflow-y']) {
+                    delete containerStyle['overflow'];
+                }
+            }
+        }
+    }
 	
     getForm(tab?: Tab) {
         if (!this.selectedTab) {

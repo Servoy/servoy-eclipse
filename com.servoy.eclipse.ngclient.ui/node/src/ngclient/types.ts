@@ -88,6 +88,10 @@ export class FormCache implements IFormCache {
         return cc ? cc : this.getFormComponent(name);
     }
 
+    public getBodyPartLayout(): { [property: string]: string } {
+        return this._parts[0]?.layout;
+    }
+
     public getLayoutContainer(id: string): StructureCache {
         return this.layoutContainersCache.get(id);
     }
@@ -418,4 +422,3 @@ export interface CSSPosition {
     width: string;
     height: string;
 }
-
