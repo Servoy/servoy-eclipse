@@ -1,4 +1,4 @@
-import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy,  ViewChild, ElementRef, EventEmitter, Output, AfterViewInit, OnDestroy, Input} from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, ViewChild, ElementRef, EventEmitter, Output, AfterViewInit, OnDestroy, Input } from '@angular/core';
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
@@ -109,5 +109,56 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
 
     getForm(tab: Tab) {
         return this.visibleTabIndex === this.getTabIndex(tab) ? super.getForm(tab) : null;
+    }
+}
+
+@Component({
+    selector: 'default-tabpanel-active-tab-visibility-listener',
+    template: '<div #element></div>',
+    standalone: false
+})
+export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit, OnDestroy {
+
+    @Input() tab: Tab;
+    @Output() visibleTab: EventEmitter<Tab> = new EventEmitter();
+
+    @ViewChild('element') elementRef: ElementRef;
+
+    observer: MutationObserver;
+    log: LoggerService;
+
+    constructor(logFactory: LoggerFactory) {
+        this.log = logFactory.getLogger('default-tabpanel');
+    }
+
+    ngAfterViewInit(): void {
+        if (typeof MutationObserver !== 'undefined') {
+            const tabNode = this.elementRef.nativeElement.parentNode.parentNode;
+
+            this.observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class') {
+                        const oldValueA = mutation.oldValue ? mutation.oldValue.split(' ') : [];
+                        if (oldValueA.indexOf('active') === -1 && mutation.target['classList'].contains('active')) {
+                            this.visibleTab.emit(this.tab);
+                        }
+                    }
+                });
+            });
+
+            this.observer.observe(tabNode, {
+                attributes: true,
+                attributeOldValue: true
+            });
+        } else {
+            this.log.warn('MutationObserver not available, default-tabpanel may not work correctly.');
+            this.visibleTab.emit(this.tab);
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (this.observer) {
+            this.observer.disconnect();
+        }
     }
 }
