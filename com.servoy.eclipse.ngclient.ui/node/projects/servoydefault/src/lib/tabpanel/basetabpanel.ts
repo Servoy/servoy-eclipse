@@ -1,7 +1,7 @@
 import { SimpleChanges, Directive, inject, input, model, contentChild, signal } from '@angular/core';
 import { TemplateRef } from '@angular/core';
 
-import { BaseCustomObject, LoggerFactory, LoggerService, ServoyBaseComponent, WindowRefService } from '@servoy/public';
+import { BaseCustomObject, LoggerFactory, LoggerService, ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
 
 
 @Directive()
@@ -34,6 +34,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     protected readonly selectedTab = signal<Tab>(undefined!);
 
     private windowRefService = inject(WindowRefService);
+    protected servoyPublicService = inject(ServoyPublicService, { optional: true });
     private waitingForServerVisibility: Record<string, any> = {};
     private lastSelectedTab!: Tab;
 
@@ -82,6 +83,29 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 		}
 		return '';
 	}
+
+    applyOverflowFromForm(containerStyle: { [property: string]: any }) {
+        const formName = this.getForm();
+        if (formName && this.servoyPublicService) {
+            const formCache = this.servoyPublicService.getFormCacheByName(formName);
+            if (formCache) {
+                const layout = formCache.getBodyPartLayout ? formCache.getBodyPartLayout() : null;
+                if (layout?.['overflow-x']) {
+                    containerStyle['overflowX'] = layout['overflow-x'];
+                } else {
+                    delete containerStyle['overflowX'];
+                }
+                if (layout?.['overflow-y']) {
+                    containerStyle['overflowY'] = layout['overflow-y'];
+                } else {
+                    delete containerStyle['overflowY'];
+                }
+                if (layout?.['overflow-x'] || layout?.['overflow-y']) {
+                    delete containerStyle['overflow'];
+                }
+            }
+        }
+    }
 	
     getForm(tab?: Tab) {
         const selected = this.selectedTab();

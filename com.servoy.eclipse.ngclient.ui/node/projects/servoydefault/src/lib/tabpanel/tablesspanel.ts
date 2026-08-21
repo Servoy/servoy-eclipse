@@ -14,4 +14,12 @@ import {BaseTabpanel,Tab} from './basetabpanel';
     imports: [CommonModule, FormsModule, SabloTabseq, NgbModule]
 } )
 export class ServoyDefaultTablesspanel extends BaseTabpanel {
+
+    containerStyle: { [property: string]: any } = { overflow: 'auto' };
+
+    getContainerStyle(): { [property: string]: any } {
+        this.containerStyle['border'] = this.borderStyle;
+        this.applyOverflowFromForm(this.containerStyle);
+        return this.containerStyle;
+    }
 }

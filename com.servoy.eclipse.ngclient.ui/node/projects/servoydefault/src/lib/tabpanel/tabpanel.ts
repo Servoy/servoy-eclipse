@@ -6,7 +6,6 @@ import { Component, ChangeDetectionStrategy, viewChild, ElementRef, output, Afte
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
-
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 
 
@@ -102,6 +101,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
             }
         }
         this.containerStyle['marginTop'] = (element.offsetWidth < element.scrollWidth ? 8 : 0) + 'px';
+        this.applyOverflowFromForm(this.containerStyle);
         return this.containerStyle;
     }
 
