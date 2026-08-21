@@ -13,55 +13,55 @@
             	<dependency>
                 	<groupId>io.modelcontextprotocol.sdk</groupId>
                 	<artifactId>mcp-core</artifactId>
-                	<version>1.1.2</version>
+                	<version>2.0.1</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>io.modelcontextprotocol.sdk</groupId>
                 	<artifactId>mcp-json-jackson2</artifactId>
-                	<version>1.1.2</version>
+                	<version>2.0.1</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>io.projectreactor</groupId>
                 	<artifactId>reactor-core</artifactId>
-                	<version>3.8.5</version>
+                	<version>3.8.7</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>org.apache.pdfbox</groupId>
                 	<artifactId>fontbox</artifactId>
-                	<version>3.0.6</version>
+                	<version>3.0.8</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>org.apache.pdfbox</groupId>
                 	<artifactId>pdfbox-io</artifactId>
-                	<version>3.0.6</version>
+                	<version>3.0.8</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>org.apache.pdfbox</groupId>
                 	<artifactId>pdfbox</artifactId>
-                	<version>3.0.6</version>
+                	<version>3.0.8</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>org.apache.tika</groupId>
                 	<artifactId>tika-core</artifactId>
-                	<version>3.2.3</version>
+                	<version>3.3.2</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>org.apache.tika</groupId>
                 	<artifactId>tika-parser-text-module</artifactId>
-                	<version>3.2.3</version>
+                	<version>3.3.2</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>org.jspecify</groupId>
                 	<artifactId>jspecify</artifactId>
-                	<version>1.0.0</version>
+                	<version>1.0.1</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
