@@ -1,4 +1,4 @@
-import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy,  ViewChild, ElementRef, EventEmitter, Output, AfterViewInit, OnDestroy, Input} from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef, ChangeDetectionStrategy, ViewChild, ElementRef, EventEmitter, Output, AfterViewInit, OnDestroy, Input } from '@angular/core';
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
