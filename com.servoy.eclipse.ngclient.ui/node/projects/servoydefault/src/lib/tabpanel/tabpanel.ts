@@ -2,7 +2,7 @@ import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy} from
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
-import { WindowRefService } from '@servoy/public';
+import { WindowRefService, ServoyPublicService } from '@servoy/public';
 import { LoggerFactory } from '@servoy/public';
 
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
@@ -15,10 +15,10 @@ import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
     
-    containerStyle = { position: 'relative', overflow: 'auto' };
+    containerStyle: { [property: string]: any } = { position: 'relative', overflow: 'auto' };
     
-    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
-        super( windowRefService, log, renderer, cdRef );
+    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef, servoyPublicService: ServoyPublicService ) {
+        super( windowRefService, log, renderer, cdRef, servoyPublicService );
     }
 
     onTabChange( event: NgbNavChangeEvent ) {
@@ -35,6 +35,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     getContainerStyle(element: HTMLElement) : { [property: string]: any }{
         const tabs = element.querySelector('ul');
         this.containerStyle['height'] = 'calc(100% - ' + tabs.clientHeight + 'px)';
-       return this.containerStyle;
+        this.applyOverflowFromForm(this.containerStyle);
+        return this.containerStyle;
     }
 }
