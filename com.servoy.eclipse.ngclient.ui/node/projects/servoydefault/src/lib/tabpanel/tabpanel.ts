@@ -2,7 +2,7 @@ import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy,  Vie
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
-import { WindowRefService } from '@servoy/public';
+import { WindowRefService, ServoyPublicService } from '@servoy/public';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
@@ -21,8 +21,8 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     
     private visibleTabIndex: number;
     
-    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
-        super( windowRefService, log, renderer, cdRef );
+    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef, servoyPublicService: ServoyPublicService ) {
+        super( windowRefService, log, renderer, cdRef, servoyPublicService );
     }
 
     onTabChange( event: NgbNavChangeEvent ) {
@@ -51,6 +51,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
             }
         }
         this.containerStyle['marginTop'] = (element.offsetWidth < element.scrollWidth ? 8 : 0) + 'px';
+        this.applyOverflowFromForm(this.containerStyle);
         return this.containerStyle;
     }
 

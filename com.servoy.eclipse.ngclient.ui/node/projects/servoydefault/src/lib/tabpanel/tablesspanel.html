@@ -1,10 +1,10 @@
 <div  #element 
-	style="position:absolute;width:100%;height:100%;overflow:auto;"
+	style="position:absolute;width:100%;height:100%;"
 	[class]='(styleClass ? styleClass : "")  + " svy-tablesspanel"' 
 	[id]="servoyApi.getMarkupId()" 
 	[sabloTabseq]="tabSeq" 
 	[sabloTabseqConfig]="{container: true, reservedGap: 50}"
-	[ngStyle]="{ border: borderStyle }"
+	[ngStyle]="getContainerStyle()"
 	>
  	<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm()}"></ng-template>
 </div>
