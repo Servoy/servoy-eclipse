@@ -2,7 +2,7 @@ import { Component, Renderer2 , ChangeDetectorRef, ChangeDetectionStrategy,  Vie
 
 import { BaseTabpanel, Tab } from './basetabpanel';
 
-import { WindowRefService } from '@servoy/public';
+import { WindowRefService, ServoyPublicService } from '@servoy/public';
 import { LoggerFactory, LoggerService } from '@servoy/public';
 
 import { NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
@@ -21,8 +21,8 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     
     private visibleTabIndex: number;
     
-    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
-        super( windowRefService, log, renderer, cdRef );
+    constructor( windowRefService: WindowRefService, log: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef, servoyPublicService: ServoyPublicService ) {
+        super( windowRefService, log, renderer, cdRef, servoyPublicService );
     }
 
     onTabChange( event: NgbNavChangeEvent ) {
@@ -51,6 +51,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
             }
         }
         this.containerStyle['marginTop'] = (element.offsetWidth < element.scrollWidth ? 8 : 0) + 'px';
+        this.applyOverflowFromForm(this.containerStyle);
         return this.containerStyle;
     }
 
@@ -108,56 +109,5 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
 
     getForm(tab: Tab) {
         return this.visibleTabIndex === this.getTabIndex(tab) ? super.getForm(tab) : null;
-    }
-}
-
-@Component({
-    selector: 'default-tabpanel-active-tab-visibility-listener',
-    template: '<div #element></div>',
-    standalone: false
-})
-export class DefaultTabpanelActiveTabVisibilityListener implements AfterViewInit, OnDestroy {
-
-    @Input() tab: Tab;
-    @Output() visibleTab: EventEmitter<Tab> = new EventEmitter();
-
-    @ViewChild('element') elementRef: ElementRef;
-
-    observer: MutationObserver;
-    log: LoggerService;
-
-    constructor(logFactory: LoggerFactory) {
-        this.log = logFactory.getLogger('default-tabpanel');
-    }
-
-    ngAfterViewInit(): void {
-        if (typeof MutationObserver !== 'undefined') {
-            const tabNode = this.elementRef.nativeElement.parentNode.parentNode;
-
-            this.observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'class') {
-                        const oldValueA = mutation.oldValue ? mutation.oldValue.split(' ') : [];
-                        if (oldValueA.indexOf('active') === -1 && mutation.target['classList'].contains('active')) {
-                            this.visibleTab.emit(this.tab);
-                        }
-                    }
-                });
-            });
-
-            this.observer.observe(tabNode, {
-                attributes: true,
-                attributeOldValue: true
-            });
-        } else {
-            this.log.warn('MutationObserver not available, default-tabpanel may not work correctly.');
-            this.visibleTab.emit(this.tab);
-        }
-    }
-
-    ngOnDestroy(): void {
-        if (this.observer) {
-            this.observer.disconnect();
-        }
     }
 }

@@ -2,7 +2,7 @@ import { Component, Renderer2,ChangeDetectorRef, ChangeDetectionStrategy} from '
 
 import {BaseTabpanel,Tab} from './basetabpanel';
 
-import { WindowRefService } from '@servoy/public';
+import { WindowRefService, ServoyPublicService } from '@servoy/public';
 
 import { LoggerFactory } from '@servoy/public';
 
@@ -13,7 +13,16 @@ import { LoggerFactory } from '@servoy/public';
     standalone: false
 } )
 export class ServoyDefaultTablesspanel extends BaseTabpanel {
-    constructor(windowRefService: WindowRefService, cdRef: ChangeDetectorRef, logFactory: LoggerFactory, renderer: Renderer2) {
-       super(windowRefService, logFactory, renderer,cdRef);
+
+    containerStyle: { [property: string]: any } = { overflow: 'auto' };
+
+    constructor(windowRefService: WindowRefService, cdRef: ChangeDetectorRef, logFactory: LoggerFactory, renderer: Renderer2, servoyPublicService: ServoyPublicService) {
+       super(windowRefService, logFactory, renderer, cdRef, servoyPublicService);
+    }
+
+    getContainerStyle(): { [property: string]: any } {
+        this.containerStyle['border'] = this.borderStyle;
+        this.applyOverflowFromForm(this.containerStyle);
+        return this.containerStyle;
     }
 }
