@@ -199,6 +199,8 @@ public class MarkerMessages
 		ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE, "Removed custom values.");
 	public static ServoyMarker ValuelistDBNotTableOrRelation = new ServoyMarker(
 		"Valuelist \"{0}\" is a database valuelist but it does not specify relation or table.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
+	public static ServoyMarker ValuelistDBNoDataproviders = new ServoyMarker(
+		"Valuelist \"{0}\" is a database valuelist but does not specify any dataproviders.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
 
 	/**
 	 * This means that the datasource definition for the valuelist does not respect the proper syntaxt and the server and table names cannot be extracted from it.

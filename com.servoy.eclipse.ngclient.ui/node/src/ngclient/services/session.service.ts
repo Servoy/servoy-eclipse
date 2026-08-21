@@ -18,7 +18,7 @@ export class SessionService {
     if (sessionExpired.viewUrl) exp.viewUrl = sessionExpired.viewUrl;
     if (sessionExpired.redirectUrl) exp.redirectUrl = sessionExpired.redirectUrl;
 
-    this.servoyService.getSolutionSettings().sessionProblem = exp;
+    this.servoyService.getSolutionSettings().sessionProblem.set(exp);
     this.windowService.switchToSessionProblemPage();
   }
 
@@ -32,7 +32,7 @@ export class SessionService {
     if (noLicense.redirectUrl) noLic.redirectUrl = noLicense.redirectUrl;
     if (noLicense.redirectTimeout) noLic.redirectTimeout = noLicense.redirectTimeout;
 
-    this.servoyService.getSolutionSettings().sessionProblem = noLic;
+    this.servoyService.getSolutionSettings().sessionProblem.set(noLic);
     this.windowService.switchToSessionProblemPage();
   }
 
@@ -46,7 +46,7 @@ export class SessionService {
     if (maintenanceMode.redirectUrl) ment.redirectUrl = maintenanceMode.redirectUrl;
     if (maintenanceMode.redirectTimeout) ment.redirectTimeout = maintenanceMode.redirectTimeout;
 
-    this.servoyService.getSolutionSettings().sessionProblem = ment;
+    this.servoyService.getSolutionSettings().sessionProblem.set(ment);
     this.windowService.switchToSessionProblemPage();
   }
 
@@ -55,7 +55,7 @@ export class SessionService {
     if (internalServerError.viewUrl) error.viewUrl = internalServerError.viewUrl;
     if (internalServerError.stack) (error as any)['stack'] = internalServerError.stack;
 
-    this.servoyService.getSolutionSettings().sessionProblem = error;
+    this.servoyService.getSolutionSettings().sessionProblem.set(error);
     this.windowService.switchToSessionProblemPage();
   }
 }

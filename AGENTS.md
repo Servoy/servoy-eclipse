@@ -101,10 +101,32 @@ This same principle applies to **local debugging**: when facing unclear errors, 
 ### Designer Plugins
 | Module | Purpose |
 |--------|---------|
-| `com.servoy.eclipse.designer` | Form designer |
-| `com.servoy.eclipse.designer.rfb` | RFB designer (Angular frontend in `node/`) |
+| `com.servoy.eclipse.designer` | Form designer (Java: commands, handlers, palette) |
+| `com.servoy.eclipse.designer.rfb` | RFB designer (Angular frontend in `node/`, communicates via websocket) |
 | `com.servoy.eclipse.designer.rib` | RIB designer (legacy) |
 | `com.servoy.eclipse.designer.wpm` | Web Package Manager (Angular frontend in `node/`) |
+
+#### Form Designer Architecture
+
+The form designer is a multi-layer system:
+
+1. **Java server** (`com.servoy.eclipse.designer` + `com.servoy.eclipse.designer.rfb`)
+   - `DesignerFilter.java` — serves palette JSON data (`/designer/palette` endpoint)
+   - `CreateComponentCommand.java` — creates persists on drop
+   - `ElementFactory.java` — programmatic component creation (Place Field wizard)
+   - `EditorServiceHandler.java` — routes websocket calls from Angular to Java handlers
+
+2. **Angular designer frontend** (`com.servoy.eclipse.designer.rfb/node/`)
+   - `palette.component.ts` — drag/drop from palette, sends `createElement` to iframe
+   - `mouseselection.component.ts` — selection decorators, resize knobs
+   - `ghostscontainer.component.ts` — ghost elements (parts, tabs)
+   - `editorsession.service.ts` — websocket communication with Java server
+
+3. **Angular content iframe** (`com.servoy.eclipse.ngclient.ui/node/src/designer/`)
+   - `designform_component.component.ts` — renders the actual form being designed
+   - Receives `createElement` messages for drag preview rendering
+
+**Component sizing:** All spec lookups for default dimensions use `IContentSpecConstants.PROPERTY_DESIGN_SIZE` first, fallback to `PROPERTY_SIZE`. The `designsize` property is server-only and declared in component `.spec` files.
 
 ### Client Plugins
 | Module | Purpose |
@@ -262,3 +284,12 @@ Key external dependencies (from target platform):
 - Equo Chromium/CEF (embedded browser)
 - Auth0 JWT
 - Servoy DLTK (custom fork)
+
+## Shared Memory (`.assistai/memory.json`)
+
+The file `.assistai/memory.json` is a **shared knowledge base** persisted via the `memory_remember` tool. It contains cross-session learnings, patterns, and architectural decisions discovered during development.
+
+- **Always commit this file** when it changes — it is shared across developers and sessions via git
+- It is NOT internal tooling state — it is deliberately accumulated project knowledge
+- Use `memory_listMemories` at the start of a session to load relevant context
+- Use `memory_remember` to persist new learnings that should survive across sessions

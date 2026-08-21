@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../environments/environment';
 
 import { WebsocketService, wrapPromiseToPropagateCustomRequestInfoInternal } from '../sablo/websocket.service';
@@ -67,9 +67,9 @@ class SolutionSettings {
   public windowName = '';
   public enableAnchoring = true;
   public ltrOrientation = true;
-  public mainForm!: FormSettings;
-  public navigatorForm!: FormSettings;
-  public sessionProblem!: SessionProblem;
+  public readonly mainForm = signal<FormSettings>(undefined!);
+  public readonly navigatorForm = signal<FormSettings>(undefined!);
+  public readonly sessionProblem = signal<SessionProblem>(undefined!);
 }
 
 @Injectable({

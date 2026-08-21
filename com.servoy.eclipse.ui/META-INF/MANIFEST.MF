@@ -89,7 +89,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.tm4e.languageconfiguration;bundle-version="0.5.2",
  org.eclipse.ui.genericeditor;bundle-version="1.2.300",
  servoy_headless_client,
- org.apache.tomcat;bundle-version="11.0.8"
+ org.apache.tomcat;bundle-version="11.0.8",
+ org.eclipse.jgit,
+ org.eclipse.egit.core
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets;version="2026.9.0",
  com.servoy.eclipse.cheatsheets.actions;version="2026.9.0",

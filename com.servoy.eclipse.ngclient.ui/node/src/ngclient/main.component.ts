@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewContainerRef, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -52,23 +52,23 @@ export class MainComponent implements OnInit, OnDestroy {
     (this.windowRef.nativeWindow as any)['executeInlineScript'] = (formname: any, script: any, params: any) => this.servoyService.executeInlineScript(formname, script, params);
   }
 
-  public get mainForm() {
-    if (this.sessionProblem) return null;
-    const mainForm = this.servoyService.getSolutionSettings().mainForm;
+  public readonly mainForm = computed(() => {
+    if (this.sessionProblem()) return null;
+    const mainForm = this.servoyService.getSolutionSettings().mainForm();
     if (mainForm && mainForm.name) return mainForm.name;
     return null;
-  }
+  });
 
-  public get navigatorForm() {
-    if (this.sessionProblem) return null;
-    const navigatorForm = this.servoyService.getSolutionSettings().navigatorForm;
+  public readonly navigatorForm = computed(() => {
+    if (this.sessionProblem()) return null;
+    const navigatorForm = this.servoyService.getSolutionSettings().navigatorForm();
     if (navigatorForm && navigatorForm.name && navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) return navigatorForm.name;
     return null;
-  }
+  });
 
-  public get sessionProblem() {
-    return this.servoyService.getSolutionSettings().sessionProblem;
-  }
+  public readonly sessionProblem = computed(() => {
+    return this.servoyService.getSolutionSettings().sessionProblem();
+  });
 
   public ngOnDestroy(): void {
     this.listener!.destroy();
@@ -81,7 +81,8 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   hasDefaultNavigator(): boolean {
-    const cache = this.mainForm ? this.formservice.getFormCacheByName(this.mainForm.toString()) : null;
+    const name = this.mainForm();
+    const cache = name ? this.formservice.getFormCacheByName(name.toString()) : null;
     return cache != null && cache.getComponent('svy_default_navigator') != null;
   }
 
@@ -90,7 +91,7 @@ export class MainComponent implements OnInit, OnDestroy {
     const orientationVar1 = ltrOrientation ? 'left' : 'right';
     const orientationVar2 = ltrOrientation ? 'right' : 'left';
 
-    this.navigatorStyle['width'] = this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px';
+    this.navigatorStyle['width'] = this.servoyService.getSolutionSettings().navigatorForm().size.width + 'px';
     this.navigatorStyle[orientationVar1] = '0px';
     delete this.navigatorStyle[orientationVar2];
     return this.navigatorStyle;
@@ -101,7 +102,7 @@ export class MainComponent implements OnInit, OnDestroy {
     const orientationVar1 = ltrOrientation ? 'right' : 'left';
     const orientationVar2 = ltrOrientation ? 'left' : 'right';
     this.formStyle[orientationVar1] = '0px';
-    this.formStyle[orientationVar2] = this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px';
+    this.formStyle[orientationVar2] = this.servoyService.getSolutionSettings().navigatorForm().size.width + 'px';
     return this.formStyle;
   }
 

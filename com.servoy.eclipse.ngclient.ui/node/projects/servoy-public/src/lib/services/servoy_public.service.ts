@@ -94,7 +94,7 @@ export abstract class ServoyPublicService {
      *
      * @param propertyValue the new value that the service has (and should send to server) for the given propertyName; if you didn't assign it yet to the service's property,
      *                      this method will do it for you.
-     * @param oldPropertValue the value that this property used to have before (or has if you did not change the reference - in this case it should be the same as „propertyValue”);
+     * @param oldPropertValue the value that this property used to have before (or has if you did not change the reference - in this case it should be the same as „propertyValue");
      *                        this value is used in case of smart types (custom array/custom objects) in order to detect if it's a full change by reference for example
      */
     public abstract sendServiceChangeToServer(serviceName: string, propertyName: string, propertyValue: unknown, oldPropertyValue: unknown): void;
@@ -134,6 +134,8 @@ export interface IFormCache {
     absolute: boolean;
     size: {width: number; height: number};
     getComponent(name: string): IComponentCache | undefined;
+    getBodyPartLayout?(): { [property: string]: string };
+
 }
 
 /**

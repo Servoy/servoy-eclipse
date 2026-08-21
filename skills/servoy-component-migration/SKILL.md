@@ -32,6 +32,7 @@ Before doing anything, detect the current state of the project. Run these checks
 | NG2-Components manifest | ? | NG2-Components attribute in MANIFEST |
 | Servoy spec alignment | ? | All spec properties have @Input or serveronly tag |
 | Signal inputs | ? | input() vs @Input() |
+| Template-bound signals | ? | All mutable template-bound properties use signal() |
 | OnPush | ? | ChangeDetectionStrategy.OnPush on all components |
 | Zoneless readiness | ? | No ChangeDetectorRef usage, no zone.js dependency |
 ```
@@ -47,8 +48,9 @@ Before doing anything, detect the current state of the project. Run these checks
 7. **NG2-Components**: check MANIFEST.MF for `NG2-Components:` attribute
 8. **Spec alignment**: compare .spec model properties vs @Input declarations (include `model()` and `input()`)
 9. **Signal inputs**: count `@Input()` vs `input()` in component files
-10. **OnPush**: check for `ChangeDetectionStrategy.OnPush` in @Component decorators
-11. **Zoneless**: grep for `ChangeDetectorRef`, `NgZone`, zone.js imports
+10. **Template-bound signals**: scan for plain class properties (non-signal) used in template bindings that are mutated programmatically
+11. **OnPush**: check for `ChangeDetectionStrategy.OnPush` in @Component decorators
+12. **Zoneless**: grep for `ChangeDetectorRef`, `NgZone`, zone.js imports
 
 Present the table, then ask the user which phase to start with (or suggest the logical next phase).
 
@@ -107,6 +109,31 @@ After reaching Angular 22, remove:
 - `@angular/platform-browser-dynamic` (use `@angular/platform-browser`)
 - `@angular/compiler` (if no JIT usage — AOT is default)
 - Any other deprecated packages flagged by `ng update`
+
+### esbuild: Node.js globals polyfill
+
+Angular 22 uses the `@angular/build:application` builder (esbuild-based) instead of the old webpack-based builder. **esbuild does NOT polyfill Node.js globals** (`global`, `process`, `Buffer`) that webpack provided automatically.
+
+**Detection:** After a successful build, check if any dependency uses CommonJS libraries that reference `global`:
+```bash
+grep -r "global\b" node_modules/<suspect-package>/ --include="*.js" -l | head -5
+```
+
+Known problematic libraries: `dragula`, `custom-event`, `crossvent`, any package using `global` as a fallback for `window`.
+
+**Fix:** Create a side-effect polyfill file in the component that imports the problematic library:
+```typescript
+// global-polyfill.ts
+(window as any).global = window;
+```
+
+Import it BEFORE the problematic library (ESM evaluates side-effect imports in order):
+```typescript
+import './global-polyfill';
+import jKanban from "@servoy/jkanban"; // ← this pulls in dragula → global
+```
+
+**Important:** Do NOT add this to the core TiNG polyfills.ts — the component that uses the library is responsible for its own polyfills.
 
 ---
 
@@ -210,11 +237,44 @@ export class MyComponentsModule {}
 ### Servoy integration: NG2-Components
 
 Update the package MANIFEST.MF:
-1. Add `NG2-Components: Component1,Component2,...` listing all Angular component class names
+1. **Replace** `NG2-Module: <ModuleName>` with `NG2-Components: Component1,Component2,...` listing all Angular component class names
 2. Add `Entry-Point: projects/<package-name>` pointing to the Angular library
 3. Ensure `NPM-PackageName: @scope/package` is set
 
-The ComponentTemplateGenerator uses these to determine which packages to include in the generated template.
+**Important:** After converting to standalone, the old `NG2-Module` attribute is no longer valid — standalone components are registered individually, not via a module. If `NG2-Module` is still present, **remove it** and add `NG2-Components` instead. The `ComponentTemplateGenerator` uses `NG2-Components` to determine which packages to include in the generated template.
+
+### Update test files
+
+After converting to standalone, all test files that use `TestBed.configureTestingModule` must be updated:
+- Move the component under test from `declarations: [...]` to `imports: [...]`
+- If `declarations` becomes empty, remove it entirely
+- Keep `schemas: [NO_ERRORS_SCHEMA]` if present
+- Keep other items in `imports` (like `ServoyPublicTestingModule`, `FormsModule`)
+
+If a standalone component imports a third-party component that fails in jsdom (e.g., canvas-gauges, Uppy Dashboard), use `TestBed.overrideComponent()` to swap it with a mock:
+```typescript
+@Component({ selector: 'the-selector', template: '', standalone: true })
+class MockComponent {}
+
+TestBed.configureTestingModule({
+    imports: [TheComponentUnderTest],
+}).overrideComponent(TheComponentUnderTest, {
+    remove: { imports: [RealThirdParty] },
+    add: { imports: [MockComponent] }
+}).compileComponents();
+```
+
+Alternatively, if the third-party just needs a browser API (like `canvas.getContext`), mock the API directly:
+```typescript
+let originalGetContext: typeof HTMLCanvasElement.prototype.getContext;
+beforeEach(() => {
+    originalGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({ /* mock 2d ctx */ }) as any;
+});
+afterEach(() => {
+    HTMLCanvasElement.prototype.getContext = originalGetContext;
+});
+```
 
 Commit: `convert to standalone components [ai]`
 
@@ -313,11 +373,103 @@ changeDetection: ChangeDetectionStrategy.OnPush
 
 Replace `this.cdRef.detectChanges()` / `this.cdRef.markForCheck()` with proper signal reactivity. If a value changes that the template observes, use a `signal()` or `computed()`.
 
+### Convert template-bound class properties to signals
+
+**This step is critical for OnPush + standalone components.** After converting inputs/outputs to signals, there are often plain class properties (declared as `propertyName: type = value` or `propertyName!: type`) that are bound in the template via `[prop]="propertyName"`, `{{propertyName}}`, `@if (propertyName)`, or `@for (item of propertyName)`.
+
+These properties are mutated programmatically (e.g., in lifecycle hooks, event handlers, or async callbacks). With `OnPush` change detection, Angular may not detect these mutations, causing either:
+- **NG0100 ExpressionChangedAfterItHasBeenCheckedError** — when the value changes during a check cycle
+- **Stale UI** — when the value changes outside a check cycle and the template never updates
+
+**Detection:** For each component, compare template bindings against class property declarations. Any property that is:
+1. Used in a template binding (`[x]="prop"`, `{{prop}}`, `@if (prop)`, `@for (item of prop)`, `[(ngModel)]="prop"`)
+2. NOT declared as `input()`, `output()`, `signal()`, `computed()`, `linkedSignal()`, `model()`, `viewChild()`, `contentChild()`
+3. Mutated anywhere in the class (via `this.prop = ...` or `this.prop.push(...)`)
+
+...must be converted to a `signal()`.
+
+**Conversion pattern:**
+```typescript
+// Before
+tabIndex!: number;
+data: MyType[] = [];
+showDashboard = false;
+
+// After
+readonly tabIndex = signal<number>(undefined as any);
+readonly data = signal<MyType[]>([]);
+readonly showDashboard = signal(false);
+```
+
+**Update mutation sites:**
+```typescript
+// Before
+this.tabIndex = -1;
+this.data = newData;
+
+// After
+this.tabIndex.set(-1);
+this.data.set(newData);
+```
+
+**Update template reads:**
+```html
+<!-- Before -->
+[tabIndex]="tabIndex"
+@if (showDashboard) { ... }
+[data]="data"
+
+<!-- After -->
+[tabIndex]="tabIndex()"
+@if (showDashboard()) { ... }
+[data]="data()"
+```
+
+**Exceptions — do NOT convert:**
+- Properties bound via `[(ngModel)]="prop"` where the component implements two-way binding with the template — use `linkedSignal()` or keep as a plain property with `FormsModule` (ngModel manages its own change tracking)
+- Properties that are `EventEmitter` instances used for `[manualRefresh]` patterns — these are observables, not state
+- Properties only read in the template but never mutated after initialization (truly constant after constructor/init) — these are safe as plain properties
+
+**Common candidates per Servoy component pattern:**
+- Internal state like `isReady`, `showX`, `isCollapsed`
+- Computed display data like `data`, `displayNodes`, `images`, `options`
+- UI control state like `tabIndex`, `selection`, `containerStyle`
+
+### Remove constructor parameters to ServoyBaseComponent
+
+`ServoyBaseComponent` no longer requires `Renderer2` or `ChangeDetectorRef` in its constructor (parameters are optional in the current release and will be removed entirely in the next). Remove them from subclass constructors:
+
+**Before:**
+```typescript
+constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+    super(renderer, cdRef);
+}
+```
+
+**After:** Remove the constructor entirely (if it only calls `super`). If the component has no other constructor logic, Angular will use the default inherited constructor.
+
+If the component still needs `Renderer2` for its own DOM operations, use `inject()`:
+```typescript
+private readonly renderer = inject(Renderer2);
+```
+
+This is required for zoneless readiness — injecting `ChangeDetectorRef` prevents zoneless operation.
+
 ### Spec property alignment check
 
 After signal migration, verify:
 - Every spec model property has a matching `input()` or `model()` signal, OR is tagged `"serveronly": true`
-- No `size` or `location` in specs (handled by framework)
+- No `size` or `location` as runtime properties in specs (these are NOT component inputs)
+- **If a spec has a `size` property that is NOT used as an `@Input`/`input()` in the Angular component**, it must be converted to `designsize` — a server-only private property that provides the default dimensions in the form designer:
+  ```json
+  "designsize": {
+    "type": "dimension",
+    "tags": {"serveronly": true, "scope": "private"},
+    "default": {"width": 80, "height": 30}
+  }
+  ```
+  Keep the same default values that the old `size` property had.
+  **Never simply remove `size` without adding `designsize`** — this breaks the designer's drag-and-drop sizing.
 - Deprecated specs don't need Angular components
 
 Commit: `migrate to signal inputs and OnPush [ai]`
@@ -332,7 +484,7 @@ Check for:
 1. No direct `NgZone` usage
 2. No `ChangeDetectorRef.detectChanges()` calls (use signals instead)
 3. No `setTimeout`/`setInterval` that expects zone.js to trigger change detection
-4. All state changes go through signals
+4. All state changes go through signals (no plain class properties bound in templates that are mutated — see Phase 5 "Convert template-bound class properties to signals")
 5. All components are OnPush
 
 Report findings — don't force zoneless if the runtime (Servoy TiNG) isn't ready yet.

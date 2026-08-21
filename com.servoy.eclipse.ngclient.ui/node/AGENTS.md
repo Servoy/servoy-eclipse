@@ -190,15 +190,19 @@ Use `find_examples` when working with newer Angular features (signal inputs, mod
 - Use `readonly` for signal properties
 - No comments unless explicitly asked
 - Prefer `inject()` function over constructor injection in new code (check what the file uses)
-- Use `standalone: false` for components in existing NgModules (check the module)
+- All components are `standalone: true` with their own `imports` array
 - Follow the existing import style (barrel imports from `@servoy/public`, relative imports within same module)
 
 ### Angular-specific rules
 
 - **No signal writes in getters/methods called from templates** — use `computed` signals instead
-- **Change detection:** components use default strategy; avoid manual `ChangeDetectorRef` unless necessary
+- **Change detection:** App uses `provideZonelessChangeDetection()`. Components use `OnPush` (default in Angular 22). Use signals or `markForCheck()` to notify Angular of state changes in async callbacks (setTimeout, Promises, WebSocket messages).
+- **Signal inputs with defaults:** Servoy form templates bind ALL model properties (`[prop]="model.prop"`). If the server never sends a value, the expression evaluates to `undefined`, overriding `input(30)`. Use a transform to preserve defaults:
+  ```typescript
+  readonly pane1MinSize = input(30, { transform: (v: any) => v ?? 30 });
+  ```
 - **RxJS:** unsubscribe in `ngOnDestroy` or use `takeUntilDestroyed()` / `async` pipe
-- **Template syntax:** use `@if`, `@for`, `@switch` (new control flow) in existing files that already use it; use `*ngIf`/`*ngFor` in files that use the old syntax
+- **Template syntax:** use `@if`, `@for`, `@switch` (new control flow) — all templates have been migrated
 
 ---
 
@@ -248,8 +252,8 @@ ngclient2 (main application)
 - **`@servoy/public` is a local file dependency:** It must be built (`npm run build_lib`) before the app can compile. Changes to `projects/servoy-public/` require a library rebuild.
 - **esbuild platform mismatch:** If `node_modules` was copied from another architecture, run `npm ci` to reinstall native binaries.
 - **Karma browser:** If Chrome is not available, use `npm run test_edge` / `test_edge_nowatch` or set `CHROME_BIN` to an alternative Chromium-based browser (Edge, Chromium).
-- **`legacy-peer-deps=true`:** Required due to Angular 21 peer dependency conflicts. Always use this flag when installing.
-- **Zone.js:** The app still uses Zone.js for change detection. Don't introduce zoneless patterns unless the project migrates.
+- **`legacy-peer-deps=true`:** Required due to Angular 22 peer dependency conflicts. Always use this flag when installing.
+- **Zone.js:** The app uses `provideZonelessChangeDetection()`. Zone.js is still in polyfills as a safety net during migration but does NOT trigger change detection. Use signals or `markForCheck()` to notify Angular of async state changes (setTimeout, Promises). See `docs/zoneless-migration.spec.md`.
 - **SVG as text:** SVG files are loaded as text strings (configured in `angular.json` loader section). Import them as strings, not as image URLs.
 
 ---
@@ -265,6 +269,7 @@ Full spec: `../../docs/angular22-modernization-remaining.spec.md`
 - **inject() migration:** Done for servoydefault (29 files) and src/ (8 files). Remaining are plain classes (not Angular DI).
 - **takeUntilDestroyed():** Done — tooltip-html.directive, form_component.component
 - **Signal queries (local):** Done — basechoice, baselabel, check, radio, spinner, calendar, combobox, typeahead, bg_splitter
+- **Signal queries (basecomponent.ts):** Done — `elementRef` is now `viewChild<ElementRef<T>>('element')` signal query
 - **Standalone components:** 100% — all directives, pipes, and components converted to `standalone: true`
 - **bootstrapApplication():** Done — `AppModule` removed, app bootstraps with `bootstrapApplication()` + `provideRouter()`
 - **Routing modules removed:** `AppRoutingModule`, `MainRoutingModule`, `ServoyDesignerRoutingModule` replaced with plain `Routes` arrays
@@ -274,10 +279,9 @@ Full spec: `../../docs/angular22-modernization-remaining.spec.md`
 - **@Input()/@Output() → signals:** Tied to `ngOnChanges` → `svyOnChanges(SimpleChanges)` pattern. Requires replacing entire change detection model with `effect()`/`computed()`.
 
 **Note:** Angular 22 signal inputs DO still trigger `ngOnChanges` (backward compatible). So migrating `@Input()` to `input()` does NOT break the `svyOnChanges` pattern. The migration to `effect()` is optional for cleaner code but not required for correctness.
-- **basecomponent.ts `elementRef`:** Used as `this.elementRef` in 100+ subclasses + external packages. Cannot convert to signal without updating all consumers.
 - **basetabpanel.ts `templateRef`:** Used in templates of subclasses (accordion, tabpanel, tablesspanel, splitpane).
-- **servoydesigner.component.ts:** Setter-based ViewChild, complex.
+- **servoydesigner.component.ts:** Setter-based ViewChild for `#element` (ResizeObserver). `mainForm` converted to signal.
 
 ### Remaining Phases
 - **Phase 6b — NgModule removal:** Remove remaining barrel NgModules (servoycore.module, servoydefault.module, servoy_public.module, servoy.module, servoydesigner.module, lfc.module, allcomponents.module, dialog.module, windowservice.module). These currently serve only as re-export groupings; all components already have their own imports.
-- **Phase 7 — Zoneless:** Remove zone.js, switch to `provideZonelessChangeDetection()`, eliminate all `ChangeDetectorRef` usage.
+- **Phase 7 — Zoneless (IN PROGRESS):** `provideZonelessChangeDetection()` is active. Zone.js still loaded as safety net. Remaining work: fix ~34 setTimeout/setInterval patterns that mutate state without `markForCheck()`, verify third-party library compatibility, then remove zone.js from polyfills. See `docs/zoneless-migration.spec.md`.

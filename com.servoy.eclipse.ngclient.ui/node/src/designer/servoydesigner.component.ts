@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy, ElementRef, Renderer2, DOCUMENT, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WindowRefService } from '@servoy/public';
 import { WebsocketSession, WebsocketService } from '../sablo/websocket.service';
@@ -26,7 +26,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
   elementRefInit!: ElementRef;
 
   private resizeObserver!: ResizeObserver;
-  mainForm!: string;
+  mainForm = signal<string | null>(null);
   solutionName!: string;
   private wsSession!: WebsocketSession;
   variantsRequested!: boolean;
@@ -57,7 +57,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.variantsRequested) {
       const formState = JSON.parse(this.variantsFormTemplate)[formName];
       this.formService.createFormCache(formName, formState, null!);
-      this.mainForm = formName;
+      this.mainForm.set(formName);
     } else {
       this.wsSession
         .callService(
@@ -73,7 +73,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
         .then((data: any) => {
           const formState = JSON.parse(data)[formName];
           this.formService.createFormCache(formName, formState, null!);
-          this.mainForm = formName;
+          this.mainForm.set(formName);
         });
     }
     this.wsSession
@@ -114,7 +114,7 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   getFormName() {
-    return this.mainForm;
+    return this.mainForm()!;
   }
 
   refresh() {
@@ -142,22 +142,22 @@ export class ServoyDesignerComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   contentRefresh() {
-    if (this.mainForm === 'VariantsForm') return;
+    if (this.mainForm() === 'VariantsForm') return;
     this.wsSession
       .callService(
         '$editor',
         'getData',
         {
-          form: this.mainForm,
+          form: this.mainForm()!,
           solution: this.solutionName,
           ng2: true,
         },
         false,
       )
       .then((data: any) => {
-        const formState = JSON.parse(data)[this.mainForm];
-        this.formService.destroyFormCache(this.mainForm);
-        this.formService.createFormCache(this.mainForm, formState, null!);
+        const formState = JSON.parse(data)[this.mainForm()!];
+        this.formService.destroyFormCache(this.mainForm()!);
+        this.formService.createFormCache(this.mainForm()!, formState, null!);
         this.designFormComponent.formCacheRefresh();
       });
   }

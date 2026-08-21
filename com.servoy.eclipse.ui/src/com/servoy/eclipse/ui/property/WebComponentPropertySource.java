@@ -133,6 +133,14 @@ public class WebComponentPropertySource extends PDPropertySource
 
 		IPropertyHandler commentHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_COMMENT.getPropertyName()));
 		if (commentHandler != null) handlers.add(commentHandler);
+
+		if (valueObject instanceof IPersist p && p.getAncestor(Form.class) instanceof Form form)
+			if (!form.isResponsiveLayout() && !form.getUseCssPosition().booleanValue())
+		{
+			// inject the size and location properties
+			handlers.add(new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName())));
+			handlers.add(new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName())));
+		}
 		return handlers.toArray(new IPropertyHandler[handlers.size()]);
 	}
 

@@ -77,6 +77,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -456,7 +457,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 							CSSPositionUtils.setLocation(webComponent, args.getLocation());
 							CSSPositionUtils.setSize(webComponent, args.getSize());
 						}
-						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+						PropertyDescription description = spec.getProperty(IContentSpecConstants.PROPERTY_DESIGN_SIZE);
+						if (description == null) description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 						if (EMPTY_SIZE.equals(args.getSize()) && description != null && description.getDefaultValue() instanceof JSONObject)
 						{
 							CSSPositionUtils.setSize(webComponent, ((JSONObject)description.getDefaultValue()).optInt("width", 80),
@@ -804,7 +806,8 @@ public class CreateComponentCommand extends BaseRestorableCommand
 			int yRelativeToParent = Math.max(0, (int)(location.y - parentWebComponent.getLocation().getY()));
 			//webComponent.setLocation(new Point(xRelativeToParent, yRelativeToParent));
 			//webComponent.setSize(size);
-			PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+			PropertyDescription description = spec.getProperty(IContentSpecConstants.PROPERTY_DESIGN_SIZE);
+			if (description == null) description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 			if (description != null && description.getDefaultValue() instanceof JSONObject)
 			{
 				//webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),

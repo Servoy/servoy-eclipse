@@ -2,7 +2,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { SabloTabseq } from '@servoy/public';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef, ChangeDetectionStrategy, signal } from '@angular/core';
 
 import { BaseTabpanel,Tab } from '../tabpanel/basetabpanel';
 
@@ -15,7 +15,7 @@ import { BaseTabpanel,Tab } from '../tabpanel/basetabpanel';
 })
 export class ServoyDefaultAccordion extends BaseTabpanel {
 
-    panelHeight!: number;
+    readonly panelHeight = signal<number>(0);
 
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes['height']) {
@@ -39,15 +39,15 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
         if (wrapper) {
             totalHeight = (wrapper as HTMLElement).offsetHeight;
         }
-        if (this.tabs) {
-            totalHeight = totalHeight - 40 * this.tabs.length;
+        if (this.tabs()) {
+            totalHeight = totalHeight - 40 * this.tabs().length;
         }
-        this.panelHeight = totalHeight;
+        this.panelHeight.set(totalHeight);
     }
 
     selectTabAt( selectionIndex: number ) {
-        if ( selectionIndex >= 0 && selectionIndex < this.tabs.length ) {
-            let tabToSelect = this.tabs[selectionIndex];
+        if ( selectionIndex >= 0 && selectionIndex < this.tabs().length ) {
+            let tabToSelect = this.tabs()[selectionIndex];
             if ( tabToSelect.disabled == true ) {
                 return;
             }
@@ -62,6 +62,6 @@ export class ServoyDefaultAccordion extends BaseTabpanel {
     }
 
     tabClicked(tab: Tab,tabIndexClicked: number, event: any){
-        this.select( this.tabs[tabIndexClicked] );
+        this.select( this.tabs()[tabIndexClicked] );
     }
 }

@@ -1,12 +1,9 @@
 <div  #element 
 	style="position:absolute;width:100%;height:100%;overflow:auto;"
-	[class]='(styleClass ? styleClass : "")  + " svy-tablesspanel"' 
+	[class]='(styleClass() ? styleClass() : "")  + " svy-tablesspanel"' 
 	[id]="servoyApi().getMarkupId()" 
-	[sabloTabseq]="tabSeq" 
+	[sabloTabseq]="tabSeq()" 
 	[sabloTabseqConfig]="{container: true, reservedGap: 50}"
-	[ngStyle]="{ border: borderStyle }"
 	>
- 	<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm()}"></ng-template>
+ 	<ng-template [ngTemplateOutlet]="templateRef()" [ngTemplateOutletContext]="{name:getForm()}"></ng-template>
 </div>
-
-

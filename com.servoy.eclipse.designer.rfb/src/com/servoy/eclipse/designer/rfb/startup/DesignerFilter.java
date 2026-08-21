@@ -62,6 +62,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -403,7 +404,8 @@ public class DesignerFilter implements Filter
 								}
 								else
 								{
-									PropertyDescription pd = spec.getProperty("size");
+									PropertyDescription pd = spec.getProperty(IContentSpecConstants.PROPERTY_DESIGN_SIZE);
+									if (pd == null) pd = spec.getProperty("size");
 									if (pd != null && pd.getDefaultValue() != null)
 									{
 										model.put("size", pd.getDefaultValue());
@@ -491,7 +493,8 @@ public class DesignerFilter implements Filter
 											if (initialValue != null) model.put(string, initialValue);
 										}
 									}
-									PropertyDescription pd = spec.getProperty("size");
+									PropertyDescription pd = spec.getProperty(IContentSpecConstants.PROPERTY_DESIGN_SIZE);
+									if (pd == null) pd = spec.getProperty("size");
 									if (pd != null && pd.getDefaultValue() != null)
 									{
 										model.put("size", pd.getDefaultValue());
