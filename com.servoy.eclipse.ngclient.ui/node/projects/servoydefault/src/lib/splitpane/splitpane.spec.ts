@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Component, TemplateRef, viewChild } from '@angular/core';
+import { Component, TemplateRef, viewChild, provideZonelessChangeDetection } from '@angular/core';
 import { ServoyPublicService, FormattingService, TooltipService, ServoyApi, WindowRefService } from '@servoy/public';
 import { Subject } from 'rxjs';
 import { signal } from '@angular/core';
@@ -54,6 +54,7 @@ describe('ServoyDefaultSplitpane', () => {
         TestBed.configureTestingModule({
             imports: [TestHostComponent],
             providers: [
+                provideZonelessChangeDetection(),
                 { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn() } },
                 { provide: FormattingService, useValue: {} },
                 { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },
@@ -95,6 +96,7 @@ describe('ServoyDefaultSplitpane - default values', () => {
         TestBed.configureTestingModule({
             imports: [ServoyDefaultSplitpane],
             providers: [
+                provideZonelessChangeDetection(),
                 { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn() } },
                 { provide: FormattingService, useValue: {} },
                 { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },

@@ -1,6 +1,6 @@
 <div class="svy-tabpanel" #element style='height:100%;width:100%;position:absolute;' [sabloTabseq]="tabSeq()"
   [sabloTabseqConfig]="{container: true, reservedGap: 50}">
-  <ul ngbNav #nav="ngbNav" class="nav-tabs text-nowrap flex-nowrap" [(activeId)]="selectedTabID" style="overflow-x: auto; overflow-y: hidden;" (navChange)="onTabChange($event)"
+  <ul ngbNav #nav="ngbNav" class="nav-tabs text-nowrap flex-nowrap" [activeId]="selectedTabID()" style="overflow-x: auto; overflow-y: hidden;" (navChange)="onTabChange($event)"
     [class]='styleClass()' [id]="servoyApi().getMarkupId()">
     @for (tab of tabs(); track tab; let i = $index) {
       <li [ngbNavItem]="tab._id" [disabled]="tab.disabled || !enabled() || !tab.containsFormId" (click)="tabClicked(tab, i)"

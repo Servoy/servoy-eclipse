@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Component } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { Subject } from 'rxjs';
 import { signal } from '@angular/core';
 import { ServoyPublicService, FormattingService, TooltipService, ServoyApi, WindowRefService } from '@servoy/public';
@@ -69,6 +69,7 @@ class TestTablesspanelHostComponent {
 }
 
 const defaultProviders = [
+    provideZonelessChangeDetection(),
     { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn() } },
     { provide: FormattingService, useValue: {} },
     { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },
@@ -145,5 +146,21 @@ describe('ServoyDefaultTablesspanel', () => {
         component.select(tabs[1]);
         await fixture.whenStable();
         expect(component.getSelectedTab().containsFormId).toBe('form2');
+    });
+
+    it('should not throw NG0100 when selectedTab changes between checks', async () => {
+        expect(component.getForm()).toBe('form1');
+        const tabs = fixture.componentInstance.tabs;
+        component.select(tabs[1]);
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(component.getForm()).toBe('form2');
+        expect(() => fixture.detectChanges()).not.toThrow();
+    });
+
+    it('getForm() should return consistent value on repeated calls', () => {
+        const result1 = component.getForm();
+        const result2 = component.getForm();
+        expect(result1).toBe(result2);
     });
 });

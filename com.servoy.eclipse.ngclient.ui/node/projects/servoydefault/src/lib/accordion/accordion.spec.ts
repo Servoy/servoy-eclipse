@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Component } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { Subject } from 'rxjs';
 import { signal } from '@angular/core';
 import { ServoyPublicService, FormattingService, TooltipService, ServoyApi, WindowRefService } from '@servoy/public';
@@ -56,6 +56,7 @@ describe('ServoyDefaultAccordion', () => {
         TestBed.configureTestingModule({
             imports: [TestAccordionHostComponent],
             providers: [
+                provideZonelessChangeDetection(),
                 { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn() } },
                 { provide: FormattingService, useValue: {} },
                 { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },
