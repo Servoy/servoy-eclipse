@@ -1,6 +1,6 @@
 {
   "name": "@servoy/public",
-  "version": "2026.9.2",
+  "version": "2026.9.3",
   "peerDependencies": {
     "@angular/common": "^22",
     "@angular/core": "^22"

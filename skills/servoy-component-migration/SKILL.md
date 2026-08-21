@@ -213,6 +213,41 @@ Remove files: `karma.conf.js`, `karma.dev.conf.js`
 - **NEVER** use `vi.stubGlobal('document', ...)` or `vi.stubGlobal('window', ...)` — this breaks jsdom
 - Mock individual methods with `vi.spyOn` and restore in `afterEach`
 
+### Zoneless Testing
+
+Component library tests should run **without Zone.js** for speed and accuracy:
+
+1. **Remove `zone.js` from polyfills** in the dummy project's `angular.json`:
+   ```json
+   "polyfills": [],
+   ```
+
+2. **For components with heavy third-party libs** (e.g., Uppy/Tus with internal timers), add `provideZonelessChangeDetection()` to the TestBed config to prevent `fixture.whenStable()` from waiting on unrelated macrotasks:
+   ```typescript
+   import { provideZonelessChangeDetection } from '@angular/core';
+
+   await TestBed.configureTestingModule({
+       imports: [MyComponent, ServoyPublicTestingModule],
+       providers: [provideZonelessChangeDetection()],
+   }).compileComponents();
+   ```
+
+3. **`setTimeout` callbacks are invisible to `fixture.whenStable()`** without Zone.js. If component code uses `setTimeout(() => callback())`, the test must flush it explicitly:
+   ```typescript
+   input.click();
+   fixture.detectChanges();
+   await new Promise(resolve => setTimeout(resolve, 0));
+   expect(callback).toHaveBeenCalled();
+   ```
+
+4. **Suppress expected console warnings** in tests that intentionally trigger them:
+   ```typescript
+   const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+   // ... trigger the warning ...
+   expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('expected message'));
+   consoleSpy.mockRestore();
+   ```
+
 Commit: `migrate tests to Vitest [ai]`
 
 ---
@@ -335,6 +370,24 @@ After installing the new `@servoy/public`, run `npm run build`. The compiler wil
 - **Initialization timing**: With `viewChild()`, `elementRef()` returns undefined until after view init. If `svyOnInit()` calls methods that access `elementRef()` or other not-yet-initialized objects (like canvas/chart instances), add null guards: `if (this.elementRef() && this.myObject) { ... }`
 - **Optional chaining on elementRef**: Code using `this.elementRef?.nativeElement` must become `this.elementRef()?.nativeElement` — don't forget the `()` before `?.`
 - **getNativeElement() overrides**: If a component overrides `getNativeElement()` with `this.elementRef()!.nativeElement.firstChild`, it can crash during `ngOnDestroy` when elementRef is already undefined. Use optional chaining: `this.elementRef()?.nativeElement?.firstChild`
+- **viewChild `{ read: ElementRef }` is critical**: The base class `ServoyBaseComponent` uses `viewChild('element', { read: ElementRef })`. Without `{ read: ElementRef }`, when `#element` is placed on an Angular component tag (like `<ngb-progressbar #element>`), `viewChild` returns the **component instance** instead of the ElementRef — causing `nativeElement` to be `undefined`. Note: do NOT use an explicit generic like `viewChild<ElementRef<T>>(...)` — TypeScript picks the wrong overload and reports `read` as unknown property. The correct form is `viewChild('element', { read: ElementRef })` without explicit generic.
+- **Test for getNativeElement()**: Every component spec MUST include a regression test that verifies `getNativeElement()` returns a valid element. This catches elementRef resolution bugs immediately:
+  ```typescript
+  it('should return a valid native element from getNativeElement()', () => {
+      expect(component.getNativeElement()).not.toBeNull();
+      expect(component.getNativeElement()).toBeInstanceOf(HTMLElement);
+  });
+  ```
+- **Test for servoyAttributes**: Components where `#element` is on a child component (not a plain div) should also verify that `addAttributes()` works:
+  ```typescript
+  it('should apply servoyAttributes on the native element', async () => {
+      fixture.componentRef.setInput('servoyAttributes', { 'data-testid': 'my-comp', 'aria-label': 'label' });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const nativeEl = component.getNativeElement();
+      expect(nativeEl.getAttribute('data-testid')).toBe('my-comp');
+  });
+  ```
 - **Indirect signal access on other instances**: Not just `this.servoyApi` but also references to signals on OTHER component instances need `()`. E.g. `this.ngGrid.servoyApi.` → `this.ngGrid.servoyApi().` and `this.dataGrid.servoyApi.` → `this.dataGrid.servoyApi().`
 - **`this.name` as function argument**: When `this.name` is passed to a function expecting `string`, the compiler reports `InputSignal<string> is not assignable to string`. Fix: `this.name()`
 
@@ -486,6 +539,38 @@ Check for:
 3. No `setTimeout`/`setInterval` that expects zone.js to trigger change detection
 4. All state changes go through signals (no plain class properties bound in templates that are mutated — see Phase 5 "Convert template-bound class properties to signals")
 5. All components are OnPush
+
+### Remove zone.js from component library test builds
+
+Component libraries don't need Zone.js for testing. Remove it from the dummy application's polyfills in `angular.json`:
+```json
+"polyfills": [],
+```
+
+This eliminates:
+- **NG0914 warnings** ("application is using zoneless change detection but still loading Zone.js")
+- **Slow tests** caused by `fixture.whenStable()` waiting on third-party timers (e.g., Uppy/Tus retry delays, dynamic import() resolution)
+- **False stability** where Zone.js hides timing issues that would surface in a real zoneless app
+
+### `@for` track expressions (NG0956)
+
+When using `@for` in templates, **never** track by object identity:
+```html
+<!-- BAD: track by identity → full DOM re-creation when array reference changes -->
+@for (item of items(); track item; let idx = $index) {
+
+<!-- GOOD: track by stable ID field -->
+@for (item of items(); track item.id; let idx = $index) {
+
+<!-- OK: track by index (when order is stable and items are never reordered) -->
+@for (item of items(); track $index; let idx = $index) {
+```
+
+Angular emits **NG0956** at runtime when track-by-identity causes full collection re-creation. Use a stable identifier (ID field) from the object model. For Servoy custom objects, common ID fields are:
+- `Collapsible.collapsibleId`
+- `Card.cardId`
+- `MenuItem.id`
+- `Slide.imageUrl` (or an index if no unique field exists)
 
 Report findings — don't force zoneless if the runtime (Servoy TiNG) isn't ready yet.
 
