@@ -169,6 +169,7 @@ public class WarExporter
 //		"org.apache.logging.log4j.jcl_*.jar", //
 		"org.antlr.runtime_*.jar", //
 		"javax.transaction_*.jar", //
+		"jakarta.transaction_*.jar", //
 		"jakarta.persistence-api_*.jar", //
 		"jakarta.mail-api_*.jar", //
 		"jakarta.activation-api_*.jar", //

@@ -266,7 +266,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.hibernate.orm.core"
-         version="5.6.15.Servoy3"/>
+         version="7.4.5.Servoy1"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
@@ -353,10 +353,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2026.9.0.qualifier"/>
 
    <plugin
-         id="org.hibernate.common.hibernate-commons-annotations"
-         version="5.1.2.Final"/>
-
-   <plugin
          id="org.apache.commons.commons-codec"
          version="1.22.1"/>
 
@@ -424,5 +420,17 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <plugin
          id="com.servoy.eclipse.cypress"
          version="2026.9.0.qualifier"/>
+
+   <plugin
+         id="wrapped.org.hibernate.models.hibernate-models"
+         version="1.1.1"/>
+
+   <plugin
+         id="org.hibernate.orm.community.dialects"
+         version="7.4.5.Servoy1"/>
+
+   <plugin
+         id="org.hibernate.orm.vector"
+         version="7.4.5.Servoy1"/>
 
 </feature>

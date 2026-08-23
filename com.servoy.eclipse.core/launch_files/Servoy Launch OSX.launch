@@ -562,8 +562,9 @@
         <setEntry value="org.eclipse.xsd@default:default"/>
         <setEntry value="org.freemarker.freemarker@default:default"/>
         <setEntry value="org.hamcrest@default:default"/>
-        <setEntry value="org.hibernate.common.hibernate-commons-annotations@default:default"/>
-        <setEntry value="org.hibernate.orm.core@default:default"/>
+        <setEntry value="org.hibernate.orm.community.dialects@3:true"/>
+        <setEntry value="org.hibernate.orm.core@3:true"/>
+        <setEntry value="org.hibernate.orm.vector@3:true"/>
         <setEntry value="org.jboss.logging.jboss-logging@default:default"/>
         <setEntry value="org.jcodings@default:default"/>
         <setEntry value="org.joni@default:default"/>
