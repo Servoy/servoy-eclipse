@@ -1,4 +1,4 @@
-import { inject, Injectable, DOCUMENT } from '@angular/core';
+import { inject, Injectable, DOCUMENT,isSignal } from '@angular/core';
 
 import { EventLike, JSEvent, LoggerFactory, LoggerService } from '@servoy/public';
 import { FormService } from './form.service';
@@ -68,8 +68,9 @@ export class SvyUtilsService {
       jsEvent.data = event.detail;
     }
     for (const chain of targetElNameChain) {
-      if (!this.formService || this.formService.getFormCacheByName(form!).getComponent(chain)) {
-        jsEvent['elementName'] = chain;
+      const name= isSignal(chain)?chain():chain;
+      if (!this.formService || this.formService.getFormCacheByName(form!).getComponent(name)) {
+        jsEvent['elementName'] = name;
         break;
       }
     }
