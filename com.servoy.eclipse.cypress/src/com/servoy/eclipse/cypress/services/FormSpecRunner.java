@@ -410,7 +410,12 @@ public class FormSpecRunner
 	public Path getCypressDir()
 	{
 		Path workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
-		Path metadataPlugins = workspaceRoot.getParent().resolve(".metadata").resolve(".plugins");
+		return getCypressDir(workspaceRoot);
+	}
+
+	Path getCypressDir(Path workspaceRoot)
+	{
+		Path metadataPlugins = workspaceRoot.resolve(".metadata").resolve(".plugins");
 		return metadataPlugins.resolve(MCP_PLUGIN_DIR).resolve(CYPRESS_DIR);
 	}
 
@@ -860,4 +865,3 @@ public class FormSpecRunner
 		}
 	}
 }
-
