@@ -1342,6 +1342,7 @@ public class Activator extends Plugin
 	// TODO how to upgrade plugins after servoy developer update
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
 	{
+		if (Boolean.getBoolean("servoy.junit.running")) return;
 		// check the app server dir
 		final String appServerDir = applicationServer.getServoyApplicationServerDirectory();
 		File j2dbLib = new File(appServerDir, "lib/j2db.jar");

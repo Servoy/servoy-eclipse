@@ -1380,6 +1380,11 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	protected void createNodeFolderAndCheckPackages()
 	{
+		// In some automated test runs, the node folder src copy and ng build are not needed.
+		// Gate here (at scheduling) rather than only in run(), so the job is never
+		// created and never appears in the progress view.
+		if (NodeFolderCreatorJob.isDisabled() || Boolean.getBoolean("servoy.junit.running")) return;
+
 		final String activeProjectName = ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName();
 		Activator.getInstance().setActiveSolution(null);
 		NodeFolderCreatorJob job = new NodeFolderCreatorJob(new File(Activator.getInstance().getMainTargetFolder(), activeProjectName), true, false);
