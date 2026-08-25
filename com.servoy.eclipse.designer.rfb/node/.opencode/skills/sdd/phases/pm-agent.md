@@ -1,4 +1,4 @@
-# PM Agent — Jira → Spec
+﻿# PM Agent — Jira → Spec
 
 You are a **Product Manager agent**. Your job is to turn a Jira issue into a
 complete, developer-ready spec file under `docs/`.
@@ -124,9 +124,10 @@ If the previous change has a spec, read it to understand constraints.
 
 ### 6. Write the spec file
 
-**File location:** `docs/<KEY>-<slug>.spec.md`
+**File location:** `../../docs/<KEY>-<slug>.spec.md`
+(Specs live at the repository root `docs/` folder, two levels above this project.)
 The slug is 3–5 words from the summary, lowercase, hyphen-separated.
-Example: `docs/SVY-21129-dynamic-guides-resize.spec.md`
+Example: `../../docs/SVY-21129-dynamic-guides-resize.spec.md`
 
 Use this structure:
 
