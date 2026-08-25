@@ -410,6 +410,32 @@ For each component:
 2. `@Input() myProp: string; @Output() myPropChange = new EventEmitter<string>()` → `readonly myProp = model<string>(undefined as any)`
 3. `@Output() onAction = new EventEmitter()` → `readonly onAction = output<Event>()`
 
+### model() equality and in-place object mutation
+
+Angular's `model()` signal uses `Object.is()` for equality checking by default. This means that if a component mutates an object/array in-place and then calls `.set()` with the **same reference**, Angular considers it unchanged — the signal doesn't fire and Servoy never pushes the change to the server.
+
+**When this is a problem:**
+- `model<any>()` or `model<SomePlainObject>()` where the type is a plain object/array (NOT an ICustomObjectValue/ICustomArrayValue)
+- The component mutates the object in-place: `current.b[2] = 'or'`
+- Then re-sets it: `this.myProp.set(current)` — same reference, no change detected
+
+**When this is NOT a problem:**
+- Primitive types (`string`, `number`, `boolean`) — always a new value
+- `ICustomArrayValue` / `ICustomObjectValue` — Servoy's converter layer tracks deep changes independently
+- `IFoundset` — has its own change listeners
+- Setting a completely new object: `this.myProp.set({...current, b: newArray})` — different reference
+
+**Fix:** Add `{ equal: () => false }` to model signals that hold plain objects/arrays which may be mutated in-place:
+```typescript
+// Before — in-place mutation is invisible
+readonly testName = model<any>(undefined);
+
+// After — every .set() is treated as a change
+readonly testName = model<any>(undefined, { equal: () => false });
+```
+
+This replaces the old pattern where `this.testNameChange.emit(this.testName)` explicitly notified the framework.
+
 ### Update template reads
 
 - `this.myProp` → `this.myProp()` (signal read)
