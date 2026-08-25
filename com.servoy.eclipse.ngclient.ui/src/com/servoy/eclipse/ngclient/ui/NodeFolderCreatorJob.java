@@ -54,6 +54,30 @@ import com.servoy.j2db.util.Utils;
 public class NodeFolderCreatorJob extends Job
 {
 
+	/** When true, run() returns OK immediately without copying or running npm. */
+	private static volatile boolean disabled = false;
+
+	/**
+	 * Disables the node folder copy/npm cycle for the duration of tests that
+	 * do not need the NG client node folder. Call this before activating any
+	 * solution in test setup. Re-enable with {@link #setDisabled(boolean) setDisabled(false)}
+	 * in teardown if a subsequent test class requires it.
+	 *
+	 * @param value true to skip the copy/npm cycle, false to re-enable it
+	 */
+	public static void setDisabled(boolean value)
+	{
+		disabled = value;
+	}
+
+	/**
+	 * @return true if the node folder copy/npm cycle is currently disabled
+	 */
+	public static boolean isDisabled()
+	{
+		return disabled;
+	}
+
 	private final File nodeFolder;
 	private final boolean createWatcher;
 	private final boolean force;
@@ -75,6 +99,7 @@ public class NodeFolderCreatorJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		if (disabled) return Status.OK_STATUS;
 		IStatus jobStatus = Status.OK_STATUS;
 
 		boolean executeNpmInstall = false;
