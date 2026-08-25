@@ -414,24 +414,43 @@ For each component:
 
 Angular's `model()` signal uses `Object.is()` for equality checking by default. This means that if a component mutates an object/array in-place and then calls `.set()` with the **same reference**, Angular considers it unchanged — the signal doesn't fire and Servoy never pushes the change to the server.
 
+**Important:** Unlike `signal()`, `model()` does NOT support a custom `equal` option. The only solution is to create a new object reference.
+
 **When this is a problem:**
 - `model<any>()` or `model<SomePlainObject>()` where the type is a plain object/array (NOT an ICustomObjectValue/ICustomArrayValue)
 - The component mutates the object in-place: `current.b[2] = 'or'`
-- Then re-sets it: `this.myProp.set(current)` — same reference, no change detected
+- Then re-sets the same reference: `this.myProp.set(current)` — no change detected
 
 **When this is NOT a problem:**
 - Primitive types (`string`, `number`, `boolean`) — always a new value
 - `ICustomArrayValue` / `ICustomObjectValue` — Servoy's converter layer tracks deep changes independently
 - `IFoundset` — has its own change listeners
-- Setting a completely new object: `this.myProp.set({...current, b: newArray})` — different reference
+- Setting a completely new object: `this.myProp.set({...current})` — different reference
 
-**Fix:** Add `{ equal: () => false }` to model signals that hold plain objects/arrays which may be mutated in-place:
+**Fix:** Always create a new reference when mutating in-place and re-setting:
 ```typescript
-// Before — in-place mutation is invisible
-readonly testName = model<any>(undefined);
+// Before — same reference, change is invisible
+const current = this.testName();
+current.b[2] = 'or';
+this.testName.set(current);  // ❌ Object.is(current, current) === true
 
-// After — every .set() is treated as a change
-readonly testName = model<any>(undefined, { equal: () => false });
+// After — shallow spread creates new reference
+const current = this.testName();
+current.b[2] = 'or';
+this.testName.set({...current});  // ✅ new object reference → change detected
+```
+
+For arrays:
+```typescript
+// Before
+const arr = this.myArray();
+arr.push(newItem);
+this.myArray.set(arr);  // ❌ same reference
+
+// After
+const arr = this.myArray();
+arr.push(newItem);
+this.myArray.set([...arr]);  // ✅ new array reference
 ```
 
 This replaces the old pattern where `this.testNameChange.emit(this.testName)` explicitly notified the framework.
