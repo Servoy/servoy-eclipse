@@ -35,9 +35,19 @@ export class ServoyApi extends Api {
 
   /**
    * This apply is only needed for nested dataproviders, so a dataprovider property of custom type, this will push and apply the data to the data model.
+   * When useTrackedChanges is true, it passes the current model value as oldValue so that sendChanges can detect
+   * it's the same reference and only push granular tracked changes (proxy-detected) instead of a full replacement.
+   * This is the equivalent of the old @Output emit(sameRef) pattern for ICustomArrayValue/ICustomObjectValue with pushToServer "allow".
    */
-  public apply(propertyName: string, value: any) {
-    this.formservice.sendChanges(this.formname, this.item.name, propertyName, value, null, true);
+  public apply(propertyName: string, value: any, useTrackedChanges = false) {
+    if (useTrackedChanges) {
+      const model = this.item.model;
+      const oldValue = model[propertyName];
+      model[propertyName] = value;
+      this.formservice.sendChanges(this.formname, this.item.name, propertyName, value, oldValue, false);
+    } else {
+      this.formservice.sendChanges(this.formname, this.item.name, propertyName, value, null, true);
+    }
   }
 
   public callServerSideApi(methodName: string, args: any[]) {
