@@ -16,7 +16,7 @@ import { ResizeEditorHeightComponent } from '../resizeeditorheight/resizeeditorh
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 
-    readonly elementRef = viewChild.required<ElementRef<Element>>('element');
+    readonly elementRef = viewChild<ElementRef<Element>>('element');
 
     ghostOffset = 20;
     containerLeftOffset!: number;
