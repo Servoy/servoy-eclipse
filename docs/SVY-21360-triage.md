@@ -175,3 +175,65 @@ fixing the actual `viewChild.required()` misuse.
 ## Questions for the reporter
 
 Not applicable — verdict is PROCEED, not NEEDS_INPUT.
+
+## Addendum: second, independent root cause found during implementation
+
+Approach 1 was implemented (`ghostscontainer.component.ts` reverted to the
+optional `viewChild('element')` query). It is a real fix for the NG0951 throw
+and the aborted dispatch loop described above, and remains part of the
+committed change.
+
+However, manual verification after that fix still showed the toolbar buttons
+for "Exploded view" and "Dynamic guides" failing to visually reflect their
+own state on initial form load (screenshots: button shown unpressed while
+the persisted preference, and the rendered canvas, were both correctly
+`true`/exploded). Debug logging confirmed the preference read, the message
+sent to the content iframe, and the content iframe's handling of that
+message were all correct — the canvas always matched the persisted
+preference. Only the toolbar button's own visual state was wrong. This is a
+second, independent bug, not a residual symptom of the NG0951 issue.
+
+### Root cause 2: mutable `ToolbarItem.state` under `OnPush`
+
+`ToolbarComponent`, `ToolbarButtonComponent` and `ToolbarSwitchComponent` are
+all `ChangeDetectionStrategy.OnPush`. `ToolbarButtonComponent`/
+`ToolbarSwitchComponent` receive their `ToolbarItem` via an `input()` signal
+(`item = input<ToolbarItem>()`) and read `item().state` directly in their
+templates for the `toggle-on` CSS class / checkbox binding.
+
+`ToolbarItem.state` was a plain mutable `boolean` field. `ToolbarComponent`
+sets it via `this.btnToggleDesignMode.state = result` from several places,
+including the promise callback in `setupItems()` that restores the
+persisted preference on form open, and calls `this.cdr.markForCheck()`
+afterwards. `markForCheck()` only marks the **ancestor** chain dirty so the
+component re-renders on the next change-detection pass — it does not force
+a child `OnPush` view to re-check when that child's `[item]` input binding
+still points at the exact same `ToolbarItem` object. Since only a field
+*inside* that object changed, not the object reference, the child button
+was never marked dirty and its template never re-evaluated the `state`
+read, so the `toggle-on` class binding kept showing the stale value.
+
+Clicking the button appeared to work because the click event originates
+*inside* the child component itself; Angular always marks the component
+that dispatched an event dirty for that tick, which incidentally forced a
+re-check of that one button. This is why the bug was invisible on click and
+only visible on programmatic updates (init/restore-from-preference) — an
+asymmetry that looked exactly like "works in reverse" when combined with
+the first bug's message-dropping behavior, but is a distinct defect with a
+distinct fix.
+
+### Fix implemented
+
+Changed `ToolbarItem.state` from `boolean` to `signal<boolean | undefined>`.
+Updated all ~27 read/write sites in `toolbar.component.ts`
+(`.state` → `.state()`, `.state = x` → `.state.set(x)`) and the two
+templates that read it directly (`toolbarbutton.component.html`,
+`toolbarswitch.component.html`, → `state()` / `state.set($event)`). Because
+the button's template now reads a signal, Angular tracks it as a reactive
+dependency of that `OnPush` view directly — any `.set()` call schedules
+that view for re-check regardless of which code path performed it, so the
+`ToolbarComponent`-vs-child identity problem no longer applies.
+
+Both fixes are committed together (see the spec's implementation plan,
+updated accordingly), since both were required to fully resolve the
+observed "toggle works in reverse" symptom for SVY-21360 and SVY-21361.
