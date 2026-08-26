@@ -1,4 +1,4 @@
-import { Component, inject, DOCUMENT, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, DOCUMENT, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SabloTabseq } from '@servoy/public';
 import { SabloService } from '../../../sablo/sablo.service';
@@ -12,7 +12,7 @@ import { FormService } from '../../form.service';
   selector: 'servoycore-dialog-window',
   templateUrl: './dialog-window.component.html',
   styleUrls: ['./dialog-window.component.css'],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule, SabloTabseq, DefaultNavigator, FormComponent],
 })
@@ -24,47 +24,46 @@ export class DialogWindowComponent {
   private readonly formservice = inject(FormService);
   private readonly doc = inject(DOCUMENT) as Document;
 
+  readonly formName = computed(() => {
+    const name = this.window?.form()?.name;
+    return name && this.formservice.hasFormCacheEntry(name) ? name : null;
+  });
+
+  readonly navigatorFormName = computed(() => {
+    const nav = this.window?.navigatorForm();
+    const name = nav && nav.name && nav.name.lastIndexOf('default_navigator_container.html') === -1 ? nav.name : null;
+    return name && this.formservice.hasFormCacheEntry(name) ? name : null;
+  });
+
+  readonly defaultNavigator = computed(() => {
+    const nav = this.window?.navigatorForm();
+    return !!(nav && nav.name && nav.name.lastIndexOf('default_navigator_container.html') >= 0);
+  });
+
+  readonly isUndecorated = computed(() => {
+    return this.window?.undecorated() || this.window?.opacity() < 1;
+  });
+
   constructor() {}
 
   setWindow(window: SvyWindow) {
     this.window = window;
   }
 
-  getFormName(): string | null {
-    const name = this.window.form ? this.window.form.name : undefined;
-    if (name && this.formservice.hasFormCacheEntry(name)) return name;
-    return null;
-  }
-
-  getNavigatorFormName(): string | null {
-    const name =
-      this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1 ? this.window.navigatorForm.name : null;
-    if (name && this.formservice.hasFormCacheEntry(name)) return name;
-    return null;
-  }
-
-  hasDefaultNavigator(): boolean {
-    return !!(this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf('default_navigator_container.html') >= 0);
-  }
-
-  isUndecorated(): boolean {
-    return this.window.undecorated || this.window.opacity < 1;
-  }
-
   getOpacity(): number {
-    return this.window.opacity;
+    return this.window.opacity();
   }
 
   getTitle(): string {
-    return this.window.title;
+    return this.window.title();
   }
 
   getBackgroundColor(): string | null {
-    return this.window.transparent ? 'transparent' : null;
+    return this.window.transparent() ? 'transparent' : null;
   }
 
   getCSSClassName() {
-    return this.window.cssClassName;
+    return this.window.cssClassName();
   }
 
   cancel() {
