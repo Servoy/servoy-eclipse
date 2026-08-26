@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
-import { DialogWindowComponent } from './dialog-window/dialog-window.component';
+import type { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
 import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService, PopupStateService } from '@servoy/public';
@@ -87,7 +87,7 @@ export class WindowService {
     }
   }
 
-  public show(name: string, form: string, title: string) {
+  public async show(name: string, form: string, title: string) {
     this.dialogShown = true;
     const currentWindow = 'window' + this.windowCounter;
     const storedWindow = this.sessionStorageService.get(currentWindow);
@@ -175,6 +175,7 @@ export class WindowService {
       const loc = { left: location.x, top: location.y };
 
       // create the bs window instance
+      const { DialogWindowComponent } = await import('./dialog-window/dialog-window.component');
       const dialogWindowComponent = this.mainViewRefService.mainContainer.createComponent(DialogWindowComponent);
       //
       dialogWindowComponent.instance.setWindow(instance);
