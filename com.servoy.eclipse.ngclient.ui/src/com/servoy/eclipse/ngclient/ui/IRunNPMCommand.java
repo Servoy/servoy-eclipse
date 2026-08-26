@@ -40,4 +40,9 @@ public interface IRunNPMCommand
 	 *
 	 */
 	boolean cancel();
+
+	/**
+	 * @param outputStream
+	 */
+	void setOutputStream(StringOutputStream outputStream);
 }

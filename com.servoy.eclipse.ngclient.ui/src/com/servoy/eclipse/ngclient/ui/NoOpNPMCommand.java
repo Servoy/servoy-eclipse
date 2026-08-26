@@ -60,4 +60,9 @@ class NoOpNPMCommand implements IRunNPMCommand
 	{
 		return true;
 	}
+
+	@Override
+	public void setOutputStream(StringOutputStream outputStream)
+	{
+	}
 }
