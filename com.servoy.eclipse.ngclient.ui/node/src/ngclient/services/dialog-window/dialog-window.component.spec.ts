@@ -1,19 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA, Component } from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DialogWindowComponent } from './dialog-window.component';
 import { SvyWindow } from '../window.service';
 import { FormService } from '../../form.service';
 import { SabloService } from '../../../sablo/sablo.service';
-import { FormComponent } from '../../form/form_component.component';
-import { DefaultNavigator } from '../../../servoycore/default-navigator/default-navigator';
-
-/* Mock components to avoid pulling in full FormComponent/DefaultNavigator dependencies */
-@Component({ selector: 'svy-form', template: '', standalone: true, inputs: ['name'] })
-class MockFormComponent {}
-
-@Component({ selector: 'svy-default-navigator', template: '', standalone: true, inputs: ['name'] })
-class MockDefaultNavigator {}
 
 describe('DialogWindowComponent', () => {
     let fixture: ComponentFixture<DialogWindowComponent>;
@@ -35,8 +26,7 @@ describe('DialogWindowComponent', () => {
             ],
             schemas: [NO_ERRORS_SCHEMA],
         }).overrideComponent(DialogWindowComponent, {
-            remove: { imports: [FormComponent, DefaultNavigator] },
-            add: { imports: [MockFormComponent, MockDefaultNavigator] },
+            set: { imports: [], schemas: [NO_ERRORS_SCHEMA] },
         }).compileComponents();
 
         fixture = TestBed.createComponent(DialogWindowComponent);
