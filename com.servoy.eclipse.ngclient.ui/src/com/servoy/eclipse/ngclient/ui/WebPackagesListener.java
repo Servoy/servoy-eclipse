@@ -163,6 +163,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		@Override
 		protected IStatus run(IProgressMonitor monitor)
 		{
+			if (Activator.isNodeExtractionAndTitaniumBuildDisabled()) return Status.CANCEL_STATUS;
+
 			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
 			try
 			{
@@ -1335,7 +1337,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// In some automated test runs, the node folder src copy and ng build are not needed.
 		// Gate here (at scheduling) rather than only in run(), so the job is never
 		// created and never appears in the progress view.
-		if (NodeFolderCreatorJob.isDisabled() || Boolean.getBoolean("servoy.junit.running")) return;
+		if (Activator.isNodeExtractionAndTitaniumBuildDisabled()) return;
 
 		final String activeProjectName = ServoyModelFinder.getServoyModel().getActiveProject().getProject().getName();
 		Activator.getInstance().setActiveSolution(null);
@@ -1432,6 +1434,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	private static void handleTitaniumNGClientBuildFailure()
 	{
+		if (Boolean.getBoolean("servoy.junit.running")) return; // don't show dialogs when running junit tests
+
 		Display display = Display.getDefault();
 
 		// a timer just in case another titanium build is quickly triggered by another change;
