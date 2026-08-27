@@ -149,7 +149,7 @@ describe('ComboboxComponent', () => {
     component.findmode = true;
     component.dataProviderID = 'searchExpr';
     component.ngOnChanges({
-      dataProviderID: new SimpleChange(3, 'searchExpr', false)
+      dataProviderID: new SimpleChange<any>(3, 'searchExpr', false)
     });
     fixture.detectChanges();
     expect(component.formattedValue).toBe('searchExpr');
