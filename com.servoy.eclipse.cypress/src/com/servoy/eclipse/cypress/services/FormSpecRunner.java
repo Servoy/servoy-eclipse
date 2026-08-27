@@ -766,6 +766,9 @@ public class FormSpecRunner
 			}
 			System.out.println("[Servoy MCP] Cypress not installed in " + scriptsDir
 				+ " - running npm install (this may take a few minutes)...");
+
+			long x = System.currentTimeMillis();
+
 			ProcessBuilder pb = new ProcessBuilder(npmPath, "install");
 			pb.directory(scriptsDir.toFile());
 			pb.redirectErrorStream(true);
@@ -788,7 +791,8 @@ public class FormSpecRunner
 				System.err.println("[Servoy MCP] npm install FAILED in " + scriptsDir + ". Output:\n" + npmOutput);
 				return "Error: npm install failed in e2e-test-scripts directory.\n" + npmOutput;
 			}
-			System.out.println("[Servoy MCP] Project Cypress installed successfully.");
+
+			System.out.println("[Servoy MCP] Project Cypress installed successfully in " + String.format( "%.2f", ((System.currentTimeMillis() - x) / 1000d)) + " s");
 			return null;
 		}
 		catch (Exception e)
@@ -831,6 +835,8 @@ public class FormSpecRunner
 					npmPath = nodePath.getParent() + File.separator + "npm";
 				}
 
+				long x = System.currentTimeMillis();
+
 				ProcessBuilder pb = new ProcessBuilder(npmPath, "install");
 				pb.directory(cypressDir.toFile());
 				pb.redirectErrorStream(true);
@@ -855,7 +861,7 @@ public class FormSpecRunner
 					System.err.println("[Servoy MCP] npm install FAILED. Output:\n" + npmOutput);
 					return "Error: npm install failed in cypress directory.\n" + npmOutput;
 				}
-				System.out.println("[Servoy MCP] Cypress installed successfully.");
+				System.out.println("[Servoy MCP] Cypress installed successfully in " + String.format( "%.2f", ((System.currentTimeMillis() - x) / 1000d)) + " s");
 			}
 			return null;
 		}
