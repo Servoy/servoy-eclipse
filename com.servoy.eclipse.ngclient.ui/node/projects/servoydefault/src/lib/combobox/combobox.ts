@@ -253,4 +253,3 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField<HTMLInputEleme
         return false;
     };
 }
-
