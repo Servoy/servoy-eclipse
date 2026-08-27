@@ -119,6 +119,54 @@ describe('ComboboxComponent', () => {
     expect(component.updateValue).toHaveBeenCalled();
   });
 
+  it('should resolve formattedValue via the valuelist when findmode is true and dataProviderID matches an entry', () => {
+    component.findmode = true;
+    component.dataProviderID = 2;
+    component.ngOnChanges({
+      dataProviderID: new SimpleChange(3, 2, false)
+    });
+    fixture.detectChanges();
+    expect(component.formattedValue).toBe('Timisoara');
+  });
+
+  it('should re-resolve formattedValue via the valuelist when dataProviderID changes while in find mode', () => {
+    component.findmode = true;
+    component.dataProviderID = 2;
+    component.ngOnChanges({
+      dataProviderID: new SimpleChange(3, 2, false)
+    });
+    fixture.detectChanges();
+    expect(component.formattedValue).toBe('Timisoara');
+
+    component.dataProviderID = 1;
+    component.ngOnChanges({
+      dataProviderID: new SimpleChange(2, 1, false)
+    });
+    fixture.detectChanges();
+    expect(component.formattedValue).toBe('Bucuresti');
+  });
+
+  it('should fall back to the raw dataProviderID value when there is no valuelist, even in find mode', () => {
+    component.valuelistID = null;
+    component.findmode = true;
+    component.dataProviderID = 'searchExpr';
+    component.ngOnChanges({
+      dataProviderID: new SimpleChange(3, 'searchExpr', false)
+    });
+    fixture.detectChanges();
+    expect(component.formattedValue).toBe('searchExpr');
+  });
+
+  it('should still resolve formattedValue via the valuelist when not in find mode (regression guard)', () => {
+    component.findmode = false;
+    component.dataProviderID = 2;
+    component.ngOnChanges({
+      dataProviderID: new SimpleChange(3, 2, false)
+    });
+    fixture.detectChanges();
+    expect(component.formattedValue).toBe('Timisoara');
+  });
+
 });
 
 class DummyValuelist extends Array<{ displayValue: string; realValue: any }> implements IValuelist {
