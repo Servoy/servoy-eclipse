@@ -648,6 +648,7 @@
 				<module>j2db_documentation.tests</module>
 				<module>com.servoy.eclipse.ngclient.ui.tests</module>
 				<module>com.servoy.eclipse.cypress.tests</module>
+				<module>com.servoy.eclipse.mcp.tests</module>
 			</modules>
 			<build>
 			 <plugins>

@@ -597,7 +597,14 @@ public class ModelUtils
 
 	public static boolean isTestRunning()
 	{
-		boolean pdeTest = Platform.getBundle("org.eclipse.pde.junit.runtime") != null;
+		// The org.eclipse.pde.junit.runtime bundle is deliberately part of the normal
+		// "Servoy Launch OSX" launch configuration (so plugin tests can be run without switching
+		// configurations), so its mere presence does not mean a test is actually running.
+		// A real PDE JUnit plugin test run starts one of that bundle's own applications
+		// (coretestapplication / uitestapplication / nonuithreadtestapplication) instead of the
+		// product's normal "org.eclipse.ui.ide.workbench" application - check that instead.
+		String application = System.getProperty("eclipse.application", "");
+		boolean pdeTest = application.startsWith("org.eclipse.pde.junit.runtime.");
 		boolean tychoTest = Platform.getBundle("org.eclipse.tycho.surefire.osgibooter") != null;
 		if (pdeTest || tychoTest)
 		{
