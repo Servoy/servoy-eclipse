@@ -1,6 +1,11 @@
+---
+name: servoy-jira
+description: "Use when asked to create, read, update, search, link, or comment on Jira issues. Triggered by: create a jira case, jira issue, file a bug, update jira, link issues, search jira, JQL, or any Jira issue key like SVY-12345, SVYX-456, SERVOY-293."
+---
+
 # Jira API Reference
 
-Load this file when asked to create, update, read, or link Jira issues.
+Load this skill when asked to create, update, read, or link Jira issues.
 
 ## Connection
 

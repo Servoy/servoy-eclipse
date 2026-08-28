@@ -27,7 +27,7 @@ approach. This means:
 
 ## Jira API Access
 
-Read `JIRA.md` (in the repository root) for full API instructions — authentication,
+Use the `servoy-jira` skill (global opencode skill) for API instructions — authentication,
 platform-specific commands (PowerShell vs bash), error handling, and common mistakes.
 
 Use the "Reading an issue" section to fetch the ticket. Use "Downloading an

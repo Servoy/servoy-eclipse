@@ -185,7 +185,7 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 
 ## Jira API
 
-When asked to create, update, or link Jira issues, load the instructions from `JIRA.md` in this repository.
+When asked to create, update, or link Jira issues, use the `servoy-jira` skill (global opencode skill).
 
 ## Code Style & Conventions
 
