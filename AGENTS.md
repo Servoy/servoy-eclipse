@@ -1,5 +1,15 @@
 # AGENTS.md - Servoy Developer Eclipse IDE
 
+## Session Startup — Skills Check
+
+At the start of each session, quickly verify that the repo's global skills are installed:
+
+1. Read `~/.config/opencode/opencode.jsonc` (or `opencode.json`) and check if `skills.paths` contains this repo's `skills/` directory.
+2. If not registered, tell the user: "This repo has global skills that aren't installed yet. Run `/install-skills` to make them available in all projects."
+3. If registered, list the `skills/*/` directories in this repo and compare against `~/.config/opencode/commands/`. If any command files (`.md` files that are NOT `SKILL.md`) are missing from the global commands dir, tell the user: "New commands found in skills/. Run `/install-skills` to update."
+
+This check should be fast — just a directory listing and a file read. Do not block on it.
+
 ## Project Overview
 
 This is the **Servoy Developer IDE** source code — a large Eclipse RCP application built as a multi-module Maven/Tycho project. It consists of ~40+ OSGi plugin bundles covering the IDE core, form designers (with Angular frontends), NG client, exporters, AI assistant integration, and platform-specific runtime bundles.
