@@ -492,7 +492,6 @@
         <setEntry value="j2db_log4j@default:true"/>
         <setEntry value="j2db_runtime@default:default"/>
         <setEntry value="j2db_server@default:default"/>
-        <setEntry value="servoy_mcp@default:default"/>
         <setEntry value="j2db_tunnel@default:default"/>
         <setEntry value="net.sourceforge.sqlexplorer@default:default"/>
         <setEntry value="org.apache.tomcat@default:default"/>

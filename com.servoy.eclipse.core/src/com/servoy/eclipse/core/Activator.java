@@ -132,8 +132,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.mcp.McpRuntime;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
@@ -924,27 +922,6 @@ public class Activator extends Plugin
 								dch.refreshDebugClients(changes);
 							}
 						});
-					}
-				});
-
-				// An MCP server scans its solution once and keeps the tool list, so a @Tool added or
-				// edited in a scope would not show up until the application server restarted. Every
-				// solution is dropped rather than the one that owns the method: a module carries tools
-				// that belong to the solution including it, and the next request just scans again.
-				servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
-				{
-					public void persistChanges(Collection<IPersist> changes)
-					{
-						if (changes == null) return;
-
-						for (IPersist persist : changes)
-						{
-							if (persist instanceof ScriptMethod)
-							{
-								McpRuntime.invalidateAll();
-								return;
-							}
-						}
 					}
 				});
 
