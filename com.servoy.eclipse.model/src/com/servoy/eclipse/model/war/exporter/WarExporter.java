@@ -52,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -417,12 +418,13 @@ public class WarExporter
 	{
 		Map<String, TreeMap<String, List<File>>> dependenciesVersions = new HashMap<>();
 		TreeMap<String, List<File>> possibleDuplicates = new TreeMap<>();
+		Map<File, String> manifestNames = new HashMap<>();
 		Set<File> libs;
 		try
 		{
 			libs = Files.walk(tmpWarDir.toPath()).filter(path -> path.toString().endsWith(".jar"))//
 				.map(path -> path.toFile()).collect(Collectors.toSet());
-			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions, possibleDuplicates));
+			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions, possibleDuplicates, manifestNames));
 		}
 		catch (IOException e)
 		{
@@ -530,7 +532,14 @@ public class WarExporter
 
 		if (!possibleDuplicates.isEmpty())
 		{
-			Optional<List<File>> moreJars = possibleDuplicates.values().stream().filter(jars -> jars.size() > 1).findAny();
+			Optional<List<File>> moreJars = possibleDuplicates.values().stream().filter(jars -> {
+				if (jars.size() <= 1) return false;
+				Set<String> distinctManifestNames = jars.stream()
+					.map(manifestNames::get)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+				return distinctManifestNames.size() != jars.size();
+			}).findAny();
 			if (!moreJars.isPresent()) return;
 			messageBuilder = new StringBuilder(
 				"The following jars have similar file names so they are possible duplicates, which means the war deployment could fail if the wrong jar is used. \n" +
@@ -539,6 +548,11 @@ public class WarExporter
 			{
 				if (jars.size() > 1)
 				{
+					Set<String> distinctManifestNames = jars.stream()
+						.map(manifestNames::get)
+						.filter(Objects::nonNull)
+						.collect(Collectors.toSet());
+					if (distinctManifestNames.size() == jars.size()) continue;
 					String message = jars.stream().map(file -> getRelativePath(tmpWarDir, file))//
 						.collect(Collectors.joining(", "));
 					message = message.substring(0, message.lastIndexOf(",")) + message.substring(message.lastIndexOf(",")).replace(",", " and");
@@ -1749,10 +1763,12 @@ public class WarExporter
 		}
 	}
 
-	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions, TreeMap<String, List<File>> allJars)
+	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions, TreeMap<String, List<File>> allJars,
+		Map<File, String> manifestNames)
 	{
 		String jarName = null;
 		String version = null;
+		String manifestName = null;
 		try
 		{
 			Pair<String, String> pair = JarManager.getNameAndVersion(jarFile.toURI().toURL());
@@ -1760,6 +1776,7 @@ public class WarExporter
 			{
 				jarName = pair.getLeft();
 				version = pair.getRight();
+				manifestName = pair.getLeft();
 			}
 		}
 		catch (MalformedURLException e)
@@ -1795,6 +1812,8 @@ public class WarExporter
 		}
 		if (jarFile.getPath().contains("plugins"))
 			allJars.get(name).add(jarFile);
+		if (manifestName != null)
+			manifestNames.put(jarFile, manifestName);
 
 		TreeMap<String, List<File>> vFiles = dependenciesVersions.get(jarName);
 		if (!vFiles.containsKey(version))
