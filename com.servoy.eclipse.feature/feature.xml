@@ -149,6 +149,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="2026.9.0.qualifier"/>
 
    <plugin
+         id="servoy_mcp"
+         version="2026.9.0.qualifier"
+         unpack="false"/>
+
+   <plugin
          id="servoy_debug"
          version="2026.9.0.qualifier"/>
 
