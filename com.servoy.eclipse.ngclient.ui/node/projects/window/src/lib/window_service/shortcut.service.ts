@@ -1,6 +1,6 @@
 import { inject, Injectable, DOCUMENT } from '@angular/core';
 
-import {BaseCustomObject} from '@servoy/public';
+
 
 @Injectable()
 export class ShortcutService {
@@ -247,11 +247,11 @@ export class ShortcutService {
     }
 }
 
-export class Shortcut extends BaseCustomObject{
+export interface Shortcut {
     [key: string]: any;
-    public type?: string;
-    public propagate?: boolean;
-    public disable_in_input?: boolean;
-    public target?: any;
-    public keycode?: boolean;
+    type?: string;
+    propagate?: boolean;
+    disable_in_input?: boolean;
+    target?: any;
+    keycode?: boolean;
 }
