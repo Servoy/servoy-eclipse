@@ -349,6 +349,70 @@ afterEach(() => {
 });
 ```
 
+### Delete the NgModule file
+
+Once all components are standalone and `NG2-Module` is removed from MANIFEST.MF, the
+`*.module.ts` file is dead code. Before deleting it, audit its contents for three categories:
+
+#### 1. `registerType()` calls — almost always removable
+
+`SpecTypesService.registerType()` is deprecated. The converter in `json_object_converter.ts`
+falls back to `BaseCustomObject.prototype` when no type is registered, which is functionally
+identical for pure data-holder classes (fields only, no methods).
+
+**Audit each registered class:**
+- If the class only has field declarations (`fieldName!: type`) → **remove the registerType call**
+  and convert the class to an `interface` (drop `extends BaseCustomObject`). This prevents
+  developers from adding methods to the class expecting them to work at runtime — they won't,
+  because the converter never instantiates these classes.
+- If the class has real methods that are called at runtime → this is a **special case**. The
+  method must be inlined at all call sites (if trivial), or an alternative solution must be
+  found. Report this to the user before proceeding — do not silently remove a functional method.
+
+**Why interfaces:** With registerType removed, the custom type classes are never instantiated.
+The server sends JSON that the converter deserializes onto plain objects. A `class` with methods
+gives a false sense that those methods exist on the deserialized objects — they don't. An
+`interface` makes the contract honest: these are pure data shapes.
+
+When converting `class` to `interface`:
+- Remove `!` non-null assertions (interfaces use `fieldName: type`)
+- Remove default value assignments (interfaces can't have defaults)
+- Remove `extends BaseCustomObject`
+- Search for `new ClassName()` — replace with object literals (`{} as ClassName`)
+- Remove `BaseCustomObject` import if no longer used
+
+#### 2. Side-effect code (e.g. `Sortable.mount()`) — must be preserved
+
+Some modules contain side-effect calls that register plugins or configure third-party libraries
+at import time. These must NOT be silently deleted.
+
+**Move side effects** to one of:
+- The component file that uses the library (if only one component uses it)
+- A shared base class (if multiple components use it) — top-level side effects in a `.ts` file
+  run once at import time and are idempotent
+- A dedicated `<name>-init.ts` side-effect file imported by the relevant components
+
+Example: `Sortable.mount(new MultiDrag())` moved from module constructor to the base component
+file's top-level scope.
+
+#### 3. Service providers — check if already `providedIn: 'root'`
+
+If the module provides services (e.g. `providers: [MyService]`), check if those services
+already have `@Injectable({ providedIn: 'root' })`. If so, the module provider entry is
+redundant and the module can be deleted. If not, either add `providedIn: 'root'` to the
+service, or keep the module solely as a provider (rare).
+
+#### Cleanup checklist
+
+- [ ] All `registerType()` calls removed
+- [ ] All custom type classes converted to interfaces (or special cases reported)
+- [ ] Side-effect code moved to component files
+- [ ] Service providers verified as `providedIn: 'root'`
+- [ ] `public-api.ts` updated to remove module re-export
+- [ ] Module file deleted
+- [ ] `NG2-Module` removed from MANIFEST.MF (if not already done above)
+- [ ] Package builds and lints cleanly
+
 Commit: `convert to standalone components [ai]`
 
 ---
