@@ -36,6 +36,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     formWidth!: number;
     formHeight!: number;
     partTopPosition!: number;
+    dragCopy = false;
+    private dragCopyInitialized = false;
+    private originalGhostPositions!: Map<string, { x: number, y: number }>;
+    private pendingCtrlToggleGhost: Ghost | null = null;
 
     private topLimit = 0;
     private bottomLimit = 0;
@@ -64,12 +68,14 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         }
         this.editorContentService.getDocument().addEventListener('mouseup', (event: MouseEvent) => this.onMouseUp(event));
         this.editorContentService.getDocument().addEventListener('mousemove', (event: MouseEvent) => this.onMouseMove(event));
+        this.editorContentService.getDocument().addEventListener('keyup', (event: KeyboardEvent) => this.onKeyup(event));
         this.editorContent = this.editorContentService.querySelector('.content');
         this.contentArea = this.editorContentService.getContentArea();
         this.glasspane = this.editorContentService.getGlassPane();
     }
 
     ngOnDestroy(): void {
+        this.cleanupDragCopyState();
         this.removeSelectionChangedListener();
         this.editorContentService.removeContentMessageListener(this);
     }
@@ -260,13 +266,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
     onMouseDown(event: MouseEvent, ghost: Ghost, ghostContainer: GhostContainer) {
         let selection = this.editorSession.getSelection();
         if (event.ctrlKey || event.metaKey) {
-            const index = selection.indexOf(ghost.uuid);
-            if (index >= 0) {
-                selection.splice(index, 1);
-            } else {
-                selection.push(ghost.uuid);
-            }
-            this.editorSession.setSelection(selection);
+            this.pendingCtrlToggleGhost = ghost;
         } else {
             if (event.button == 2 && selection.indexOf(ghost.uuid) >= 0) {
                 //if we right click on the selected element while multiple selection, just show context menu and do not modify selection
@@ -331,14 +331,39 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
 
     onMouseUp(event: MouseEvent) {
         this.editorSession.ghosthandle.set(false);
+        if (this.pendingCtrlToggleGhost && this.draggingGhost &&
+            this.mousedownpoint.x === event.pageX && this.mousedownpoint.y === event.pageY) {
+            const selection = this.editorSession.getSelection();
+            const index = selection.indexOf(this.pendingCtrlToggleGhost.uuid);
+            if (index >= 0) {
+                selection.splice(index, 1);
+            } else {
+                selection.push(this.pendingCtrlToggleGhost.uuid);
+            }
+            this.editorSession.setSelection(selection);
+        }
+        this.pendingCtrlToggleGhost = null;
         if (this.draggingGhost) {
             if ((this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
-                    const obj: Record<string, any> = {};
-                    for (const ghost of this.draggingInGhostContainer.ghosts) {
-                        obj[ghost.uuid] = { 'x': ghost.location.x, 'y': ghost.location.y };
+                    if (this.dragCopy) {
+                        const selection = this.editorSession.getSelection();
+                        const uuids = selection.length > 0 ? [...selection] : [this.draggingGhost.uuid];
+                        if (!uuids.includes(this.draggingGhost.uuid)) {
+                            uuids.push(this.draggingGhost.uuid);
+                        }
+                        this.editorSession.duplicateGhosts({
+                            uuids: uuids,
+                            parentUuid: this.draggingInGhostContainer.uuid,
+                            dropIndex: this.draggingInGhostContainer.ghosts.length
+                        });
+                    } else {
+                        const obj: Record<string, any> = {};
+                        for (const ghost of this.draggingInGhostContainer.ghosts) {
+                            obj[ghost.uuid] = { 'x': ghost.location.x, 'y': ghost.location.y };
+                        }
+                        this.editorSession.sendChanges(obj);
                     }
-                    this.editorSession.sendChanges(obj);
                 }
                 if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
                     this.renderGhostsInternal(this.ghostContainers());
@@ -372,6 +397,7 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
             this.draggingClone.remove();
             this.draggingClone = null!;
         }
+        this.cleanupDragCopyState();
         this.editorContentService.getGlassPane().style.cursor = 'default';
         this.draggingGhost = null!;
         this.draggingInGhostContainer = null!;
@@ -380,54 +406,102 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.renderGhosts();
     }
 
+
+    private onKeyup(event: KeyboardEvent) {
+        if (this.dragCopy && (event.key === 'Control' || event.key === 'Meta')) {
+            this.cancelDragCopy();
+        }
+    }
+
+    private cleanupDragCopyState() {
+        this.dragCopy = false;
+        this.dragCopyInitialized = false;
+        this.originalGhostPositions = null!;
+    }
+
+    private cancelDragCopy() {
+        if (!this.dragCopy || !this.originalGhostPositions || !this.draggingInGhostContainer) return;
+        this.dragCopy = false;
+        this.dragCopyInitialized = false;
+        for (const g of this.draggingInGhostContainer.ghosts) {
+            const orig = this.originalGhostPositions.get(g.uuid);
+            if (orig) {
+                g.location.x = orig.x;
+                g.location.y = orig.y;
+                g.style.left = g.location.x + this.ghostOffset + 'px';
+            }
+        }
+    }
+
     onMouseMove(event: MouseEvent) {
         if (this.draggingGhost && (this.mousedownpoint.y != event.pageY || this.mousedownpoint.x != event.pageX)) {
             this.editorContentService.getGlassPane().style.cursor = 'pointer';
             if (this.draggingGhost.type == GHOST_TYPES.GHOST_TYPE_CONFIGURATION) {
+                if (!this.dragCopyInitialized && (event.ctrlKey || event.metaKey) &&
+                    !this.draggingGhost.class?.includes('inherited_element')) {
+                    this.dragCopy = true;
+                    this.originalGhostPositions = new Map();
+                    for (const g of this.draggingInGhostContainer.ghosts) {
+                        this.originalGhostPositions.set(g.uuid, { x: g.location.x, y: g.location.y });
+                    }
+                }
+                this.dragCopyInitialized = true;
+
                 if (!this.draggingClone.parentNode) {
                     this.editorContentService.getBodyElement().appendChild(this.draggingClone);
                 }
                 this.renderer.setStyle(this.draggingClone, 'left', (event.pageX - this.leftOffsetRelativeToSelectedGhost) + 'px');
                 this.renderer.setStyle(this.draggingClone, 'top', (event.pageY - this.topOffsetRelativeToSelectedGhost) + 'px');
-                const initialIndex = this.draggingInGhostContainer.ghosts.indexOf(this.draggingGhost);
-                let newIndex = -1;
-                const ghostWidth = this.draggingGhost.size.width;
-                for (let index = 0; index < this.draggingInGhostContainer.ghosts.length; index++) {
-                    const ghostStart = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset;
-                    const ghostEnd = ghostStart + ghostWidth;
-                    const currentPosition = event.pageX - this.containerLeftOffset;
-                    if (currentPosition == ghostStart || currentPosition == ghostEnd) {
-                        // on the border, do nothing
-                        break;
+
+                if (this.dragCopy) {
+                    for (const g of this.draggingInGhostContainer.ghosts) {
+                        const orig = this.originalGhostPositions.get(g.uuid);
+                        if (orig) {
+                            g.location.x = orig.x;
+                            g.location.y = orig.y;
+                            g.style.left = g.location.x + this.ghostOffset + 'px';
+                        }
                     }
-                    if (newIndex < 0 && (currentPosition > ghostStart || index == 0) && (currentPosition < ghostEnd || index == this.draggingInGhostContainer.ghosts.length - 1)) {
-                        // found its place, is it changed ?
-                        if (index == initialIndex) {
-                            // everything is fine, do not touch it
+                } else {
+                    const initialIndex = this.draggingInGhostContainer.ghosts.indexOf(this.draggingGhost);
+                    let newIndex = -1;
+                    const ghostWidth = this.draggingGhost.size.width;
+                    for (let index = 0; index < this.draggingInGhostContainer.ghosts.length; index++) {
+                        const ghostStart = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset;
+                        const ghostEnd = ghostStart + ghostWidth;
+                        const currentPosition = event.pageX - this.containerLeftOffset;
+                        if (currentPosition == ghostStart || currentPosition == ghostEnd) {
+                            // on the border, do nothing
                             break;
                         }
-                        newIndex = index;
-                        this.draggingGhost.location.x = this.draggingInGhostContainer.ghosts[newIndex].location.x;
-                        this.draggingGhost.style.left = this.draggingGhost.location.x + this.ghostOffset + 'px';
-                    }
-                    if (index < initialIndex && newIndex >= 0) {
-                        // the newindex was already found, move current ghost to right
-                        this.draggingInGhostContainer.ghosts[index].location.x += ghostWidth;
-                        this.draggingInGhostContainer.ghosts[index].style.left = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset + 'px';
-                    }
-                    if (index > initialIndex) {
-                        if (newIndex < 0 || newIndex == index) {
-                            //move current ghost to left
-                            this.draggingInGhostContainer.ghosts[index].location.x -= ghostWidth;
+                        if (newIndex < 0 && (currentPosition > ghostStart || index == 0) && (currentPosition < ghostEnd || index == this.draggingInGhostContainer.ghosts.length - 1)) {
+                            if (index == initialIndex) {
+                                // found its place, is it changed ?
+                                // everything is fine, do not touch it
+                                break;
+                            }
+                            newIndex = index;
+                            this.draggingGhost.location.x = this.draggingInGhostContainer.ghosts[newIndex].location.x;
+                            this.draggingGhost.style.left = this.draggingGhost.location.x + this.ghostOffset + 'px';
+                        }
+                        if (index < initialIndex && newIndex >= 0) {
+                            // the newindex was already found, move current ghost to right
+                            this.draggingInGhostContainer.ghosts[index].location.x += ghostWidth;
                             this.draggingInGhostContainer.ghosts[index].style.left = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset + 'px';
-
+                        }
+                        if (index > initialIndex) {
+                            if (newIndex < 0 || newIndex == index) {
+                                //move current ghost to left
+                                this.draggingInGhostContainer.ghosts[index].location.x -= ghostWidth;
+                                this.draggingInGhostContainer.ghosts[index].style.left = this.draggingInGhostContainer.ghosts[index].location.x + this.ghostOffset + 'px';
+                            }
                         }
                     }
-                }
-                if (newIndex >= 0) {
-                    // now all styling is fixed, add ghost in new position so that position is ordered
-                    this.draggingInGhostContainer.ghosts.splice(initialIndex, 1);
-                    this.draggingInGhostContainer.ghosts.splice(newIndex, 0, this.draggingGhost);
+                    if (newIndex >= 0) {
+                        // now all styling is fixed, add ghost in new position so that position is ordered
+                        this.draggingInGhostContainer.ghosts.splice(initialIndex, 1);
+                        this.draggingInGhostContainer.ghosts.splice(newIndex, 0, this.draggingGhost);
+                    }
                 }
             }
             if (this.draggingGhost.type === GHOST_TYPES.GHOST_TYPE_COMPONENT) {

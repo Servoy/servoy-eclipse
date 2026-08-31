@@ -47,6 +47,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupComm
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ConvertComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentsHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.DuplicateGhostsHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ExecuteDeveloperMenu;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GetPartStylesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
@@ -152,6 +153,7 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 		configuredHandlers.put("createComponents", new CreateComponentsHandler(editorPart, selectionProvider));
+		configuredHandlers.put("duplicateGhosts", new DuplicateGhostsHandler(editorPart, selectionProvider));
 		configuredHandlers.put("openElementWizard", new OpenElementWizardHandler(editorPart, fieldPositioner, selectionProvider));
 		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(editorPart, fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
