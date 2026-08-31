@@ -62,12 +62,15 @@ public class RunNPMCommand extends WorkspaceJob implements IRunNPMCommand
 
 	private Map<String, String> extraEnvironment = Map.of();
 
-	/**
-	 * Extra environment variables to inject into the child process environment
-	 * before the command is started. Must be called before {@link #runCommand}.
-	 *
-	 * @param extra the variables to inject; a defensive copy is taken
-	 */
+	private StringOutputStream customOutputStream;
+
+	@Override
+	public void setOutputStream(StringOutputStream outputStream)
+	{
+		this.customOutputStream = outputStream;
+	}
+
+	@Override
 	public void setExtraEnvironment(Map<String, String> extra)
 	{
 		this.extraEnvironment = Map.copyOf(extra);
@@ -110,7 +113,7 @@ public class RunNPMCommand extends WorkspaceJob implements IRunNPMCommand
 
 	public void runCommand(IProgressMonitor monitor) throws IOException, InterruptedException
 	{
-		StringOutputStream console = Activator.getInstance().getConsole().outputStream();
+		StringOutputStream console = customOutputStream != null ? customOutputStream : Activator.getInstance().getConsole().outputStream();
 
 		if (monitor.isCanceled())
 		{
@@ -282,7 +285,7 @@ public class RunNPMCommand extends WorkspaceJob implements IRunNPMCommand
 		{
 			if (process != null)
 			{
-				StringOutputStream console = Activator.getInstance().getConsole().outputStream();
+				StringOutputStream console = customOutputStream != null ? customOutputStream : Activator.getInstance().getConsole().outputStream();
 
 				writeConsole(console, "Cancel requested by user... Trying to stop process...");
 				//			workerThread.interrupt(); // to get out of sync-reading console output in runCommands; actually don't know if that would work as the .read method of input stream only throws IOException; so I don't know if the actual native impl. of FileInputStream that is used here checks for thread interrupt status

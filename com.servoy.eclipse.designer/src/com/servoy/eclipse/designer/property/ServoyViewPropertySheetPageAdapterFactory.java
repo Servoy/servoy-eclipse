@@ -17,6 +17,10 @@
 package com.servoy.eclipse.designer.property;
 
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
@@ -40,8 +44,45 @@ public class ServoyViewPropertySheetPageAdapterFactory implements IAdapterFactor
 	{
 		if ((obj instanceof SolutionExplorerView || obj instanceof FormHierarchyView) && key == IPropertySheetPage.class)
 		{
-			PropertySheetPage page = new ModifiedPropertySheetPage(null);
-			page.setRootEntry(new OpenEditorUndoablePropertySheetEntry());
+			OpenEditorUndoablePropertySheetEntry rootEntry = new OpenEditorUndoablePropertySheetEntry();
+
+			PropertySheetPage page = new ModifiedPropertySheetPage(null)
+			{
+				@Override
+				public void setActionBars(IActionBars actionBars)
+				{
+					super.setActionBars(actionBars);
+
+					// Wire Ctrl+Z / Ctrl+Y to the editor's CommandStack so undo/redo works
+					// from the Properties view when a persist is selected in Solution Explorer.
+					actionBars.setGlobalActionHandler(ActionFactory.UNDO.getId(), new Action("Undo")
+					{
+						@Override
+						public void run()
+						{
+							CommandStack cs = rootEntry.resolveCommandStack();
+							if (cs != null && cs.canUndo())
+							{
+								cs.undo();
+							}
+						}
+					});
+					actionBars.setGlobalActionHandler(ActionFactory.REDO.getId(), new Action("Redo")
+					{
+						@Override
+						public void run()
+						{
+							CommandStack cs = rootEntry.resolveCommandStack();
+							if (cs != null && cs.canRedo())
+							{
+								cs.redo();
+							}
+						}
+					});
+					actionBars.updateActionBars();
+				}
+			};
+			page.setRootEntry(rootEntry);
 			return page;
 		}
 

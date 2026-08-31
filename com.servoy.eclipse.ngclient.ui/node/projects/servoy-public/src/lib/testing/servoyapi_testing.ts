@@ -11,7 +11,7 @@ export class ServoyApiTesting implements ServoyApi {
     public startEdit(propertyName: string) {
         
     }
-    public apply(propertyName: string, value: unknown) {
+    public apply(propertyName: string, value: unknown, useTrackedChanges?: boolean) {
        
     }
     public callServerSideApi(methodName: string, args: Array<unknown>) {

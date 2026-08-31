@@ -20,7 +20,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
     readonly servoyApi = input<ServoyApi>(undefined as any);
     readonly servoyAttributes = input<{ [property: string]: string }>(undefined as any);
 
-    readonly elementRef = viewChild<ElementRef<T>>('element');
+    readonly elementRef = viewChild('element', { read: ElementRef });
 
     protected readonly renderer = inject(Renderer2);
     protected readonly cdRef = inject(ChangeDetectorRef);
@@ -196,7 +196,7 @@ export class ServoyBaseComponent<T extends HTMLElement> implements AfterViewInit
      * @internal
      */
     protected initializeComponent() {
-        if (!this.initialized && this.elementRef()) {
+        if (!this.initialized && this.getNativeElement()) {
             this.initialized = true;
             this.svyOnInit();
         }

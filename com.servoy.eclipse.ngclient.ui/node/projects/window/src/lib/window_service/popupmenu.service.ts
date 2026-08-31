@@ -1,6 +1,6 @@
 import { inject, Injectable, SecurityContext, DOCUMENT } from '@angular/core';
 
-import { ServoyPublicService, Callback, BaseCustomObject, TooltipService } from '@servoy/public';
+import { ServoyPublicService, Callback, TooltipService } from '@servoy/public';
 import { createPopper, VirtualElement } from '@popperjs/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { timeout } from 'rxjs';
@@ -406,30 +406,30 @@ export class PopupMenuService {
 	}
 }
 
-export class Popup extends BaseCustomObject {
-	public name!: string;
-	public cssClass!: string;
-	public items!: MenuItem[];
+export interface Popup {
+	name: string;
+	cssClass: string;
+	items: MenuItem[];
 }
 
-export class MenuItem extends BaseCustomObject {
-	public id!: string;
-	public text!: string;
-	public callback!: Callback;
-	public name!: string;
-	public align!: number;
-	public enabled!: boolean;
-	public visible!: boolean;
-	public icon!: string;
-	public fa_icon!: string;
-	public mnemonic!: string;
-	public backgroundColor!: string;
-	public foregroundColor!: string;
-	public selected!: boolean;
-	public accelarator!: string;
-	public methodArguments!: Array<any>;
-	public cssClass!: string;
-	public items!: MenuItem[];
-	public tooltipText!: string;
-    public autoClose!: boolean;
+export interface MenuItem {
+	id: string;
+	text: string;
+	callback: Callback;
+	name: string;
+	align: number;
+	enabled: boolean;
+	visible: boolean;
+	icon: string;
+	fa_icon: string;
+	mnemonic: string;
+	backgroundColor: string;
+	foregroundColor: string;
+	selected: boolean;
+	accelarator: string;
+	methodArguments: Array<any>;
+	cssClass: string;
+	items: MenuItem[];
+	tooltipText: string;
+    autoClose: boolean;
 }

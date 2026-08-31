@@ -1,9 +1,9 @@
-import { inject, Injectable, Renderer2, RendererFactory2, ComponentRef, DOCUMENT } from '@angular/core';
+import { inject, Injectable, Renderer2, RendererFactory2, ComponentRef, DOCUMENT, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service';
-import { DialogWindowComponent } from './dialog-window/dialog-window.component';
+import type { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow, BSWindowOptions } from './bootstrap-window/bswindow';
 import { WindowRefService, LocalStorageService, SessionStorageService, MainViewRefService, PopupStateService } from '@servoy/public';
@@ -87,7 +87,7 @@ export class WindowService {
     }
   }
 
-  public show(name: string, form: string, title: string) {
+  public async show(name: string, form: string, title: string) {
     this.dialogShown = true;
     const currentWindow = 'window' + this.windowCounter;
     const storedWindow = this.sessionStorageService.get(currentWindow);
@@ -99,7 +99,7 @@ export class WindowService {
     }
     const instance = this.instances[name];
     if (instance) {
-      instance.title = title;
+      instance.title.set(title);
       if (instance.bsWindowInstance) {
         // already showing
         return;
@@ -126,7 +126,7 @@ export class WindowService {
       // resolve initial bounds
       let location = null;
       let centerLocation = false;
-      let size = instance.form.size;
+      let size = instance.form().size;
       if (instance.initialBounds) {
         const bounds = instance.initialBounds;
         if (bounds.x > -1 && bounds.y > -1) {
@@ -147,7 +147,7 @@ export class WindowService {
       }
       // -1 means default size and location(center)
       let formSize = size;
-      if (!formSize || (formSize.width === -1 && formSize.height === -1)) formSize = instance.form.size;
+      if (!formSize || (formSize.width === -1 && formSize.height === -1)) formSize = instance.form().size;
 
       const windowWidth = this.doc.documentElement.clientWidth;
       const windowHeight = this.doc.documentElement.clientHeight;
@@ -175,6 +175,7 @@ export class WindowService {
       const loc = { left: location.x, top: location.y };
 
       // create the bs window instance
+      const { DialogWindowComponent } = await import('./dialog-window/dialog-window.component');
       const dialogWindowComponent = this.mainViewRefService.mainContainer.createComponent(DialogWindowComponent);
       //
       dialogWindowComponent.instance.setWindow(instance);
@@ -183,12 +184,12 @@ export class WindowService {
       const opt: Partial<BSWindowOptions> = {
         id: instance.name,
         fromElement: dialogWindowComponent.location.nativeElement.childNodes[0],
-        title: instance.title,
+        title: instance.title(),
         resizable: !!instance.resizable,
         location: loc,
         size,
         isModal: instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG,
-        undecorated: instance.undecorated,
+        undecorated: instance.undecorated(),
       };
 
       // test if it is modal dialog, then the request blocks on the server and we should hide the loading.
@@ -238,7 +239,7 @@ export class WindowService {
       const height = instance.bsWindowInstance!.element.getBoundingClientRect().height;
       if (width > 0 && height > 0) {
         const dialogSize = size || { width, height };
-        const isUndecorated = instance.undecorated;
+        const isUndecorated = instance.undecorated();
         const headerHeight = instance.bsWindowInstance!.options.elements.handle.getBoundingClientRect().height;
         const footerHeight = instance.bsWindowInstance!.options.elements.footer.getBoundingClientRect().height;
         if (centerLocation) {
@@ -379,7 +380,7 @@ export class WindowService {
   public setUndecorated(name: string, undecorated: boolean) {
     this.saveInSessionStorage(undecorated, 'undecorated');
     if (this.instances[name]) {
-      this.instances[name].undecorated = undecorated;
+      this.instances[name].undecorated.set(undecorated);
     }
   }
 
@@ -393,14 +394,14 @@ export class WindowService {
   public setCSSClassName(name: string, cssClassName: string) {
     this.saveInSessionStorage(cssClassName, 'cssClassName');
     if (this.instances[name]) {
-      this.instances[name].cssClassName = cssClassName;
+      this.instances[name].cssClassName.set(cssClassName);
     }
   }
 
   public setOpacity(name: string, opacity: boolean) {
     this.saveInSessionStorage(opacity, 'opacity');
     if (this.instances[name]) {
-      this.instances[name].opacity = opacity ? 0 : 1;
+      this.instances[name].opacity.set(opacity ? 0 : 1);
     }
   }
 
@@ -414,7 +415,7 @@ export class WindowService {
   public setTransparent(name: string, transparent: boolean) {
     this.saveInSessionStorage(transparent, 'transparent');
     if (this.instances[name]) {
-      this.instances[name].transparent = transparent;
+      this.instances[name].transparent.set(transparent);
     }
   }
 
@@ -456,8 +457,8 @@ export class WindowService {
       this.sessionStorageService.set(currentWindow, storedWindow);
     }
     if (this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW) {
-      this.instances[name].form = form;
-      this.instances[name].navigatorForm = navigatorForm;
+      this.instances[name].form.set(form);
+      this.instances[name].navigatorForm.set(navigatorForm);
     }
     this.servoyService.loaded().then(() => {
       // if first show of this form in browser window then request initial data (dataproviders and such)
@@ -573,28 +574,32 @@ export class WindowService {
 }
 
 export class SvyWindow {
-  name: string;
-  type: number;
-  title = '';
-  opacity = 1;
-  undecorated = false;
-  cssClassName: string | null = null;
+  readonly name: string;
+  readonly type: number;
+  readonly renderer2: Renderer2;
+  readonly windowService: WindowService;
+
+  // Template-bound properties → signals (mutated externally, read in dialog template)
+  readonly title = signal('');
+  readonly opacity = signal(1);
+  readonly undecorated = signal(false);
+  readonly cssClassName = signal<string | null>(null);
+  readonly transparent = signal(false);
+  readonly navigatorForm = signal<any>(null);
+  readonly form = signal<any>(null);
+
+  // Not template-bound → plain properties
   closeOnEscape = false;
   size: { width: number; height: number } | null = null;
   location: { x: number; y: number } | null = null;
-  navigatorForm: any = null;
-  form: any = null;
   initialBounds: any = null;
   resizable = false;
-  transparent = false;
   storeBounds = false;
   loadingIndicatorIsHidden?: number;
-  renderer2: Renderer2;
 
   keyUpListener: ((event: KeyboardEvent) => void) | null = null;
 
   bsWindowInstance: BSWindow | null = null; // bootstrap-window instance , available only after creation
-  windowService: WindowService;
   componentRef!: ComponentRef<DialogWindowComponent>;
 
   constructor(name: string, type: number, windowService: WindowService, renderer2: Renderer2) {
@@ -669,7 +674,7 @@ export class SvyWindow {
   }
 
   setTitle(title: string) {
-    this.title = title;
+    this.title.set(title);
     if (this.bsWindowInstance) this.bsWindowInstance.setTitle(title);
   }
 }

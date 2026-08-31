@@ -6,16 +6,16 @@
       <h4 class="window-title"></h4>
     </div>
     <div class="window-body">
-      @if (hasDefaultNavigator()) {
-        <svy-default-navigator [name]="getFormName()!"></svy-default-navigator>
+      @if (defaultNavigator()) {
+        <svy-default-navigator [name]="formName()!"></svy-default-navigator>
       }
-      @if (getNavigatorFormName() != null) {
-        <svy-form [name]="getNavigatorFormName()!"></svy-form>
+      @if (navigatorFormName() != null) {
+        <svy-form [name]="navigatorFormName()!"></svy-form>
       }
       <div [id]="window.name + '_tabStart'" [sabloTabseq]="1" (focus)="firstElementFocused($event)"></div>
-      <div [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" [style]="{'height': '100%', 'position': 'absolute', 'top': '0px', 'right': '0px', 'bottom': '0px', 'left': this.window.navigatorForm.size.width + 'px'}">
-        @if (getFormName() != null) {
-          <svy-form [name]="getFormName()!"></svy-form>
+      <div [sabloTabseq]="2" [sabloTabseqConfig]="{container: true}" [style]="{'height': '100%', 'position': 'absolute', 'top': '0px', 'right': '0px', 'bottom': '0px', 'left': (this.window.navigatorForm()?.size?.width ?? 0) + 'px'}">
+        @if (formName() != null) {
+          <svy-form [name]="formName()!"></svy-form>
         }
       </div>
       <div [id]="window.name + '_tabStop'" [sabloTabseq]="3" (focus)="lastElementFocused($event)"></div>

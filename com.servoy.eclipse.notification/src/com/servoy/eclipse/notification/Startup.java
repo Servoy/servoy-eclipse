@@ -29,7 +29,10 @@ public class Startup implements IStartup
 	@Override
 	public void earlyStartup()
 	{
-		Activator.getDefault().startNotificationJob();
+		if (!Boolean.getBoolean("servoy.junit.running"))
+		{
+			Activator.getDefault().startNotificationJob();
+		}
 	}
 
 }

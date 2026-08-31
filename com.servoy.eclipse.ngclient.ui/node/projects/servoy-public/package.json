@@ -1,11 +1,8 @@
 {
   "name": "@servoy/public",
-  "version": "2026.9.2",
-  "peerDependencies": {
-    "@angular/common": "^22",
-    "@angular/core": "^22"
-  },
+  "version": "2026.9.5",
   "dependencies": {
+    "@types/luxon": "^3",
     "bignumber.js": "^11.1",
     "luxon": "^3",
     "numbro": "^2.5",

@@ -44,6 +44,55 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import static org.junit.jupiter.api.Assertions.*;
 ```
 
+### Integration test infrastructure (for OSGi/workbench tests)
+
+When writing integration tests (that require PDE to be running), that might
+extend `AbstractIntegrationTest` or `ServoyRunnerTestBase`, use the shared utilities
+in `TestUtilitiesClass` — do NOT re-implement them or use raw `Thread.sleep`:
+
+| Need | Use |
+|------|-----|
+| Wait for an async condition | `pumpEventsUntil(maxMs, () -> { assert...; })` |
+| Wait for workspace build jobs | `waitForWorkspaceBuildJobs()` |
+| Wait for app server | `waitForAppServer()` |
+| Create/activate a test solution | `ensureTestSolutionInWorkspace(...)` + `ensureActiveProject()` |
+| Write a file in the workspace | `writeProjectFile(...)` / `writeProjectFileInWorkspaceRun(...)` |
+| Other similar needs | if they are not covered by existing utilities, tweak those or add new code using a similar approach that does not waste time |
+
+**Never use `Thread.sleep(N_SECONDS)` in integration tests.** Replace with
+`pumpEventsUntil(N_MS, assertions)` — it exits as soon as the condition is met
+and still drives the SWT event loop to prevent deadlocks.
+
+`Activator.setNodeExtractionAndTitaniumBuildDisabled` is **disabled by default** in `AbstractIntegrationTest`'s
+`@BeforeClass`. Only override `disableNodeFolderCreatorJob()` and call
+`Activator.setNodeExtractionAndTitaniumBuildDisabled(false)` when the test genuinely needs the node/npm
+build to run (e.g. Cypress tests). Never let it run when it is not needed.
+
+### Test quality rules
+
+**No `Assume.*` to skip tests.** If a test silently passes because a precondition
+was not met, it provides zero value. If the setup is missing, fix the setup. If it
+is unclear what the correct behaviour should be, **ask** before writing the test.
+
+**No green-for-the-sake-of-green tests.** Before writing a test, ask: "What would
+this test actually catch if the code were broken?" If the answer is "nothing
+specific", do not write it. Red flags:
+
+- Assertions that accept anything (e.g. `result.contains("passed") || result.contains("failed") || result.contains("timed out") || result.contains("error")`)
+
+If the tested code does not expose enough state to write a meaningful assertion,
+like "did it fail in the way we expect it to?" instead of "did it fail" consider
+whether the production code should expose more info. If so, note it as an open question
+in the spec and ask the user before proceeding — implementing the extra observable state
+is usually the right call.
+
+**No expensive end-to-end tests as a substitute for unit tests.** If a test needs
+to run `npm install`, wait for a titanium/ng build, or launch a full browser to
+assert on a string that could be `"passed"` or `"failed"`, it is an integration
+smoke test, not a unit test. Such tests should be written only when the actual
+end-to-end outcome is what needs to be verified, and the spec must explicitly call
+for it. Otherwise, test the individual components in isolation.
+
 ### Best practices
 
 **Test class structure:**

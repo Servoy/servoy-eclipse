@@ -27,9 +27,10 @@ export abstract class ServoyApi {
 
     /**
       * This apply is only needed for nested dataproviders, so a dataprovider property of custom type, this will push and apply the data to the data model.
-      * Normal main spec model dataprovider should be pushed using an Change Emitter. 
+      * When useTrackedChanges is true, only granular proxy-tracked changes are pushed (equivalent to the old @Output emit pattern).
+      * Use useTrackedChanges=true for ICustomArrayValue/ICustomObjectValue with pushToServer "allow" where you want to manually trigger a push.
       */
-    public abstract apply(propertyName: string, value: unknown): void;
+    public abstract apply(propertyName: string, value: unknown, useTrackedChanges?: boolean): void;
 
     /**
       * Call this components serverside api with the given arguments

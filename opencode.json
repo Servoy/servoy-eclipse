@@ -4,6 +4,10 @@
     "sdd": {
       "description": "Run full Spec-Driven Development pipeline for a Jira issue",
       "template": "Load the 'sdd' skill and execute the full SDD pipeline for: $ARGUMENTS"
+    },
+    "install-skills": {
+      "description": "Install Servoy global skills and commands into your opencode config",
+      "template": "Read the file .opencode/commands/install-skills.md and execute the instructions in it."
     }
   },
   "mcp": {

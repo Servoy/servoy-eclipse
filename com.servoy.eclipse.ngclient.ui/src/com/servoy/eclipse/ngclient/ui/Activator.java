@@ -39,6 +39,17 @@ public class Activator extends Plugin
 	// The shared instance
 	private static Activator plugin;
 
+	/**
+	 * When true, run() of some affected jobs returns CANCELLED immediately, without doing
+	 * anything else. Some jobs might not even be started.
+	 *
+	 * In normal operation this will always be false (so everything is enabled).
+	 *
+	 * When running junit tests this will be true initially (because most tests only test the java/persist/developer part),
+	 * and then each test class can change it at will.
+	 */
+	private static volatile boolean nodeExtractionAndTitaniumBuildDisabled = Boolean.getBoolean("servoy.junit.running");
+
 	private File nodePath;
 	private File npmPath;
 	private RunNPMCommand buildCommand;
@@ -97,7 +108,8 @@ public class Activator extends Plugin
 		if (nodeReady.getCount() > 0)
 		{
 			nodeReady.countDown();
-			if (nodeReady.getCount() == 0 && nodePath != null && ServoyModelFinder.getServoyModel() != null && ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
+			if (nodeReady.getCount() == 0 && nodePath != null && ServoyModelFinder.getServoyModel() != null &&
+				ServoyModelFinder.getServoyModel().getNGPackageManager() != null)
 			{
 				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new WebPackagesListener());
 			}
@@ -128,6 +140,8 @@ public class Activator extends Plugin
 
 	public void extractNode()
 	{
+		if (isNodeExtractionAndTitaniumBuildDisabled()) return;
+
 		String nodePth = getSystemOrEvironmentProperty("servoy.nodePath");
 		String npmPth = getSystemOrEvironmentProperty("servoy.npmPath");
 		if (nodePth != null && npmPth != null)
@@ -286,6 +300,46 @@ public class Activator extends Plugin
 		{
 			ServoyLog.logError(e);
 		}
+	}
+
+	/**
+	 * Disables or not the node install extraction / node source folder copy/npm angular titanium build cycle for the duration of tests that
+	 * do not need the NG client node folder. Call this before activating any
+	 * solution in test setup. Re-enable with {@link #setDisabled(boolean) setDisabled(false)}
+	 * in teardown if a subsequent test class requires it.<br/><br/>
+	 *
+	 * Also trigger a manual build when you re-enable it - at the point you need the angular build result.<br/>
+	 * So you can use {@link com.servoy.eclipse.ngclient.ui.CopySourceFolderAction#startTitaniumNGBuild(int)}.<br/><br/>
+	 *
+	 * A call to {@link com.servoy.eclipse.ngclient.ui.Activator#extractNode()} + wait for it will be done directly by this method when it
+	 * switches from true to false, in order to make sure node installation is ready to use.
+	 *
+	 * @param value true to skip the copy/titanium build cycle, false to re-enable it
+	 */
+	public static void setNodeExtractionAndTitaniumBuildDisabled(boolean value)
+	{
+		boolean previousDisabledValue = nodeExtractionAndTitaniumBuildDisabled;
+		nodeExtractionAndTitaniumBuildDisabled = value;
+		if (previousDisabledValue && !nodeExtractionAndTitaniumBuildDisabled)
+		{
+			long x = System.currentTimeMillis();
+			System.out.println("*** starting node extraction");
+
+			Activator.getInstance().extractNode(); // just to be sure node installation is extracted/present before any builds run
+			Activator.getInstance().waitForNodeExtraction(); // TODO: is this ok when running junit tests or should we add that job
+			// to a job group and join just as we do for the eclipse build jobs and titanium build jobs?
+			// so similar to how TestUtilitiesClass.waitForWorkspaceBuildJobs() and waitForTitaniumuildJobs() do it
+
+			System.out.println("*** node extraction took: " + String.format("%.2f", ((System.currentTimeMillis() - x) / 1000d)) + " s");
+		}
+	}
+
+	/**
+	 * @return true if the node install extraction / node src folder copy / titanium build cycle is currently disabled
+	 */
+	public static boolean isNodeExtractionAndTitaniumBuildDisabled()
+	{
+		return nodeExtractionAndTitaniumBuildDisabled;
 	}
 
 	@Override

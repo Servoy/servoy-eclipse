@@ -98,6 +98,8 @@ public class CopySourceFolderAction extends Action
 	 */
 	public static void startTitaniumNGBuild(final int typeOfBuild)
 	{
+		if (Activator.isNodeExtractionAndTitaniumBuildDisabled()) return;
+
 		File solutionProjectFolder = Activator.getInstance().getSolutionProjectFolder();
 		if (solutionProjectFolder == null)
 		{
