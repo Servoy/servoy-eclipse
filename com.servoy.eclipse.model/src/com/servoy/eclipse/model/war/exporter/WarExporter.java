@@ -501,7 +501,8 @@ public class WarExporter
 										"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
 								}
 								messageBuilder.append("\nDependency '" + path +
-									"' is not exported because another " + latestJar.getName().replace("-" + version, "") + " with a higher version (" +
+									"'" + ("0".equals(version) ? "" : " (" + version + ")") +
+									" is not exported because another " + latestJar.getName().replace("-" + version, "") + " with a higher version (" +
 									latest +
 									") is already present in '" + latestJarPath + "'. \n");
 							}
