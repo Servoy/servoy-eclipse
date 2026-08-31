@@ -147,6 +147,7 @@ public class WarExporter
 		"servoy_shared_" + ClientVersion.getPureVersion() + "*.jar", //
 		"servoy_smart_client_" + ClientVersion.getPureVersion() + "*.jar", //
 		"servoy_headless_client_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_mcp_" + ClientVersion.getPureVersion() + "*.jar", //
 		"j2db_log4j_" + ClientVersion.getPureVersion() + "*.jar", //
 		"j2db_server_" + ClientVersion.getPureVersion() + "*.jar", //
 		"sablo_" + ClientVersion.getPureVersion() + "*.jar", //
@@ -186,7 +187,8 @@ public class WarExporter
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"stax2-api_*.jar", "com.fasterxml.woodstox.woodstox-core_*.jar", "com.fasterxml.jackson.dataformat.jackson-dataformat-xml_*.jar", "wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
 		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
-		"org.owasp.encoder_*.jar" };
+		"org.owasp.encoder_*.jar", "reactive-streams_*.jar", "io.projectreactor.reactor-core_*.jar", "org.jspecify.jspecify_*.jar", //
+		"io.modelcontextprotocol.sdk.mcp-core_*.jar", "io.modelcontextprotocol.sdk.mcp-json-jackson2_*.jar" };
 
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
 
