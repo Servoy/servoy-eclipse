@@ -2846,7 +2846,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						boolean ownFileChanged = true;
 						if (compositeWithItems)
 						{
-							String ownFilePath = new File(solutionLocationDir,
+							String ownFilePath = new File(solutionLocationDir.getParentFile(),
 								SolutionSerializer.getRelativeFilePath(persist, false)).getAbsolutePath();
 							ownFileChanged = changedFilePaths.contains(ownFilePath);
 						}
