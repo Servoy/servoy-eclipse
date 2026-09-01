@@ -253,6 +253,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formDerivedFormDifferentTable;
 	public static String ErrorWarningPreferencePage_formDerivedFormRedefinedVariable;
 	public static String ErrorWarningPreferencePage_formDuplicatePart;
+	public static String ErrorWarningPreferencePage_formCssPositionNoBodyPart;
 	public static String ErrorWarningPreferencePage_formEditableComboboxCustomValuelist;
 	public static String ErrorWarningPreferencePage_formExtendsCycle;
 	public static String ErrorWarningPreferencePage_formFileNameInconsistent;

@@ -727,6 +727,18 @@ public class ServoyFormBuilder
 						}
 					}
 
+					// check for css position form without a body part (will fall back to record view at runtime)
+					if (!form.isResponsiveLayout() && Boolean.TRUE.equals(form.getUseCssPosition()))
+					{
+						Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(form, fs).getFlattenedForm(form);
+						if (flattenedForm != null && !flattenedForm.hasPart(Part.BODY))
+						{
+							ServoyMarker mk = MarkerMessages.FormCssPositionNoBodyPart.fill(form.getName());
+							ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.FORM_CSS_POSITION_NO_BODY_PART,
+								IMarker.PRIORITY_NORMAL, null, form);
+						}
+					}
+
 					// check to see if there are too many portals/tab panels for an acceptable slow WAN SC deployment
 					int portalAndTabPanelCount = 0;
 					// check to see if there are too many columns in a table view form (that could result in poor WC performance when selecting rows for example)
