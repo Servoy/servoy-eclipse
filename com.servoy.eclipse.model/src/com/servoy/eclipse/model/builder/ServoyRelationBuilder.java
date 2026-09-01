@@ -408,7 +408,7 @@ public class ServoyRelationBuilder
 			{
 				mk = MarkerMessages.RelationItemTypeProblem.fill(element.getName(), typeMismatchWarning);
 				ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
-					ServoyBuilder.RELATION_ITEM_TYPE_PROBLEM, IMarker.PRIORITY_LOW,
+					ServoyBuilder.RELATION_ITEM_TYPE_PROBLEM, IMarker.PRIORITY_NORMAL,
 					null, element);
 			}
 		}

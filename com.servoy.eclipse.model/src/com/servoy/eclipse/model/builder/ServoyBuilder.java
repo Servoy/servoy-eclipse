@@ -439,6 +439,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_DERIVED_FORM_REDEFINED_VARIABLE = new Pair<String, ProblemSeverity>(
 		"formDerivedFormRedefinedVariable", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_DUPLICATE_PART = new Pair<String, ProblemSeverity>("formDuplicatePart", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_CSS_POSITION_NO_BODY_PART = new Pair<String, ProblemSeverity>("formCssPositionNoBodyPart",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST = new Pair<String, ProblemSeverity>(
 		"formEditableComboboxCustomValuelist", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_EXTENDS_CYCLE = new Pair<String, ProblemSeverity>("formExtendsCycle", ProblemSeverity.WARNING);
@@ -533,7 +535,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> RELATION_ITEM_UUID_PROBLEM = new Pair<String, ProblemSeverity>("relationItemUUIDProblem",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RELATION_ITEM_TYPE_PROBLEM = new Pair<String, ProblemSeverity>("relationItemTypeProblem",
-		ProblemSeverity.WARNING);
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RELATION_GENERIC_ERROR = new Pair<String, ProblemSeverity>("relationGenericError", ProblemSeverity.ERROR);
 
 	// valuelist problems
@@ -1572,37 +1574,37 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	public static void checkDeprecatedPropertyUsage(IPersist persist, IResource markerResource, IProject project)
 	{
-//		if (persist instanceof Solution)
-//		{
-//			Solution solution = (Solution)persist;
-//
-//			// loginForm is deprecated, use loginSolution (not needed for WebClient)
-//			if (solution.getLoginFormID() > 0)
-//			{
-//				try
-//				{
-//					if (solution.getLoginSolutionName() != null)
-//					{
-//						// login form will be ignored
-//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
-//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
-//							"Solution '" + solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
-//					}
-//					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY && solution.getSolutionType() != SolutionMetaData.MOBILE &&
-//						solution.getSolutionType() != SolutionMetaData.NG_CLIENT_ONLY)
-//					{
-//						// loginForm is deprecated
-//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
-//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
-//							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
-//					}
-//				}
-//				catch (Exception e)
-//				{
-//					ServoyLog.logError(e);
-//				}
-//			}
-//		}
+		//		if (persist instanceof Solution)
+		//		{
+		//			Solution solution = (Solution)persist;
+		//
+		//			// loginForm is deprecated, use loginSolution (not needed for WebClient)
+		//			if (solution.getLoginFormID() > 0)
+		//			{
+		//				try
+		//				{
+		//					if (solution.getLoginSolutionName() != null)
+		//					{
+		//						// login form will be ignored
+		//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+		//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+		//							"Solution '" + solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
+		//					}
+		//					else if (solution.getSolutionType() != SolutionMetaData.WEB_CLIENT_ONLY && solution.getSolutionType() != SolutionMetaData.MOBILE &&
+		//						solution.getSolutionType() != SolutionMetaData.NG_CLIENT_ONLY)
+		//					{
+		//						// loginForm is deprecated
+		//						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+		//							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
+		//							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
+		//					}
+		//				}
+		//				catch (Exception e)
+		//				{
+		//					ServoyLog.logError(e);
+		//				}
+		//			}
+		//		}
 
 		if (persist instanceof Form || persist instanceof Portal)
 		{
