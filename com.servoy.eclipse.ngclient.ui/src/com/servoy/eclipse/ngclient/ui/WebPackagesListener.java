@@ -83,6 +83,7 @@ import com.servoy.eclipse.model.ING2WarExportModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.IEditorRefresh;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
@@ -1434,7 +1435,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 	private static void handleTitaniumNGClientBuildFailure()
 	{
-		if (Boolean.getBoolean("servoy.junit.running")) return; // don't show dialogs when running junit tests
+		if (ModelUtils.isTestRunning()) return; // don't show dialogs when running junit tests
 
 		Display display = Display.getDefault();
 

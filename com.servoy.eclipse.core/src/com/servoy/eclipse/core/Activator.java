@@ -1198,7 +1198,7 @@ public class Activator extends Plugin
 	 */
 	private void checkDefaultPostgressInstall(IApplicationServerSingleton appServer)
 	{
-		if (Boolean.getBoolean("servoy.junit.running")) return;
+		if (ModelUtils.isTestRunning()) return;
 
 		File file = new File(appServer.getServoyApplicationServerDirectory() + "/postgres_db/servoy_repository.dbdump");
 		if (file.exists())
@@ -1321,7 +1321,7 @@ public class Activator extends Plugin
 	// TODO how to upgrade plugins after servoy developer update
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
 	{
-		if (Boolean.getBoolean("servoy.junit.running")) return;
+		if (ModelUtils.isTestRunning()) return;
 		// check the app server dir
 		final String appServerDir = applicationServer.getServoyApplicationServerDirectory();
 		File j2dbLib = new File(appServerDir, "lib/j2db.jar");
