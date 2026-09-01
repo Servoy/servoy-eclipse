@@ -100,6 +100,18 @@ public class SwtBrowserWrapper implements IBrowser
 		return this.browser;
 	}
 
+	@Override
+	public void addBrowserFunction(String name, IBrowserFunction function)
+	{
+		new org.eclipse.swt.browser.BrowserFunction(this.browser, name)
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				return function.function(arguments);
+			}
+		};
+	}
 
 	@Override
 	public boolean isDisposed()
