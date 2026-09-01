@@ -1221,6 +1221,8 @@ public class Activator extends Plugin
 	 */
 	private void checkDefaultPostgressInstall(IApplicationServerSingleton appServer)
 	{
+		if (Boolean.getBoolean("servoy.junit.running")) return;
+
 		File file = new File(appServer.getServoyApplicationServerDirectory() + "/postgres_db/servoy_repository.dbdump");
 		if (file.exists())
 		{
