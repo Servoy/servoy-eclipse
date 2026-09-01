@@ -76,6 +76,16 @@ public interface IBrowser
 	public Object getBrowserInstance();
 
 	/**
+	 * Registers a callback that can be invoked from JavaScript running in this browser.
+	 * The registration is backed by the browser-specific {@code BrowserFunction}
+	 * implementation, so callers do not need to know which browser backend is used.
+	 *
+	 * @param name the name of the JavaScript function to create
+	 * @param function the callback invoked when the JavaScript function is called
+	 */
+	public void addBrowserFunction(String name, IBrowserFunction function);
+
+	/**
 	 * Sets the HTML content of the browser.
 	 * For Chromium on Linux, if the content is large, it uses a temporary file approach
 	 * instead of setText to avoid size limitations.

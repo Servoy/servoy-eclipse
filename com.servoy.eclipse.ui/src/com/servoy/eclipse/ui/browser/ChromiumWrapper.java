@@ -161,6 +161,19 @@ public class ChromiumWrapper implements IBrowser
 	}
 
 	@Override
+	public void addBrowserFunction(String name, IBrowserFunction function)
+	{
+		new com.equo.chromium.swt.BrowserFunction(this.browser, name)
+		{
+			@Override
+			public Object function(Object[] arguments)
+			{
+				return function.function(arguments);
+			}
+		};
+	}
+
+	@Override
 	public boolean isDisposed()
 	{
 		return this.browser.isDisposed();
