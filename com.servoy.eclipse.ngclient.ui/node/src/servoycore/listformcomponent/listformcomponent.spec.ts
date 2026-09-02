@@ -325,6 +325,65 @@ describe('ListFormComponent', () => {
     });
   });
 
+  describe('getAGGridStyle', () => {
+    const BORDER_SUB_VARS: Record<string, string> = {
+      '--ag-row-border-style': 'solid',
+      '--ag-row-border-color': 'transparent',
+      '--ag-row-border-width': '0',
+      '--ag-borders-critical': '0 solid',
+      '--ag-border-color': 'transparent',
+    };
+
+    it('should define the border sub-variables the measurement composites resolve to', () => {
+      const style = component.getAGGridStyle();
+      for (const [key, value] of Object.entries(BORDER_SUB_VARS)) {
+        expect(style[key]).toBe(value);
+      }
+    });
+
+    it('should use zero-width, non-visible border values (no visible border introduced)', () => {
+      const style = component.getAGGridStyle();
+      expect(style['--ag-row-border-width']).toBe('0');
+      expect(style['--ag-row-border-color']).toBe('transparent');
+      expect(style['--ag-border-color']).toBe('transparent');
+      expect(style['--ag-borders-critical']).not.toMatch(/\d+px/);
+      expect(style['--ag-borders-critical'].trim().startsWith('0')).toBe(true);
+    });
+
+    it('should preserve the existing height variables', () => {
+      const style = component.getAGGridStyle();
+      expect(style['--ag-row-height']).toBe(42);
+      expect(style['--ag-header-height']).toBe(48);
+      expect(style['--ag-list-item-height']).toBe(24);
+    });
+
+    it('should include the border sub-variables in the absolute-layout / responsiveHeight<1 branch (height 100%)', () => {
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+      const style = component.getAGGridStyle();
+      expect(style['height']).toBe('100%');
+      for (const [key, value] of Object.entries(BORDER_SUB_VARS)) {
+        expect(style[key]).toBe(value);
+      }
+    });
+
+    it('should include the border sub-variables in the responsive-height branch (height in px)', () => {
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+      fixture.componentRef.setInput('responsiveHeight', 300);
+      const style = component.getAGGridStyle();
+      expect(style['height']).toBe('300px');
+      for (const [key, value] of Object.entries(BORDER_SUB_VARS)) {
+        expect(style[key]).toBe(value);
+      }
+    });
+
+    it('should not apply any ag-theme-* class in the style object', () => {
+      const style = component.getAGGridStyle();
+      const hasThemeEntry = Object.keys(style).some((key) => /ag-theme-/.test(key) || (typeof style[key] === 'string' && /ag-theme-/.test(style[key])));
+      expect(hasThemeEntry).toBe(false);
+      expect(style['class']).toBeUndefined();
+    });
+  });
+
   describe('registerComponent / unRegisterComponent', () => {
     it('should register a component at the given row index', () => {
       const mockComp = { name: () => 'btn1' } as any;
