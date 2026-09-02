@@ -14,9 +14,6 @@
 	</parent>
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<properties>
-		<test.script>test</test.script>
-	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -180,7 +177,7 @@
 							<workingDirectory>node</workingDirectory>
 							<skipTests>${maven.test.skip}</skipTests>
 							<testFailureIgnore>false</testFailureIgnore>
-							<arguments>run ${test.script}</arguments>
+							<arguments>run test</arguments>
 						</configuration>
 					</execution>
 				</executions>
