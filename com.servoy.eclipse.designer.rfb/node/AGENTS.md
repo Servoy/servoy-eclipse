@@ -147,6 +147,8 @@ This project uses `provideZonelessChangeDetection()`. When testing components:
   - `src/designer/ghostscontainer/ghostscontainer.component.spec.ts`
   - `src/designer/inlinedit/inlineedit.component.spec.ts`
   - `src/designer/toolbar/toolbar.component.spec.ts`
+  - `src/designer/toolbar/item/toolbaritem.component.spec.ts` (SVY-21405 — `isDisabled()` for boolean and function-valued `enabled` signal)
+  - `src/designer/toolbar/item/toolbarbutton.browser.spec.ts` (SVY-21405 — button `disabled` DOM attribute updates after `enabled.set(...)` from outside an Angular event, under OnPush)
   - `src/designer/variantscontent/variantscontent.component.spec.ts`
   - `src/designer/variantspreview/variantspreview.component.spec.ts`
   - `src/designer/resizeeditorheight/resizeeditorheight.component.spec.ts`
