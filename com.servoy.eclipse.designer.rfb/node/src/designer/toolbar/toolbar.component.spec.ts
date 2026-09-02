@@ -73,27 +73,27 @@ describe('ToolbarComponent', () => {
 
   describe('selectionChanged', () => {
     it('should update btnZoomOut enabled based on showingContainer', () => {
-      (component as any).btnZoomOut = { enabled: false };
-      (component as any).btnMoveUp = { enabled: false };
-      (component as any).btnMoveDown = { enabled: false };
-      (component as any).btnZoomIn = { enabled: false };
+      (component as any).btnZoomOut = { enabled: signal<(() => boolean) | boolean>(false) };
+      (component as any).btnMoveUp = { enabled: signal<(() => boolean) | boolean>(false) };
+      (component as any).btnMoveDown = { enabled: signal<(() => boolean) | boolean>(false) };
+      (component as any).btnZoomIn = { enabled: signal<(() => boolean) | boolean>(false) };
       urlParser.isShowingContainer.mockReturnValue('container1');
       urlParser.isAbsoluteFormLayout.mockReturnValue(true);
       component.selectionChanged(['id1']);
-      expect((component as any).btnZoomOut.enabled).toBe(true);
+      expect((component as any).btnZoomOut.enabled()).toBe(true);
     });
 
     it('should enable move buttons for single selection in responsive', () => {
-      (component as any).btnZoomOut = { enabled: false };
-      (component as any).btnMoveUp = { enabled: false };
-      (component as any).btnMoveDown = { enabled: false };
-      (component as any).btnZoomIn = { enabled: false };
+      (component as any).btnZoomOut = { enabled: signal<(() => boolean) | boolean>(false) };
+      (component as any).btnMoveUp = { enabled: signal<(() => boolean) | boolean>(false) };
+      (component as any).btnMoveDown = { enabled: signal<(() => boolean) | boolean>(false) };
+      (component as any).btnZoomIn = { enabled: signal<(() => boolean) | boolean>(false) };
       urlParser.isAbsoluteFormLayout.mockReturnValue(false);
       urlParser.isShowingContainer.mockReturnValue(null);
       component.selectionChanged(['id1']);
-      expect((component as any).btnMoveUp.enabled).toBe(true);
-      expect((component as any).btnMoveDown.enabled).toBe(true);
-      expect((component as any).btnZoomIn.enabled).toBe(true);
+      expect((component as any).btnMoveUp.enabled()).toBe(true);
+      expect((component as any).btnMoveDown.enabled()).toBe(true);
+      expect((component as any).btnZoomIn.enabled()).toBe(true);
     });
   });
 });

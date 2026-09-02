@@ -142,7 +142,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.standard_actions = this.getCategoryItems(TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         if (this.urlParser.isAbsoluteFormLayout()) {
-            this.btnToggleDesignMode.enabled = false;
+            this.btnToggleDesignMode.enabled.set(false);
             this.btnZoomIn.hide = true;
             if (!this.urlParser.isShowingContainer()) {
                 this.btnZoomOut.hide = true;
@@ -195,7 +195,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.zoom = this.getCategoryItems(TOOLBAR_CATEGORIES.ZOOM);
         }
 
-        this.btnZoomOut.enabled = this.urlParser.isShowingContainer() != null;
+        this.btnZoomOut.enabled.set(this.urlParser.isShowingContainer() != null);
         const promise = this.editorSession.isShowData();
         void promise.then((result: boolean) => {
             this.btnToggleShowData.state.set(result);
@@ -265,7 +265,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         });
 
         if (this.editorContentService.getDesignerElementById('errorsDiv') !== null) {
-            this.btnShowErrors.enabled = true;
+            this.btnShowErrors.enabled.set(true);
             if (this.editorContentService.getDesignerElementById('closeErrors')) {
                 this.editorContentService.getDesignerElementById('closeErrors')!.addEventListener('click', () => {
                     this.btnShowErrors.state.set(!this.btnShowErrors.state());
@@ -1085,7 +1085,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         //this.btnTabSequence.enabled = selection.length > 1;
         //this.btnSameWidth.enabled = selection.length > 1;
         //this.btnSameHeight.enabled = selection.length > 1;
-        this.btnZoomOut.enabled = this.urlParser.isShowingContainer() != null;
+        this.btnZoomOut.enabled.set(this.urlParser.isShowingContainer() != null);
         if (this.urlParser.isAbsoluteFormLayout()) {
             //this.btnDistributeHorizontalSpacing.enabled = selection.length > 2;
            // this.btnDistributeHorizontalCenters.enabled = selection.length > 2;
@@ -1105,9 +1105,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             //this.btnBringToFront.enabled = selection.length > 0;
             //this.btnSendToBack.enabled = selection.length > 0;
         } else {
-            this.btnMoveUp.enabled = selection.length == 1;
-            this.btnMoveDown.enabled = selection.length == 1;
-            this.btnZoomIn.enabled = selection.length == 1;
+            this.btnMoveUp.enabled.set(selection.length == 1);
+            this.btnMoveDown.enabled.set(selection.length == 1);
+            this.btnZoomIn.enabled.set(selection.length == 1);
         }
     }
 
@@ -1211,13 +1211,15 @@ export class ToolbarItem {
     decbutton_text!: string;
     incbutton_text!: string;
     readonly state = signal<boolean | undefined>(undefined);
+    readonly enabled = signal<(() => boolean) | boolean>(false);
     tooltip!: string;
     onSet!: (value: unknown) => void;
 
     constructor(
         public text: string,
         public icon: string | null,
-        public enabled: (() => boolean) | boolean,
+        enabled: (() => boolean) | boolean,
         public onclick: ((text?: string) => void) | null) {
+        this.enabled.set(enabled);
     }
 }
