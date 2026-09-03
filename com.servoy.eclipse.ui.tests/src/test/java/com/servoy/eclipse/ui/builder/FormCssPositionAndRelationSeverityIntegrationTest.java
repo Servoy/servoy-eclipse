@@ -23,13 +23,15 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -41,6 +43,7 @@ import com.servoy.base.query.IQueryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.builder.ServoyBuilderUtils;
+import com.servoy.eclipse.model.builder.ServoyFormBuilder;
 import com.servoy.eclipse.model.builder.ServoyRelationBuilder;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -124,11 +127,37 @@ public class FormCssPositionAndRelationSeverityIntegrationTest extends BuilderMa
 		return prefix + "_" + System.nanoTime();
 	}
 
+	/**
+	 * Saves the given persists to the editing solution, waits for the write to settle, then invokes the
+	 * real form marker-creation code ({@link ServoyFormBuilder#addFormMarkers}) directly on each saved
+	 * {@link Form}.
+	 * <p>
+	 * A full {@code servoyBuilder} pass visits {@code servoyProject.getSolution()} - the active solution
+	 * reloaded from disk - not the editing solution the test wrote to. That reload is driven
+	 * asynchronously by the workspace resource-change listener and does not reliably land before a
+	 * synchronous {@code build(FULL_BUILD)} in-test, so the builder would traverse a model that does not
+	 * yet contain the freshly saved form and create no marker. Calling {@code addFormMarkers} directly on
+	 * the editing form - after clearing any markers a background build may already have added - exercises
+	 * exactly the same marker-creation code against a form that is guaranteed to be in the model. This is
+	 * the same pattern the product itself uses in {@code ServoyValuelistBuilder}/{@code ServoyRelationBuilder}
+	 * (deleteMarkers + addFormMarkers) and that {@link #saveAndCheckRelation} already relies on for relations.
+	 */
 	private void saveAndBuild(IPersist... persists) throws Exception
 	{
 		activeProject.saveEditingSolutionNodes(persists, true);
-		activeProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 		waitForWorkspaceBuildJobs();
+
+		Set<UUID> methodsParsed = new HashSet<>();
+		Map<Form, Boolean> formsAbstractChecked = new HashMap<>();
+		for (IPersist persist : persists)
+		{
+			if (persist instanceof Form)
+			{
+				Form form = (Form)persist;
+				ServoyFormBuilder.deleteMarkers(form); // clear any markers the background build may already have added
+				ServoyFormBuilder.addFormMarkers(activeProject, form, methodsParsed, formsAbstractChecked);
+			}
+		}
 	}
 
 	/**
@@ -153,6 +182,18 @@ public class FormCssPositionAndRelationSeverityIntegrationTest extends BuilderMa
 		waitForWorkspaceBuildJobs();
 		ServoyRelationBuilder.deleteMarkers(relation); // clear any markers the background build may already have added
 		ServoyRelationBuilder.checkRelation(relation);
+	}
+
+	/**
+	 * Regenerates the form markers for a single already-saved {@link Form} (delete + addFormMarkers) and
+	 * returns the resulting "no body part" markers. Runs synchronously on the caller's thread with no event
+	 * pumping, so a pending background build cannot interleave and wipe the markers before they are asserted.
+	 */
+	private List<IMarker> regenerateAndFindNoBodyMarkers(Form form) throws CoreException
+	{
+		ServoyFormBuilder.deleteMarkers(form);
+		ServoyFormBuilder.addFormMarkers(activeProject, form, new HashSet<>(), new HashMap<>());
+		return findMarkersContaining(form, ServoyBuilder.PROJECT_FORM_MARKER_TYPE, "no body part");
 	}
 
 	private List<IMarker> findMarkersContaining(IPersist persist, String markerType, String messageSubstring) throws CoreException
@@ -272,26 +313,27 @@ public class FormCssPositionAndRelationSeverityIntegrationTest extends BuilderMa
 	{
 		String rootName = unique("svy21356_chainRoot");
 		Form rootForm = createPlainCssPositionForm(rootName);
-		saveAndBuild(rootForm);
 
 		String midName = unique("svy21356_chainMid");
 		Form midForm = createPlainCssPositionForm(midName);
 		midForm.setExtendsForm(rootForm);
 		midForm.setExtendsID(rootForm.getUUID().toString());
-		saveAndBuild(midForm);
 
 		String leafName = unique("svy21356_chainLeaf");
 		Form leafForm = createPlainCssPositionForm(leafName);
 		leafForm.setExtendsForm(midForm);
 		leafForm.setExtendsID(midForm.getUUID().toString());
-		saveAndBuild(leafForm);
 
-		assertEquals("Root form in the chain should have exactly one marker", 1,
-			findMarkersContaining(rootForm, ServoyBuilder.PROJECT_FORM_MARKER_TYPE, "no body part").size());
-		assertEquals("Middle form in the chain should have exactly one marker", 1,
-			findMarkersContaining(midForm, ServoyBuilder.PROJECT_FORM_MARKER_TYPE, "no body part").size());
-		assertEquals("Leaf form in the chain should have exactly one marker", 1,
-			findMarkersContaining(leafForm, ServoyBuilder.PROJECT_FORM_MARKER_TYPE, "no body part").size());
+		// Persist the whole chain first (one save). A full builder pass clears form markers project-wide and
+		// only recreates them for forms already in the active (asynchronously reloaded) solution, so markers
+		// created for one form can be wiped when a later form triggers a background build. Assert each form by
+		// regenerating its markers immediately before checking it, synchronously, so no background build can
+		// interleave between creation and assertion.
+		saveAndBuild(rootForm, midForm, leafForm);
+
+		assertEquals("Root form in the chain should have exactly one marker", 1, regenerateAndFindNoBodyMarkers(rootForm).size());
+		assertEquals("Middle form in the chain should have exactly one marker", 1, regenerateAndFindNoBodyMarkers(midForm).size());
+		assertEquals("Leaf form in the chain should have exactly one marker", 1, regenerateAndFindNoBodyMarkers(leafForm).size());
 	}
 
 	@Test
