@@ -120,17 +120,29 @@ public class FormSpecRunner
 	}
 
 	/**
-	 * Finds a file directly under {@code dir} whose name starts with {@code baseName} and ends
-	 * with {@code extension}, or null if the directory is missing / nothing matches.
+	 * Finds the media file Cypress wrote for the given spec. Cypress names the file after the
+	 * full spec filename including its .cy.ts/.cy.js part (e.g. a "login" spec produces
+	 * "login.cy.ts.mp4"), and mirrors the spec's subfolder structure under {@code dir}. The
+	 * {@code baseName} here has the .cy.js/.cy.ts suffix already stripped and may carry a
+	 * subfolder prefix (e.g. "appB/login") from run-all discovery, so we match on the last
+	 * path segment against both the .cy.ts and .cy.js filename variants. Returns null if the
+	 * directory is missing or nothing matches.
 	 */
 	private Path findMatchingFile(Path dir, String baseName, String extension) {
 		if (!Files.isDirectory(dir)) {
 			return null;
 		}
+		String leaf = baseName.replace('\\', '/');
+		int slash = leaf.lastIndexOf('/');
+		if (slash >= 0) {
+			leaf = leaf.substring(slash + 1);
+		}
+		String tsName = leaf + ".cy.ts" + extension;
+		String jsName = leaf + ".cy.js" + extension;
 		try (java.util.stream.Stream<Path> walk = Files.walk(dir)) {
 			return walk.filter(Files::isRegularFile).filter(p -> {
 				String name = p.getFileName().toString();
-				return name.equals(baseName + extension);
+				return name.equals(tsName) || name.equals(jsName);
 			}).findFirst().orElse(null);
 		} catch (Exception e) {
 			return null;
@@ -146,13 +158,20 @@ public class FormSpecRunner
 		if (!Files.isDirectory(screenshotsDir)) {
 			return null;
 		}
+		String leaf = baseName.replace('\\', '/');
+		int slash = leaf.lastIndexOf('/');
+		if (slash >= 0) {
+			leaf = leaf.substring(slash + 1);
+		}
+		String tsFolder = leaf + ".cy.ts";
+		String jsFolder = leaf + ".cy.js";
 		try (java.util.stream.Stream<Path> walk = Files.walk(screenshotsDir)) {
 			java.util.List<Path> pngs = walk.filter(Files::isRegularFile)
 					.filter(p -> p.getFileName().toString().endsWith(".png"))
 					.filter(p -> {
 						for (Path segment : p) {
 							String seg = segment.toString();
-							if (seg.equals(baseName + ".cy.ts") || seg.equals(baseName + ".cy.js")) {
+							if (seg.equals(tsFolder) || seg.equals(jsFolder)) {
 								return true;
 							}
 						}

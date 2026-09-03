@@ -61,7 +61,7 @@ public class RunSingleTestHandler {
 					sessionManager.updateResult(testName,
 							new CypressTestResult(testName, testType, TestStatus.ERROR, e.getMessage(), null, 0));
 				} finally {
-					sessionManager.setActiveRunner(null);
+					sessionManager.clearActiveRunner(runner);
 					monitor.done();
 				}
 				return Status.OK_STATUS;
