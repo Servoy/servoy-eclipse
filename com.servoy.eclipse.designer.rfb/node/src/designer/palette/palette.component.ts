@@ -54,7 +54,7 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         if (this.urlParser.isAbsoluteFormLayout()) {
             effect(() => {
                 const value = this.guidesService.snapData();
-                if (value) untracked(() => this.snap(value));
+                untracked(() => this.snap(value));
             });
         }
         this.editorSession.setPaletteRefresher(this);
@@ -522,7 +522,11 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
         });
     }
 
-    snap(data: SnapData) {
+    snap(data: SnapData | null) {
+        if (!data) {
+            this.snapData = null!;
+            return;
+        }
         if (this.dragItem?.paletteItemBeingDragged && !this.dragItem.ghost && !this.dragItem.contentItemBeingDragged) {
             this.dragItem.contentItemBeingDragged = this.editorContentService.getContentElementById('svy_draggedelement');
         }
