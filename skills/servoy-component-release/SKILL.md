@@ -116,7 +116,19 @@ The changelog covers commits since the previous release tag. The tag history is 
    - The Case cell links to `https://servoy-cloud.atlassian.net/browse/<KEY>`.
    - The Description cell is the commit subject with the leading key stripped (so it isn't duplicated).
 
-5. Write the table to a notes file (e.g. a temp file) and **present it to the user for review/edit** before it is used.
+5. **Sanitize each Description cell before writing it.** GitHub renders release notes as Markdown, so raw tokens in a commit subject get turned into unintended links or mentions:
+   - `@word` (e.g. `@input`) is rendered as a **@-mention of a GitHub user** — if that account exists, it links to it and the release's auto-generated **Contributors** section lists that account. This is how a phantom "input" contributor appears from a subject like `add serveronly tag to spec properties without @input`.
+   - `#123` is rendered as an **issue/PR link**.
+   - `<...>` may be interpreted as an HTML tag and disappear.
+
+   **Backtick-wrap each offending token so it renders literally.** A backslash escape (`\@input`) is NOT reliable for @-mentions — GitHub still resolves the mention and lists the phantom contributor. Backtick-wrapping is the only method confirmed to neutralize all three token types:
+   - `@word` → `` `@input` `` (backtick-wrap). Do not use `\@` — it does not stop the mention. As a plain-text alternative that avoids inline-code styling, replace the leading `@` with the HTML entity `&#64;` (`&#64;input` renders as `@input` with no mention).
+   - `#123` → `` `#123` `` (backtick-wrap).
+   - `<Foo>` → `` `<Foo>` `` (backtick-wrap).
+
+   Apply this only to the Description text — never to the Case link. The goal is that no commit subject can trigger a GitHub mention, issue link, or HTML interpretation.
+
+6. Write the table to a notes file (e.g. a temp file) and **present it to the user for review/edit** before it is used.
 
 ---
 
