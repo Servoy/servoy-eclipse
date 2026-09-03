@@ -42,9 +42,17 @@ public final class CypressTestSessionManager {
 			this.results = results;
 		}
 
-		public String label() { return label; }
-		public LocalDateTime timestamp() { return timestamp; }
-		public List<CypressTestResult> results() { return results; }
+		public String label() {
+			return label;
+		}
+
+		public LocalDateTime timestamp() {
+			return timestamp;
+		}
+
+		public List<CypressTestResult> results() {
+			return results;
+		}
 
 		void updateResults(List<CypressTestResult> results) {
 			this.results = results;
@@ -53,10 +61,13 @@ public final class CypressTestSessionManager {
 		@Override
 		public String toString() {
 			long passed = results.stream().filter(r -> r.status() == TestStatus.PASSED).count();
-			long failed = results.stream().filter(r -> r.status() == TestStatus.FAILED || r.status() == TestStatus.ERROR).count();
-			long pending = results.stream().filter(r -> r.status() == TestStatus.PENDING || r.status() == TestStatus.RUNNING).count();
+			long failed = results.stream()
+					.filter(r -> r.status() == TestStatus.FAILED || r.status() == TestStatus.ERROR).count();
+			long pending = results.stream()
+					.filter(r -> r.status() == TestStatus.PENDING || r.status() == TestStatus.RUNNING).count();
 			String suffix = pending > 0 ? " [running]" : "";
-			return timestamp.format(TIME_FMT) + " - " + label + " (" + passed + " passed, " + failed + " failed)" + suffix;
+			return timestamp.format(TIME_FMT) + " - " + label + " (" + passed + " passed, " + failed + " failed)"
+					+ suffix;
 		}
 	}
 
@@ -93,6 +104,9 @@ public final class CypressTestSessionManager {
 	}
 
 	public synchronized void updateResult(String testName, CypressTestResult result) {
+		if (!running) {
+			return;
+		}
 		results.put(testName, result);
 		if (result.status() != TestStatus.RUNNING) {
 			boolean allDone = results.values().stream()
@@ -132,7 +146,8 @@ public final class CypressTestSessionManager {
 		for (Map.Entry<String, CypressTestResult> entry : results.entrySet()) {
 			CypressTestResult r = entry.getValue();
 			if (r.status() == TestStatus.PENDING || r.status() == TestStatus.RUNNING) {
-				results.put(entry.getKey(), new CypressTestResult(r.testName(), r.testType(), TestStatus.ERROR, "Cancelled", null, 0));
+				results.put(entry.getKey(),
+						new CypressTestResult(r.testName(), r.testType(), TestStatus.ERROR, "Cancelled", null, 0));
 			}
 		}
 		if (activeHistoryEntry != null) {
