@@ -121,12 +121,13 @@ public class FormSpecRunner
 
 	/**
 	 * Finds the media file Cypress wrote for the given spec. Cypress names the file after the
-	 * full spec filename including its .cy.ts/.cy.js part (e.g. a "login" spec produces
-	 * "login.cy.ts.mp4"), and mirrors the spec's subfolder structure under {@code dir}. The
-	 * {@code baseName} here has the .cy.js/.cy.ts suffix already stripped and may carry a
-	 * subfolder prefix (e.g. "appB/login") from run-all discovery, so we match on the last
-	 * path segment against both the .cy.ts and .cy.js filename variants. Returns null if the
-	 * directory is missing or nothing matches.
+	 * full spec filename (e.g. an E2E "login" spec produces "login.cy.ts.mp4"; a form spec
+	 * produces "mysolution.login.spec.cy.js.mp4" or the legacy "login.spec.cy.js.mp4"), and
+	 * mirrors the spec's subfolder structure under {@code dir}. The {@code baseName} here has
+	 * the .cy.js/.cy.ts suffix already stripped and may carry a subfolder prefix (e.g.
+	 * "appB/login") from run-all discovery, so we match on the last path segment against both
+	 * the E2E and form spec filename variants. Returns null if the directory is missing or
+	 * nothing matches.
 	 */
 	private Path findMatchingFile(Path dir, String baseName, String extension) {
 		if (!Files.isDirectory(dir)) {
@@ -139,10 +140,13 @@ public class FormSpecRunner
 		}
 		String tsName = leaf + ".cy.ts" + extension;
 		String jsName = leaf + ".cy.js" + extension;
+		String formSpecSuffix = "." + leaf + ".spec.cy.js" + extension;
+		String formSpecName = leaf + ".spec.cy.js" + extension;
 		try (java.util.stream.Stream<Path> walk = Files.walk(dir)) {
 			return walk.filter(Files::isRegularFile).filter(p -> {
 				String name = p.getFileName().toString();
-				return name.equals(tsName) || name.equals(jsName);
+				return name.equals(tsName) || name.equals(jsName) || name.equals(formSpecName)
+						|| name.endsWith(formSpecSuffix);
 			}).findFirst().orElse(null);
 		} catch (Exception e) {
 			return null;
@@ -151,8 +155,9 @@ public class FormSpecRunner
 
 	/**
 	 * Finds a screenshot .png for the given spec. Cypress nests screenshots under a per-spec
-	 * folder (cypress/screenshots/&lt;base&gt;.cy.ts/...), so we search recursively for the
-	 * first .png whose path contains the spec base name. Prefers a "(failed)" screenshot.
+	 * folder named after the full spec filename (e.g. "login.cy.ts" for E2E, or
+	 * "mysolution.login.spec.cy.js"/"login.spec.cy.js" for form specs), so we search recursively
+	 * for the first .png under a matching folder. Prefers a "(failed)" screenshot.
 	 */
 	private Path findScreenshot(Path screenshotsDir, String baseName) {
 		if (!Files.isDirectory(screenshotsDir)) {
@@ -165,13 +170,16 @@ public class FormSpecRunner
 		}
 		String tsFolder = leaf + ".cy.ts";
 		String jsFolder = leaf + ".cy.js";
+		String formSpecSuffix = "." + leaf + ".spec.cy.js";
+		String formSpecFolder = leaf + ".spec.cy.js";
 		try (java.util.stream.Stream<Path> walk = Files.walk(screenshotsDir)) {
 			java.util.List<Path> pngs = walk.filter(Files::isRegularFile)
 					.filter(p -> p.getFileName().toString().endsWith(".png"))
 					.filter(p -> {
 						for (Path segment : p) {
 							String seg = segment.toString();
-							if (seg.equals(tsFolder) || seg.equals(jsFolder)) {
+							if (seg.equals(tsFolder) || seg.equals(jsFolder) || seg.equals(formSpecFolder)
+									|| seg.endsWith(formSpecSuffix)) {
 								return true;
 							}
 						}
