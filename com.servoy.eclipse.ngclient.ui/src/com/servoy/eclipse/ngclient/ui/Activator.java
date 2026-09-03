@@ -25,6 +25,7 @@ import org.eclipse.ui.console.IOConsole;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
@@ -48,7 +49,7 @@ public class Activator extends Plugin
 	 * When running junit tests this will be true initially (because most tests only test the java/persist/developer part),
 	 * and then each test class can change it at will.
 	 */
-	private static volatile boolean nodeExtractionAndTitaniumBuildDisabled = Boolean.getBoolean("servoy.junit.running");
+	private static volatile boolean nodeExtractionAndTitaniumBuildDisabled = ModelUtils.isTestRunning();
 
 	private File nodePath;
 	private File npmPath;
