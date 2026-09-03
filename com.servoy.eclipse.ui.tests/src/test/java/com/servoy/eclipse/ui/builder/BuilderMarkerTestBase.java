@@ -65,7 +65,7 @@ import com.servoy.j2db.util.UUID;
 public abstract class BuilderMarkerTestBase
 {
 	private static final long APP_SERVER_POLL_MS = 15_000;
-	private static final long ACTIVATE_SETTLE_MS = 10_000;
+	protected static final long ACTIVATE_SETTLE_MS = 10_000;
 
 	private static Boolean appServerAvailableCache;
 
