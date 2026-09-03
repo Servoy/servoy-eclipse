@@ -108,7 +108,7 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 					Display.getDefault().asyncExec(() -> MessageDialog.openError(null, "Cypress Form Tests",
 							"Error running tests: " + e.getMessage()));
 				} finally {
-					sessionManager.setActiveRunner(null);
+					sessionManager.clearActiveRunner(runner);
 					monitor.done();
 				}
 				return Status.OK_STATUS;
@@ -171,7 +171,7 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 					Display.getDefault().asyncExec(() -> MessageDialog.openError(null, "Cypress Form Tests",
 							"Error running tests: " + e.getMessage()));
 				} finally {
-					sessionManager.setActiveRunner(null);
+					sessionManager.clearActiveRunner(runner);
 					monitor.done();
 				}
 				return Status.OK_STATUS;

@@ -97,7 +97,7 @@ public class RunAllE2ETestsHandler {
 					Display.getDefault().asyncExec(() -> MessageDialog.openError(null, "Cypress E2E Tests",
 							"Error running tests: " + e.getMessage()));
 				} finally {
-					sessionManager.setActiveRunner(null);
+					sessionManager.clearActiveRunner(runner);
 					monitor.done();
 				}
 				return Status.OK_STATUS;

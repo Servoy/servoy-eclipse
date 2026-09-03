@@ -160,6 +160,17 @@ public final class CypressTestSessionManager {
 		this.activeRunner = runner;
 	}
 
+	/**
+	 * Clears the active runner only if it is still {@code runner}, so a run
+	 * finishing its {@code finally} block cannot null out a runner that a newer run
+	 * has already installed.
+	 */
+	public synchronized void clearActiveRunner(FormSpecRunner runner) {
+		if (this.activeRunner == runner) {
+			this.activeRunner = null;
+		}
+	}
+
 	public synchronized void clear() {
 		results.clear();
 		running = false;
