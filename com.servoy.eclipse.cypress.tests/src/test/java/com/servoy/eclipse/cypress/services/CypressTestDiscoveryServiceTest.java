@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -290,5 +291,101 @@ public class CypressTestDiscoveryServiceTest
 			assertTrue(service.hasAnyTest());
 		}
 	}
-}
 
+	/**
+	 * Exercises the private {@code collectE2ETestNames(Path baseDir, Path scanRoot)} helper
+	 * directly via reflection. This is the logic backing {@code discoverAllE2ETests()} and
+	 * {@code discoverSolutionE2ETests()}, which cannot be driven end-to-end here because they
+	 * resolve their scan directory from the live Eclipse workspace root rather than an injectable
+	 * field.
+	 */
+	@Nested
+	@DisplayName("collectE2ETestNames")
+	class CollectE2ETestNames
+	{
+		@SuppressWarnings("unchecked")
+		private List<String> invoke(Path baseDir, Path scanRoot) throws Exception
+		{
+			Method method = CypressTestDiscoveryService.class.getDeclaredMethod("collectE2ETestNames", Path.class,
+				Path.class);
+			method.setAccessible(true);
+			return (List<String>)method.invoke(service, baseDir, scanRoot);
+		}
+
+		@Test
+		@DisplayName("returns bare name for a spec directly under the base dir")
+		void bareNameAtRoot() throws Exception
+		{
+			Files.createFile(tempDir.resolve("login.cy.ts"));
+
+			List<String> names = invoke(tempDir, tempDir);
+
+			assertEquals(List.of("login"), names);
+		}
+
+		@Test
+		@DisplayName("returns a subfolder-qualified name for a nested spec")
+		void subfolderQualifiedName() throws Exception
+		{
+			Path appA = Files.createDirectories(tempDir.resolve("appA"));
+			Files.createFile(appA.resolve("login.cy.ts"));
+
+			List<String> names = invoke(tempDir, tempDir);
+
+			assertEquals(List.of("appA/login"), names);
+		}
+
+		@Test
+		@DisplayName("keeps same-named specs in different subfolders distinct")
+		void distinguishesSameNameInDifferentSubfolders() throws Exception
+		{
+			Path appA = Files.createDirectories(tempDir.resolve("appA"));
+			Path appB = Files.createDirectories(tempDir.resolve("appB"));
+			Files.createFile(appA.resolve("login.cy.ts"));
+			Files.createFile(appB.resolve("login.cy.js"));
+
+			List<String> names = invoke(tempDir, tempDir);
+
+			assertEquals(2, names.size());
+			assertAll(() -> assertTrue(names.contains("appA/login")),
+				() -> assertTrue(names.contains("appB/login")));
+		}
+
+		@Test
+		@DisplayName("uses forward slashes even on backslash-style path separators")
+		void usesForwardSlashSeparator() throws Exception
+		{
+			Path nested = Files.createDirectories(tempDir.resolve("appA").resolve("sub"));
+			Files.createFile(nested.resolve("login.cy.ts"));
+
+			List<String> names = invoke(tempDir, tempDir);
+
+			assertEquals(List.of("appA/sub/login"), names);
+			assertFalse(names.get(0).contains("\\"));
+		}
+
+		@Test
+		@DisplayName("names are relative to baseDir even when scanRoot is a subfolder")
+		void namesRelativeToBaseDirWhenScanRootIsSubfolder() throws Exception
+		{
+			Path solutionDir = Files.createDirectories(tempDir.resolve("mySolution"));
+			Files.createFile(solutionDir.resolve("login.cy.ts"));
+
+			List<String> names = invoke(tempDir, solutionDir);
+
+			assertEquals(List.of("mySolution/login"), names);
+		}
+
+		@Test
+		@DisplayName("ignores non .cy.js/.cy.ts files")
+		void ignoresUnrelatedFiles() throws Exception
+		{
+			Files.createFile(tempDir.resolve("readme.md"));
+			Files.createFile(tempDir.resolve("helper.js"));
+
+			List<String> names = invoke(tempDir, tempDir);
+
+			assertTrue(names.isEmpty());
+		}
+	}
+}

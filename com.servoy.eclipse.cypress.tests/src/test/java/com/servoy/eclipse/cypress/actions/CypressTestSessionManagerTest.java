@@ -322,6 +322,23 @@ class CypressTestSessionManagerTest {
 					() -> assertEquals(TestStatus.FAILED, results.get(1).status()),
 					() -> assertEquals("boom", results.get(1).errorSummary()));
 		}
+
+		@Test
+		@DisplayName("a late updateResult after stop() does not overwrite the Cancelled entry")
+		void lateUpdateAfterStopIsIgnored() {
+			manager.startSession(List.of("a", "b"), TestType.E2E);
+			manager.markRunning("a", TestType.E2E);
+
+			manager.stop();
+
+			// simulate the in-flight spec finishing right after Stop
+			manager.updateResult("a",
+					new CypressTestResult("a", TestType.E2E, TestStatus.PASSED, null, "All tests passed", 500));
+
+			CypressTestResult r = manager.getResults().get(0);
+			assertAll(() -> assertEquals(TestStatus.ERROR, r.status()),
+					() -> assertEquals("Cancelled", r.errorSummary()));
+		}
 	}
 
 	@Nested

@@ -85,20 +85,7 @@ public class CypressTestDiscoveryService {
 		if (e2eDir == null || !Files.isDirectory(e2eDir)) {
 			return Collections.emptyList();
 		}
-		try (Stream<Path> walk = Files.walk(e2eDir)) {
-			return walk.filter(p -> {
-				String name = p.getFileName().toString();
-				return name.endsWith(E2E_CY_JS_EXTENSION) || name.endsWith(E2E_CY_TS_EXTENSION);
-			}).map(p -> {
-				String fileName = p.getFileName().toString();
-				if (fileName.endsWith(E2E_CY_JS_EXTENSION)) {
-					return fileName.substring(0, fileName.length() - E2E_CY_JS_EXTENSION.length());
-				}
-				return fileName.substring(0, fileName.length() - E2E_CY_TS_EXTENSION.length());
-			}).toList();
-		} catch (IOException e) {
-			return Collections.emptyList();
-		}
+		return collectE2ETestNames(e2eDir, e2eDir);
 	}
 
 	public List<String> discoverSolutionE2ETests() {
@@ -115,16 +102,30 @@ public class CypressTestDiscoveryService {
 		if (!Files.isDirectory(solutionDir)) {
 			return Collections.emptyList();
 		}
-		try (Stream<Path> walk = Files.walk(solutionDir)) {
+		return collectE2ETestNames(solutionDir, solutionDir);
+	}
+
+	/**
+	 * Walks {@code scanRoot} recursively and returns a unique, run-ready name for
+	 * each E2E spec. Names are relative to {@code baseDir} (with forward slashes
+	 * and the .cy.js/.cy.ts suffix stripped) so that two specs sharing a bare base
+	 * name in different subfolders (e.g. appA/login and appB/login) do not collapse
+	 * to a single entry. The base is the top-level e2e directory so the returned
+	 * names round-trip through
+	 * {@link FormSpecRunner#runE2ECypressTests(String, boolean)}, which resolves
+	 * them against it.
+	 */
+	private List<String> collectE2ETestNames(Path baseDir, Path scanRoot) {
+		try (Stream<Path> walk = Files.walk(scanRoot)) {
 			return walk.filter(p -> {
 				String name = p.getFileName().toString();
 				return name.endsWith(E2E_CY_JS_EXTENSION) || name.endsWith(E2E_CY_TS_EXTENSION);
 			}).map(p -> {
-				String fileName = p.getFileName().toString();
-				if (fileName.endsWith(E2E_CY_JS_EXTENSION)) {
-					return fileName.substring(0, fileName.length() - E2E_CY_JS_EXTENSION.length());
+				String relative = baseDir.relativize(p).toString().replace('\\', '/');
+				if (relative.endsWith(E2E_CY_JS_EXTENSION)) {
+					return relative.substring(0, relative.length() - E2E_CY_JS_EXTENSION.length());
 				}
-				return fileName.substring(0, fileName.length() - E2E_CY_TS_EXTENSION.length());
+				return relative.substring(0, relative.length() - E2E_CY_TS_EXTENSION.length());
 			}).toList();
 		} catch (IOException e) {
 			return Collections.emptyList();

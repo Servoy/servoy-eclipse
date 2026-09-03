@@ -111,12 +111,14 @@ public class JSUnitCoverageWriter
 				for (Map.Entry<String, Map<String, Map<Integer, Integer>>> scopeEntry : typeEntry.getValue().entrySet())
 				{
 					String scopeName = scopeEntry.getKey();
+					if (EXCLUDED_SOURCES.contains(scopeName)) continue;
 					Map<String, Set<Integer>> reachableForSource = findReachableForScope(reachableLines, type, scopeName);
 
 					List<FunctionEntry> functions = new ArrayList<>();
 					for (Map.Entry<String, Map<Integer, Integer>> funcEntry : scopeEntry.getValue().entrySet())
 					{
 						String funcName = funcEntry.getKey();
+						if (EXCLUDED_SOURCES.contains(funcName)) continue;
 						Set<Integer> hitLines = funcEntry.getValue().keySet();
 
 						Set<Integer> reachableForFunc = reachableForSource != null ? reachableForSource.get(funcName) : null;
@@ -170,20 +172,6 @@ public class JSUnitCoverageWriter
 
 		sb.append("  \"summary\": { \"coveredLines\": ").append(totalCovered)
 			.append(", \"uncoveredLines\": ").append(totalUncovered).append(" },\n");
-
-		// ---- debug: raw reachable source names for diagnostics ----
-		sb.append("  \"_debug_reachableSources\": [");
-		if (reachableLines != null)
-		{
-			boolean first = true;
-			for (String srcName : reachableLines.keySet())
-			{
-				if (!first) sb.append(", ");
-				sb.append(jsonString(srcName));
-				first = false;
-			}
-		}
-		sb.append("],\n");
 
 		// ---- scopes array ----
 		sb.append("  \"scopes\": ");
@@ -275,19 +263,6 @@ public class JSUnitCoverageWriter
 		}
 
 		return null;
-	}
-
-	/**
-	 * Derives the Rhino source name from a scope/form name and type.
-	 * Servoy compiles global scope scripts as "scopeName.js" and form scripts as "forms/formName.js".
-	 */
-	private static String resolveSourceName(String type, String scopeName)
-	{
-		if ("forms".equals(type))
-		{
-			return "forms/" + scopeName + ".js";
-		}
-		return scopeName + ".js";
 	}
 
 	private static String jsonString(String s)

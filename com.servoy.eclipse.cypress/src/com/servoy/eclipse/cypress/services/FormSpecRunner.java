@@ -120,17 +120,33 @@ public class FormSpecRunner
 	}
 
 	/**
-	 * Finds a file directly under {@code dir} whose name starts with {@code baseName} and ends
-	 * with {@code extension}, or null if the directory is missing / nothing matches.
+	 * Finds the media file Cypress wrote for the given spec. Cypress names the file after the
+	 * full spec filename (e.g. an E2E "login" spec produces "login.cy.ts.mp4"; a form spec
+	 * produces "mysolution.login.spec.cy.js.mp4" or the legacy "login.spec.cy.js.mp4"), and
+	 * mirrors the spec's subfolder structure under {@code dir}. The {@code baseName} here has
+	 * the .cy.js/.cy.ts suffix already stripped and may carry a subfolder prefix (e.g.
+	 * "appB/login") from run-all discovery, so we match on the last path segment against both
+	 * the E2E and form spec filename variants. Returns null if the directory is missing or
+	 * nothing matches.
 	 */
 	private Path findMatchingFile(Path dir, String baseName, String extension) {
 		if (!Files.isDirectory(dir)) {
 			return null;
 		}
+		String leaf = baseName.replace('\\', '/');
+		int slash = leaf.lastIndexOf('/');
+		if (slash >= 0) {
+			leaf = leaf.substring(slash + 1);
+		}
+		String tsName = leaf + ".cy.ts" + extension;
+		String jsName = leaf + ".cy.js" + extension;
+		String formSpecSuffix = "." + leaf + ".spec.cy.js" + extension;
+		String formSpecName = leaf + ".spec.cy.js" + extension;
 		try (java.util.stream.Stream<Path> walk = Files.walk(dir)) {
 			return walk.filter(Files::isRegularFile).filter(p -> {
 				String name = p.getFileName().toString();
-				return name.startsWith(baseName) && name.endsWith(extension);
+				return name.equals(tsName) || name.equals(jsName) || name.equals(formSpecName)
+						|| name.endsWith(formSpecSuffix);
 			}).findFirst().orElse(null);
 		} catch (Exception e) {
 			return null;
@@ -139,17 +155,36 @@ public class FormSpecRunner
 
 	/**
 	 * Finds a screenshot .png for the given spec. Cypress nests screenshots under a per-spec
-	 * folder (cypress/screenshots/&lt;base&gt;.cy.ts/...), so we search recursively for the
-	 * first .png whose path contains the spec base name. Prefers a "(failed)" screenshot.
+	 * folder named after the full spec filename (e.g. "login.cy.ts" for E2E, or
+	 * "mysolution.login.spec.cy.js"/"login.spec.cy.js" for form specs), so we search recursively
+	 * for the first .png under a matching folder. Prefers a "(failed)" screenshot.
 	 */
 	private Path findScreenshot(Path screenshotsDir, String baseName) {
 		if (!Files.isDirectory(screenshotsDir)) {
 			return null;
 		}
+		String leaf = baseName.replace('\\', '/');
+		int slash = leaf.lastIndexOf('/');
+		if (slash >= 0) {
+			leaf = leaf.substring(slash + 1);
+		}
+		String tsFolder = leaf + ".cy.ts";
+		String jsFolder = leaf + ".cy.js";
+		String formSpecSuffix = "." + leaf + ".spec.cy.js";
+		String formSpecFolder = leaf + ".spec.cy.js";
 		try (java.util.stream.Stream<Path> walk = Files.walk(screenshotsDir)) {
 			java.util.List<Path> pngs = walk.filter(Files::isRegularFile)
 					.filter(p -> p.getFileName().toString().endsWith(".png"))
-					.filter(p -> p.toString().contains(baseName)).toList();
+					.filter(p -> {
+						for (Path segment : p) {
+							String seg = segment.toString();
+							if (seg.equals(tsFolder) || seg.equals(jsFolder) || seg.equals(formSpecFolder)
+									|| seg.endsWith(formSpecSuffix)) {
+								return true;
+							}
+						}
+						return false;
+					}).toList();
 			// Prefer a screenshot marked "(failed)" if present
 			return pngs.stream().filter(p -> p.getFileName().toString().contains("(failed)")).findFirst()
 					.orElse(pngs.stream().findFirst().orElse(null));
@@ -567,17 +602,36 @@ public class FormSpecRunner
 			}
 			if (!Files.exists(specFilePath) && Files.exists(e2eBaseDir))
 			{
-				// recursive walk: find first file whose base name (without .cy.js/.cy.ts) matches targetForm
-				String baseName = targetForm.replaceAll("\\.cy\\.(js|ts)$", "");
-				try (java.util.stream.Stream<Path> walk = Files.walk(e2eBaseDir))
+				// try the target as a path relative to the base e2e dir (handles names carrying a
+				// subfolder such as "appB/login" produced by run-all discovery across solutions)
+				Path baseRelative = e2eBaseDir.resolve(targetForm);
+				if (Files.exists(baseRelative))
 				{
-					specFilePath = walk
-						.filter(p -> {
-							String name = p.getFileName().toString();
-							return name.equals(baseName + ".cy.js") || name.equals(baseName + ".cy.ts");
-						})
-						.findFirst()
-						.orElse(e2eDir.resolve(targetForm + ".cy.js")); // keep as missing path for error message
+					specFilePath = baseRelative;
+				}
+				else if (Files.exists(e2eBaseDir.resolve(targetForm + ".cy.js")))
+				{
+					specFilePath = e2eBaseDir.resolve(targetForm + ".cy.js");
+				}
+				else if (Files.exists(e2eBaseDir.resolve(targetForm + ".cy.ts")))
+				{
+					specFilePath = e2eBaseDir.resolve(targetForm + ".cy.ts");
+				}
+				else
+				{
+					// last resort: recursive walk matching the bare base name (may be ambiguous
+					// when the same base name exists under multiple subfolders)
+					String baseName = targetForm.replaceAll("\\.cy\\.(js|ts)$", "");
+					try (java.util.stream.Stream<Path> walk = Files.walk(e2eBaseDir))
+					{
+						specFilePath = walk
+							.filter(p -> {
+								String name = p.getFileName().toString();
+								return name.equals(baseName + ".cy.js") || name.equals(baseName + ".cy.ts");
+							})
+							.findFirst()
+							.orElse(e2eDir.resolve(targetForm + ".cy.js")); // keep as missing path for error message
+					}
 				}
 			}
 			if (!Files.exists(specFilePath))
