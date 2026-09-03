@@ -29,7 +29,7 @@ export class DynamicGuidesComponent {
   constructor() {
       effect(() => {
           const value = this.guidesService.snapData();
-          if (value) untracked(() => this.setGuides(value));
+          untracked(() => this.setGuides(value));
       });
       this.editorContentService.executeOnlyAfterInit(() => {
         this.editorSession.getSnapThreshold().then((thresholds: any) => {
@@ -72,9 +72,10 @@ export class DynamicGuidesComponent {
     this.clearGuides();
   }
 
-  private setGuides(data: SnapData) {
+  private setGuides(data: SnapData | null) {
 	this.clearGuides();
-    if (!this.editorSession.dragging() && !this.editorSession.resizing()) {
+    if (!data || !this.editorSession.dragging() && !this.editorSession.resizing()) {
+      this.snapData = null;
       return;
     }
     this.snapData = data;

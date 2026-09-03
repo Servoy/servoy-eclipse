@@ -139,6 +139,23 @@ describe('PaletteComponent', () => {
       component.snap({ top: 50, left: 100 } as any);
       expect((component as any).snapData).toBeNull();
     });
+
+    it('should reset snapData to null when snap(null) is called after a snap (SVY-21412)', () => {
+      const mockEl = { style: {} } as any;
+      (component as any).dragItem = { paletteItemBeingDragged: {}, contentItemBeingDragged: mockEl, ghost: null };
+      const data = { top: 50, left: 100, width: 200, height: 150 } as any;
+      component.snap(data);
+      expect((component as any).snapData).toBe(data);
+
+      component.snap(null);
+      expect((component as any).snapData).toBeNull();
+    });
+
+    it('should not throw when snap(null) is called with no drag in progress', () => {
+      (component as any).dragItem = {};
+      expect(() => component.snap(null)).not.toThrow();
+      expect((component as any).snapData).toBeNull();
+    });
   });
 
   describe('search history', () => {
