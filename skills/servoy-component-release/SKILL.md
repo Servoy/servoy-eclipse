@@ -84,9 +84,9 @@ Each Servoy component repo exposes an `npm run build` that produces the release 
 
 ---
 
-## Phase 2 — Changelog table from commit subjects
+## Phase 2 — Changelog table from git commits
 
-The changelog is built purely from git commit **subjects** — no Jira lookup.
+The changelog is built from git commits (subject + body) — no Jira lookup. All real-work commits are included (keyed and keyless); only version-maintenance / release-plumbing commits are filtered out.
 
 ### Detect the start tag
 
@@ -103,20 +103,37 @@ The changelog covers commits since the previous release tag. The tag history is 
 
 ### Build the table
 
-1. `git log <startTag>..HEAD --pretty=format:%s` to get commit subjects.
-2. Extract Jira keys matching `SVY-`, `SVYX-`, or `SERVOY-` (e.g. `SVY-20489`, `SVYX-1127`, `SERVOY-293`).
-3. **Only include commits that contain a Jira key.** Commits with no key (e.g. `bump version to 2026.9.1 [ai]`, merge commits) are **omitted** to keep the changelog clean.
-4. Format as a Markdown table (bootstrapcomponents style):
+1. `git log <startTag>..HEAD --pretty=format:%h%x09%s%x09%b` to get, per commit, the short hash, subject, and body (so a richer description can be written — see step 6).
+2. **Filter out version-maintenance / release-plumbing commits.** These are noise and must NOT appear in the changelog, whether or not they carry a Jira key. Drop a commit when its subject matches (case-insensitive) any of:
+   - `bump version` / `version bump` / a bare version-only subject like `2026.9.1`
+   - `release` used in the plumbing sense (e.g. `prepare release`, `release 2026.9.1`, `tag release`) — do NOT drop a commit that merely fixes a bug *for* a release if it describes real work
+   - `publish to SPM` / `publish to spm`
+   - merge commits (`Merge branch ...`, `Merge remote-tracking ...`)
+
+   When in doubt about whether a commit is real work or plumbing, keep it and let the user remove it during review (step 7).
+3. Extract Jira keys matching `SVY-`, `SVYX-`, or `SERVOY-` (e.g. `SVY-20489`, `SVYX-1127`, `SERVOY-293`) from each remaining subject.
+4. **Include every remaining commit**, keyed or not:
+   - Commits **with** a Jira key come first, in commit order, with the key in the Case cell.
+   - Commits **without** a Jira key are appended **after** the keyed ones, with an empty Case cell (`—`).
+5. Format as a Markdown table (bootstrapcomponents style):
    ```markdown
    | Case | Description |
    | --- | --- |
-   | [SVY-20489](https://servoy-cloud.atlassian.net/browse/SVY-20489) | Walk through all core packages and configure basic properties |
-   | [SVYX-1127](https://servoy-cloud.atlassian.net/browse/SVYX-1127) | Add onCellFocusGained method in NGGrid |
+   | [SVY-20489](https://servoy-cloud.atlassian.net/browse/SVY-20489) | Configured basic properties across all core packages and components so they surface correctly in the designer. |
+   | [SVYX-1127](https://servoy-cloud.atlassian.net/browse/SVYX-1127) | Added an `onCellFocusGained` event to NG Grid. It fires when a cell receives focus, letting solutions react to keyboard/mouse navigation. |
+   | — | Fixed a rendering glitch where the typeahead dropdown caret was misaligned on the first open. |
    ```
-   - The Case cell links to `https://servoy-cloud.atlassian.net/browse/<KEY>`.
-   - The Description cell is the commit subject with the leading key stripped (so it isn't duplicated).
+   - The Case cell links to `https://servoy-cloud.atlassian.net/browse/<KEY>`, or is `—` for keyless commits.
 
-5. **Sanitize each Description cell before writing it.** GitHub renders release notes as Markdown, so raw tokens in a commit subject get turned into unintended links or mentions:
+### Write a clear, concise description (2–4 sentences)
+
+6. The Description cell is **not** the raw commit subject. Write a short, human-readable summary of **what was done**, in **2–4 sentences**:
+   - Use the commit subject AND body for context. Prefer plain, user-facing language (what changed and why it matters), not internal implementation jargon.
+   - Strip the leading Jira key from the text (it already appears in the Case cell, so it isn't duplicated).
+   - Keep it tight: 2 sentences for a simple fix, up to 4 for something with notable behavior/impact. Never a wall of text.
+   - Do not invent details that aren't supported by the commit — if the subject/body is thin, a single clear sentence is fine.
+
+7. **Sanitize each Description cell before writing it.** GitHub renders release notes as Markdown, so raw tokens get turned into unintended links or mentions:
    - `@word` (e.g. `@input`) is rendered as a **@-mention of a GitHub user** — if that account exists, it links to it and the release's auto-generated **Contributors** section lists that account. This is how a phantom "input" contributor appears from a subject like `add serveronly tag to spec properties without @input`.
    - `#123` is rendered as an **issue/PR link**.
    - `<...>` may be interpreted as an HTML tag and disappear.
@@ -126,9 +143,9 @@ The changelog covers commits since the previous release tag. The tag history is 
    - `#123` → `` `#123` `` (backtick-wrap).
    - `<Foo>` → `` `<Foo>` `` (backtick-wrap).
 
-   Apply this only to the Description text — never to the Case link. The goal is that no commit subject can trigger a GitHub mention, issue link, or HTML interpretation.
+   Apply this only to the Description text — never to the Case link. The goal is that no description can trigger a GitHub mention, issue link, or HTML interpretation.
 
-6. Write the table to a notes file (e.g. a temp file) and **present it to the user for review/edit** before it is used.
+8. Write the table to a notes file (e.g. a temp file) and **present it to the user for review/edit** before it is used.
 
 ---
 
