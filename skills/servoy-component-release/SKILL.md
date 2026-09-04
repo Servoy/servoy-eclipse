@@ -119,11 +119,12 @@ The changelog covers commits since the previous release tag. The tag history is 
    ```markdown
    | Case | Description |
    | --- | --- |
-   | [SVY-20489](https://servoy-cloud.atlassian.net/browse/SVY-20489) | Configured basic properties across all core packages and components so they surface correctly in the designer. |
-   | [SVYX-1127](https://servoy-cloud.atlassian.net/browse/SVYX-1127) | Added an `onCellFocusGained` event to NG Grid. It fires when a cell receives focus, letting solutions react to keyboard/mouse navigation. |
+   | [SVY&#8209;20489](https://servoy-cloud.atlassian.net/browse/SVY-20489) | Configured basic properties across all core packages and components so they surface correctly in the designer. |
+   | [SVYX&#8209;1127](https://servoy-cloud.atlassian.net/browse/SVYX-1127) | Added an `onCellFocusGained` event to NG Grid. It fires when a cell receives focus, letting solutions react to keyboard/mouse navigation. |
    | — | Fixed a rendering glitch where the typeahead dropdown caret was misaligned on the first open. |
    ```
    - The Case cell links to `https://servoy-cloud.atlassian.net/browse/<KEY>`, or is `—` for keyless commits.
+   - **Keep the case number on one line.** Use a non-breaking hyphen (`&#8209;`) instead of a plain `-` in the **link text** (e.g. `SVY&#8209;20489`), so GitHub cannot wrap the key across two lines. The URL in the link target keeps the normal `-` (`.../browse/SVY-20489`) — only the displayed text uses `&#8209;`.
 
 ### Write a clear, concise description (2–4 sentences)
 
