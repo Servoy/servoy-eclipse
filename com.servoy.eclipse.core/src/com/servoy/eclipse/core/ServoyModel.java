@@ -1115,7 +1115,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							public void run()
 							{
 								MessageDialog.openError(UIUtils.getActiveShell(), "Error activating solution", "Solution " + project +
-									" cannot be activated. The Solution or some of its modules was created or updated by a newer version of Servoy. Either switch to a newer version of Servoy or rollback the changes made.");
+									" cannot be activated. Please check for problems in the underlying file representation.");
 							}
 						});
 						return;
@@ -2846,7 +2846,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						boolean ownFileChanged = true;
 						if (compositeWithItems)
 						{
-							String ownFilePath = new File(solutionLocationDir,
+							String ownFilePath = new File(solutionLocationDir.getParentFile(),
 								SolutionSerializer.getRelativeFilePath(persist, false)).getAbsolutePath();
 							ownFileChanged = changedFilePaths.contains(ownFilePath);
 						}

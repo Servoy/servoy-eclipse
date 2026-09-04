@@ -184,12 +184,24 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
         this.editorContentService.getGlassPane().style.cursor = 'pointer';
 
         if ((event.ctrlKey || event.metaKey) && this.selectionToDrag == null) {
-            this.dragCopy = true;
             const selection = this.editorSession.getSelection();
-            if (this.dragNode && !selection.includes(this.dragNode.getAttribute('svy-id')!)) {
-                selection.push(this.dragNode.getAttribute('svy-id')!);
+            const hasContentElements = selection.some(id => this.editorContentService.getContentElement(id) != null);
+            if (!hasContentElements) {
+                this.selectionToDrag = [];
+                this.editorContentService.getGlassPane().style.cursor = 'default';
+            } else {
+                this.dragCopy = true;
+                if (this.dragNode && !selection.includes(this.dragNode.getAttribute('svy-id')!)) {
+                    selection.push(this.dragNode.getAttribute('svy-id')!);
+                }
+                this.initSelectionToDrag(selection);
+                if (this.selectionToDrag!.length === 0) {
+                    this.dragCopy = false;
+                    this.selectionToDrag = null;
+                    this.editorContentService.getGlassPane().style.cursor = 'default';
+                    return;
+                }
             }
-            this.initSelectionToDrag(selection);
         }
 
         if (!this.selectionToDrag) {
@@ -198,6 +210,11 @@ export class DragselectionComponent implements OnInit, ISupportAutoscroll {
                 selection = [this.dragNode!.getAttribute('svy-id')!];
             }
             this.initSelectionToDrag(selection);
+            if (this.selectionToDrag!.length === 0) {
+                this.dragCopy = false;
+                this.selectionToDrag = null;
+                return;
+            }
         }
 
 		if (this.selectionToDrag!.length > 0) {

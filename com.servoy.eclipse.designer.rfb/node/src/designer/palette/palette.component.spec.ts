@@ -1,7 +1,15 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest';
-import { signal } from '@angular/core';
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { signal, provideZonelessChangeDetection, NO_ERRORS_SCHEMA } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { PaletteComponent, SearchTextPipe, SearchTextDeepPipe } from './palette.component';
+import { EditorSessionService } from '../services/editorsession.service';
+import { URLParserService } from '../services/urlparser.service';
+import { DesignerUtilsService } from '../services/designerutils.service';
+import { EditorContentService } from '../services/editorcontent.service';
+import { DynamicGuidesService, SnapData } from '../services/dynamicguides.service';
+import { WindowRefService } from '@servoy/public';
 
 describe('PaletteComponent', () => {
   let component: PaletteComponent;
@@ -138,6 +146,115 @@ describe('PaletteComponent', () => {
       (component as any).dragItem = { paletteItemBeingDragged: null, contentItemBeingDragged: null };
       component.snap({ top: 50, left: 100 } as any);
       expect((component as any).snapData).toBeNull();
+    });
+
+    it('should reset snapData to null when guide clears (SVY-21412)', () => {
+      const mockEl = { style: {} } as any;
+      (component as any).dragItem = { paletteItemBeingDragged: {}, contentItemBeingDragged: mockEl, ghost: null };
+      const data = { top: 50, left: 100, width: 200, height: 150 } as any;
+      component.snap(data);
+      expect((component as any).snapData).toBe(data);
+
+      expect(() => component.snap(null)).not.toThrow();
+      expect((component as any).snapData).toBeNull();
+    });
+
+    it('snap(SnapData) should set snapData when a dragged content item exists (SVY-21412)', () => {
+      const mockEl = { style: {} } as any;
+      (component as any).dragItem = { paletteItemBeingDragged: {}, contentItemBeingDragged: mockEl, ghost: null };
+      const data = { top: 40, left: 60 } as any;
+      component.snap(data);
+      expect((component as any).snapData).toBe(data);
+    });
+
+    it('snap(null) should not throw when no drag is in progress (SVY-21412)', () => {
+      (component as any).dragItem = {};
+      (component as any).snapData = null;
+      expect(() => component.snap(null)).not.toThrow();
+      expect((component as any).snapData).toBeNull();
+    });
+  });
+
+  describe('guidesService effect forwarding (SVY-21412)', () => {
+    let guideSnapData: ReturnType<typeof signal<SnapData | null>>;
+    let effectComponent: PaletteComponent;
+    let contentElement: HTMLElement;
+    let effectFixture: ReturnType<typeof TestBed.createComponent<PaletteComponent>>;
+
+    beforeEach(() => {
+      guideSnapData = signal<SnapData | null>(null);
+      contentElement = document.createElement('div');
+
+      const editorSessionMock = {
+        setPaletteRefresher: vi.fn(),
+        packages: signal([]),
+        dragging: signal(false),
+        variantsTrigger: { set: vi.fn(), emit: vi.fn() },
+        variantsScroll: { set: vi.fn(), emit: vi.fn() },
+        variantsPopup: { emit: vi.fn() },
+        registerAutoscroll: vi.fn(),
+        unregisterAutoscroll: vi.fn(),
+        setDragging: vi.fn(),
+        createComponent: vi.fn()
+      };
+      const urlParserMock = {
+        isAbsoluteFormLayout: vi.fn().mockReturnValue(true),
+        getFormName: vi.fn().mockReturnValue('testForm')
+      };
+      const editorContentServiceMock = {
+        getBodyElement: vi.fn().mockReturnValue({ addEventListener: vi.fn() }),
+        getContentElementById: vi.fn().mockReturnValue(contentElement),
+        getContentArea: vi.fn().mockReturnValue({ scrollTop: 0, scrollLeft: 0, focus: vi.fn() }),
+        getPallete: vi.fn().mockReturnValue({ getBoundingClientRect: vi.fn().mockReturnValue({ width: 200 }), scrollTop: 0 }),
+        getGlassPane: vi.fn().mockReturnValue({ style: {} })
+      };
+      const windowRefMock = { nativeWindow: { addEventListener: vi.fn(), location: { host: 'localhost' } } };
+      const guidesServiceMock = { snapData: guideSnapData };
+      const httpMock = { get: vi.fn().mockReturnValue(of([])) };
+
+      TestBed.configureTestingModule({
+        imports: [PaletteComponent],
+        providers: [
+          provideZonelessChangeDetection(),
+          { provide: EditorSessionService, useValue: editorSessionMock },
+          { provide: URLParserService, useValue: urlParserMock },
+          { provide: DesignerUtilsService, useValue: { getDropNode: vi.fn().mockReturnValue({ dropAllowed: false }), adjustElementRect: vi.fn() } },
+          { provide: EditorContentService, useValue: editorContentServiceMock },
+          { provide: WindowRefService, useValue: windowRefMock },
+          { provide: DynamicGuidesService, useValue: guidesServiceMock },
+          { provide: HttpClient, useValue: httpMock }
+        ],
+        schemas: [NO_ERRORS_SCHEMA]
+      });
+
+      effectFixture = TestBed.createComponent(PaletteComponent);
+      effectComponent = effectFixture.componentInstance;
+      // simulate an in-progress palette drag so snap() applies the SnapData
+      effectComponent.dragItem = { paletteItemBeingDragged: {} as any, contentItemBeingDragged: contentElement, ghost: null! };
+      effectFixture.detectChanges();
+    });
+
+    afterEach(() => {
+      effectFixture?.destroy();
+      TestBed.resetTestingModule();
+    });
+
+    it('should set local snapData when guidesService emits a SnapData', () => {
+      const data = new SnapData({} as MouseEvent, 50, 100, {}, undefined, 200, 150);
+      guideSnapData.set(data);
+      effectFixture.detectChanges();
+      expect((effectComponent as any).snapData).toBe(data);
+    });
+
+    it('should reset local snapData to null when guidesService emits SnapData then null', () => {
+      const data = new SnapData({} as MouseEvent, 50, 100, {}, undefined, 200, 150);
+      guideSnapData.set(data);
+      effectFixture.detectChanges();
+      expect((effectComponent as any).snapData).toBe(data);
+
+      guideSnapData.set(null);
+      effectFixture.detectChanges();
+      expect((effectComponent as any).snapData).toBeNull();
     });
   });
 

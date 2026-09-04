@@ -16,7 +16,9 @@
  */
 package com.servoy.eclipse.designer.property;
 
+import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.ui.IEditorPart;
 
 import com.servoy.eclipse.ui.EditorActionsRegistry;
@@ -31,6 +33,10 @@ import com.servoy.j2db.dataprocessing.IModificationListener;
 public final class OpenEditorUndoablePropertySheetEntry extends UndoablePropertySheetEntry
 {
 	private final IModificationListener editorComponentActionListener;
+
+	/** The command stack we currently have a listener on (may change if the editor is closed and reopened). */
+	private CommandStack listenerStack;
+	private CommandStackListener undoRefreshListener;
 
 	public OpenEditorUndoablePropertySheetEntry()
 	{
@@ -72,9 +78,44 @@ public final class OpenEditorUndoablePropertySheetEntry extends UndoableProperty
 		return stack;
 	}
 
+	/**
+	 * Returns the resolved command stack. Public accessor so the property sheet page
+	 * can wire undo/redo actions to it.
+	 */
+	public CommandStack resolveCommandStack()
+	{
+		return getCommandStack();
+	}
+
+	@Override
+	protected void executeCommand(Command command)
+	{
+		// Ensure we have a CommandStackListener registered on the current stack
+		// so that undo/redo triggers a refresh in the Properties view.
+		// The stack may change if the editor is closed and reopened, so re-register if needed.
+		CommandStack cs = getCommandStack();
+		if (cs != null && cs != listenerStack)
+		{
+			if (listenerStack != null && undoRefreshListener != null)
+			{
+				listenerStack.removeCommandStackListener(undoRefreshListener);
+			}
+			undoRefreshListener = (e) -> refreshFromRoot();
+			cs.addCommandStackListener(undoRefreshListener);
+			listenerStack = cs;
+		}
+		super.executeCommand(command);
+	}
+
 	@Override
 	public void dispose()
 	{
+		if (listenerStack != null && undoRefreshListener != null)
+		{
+			listenerStack.removeCommandStackListener(undoRefreshListener);
+			listenerStack = null;
+			undoRefreshListener = null;
+		}
 		if (editorComponentActionListener != null)
 		{
 			EditorActionsRegistry.removeComponentActionListener(EditorComponentActions.CREATE_CUSTOM_COMPONENT, editorComponentActionListener);

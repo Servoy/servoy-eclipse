@@ -21,7 +21,7 @@
                       https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd"
   version="6.1">
   <!--  this version below should be upped if servoy makes changes to this file! -->
-  <!--  servoy web.xml version:6 -->
+  <!--  servoy web.xml version:7 -->
   <!-- Servoy related servlets -->
   
   <absolute-ordering>
@@ -29,6 +29,7 @@
     <name>log4j</name>
     <name>sablo</name>
     <name>servoy_ngclient</name>
+    <name>servoy_mcp</name>
   </absolute-ordering>
    
    <listener>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, inject, signal } from '@angular/core';
 import { DesignSizeService } from '../services/designsize.service';
 import { EditorSessionService, ISelectionChangedListener } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -142,7 +142,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.standard_actions = this.getCategoryItems(TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         if (this.urlParser.isAbsoluteFormLayout()) {
-            this.btnToggleDesignMode.enabled = false;
+            this.btnToggleDesignMode.enabled.set(false);
             this.btnZoomIn.hide = true;
             if (!this.urlParser.isShowingContainer()) {
                 this.btnZoomOut.hide = true;
@@ -175,8 +175,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
 
             const guidesPromise = this.editorSession.isShowDynamicGuides();
             void guidesPromise.then((result: boolean) => {
-                this.btnToggleDynamicGuides.state = result;
+                this.btnToggleDynamicGuides.state.set(result);
                 this.editorSession.fireShowDynamicGuidesChangedListeners(result);
+                this.cdr.markForCheck();
             });
 
         } else {
@@ -194,31 +195,32 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             this.zoom = this.getCategoryItems(TOOLBAR_CATEGORIES.ZOOM);
         }
 
-        this.btnZoomOut.enabled = this.urlParser.isShowingContainer() != null;
+        this.btnZoomOut.enabled.set(this.urlParser.isShowingContainer() != null);
         const promise = this.editorSession.isShowData();
         void promise.then((result: boolean) => {
-            this.btnToggleShowData.state = result;
+            this.btnToggleShowData.state.set(result);
         });
         const wireframePromise = this.editorSession.isShowWireframe();
         void wireframePromise.then((result: boolean) => {
-            this.btnToggleDesignMode.state = result;
+            this.btnToggleDesignMode.state.set(result);
             this.editorSession.showWireframe.set(result);
             
             // always send showwireframe because this will also display the ghosts
             this.editorContentService.executeOnlyAfterInit(() => {
                 this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
             });
+            this.cdr.markForCheck();
             // TODO:
             // this.editorSession.setContentSizes();
         });
         const highlightPromise = this.editorSession.isShowHighlight();
         void highlightPromise.then((result: boolean) => {
-            this.btnHighlightWebcomponents.state = result;
+            this.btnHighlightWebcomponents.state.set(result);
             this.editorSession.fireHighlightChangedListeners(result);
         });
         const hideInheritedPromise = this.editorSession.isHideInherited();
         void hideInheritedPromise.then((result: boolean) => {
-            this.btnHideInheritedElements.state = result;
+            this.btnHideInheritedElements.state.set(result);
             if (result) {
                 this.applyHideInherited(result);
             }
@@ -258,16 +260,16 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         void showI18NValuesPromise.then((result: boolean) => {
             if (result) {
                 this.btnToggleI18NValues.text = 'Show I18N text as keys';
-                this.btnToggleI18NValues.state = true;
+                this.btnToggleI18NValues.state.set(true);
             }
         });
 
         if (this.editorContentService.getDesignerElementById('errorsDiv') !== null) {
-            this.btnShowErrors.enabled = true;
+            this.btnShowErrors.enabled.set(true);
             if (this.editorContentService.getDesignerElementById('closeErrors')) {
                 this.editorContentService.getDesignerElementById('closeErrors')!.addEventListener('click', () => {
-                    this.btnShowErrors.state = !this.btnShowErrors.state;
-                    this.editorContentService.getDesignerElementById('errorsDiv')!.style.display = this.btnShowErrors.state ? 'block' : 'none';
+                    this.btnShowErrors.state.set(!this.btnShowErrors.state());
+                    this.editorContentService.getDesignerElementById('errorsDiv')!.style.display = this.btnShowErrors.state() ? 'block' : 'none';
                 });
             }
         }
@@ -290,12 +292,12 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             () => {
                 const promise = this.editorSession.toggleHighlight();
                 void promise.then((result: boolean) => {
-                    this.btnHighlightWebcomponents.state = result;
+                    this.btnHighlightWebcomponents.state.set(result);
                     this.editorSession.fireHighlightChangedListeners(result);
                 })
             }
         );
-        this.btnHighlightWebcomponents.state = true;
+        this.btnHighlightWebcomponents.state.set(true);
 
         if (this.urlParser.isAbsoluteFormLayout()) {
             this.btnToggleDynamicGuides = new ToolbarItem(
@@ -305,8 +307,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 () => {
                     const promise = this.editorSession.toggleShowDynamicGuides();
                     void promise.then((result: boolean) => {
-                        this.btnToggleDynamicGuides.state = result;
+                        this.btnToggleDynamicGuides.state.set(result);
                         this.editorSession.fireShowDynamicGuidesChangedListeners(result);
+                        this.cdr.markForCheck();
                     })
                 }
             );
@@ -327,7 +330,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 this.editorSession.toggleShowData();
             }
         );
-        this.btnToggleShowData.state = false;
+        this.btnToggleShowData.state.set(false);
 
         this.btnToggleDesignMode = new ToolbarItem(
             'Exploded view',
@@ -336,9 +339,10 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             () => {
                 const promise = this.editorSession.toggleShowWireframe();
                 void promise.then((result: boolean) => {
-                    this.btnToggleDesignMode.state = result;
+                    this.btnToggleDesignMode.state.set(result);
                     this.editorSession.showWireframe.set(result);
                     this.editorContentService.sendMessageToIframe({ id: 'showWireframe', value: result });
+                    this.cdr.markForCheck();
                     // wait for css classes to be applied
                     setTimeout(() => { /* allow CSS reflow */ }, 300);
                     // TODO:
@@ -347,7 +351,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
                 });
             }
         );
-        this.btnToggleDesignMode.state = false;
+        this.btnToggleDesignMode.state.set(false);
 
         this.btnSolutionCss = new ToolbarItem(
             TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS,
@@ -461,7 +465,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         this.btnSetMaxLevelContainer.decIcon = 'images/zoom_out_xs.png';
         this.btnSetMaxLevelContainer.incbutton_text = 'Increase maximum display level';
         this.btnSetMaxLevelContainer.incIcon = 'images/zoom_in_xs.png';
-        this.btnSetMaxLevelContainer.state = false;
+        this.btnSetMaxLevelContainer.state.set(false);
 
 		// deprecated
         /*this.btnSaveAsTemplate = new ToolbarItem(
@@ -484,19 +488,19 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             'images/hide_inherited.png',
             true,
             () => {
-                if (this.btnHideInheritedElements.state) {
-                    this.btnHideInheritedElements.state = false;
+                if (this.btnHideInheritedElements.state()) {
+                    this.btnHideInheritedElements.state.set(false);
                     this.btnHideInheritedElements.text = 'Show inherited elements';
                 } else {
-                    this.btnHideInheritedElements.state = true;
+                    this.btnHideInheritedElements.state.set(true);
                     this.btnHideInheritedElements.text = 'Hide inherited elements'
                 }
-                this.applyHideInherited(this.btnHideInheritedElements.state);
+                this.applyHideInherited(!!this.btnHideInheritedElements.state());
                 this.editorSession.executeAction('toggleHideInherited');
             }
         );
         this.btnHideInheritedElements.disabledIcon = 'images/hide_inherited-disabled.png';
-        this.btnHideInheritedElements.state = false;
+        this.btnHideInheritedElements.state.set(false);
 
         this.btnVisualFeedbackOptions = new ToolbarItem(
             '',
@@ -984,17 +988,17 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             'toolbar/icons/i18n.png',
             true,
             () => {
-                if (this.btnToggleI18NValues.state) {
-                    this.btnToggleI18NValues.state = false;
+                if (this.btnToggleI18NValues.state()) {
+                    this.btnToggleI18NValues.state.set(false);
                     this.btnToggleI18NValues.text = 'Show resolved I18N text';
                 } else {
-                    this.btnToggleI18NValues.state = true;
+                    this.btnToggleI18NValues.state.set(true);
                     this.btnToggleI18NValues.text = 'Show I18N text as keys';
                 }
                 void this.editorSession.toggleShowI18NValues();
             }
         );
-        this.btnToggleI18NValues.state = false;
+        this.btnToggleI18NValues.state.set(false);
         this.add(this.btnToggleI18NValues, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
         this.btnShowErrors = new ToolbarItem(
@@ -1002,12 +1006,12 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             'toolbar/icons/error.png',
             false,
             () => {
-                this.btnShowErrors.state = !this.btnShowErrors.state;
-                this.editorContentService.getDesignerElementById('errorsDiv')!.style.display = this.btnShowErrors.state ? 'block' : 'none';
+                this.btnShowErrors.state.set(!this.btnShowErrors.state());
+                this.editorContentService.getDesignerElementById('errorsDiv')!.style.display = this.btnShowErrors.state() ? 'block' : 'none';
             }
         );
         this.btnShowErrors.disabledIcon = 'toolbar/icons/disabled_error.png';
-        this.btnShowErrors.state = false;
+        this.btnShowErrors.state.set(false);
 
         this.add(this.btnShowErrors, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 		
@@ -1081,7 +1085,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         //this.btnTabSequence.enabled = selection.length > 1;
         //this.btnSameWidth.enabled = selection.length > 1;
         //this.btnSameHeight.enabled = selection.length > 1;
-        this.btnZoomOut.enabled = this.urlParser.isShowingContainer() != null;
+        this.btnZoomOut.enabled.set(this.urlParser.isShowingContainer() != null);
         if (this.urlParser.isAbsoluteFormLayout()) {
             //this.btnDistributeHorizontalSpacing.enabled = selection.length > 2;
            // this.btnDistributeHorizontalCenters.enabled = selection.length > 2;
@@ -1101,9 +1105,9 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
             //this.btnBringToFront.enabled = selection.length > 0;
             //this.btnSendToBack.enabled = selection.length > 0;
         } else {
-            this.btnMoveUp.enabled = selection.length == 1;
-            this.btnMoveDown.enabled = selection.length == 1;
-            this.btnZoomIn.enabled = selection.length == 1;
+            this.btnMoveUp.enabled.set(selection.length == 1);
+            this.btnMoveDown.enabled.set(selection.length == 1);
+            this.btnZoomIn.enabled.set(selection.length == 1);
         }
     }
 
@@ -1206,14 +1210,16 @@ export class ToolbarItem {
     decIcon!: string;
     decbutton_text!: string;
     incbutton_text!: string;
-    state!: boolean;
+    readonly state = signal<boolean | undefined>(undefined);
+    readonly enabled = signal<(() => boolean) | boolean>(false);
     tooltip!: string;
     onSet!: (value: unknown) => void;
 
     constructor(
         public text: string,
         public icon: string | null,
-        public enabled: (() => boolean) | boolean,
+        enabled: (() => boolean) | boolean,
         public onclick: ((text?: string) => void) | null) {
+        this.enabled.set(enabled);
     }
 }

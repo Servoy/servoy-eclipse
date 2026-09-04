@@ -12,7 +12,7 @@ export class ToolbarItemComponent {
     }
 
     isDisabled(): boolean {
-        const enabled = this.item()!.enabled;
+        const enabled = this.item()!.enabled();
         return typeof(enabled) == 'function' ? !enabled() : !enabled;
     }
 }

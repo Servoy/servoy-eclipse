@@ -155,4 +155,171 @@ describe('DragselectionComponent', () => {
       expect(result).toEqual({ bottom: 0, right: 0 });
     });
   });
+
+  describe('SVY-21150: Ctrl+drag ghost column guard', () => {
+    const makeMockEvent = (overrides: Partial<MouseEvent> = {}): MouseEvent => ({
+      clientX: 100,
+      clientY: 100,
+      pageX: 100,
+      pageY: 100,
+      ctrlKey: false,
+      metaKey: false,
+      button: 0,
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+      ...overrides
+    } as unknown as MouseEvent);
+
+    const makeSvyWrapper = (svyId: string): HTMLElement => {
+      const el = document.createElement('div');
+      el.classList.add('svy-wrapper');
+      el.setAttribute('svy-id', svyId);
+      el.style.top = '50px';
+      el.style.left = '30px';
+      el.style.position = 'absolute';
+      el.style.width = '100px';
+      el.style.height = '80px';
+      return el;
+    };
+
+    const setupDragState = () => {
+      (component as any).dragStartEvent = makeMockEvent({ clientX: 50, clientY: 50 });
+      editorSession.dragging = signal(true);
+      (component as any).currentElementsInfo = new Map();
+    };
+
+    it('should not initiate drag-copy when Ctrl+drag with ghost-only selection', () => {
+      setupDragState();
+      editorSession.getSelection.mockReturnValue(['ghost-col-1', 'ghost-col-2']);
+      editorContentService.getContentElement.mockReturnValue(null);
+
+      const dragNode = makeSvyWrapper('aggrid-parent');
+      (component as any).dragNode = dragNode;
+
+      component.onMouseMove(makeMockEvent({ ctrlKey: true }));
+
+      expect((component as any).dragCopy).toBe(false);
+      expect((component as any).selectionToDrag).toEqual([]);
+      expect(editorSession.createComponents).not.toHaveBeenCalled();
+    });
+
+    it('should proceed with drag-copy when Ctrl+drag with real content elements', () => {
+      setupDragState();
+      const realEl = makeSvyWrapper('real-btn-1');
+      editorSession.getSelection.mockReturnValue(['real-btn-1']);
+      editorContentService.getContentElement.mockReturnValue(realEl);
+      editorContentService.getContentBodyElement.mockReturnValue(document.createElement('div'));
+      editorContentService.querySelector.mockReturnValue(null);
+      editorContentService.getContentArea.mockReturnValue({
+        getElementsByClassName: vi.fn().mockReturnValue({ length: 0, item: vi.fn() }),
+        scrollTop: 0,
+        scrollLeft: 0,
+        offsetTop: 0,
+        offsetLeft: 0
+      });
+
+      const dragNode = makeSvyWrapper('real-btn-1');
+      dragNode.setAttribute('svy-id', 'real-btn-1');
+      (component as any).dragNode = dragNode;
+
+      component.onMouseMove(makeMockEvent({ ctrlKey: true }));
+
+      expect((component as any).dragCopy).toBe(true);
+      expect((component as any).selectionToDrag!.length).toBeGreaterThan(0);
+    });
+
+    it('should only process real content elements in mixed ghost+real selection', () => {
+      setupDragState();
+      editorSession.getSelection.mockReturnValue(['real-btn-1', 'ghost-col-1', 'ghost-col-2']);
+
+      const realEl = makeSvyWrapper('real-btn-1');
+      editorContentService.getContentElement.mockImplementation((id: string) =>
+        id === 'real-btn-1' ? realEl : null
+      );
+      editorContentService.getContentBodyElement.mockReturnValue(document.createElement('div'));
+      editorContentService.querySelector.mockReturnValue(null);
+      editorContentService.getContentArea.mockReturnValue({
+        getElementsByClassName: vi.fn().mockReturnValue({ length: 0, item: vi.fn() }),
+        scrollTop: 0,
+        scrollLeft: 0,
+        offsetTop: 0,
+        offsetLeft: 0
+      });
+
+      const dragNode = makeSvyWrapper('real-btn-1');
+      (component as any).dragNode = dragNode;
+
+      component.onMouseMove(makeMockEvent({ ctrlKey: true }));
+
+      expect((component as any).dragCopy).toBe(true);
+      expect((component as any).selectionToDrag!.length).toBe(1);
+    });
+
+    it('should be a no-op when non-Ctrl drag with ghost-only selection', () => {
+      setupDragState();
+      editorSession.getSelection.mockReturnValue(['ghost-col-1', 'ghost-col-2']);
+      editorContentService.getContentElement.mockReturnValue(null);
+
+      const dragNode = makeSvyWrapper('aggrid-parent');
+      dragNode.setAttribute('svy-id', 'aggrid-parent');
+      (component as any).dragNode = dragNode;
+
+      expect(() => {
+        component.onMouseMove(makeMockEvent({ ctrlKey: false }));
+      }).not.toThrow();
+
+      expect((component as any).dragCopy).toBe(false);
+      expect((component as any).selectionToDrag).toBeNull();
+      expect(editorSession.sendChanges).not.toHaveBeenCalled();
+      expect(editorSession.createComponents).not.toHaveBeenCalled();
+    });
+
+    it('should move elements on non-Ctrl drag with real content elements', () => {
+      setupDragState();
+      const realEl = makeSvyWrapper('real-btn-1');
+      realEl.style.top = '50px';
+      realEl.style.left = '30px';
+      editorSession.getSelection.mockReturnValue(['real-btn-1']);
+      editorContentService.getContentElement.mockReturnValue(realEl);
+      editorContentService.querySelector.mockReturnValue(null);
+      editorContentService.getContentArea.mockReturnValue({
+        getElementsByClassName: vi.fn().mockReturnValue({ length: 0, item: vi.fn() }),
+        scrollTop: 0,
+        scrollLeft: 0,
+        offsetTop: 0,
+        offsetLeft: 0
+      });
+
+      const dragNode = makeSvyWrapper('real-btn-1');
+      (component as any).dragNode = dragNode;
+
+      component.onMouseMove(makeMockEvent({ ctrlKey: false }));
+
+      expect((component as any).dragCopy).toBe(false);
+      expect((component as any).selectionToDrag).not.toBeNull();
+      expect((component as any).selectionToDrag!.length).toBe(1);
+      expect((component as any).currentElementsInfo.size).toBe(1);
+    });
+
+    it('should reset state when initSelectionToDrag returns empty result on non-Ctrl path', () => {
+      setupDragState();
+      editorSession.getSelection.mockReturnValue(['ghost-col-1']);
+      editorContentService.getContentElement.mockReturnValue(null);
+      editorContentService.querySelector.mockReturnValue(null);
+      editorContentService.getContentArea.mockReturnValue({
+        getElementsByClassName: vi.fn().mockReturnValue({ length: 0, item: vi.fn() }),
+        scrollTop: 0,
+        scrollLeft: 0,
+        offsetTop: 0,
+        offsetLeft: 0
+      });
+
+      (component as any).dragNode = makeSvyWrapper('ghost-col-1');
+
+      component.onMouseMove(makeMockEvent({ ctrlKey: false }));
+
+      expect((component as any).selectionToDrag).toBeNull();
+      expect((component as any).dragCopy).toBe(false);
+    });
+  });
 });

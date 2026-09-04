@@ -132,6 +132,8 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.mcp.McpRuntime;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
@@ -925,6 +927,27 @@ public class Activator extends Plugin
 					}
 				});
 
+				// An MCP server scans its solution once and keeps the tool list, so a @Tool added or
+				// edited in a scope would not show up until the application server restarted. Every
+				// solution is dropped rather than the one that owns the method: a module carries tools
+				// that belong to the solution including it, and the next request just scans again.
+				servoyModel.addPersistChangeListener(true, new IPersistChangeListener()
+				{
+					public void persistChanges(Collection<IPersist> changes)
+					{
+						if (changes == null) return;
+
+						for (IPersist persist : changes)
+						{
+							if (persist instanceof ScriptMethod)
+							{
+								McpRuntime.invalidateAll();
+								return;
+							}
+						}
+					}
+				});
+
 				// flush bean design instances of changed beans
 				servoyModel.addPersistChangeListener(false, new IPersistChangeListener()
 				{
@@ -1198,6 +1221,8 @@ public class Activator extends Plugin
 	 */
 	private void checkDefaultPostgressInstall(IApplicationServerSingleton appServer)
 	{
+		if (ModelUtils.isTestRunning()) return;
+
 		File file = new File(appServer.getServoyApplicationServerDirectory() + "/postgres_db/servoy_repository.dbdump");
 		if (file.exists())
 		{
@@ -1319,6 +1344,7 @@ public class Activator extends Plugin
 	// TODO how to upgrade plugins after servoy developer update
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
 	{
+		if (ModelUtils.isTestRunning()) return;
 		// check the app server dir
 		final String appServerDir = applicationServer.getServoyApplicationServerDirectory();
 		File j2dbLib = new File(appServerDir, "lib/j2db.jar");

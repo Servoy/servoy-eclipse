@@ -1,6 +1,6 @@
 @if (!item()!.list) {
   <div class="btn-group">
-    <button type="button" class="btn btn-xs" [ngClass]="item()!.state !== undefined && item()!.state ? 'toggle-on' : ''" (click)="item()!.onclick?.()" [disabled]="isDisabled()" [style]="item()!.style">
+    <button type="button" class="btn btn-xs" [ngClass]="item()!.state() ? 'toggle-on' : ''" (click)="item()!.onclick?.()" [disabled]="isDisabled()" [style]="item()!.style">
       <img [src]="'designer/assets/' +  (isDisabled() && item()!.disabledIcon ?  item()!.disabledIcon : item()!.icon)" alt="{{item()!.text}}" title="{{item()!.tooltip ? item()!.tooltip : item()!.text}}"/>
     </button>
   </div>
@@ -8,10 +8,10 @@
 @if (item()!.list) {
   <div class="btn-group">
     @if (!item()!.getIconStyle) {
-      <button type="button" title="{{item()!.tooltip}}" class="btn btn-xs" (click)="item()!.onclick?.(item()!.text)" [disabled]="!item()!.enabled">{{item()!.getIconStyle?.call(null, item()!.text) || item()!.icon ? "" : item()!.text}}</button>
+      <button type="button" title="{{item()!.tooltip}}" class="btn btn-xs" (click)="item()!.onclick?.(item()!.text)" [disabled]="isDisabled()">{{item()!.getIconStyle?.call(null, item()!.text) || item()!.icon ? "" : item()!.text}}</button>
     }
     <div ngbDropdown>
-      <button id="{{item()!.text}}" ngbDropdownToggle type="button" class="btn" [ngClass]="item()!.getIconStyle?.(item()!.text) ? '' : 'btn-xs dropdown-toggle'" [disabled]="!item()!.enabled"
+      <button id="{{item()!.text}}" ngbDropdownToggle type="button" class="btn" [ngClass]="item()!.getIconStyle?.(item()!.text) ? '' : 'btn-xs dropdown-toggle'" [disabled]="isDisabled()"
         style="background-repeat:no-repeat;background-position:left center;min-width:26px;height:24px;padding-left:0px"
         [ngStyle]="item()!.getIconStyle?.(item()!.text) ?? {}" (click)="item()!.onclick?.(item()!.text)" title="{{item()!.tooltip}}">
         @if (item()!.icon) {

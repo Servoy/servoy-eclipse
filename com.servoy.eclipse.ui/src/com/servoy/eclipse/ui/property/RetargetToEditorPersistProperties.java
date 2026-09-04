@@ -72,7 +72,7 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 
 	public void resetPropertyValue(final Object id)
 	{
-		Display.getCurrent().asyncExec(new Runnable()
+		Display.getCurrent().syncExec(new Runnable()
 		{
 			public void run()
 			{
@@ -113,29 +113,18 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 		final IEditorPart editor = openPersistEditor(persistProperties, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
 		if (editor != null)
 		{
-			Command cmd = new Command()
+			// Just open the editor and apply the change directly.
+			// Do NOT wrap in a Command here: the caller (UndoablePropertySheetEntry / OpenEditorUndoablePropertySheetEntry)
+			// already wraps set/reset in a proper Command with undo support (SetValueCommand / ResetValueCommand)
+			// and pushes it onto the editor's CommandStack. Adding a second Command here would double-wrap
+			// the operation, corrupting the undo stack.
+			if (set)
 			{
-				@Override
-				public void execute()
-				{
-					if (set)
-					{
-						persistProperties.setPropertyValue(id, value);
-					}
-					else
-					{
-						persistProperties.resetPropertyValue(id);
-					}
-				}
-			};
-			CommandStack commandStack = editor.getAdapter(CommandStack.class);
-			if (commandStack != null)
-			{
-				commandStack.execute(cmd);
+				persistProperties.setPropertyValue(id, value);
 			}
 			else
 			{
-				cmd.execute();
+				persistProperties.resetPropertyValue(id);
 			}
 		}
 	}

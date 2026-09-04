@@ -1075,6 +1075,11 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
       '--ag-row-height': 42,
       '--ag-header-height': 48,
       '--ag-list-item-height': 24,
+      '--ag-row-border-style': 'solid',
+      '--ag-row-border-color': 'transparent',
+      '--ag-row-border-width': '0',
+      '--ag-borders-critical': '0 solid',
+      '--ag-border-color': 'transparent',
     };
     if (this.servoyApi().isInAbsoluteLayout() || this.responsiveHeight()! < 1) {
       aggridStyle['height'] = '100%';

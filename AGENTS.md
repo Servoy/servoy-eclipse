@@ -1,5 +1,15 @@
 # AGENTS.md - Servoy Developer Eclipse IDE
 
+## Session Startup — Skills Check
+
+At the start of each session, quickly verify that the repo's global skills are installed:
+
+1. Read `~/.config/opencode/opencode.jsonc` (or `opencode.json`) and check if `skills.paths` contains this repo's `skills/` directory.
+2. If not registered, tell the user: "This repo has global skills that aren't installed yet. Run `/install-skills` to make them available in all projects."
+3. If registered, list the `skills/*/` directories in this repo and compare against `~/.config/opencode/commands/`. If any command files (`.md` files that are NOT `SKILL.md`) are missing from the global commands dir, tell the user: "New commands found in skills/. Run `/install-skills` to update."
+
+This check should be fast — just a directory listing and a file read. Do not block on it.
+
 ## Project Overview
 
 This is the **Servoy Developer IDE** source code — a large Eclipse RCP application built as a multi-module Maven/Tycho project. It consists of ~40+ OSGi plugin bundles covering the IDE core, form designers (with Angular frontends), NG client, exporters, AI assistant integration, and platform-specific runtime bundles.
@@ -185,7 +195,7 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 
 ## Jira API
 
-When asked to create, update, or link Jira issues, load the instructions from `JIRA.md` in this repository.
+When asked to create, update, or link Jira issues, use the `servoy-jira` skill (global opencode skill).
 
 ## Code Style & Conventions
 
@@ -218,6 +228,8 @@ When asked to create, update, or link Jira issues, load the instructions from `J
 - **SVY-21121 Console/AI view in perspective:** `com.servoy.eclipse.ui.tests` → `DesignPerspectiveTest` [Plugin JUnit] — tests that Console and Servoy AI views are added as visible views (not placeholders) in the bottom folder of the Servoy Design perspective
 - **SVY-21272 ClassCastException in hasChildren:** `com.servoy.eclipse.ui.tests` → `SolutionExplorerTreeContentProviderHasChildrenTest` [JUnit] — tests that `hasChildren()` does not throw ClassCastException when parent is a plain SimpleUserNode (e.g., RETURNTYPEPLACEHOLDER), and correctly returns false for UserNode with TABLE/INMEMORY_DATASOURCE/VIEW_FOUNDSET types
 - **SVY-21149 Dark theme icon existence:** `com.servoy.eclipse.ui.tests` → `ImageReplacementMapperDarkIconsTest` [JUnit] — tests that `darkicons/expandall-disabled.png` and `darkicons/expandall-disabled@2x.png` exist in `com.servoy.eclipse.ui.tweaks` and are valid PNGs with correct dimensions (16×16 and 32×32)
+- **SVY-21405 Zoom button enabled signal:** `com.servoy.eclipse.designer.rfb/node` → `toolbaritem.component.spec.ts` [Vitest unit, jsdom] and `toolbarbutton.browser.spec.ts` [Vitest browser, Chromium] — unit tests verify `ToolbarItemComponent.isDisabled()` narrows the `enabled` signal for both boolean and function-valued forms and reflects `enabled.set(...)`; the browser test verifies the OnPush `ToolbarButtonComponent`'s `[disabled]` DOM attribute updates when `item.enabled.set(...)` is called from outside an Angular event (the regression fix)
+- **SVY-21356 CSS-position no-body / relation severity builder markers:** `com.servoy.eclipse.ui.tests` → `FormCssPositionAndRelationSeverityIntegrationTest` [Plugin JUnit, JUnit 4] (with shared harness `BuilderMarkerTestBase`) — creates forms/relations in a synthetic solution and runs `com.servoy.eclipse.core.servoyBuilder` to assert `FORM_CSS_POSITION_NO_BODY_PART` (ERROR, scoped to non-responsive CSS-position forms, honours flattened-form inheritance) and `RELATION_ITEM_TYPE_PROBLEM` (raised WARNING→ERROR) markers, plus NO-GAP regression scenarios (dangling valuelistID, databaseValuesType, unresolvable dataSource). Ported from Servoy-Copilot where it did not belong.
 
 ## Troubleshooting: Angular Source Build Failures
 

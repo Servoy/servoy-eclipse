@@ -75,6 +75,7 @@ public class NodeFolderCreatorJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		if (Activator.isNodeExtractionAndTitaniumBuildDisabled()) return Status.CANCEL_STATUS;
 		IStatus jobStatus = Status.OK_STATUS;
 
 		boolean executeNpmInstall = false;

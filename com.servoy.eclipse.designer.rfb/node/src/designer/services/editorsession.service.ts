@@ -240,6 +240,10 @@ export class EditorSessionService implements ServiceProvider {
     createComponents(components: any) {
         void this.wsSession.callService('formeditor', 'createComponents', components, true)
     }
+
+    duplicateGhosts(args: { uuids: string[], parentUuid: string, dropIndex: number }) {
+        void this.wsSession.callService('formeditor', 'duplicateGhosts', args, true);
+    }
     
     updateFavoritesComponents(component: any) {
         void this.wsSession.callService('formeditor', 'updateFavoritesComponents', component, true)

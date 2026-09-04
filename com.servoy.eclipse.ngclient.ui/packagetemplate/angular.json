@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "cli": {
-    "analytics": "c73821cc-c3cd-481c-a275-0657b4a6c943"
+    "analytics": false
   },
   "version": 1,
   "newProjectRoot": "projects",
@@ -23,40 +23,40 @@
               "tsConfig": "project/tsconfig.lib.prod.json"
             }
           }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "project/tsconfig.spec.json"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "project/**/*.ts",
+              "project/**/*.html"
+            ]
+          }
         }
       }
     }
   },
   "schematics": {
-    "@angular-eslint/schematics:application": {
-      "setParserOptionsProject": true
-    },
-    "@angular-eslint/schematics:library": {
-      "setParserOptionsProject": true
-    },
     "@schematics/angular:component": {
-      "type": "component"
+      "type": "component",
+      "standalone": true
     },
     "@schematics/angular:directive": {
-      "type": "directive"
+      "type": "directive",
+      "standalone": true
     },
     "@schematics/angular:service": {
       "type": "service"
     },
-    "@schematics/angular:guard": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:interceptor": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:module": {
-      "typeSeparator": "."
-    },
     "@schematics/angular:pipe": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:resolver": {
-      "typeSeparator": "."
+      "typeSeparator": ".",
+      "standalone": true
     }
   }
 }

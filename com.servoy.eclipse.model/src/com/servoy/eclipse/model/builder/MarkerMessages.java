@@ -311,6 +311,9 @@ public class MarkerMessages
 		"rowBGColorCalculation of form \"{0}\" is linked to an entity that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 	public static ServoyMarker FormDuplicatePart = new ServoyMarker("Form \"{0}\" has multiple parts of type: \"{1}\".",
 		ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE);
+	public static ServoyMarker FormCssPositionNoBodyPart = new ServoyMarker(
+		"Form \"{0}\" uses CSS position layout but has no body part; it will be shown in record view at runtime.",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker NonAccessibleFormInModuleUsedInParentSolutionForm = new ServoyMarker(
 		"Non-public {0} \"{1}\" from module \"{2}\" is used in solution \"{3}\", in form \"{4}\". This is not allowed.",

@@ -502,6 +502,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_formDerivedFormRedefinedVariable, false));
 			associatedProblemMarkers.add(
 				new ErrorWarningPreferenceItem(ServoyBuilder.FORM_DUPLICATE_PART, Messages.ErrorWarningPreferencePage_formDuplicatePart, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_CSS_POSITION_NO_BODY_PART,
+				Messages.ErrorWarningPreferencePage_formCssPositionNoBodyPart, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST,
 				Messages.ErrorWarningPreferencePage_formEditableComboboxCustomValuelist, false));
 			associatedProblemMarkers.add(

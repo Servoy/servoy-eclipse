@@ -1,6 +1,6 @@
 import { inject, Injectable, ComponentRef, DOCUMENT } from '@angular/core';
 
-import { ServoyFormPopupComponent } from './popupform/popupform';
+import type { ServoyFormPopupComponent } from './popupform/popupform';
 import { FormService } from '../form.service';
 import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../servoy.service';
@@ -113,7 +113,7 @@ export class PopupFormService {
     }
   }
 
-  private showPopup(popup: PopupForm, counter?: number) {
+  private async showPopup(popup: PopupForm, counter?: number) {
     if (
       (this.formPopupComponent && !popup.parent) ||
       (this.formPopupComponent && this.formPopupComponent.instance.popup.form === popup.form && isEqual(this.formPopupComponent.instance.popup.parent, popup.parent))
@@ -173,6 +173,7 @@ export class PopupFormService {
           popup.parentInstance = this.formPopupComponent;
         }
       }
+      const { ServoyFormPopupComponent } = await import('./popupform/popupform');
       this.formPopupComponent = this.mainViewRefService.mainContainer.createComponent(ServoyFormPopupComponent);
       this.formPopupComponent.instance.setPopupForm(popup);
       this.sequencePopup = false;

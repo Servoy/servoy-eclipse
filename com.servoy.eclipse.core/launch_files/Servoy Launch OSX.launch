@@ -680,6 +680,7 @@
         <setEntry value="servoy_base@default:default"/>
         <setEntry value="servoy_debug@default:default"/>
         <setEntry value="servoy_headless_client@default:default"/>
+        <setEntry value="servoy_mcp@default:default"/>
         <setEntry value="servoy_ngclient.tests@default:false"/>
         <setEntry value="servoy_ngclient@default:default"/>
         <setEntry value="servoy_shared@default:default"/>

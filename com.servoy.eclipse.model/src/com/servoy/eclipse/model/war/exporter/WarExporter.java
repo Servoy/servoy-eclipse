@@ -52,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -146,6 +147,7 @@ public class WarExporter
 		"servoy_shared_" + ClientVersion.getPureVersion() + "*.jar", //
 		"servoy_smart_client_" + ClientVersion.getPureVersion() + "*.jar", //
 		"servoy_headless_client_" + ClientVersion.getPureVersion() + "*.jar", //
+		"servoy_mcp_" + ClientVersion.getPureVersion() + "*.jar", //
 		"j2db_log4j_" + ClientVersion.getPureVersion() + "*.jar", //
 		"j2db_server_" + ClientVersion.getPureVersion() + "*.jar", //
 		"sablo_" + ClientVersion.getPureVersion() + "*.jar", //
@@ -185,7 +187,8 @@ public class WarExporter
 		"com.fasterxml.jackson.core.jackson-annotations_*.jar", "wrapped.com.auth0.java-jwt*.jar", //
 		"stax2-api_*.jar", "com.fasterxml.woodstox.woodstox-core_*.jar", "com.fasterxml.jackson.dataformat.jackson-dataformat-xml_*.jar", "wrapped.com.auth0.jwks-rsa_*.jar", "com.github.scribejava.apis_*jar", //
 		"com.github.scribejava.core_*.jar", "com.github.scribejava.java8_*.jar", //
-		"org.owasp.encoder_*.jar" };
+		"org.owasp.encoder_*.jar", "reactive-streams_*.jar", "io.projectreactor.reactor-core_*.jar", "org.jspecify.jspecify_*.jar", //
+		"io.modelcontextprotocol.sdk.mcp-core_*.jar", "io.modelcontextprotocol.sdk.mcp-json-jackson2_*.jar" };
 
 	private static final Set<String> EXCLUDED_RESOURCES_BY_NAME;
 
@@ -417,12 +420,13 @@ public class WarExporter
 	{
 		Map<String, TreeMap<String, List<File>>> dependenciesVersions = new HashMap<>();
 		TreeMap<String, List<File>> possibleDuplicates = new TreeMap<>();
+		Map<File, String> manifestNames = new HashMap<>();
 		Set<File> libs;
 		try
 		{
 			libs = Files.walk(tmpWarDir.toPath()).filter(path -> path.toString().endsWith(".jar"))//
 				.map(path -> path.toFile()).collect(Collectors.toSet());
-			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions, possibleDuplicates));
+			libs.forEach(jar -> checkDuplicateJar(jar, dependenciesVersions, possibleDuplicates, manifestNames));
 		}
 		catch (IOException e)
 		{
@@ -497,7 +501,8 @@ public class WarExporter
 										"The following jars are not exported to avoid potential problems due to duplicate jars in the plugins or the Servoy core: \n\n");
 								}
 								messageBuilder.append("\nDependency '" + path +
-									"' is not exported because another " + latestJar.getName().replace("-" + version, "") + " with a higher version (" +
+									"'" + ("0".equals(version) ? "" : " (" + version + ")") +
+									" is not exported because another " + latestJar.getName().replace("-" + version, "") + " with a higher version (" +
 									latest +
 									") is already present in '" + latestJarPath + "'. \n");
 							}
@@ -530,7 +535,14 @@ public class WarExporter
 
 		if (!possibleDuplicates.isEmpty())
 		{
-			Optional<List<File>> moreJars = possibleDuplicates.values().stream().filter(jars -> jars.size() > 1).findAny();
+			Optional<List<File>> moreJars = possibleDuplicates.values().stream().filter(jars -> {
+				if (jars.size() <= 1) return false;
+				Set<String> distinctManifestNames = jars.stream()
+					.map(manifestNames::get)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+				return distinctManifestNames.size() != jars.size();
+			}).findAny();
 			if (!moreJars.isPresent()) return;
 			messageBuilder = new StringBuilder(
 				"The following jars have similar file names so they are possible duplicates, which means the war deployment could fail if the wrong jar is used. \n" +
@@ -539,6 +551,11 @@ public class WarExporter
 			{
 				if (jars.size() > 1)
 				{
+					Set<String> distinctManifestNames = jars.stream()
+						.map(manifestNames::get)
+						.filter(Objects::nonNull)
+						.collect(Collectors.toSet());
+					if (distinctManifestNames.size() == jars.size()) continue;
 					String message = jars.stream().map(file -> getRelativePath(tmpWarDir, file))//
 						.collect(Collectors.joining(", "));
 					message = message.substring(0, message.lastIndexOf(",")) + message.substring(message.lastIndexOf(",")).replace(",", " and");
@@ -1749,10 +1766,12 @@ public class WarExporter
 		}
 	}
 
-	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions, TreeMap<String, List<File>> allJars)
+	private void checkDuplicateJar(File jarFile, Map<String, TreeMap<String, List<File>>> dependenciesVersions, TreeMap<String, List<File>> allJars,
+		Map<File, String> manifestNames)
 	{
 		String jarName = null;
 		String version = null;
+		String manifestName = null;
 		try
 		{
 			Pair<String, String> pair = JarManager.getNameAndVersion(jarFile.toURI().toURL());
@@ -1760,6 +1779,7 @@ public class WarExporter
 			{
 				jarName = pair.getLeft();
 				version = pair.getRight();
+				manifestName = pair.getLeft();
 			}
 		}
 		catch (MalformedURLException e)
@@ -1795,6 +1815,8 @@ public class WarExporter
 		}
 		if (jarFile.getPath().contains("plugins"))
 			allJars.get(name).add(jarFile);
+		if (manifestName != null)
+			manifestNames.put(jarFile, manifestName);
 
 		TreeMap<String, List<File>> vFiles = dependenciesVersions.get(jarName);
 		if (!vFiles.containsKey(version))

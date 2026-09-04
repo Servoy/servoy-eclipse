@@ -142,7 +142,7 @@ export abstract class AbstractFormComponent {
           (ret) => converterService.convertFromClientToServer(ret, callSpec?.returnType ?? undefined!, undefined, PushToServerUtils.PROPERTY_CONTEXT_FOR_OUTGOING_ARGS_AND_RETURN_VALUES)[0],
         );
       } else {
-        log.error(log.buildMessage(() => 'Api ' + apiName + ' for component ' + comp.name + ' was not found, please check component implementation.'));
+        log.error(log.buildMessage(() => 'Api ' + apiName + ' for component ' + comp.name() + ' was not found, please check component implementation.'));
         return null!;
       }
     } else {

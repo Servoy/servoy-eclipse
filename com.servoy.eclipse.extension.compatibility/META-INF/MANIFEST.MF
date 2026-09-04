@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Extension Compatibility
 Bundle-SymbolicName: com.servoy.eclipse.extension.compatibility;singleton:=true
-Bundle-Version: 2026.9.0.qualifier
+Bundle-Version: 2026.12.0.qualifier
 Bundle-Vendor: Servoy
 Require-Bundle: servoy_shared,
  servoy_smart_client,
@@ -21,7 +21,7 @@ Require-Bundle: servoy_shared,
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.22.0",
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.22.0",
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.22.0",
-  com.fasterxml.jackson.dataformat.jackson-dataformat-xml;bundle-version="2.22.0",
+ com.fasterxml.jackson.dataformat.jackson-dataformat-xml;bundle-version="2.22.0",
  wrapped.com.auth0.java-jwt;bundle-version="4.2.2",
  org.apache.commons.commons-compress;bundle-version="1.25.0",
  org.apache.commons.commons-codec;bundle-version="1.16.0",
@@ -30,10 +30,11 @@ Require-Bundle: servoy_shared,
  com.github.scribejava.java8;bundle-version="8.3.3",
  wrapped.com.auth0.jwks-rsa;bundle-version="0.22.1",
  org.apache.commons.text;bundle-version="1.12.0",
-  stax2-api;bundle-version="4.3.0",
+ stax2-api;bundle-version="4.3.0",
  com.fasterxml.woodstox.woodstox-core;bundle-version="7.2.0",
  org.apache.commons.commons-fileupload2-core;bundle-version="2.0.0",
- org.apache.commons.commons-fileupload2-jakarta-servlet6;bundle-version="2.0.0"
+ org.apache.commons.commons-fileupload2-jakarta-servlet6;bundle-version="2.0.0",
+ com.google.guava;bundle-version="33.6.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

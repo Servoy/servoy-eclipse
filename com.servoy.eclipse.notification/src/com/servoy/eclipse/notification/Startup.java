@@ -19,6 +19,8 @@ package com.servoy.eclipse.notification;
 
 import org.eclipse.ui.IStartup;
 
+import com.servoy.eclipse.model.util.ModelUtils;
+
 
 /**
  * @author gboros
@@ -29,7 +31,10 @@ public class Startup implements IStartup
 	@Override
 	public void earlyStartup()
 	{
-		Activator.getDefault().startNotificationJob();
+		if (!ModelUtils.isTestRunning())
+		{
+			Activator.getDefault().startNotificationJob();
+		}
 	}
 
 }
