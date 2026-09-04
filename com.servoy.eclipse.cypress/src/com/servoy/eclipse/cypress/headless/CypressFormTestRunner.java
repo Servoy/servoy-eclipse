@@ -42,7 +42,7 @@ import com.servoy.j2db.util.Settings;
  * {@code org.eclipse.core.runtime.applications} extension and invoke via:
  *
  * <pre>
- * ./servoy_developer -application com.servoy.eclipse.developer.mcp.cypressFormTestRunner \
+ * ./servoy_developer -application com.servoy.eclipse.cypress.cypressFormTestRunner \
  *     -data /workspace -s mySolution -o /path/to/test-results
  * </pre>
  *
