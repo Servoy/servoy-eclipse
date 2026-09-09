@@ -142,15 +142,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
-//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
-//		{
-//			solutions.add(NewSolutionWizardDefaultPackages.SVYGEN_TEMPLATES);
-//			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
-//		}
-//		else
-//		{
+		//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+		//		{
+		//			solutions.add(NewSolutionWizardDefaultPackages.SVYGEN_TEMPLATES);
+		//			solutionName = AISolutionGenerator.getAIGeneratedJSON(configPage.getSvyGenPath()).optString("projectName", "new_ai_gen_solution");
+		//		}
+		//		else
+		//		{
 		solutionName = configPage.getNewSolutionName();
-//		}
+		//		}
 
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
@@ -163,14 +163,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				try
 				{
 					Solution solution = null;
-//					if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
-//					{
-//						solution = AISolutionGenerator.createSolutionFromAIContent(configPage.getSvyGenPath());
-//					}
-//					else
-//					{
+					//					if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+					//					{
+					//						solution = AISolutionGenerator.createSolutionFromAIContent(configPage.getSvyGenPath());
+					//					}
+					//					else
+					//					{
 					solution = (Solution)repository.createNewRootObject(solutionName, IRepository.SOLUTIONS);
-//					}
+					//					}
 
 					String modulesTokenized = Utils.getTokenValue(solutions.toArray(new String[] { }), ",");
 					solution.setModulesNames(modulesTokenized);
@@ -230,7 +230,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						int solutionType = configPage.getSolutionType();
 						solution.setSolutionType(solutionType);
 
-//						solution.putCustomProperty(new String[] { "svygen_path" }, configPage.getSvyGenPath());
+						//						solution.putCustomProperty(new String[] { "svygen_path" }, configPage.getSvyGenPath());
 
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
@@ -365,7 +365,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					else
 					{
 						servoyModel.setActiveProject(newProject, true);
-//						genAISol(newProject);
+						//						genAISol(newProject);
 					}
 				}
 				else
@@ -447,17 +447,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
 			progressService.run(true, false, importSolutionsRunnable);
 			progressService.run(true, false, solutionActivationRunnable);
-			progressService.run(true, false, createGitInitRunnable(solutionName));
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
 		}
 
-//		RunDesignClientDialog dialog = new RunDesignClientDialog(getShell());
-//		dialog.setBlockOnOpen(true);
-//		dialog.open();
-//		dialog.close();\
+		//		RunDesignClientDialog dialog = new RunDesignClientDialog(getShell());
+		//		dialog.setBlockOnOpen(true);
+		//		dialog.open();
+		//		dialog.close();\
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
@@ -472,20 +471,23 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				}
 			}
 		});
+
+		scheduleGitInit(solutionName);
+
 		return true;
 	}
 
-//	private void genAISol(ServoyProject activeProject)
-//	{
-//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
-//		{
-//			if (activeProject == null)
-//			{
-//				throw new RuntimeException("No active project found to generate solution from AI content.");
-//			}
-//			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
-//		}
-//	}
+	//	private void genAISol(ServoyProject activeProject)
+	//	{
+	//		if (configPage.getSvyGenPath() != null && configPage.getSvyGenPath().length() > 0)
+	//		{
+	//			if (activeProject == null)
+	//			{
+	//				throw new RuntimeException("No active project found to generate solution from AI content.");
+	//			}
+	//			AISolutionGenerator.generateSolutionFromAIContent(activeProject);
+	//		}
+	//	}
 
 	public static IRunnableWithProgress importSolutions(final Map<String, SolutionPackageInstallInfo> solutions, final String jobName, String newSolutionName,
 		boolean activateSolution, boolean overwriteModules)
@@ -925,72 +927,82 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			.orElse(null);
 	}
 
-	private IRunnableWithProgress createGitInitRunnable(String newSolutionName)
+	private void scheduleGitInit(String newSolutionName)
 	{
-		return monitor -> {
-			monitor.beginTask("Initializing Git repository", 1);
-			try
+		Job job = new WorkspaceJob("Initializing Git repository")
+		{
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(newSolutionName);
-				if (!project.exists() || !project.isOpen())
+				monitor.beginTask("Initializing Git repository", 1);
+				try
 				{
-					monitor.done();
-					return;
-				}
-
-				java.io.File workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
-				java.io.File gitDir = new java.io.File(workspaceRoot, ".git");
-
-				if (gitDir.exists())
-				{
-					org.eclipse.egit.core.RepositoryUtil.INSTANCE.getRepositories();
-					org.eclipse.jgit.lib.Repository repo = org.eclipse.jgit.storage.file.FileRepositoryBuilder.create(gitDir);
-					org.eclipse.egit.core.op.ConnectProviderOperation connectOp = new org.eclipse.egit.core.op.ConnectProviderOperation(project, repo.getDirectory());
-					connectOp.execute(new org.eclipse.core.runtime.NullProgressMonitor());
-					repo.close();
-				}
-				else
-				{
-					try (org.eclipse.jgit.api.Git git = org.eclipse.jgit.api.Git.init().setDirectory(workspaceRoot).call())
+					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(newSolutionName);
+					if (!project.exists() || !project.isOpen())
 					{
-						org.eclipse.jgit.lib.Repository repo = git.getRepository();
+						monitor.done();
+						return Status.OK_STATUS;
+					}
 
-						java.io.File gitignoreFile = new java.io.File(workspaceRoot, ".gitignore");
-						if (!gitignoreFile.exists())
-						{
-							java.nio.file.Files.write(gitignoreFile.toPath(),
-								".metadata/\n*.class\n*.jar\n.settings/\nnode_modules/\n.opencode/\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-						}
+					java.io.File workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
+					java.io.File gitDir = new java.io.File(workspaceRoot, ".git");
 
-						IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-						for (IProject p : allProjects)
+					if (gitDir.exists())
+					{
+						org.eclipse.egit.core.RepositoryUtil.INSTANCE.getRepositories();
+						org.eclipse.jgit.lib.Repository repo = org.eclipse.jgit.storage.file.FileRepositoryBuilder.create(gitDir);
+						org.eclipse.egit.core.op.ConnectProviderOperation connectOp = new org.eclipse.egit.core.op.ConnectProviderOperation(project,
+							repo.getDirectory());
+						connectOp.execute(new org.eclipse.core.runtime.NullProgressMonitor());
+						repo.close();
+					}
+					else
+					{
+						try (org.eclipse.jgit.api.Git git = org.eclipse.jgit.api.Git.init().setDirectory(workspaceRoot).call())
 						{
-							if (p.isOpen())
+							org.eclipse.jgit.lib.Repository repo = git.getRepository();
+
+							java.io.File gitignoreFile = new java.io.File(workspaceRoot, ".gitignore");
+							if (!gitignoreFile.exists())
 							{
-								try
+								java.nio.file.Files.write(gitignoreFile.toPath(),
+									".metadata/\n*.class\n*.jar\n.settings/\nnode_modules/\n.opencode/\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+							}
+
+							IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+							for (IProject p : allProjects)
+							{
+								if (p.isOpen())
 								{
-									org.eclipse.egit.core.op.ConnectProviderOperation connectOp = new org.eclipse.egit.core.op.ConnectProviderOperation(p, repo.getDirectory());
-									connectOp.execute(new org.eclipse.core.runtime.NullProgressMonitor());
-								}
-								catch (Exception e)
-								{
-									// non-fatal
+									try
+									{
+										org.eclipse.egit.core.op.ConnectProviderOperation connectOp = new org.eclipse.egit.core.op.ConnectProviderOperation(p,
+											repo.getDirectory());
+										connectOp.execute(new org.eclipse.core.runtime.NullProgressMonitor());
+									}
+									catch (Exception e)
+									{
+										// non-fatal
+									}
 								}
 							}
-						}
 
-						git.add().addFilepattern(".").call();
-						git.commit().setMessage("Initial commit").call();
+							git.add().addFilepattern(".").call();
+							git.commit().setMessage("Initial commit").call();
+						}
 					}
 				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Git init after new solution wizard failed", e);
+				}
+				monitor.worked(1);
+				monitor.done();
+				return Status.OK_STATUS;
 			}
-			catch (Exception e)
-			{
-				ServoyLog.logError("Git init after new solution wizard failed", e);
-			}
-			monitor.worked(1);
-			monitor.done();
 		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
 	}
 
 	public static class SolutionPackageInstallInfo
