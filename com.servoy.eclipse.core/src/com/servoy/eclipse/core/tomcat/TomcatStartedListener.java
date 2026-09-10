@@ -36,8 +36,8 @@ public class TomcatStartedListener implements ITomcatStartedListener
 				String message;
 				if (uuid == null)
 				{
-					message = "Please check your startup to see if you have something else running at\nhttp://localhost:" +
-						ApplicationServerRegistry.get().getWebServerPort() + "/";
+					message = "Tomcat did not start properly. Please check your tomcat startup logs to see if you have something else running at\nhttp://localhost:" +
+						ApplicationServerRegistry.get().getWebServerPort() + "/ or if there is a tomcat start up failure for another reason.";
 				}
 				else
 				{
