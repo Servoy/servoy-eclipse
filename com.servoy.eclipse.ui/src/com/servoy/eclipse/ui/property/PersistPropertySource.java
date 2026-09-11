@@ -53,6 +53,7 @@ import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.IPropertySource2;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.json.JSONArray;
@@ -254,6 +255,7 @@ import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Property source for IPersist objects.
@@ -263,7 +265,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource, HasPersistContext
+public class PersistPropertySource implements ISetterAwarePropertySource, IPropertySource2, IAdaptable, IModelSavePropertySource, HasPersistContext
 {
 	public static String CUSTOM_EVENTS_CATEGORY = "Custom Events";
 
@@ -2411,6 +2413,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	{
 		if (readOnly) return false;
 
+		if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id))
+		{
+			// the form name is mandatory and not resettable; report it as not-set so "Restore Default" is disabled
+			return false;
+		}
+
 		// recursively process a.b.c properties
 		if (id instanceof String && !((String)id).startsWith(BEAN_PROPERTY_PREFIX_DOT))
 		{
@@ -2489,6 +2497,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		if (persistContext.getPersist() instanceof LayoutContainer && ("class".equals(id) || "style".equals(id)))
 		{
 			return ((LayoutContainer)persistContext.getPersist()).getAttribute((String)id) != null;
+		}
+		if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id))
+		{
+			// the form name is not resettable; "Restore Default" must be disabled so it can never be cleared to null
+			return false;
 		}
 		// Even when the value is null it may even be set, some properties have a non-null default
 		return (((AbstractBase)persistContext.getPersist()).hasProperty((String)id));
@@ -2620,6 +2633,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	protected void clearAbstractBaseProperty(PropertyDescriptorWrapper propertyDescriptor, Object id, AbstractBase persist)
 	{
+		if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id))
+		{
+			// defense in depth: never clear the form name to null
+			return;
+		}
 		((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 	}
 
@@ -2716,12 +2734,23 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					if (value instanceof String || value == null)
 					{
-						changed |= !Utils.equalObjects(value, ((ISupportUpdateableName)beanPropertyPersist).getName());
-						((ISupportUpdateableName)beanPropertyPersist).updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
-							(String)value);
-						if (changed)
+						String newName = (String)value;
+						boolean nameChanged = !Utils.equalObjects(newName, ((ISupportUpdateableName)beanPropertyPersist).getName());
+						if (nameChanged && (newName == null || !IdentDocumentValidator.isJavaIdentifier(newName)))
 						{
+							// safety net: silently reject null/empty/non-identifier names and keep the current name;
+							// the cell editor validator already shows an inline "Invalid form name" error, so no dialog here
 							refreshPropertiesView();
+						}
+						else
+						{
+							changed |= nameChanged;
+							((ISupportUpdateableName)beanPropertyPersist).updateName(
+								ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName);
+							if (changed)
+							{
+								refreshPropertiesView();
+							}
 						}
 					}
 					else
@@ -3769,6 +3798,13 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								{
 									return "Cannot change name of an override element.";
 								}
+								if (persistContext.getPersist() instanceof Form &&
+									(!(value instanceof String) || !IdentDocumentValidator.isJavaIdentifier((String)value)))
+								{
+									// a form name is mandatory and must be a valid identifier; an empty/invalid name would
+									// clear it to null and save the form as null.js (SVY-20310)
+									return "Invalid form name";
+								}
 								if (value instanceof String && ((String)value).length() > 0)
 								{
 									try
@@ -4081,5 +4117,16 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	public boolean defaultIsPropertySet(Object id)
 	{
 		return isPersistPropertySet(id);
+	}
+
+	@Override
+	public boolean isPropertyResettable(Object id)
+	{
+		if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id))
+		{
+			// the form name is mandatory; "Restore Default" must never clear it to null
+			return false;
+		}
+		return true;
 	}
 }

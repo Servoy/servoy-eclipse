@@ -144,6 +144,7 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 ## Testing
 
 - **Java plugin tests:** `com.servoy.eclipse.tests` (eclipse-test-plugin packaging)
+- **UI property tests (SVY-21432):** `com.servoy.eclipse.ui.tests` fragment — `com.servoy.eclipse.ui.property.RepositoryHelperShouldShowNameTest` (Form `name` shown again, other props still suppressed) and `com.servoy.eclipse.ui.property.IdentDocumentValidatorFormNameTest` (form-name validation rule the setter enforces)
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
 - **WPM tests:** `com.servoy.eclipse.designer.wpm/node/src/test.ts`
