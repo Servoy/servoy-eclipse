@@ -196,6 +196,7 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         }
 
         this.btnZoomOut.enabled.set(this.urlParser.isShowingContainer() != null);
+        this.btnZoomIn.enabled.set(this.isZoomableLayoutContainerSelected(this.editorSession.getSelection()));
         const promise = this.editorSession.isShowData();
         void promise.then((result: boolean) => {
             this.btnToggleShowData.state.set(result);
@@ -1107,8 +1108,17 @@ export class ToolbarComponent implements OnInit, ISelectionChangedListener {
         } else {
             this.btnMoveUp.enabled.set(selection.length == 1);
             this.btnMoveDown.enabled.set(selection.length == 1);
-            this.btnZoomIn.enabled.set(selection.length == 1);
+            this.btnZoomIn.enabled.set(this.isZoomableLayoutContainerSelected(selection));
         }
+    }
+
+    private isZoomableLayoutContainerSelected(selection: string[]): boolean {
+        if (!selection || selection.length != 1) return false;
+        const node = this.editorContentService.getContentElement(selection[0]);
+        if (!node) return false;
+        return node.classList.contains('svy-layoutcontainer')
+            && !node.getAttribute('data-maincontainer')
+            && !node.classList.contains('svy-responsivecontainer');
     }
 
     applyHideInherited(hideInherited: boolean) {
