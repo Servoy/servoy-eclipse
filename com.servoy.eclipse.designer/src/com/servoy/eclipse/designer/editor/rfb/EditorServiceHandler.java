@@ -210,22 +210,13 @@ public class EditorServiceHandler implements IServerService
 			@Override
 			public Object executeMethod(String methodName, JSONObject args)
 			{
-				PersistContext selection = null;
-				if (selectionProvider != null && selectionProvider.getSelection() instanceof IStructuredSelection &&
-					((IStructuredSelection)selectionProvider.getSelection()).size() == 1)
-				{
-					selection = (PersistContext)((IStructuredSelection)selectionProvider.getSelection()).getFirstElement();
-				}
+				PersistContext selection = getSinglePersistContextSelection(selectionProvider);
 				if (selection != null)
 				{
-					IPersist currentPersist = selection.getPersist();
-					while (currentPersist != null && !(currentPersist instanceof LayoutContainer))
+					LayoutContainer layoutContainer = findLayoutContainer(selection.getPersist());
+					if (layoutContainer != null)
 					{
-						currentPersist = currentPersist.getParent();
-					}
-					if (currentPersist instanceof LayoutContainer)
-					{
-						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn(layoutContainer);
 					}
 				}
 				return null;
@@ -467,7 +458,8 @@ public class EditorServiceHandler implements IServerService
 				Display.getDefault().asyncExec(() -> {
 					try
 					{
-						org.eclipse.ui.handlers.IHandlerService handlerService = PlatformUI.getWorkbench().getService(org.eclipse.ui.handlers.IHandlerService.class);
+						org.eclipse.ui.handlers.IHandlerService handlerService = PlatformUI.getWorkbench()
+							.getService(org.eclipse.ui.handlers.IHandlerService.class);
 						handlerService.executeCommand("com.servoy.eclipse.developer.mcp.commands.runCypressFormTest", null);
 					}
 					catch (Exception e)
@@ -673,6 +665,35 @@ public class EditorServiceHandler implements IServerService
 				return settings;
 			}
 		});
+	}
+
+	/**
+	 * Resolves the current selection of the given provider to a single {@link PersistContext}, or <code>null</code> when the
+	 * selection is empty, has more than one element, or its single element is not a {@link PersistContext} (e.g. the
+	 * {@link com.servoy.j2db.persistence.Form} itself). Package-visible for unit testing.
+	 */
+	static PersistContext getSinglePersistContextSelection(ISelectionProvider selectionProvider)
+	{
+		if (selectionProvider != null && selectionProvider.getSelection() instanceof IStructuredSelection structuredSelection &&
+			structuredSelection.size() == 1 && structuredSelection.getFirstElement() instanceof PersistContext persistContext)
+		{
+			return persistContext;
+		}
+		return null;
+	}
+
+	/**
+	 * Walks up the parent chain of the given persist and returns the first enclosing {@link LayoutContainer}, or
+	 * <code>null</code> when none is found. Package-visible for unit testing.
+	 */
+	static LayoutContainer findLayoutContainer(IPersist persist)
+	{
+		IPersist currentPersist = persist;
+		while (currentPersist != null && !(currentPersist instanceof LayoutContainer))
+		{
+			currentPersist = currentPersist.getParent();
+		}
+		return currentPersist instanceof LayoutContainer ? (LayoutContainer)currentPersist : null;
 	}
 
 	@Override

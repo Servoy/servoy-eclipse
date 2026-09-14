@@ -1221,10 +1221,8 @@ public class Activator extends Plugin
 	 */
 	private void checkDefaultPostgressInstall(IApplicationServerSingleton appServer)
 	{
-		if (ModelUtils.isTestRunning()) return;
-
 		File file = new File(appServer.getServoyApplicationServerDirectory() + "/postgres_db/servoy_repository.dbdump");
-		if (file.exists())
+		if (file.exists() && !ModelUtils.isTestRunning())
 		{
 			// if the zip is there then always aks the question.
 			Display.getDefault().asyncExec(new Runnable()

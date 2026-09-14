@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("run_cypress_form_tests launcher scripts")
 public class RunCypressFormTestsLauncherTest {
 
-	private static final String APP_ID = "com.servoy.eclipse.developer.mcp.cypressFormTestRunner";
+	private static final String APP_ID = "com.servoy.eclipse.cypress.cypressFormTestRunner";
 	private static final String XMS = "-Xms256m";
 	private static final String XMX = "-Xmx2048m";
 	private static final String SKIP_CHECKOUT = "-Dservoy.cloud.skipCheckout=true";
