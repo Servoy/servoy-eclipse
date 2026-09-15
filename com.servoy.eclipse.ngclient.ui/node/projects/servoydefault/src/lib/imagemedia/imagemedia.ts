@@ -71,12 +71,14 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField<HTMLDivEleme
 
     private updateImageURL() {
         if (this.dataProviderID) {
-            const contentType = this.dataProviderID.contentType;
-            if (contentType != null && contentType !== undefined && contentType.indexOf('image') === 0) {
-                this.imageURL = this.dataProviderID.url;
-            } else {
-                this.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
-            }
+            if (this.dataProviderID.url) {
+                const contentType = this.dataProviderID.contentType;
+                if (contentType != null && contentType !== undefined && contentType.indexOf('image') === 0) {
+                    this.imageURL = this.dataProviderID.url;
+                } else {
+                    this.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
+                }
+            } else this.imageURL = this.dataProviderID;
         } else {
             this.imageURL = ServoyDefaultImageMedia.EMPTY;
         }
