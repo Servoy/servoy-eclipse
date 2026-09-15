@@ -1,11 +1,20 @@
-# Spec: SVY-20449 — Bootstrap tabpanel ignores form "scrollbars = never" in NG2
+# Spec: SVY-20449 — form "scrollbars = never" ignored in NG2 (all host containers)
+
+> **Single source of truth.** This spec (with `SVY-20449-triage.md`) is the canonical
+> record for SVY-20449 across **both** repositories — `servoy-eclipse` (servoycore
+> formcontainer, servoydefault tabpanel/tablesspanel, `@servoy/public` API) and
+> `bootstrapcomponents` (bootstrap tabpanel + accordion). The `bootstrapcomponents` repo no
+> longer carries its own copy; see §8 for the bootstrap-repo details, cross-branch port, and
+> commit table.
 
 ## 1. Goal
-Make the default **bootstrap** tabpanel (`ServoyBootstrapTabpanel`) honor a contained
-form's "scrollbars = never" setting in NG2, so no scrollbars appear on the outer tabpanel
-container when the inner form's body part is set to `overflow: hidden`. This closes the
-second reopening of SVY-20449, whose sample (`testscrollbars.servoy`, tab `TAB_2`) uses a
-bootstrap tabpanel — the one hosting component the prior fixes never touched.
+Make every host container that shows a contained form honor the form's "scrollbars = never"
+setting in NG2/TiNG, so no scrollbars appear on the host when the inner form's body part is
+set to `overflow: hidden`. The final gaps closed here are the **bootstrap** tabpanel
+(`ServoyBootstrapTabpanel`) and accordion, plus the **servoydefault** default tabpanel when
+`tabOrientation` is set. The reporter's sample (`testscrollbars.servoy`, tab `TAB_2`) uses a
+bootstrap tabpanel; the accordion and the servoydefault tabpanel are the third-reopening
+cases.
 
 ## 2. Background
 
@@ -326,3 +335,67 @@ All changes are in the **bootstrapcomponents** repo
 | Does `accordion.html` wrap its content in a scroll container with hardcoded `overflow`? Check accordion and split pane. | Dev | Resolved — yes, `accordion.html:10` hardcodes `overflow: auto` inline; fixed via the `bodyOverflow` computed signal + style bindings (§3.6). Split pane: no such component exists in this repo. |
 | Confirm the bootstrap `[ngbNavOutlet]` div is the exact element carrying the scrollbars in the reopened sample (vs the inner form wrapper), so applying overflow to `containerStyle` fully removes them. | Dev/QA | Resolved — verified against the sample; no scrollbars on the tabpanel container. |
 | Third reopening: which containers still scrolled after `c907b53`? | Dev | Resolved — (a) servoydefault tabpanel `[ngbNavOutlet]` (form name resolved to `null` via the `getForm(tab)` override); (b) bootstrap accordion **outer** `.svy-accordion-scrollable` div (`overflow-y: auto` from CSS). Both fixed (§3.7–§3.8) and verified. |
+
+## 8. bootstrapcomponents repo — details, cross-branch port, and commits
+
+This section is the canonical record for the `bootstrapcomponents` side (previously a
+separate `components/docs/SVY-20449-*` pair, now removed in favor of this file).
+
+### 8.1 Components and root cause
+The bootstrap host components hardcoded `overflow: auto` and never consulted the contained
+form's body-part overflow:
+- **tabpanel** — `containerStyle = { position, minHeight, overflow: 'auto' }` on the
+  `[ngbNavOutlet]` div (`tabpanel.ts` / `tabpanel.html`).
+- **accordion** — inner `ngbAccordionBody` inline `overflow: auto`, **and** the outer
+  `<div class="bts-accordion svy-accordion-scrollable">` whose `.svy-accordion-scrollable`
+  CSS rule (`svy_bootstrapcomponents.css`) forces `overflow-y: auto` on the root.
+- **tablesspanel** — sets only `position`/`minHeight`; unaffected, out of scope.
+- No split-pane component exists in this repo.
+
+### 8.2 Shared helper
+`applyOverflowFromForm(containerStyle)` lives on `bts_basetabpanel.ts`; it resolves the
+selected tab via `tabs()[getRealTabIndex()]` (not a display-gating override, so it does not
+have the servoydefault §3.7 problem), reads the form's body-part overflow, sets
+`overflowX`/`overflowY`, and deletes the blanket `overflow` when an axis is constrained.
+Tabpanel calls it in `getContainerStyle()`; accordion calls it in both `getBodyStyle()`
+(inner body) and `getContainerStyle()` (outer root, `[ngStyle]` on `accordion.html:1`).
+
+### 8.3 Published `@servoy/public` type gap (build break) — F1
+The published `IFormCache` `.d.ts` does **not** declare `getBodyPartLayout?()` in any pinned
+version (`2024.3.0`, `2025.3.0`, `2025.9.1`, `2026.9.3`), so a guarded call failed the CI
+production build with `TS2339`. Fix: cast `getFormCacheByName()` to a local structural type
+`{ getBodyPartLayout?(): { [property: string]: string } }`, keeping the runtime
+optional-chaining guard (no-op on older runtimes). Applied in `bts_basetabpanel.ts`.
+
+### 8.4 Accordion root scroll — F2 / F2b
+The accordion **body** was correctly `overflow: hidden`, but the **root**
+`.svy-accordion-scrollable` still scrolled. First observed and fixed on `2025.12`
+(`getRootStyle()` + `[ngStyle]` on the root). Originally believed 2025.12-only, but
+re-verified on `2026.6`: the root also carries `svy-accordion-scrollable`
+(`overflow-y: auto`, `svy_bootstrapcomponents.css:82-85`), so it scrolled there too — this is
+the third-reopening accordion case. Fixed on `2026.6` as `getContainerStyle()` (seeded
+`{ overflowY: 'auto' }`, run through `applyOverflowFromForm`) bound via
+`[ngStyle]="getContainerStyle()"` on `accordion.html:1`; functionally identical to the
+2025.12 `getRootStyle()`.
+
+### 8.5 Standalone accordion on master — F3
+On `master` the accordion is `standalone: true`; adding the `[ngStyle]` binding surfaced
+`NG8002` because `NgStyle` was not in `imports`. Fixed by adding `NgStyle` to the component
+`imports`. On `2026.6` and earlier the accordion is `standalone: false` and gets `NgStyle`
+from a shared module — no import change needed.
+
+### 8.6 Cross-branch commit table
+The bootstrap fix was ported across the maintained branches.
+
+| Branch | Inner tabpanel/accordion fix | Cast fix (F1) | Root fix (F2/F2b) | NgStyle (F3) |
+|--------|------------------------------|---------------|-------------------|--------------|
+| 2024.3 | — | `640d554` | n/a | n/a |
+| 2025.3 | — | `075cc1e` | n/a | n/a |
+| 2025.06 | — | `ae9a742` | n/a | n/a |
+| 2025.9 | — | `16c8fa8` | n/a | n/a |
+| 2025.12 | — | `cf4c402` | `e50b3b1` | n/a |
+| 2026.6 | `c907b53` | `481d0f0` | (this change) | n/a |
+| master | — | `a9ab64e` | n/a | included in `a9ab64e` |
+
+Note: on `2026.6` the tabpanel/accordion inner-body fix and the outer-root accordion fix are
+the ones this spec's third-reopening work (§3.6, §3.8, §8.4) covers.
