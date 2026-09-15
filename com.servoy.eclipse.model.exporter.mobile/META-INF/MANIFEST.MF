@@ -12,15 +12,6 @@ Require-Bundle: org.eclipse.core.runtime,
  sablo
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/js.jar,
- lib/jshybugger.jar,
- lib/netty-3.6.5.Final.jar,
- lib/webbit-0.4.15.jar,
- .
-Export-Package: com.servoy.eclipse.model.mobile.exporter,
- org.jshybugger,
- org.jshybugger.instrumentation,
- org.jshybugger.proxy,
- org.webbitserver
+Export-Package: com.servoy.eclipse.model.mobile.exporter
 Automatic-Module-Name: com.servoy.eclipse.model.exporter.mobile
 Import-Package: org.apache.commons.io;version="[2.16.0,3.0.0)"

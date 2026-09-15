@@ -42,13 +42,11 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 	public static String SERVER_URL_KEY = "serverURL";
 	public static String SERVICE_SOLUTION_KEY_PREFIX = "serviceSolution_";
 	public static String TIMEOUT_KEY = "timeout";
-	public static String DEBUG_MODE_KEY = "debug_mode";
 
 	private Text serverURL;
 	private Text serviceSolutionName;
 	private Text timeout;
 	private final MobileExporter mobileExporter;
-	private Button debugCheck;
 
 	public ExportOptionsPage(String pageName, MobileExporter mobileExporter)
 	{
@@ -86,42 +84,14 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 		serviceSolutionName = new Text(container, SWT.BORDER);
 		serviceSolutionName.setToolTipText("This is the name of the service solution mobile clients connects to (must be available at server URL).");
 
-		Label debugLabel = new Label(container, SWT.NONE);
-		debugLabel.setText("Export in debug mode"); //, .
-
-		final Label label = new Label(container, SWT.NONE);
-		label.setText("Starts a connection between the mobile device and the developer.\nSo the developer must run and the mobile solution must be active.\nThen connect chrome to: localhost:8889 on the developer machine after the mobile solution is started");
-		label.setVisible(false);
-
-		debugCheck = new Button(container, SWT.CHECK);
-		debugCheck.setSelection(getDialogSettings().getBoolean(DEBUG_MODE_KEY));
-		mobileExporter.setDebugMode(debugCheck.getSelection());
-		debugCheck.addSelectionListener(new SelectionListener()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				label.setVisible(debugCheck.getSelection());
-				mobileExporter.setDebugMode(debugCheck.getSelection());
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-				label.setVisible(debugCheck.getSelection());
-				mobileExporter.setDebugMode(debugCheck.getSelection());
-			}
-		});
-
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(serviceSolutionLabel).add(timeoutLabel).add(
-					debugLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(solutionLabel).add(serverURLLabel).add(serviceSolutionLabel).add(
+					timeoutLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(solutionName).add(serverURL, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
-					serviceSolutionName, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(timeout, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(
-					debugCheck, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE)).addContainerGap()).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(label)));
+					serviceSolutionName, GroupLayout.PREFERRED_SIZE, 400, Short.MAX_VALUE).add(timeout, GroupLayout.PREFERRED_SIZE, 400,
+						Short.MAX_VALUE)).addContainerGap()));
 
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(
@@ -131,9 +101,7 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serviceSolutionName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE).add(serviceSolutionLabel)).add(7).add(
 				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(timeout, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(timeoutLabel)).add(7).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(debugCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(debugLabel)).add(10).add(label)));
+					GroupLayout.PREFERRED_SIZE).add(timeoutLabel))));
 
 		container.setLayout(groupLayout);
 
@@ -201,11 +169,6 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 		return serviceSolutionName.getText();
 	}
 
-	public boolean useDebugMode()
-	{
-		return debugCheck.getSelection();
-	}
-
 	private String getTimeout()
 	{
 		return timeout.getText();
@@ -237,7 +200,6 @@ public class ExportOptionsPage extends WizardPage implements IMobileExportProper
 		getDialogSettings().put(ExportOptionsPage.SERVER_URL_KEY, serverURL.getText());
 		getDialogSettings().put(ExportOptionsPage.SERVICE_SOLUTION_KEY_PREFIX + mobileExporter.getSolutionName(), getServiceSolutionName());
 		getDialogSettings().put(ExportOptionsPage.TIMEOUT_KEY, getTimeout());
-		getDialogSettings().put(ExportOptionsPage.DEBUG_MODE_KEY, useDebugMode());
 		return true;
 	}
 

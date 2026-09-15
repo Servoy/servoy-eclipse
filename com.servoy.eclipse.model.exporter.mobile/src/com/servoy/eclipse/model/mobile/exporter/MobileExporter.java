@@ -48,12 +48,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.jshybugger.instrumentation.DebugInstrumentator;
-import org.jshybugger.instrumentation.JsCodeLoader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.ast.AstRoot;
 import org.sablo.specification.ClientSideTypeCache;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -182,8 +179,6 @@ public class MobileExporter
 	private boolean skipConnect = false;
 	private boolean useTestWar = false;
 	private String testSuiteCode;
-	private boolean debugMode = false;
-	private final Map<String, Integer> filenameEndings = new HashMap<String, Integer>();
 
 	private FlattenedSolution fs;
 	private LineMapper lineMapper;
@@ -614,30 +609,6 @@ public class MobileExporter
 			String template = Utils.getTXTFileContent(getClass().getResourceAsStream(RELATIVE_TEMPLATE_PATH), Charset.forName("UTF8"));
 			ScriptStringBuilder builder = new ScriptStringBuilder(useTestWar); // when creating test war code we need to map line numbers so as to show correct stacks for failures/errors
 
-			if (debugMode)
-			{
-				String url = serverURL;
-				int port = url.lastIndexOf(':');
-				if (port > 7)
-				{ // ship the http://
-					url = url.substring(0, port);
-				}
-				builder.append("JsHybuggerConfig = {\n");
-				builder.append("endpoint: '");
-				builder.append(url);
-				builder.append(":8889/jshybugger/'\n"); // for now hard coded 8889 port
-				builder.append("};\n");
-
-				InputStream resourceAsStream = JsCodeLoader.class.getResourceAsStream("/jshybugger.js");
-				String txtFileContent = Utils.getTXTFileContent(resourceAsStream, Charset.forName("UTF8"), true);
-				builder.append(txtFileContent);
-				builder.append("\nDebugger.setScriptSource = function(params) {\n");
-				builder.append("eval(params.source);\n");
-				builder.append("}\n");
-
-			}
-
-
 			int formsLoopStartIndex = template.indexOf(FORM_LOOP_START);
 			int formsLoopEndIndex = template.indexOf(FORM_LOOP_END);
 			builder.append(template.substring(0, formsLoopStartIndex));
@@ -665,17 +636,6 @@ public class MobileExporter
 			replaceScopesScripting(builder, template.substring(scopesLoopStartIndex + SCOPES_LOOP_START.length(), scopesLoopEndIndex), ",\n");
 
 			builder.append(template.substring(scopesLoopEndIndex + SCOPES_LOOP_END.length()));
-			if (debugMode && filenameEndings.size() > 0)
-			{
-				for (Entry<String, Integer> entry : filenameEndings.entrySet())
-				{
-					builder.append("\nJsHybugger.loadFile('");
-					builder.append(entry.getKey());
-					builder.append("', ");
-					builder.append(String.valueOf(entry.getValue()));
-					builder.append(");");
-				}
-			}
 			return builder.toString();
 		}
 		return null;
@@ -837,24 +797,7 @@ public class MobileExporter
 						String fileContent = Utils.getTXTFileContent(zipStream, Charset.forName("UTF8"), false);
 						for (String key : renameMap.keySet())
 						{
-							if (debugMode && (key.equals("solution.js") || key.equals("solution_json.js")))
-							{
-								String url = serverURL;
-								int port = url.lastIndexOf(':');
-								if (port > 7)
-								{ // ship the http://
-									url = url.substring(0, port);
-								}
-								String params = "?t=" + timeout + "&sc=" + skipConnect + "&s=" + getFlattenedSolution().getSolution().getName() + "&u=" +
-									serverURL;
-								if (serviceSolutionName != null) params += "&ss=" + serviceSolutionName;
-
-								fileContent = fileContent.replaceAll(Pattern.quote("' + base + '" + key), url + ":8889/" + key + params);
-							}
-							else
-							{
-								fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
-							}
+							fileContent = fileContent.replaceAll(Pattern.quote(key), renameMap.get(key));
 						}
 						if (entryName.equals(htmlFile))
 						{
@@ -1175,42 +1118,16 @@ public class MobileExporter
 		}
 		String code = ScriptEngine.extractFunction(method.getDeclaration(), functionAndName);
 
-		if (debugMode)
+		if (useTestWar)
 		{
-			try
-			{
-				String workspaceRelativePath = SolutionSerializer.getScriptPath(method, false);
-				String scriptPath = serverURL + "/" + workspaceRelativePath;
-				byte[] bytes = code.getBytes(Charset.forName("UTF8"));
-				ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-				ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
-				ServoyDebugInstrumentator instrumenator = new ServoyDebugInstrumentator();
-				JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1, instrumenator, false);
-				code = new String(baos.toByteArray(), Charset.forName("UTF8"));
-				if (useTestWar) lineMapper.mapFunctionDebugMode(scriptResult.getCurrentLineNumber(), workspaceRelativePath, code);
-
-				Integer linenr = filenameEndings.get(scriptPath);
-				if (linenr == null || linenr.intValue() < instrumenator.endLine) filenameEndings.put(scriptPath, Integer.valueOf(instrumenator.endLine));
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
+			long beginLineNo = scriptResult.getCurrentLineNumber();
 			scriptResult.append(code);
+			lineMapper.mapFunction(beginLineNo, scriptResult.getCurrentLineNumber(), SolutionSerializer.getScriptPath(method, false),
+				method.getLineNumberOffset());
 		}
 		else
 		{
-			if (useTestWar)
-			{
-				long beginLineNo = scriptResult.getCurrentLineNumber();
-				scriptResult.append(code);
-				lineMapper.mapFunction(beginLineNo, scriptResult.getCurrentLineNumber(), SolutionSerializer.getScriptPath(method, false),
-					method.getLineNumberOffset());
-			}
-			else
-			{
-				scriptResult.append(code);
-			}
+			scriptResult.append(code);
 		}
 	}
 
@@ -1257,11 +1174,6 @@ public class MobileExporter
 	public void setTimeout(int timeout)
 	{
 		this.timeout = timeout;
-	}
-
-	public void setDebugMode(boolean debugMode)
-	{
-		this.debugMode = debugMode;
 	}
 
 	/**
@@ -1384,17 +1296,6 @@ public class MobileExporter
 		testCode.append("    __solutionTestSuite.sendTestTreeAndRun();\n}");
 
 		this.testSuiteCode = testCode.toString();
-	}
-
-	private class ServoyDebugInstrumentator extends DebugInstrumentator
-	{
-		private int endLine;
-
-		@Override
-		protected void loadFile(AstRoot node)
-		{
-			endLine = node.getEndLineno();
-		}
 	}
 
 	/**

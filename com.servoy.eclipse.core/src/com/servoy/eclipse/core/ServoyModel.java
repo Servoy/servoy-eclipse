@@ -102,16 +102,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
-import org.jshybugger.instrumentation.DebugInstrumentator;
-import org.jshybugger.instrumentation.JsCodeLoader;
-import org.jshybugger.proxy.DebugWebAppService;
-import org.jshybugger.proxy.ScriptSourceProvider;
 import org.json.JSONObject;
-import org.mozilla.javascript.ast.AstRoot;
-import org.webbitserver.HttpControl;
-import org.webbitserver.HttpHandler;
-import org.webbitserver.HttpRequest;
-import org.webbitserver.HttpResponse;
 
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
@@ -312,173 +303,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null &&
 						Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true))
 						EclipseMessages.writeProjectI18NFiles(aProject, false, false);
-
-					boolean isMobile = solution.getSolutionType() == SolutionMetaData.MOBILE;
-					if (!isMobile)
-					{
-						Solution[] modules = aProject.getModules();
-						for (Solution module : modules)
-						{
-							if (module.getSolutionType() == SolutionMetaData.MOBILE_MODULE)
-							{
-								isMobile = true;
-								break;
-							}
-						}
-					}
-					if (isMobile)
-					{
-						try
-						{
-							DebugWebAppService debugWebAppService = DebugWebAppService.startDebugWebAppService(8889, new ScriptSourceProvider()
-							{
-								@Override
-								public String loadScriptResourceById(String scriptUri, boolean encode) throws IOException
-								{
-									int index = scriptUri.indexOf("//");
-									index = scriptUri.indexOf('/', index + 2);
-									return new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(scriptUri.substring(index + 1));
-								}
-
-								public String setScriptSource(String scriptUri, String scriptSource)
-								{
-									try
-									{
-										int index = scriptUri.indexOf("//");
-										index = scriptUri.indexOf('/', index + 2);
-										String workspaceFile = scriptUri.substring(index + 1);
-										new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).setUTF8Contents(workspaceFile, scriptSource);
-										Path path = new Path(workspaceFile);
-										ServoyProject servoyProject = getServoyProject(path.segment(0));
-										if (servoyProject != null && servoyProject.getProject().isOpen())
-										{
-											String scopeKind = "forms";
-											String scopeName = null;
-											Solution sol = servoyProject.getSolution();
-											Iterator<ScriptMethod> scriptMethods = null;
-											if (path.segmentCount() == 2)
-											{
-												scopeKind = "scopes";
-												// globals/scopes
-												scopeName = path.segment(1);
-												if (scopeName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
-												{
-													scopeName = scopeName.substring(0, scopeName.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
-												}
-												scriptMethods = sol.getScriptMethods(scopeName, false);
-											}
-											else if (path.segmentCount() == 3 && path.segment(1).equals(SolutionSerializer.FORMS_DIR))
-											{
-												// forms
-												scopeName = path.segment(2);
-												if (scopeName.endsWith(SolutionSerializer.JS_FILE_EXTENSION))
-												{
-													scopeName = scopeName.substring(0, scopeName.length() - SolutionSerializer.JS_FILE_EXTENSION.length());
-												}
-												scriptMethods = sol.getForm(scopeName).getScriptMethods(false);
-
-											}
-											StringBuilder sb = new StringBuilder();
-											while (scriptMethods.hasNext())
-											{
-												ScriptMethod sm = scriptMethods.next();
-												sb.append("_ServoyInit_.");
-												sb.append(scopeKind);
-												sb.append(".");
-												sb.append(scopeName);
-												sb.append("._sv_pushedfncs['");
-												sb.append(sm.getName());
-												sb.append("']=");
-												sb.append(parseScriptMethod(sm));
-												sb.append(";\n");
-											}
-											if (scopeKind.equals("forms"))
-											{
-												sb.append("_ServoyUtils_.reloadFormScope('");
-												sb.append(scopeName);
-												sb.append("')");
-											}
-											else
-											{
-												sb.append("_ServoyUtils_.reloadGlobalScope('");
-												sb.append(scopeName);
-												sb.append("')");
-											}
-											return sb.toString();
-										}
-										return null;
-									}
-									catch (IOException e)
-									{
-										ServoyLog.logError("error saving changes from debugger", e);
-									}
-									return null;
-								}
-
-								private String parseScriptMethod(IScriptProvider method)
-								{
-									try
-									{
-										String code = method.getDeclaration();
-										String scriptPath = SolutionSerializer.getScriptPath(method, false);
-										code = ScriptEngine.extractFunction(code, "function $1");
-										byte[] bytes = code.getBytes(Charset.forName("UTF8"));
-										ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-										ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length * 2);
-										DebugInstrumentator instrumenator = new DebugInstrumentator()
-										{
-											@Override
-											protected void loadFile(AstRoot node)
-											{
-											}
-										};
-										JsCodeLoader.instrumentFile(scriptPath, bais, baos, new HashMap<String, Object>(), method.getLineNumberOffset() - 1,
-											instrumenator, false);
-										code = new String(baos.toByteArray(), Charset.forName("UTF8"));
-										return JSONObject.quote(ScriptEngine.extractFunction(code, ""));
-									}
-									catch (Exception e)
-									{
-										ServoyLog.logError("error parsing script method " + method.getName(), e);
-									}
-									return null;
-								}
-							});
-
-							debugWebAppService.addHandler("/solution.js", new HttpHandler()
-							{
-								@Override
-								public void handleHttpRequest(HttpRequest request, HttpResponse response, HttpControl arg2) throws Exception
-								{
-									MobileExporter exporter = getMobileExporter(request);
-
-									String solutionJs = exporter.doScriptingExport();
-									response.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
-									response.content(solutionJs);
-									response.end();
-								}
-							});
-							debugWebAppService.addHandler("/solution_json.js", new HttpHandler()
-							{
-								@Override
-								public void handleHttpRequest(HttpRequest request, HttpResponse response, HttpControl arg2) throws Exception
-								{
-									MobileExporter exporter = getMobileExporter(request);
-
-									String persist_json = exporter.doPersistExport();
-									response.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
-									response.content(persist_json);
-									response.end();
-								}
-							});
-
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logError("Couldn't start the mobile debug service", e);
-						}
-					}
-
 				}
 			}
 
@@ -706,26 +530,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				}
 
 				return true;
-			}
-
-			private MobileExporter getMobileExporter(HttpRequest request)
-			{
-				MobileExporter exporter = new MobileExporter(null);
-				exporter.setDebugMode(true);
-				exporter.setServerURL(request.queryParam("u"));
-				exporter.setSolutionName(request.queryParam("s"));
-				exporter.setServiceSolutionName(request.queryParam("ss"));
-				String timeout = request.queryParam("t");
-				if (timeout != null)
-				{
-					exporter.setTimeout(Integer.parseInt(timeout));
-				}
-				String skipConnect = request.queryParam("sc");
-				if (skipConnect != null)
-				{
-					exporter.setSkipConnect(Boolean.parseBoolean(skipConnect));
-				}
-				return exporter;
 			}
 		});
 		workingSetChangeListener = new IPropertyChangeListener()
