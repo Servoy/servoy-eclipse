@@ -3,12 +3,13 @@ import { TestBed, fakeAsync, tick, waitForAsync, discardPeriodicTasks } from '@a
 import { ServoyDefaultTabpanel } from './tabpanel';
 import { Tab } from './basetabpanel';
 
-import { ServoyApi, ServoyPublicTestingModule, LoggerFactory, WindowRefService } from '@servoy/public';
+import { ServoyApi, ServoyPublicService, ServoyPublicTestingModule, LoggerFactory, WindowRefService } from '@servoy/public';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
+    let servoyPublicService;
     beforeEach( waitForAsync(() => {
         servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'formWillShow', 'hideForm', 'trustAsHtml','registerComponent','unRegisterComponent'] );
         servoyApi.getMarkupId.and.returnValue( '1' );
@@ -22,6 +23,7 @@ describe( 'ServoyDefaultTabpanel', () => {
             imports: [NgbModule, ServoyPublicTestingModule],
             providers: [WindowRefService, LoggerFactory]
         } ).compileComponents();
+        servoyPublicService = TestBed.inject(ServoyPublicService);
     } ) );
 
     const createComponentWithTabs = () => {
@@ -99,6 +101,44 @@ describe( 'ServoyDefaultTabpanel', () => {
 		discardPeriodicTasks();
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
+      } ) );
+
+    it( 'should apply the selected form scrollbars=never overflow to the container', fakeAsync(() => {
+        const fixture = createComponentWithTabs();
+        spyOn( servoyPublicService, 'getFormCacheByName' ).and.returnValue(
+            { getBodyPartLayout: () => ({ 'overflow-x': 'hidden', 'overflow-y': 'hidden' }) } as any );
+
+        const changes: SimpleChanges = {};
+        changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
+        fixture.componentInstance.ngOnChanges( changes );
+        fixture.detectChanges();
+
+        const element = fixture.nativeElement.querySelector( '.svy-tabpanel' ) as HTMLElement;
+        const style = fixture.componentInstance.getContainerStyle( element );
+		discardPeriodicTasks();
+
+        expect( style['overflowX'] ).toBe( 'hidden' );
+        expect( style['overflowY'] ).toBe( 'hidden' );
+        expect( style['overflow'] ).toBeUndefined();
+      } ) );
+
+    it( 'should keep overflow auto when the selected form has no scrollbar restriction', fakeAsync(() => {
+        const fixture = createComponentWithTabs();
+        spyOn( servoyPublicService, 'getFormCacheByName' ).and.returnValue(
+            { getBodyPartLayout: () => ({}) } as any );
+
+        const changes: SimpleChanges = {};
+        changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
+        fixture.componentInstance.ngOnChanges( changes );
+        fixture.detectChanges();
+
+        const element = fixture.nativeElement.querySelector( '.svy-tabpanel' ) as HTMLElement;
+        const style = fixture.componentInstance.getContainerStyle( element );
+		discardPeriodicTasks();
+
+        expect( style['overflow'] ).toBe( 'auto' );
+        expect( style['overflowX'] ).toBeUndefined();
+        expect( style['overflowY'] ).toBeUndefined();
       } ) );
 
 } );

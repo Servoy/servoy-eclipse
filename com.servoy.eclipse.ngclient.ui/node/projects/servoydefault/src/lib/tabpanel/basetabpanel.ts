@@ -78,7 +78,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 	}
 
     applyOverflowFromForm(containerStyle: { [property: string]: any }) {
-        const formName = this.getForm();
+        const formName = this.getSelectedFormName();
         if (formName && this.servoyPublicService) {
             const formCache = this.servoyPublicService.getFormCacheByName(formName);
             if (formCache) {
@@ -101,6 +101,18 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     }
 	
     getForm(tab?: Tab) {
+        const selectedFormName = this.getSelectedFormName();
+        if (tab) {
+            if (this.selectedTab && (tab.containsFormId === this.selectedTab.containsFormId) && (tab.relationName === this.selectedTab.relationName)) {
+                return tab.containsFormId;
+            }
+        } else if (selectedFormName) {
+            return selectedFormName;
+        }
+        return null;
+    }
+
+    protected getSelectedFormName(): string {
         if (!this.selectedTab) {
             const tabIndex = this.getRealTabIndex();
             if (tabIndex >= 0) this.select(this.tabs[tabIndex]);
@@ -109,14 +121,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                 this.select(this.tabs[0]);
             }
         }
-        if (tab) {
-            if (this.selectedTab && (tab.containsFormId === this.selectedTab.containsFormId) && (tab.relationName === this.selectedTab.relationName)) {
-                return tab.containsFormId;
-            }
-        } else if (this.selectedTab) {
-            return this.selectedTab.containsFormId;
-        }
-        return null;
+        return this.selectedTab ? this.selectedTab.containsFormId : null;
     }
 
     select(tab: Tab) {
