@@ -85,7 +85,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
 	}
 
     applyOverflowFromForm(containerStyle: { [property: string]: any }) {
-        const formName = this.getForm();
+        const formName = this.getSelectedFormName();
         if (formName && this.servoyPublicService) {
             const formCache = this.servoyPublicService.getFormCacheByName(formName);
             if (formCache) {
@@ -120,6 +120,11 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
             return selected.containsFormId;
         }
         return null;
+    }
+
+    protected getSelectedFormName(): string {
+        const selected = this.selectedTab();
+        return selected ? selected.containsFormId : null;
     }
 
     select(tab: Tab) {
