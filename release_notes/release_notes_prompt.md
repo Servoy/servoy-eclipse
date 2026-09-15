@@ -1,6 +1,6 @@
 # Release Notes Generation Prompt
 
-We are in the parent directory of multiple git repository subdirectories that together make up our Servoy LTS product.
+We are in the parent directory of multiple git repository subdirectories that together make up our Servoy product.
 
 Collect all commits from the following 5 repositories between tag `<PREVIOUS_TAG>` and `HEAD` (these release notes are for `<NEW_VERSION>`):
 - `sablo`
