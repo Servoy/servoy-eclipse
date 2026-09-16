@@ -122,7 +122,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         return null;
     }
 
-    protected getSelectedFormName(): string {
+    protected getSelectedFormName(): string | null {
         const selected = this.selectedTab();
         return selected ? selected.containsFormId : null;
     }
