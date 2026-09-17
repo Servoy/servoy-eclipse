@@ -44,6 +44,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -67,7 +68,7 @@ public class KeyPressedHandler implements IServerService
 		Form form = editorPart.getForm();
 		for (IPersist iPersist : selection)
 		{
-			if (Utils.isInheritedFormElement(iPersist, form)) return true;
+			if (Utils.isInheritedFormElement(iPersist, form) && !PersistHelper.isOverrideElement(iPersist)) return true;
 		}
 		return false;
 	}
