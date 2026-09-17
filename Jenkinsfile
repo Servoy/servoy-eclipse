@@ -85,7 +85,7 @@ pipeline {
                         configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
                         configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
                     ]) {
-                        sh 'export MAVEN_OPTS="-Dmaven.test.failure.ignore=true" && mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" $goals'
+                        sh 'mvn -B -fae -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" $goals'
                     }
                 }
             }
