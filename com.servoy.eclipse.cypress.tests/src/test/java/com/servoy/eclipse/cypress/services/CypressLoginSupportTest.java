@@ -1,9 +1,9 @@
-﻿package com.servoy.eclipse.cypress.services;
+package com.servoy.eclipse.cypress.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -13,9 +13,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.servoy.eclipse.cypress.services.CypressLoginSupport.AuthKind;
 import com.servoy.eclipse.cypress.services.CypressLoginSupport.AuthRequirement;
@@ -25,13 +25,13 @@ public class CypressLoginSupportTest {
 	private CypressLoginSupport support;
 	private Path tempDir;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		support = new CypressLoginSupport();
 		tempDir = Files.createTempDirectory("cypress-login-test");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		if (tempDir != null && Files.exists(tempDir)) {
 			Files.walkFileTree(tempDir, new SimpleFileVisitor<Path>() {
@@ -99,8 +99,7 @@ public class CypressLoginSupportTest {
 		Path supportDir = tempDir.resolve("support");
 		Files.createDirectories(supportDir);
 		Path commandsFile = supportDir.resolve("commands.js");
-		Files.writeString(commandsFile, "// stuff\nCypress.Commands.add('login', () => {});\n",
-				StandardCharsets.UTF_8);
+		Files.writeString(commandsFile, "// stuff\nCypress.Commands.add('login', () => {});\n", StandardCharsets.UTF_8);
 
 		boolean written = support.writeLoginCommand(supportDir);
 
@@ -120,8 +119,8 @@ public class CypressLoginSupportTest {
 
 		assertTrue(written);
 		String tsContent = Files.readString(tsFile, StandardCharsets.UTF_8);
-		assertTrue("Should write to commands.ts", tsContent.contains("Cypress.Commands.add('login'"));
-		assertFalse("commands.js should NOT be created", Files.exists(supportDir.resolve("commands.js")));
+		assertTrue(tsContent.contains("Cypress.Commands.add('login'"), "Should write to commands.ts");
+		assertFalse(Files.exists(supportDir.resolve("commands.js")), "commands.js should NOT be created");
 	}
 
 	@Test
@@ -138,8 +137,8 @@ public class CypressLoginSupportTest {
 		assertTrue(written);
 		String tsContent = Files.readString(tsFile, StandardCharsets.UTF_8);
 		String jsContent = Files.readString(jsFile, StandardCharsets.UTF_8);
-		assertTrue("Login command should be in .ts", tsContent.contains("Cypress.Commands.add('login'"));
-		assertFalse("Login command should NOT be in .js", jsContent.contains("Cypress.Commands.add('login'"));
+		assertTrue(tsContent.contains("Cypress.Commands.add('login'"), "Login command should be in .ts");
+		assertFalse(jsContent.contains("Cypress.Commands.add('login'"), "Login command should NOT be in .js");
 	}
 
 	@Test
@@ -147,8 +146,7 @@ public class CypressLoginSupportTest {
 		Path supportDir = tempDir.resolve("support");
 		Files.createDirectories(supportDir);
 		Path tsFile = supportDir.resolve("commands.ts");
-		Files.writeString(tsFile, "// existing\nCypress.Commands.add('login', () => {});\n",
-				StandardCharsets.UTF_8);
+		Files.writeString(tsFile, "// existing\nCypress.Commands.add('login', () => {});\n", StandardCharsets.UTF_8);
 
 		boolean written = support.writeLoginCommand(supportDir);
 
@@ -166,7 +164,7 @@ public class CypressLoginSupportTest {
 
 		boolean written = support.writeLoginCommand(supportDir);
 
-		assertFalse("Should detect marker in .js even when .ts is target", written);
+		assertFalse(written, "Should detect marker in .js even when .ts is target");
 	}
 
 	@Test
@@ -177,10 +175,10 @@ public class CypressLoginSupportTest {
 
 		Path commandsFile = supportDir.resolve("commands.js");
 		String content = Files.readString(commandsFile, StandardCharsets.UTF_8);
-		assertTrue("Should handle cookie consent modals", content.contains("cookieConsent"));
-		assertTrue("Should wait for modal-backdrop to disappear", content.contains(".modal-backdrop"));
-		assertTrue("Should look for buttons in active modals", content.contains("modal.in button"));
-		assertTrue("Should wait briefly for modals to appear", content.contains("cy.wait(500)"));
+		assertTrue(content.contains("cookieConsent"), "Should handle cookie consent modals");
+		assertTrue(content.contains(".modal-backdrop"), "Should wait for modal-backdrop to disappear");
+		assertTrue(content.contains("modal.in button"), "Should look for buttons in active modals");
+		assertTrue(content.contains("cy.wait(500)"), "Should wait briefly for modals to appear");
 	}
 
 	// --- writeCypressEnvJson ---
@@ -206,8 +204,8 @@ public class CypressLoginSupportTest {
 		support.writeCypressEnvJson(tempDir, "http://localhost:8080", "user", "pass", "body");
 
 		String content = Files.readString(envFile, StandardCharsets.UTF_8);
-		assertTrue("Should preserve custom key", content.contains("MY_CUSTOM_KEY"));
-		assertTrue("Should add login key", content.contains("\"TEST_USERNAME\" : \"user\""));
+		assertTrue(content.contains("MY_CUSTOM_KEY"), "Should preserve custom key");
+		assertTrue(content.contains("\"TEST_USERNAME\" : \"user\""), "Should add login key");
 	}
 
 	@Test
@@ -309,4 +307,3 @@ public class CypressLoginSupportTest {
 		assertFalse(msg.toLowerCase().contains("password\":"));
 	}
 }
-

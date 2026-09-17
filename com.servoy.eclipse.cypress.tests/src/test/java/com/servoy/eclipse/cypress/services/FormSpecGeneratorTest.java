@@ -1,15 +1,15 @@
 package com.servoy.eclipse.cypress.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FormSpecGeneratorTest {
 	/**
@@ -82,43 +82,43 @@ public class FormSpecGeneratorTest {
 
 	@Test
 	public void testFormSpecGenerator_isCreatable() {
-		assertNotNull("FormSpecGenerator must have @Creatable annotation",
-				FormSpecGenerator.class.getAnnotation(org.eclipse.e4.core.di.annotations.Creatable.class));
+		assertNotNull(FormSpecGenerator.class.getAnnotation(org.eclipse.e4.core.di.annotations.Creatable.class),
+				"FormSpecGenerator must have @Creatable annotation");
 	}
 
 	@Test
 	public void testFormSpecGenerator_hasGenerateSpecMethod() throws NoSuchMethodException {
-		assertNotNull("FormSpecGenerator must have generateSpec(String) method",
-				FormSpecGenerator.class.getMethod("generateSpec", String.class));
+		assertNotNull(FormSpecGenerator.class.getMethod("generateSpec", String.class),
+				"FormSpecGenerator must have generateSpec(String) method");
 	}
 
 	@Test
 	public void testFormSpecGenerator_hasSpecExistsMethod() throws NoSuchMethodException {
-		assertNotNull("FormSpecGenerator must have specExists(String) method",
-				FormSpecGenerator.class.getMethod("specExists", String.class));
+		assertNotNull(FormSpecGenerator.class.getMethod("specExists", String.class),
+				"FormSpecGenerator must have specExists(String) method");
 	}
 
 	@Test
 	public void testFormSpecGenerator_generateSpecReturnType() throws NoSuchMethodException {
-		assertEquals("generateSpec must return String", String.class,
-				FormSpecGenerator.class.getMethod("generateSpec", String.class).getReturnType());
+		assertEquals(String.class, FormSpecGenerator.class.getMethod("generateSpec", String.class).getReturnType(),
+				"generateSpec must return String");
 	}
 
 	@Test
 	public void testFormSpecGenerator_specExistsReturnType() throws NoSuchMethodException {
-		assertEquals("specExists must return boolean", boolean.class,
-				FormSpecGenerator.class.getMethod("specExists", String.class).getReturnType());
+		assertEquals(boolean.class, FormSpecGenerator.class.getMethod("specExists", String.class).getReturnType(),
+				"specExists must return boolean");
 	}
 
 	@Test
 	public void testFormSpecGenerator_hasNoArgConstructor() throws NoSuchMethodException {
-		assertNotNull("FormSpecGenerator must have a no-arg constructor", FormSpecGenerator.class.getConstructor());
+		assertNotNull(FormSpecGenerator.class.getConstructor(), "FormSpecGenerator must have a no-arg constructor");
 	}
 
 	@Test
 	public void testFormSpecGenerator_canBeInstantiated() {
 		FormSpecGenerator gen = new FormSpecGenerator();
-		assertNotNull("FormSpecGenerator must be instantiable", gen);
+		assertNotNull(gen, "FormSpecGenerator must be instantiable");
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class FormSpecGeneratorTest {
 				break;
 			}
 		}
-		assertTrue("FormSpecGenerator should no longer have a parseFrmFile method", !found);
+		assertTrue(!found, "FormSpecGenerator should no longer have a parseFrmFile method");
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class FormSpecGeneratorTest {
 				break;
 			}
 		}
-		assertTrue("FormSpecGenerator must have a buildMetadata method", found);
+		assertTrue(found, "FormSpecGenerator must have a buildMetadata method");
 	}
 
 	@Test
@@ -160,7 +160,7 @@ public class FormSpecGeneratorTest {
 				break;
 			}
 		}
-		assertTrue("FormSpecGenerator must have a generateCypressSpecContent method", found);
+		assertTrue(found, "FormSpecGenerator must have a generateCypressSpecContent method");
 	}
 
 	@Test
@@ -173,7 +173,7 @@ public class FormSpecGeneratorTest {
 				break;
 			}
 		}
-		assertTrue("FormSpecGenerator must have a generateSetupContent method", found);
+		assertTrue(found, "FormSpecGenerator must have a generateSetupContent method");
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("testForm", "db:/test/t1");
 		String setup = (String) getGenerateSetupContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated setup must contain spec_setUp function", setup.contains("function spec_setUp()"));
+		assertTrue(setup.contains("function spec_setUp()"), "Generated setup must contain spec_setUp function");
 	}
 
 	@Test
@@ -189,7 +189,7 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("testForm", "db:/test/t1");
 		String setup = (String) getGenerateSetupContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated setup must contain spec_tearDown function", setup.contains("function spec_tearDown()"));
+		assertTrue(setup.contains("function spec_tearDown()"), "Generated setup must contain spec_tearDown function");
 	}
 
 	@Test
@@ -197,8 +197,8 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("testForm", null);
 		String setup = (String) getGenerateSetupContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated setup must contain @properties with uuid",
-				setup.contains("@properties={typeid:24,uuid:\""));
+		assertTrue(setup.contains("@properties={typeid:24,uuid:\""),
+				"Generated setup must contain @properties with uuid");
 	}
 
 	@Test
@@ -206,7 +206,7 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("testForm", null);
 		String setup = (String) getGenerateSetupContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated setup must mention Cypress", setup.contains("Cypress"));
+		assertTrue(setup.contains("Cypress"), "Generated setup must mention Cypress");
 	}
 
 	// --- Cypress spec content generation tests ---
@@ -216,7 +216,7 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "btn1", null, null, false, true, false } });
 		String spec = (String) getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated spec must NOT contain @properties annotation", !spec.contains("@properties"));
+		assertTrue(!spec.contains("@properties"), "Generated spec must NOT contain @properties annotation");
 	}
 
 	@Test
@@ -224,7 +224,7 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("myForm", null);
 		String spec = (String) getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated spec must use cy.visit()", spec.contains("cy.visit("));
+		assertTrue(spec.contains("cy.visit("), "Generated spec must use cy.visit()");
 	}
 
 	@Test
@@ -232,8 +232,8 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "btn1", null, null, false, true, false } });
 		String spec = (String) getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated spec must use cy.get() with data-cy selectors",
-				spec.contains("cy.get('[data-cy=\"myForm.btn1\"]')"));
+		assertTrue(spec.contains("cy.get('[data-cy=\"myForm.btn1\"]')"),
+				"Generated spec must use cy.get() with data-cy selectors");
 	}
 
 	@Test
@@ -241,8 +241,8 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "lbl1", null, null, false, false, true } });
 		String spec = (String) getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated spec must use describe()", spec.contains("describe('myForm"));
-		assertTrue("Generated spec must use it()", spec.contains("it('"));
+		assertTrue(spec.contains("describe('myForm"), "Generated spec must use describe()");
+		assertTrue(spec.contains("it('"), "Generated spec must use it()");
 	}
 
 	@Test
@@ -250,9 +250,9 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("myForm", null);
 		String spec = (String) getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated spec must use relative URL with formpreview param",
-				spec.contains("?formpreview=myForm&svy_testmode=true"));
-		assertTrue("Generated spec must NOT contain hardcoded localhost URL", !spec.contains("http://localhost"));
+		assertTrue(spec.contains("?formpreview=myForm&svy_testmode=true"),
+				"Generated spec must use relative URL with formpreview param");
+		assertTrue(!spec.contains("http://localhost"), "Generated spec must NOT contain hardcoded localhost URL");
 	}
 
 	@Test
@@ -260,7 +260,7 @@ public class FormSpecGeneratorTest {
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "lbl1", null, null, false, false, true } });
 		String spec = (String) getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated spec must check for error overlay", spec.contains(".svy-error, .error-overlay"));
+		assertTrue(spec.contains(".svy-error, .error-overlay"), "Generated spec must check for error overlay");
 	}
 
 	@Test
@@ -269,20 +269,20 @@ public class FormSpecGeneratorTest {
 				new Object[][] { { "btn_save", null, null, false, true, false } });
 		String spec = (String) getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
 
-		assertTrue("Generated spec must have buttons are clickable test", spec.contains("buttons are clickable"));
-		assertTrue("Generated spec must check button is enabled", spec.contains("'be.enabled'"));
+		assertTrue(spec.contains("buttons are clickable"), "Generated spec must have buttons are clickable test");
+		assertTrue(spec.contains("'be.enabled'"), "Generated spec must check button is enabled");
 	}
 
 	@Test
 	public void testFormSpecGenerator_hasGetSpecFilePathMethod() throws NoSuchMethodException {
-		assertNotNull("FormSpecGenerator must have getSpecFilePath(String) method",
-				FormSpecGenerator.class.getMethod("getSpecFilePath", String.class));
+		assertNotNull(FormSpecGenerator.class.getMethod("getSpecFilePath", String.class),
+				"FormSpecGenerator must have getSpecFilePath(String) method");
 	}
 
 	@Test
 	public void testFormSpecGenerator_hasGetFormSpecDirMethod() throws NoSuchMethodException {
-		assertNotNull("FormSpecGenerator must have getFormSpecDir() method",
-				FormSpecGenerator.class.getMethod("getFormSpecDir"));
+		assertNotNull(FormSpecGenerator.class.getMethod("getFormSpecDir"),
+				"FormSpecGenerator must have getFormSpecDir() method");
 	}
 
 	@Test
@@ -296,7 +296,7 @@ public class FormSpecGeneratorTest {
 				break;
 			}
 		}
-		assertTrue("FormSpecGenerator should no longer have getFormsDir() method (renamed to getFormSpecDir)", !found);
+		assertTrue(!found, "FormSpecGenerator should no longer have getFormsDir() method (renamed to getFormSpecDir)");
 	}
 
 	@Test
@@ -311,6 +311,6 @@ public class FormSpecGeneratorTest {
 				break;
 			}
 		}
-		assertTrue("FormSpecGenerator should no longer have ensureBuildpathExclusion method", !found);
+		assertTrue(!found, "FormSpecGenerator should no longer have ensureBuildpathExclusion method");
 	}
 }

@@ -1,159 +1,135 @@
 package com.servoy.eclipse.cypress.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FormSpecGeneratorSolutionPrefixTest
-{
+public class FormSpecGeneratorSolutionPrefixTest {
 	@Test
-	public void testHasSpecExistsWithSolutionName() throws NoSuchMethodException
-	{
-		assertNotNull("FormSpecGenerator must have specExists(String, String) method",
-			FormSpecGenerator.class.getMethod("specExists", String.class, String.class));
+	public void testHasSpecExistsWithSolutionName() throws NoSuchMethodException {
+		assertNotNull(FormSpecGenerator.class.getMethod("specExists", String.class, String.class),
+				"FormSpecGenerator must have specExists(String, String) method");
 	}
 
 	@Test
-	public void testSpecExistsWithSolutionNameReturnType() throws NoSuchMethodException
-	{
-		assertEquals("specExists(String,String) must return boolean", boolean.class,
-			FormSpecGenerator.class.getMethod("specExists", String.class, String.class).getReturnType());
+	public void testSpecExistsWithSolutionNameReturnType() throws NoSuchMethodException {
+		assertEquals(boolean.class,
+				FormSpecGenerator.class.getMethod("specExists", String.class, String.class).getReturnType(),
+				"specExists(String,String) must return boolean");
 	}
 
 	@Test
-	public void testHasGetSpecFilePathWithSolutionName() throws NoSuchMethodException
-	{
-		assertNotNull("FormSpecGenerator must have getSpecFilePath(String, String) method",
-			FormSpecGenerator.class.getMethod("getSpecFilePath", String.class, String.class));
+	public void testHasGetSpecFilePathWithSolutionName() throws NoSuchMethodException {
+		assertNotNull(FormSpecGenerator.class.getMethod("getSpecFilePath", String.class, String.class),
+				"FormSpecGenerator must have getSpecFilePath(String, String) method");
 	}
 
 	@Test
-	public void testGetSpecFilePathWithSolutionNameReturnType() throws NoSuchMethodException
-	{
-		assertEquals("getSpecFilePath(String,String) must return Path", Path.class,
-			FormSpecGenerator.class.getMethod("getSpecFilePath", String.class, String.class).getReturnType());
+	public void testGetSpecFilePathWithSolutionNameReturnType() throws NoSuchMethodException {
+		assertEquals(Path.class,
+				FormSpecGenerator.class.getMethod("getSpecFilePath", String.class, String.class).getReturnType(),
+				"getSpecFilePath(String,String) must return Path");
 	}
 
 	@Test
-	public void testHasGetSetupFilePathWithSolutionName() throws NoSuchMethodException
-	{
-		assertNotNull("FormSpecGenerator must have getSetupFilePath(String, String) method",
-			FormSpecGenerator.class.getMethod("getSetupFilePath", String.class, String.class));
+	public void testHasGetSetupFilePathWithSolutionName() throws NoSuchMethodException {
+		assertNotNull(FormSpecGenerator.class.getMethod("getSetupFilePath", String.class, String.class),
+				"FormSpecGenerator must have getSetupFilePath(String, String) method");
 	}
 
 	@Test
-	public void testGetSetupFilePathWithSolutionNameReturnType() throws NoSuchMethodException
-	{
-		assertEquals("getSetupFilePath(String,String) must return Path", Path.class,
-			FormSpecGenerator.class.getMethod("getSetupFilePath", String.class, String.class).getReturnType());
+	public void testGetSetupFilePathWithSolutionNameReturnType() throws NoSuchMethodException {
+		assertEquals(Path.class,
+				FormSpecGenerator.class.getMethod("getSetupFilePath", String.class, String.class).getReturnType(),
+				"getSetupFilePath(String,String) must return Path");
 	}
 
 	@Test
-	public void testHasFindExistingSpecFile() throws NoSuchMethodException
-	{
-		assertNotNull("FormSpecGenerator must have findExistingSpecFile(String, String) method",
-			FormSpecGenerator.class.getMethod("findExistingSpecFile", String.class, String.class));
+	public void testHasFindExistingSpecFile() throws NoSuchMethodException {
+		assertNotNull(FormSpecGenerator.class.getMethod("findExistingSpecFile", String.class, String.class),
+				"FormSpecGenerator must have findExistingSpecFile(String, String) method");
 	}
 
 	@Test
-	public void testFindExistingSpecFileReturnType() throws NoSuchMethodException
-	{
-		assertEquals("findExistingSpecFile must return Path", Path.class,
-			FormSpecGenerator.class.getMethod("findExistingSpecFile", String.class, String.class).getReturnType());
+	public void testFindExistingSpecFileReturnType() throws NoSuchMethodException {
+		assertEquals(Path.class,
+				FormSpecGenerator.class.getMethod("findExistingSpecFile", String.class, String.class).getReturnType(),
+				"findExistingSpecFile must return Path");
 	}
 
 	@Test
-	public void testHasFindExistingSetupFile() throws NoSuchMethodException
-	{
-		assertNotNull("FormSpecGenerator must have findExistingSetupFile(String, String) method",
-			FormSpecGenerator.class.getMethod("findExistingSetupFile", String.class, String.class));
+	public void testHasFindExistingSetupFile() throws NoSuchMethodException {
+		assertNotNull(FormSpecGenerator.class.getMethod("findExistingSetupFile", String.class, String.class),
+				"FormSpecGenerator must have findExistingSetupFile(String, String) method");
 	}
 
 	@Test
-	public void testFindExistingSetupFileReturnType() throws NoSuchMethodException
-	{
-		assertEquals("findExistingSetupFile must return Path", Path.class,
-			FormSpecGenerator.class.getMethod("findExistingSetupFile", String.class, String.class).getReturnType());
+	public void testFindExistingSetupFileReturnType() throws NoSuchMethodException {
+		assertEquals(Path.class,
+				FormSpecGenerator.class.getMethod("findExistingSetupFile", String.class, String.class).getReturnType(),
+				"findExistingSetupFile must return Path");
 	}
 
 	@Test
-	public void testGetSpecFilePathSolutionPrefix()
-	{
+	public void testGetSpecFilePathSolutionPrefix() {
 		FormSpecGenerator gen = new FormSpecGenerator();
-		try
-		{
+		try {
 			Path specPath = gen.getSpecFilePath("myForm", "mySolution");
-			assertNotNull("getSpecFilePath(formName, solutionName) must not return null", specPath);
+			assertNotNull(specPath, "getSpecFilePath(formName, solutionName) must not return null");
 			String fileName = specPath.getFileName().toString();
-			assertEquals("Spec file must be solution-prefixed", "mySolution.myForm.spec.cy.js", fileName);
-		}
-		catch (Exception e)
-		{
-			assertTrue("Expected exception in plain JUnit (no workspace): " + e.getMessage(), true);
+			assertEquals("mySolution.myForm.spec.cy.js", fileName, "Spec file must be solution-prefixed");
+		} catch (Exception e) {
+			assertTrue(true, "Expected exception in plain JUnit (no workspace): " + e.getMessage());
 		}
 	}
 
 	@Test
-	public void testGetSetupFilePathSolutionPrefix()
-	{
+	public void testGetSetupFilePathSolutionPrefix() {
 		FormSpecGenerator gen = new FormSpecGenerator();
-		try
-		{
+		try {
 			Path setupPath = gen.getSetupFilePath("myForm", "mySolution");
-			assertNotNull("getSetupFilePath(formName, solutionName) must not return null", setupPath);
+			assertNotNull(setupPath, "getSetupFilePath(formName, solutionName) must not return null");
 			String fileName = setupPath.getFileName().toString();
-			assertEquals("Setup file must be solution-prefixed", "mySolution.myForm.spec.js", fileName);
-		}
-		catch (Exception e)
-		{
-			assertTrue("Expected exception in plain JUnit (no workspace): " + e.getMessage(), true);
+			assertEquals("mySolution.myForm.spec.js", fileName, "Setup file must be solution-prefixed");
+		} catch (Exception e) {
+			assertTrue(true, "Expected exception in plain JUnit (no workspace): " + e.getMessage());
 		}
 	}
 
 	@Test
-	public void testFindExistingSpecFileReturnsNullWhenNothingExists()
-	{
+	public void testFindExistingSpecFileReturnsNullWhenNothingExists() {
 		FormSpecGenerator gen = new FormSpecGenerator();
-		try
-		{
+		try {
 			Path result = gen.findExistingSpecFile("nonExistentForm", "nonExistentSolution");
-			assertNull("findExistingSpecFile must return null when no file exists", result);
-		}
-		catch (Exception e)
-		{
-			assertTrue("Expected exception in plain JUnit (no workspace): " + e.getMessage(), true);
+			assertNull(result, "findExistingSpecFile must return null when no file exists");
+		} catch (Exception e) {
+			assertTrue(true, "Expected exception in plain JUnit (no workspace): " + e.getMessage());
 		}
 	}
 
 	@Test
-	public void testFindExistingSetupFileReturnsNullWhenNothingExists()
-	{
+	public void testFindExistingSetupFileReturnsNullWhenNothingExists() {
 		FormSpecGenerator gen = new FormSpecGenerator();
-		try
-		{
+		try {
 			Path result = gen.findExistingSetupFile("nonExistentForm", "nonExistentSolution");
-			assertNull("findExistingSetupFile must return null when no file exists", result);
-		}
-		catch (Exception e)
-		{
-			assertTrue("Expected exception in plain JUnit (no workspace): " + e.getMessage(), true);
+			assertNull(result, "findExistingSetupFile must return null when no file exists");
+		} catch (Exception e) {
+			assertTrue(true, "Expected exception in plain JUnit (no workspace): " + e.getMessage());
 		}
 	}
 
 	@Test
-	public void testLegacySingleArgMethodsStillExist() throws NoSuchMethodException
-	{
-		assertNotNull("Legacy specExists(String) must still exist",
-			FormSpecGenerator.class.getMethod("specExists", String.class));
-		assertNotNull("Legacy getSpecFilePath(String) must still exist",
-			FormSpecGenerator.class.getMethod("getSpecFilePath", String.class));
-		assertNotNull("Legacy getSetupFilePath(String) must still exist",
-			FormSpecGenerator.class.getMethod("getSetupFilePath", String.class));
+	public void testLegacySingleArgMethodsStillExist() throws NoSuchMethodException {
+		assertNotNull(FormSpecGenerator.class.getMethod("specExists", String.class),
+				"Legacy specExists(String) must still exist");
+		assertNotNull(FormSpecGenerator.class.getMethod("getSpecFilePath", String.class),
+				"Legacy getSpecFilePath(String) must still exist");
+		assertNotNull(FormSpecGenerator.class.getMethod("getSetupFilePath", String.class),
+				"Legacy getSetupFilePath(String) must still exist");
 	}
 }
