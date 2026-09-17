@@ -1,109 +1,84 @@
 package com.servoy.eclipse.cypress.services;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FormSpecRunnerShutdownTest
-{
+public class FormSpecRunnerShutdownTest {
 	@Test
-	public void testHasShutdownFormPreviewClientsMethod()
-	{
+	public void testHasShutdownFormPreviewClientsMethod() {
 		Method[] methods = FormSpecRunner.class.getDeclaredMethods();
 		boolean found = false;
-		for (Method m : methods)
-		{
-			if ("shutdownFormPreviewClients".equals(m.getName()))
-			{
+		for (Method m : methods) {
+			if ("shutdownFormPreviewClients".equals(m.getName())) {
 				found = true;
 				break;
 			}
 		}
-		assertTrue("FormSpecRunner must have shutdownFormPreviewClients method", found);
+		assertTrue(found, "FormSpecRunner must have shutdownFormPreviewClients method");
 	}
 
 	@Test
-	public void testShutdownFormPreviewClientsIsPrivate()
-	{
+	public void testShutdownFormPreviewClientsIsPrivate() {
 		Method[] methods = FormSpecRunner.class.getDeclaredMethods();
-		for (Method m : methods)
-		{
-			if ("shutdownFormPreviewClients".equals(m.getName()))
-			{
-				assertTrue("shutdownFormPreviewClients must be private",
-					java.lang.reflect.Modifier.isPrivate(m.getModifiers()));
+		for (Method m : methods) {
+			if ("shutdownFormPreviewClients".equals(m.getName())) {
+				assertTrue(java.lang.reflect.Modifier.isPrivate(m.getModifiers()),
+						"shutdownFormPreviewClients must be private");
 				return;
 			}
 		}
-		assertTrue("shutdownFormPreviewClients method not found", false);
+		assertTrue(false, "shutdownFormPreviewClients method not found");
 	}
 
 	@Test
-	public void testShutdownFormPreviewClientsReturnsVoid()
-	{
+	public void testShutdownFormPreviewClientsReturnsVoid() {
 		Method[] methods = FormSpecRunner.class.getDeclaredMethods();
-		for (Method m : methods)
-		{
-			if ("shutdownFormPreviewClients".equals(m.getName()))
-			{
-				assertTrue("shutdownFormPreviewClients must return void",
-					m.getReturnType() == void.class);
+		for (Method m : methods) {
+			if ("shutdownFormPreviewClients".equals(m.getName())) {
+				assertTrue(m.getReturnType() == void.class, "shutdownFormPreviewClients must return void");
 				return;
 			}
 		}
-		assertTrue("shutdownFormPreviewClients method not found", false);
+		assertTrue(false, "shutdownFormPreviewClients method not found");
 	}
 
 	@Test
-	public void testShutdownFormPreviewClientsHasNoParams()
-	{
+	public void testShutdownFormPreviewClientsHasNoParams() {
 		Method[] methods = FormSpecRunner.class.getDeclaredMethods();
-		for (Method m : methods)
-		{
-			if ("shutdownFormPreviewClients".equals(m.getName()))
-			{
-				assertTrue("shutdownFormPreviewClients must have zero parameters",
-					m.getParameterCount() == 0);
+		for (Method m : methods) {
+			if ("shutdownFormPreviewClients".equals(m.getName())) {
+				assertTrue(m.getParameterCount() == 0, "shutdownFormPreviewClients must have zero parameters");
 				return;
 			}
 		}
-		assertTrue("shutdownFormPreviewClients method not found", false);
+		assertTrue(false, "shutdownFormPreviewClients method not found");
 	}
 
 	@Test
-	public void testFormPreviewNGClientHasShutdownExistingMethod() throws Exception
-	{
-		Method method = com.servoy.eclipse.ngclient.startup.FormPreviewNGClient.class.getDeclaredMethod("shutdownExisting");
-		assertNotNull("FormPreviewNGClient must have shutdownExisting method", method);
-		assertTrue("shutdownExisting must be public",
-			java.lang.reflect.Modifier.isPublic(method.getModifiers()));
-		assertTrue("shutdownExisting must be static",
-			java.lang.reflect.Modifier.isStatic(method.getModifiers()));
-		assertTrue("shutdownExisting must return void",
-			method.getReturnType() == void.class);
+	public void testFormPreviewNGClientHasShutdownExistingMethod() throws Exception {
+		Method method = com.servoy.eclipse.ngclient.startup.FormPreviewNGClient.class
+				.getDeclaredMethod("shutdownExisting");
+		assertNotNull(method, "FormPreviewNGClient must have shutdownExisting method");
+		assertTrue(java.lang.reflect.Modifier.isPublic(method.getModifiers()), "shutdownExisting must be public");
+		assertTrue(java.lang.reflect.Modifier.isStatic(method.getModifiers()), "shutdownExisting must be static");
+		assertTrue(method.getReturnType() == void.class, "shutdownExisting must return void");
 	}
 
 	@Test
-	public void testShutdownFormPreviewClientsDoesNotThrowWithNoServer()
-	{
+	public void testShutdownFormPreviewClientsDoesNotThrowWithNoServer() {
 		FormSpecRunner runner = new FormSpecRunner();
-		try
-		{
+		try {
 			Method m = FormSpecRunner.class.getDeclaredMethod("shutdownFormPreviewClients");
 			m.setAccessible(true);
 			m.invoke(runner);
-		}
-		catch (java.lang.reflect.InvocationTargetException e)
-		{
-			assertTrue("shutdownFormPreviewClients should not throw even without a server: " + e.getCause(),
-				false);
-		}
-		catch (Exception e)
-		{
-			assertTrue("Expected graceful handling: " + e.getMessage(), true);
+		} catch (java.lang.reflect.InvocationTargetException e) {
+			assertTrue(false, "shutdownFormPreviewClients should not throw even without a server: " + e.getCause());
+		} catch (Exception e) {
+			assertTrue(true, "Expected graceful handling: " + e.getMessage());
 		}
 	}
 }
