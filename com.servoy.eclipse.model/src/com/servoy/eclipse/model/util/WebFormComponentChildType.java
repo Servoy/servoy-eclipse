@@ -505,6 +505,7 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 			}
 			propertyValue = value;
 		}
+		boolean ownsPropertyValue = false;
 		if (flattened && element != null)
 		{
 			JSONObject full = new JSONObject();
@@ -523,10 +524,16 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 			}
 			ServoyJSONObject.mergeAndDeepCloneJSON(propertyValue, full);
 			propertyValue = full;
+			ownsPropertyValue = true;
 		}
-		if (propertyValue != null && forMutation &&
+		if (propertyValue != null && (forMutation || flattened) &&
 			propertyValue.opt(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()) instanceof String legacyCustomPropertiesValue)
 		{
+			if (!forMutation && !ownsPropertyValue)
+			{
+				// flattened read without a resolved form element: propertyValue is the shared parent json, so normalize on a copy to not mutate it on a read
+				propertyValue = new ServoyJSONObject(propertyValue, ServoyJSONObject.getNames(propertyValue), false, true);
+			}
 			// save it in pure json format
 			propertyValue.put(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName(),
 				new ServoyJSONObject(legacyCustomPropertiesValue, false, false, true));
