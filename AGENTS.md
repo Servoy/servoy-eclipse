@@ -186,10 +186,48 @@ When asked to create, update, or link Jira issues, use the `servoy-jira` skill (
 
 - **Java plugin tests:** `com.servoy.eclipse.tests` (eclipse-test-plugin packaging)
 - **UI property tests (SVY-21432):** `com.servoy.eclipse.ui.tests` fragment — `com.servoy.eclipse.ui.property.RepositoryHelperShouldShowNameTest` (Form `name` shown again, other props still suppressed) and `com.servoy.eclipse.ui.property.IdentDocumentValidatorFormNameTest` (form-name validation rule the setter enforces)
+- **Cypress plugin tests:** `com.servoy.eclipse.cypress.tests` — fragment of `com.servoy.eclipse.cypress`. Split by naming convention (below); some classes are pure-logic unit tests, others need the OSGi/workbench and must run as PDE plug-in tests.
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **LFC per-row auto-height (SVY-21457):** `com.servoy.eclipse.ngclient.ui/node/src/servoycore/listformcomponent/listformcomponent.spec.ts` and `row-renderer.component.spec.ts` (Jasmine/Karma) — asserts that native AG Grid `autoHeight` is disabled only for the per-row auto-height path (responsive, `responsiveHeight < 0`) and unchanged elsewhere; that `getRowHeight`/`applyMeasuredRowHeight` feed each row's explicitly-measured height back into AG Grid's server-side row model; the `visibility: hidden` anti-flicker reveal; the hardened resize-observer guard (column-count only, immune to scrollbar-driven width jitter); and (in `row-renderer.component.spec.ts`) `RowRenderer`'s per-row measurement via `ngAfterViewInit` and the recursive float-collapse-safe `measureContentHeight`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
 - **WPM tests:** `com.servoy.eclipse.designer.wpm/node/src/test.ts`
+
+### Test types & naming convention
+
+Tests in a `<plugin>.tests` fragment project fall into two categories that use **different runners** — the class name suffix tells you which one:
+
+| Test type | Class name suffix | Runner | Needs |
+|-----------|-------------------|--------|-------|
+| Unit test (pure logic) | `*Test` | `eclipse-ide_runJUnitTests` / `eclipse-ide_runClassTests` | Nothing — no OSGi container, no live workspace |
+| Integration test | `*IntegrationTest` | `eclipse-pde_runJUnitPluginTests` / `eclipse-pde_runJUnitPluginTestClass` | Eclipse workbench + OSGi container (e.g. `ResourcesPlugin`, `Display`, `ServoyModelManager`, extension points) |
+
+**Decision rule:** if the test needs `Platform.getBundle()`, the Eclipse workspace, `ServoyModel`/`ServoyModelManager`, `Display`/SWT, or extension-point contributions → it's a **PDE plug-in test** and must live in its own package (e.g. `...cypress.integration`) with the `*IntegrationTest` suffix. Otherwise it is a **plain JUnit test** and belongs in a package that only ever runs with the plain runner. Keep the two kinds in separate packages per fragment project so it's always obvious which launcher a package needs — never mix them in the same package.
+
+**No `Assume.*` to skip tests.** A test that silently passes because a precondition (app server, Servoy project, workspace state, etc.) was not met provides zero value. If the setup is missing, fix the setup/launcher instead of skipping the test — a test must always exercise and assert a specific expected behaviour, not "did something happen" in general.
+
+**No green-for-the-sake-of-green tests.** Every assertion must fail if the code under test is broken. Reject assertions that accept multiple outcomes (e.g. `result.contains("passed") || result.contains("failed")`) — assert the one specific outcome the scenario should produce.
+
+### Running PDE plug-in tests
+
+- Use `eclipse-runner_listLaunchConfigurations` (with `typeFilter="junit-plugin"`) to discover saved `.launch` configurations before falling back to a bare `eclipse-pde_runJUnitPluginTests` call. A saved config (e.g. one named `AssistAI-PDE-<project>.tests`) already carries the right workspace-bundle selection, VM args and system properties (`servoy.application_server.dir`, `property-file`, etc.) — a default/plain PDE launch often omits bundles like `com.servoy.eclipse.core` or `com.servoy.eclipse.ui`, which shows up as `NoClassDefFoundError` cascades.
+- Pass `launcherName` + `className` to reuse a saved config's classpath/bundle selection while overriding just the test target. Running several classes via a comma-separated `className` together with `launcherName` is unreliable — run each class in its own call.
+- These tests start the Servoy Developer runtime and can take 60–120s+. Poll with `getOperationStatus` using increasing wait times, and use `includeResults` to see intermediate pass/fail counts without waiting for the full run.
+
+### Troubleshooting: JUnit 6 `NoSuchMethodError` (e.g. `Namespace.getParts()`)
+
+If a JUnit 6 (Jupiter) test fails at runtime with:
+```
+java.lang.NoSuchMethodError: 'java.util.List org.junit.jupiter.api.extension.ExtensionContext$Namespace.getParts()'
+```
+**Root cause:** the `org.eclipse.dltk.javascript.rhino` workspace project bundles an older `junit-jupiter-api-5.x.jar` in its `test-libs/` folder. When PDE builds the flat classpath for a plain JUnit launch, it includes all workspace project dependencies — including rhino's `test-libs`. The older 5.x API jar can appear earlier on the classpath than the target platform's 6.x jar, causing version conflicts.
+
+**Fix:** open `org.eclipse.dltk.javascript.rhino` → Java Build Path → Libraries tab → remove or uncheck the `test-libs/junit-jupiter-api-*.jar`, `test-libs/junit-4.*.jar` and `test-libs/hamcrest-*.jar` entries (or remove `test-libs` from rhino's `.classpath` entirely).
+
+### Integration test infrastructure
+
+PDE integration tests that activate a Servoy solution should extend a shared base class providing common utilities rather than reimplementing them — e.g. an SWT event-pump helper (`pumpEventsUntil(maxMs, assertions)` instead of raw `Thread.sleep`), `waitForWorkspaceBuildJobs()`, `waitForAppServer()`, solution creation/activation helpers, and a dialog guard that fails a test immediately if an unexpected SWT dialog pops up instead of hanging the run. If no such base class exists yet for a given `.tests` project, check whether one already exists in a sibling `.tests` project (e.g. in the Servoy-Copilot workspace) before writing new plumbing from scratch — it is often better to share/move the base class than to duplicate it.
+
+These PDE tests are typically run **without** cleaning the workspace between runs (to reuse node/cypress/... caches under `.metadata`). Because of that, each integration test class must delete the workspace projects it uses in `@BeforeClass`, so every run starts from a known state.
 
 ## Dependencies
 
