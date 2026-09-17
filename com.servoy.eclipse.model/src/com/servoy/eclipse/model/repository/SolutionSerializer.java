@@ -1217,7 +1217,15 @@ public class SolutionSerializer
 				{
 					property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, true, true)); // always store as pure json
 				}
-				else property_values.put(propertyName, new ServoyJSONObject(propertyValue, false, false, true)); // always store as pure json
+				else
+				{
+					ServoyJSONObject jsonValue = new ServoyJSONObject(propertyValue, false, false, true); // always store as pure json
+					if (persist instanceof WebComponent && StaticContentSpecLoader.PROPERTY_JSON.getPropertyName().equals(propertyName))
+					{
+						normalizeFormComponentChildCustomProperties(jsonValue);
+					}
+					property_values.put(propertyName, jsonValue);
+				}
 			}
 
 			if (valueFilter != null)
@@ -1312,6 +1320,35 @@ public class SolutionSerializer
 		}
 
 		return new ServoyJSONObject(property_values, !useQuotesForKey, true);
+	}
+
+	/**
+	 * Normalizes any nested form-component child's legacy string <code>customProperties</code> into a pure json object,
+	 * recursing into further nested form-component children. Idempotent: an already-object value is left unchanged.
+	 *
+	 * @param jsonValue the web component's json blob value
+	 * @return the same json value, with nested legacy string customProperties converted to json objects
+	 */
+	static JSONObject normalizeFormComponentChildCustomProperties(JSONObject jsonValue)
+	{
+		if (jsonValue == null) return jsonValue;
+		for (String key : jsonValue.keySet())
+		{
+			Object child = jsonValue.opt(key);
+			if (child instanceof JSONObject childObject)
+			{
+				if (childObject.opt(
+					StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName()) instanceof String legacyCustomPropertiesValue)
+				{
+					// legacy string value, convert to pure json object
+					childObject.put(StaticContentSpecLoader.PROPERTY_CUSTOMPROPERTIES.getPropertyName(),
+						new ServoyJSONObject(legacyCustomPropertiesValue, false, false, true));
+				}
+				// a child's own json can hold further nested form-component children with customProperties
+				normalizeFormComponentChildCustomProperties(childObject);
+			}
+		}
+		return jsonValue;
 	}
 
 	/**
