@@ -177,6 +177,7 @@ public class WarExporter
 		"jakarta.persistence-api_*.jar", //
 		"jakarta.mail-api_*.jar", //
 		"jakarta.activation-api_*.jar", //
+		"jakarta.xml.bind-api_*.jar", // Hibernate 7 references jakarta.xml.bind (XmlMappingBinderAccess)
 		"xstream_*.jar", //
 		"org.jsoup_*.jar", //
 		"com.github.ua-parser.uap-java_*.jar", //
