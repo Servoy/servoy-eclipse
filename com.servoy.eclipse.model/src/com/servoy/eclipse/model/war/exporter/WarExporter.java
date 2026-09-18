@@ -163,12 +163,12 @@ public class WarExporter
 		"org.apache.commons.commons-fileupload2-core_*.jar", //
 		"org.apache.commons.commons-fileupload2-jakarta-servlet6_*.jar", //
 		"com.google.guava_*.jar", //
-		"hibernate-core-*.jar", //
-		"hibernate-community-dialects-*.jar", //
-		"hibernate-vector-*.jar", //
-		"hibernate-models-*.jar", //
+		"org.hibernate.orm.core_*.jar", //
+		"org.hibernate.orm.community.dialects_*.jar", //
+		"org.hibernate.orm.vector_*.jar", //
+		"wrapped.org.hibernate.models.hibernate-models_*.jar", //
 		"org.antlr.antlr4-runtime_*.jar", //
-		"jakarta.transaction-api-*.jar", //
+		"jakarta.transaction-api_*.jar", //
 		"org.apache.logging.log4j.api_*.jar", //
 		"org.apache.logging.log4j.core_*.jar", //
 		"org.apache.logging.log4j.slf4j2.impl_*.jar", //
