@@ -14,6 +14,21 @@
 	<artifactId>com.servoy.eclipse.product</artifactId>
 	<packaging>eclipse-repository</packaging>
 
+	<properties>
+		<!-- Executable (jsign) signing properties. By default they fall back to the
+		     self-signed jarsigner.* values, so servoy.exe is self signed like before.
+		     The sign-with-usb-token profile in settings.xml overrides exesign.* to
+		     point at the SafeNet USB token (PKCS11) when SIGN_TOKEN_PIN is present.
+		     These are kept SEPARATE from jarsigner.* on purpose: jarsigner.* is used
+		     by the maven-jarsigner-plugin for the p2 jars, which must stay on the
+		     self-signed JKS keystore (the standard JDK jarsigner cannot use a PKCS11
+		     cfg file as keystore). -->
+		<exesign.keystore>${jarsigner.keystore}</exesign.keystore>
+		<exesign.storetype></exesign.storetype>
+		<exesign.alias>${jarsigner.alias}</exesign.alias>
+		<exesign.storepass>${jarsigner.storepass}</exesign.storepass>
+	</properties>
+
 	<build>
 		<plugins>
             <plugin>
@@ -135,7 +150,7 @@
 			<plugin>
 				<groupId>net.jsign</groupId>
 				<artifactId>jsign-maven-plugin</artifactId>
-				<version>6.0</version>
+				<version>7.5</version>
 				<executions>
 					<execution>
 					   <id>sign</id>
@@ -147,10 +162,15 @@
 							<file>${project.build.directory}/tosign/servoy.exe</file>
 							<name>Servoy</name>
 							<url>http://servoy.com</url>
-							<keystore>${jarsigner.keystore}</keystore>
-							<alias>${jarsigner.alias}</alias>
-							<storepass>${jarsigner.storepass}</storepass>
+							<keystore>${exesign.keystore}</keystore>
+							<storetype>${exesign.storetype}</storetype>
+							<alias>${exesign.alias}</alias>
+							<storepass>${exesign.storepass}</storepass>
 							<tsaurl>http://timestamp.sectigo.com,http://timestamp.digicert.com,${jarsigner.tsa}</tsaurl>
+							<!-- Replace the existing (Eclipse.org) signature instead of appending a
+							     second one; the Eclipse cert is expired so it must not stay as the
+							     primary signature. -->
+							<replace>true</replace>
 						</configuration>
 					</execution>
                     <execution>
@@ -163,10 +183,15 @@
                             <file>${project.build.directory}/tosign_aarch64/servoy.exe</file>
                             <name>Servoy</name>
                             <url>http://servoy.com</url>
-                            <keystore>${jarsigner.keystore}</keystore>
-                            <alias>${jarsigner.alias}</alias>
-                            <storepass>${jarsigner.storepass}</storepass>
+                            <keystore>${exesign.keystore}</keystore>
+                            <storetype>${exesign.storetype}</storetype>
+                            <alias>${exesign.alias}</alias>
+                            <storepass>${exesign.storepass}</storepass>
                             <tsaurl>http://timestamp.sectigo.com,http://timestamp.digicert.com,${jarsigner.tsa}</tsaurl>
+                            <!-- Replace the existing (Eclipse.org) signature instead of appending a
+                                 second one; the Eclipse cert is expired so it must not stay as the
+                                 primary signature. -->
+                            <replace>true</replace>
                         </configuration>
                     </execution>
 				</executions>
