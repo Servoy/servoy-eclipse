@@ -350,8 +350,20 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
           //if it's not a layout it must be a component
           this.insertedClone = this.formCache.getComponent(event.data.uuid)!;
           if (!(this.insertedClone as ComponentCache).layout) {
-            const elWidth = (this.insertedClone as ComponentCache).model.size ? (this.insertedClone as ComponentCache).model.size!.width : 200;
-            const elHeight = (this.insertedClone as ComponentCache).model.size ? (this.insertedClone as ComponentCache).model.size!.height : 100;
+            // SVY-21483: prefer the real rendered size measured on the RFB drag source
+            // (event.data.size, added in dragselection-responsive.component.ts) over the
+            // component's design-time model.size, which in a responsive/flex row rarely
+            // matches how the element actually renders and produced an oversized preview.
+            // model.size / 200x100 remain as fallbacks for when no size was measurable
+            // (e.g. a detached/zero-box source element).
+            const measuredSize = event.data.size;
+            const hasMeasuredSize = measuredSize && typeof measuredSize.width === 'number' && typeof measuredSize.height === 'number' && measuredSize.width > 0 && measuredSize.height > 0;
+            const elWidth = hasMeasuredSize
+              ? measuredSize.width
+              : (this.insertedClone as ComponentCache).model.size ? (this.insertedClone as ComponentCache).model.size!.width : 200;
+            const elHeight = hasMeasuredSize
+              ? measuredSize.height
+              : (this.insertedClone as ComponentCache).model.size ? (this.insertedClone as ComponentCache).model.size!.height : 100;
             (this.insertedClone as ComponentCache).layout = { width: elWidth + 'px', height: elHeight + 'px' };
           }
           const oldModel = (this.insertedClone as ComponentCache).model;

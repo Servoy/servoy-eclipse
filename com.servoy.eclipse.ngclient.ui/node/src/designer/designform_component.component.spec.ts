@@ -1,4 +1,5 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 import { DesignFormComponent } from './designform_component.component';
 import { StructureCache, ComponentCache } from '../ngclient/types';
 
@@ -248,6 +249,104 @@ describe('DesignFormComponent', () => {
       component.onVariantsMouseDown(event);
 
       expect(postMessageSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createDraggedComponent message handler - component size preference', () => {
+    // SVY-21483: the non-layout (component) branch of the createDraggedComponent
+    // handler must prefer event.data.size (a positive measured size) over model.size,
+    // and fall back to model.size then 200x100 when no measured size is supplied.
+    // The handler body lives inside the constructor's 'message' listener closure,
+    // so it is exercised here by constructing a real instance (via the DI-free
+    // Object.create pattern used elsewhere in this file is not possible for the
+    // closure itself) - instead we call the constructor with minimal fakes.
+    let messageListener: (event: MessageEvent) => void;
+    let insertedCloneComponent: ComponentCache;
+
+    beforeEach(() => {
+      insertedCloneComponent = Object.create(ComponentCache.prototype);
+      (insertedCloneComponent as any).model = { size: undefined };
+      insertedCloneComponent.parent = Object.create(StructureCache.prototype);
+      (insertedCloneComponent as any).name = 'comp1';
+      (insertedCloneComponent as any).specName = 'button';
+      (insertedCloneComponent as any).type = 'button';
+      (insertedCloneComponent as any).handlers = [];
+      insertedCloneComponent.layout = undefined as any;
+
+      const formCache: any = {
+        getLayoutContainer: vi.fn().mockReturnValue(undefined),
+        getComponent: vi.fn().mockReturnValue(insertedCloneComponent),
+      };
+
+      const addEventListenerSpy = vi.fn((_type: string, listener: (event: MessageEvent) => void) => {
+        messageListener = listener;
+      });
+      const windowRefService: any = {
+        nativeWindow: { addEventListener: addEventListenerSpy, parent: { postMessage: vi.fn() } },
+      };
+      const logFactory: any = { getLogger: () => ({ warn: vi.fn(), error: vi.fn(), debug: vi.fn(), info: vi.fn() }) };
+      const renderer: any = { setStyle: vi.fn(), addClass: vi.fn(), removeAttribute: vi.fn() };
+      const formservice: any = { setDesignerMode: vi.fn() };
+
+      const changeHandler: any = { detectChanges: vi.fn(), markForCheck: vi.fn() };
+
+      component = TestBed.runInInjectionContext(
+        () => new DesignFormComponent(formservice, {} as any, logFactory, changeHandler, {} as any, renderer, {} as any, windowRefService, {} as any),
+      );
+      (component as any).formCache = formCache;
+      (component as any).name = 'aForm';
+    });
+
+    const dispatchCreateDraggedComponent = (data: Record<string, unknown>) => {
+      messageListener({ data: { id: 'createDraggedComponent', uuid: 'comp1', dragCopy: false, ...data } } as MessageEvent);
+    };
+
+    it('should prefer a positive measured size over model.size', () => {
+      insertedCloneComponent.model.size = { width: 150, height: 80 };
+
+      dispatchCreateDraggedComponent({ size: { width: 42, height: 21 } });
+
+      expect(insertedCloneComponent.layout).toEqual({ width: '42px', height: '21px' });
+    });
+
+    it('should use model.size when no measured size is supplied', () => {
+      insertedCloneComponent.model.size = { width: 150, height: 80 };
+
+      dispatchCreateDraggedComponent({});
+
+      expect(insertedCloneComponent.layout).toEqual({ width: '150px', height: '80px' });
+    });
+
+    it('should fall back to 200x100 when neither measured size nor model.size are present', () => {
+      insertedCloneComponent.model.size = undefined;
+
+      dispatchCreateDraggedComponent({});
+
+      expect(insertedCloneComponent.layout).toEqual({ width: '200px', height: '100px' });
+    });
+
+    it('should treat a zero-width measured size as absent and fall through to model.size', () => {
+      insertedCloneComponent.model.size = { width: 150, height: 80 };
+
+      dispatchCreateDraggedComponent({ size: { width: 0, height: 40 } });
+
+      expect(insertedCloneComponent.layout).toEqual({ width: '150px', height: '80px' });
+    });
+
+    it('should treat a negative measured height as absent and fall through to model.size', () => {
+      insertedCloneComponent.model.size = { width: 150, height: 80 };
+
+      dispatchCreateDraggedComponent({ size: { width: 40, height: -5 } });
+
+      expect(insertedCloneComponent.layout).toEqual({ width: '150px', height: '80px' });
+    });
+
+    it('should treat a non-numeric measured size as absent and fall through to the 200x100 fallback', () => {
+      insertedCloneComponent.model.size = undefined;
+
+      dispatchCreateDraggedComponent({ size: { width: 'abc', height: 40 } });
+
+      expect(insertedCloneComponent.layout).toEqual({ width: '200px', height: '100px' });
     });
   });
 });
