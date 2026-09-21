@@ -82,4 +82,167 @@ describe('DragselectionResponsiveComponent', () => {
       expect(() => component.updateLocationCallback(5, 10)).not.toThrow();
     });
   });
+
+  describe('getMeasuredDragSize', () => {
+    // SVY-21483: measure the dragged element's rendered size so the responsive
+    // drag preview matches the actual element, not model.size / 200x100 fallback.
+    const setDragNode = (node: HTMLElement) => {
+      (component as any).dragNode = node;
+    };
+    const stubClientBox = (el: HTMLElement, width: number, height: number) => {
+      Object.defineProperty(el, 'clientWidth', { value: width, configurable: true });
+      Object.defineProperty(el, 'clientHeight', { value: height, configurable: true });
+    };
+    const stubRect = (el: HTMLElement, rect: Partial<DOMRect>) => {
+      el.getBoundingClientRect = vi.fn().mockReturnValue({ width: 0, height: 0, ...rect });
+    };
+
+    it('should measure the dragNode directly when it has a non-zero client box', () => {
+      const node = document.createElement('button');
+      stubClientBox(node, 84, 32);
+      stubRect(node, { width: 84, height: 32 });
+      setDragNode(node);
+
+      const size = (component as any).getMeasuredDragSize();
+
+      expect(size).toEqual({ width: 84, height: 32 });
+    });
+
+    it('should measure firstElementChild when dragNode reports a zero client box but has a child', () => {
+      const wrapper = document.createElement('div');
+      stubClientBox(wrapper, 0, 0);
+      stubRect(wrapper, { width: 0, height: 0 });
+
+      const child = document.createElement('span');
+      stubRect(child, { width: 60, height: 24 });
+      wrapper.appendChild(child);
+
+      setDragNode(wrapper);
+
+      const size = (component as any).getMeasuredDragSize();
+
+      expect(size).toEqual({ width: 60, height: 24 });
+    });
+
+    it('should measure parentElement when dragNode is a zero-box component with no children and no svy-layoutname', () => {
+      const parent = document.createElement('div');
+      stubRect(parent, { width: 120, height: 40 });
+
+      const node = document.createElement('div');
+      stubClientBox(node, 0, 0);
+      stubRect(node, { width: 0, height: 0 });
+      // no firstElementChild, no svy-layoutname attribute -> it's a plain component
+      parent.appendChild(node);
+
+      setDragNode(node);
+
+      const size = (component as any).getMeasuredDragSize();
+
+      expect(size).toEqual({ width: 120, height: 40 });
+    });
+
+    it('should not fall back to parentElement when dragNode is a zero-box layout container', () => {
+      const parent = document.createElement('div');
+      stubRect(parent, { width: 500, height: 500 });
+
+      const node = document.createElement('div');
+      node.setAttribute('svy-layoutname', 'flex-row');
+      stubClientBox(node, 0, 0);
+      stubRect(node, { width: 0, height: 0 });
+      parent.appendChild(node);
+
+      setDragNode(node);
+
+      const size = (component as any).getMeasuredDragSize();
+
+      // measures node itself (0x0, no child, has svy-layoutname so parent fallback is skipped) -> undefined
+      expect(size).toBeUndefined();
+    });
+
+    it('should return undefined when the measured rect has zero width and height', () => {
+      const node = document.createElement('div');
+      stubClientBox(node, 40, 40);
+      stubRect(node, { width: 0, height: 0 });
+      setDragNode(node);
+
+      const size = (component as any).getMeasuredDragSize();
+
+      expect(size).toBeUndefined();
+    });
+
+    it('should return undefined when the measured rect has a negative width', () => {
+      const node = document.createElement('div');
+      stubClientBox(node, 40, 40);
+      stubRect(node, { width: -10, height: 20 });
+      setDragNode(node);
+
+      const size = (component as any).getMeasuredDragSize();
+
+      expect(size).toBeUndefined();
+    });
+
+    it('should return undefined when the measured rect has a non-finite dimension', () => {
+      const node = document.createElement('div');
+      stubClientBox(node, 40, 40);
+      stubRect(node, { width: Infinity, height: 20 });
+      setDragNode(node);
+
+      const size = (component as any).getMeasuredDragSize();
+
+      expect(size).toBeUndefined();
+    });
+  });
+
+  describe('onMouseMove sends measured size in createDraggedComponent message', () => {
+    const buildDragStartState = (dragNode: HTMLElement, dragStartEvent: MouseEvent) => {
+      (component as any).dragNode = dragNode;
+      (component as any).dragStartEvent = dragStartEvent;
+      (component as any).dragItem = { topContainer: false, layoutName: '', componentType: 'component' };
+      (component as any).canDrop = { dropAllowed: false };
+      editorContentService.getGlassPane.mockReturnValue({
+        style: {},
+        getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0 }),
+        parentElement: { style: { paddingLeft: '0px' } },
+      });
+      (component as any).designerUtilsService.getDropNode = vi.fn().mockReturnValue({ dropAllowed: false });
+      (component as any).designerUtilsService.getNextElementSibling = vi.fn().mockReturnValue(null);
+    };
+
+    it('should include a positive measured size in the createDraggedComponent message', () => {
+      const node = document.createElement('button');
+      Object.defineProperty(node, 'clientWidth', { value: 84, configurable: true });
+      Object.defineProperty(node, 'clientHeight', { value: 32, configurable: true });
+      node.getBoundingClientRect = vi.fn().mockReturnValue({ width: 84, height: 32 });
+      node.setAttribute('svy-id', 'btn1');
+
+      const startEvent = { clientX: 0, clientY: 0 } as MouseEvent;
+      buildDragStartState(node, startEvent);
+
+      const moveEvent = { buttons: 1, clientX: 20, clientY: 20, pageX: 20, pageY: 20, ctrlKey: false, metaKey: false } as MouseEvent;
+      component.onMouseMove(moveEvent);
+
+      expect(editorContentService.sendMessageToIframe).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'createDraggedComponent', uuid: 'btn1', size: { width: 84, height: 32 } }),
+      );
+    });
+
+    it('should omit size from the createDraggedComponent message when nothing measurable', () => {
+      const node = document.createElement('div');
+      Object.defineProperty(node, 'clientWidth', { value: 0, configurable: true });
+      Object.defineProperty(node, 'clientHeight', { value: 0, configurable: true });
+      node.getBoundingClientRect = vi.fn().mockReturnValue({ width: 0, height: 0 });
+      node.setAttribute('svy-layoutname', 'flex-row');
+      node.setAttribute('svy-id', 'row1');
+
+      const startEvent = { clientX: 0, clientY: 0 } as MouseEvent;
+      buildDragStartState(node, startEvent);
+
+      const moveEvent = { buttons: 1, clientX: 20, clientY: 20, pageX: 20, pageY: 20, ctrlKey: false, metaKey: false } as MouseEvent;
+      component.onMouseMove(moveEvent);
+
+      expect(editorContentService.sendMessageToIframe).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'createDraggedComponent', uuid: 'row1', size: undefined }),
+      );
+    });
+  });
 });

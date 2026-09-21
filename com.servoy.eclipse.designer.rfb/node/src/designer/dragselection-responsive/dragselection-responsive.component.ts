@@ -110,7 +110,10 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
             if (Math.abs(this.dragStartEvent.clientX - event.clientX) > 5 || Math.abs(this.dragStartEvent.clientY - event.clientY) > 5) {
                 this.editorSession.setDragging( true );
                 this.dragCopy = event.ctrlKey || event.metaKey;
-                this.editorContentService.sendMessageToIframe({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute('svy-id'), dragCopy: this.dragCopy });
+                // SVY-21483: include the dragged element's real rendered size (when measurable)
+                // so the iframe-side drag preview matches it instead of the design-time model size
+                const size = this.getMeasuredDragSize();
+                this.editorContentService.sendMessageToIframe({ id: 'createDraggedComponent', uuid: this.dragNode.getAttribute('svy-id'), dragCopy: this.dragCopy, size });
                 if (this.dropHighlight !== this.dragItem.layoutName) {
                     const elements = this.dragNode.querySelectorAll('[svy-id]');
                     const dropHighlightIgnoredIds = Array.from(elements).map((element) => {
@@ -238,6 +241,39 @@ export class DragselectionResponsiveComponent implements OnInit, ISupportAutoscr
         this.dragItem = {};
         this.dragCopy = false;
         this.editorSession.unregisterAutoscroll(this);
+    }
+
+    /**
+     * SVY-21483: measures the real rendered size of the element being dragged, so the
+     * responsive drag preview (#svy_draggedelement in designform_component.component.ts)
+     * can be sized to match what the user actually sees instead of falling back to the
+     * component's design-time model.size / the 200x100 default.
+     *
+     * Mirrors the existing highlightEl fallback above (in onMouseDown): a wrapper node
+     * with no box of its own (clientWidth/clientHeight both 0) is not what should be
+     * measured - fall back to its first child if it has one, or to its parent when the
+     * node is a plain component wrapper (not a layout container, which has no useful
+     * parent box to substitute).
+     *
+     * Returns undefined when nothing measurable is found, so the iframe-side handler
+     * falls through to its own model.size / 200x100 fallback chain unchanged.
+     */
+    private getMeasuredDragSize(): { width: number, height: number } | undefined {
+        let elementToMeasure: HTMLElement = this.dragNode;
+        if (this.dragNode.clientWidth == 0 && this.dragNode.clientHeight == 0) {
+            if (this.dragNode.firstElementChild) {
+                elementToMeasure = this.dragNode.firstElementChild as HTMLElement;
+            } else if (!this.dragNode.getAttribute('svy-layoutname')) {
+                elementToMeasure = this.dragNode.parentElement!; //component
+            }
+        }
+        const rect = elementToMeasure.getBoundingClientRect();
+        // guard against 0x0 (nothing rendered), and against NaN/Infinity from a detached
+        // or otherwise unmeasurable element - either case must NOT be sent as a real size
+        if (Number.isFinite(rect.width) && Number.isFinite(rect.height) && rect.width > 0 && rect.height > 0) {
+            return { width: rect.width, height: rect.height };
+        }
+        return undefined;
     }
 
     private findAncestor(el: HTMLElement, cls: string): HTMLElement | null {
