@@ -1,5 +1,6 @@
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { TemplateRef } from '@angular/core';
 import { DesignFormComponent } from './designform_component.component';
 import { StructureCache, ComponentCache } from '../ngclient/types';
 
@@ -347,6 +348,89 @@ describe('DesignFormComponent', () => {
       dispatchCreateDraggedComponent({ size: { width: 'abc', height: 40 } });
 
       expect(insertedCloneComponent.layout).toEqual({ width: '200px', height: '100px' });
+    });
+  });
+
+  describe('getTemplate - missing template ref (SVY-21380)', () => {
+    // SVY-21380: getTemplate() must never evaluate undefined() / never throw for a
+    // component whose per-instance template ref is missing (e.g. a missing spec
+    // substituted by servoycore-errorbean before its template is regenerated). A
+    // regression to `return (this as any)[item.type]();` makes undefined() throw and
+    // blanks the whole form editor canvas. Here getTemplate() must instead resolve
+    // the ref to a local variable and return `typeof ref === 'function' ? ref() : ref`
+    // (a harmless undefined that Angular's [ngTemplateOutlet] tolerates).
+    let errorSpy: ReturnType<typeof vi.fn>;
+
+    const makeComponentCacheLike = (type: string | undefined): ComponentCache => {
+      // getTemplate()'s component branch only reads item.type and does
+      // `item instanceof StructureCache / FormComponentCache` checks first, so a real
+      // ComponentCache prototype (that is neither of those) is enough to reach the branch.
+      const item = Object.create(ComponentCache.prototype) as ComponentCache;
+      Object.defineProperty(item, 'type', { value: type, writable: true });
+      return item;
+    };
+
+    beforeEach(() => {
+      errorSpy = vi.fn();
+      component = Object.create(DesignFormComponent.prototype);
+      (component as any).log = {
+        error: errorSpy,
+        buildMessage: (fn: () => string) => fn(),
+      };
+    });
+
+    it('should not throw and should return undefined when the resolved ref is missing', () => {
+      const item = makeComponentCacheLike('servoycoreErrorbean');
+      // no `servoycoreErrorbean` resolver method on the instance -> ref is undefined
+
+      let result: unknown;
+      expect(() => {
+        result = component.getTemplate(item);
+      }).not.toThrow();
+      expect(result).toBeUndefined();
+    });
+
+    it('should log the "was not found" error for a missing ref', () => {
+      const item = makeComponentCacheLike('servoycoreErrorbean');
+
+      component.getTemplate(item);
+
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Template for servoycoreErrorbean was not found'));
+    });
+
+    it('should call and return the resolved template ref when it is a function', () => {
+      const fakeTemplateRef = { _fake: 'templateRef' } as unknown as TemplateRef<any>;
+      const item = makeComponentCacheLike('testpkgButton');
+      (component as any).testpkgButton = vi.fn().mockReturnValue(fakeTemplateRef);
+
+      const result = component.getTemplate(item);
+
+      expect((component as any).testpkgButton).toHaveBeenCalledTimes(1);
+      expect(result).toBe(fakeTemplateRef);
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not log and should return undefined for the intentional menu branch', () => {
+      const item = makeComponentCacheLike('menu');
+
+      let result: unknown;
+      expect(() => {
+        result = component.getTemplate(item);
+      }).not.toThrow();
+      expect(result).toBeUndefined();
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not throw and should not log when item.type is undefined', () => {
+      const item = makeComponentCacheLike(undefined);
+
+      let result: unknown;
+      expect(() => {
+        result = component.getTemplate(item);
+      }).not.toThrow();
+      expect(result).toBeUndefined();
+      expect(errorSpy).not.toHaveBeenCalled();
     });
   });
 });

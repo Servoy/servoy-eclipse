@@ -38,6 +38,7 @@ import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.j2db.persistence.IContentSpecConstants;
+import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
@@ -89,7 +90,10 @@ public class ComponentTemplateGenerator
 			{
 				continue; // special case for some old core components, shouldn't be generated
 			}
-			if (spec.isDeprecated()) continue;
+			// errorbean is deprecated for user placement (SVY-19023) but is the designated FormElement.ERROR_BEAN
+			// fallback substituted for any missing component spec, so its template must always be generated -
+			// otherwise a missing spec has no substitute template and the form editor blanks (SVY-21380).
+			if (spec.isDeprecated() && !FormElement.ERROR_BEAN.equals(spec.getName())) continue;
 			if (model == null || model.getAllExportedComponents().contains(spec.getName()))
 			{
 				String packageName = spec.getPackageName();

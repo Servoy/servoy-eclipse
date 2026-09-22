@@ -12,4 +12,6 @@ import { ServoyBaseComponent, TooltipDirective } from '@servoy/public';
 export class ErrorBean extends ServoyBaseComponent<HTMLDivElement> {
   readonly error = input(undefined);
   readonly toolTipText = input<string>(undefined!);
+  readonly location = input<any>(undefined);
+  readonly size = input<any>(undefined);
 }

@@ -565,10 +565,11 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
       return item.responsive ? this.formComponentResponsiveDiv()! : this.formComponentAbsoluteDiv()!;
     } else {
       if (item.type === 'menu') return undefined!;
-      if ((this as any)[item.type] === undefined && item.type !== undefined) {
+      const componentRef = (this as any)[item.type];
+      if (typeof componentRef !== 'function' && item.type !== undefined) {
         this.log.error(this.log.buildMessage(() => 'Template for ' + item.type + ' was not found, please check form_component template.'));
       }
-      return (this as any)[item.type]();
+      return typeof componentRef === 'function' ? componentRef() : componentRef;
     }
   }
 
