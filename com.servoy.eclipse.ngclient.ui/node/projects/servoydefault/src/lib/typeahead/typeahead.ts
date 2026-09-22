@@ -58,7 +58,10 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField<HTMLInputElem
 			this.focus$.next('');
 		}
 	}
-	onClick() {
+	onClick(event?: any) {
+		if (this.editable() == false && this.onActionMethodID()) {
+			this.onActionMethodID()(event);
+		}
 		if (((this.showPopupOnFocusGain || this.showPopupOnFocusGain === null || this.showPopupOnFocusGain === undefined) && this.editable() && !this.readOnly()) || this.findmode()) {
 			this.click$.next('');
 		}
