@@ -172,6 +172,135 @@ Link type names: `"Relates"`, `"Blocks"`, `"Cloners"`, `"Duplicate"`.
 
 ---
 
+## Adding a comment
+
+Comments use ADF (same document format as descriptions). The body is `{"body": <ADF doc>}`.
+
+**Windows quoting warning:** PowerShell mangles inline JSON that contains nested quotes.
+Write the JSON body to a UTF-8 temp file and pass it by reference instead of inlining it.
+
+### PowerShell (Windows)
+
+```powershell
+$token = $env:ATLASSIAN_AUTH_BASIC
+$headers = @{ "Authorization" = "Basic $token"; "Content-Type" = "application/json" }
+# $jsonBody built as a here-string / written to a temp file to avoid inline-quote mangling
+$tmp = Join-Path $env:TEMP "jira-comment.json"
+Set-Content -Path $tmp -Value $jsonBody -Encoding utf8
+Invoke-RestMethod -Uri "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/comment" `
+  -Method POST -Headers $headers `
+  -Body ([System.Text.Encoding]::UTF8.GetBytes((Get-Content -Raw $tmp))) -ContentType "application/json"
+Remove-Item $tmp
+```
+
+### bash (macOS/Linux)
+
+```bash
+TOKEN="$ATLASSIAN_AUTH_BASIC"
+curl -s -X POST -H "Authorization: Basic $TOKEN" -H "Content-Type: application/json" \
+  -d "$JSON_BODY" \
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/comment"
+```
+
+### Comment body with an ordered (numbered) list
+
+A plain paragraph with `\n` does **not** render as a list — use `orderedList` +
+`listItem` + `paragraph` nodes. A `heading` above it gives the block a title.
+
+```json
+{
+  "body": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      {"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "Manual test plan"}]},
+      {"type": "orderedList", "content": [
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "First step"}]}]},
+        {"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Second step"}]}]}
+      ]},
+      {"type": "paragraph", "content": [{"type": "text", "text": "-- posted by review assistant"}]}
+    ]
+  }
+}
+```
+
+Use `bulletList` instead of `orderedList` for an unordered list; the item structure is
+identical.
+
+---
+
+## Who am I (current user)
+
+```powershell
+$token = $env:ATLASSIAN_AUTH_BASIC
+$headers = @{ "Authorization" = "Basic $token" }
+$me = Invoke-RestMethod -Uri "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/myself" -Headers $headers
+$me.accountId   # use this to compare against issue.fields.assignee.accountId
+```
+
+---
+
+## Assigning an issue
+
+Assign by `accountId`. Use `null` to unassign, or `"-1"` for the project default assignee.
+
+```powershell
+$token = $env:ATLASSIAN_AUTH_BASIC
+$headers = @{ "Authorization" = "Basic $token"; "Content-Type" = "application/json" }
+$jsonBody = '{"accountId":"<ACCOUNT_ID>"}'
+Invoke-RestMethod -Uri "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/assignee" `
+  -Method PUT -Headers $headers `
+  -Body ([System.Text.Encoding]::UTF8.GetBytes($jsonBody)) -ContentType "application/json"
+```
+
+```bash
+TOKEN="$ATLASSIAN_AUTH_BASIC"
+curl -s -X PUT -H "Authorization: Basic $TOKEN" -H "Content-Type: application/json" \
+  -d '{"accountId":"<ACCOUNT_ID>"}' \
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/assignee"
+```
+
+Success is `204 No Content` (empty body).
+
+---
+
+## Transitioning an issue (changing status)
+
+Transition ids are **workflow-specific** — always read the available transitions for the
+issue first, then match by target status name (`to.name`), never by a hardcoded id.
+
+```powershell
+$token = $env:ATLASSIAN_AUTH_BASIC
+$headers = @{ "Authorization" = "Basic $token"; "Content-Type" = "application/json" }
+# 1. list what's available from the current status
+$t = Invoke-RestMethod -Uri "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/transitions" -Headers $headers
+$t.transitions | ForEach-Object { "$($_.id) $($_.name) -> $($_.to.name)" }
+# 2. perform one (pick the id whose $_.to.name is the status you want)
+$jsonBody = '{"transition":{"id":"<TRANSITION_ID>"}}'
+Invoke-RestMethod -Uri "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/transitions" `
+  -Method POST -Headers $headers `
+  -Body ([System.Text.Encoding]::UTF8.GetBytes($jsonBody)) -ContentType "application/json"
+```
+
+```bash
+TOKEN="$ATLASSIAN_AUTH_BASIC"
+curl -s -H "Authorization: Basic $TOKEN" \
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/transitions"
+curl -s -X POST -H "Authorization: Basic $TOKEN" -H "Content-Type: application/json" \
+  -d '{"transition":{"id":"<TRANSITION_ID>"}}' \
+  "https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3/rest/api/3/issue/{ISSUE_KEY}/transitions"
+```
+
+Success is `204 No Content`. SVY project statuses: `Open`, `In Progress`, `In Review`,
+`Resolved`, `Closed`, `Reopened`. From `In Review` the SVY workflow offers `Resolve Issue`
+(→ `Resolved`) and `Code review problem` (→ `In Progress`) — but always confirm live.
+
+**Note on JQL search:** this instance uses the enhanced search endpoint
+`GET /rest/api/3/search/jql?jql=...&fields=...` (the older `/rest/api/3/search` returns
+nothing here). URL-encode the JQL.
+
+---
+
 ## Error handling
 
 ### PowerShell (Windows)

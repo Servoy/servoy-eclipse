@@ -6,7 +6,7 @@ At the start of each session, quickly verify that the repo's global skills are i
 
 1. Read `~/.config/opencode/opencode.jsonc` (or `opencode.json`) and check if `skills.paths` contains this repo's `skills/` directory.
 2. If not registered, tell the user: "This repo has global skills that aren't installed yet. Run `/install-skills` to make them available in all projects."
-3. If registered, list the `skills/*/` directories in this repo and compare against `~/.config/opencode/commands/`. If any command files (`.md` files that are NOT `SKILL.md`) are missing from the global commands dir, tell the user: "New commands found in skills/. Run `/install-skills` to update."
+3. If registered, list the `skills/*/` directories in this repo and compare against `~/.config/opencode/commands/`. For each command file (`.md` files that are NOT `SKILL.md`), check both presence and contents: it is **missing** if no file with that name exists in the global commands dir, or **out of sync** if a file exists but its contents differ from the source. If any command is missing or out of sync, tell the user: "Skill commands are missing or out of date in skills/. Run `/install-skills` to update."
 
 This check should be fast — just a directory listing and a file read. Do not block on it.
 
