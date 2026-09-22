@@ -410,8 +410,8 @@ Match by the target status name (`to.name`), not by id. In the SVY workflow an `
 issue typically offers `Resolve Issue` (→ `Resolved`) and `Code review problem`
 (→ `In Progress`), but always read them live.
 
-**HUMAN GATE.** Use the `question` tool, tailoring the recommended option to the review's
-overall risk rating from Phase E:
+**HUMAN GATE 1 — direction.** Use the `question` tool, tailoring the recommended option to
+the review's overall risk rating from Phase E:
 
 - Header: "Issue Status"
 - Question: "The review of `{JIRA_KEY}` is done (overall risk: `<rating>`). Move the issue on?"
@@ -422,23 +422,65 @@ overall risk rating from Phase E:
     (e.g. `Code review problem`): "Send back to the author (→ In Progress) (Recommended)".
   - Always also offer the other transition, and "Leave it in In Review".
 
-On the user's choice, POST the matching transition:
+**HUMAN GATE 2 — time spent (required for *either* transition).** In the SVY workflow the
+`Resolve Issue` **and** the `Code review problem` transition screens make **Time Spent a
+required field** — the transition is rejected with `"Field Time Spent is required."` if you
+POST it bare. So whenever the user picks a transition (resolve *or* bounce, i.e. review
+passed or review failed), you must log the time the review took. Ask the user with the
+`question` tool:
+
+- Header: "Time Spent"
+- Question: "How much time should I log on `{JIRA_KEY}` for this review before transitioning?"
+- Options: make a **good guess** from the actual work done this session and mark it
+  `(Recommended)` — e.g. a LOW-risk two-file review that also wrote the manual test plan and
+  follow-ups is about `1h`; a quick skim `30m`; a deep cross-checked pass `1h 30m`. Always
+  offer a couple of alternatives around the guess. Phrase durations in Jira's format
+  (`30m`, `1h`, `1h 30m`, `2h`).
+
+Do **not** log the time as a separate `POST /worklog` call and *then* transition — that
+double-counts (the transition screen logs its own worklog). Log it **on the transition**
+via the `update.worklog` block instead.
+
+On the user's choices, POST the matching transition **with the worklog and, for
+`Resolve Issue`, the required `resolution` field**:
 
 ```
 POST /rest/api/3/issue/{JIRA_KEY}/transitions
-body: {"transition":{"id":"<matched id>"}}
+body (resolve):
+{
+  "transition": { "id": "<matched id>" },
+  "fields":     { "resolution": { "id": "<resolution id>" } },
+  "update":     { "worklog": [ { "add": {
+    "timeSpent": "<e.g. 1h>",
+    "comment":   "Peer review (case-review): change narrative, regression/blast-radius, security assessment, and manual test plan."
+  } } ] }
+}
+body (bounce → In Progress): same, but omit the "resolution" field (In Progress needs none).
 ```
 
-A `204 No Content` means success — confirm the new status to the user. If the chosen
-transition is no longer offered (the workflow changed under you), re-read transitions and
-report what is actually available rather than guessing. Never transition without the
-explicit answer from this gate.
+**Two format gotchas learned the hard way — get these exact:**
+1. **`resolution` is required on the `Resolve Issue` screen.** Discover the required fields
+   with `GET /rest/api/3/issue/{JIRA_KEY}/transitions?expand=transitions.fields` and the
+   resolution id with `GET /rest/api/3/resolution` (SVY: `Fixed` = `10006`). Omitting it
+   fails with `"resolution ... is required"`. The bounce transition needs no resolution.
+2. **The worklog `comment` on a *transition* screen must be a plain STRING, not ADF.** This
+   is the opposite of the standalone `POST /worklog` endpoint, which wants an ADF doc object.
+   Sending an ADF object here fails with `"comment": "expected a string"`. So: transition
+   worklog comment = `"...string..."`; standalone worklog comment = `{ "type": "doc", ... }`.
+
+Verify by re-reading `status`, `resolution` and `timetracking.timeSpent` afterwards rather
+than trusting the POST response — a `204`/empty body does not prove the fields stuck. Note
+that the SVY `Resolve Issue` post-function may **clear the assignee** on resolution; that is
+the workflow's own behaviour, not an error. If the chosen transition is no longer offered
+(the workflow changed under you), re-read transitions and report what is actually available
+rather than guessing. Never transition without the explicit answers from both gates.
 
 This skill **never pushes and never edits source files.** Its only writes, all behind the
 explicit human gates above, are:
 - a single committed **review summary** (`<ISSUE_REF>-review-summary.md`) plus an optional
   `.gitignore` line for the scratch dir (Phase F.0) — never the scratch reports, never code;
-- the Jira issue's **assignee and status** (Phase A.0 and F.1).
+- the Jira issue's **assignee, status, and a worklog** (Phase A.0 and F.1) — the worklog is
+  the review time, logged on the resolve/bounce transition per the user's Time Spent answer.
 
 The reviewed code and its history are read-only, and it never pushes. If the reviewer wants
 a fix applied, that is a separate task.
