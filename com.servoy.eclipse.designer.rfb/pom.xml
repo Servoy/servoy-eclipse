@@ -102,7 +102,20 @@
 						</configuration>
 					</execution>
 
-					<!-- 6. Run browser integration tests -->
+					<!-- 6. Install Playwright browser (idempotent: only downloads when the cached revision does not match the installed Playwright version) -->
+					<execution>
+						<id>playwright install chromium</id>
+						<phase>test</phase>
+						<goals>
+							<goal>npx</goal>
+						</goals>
+						<configuration>
+							<skipTests>${maven.test.skip}</skipTests>
+							<arguments>playwright install chromium</arguments>
+						</configuration>
+					</execution>
+
+					<!-- 7. Run browser integration tests -->
 					<execution>
 						<id>angular vitest browser</id>
 						<phase>test</phase>
