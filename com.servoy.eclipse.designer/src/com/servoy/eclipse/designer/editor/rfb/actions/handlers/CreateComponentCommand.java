@@ -571,10 +571,34 @@ public class CreateComponentCommand extends BaseRestorableCommand
 									}
 								}
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-								// this is a fix for dropping the responsive container on csspos
+								// SVY-21386: a responsive layout container has no visual coordinate - its
+								// order is driven by an ordering counter stored in its location. Decide that
+								// counter here based on where the container is dropped:
+								Point location;
+								if (args.getRightSibling() != null)
+								{
+									// dropped between/above an existing sibling: renumber the siblings so the
+									// new container takes the right sibling's slot (existing behaviour)
+									location = getLocationAndShiftSiblings(form, parentSupportingElements, args, extraChangedPersists);
+								}
+								else if (form.isResponsiveLayout() || parentSupportingElements instanceof CSSPositionLayoutContainer)
+								{
+									// dropped at the bottom of a responsive form (no right sibling): assign a
+									// monotonic max(sibling)+1 ordering counter - the same computation the
+									// Outline-add path uses (AddContainerCommand.computeNextLayoutContainerIndex)
+									// - instead of the raw pixel drop coordinate. A pixel coordinate is not
+									// guaranteed to exceed the existing siblings' counters, which made a
+									// bottom-dropped row sort above them after reload.
+									int index = AddContainerCommand.computeNextLayoutContainerIndex(parentSupportingElements);
+									location = new Point(index, index);
+								}
+								else
+								{
+									// absolute layout: the drop location is a real pixel position, keep it as-is
+									location = args.getLocation();
+								}
 								List<IPersist> res = createLayoutContainer(form, parentSupportingElements, layoutSpec, sameTypeChildContainer, config,
-									args.getRightSibling() != null
-										? getLocationAndShiftSiblings(form, parentSupportingElements, args, extraChangedPersists) : args.getLocation(),
+									location,
 									specifications, args.getPackageName());
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
@@ -598,14 +622,14 @@ public class CreateComponentCommand extends BaseRestorableCommand
 
 									}
 								}
-//								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
-//								{
-//									LayoutContainer layoutContainer = (LayoutContainer)res.get(0);
-//									List<IPersist> children = new ArrayList<>(((AbstractContainer)layoutContainer.getParent()).getAllObjectsAsList());
-//									Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
-//									//only refresh if it's not the last element
-//									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
-//								}
+								//								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
+								//								{
+								//									LayoutContainer layoutContainer = (LayoutContainer)res.get(0);
+								//									List<IPersist> children = new ArrayList<>(((AbstractContainer)layoutContainer.getParent()).getAllObjectsAsList());
+								//									Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
+								//									//only refresh if it's not the last element
+								//									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
+								//								}
 								IPersist[] result = res.toArray(new IPersist[0]);
 								return result;
 							}
