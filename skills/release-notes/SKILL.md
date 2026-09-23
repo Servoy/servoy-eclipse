@@ -1,6 +1,6 @@
 ---
 name: release-notes
-description: "Use when generating Servoy LTS/product release notes across the multi-repo checkout (sablo, server, servoy-client, servoy-eclipse, servoy-extensions): collect commits between two tags, build Bug Fixes / Other Changes / Dependency Updates tables and a plain case list, and write RELEASE_NOTES_<version>.md. Triggered by 'release notes', 'generate release notes', 'release notes for 2025.3.7', or '/release-notes'."
+description: "Use when generating Servoy product release notes across the multi-repo checkout (sablo, server, servoy-client, servoy-eclipse, servoy-extensions): collect commits between two tags, filter to product-relevant cases, review each case's Jira security level (public vs private) with the user, then write the public cases into the GitBook major-release document (release-notes/<major>.md). Triggered by 'release notes', 'generate release notes', 'release notes for 2026.9_RC2', or '/release-notes'."
 ---
 
 # Release Notes — Cross-Repo Generator
@@ -8,7 +8,14 @@ description: "Use when generating Servoy LTS/product release notes across the mu
 You generate the release notes for a Servoy product release. The product is made of **five
 git repositories** checked out side by side under a common parent directory. This skill
 collects everything that changed between the previous release tag and now, across all five,
-and writes a single Markdown release-notes document.
+filters to the product-relevant cases, reviews each case's public/private status with the
+user, and writes the public cases into the **GitBook** major-release document (one Markdown
+file per major release — **not** into the product repos).
+
+**Pipeline:** locate repos (Phase 0) → confirm the tag range (Phase 1) → collect commits and
+filter to relevant cases (Phase 2) → review each case's security level with the user, twice,
+so nothing private is published (Phase 2.5) → dependency notes (Phase 3) → write into the
+GitBook major-release file (Phase 4) → report (Phase 5).
 
 The five repositories:
 
@@ -80,7 +87,7 @@ never run the collection on inferred values silently.
    `NEW_VERSION`. If the confirmed `PREVIOUS_TAG` does not exist in a repo (tags can differ
    per repo), say so and ask how to handle that repo (a different tag, or skip it).
 
-## Phase 2 — Collect commits (all five repos)
+## Phase 2 — Collect commits and filter to the relevant cases
 
 For each repo, get the commit list between the confirmed tag and HEAD:
 
@@ -88,19 +95,76 @@ For each repo, get the commit list between the confirmed tag and HEAD:
 git -C "<ROOT>/<repo>" log --oneline "<PREVIOUS_TAG>..HEAD"
 ```
 
-Then classify:
+Extract every case reference (`SVY-\d+`, `SVYX-\d+`, `SERVOY-\d+`) and deduplicate across all
+five repos. A commit may carry several cases; keep each. Also keep the non-case commits that
+are genuinely meaningful for an "Other Changes" summary.
 
-1. **Bug fixes & changes** — commits containing a case reference (`SVY-\d+` or `SVYX-\d+`).
-   Collect them for a **Bug Fixes** table with columns **Case | Description | Component**
-   (Component = the repo the commit came from, or a finer module if obvious from the path).
-   A commit may carry several cases; list each case.
+**Filter out irrelevant cases and commits right away** — these never reach the review list or
+the notes, because they are not user-facing product changes:
 
-2. **Other changes** — commits with no case reference that are still meaningful. **Skip**
-   merge commits, version bumps, and Jenkins/CI/build-file-only changes. Collect the rest for
-   an **Other Changes** table with columns **Component | Description**.
+- merge commits, pure version bumps ("updated version", "rc2", "bumped the plugin code"),
+  and Jenkins/CI/build-file-only changes;
+- cases that are purely **internal development, tooling, or release plumbing** — e.g. build
+  infrastructure, test-only migrations/speed-ups, `skill`/`opencode`/AI-agent config work,
+  repo/URL/port changes, or anything whose only effect is on how Servoy is built or released
+  rather than on the product a customer runs.
 
-Keep descriptions concise — the commit subject, cleaned up (drop trailing markers like
-`[ai]`, drop the case key from the description column since it has its own column).
+When in doubt about whether a case is product-relevant, keep it for now — the user reviews the
+list in Phase 2.5 and can drop it there. But obvious build/release/internal noise should be
+dropped here so the review list stays focused.
+
+Keep descriptions concise — the commit subject, cleaned up (drop trailing markers like `[ai]`,
+drop the case key from the description column since it has its own column).
+
+The output of this phase is `RELEVANT_CASES`: the deduplicated set of product-relevant case
+keys, each with its summary and originating component/repo.
+
+## Phase 2.5 — Case review & privacy gate (MANDATORY — these notes are published publicly)
+
+The release notes are published on the public GitBook, so **no private/customer-confidential
+case may end up in them**. Jira carries a per-issue **security level** that decides this, and
+it is machine-readable. But the user also wants a chance to flip cases either way (make a
+currently-public case private, or clear a private flag that should be public) *before* the
+notes are cut — so this phase is a full review of the whole relevant list, not just the
+already-restricted ones.
+
+1. **Fetch the security level and summary for every case in `RELEVANT_CASES`** from Jira
+   (load the `servoy-jira` skill for the base URL + `ATLASSIAN_AUTH_BASIC` auth). The field
+   is `security`:
+
+   ```
+   GET /rest/api/3/issue/{KEY}?fields=security,summary
+   ```
+
+   - `security` is **`null`** → no security level set → currently **PUBLIC** (the normal state
+     for a public case).
+   - `security` is **non-null** (e.g. `security.name == "Private"`) → currently **RESTRICTED**.
+
+2. **Show the user the WHOLE relevant list** as a single table with **clickable links**, so
+   they can open any case and adjust its security level in Jira as they see fit — the user may
+   want some public ones made private and some private ones made public:
+
+   - Link format: `https://servoy-cloud.atlassian.net/browse/{KEY}`
+   - Columns: **Key (linked) | Security (Public / Private) | Summary**.
+   - Tell the user plainly: "Here is the full relevant case list with its current security
+     level. Go over them and adjust the security level in Jira for any that are wrong. Tell me
+     when you're done and I'll re-query."
+
+3. **Wait for the user**, then **re-query the security level for every case** (same GET as
+   step 1) so the table reflects their edits — do not reuse the first result.
+
+4. **Show the FINAL table** (same three columns, clickable links) reflecting the re-queried
+   state, and confirm it with the user before writing anything.
+
+5. **Split by the final security level:**
+   - **Public** cases (`security == null`) → included in the release notes.
+   - **Restricted** cases (`security != null`) → **excluded** from the public notes.
+
+   Do not name the excluded restricted cases in any public artifact — only report the count to
+   the user in chat. When in doubt, leave a case out.
+
+Never write a restricted case into the public notes. The final published set is exactly the
+cases that are `security == null` in the re-queried Phase 2.5 table.
 
 ## Phase 3 — Dependency updates
 
@@ -118,39 +182,69 @@ newly added dependencies (skip pure formatting/whitespace, skip pure project-ver
 
 Record each change as **Dependency | From | To**, grouped per repo/file.
 
-## Phase 4 — Write the document
+## Phase 4 — Write into the GitBook major-release document
 
-Write the full release notes as Markdown to:
+Release notes are **not** kept in the servoy-eclipse repo. They live in the separate **GitBook
+repository**, one Markdown file per **major release**, at:
 
 ```
-<ROOT>/servoy-eclipse/release_notes/RELEASE_NOTES_<NEW_VERSION>.md
+<GITBOOK_ROOT>/release-notes/<major>.md      e.g. release-notes/2026.09.md
 ```
 
-Create the `release_notes` directory if it does not exist. The document contains, in order:
+Locate `<GITBOOK_ROOT>` — the `gitbook` checkout, usually a sibling of the product repos
+(e.g. `C:\Users\jcomp\git\gitbook`). If you cannot find it, ask the user for its path. The
+`<major>` is the marketing version the release belongs to (`2026.09`), derived from
+`NEW_VERSION` — an RC like `2026.9_RC2` belongs to the `2026.09` document.
 
-1. A short title/header naming the version.
-2. A **Bug Fixes** table (Case | Description | Component).
-3. An **Other Changes** table (Component | Description).
-4. A **Dependency Updates** section, split per repo/file, each with From/To columns.
-5. A plain **Case List** fenced code block listing every `SVY-xxx` and `SVYX-xxx` case
-   number (deduplicated, sorted), suitable for pasting into a tracker or changelog.
+**Two cases:**
 
-Look at the most recent existing `RELEASE_NOTES_*.md` in that directory first and match its
-structure and heading style, so successive releases stay consistent.
+### A. The major-release file already exists (a later RC of an existing major)
+
+This is the common case: RC1 (or the final) already produced `release-notes/<major>.md` with
+the big prose sections (headline features, Security Hardening, Platform & Infrastructure, the
+themed lists, and per-RC "All Cases" tables). You are **adding this RC's delta**, not
+regenerating the file:
+
+1. **Read the existing file first** and match its structure and heading style exactly.
+2. **Generic / thematic improvements** (things worth describing in prose — a dependency bump,
+   a signing change, a cross-cutting improvement) go into the relevant existing themed section,
+   or a new `## <Theme>` section if none fits. This is where non-case build/tooling notes that
+   ARE worth mentioning to customers can go, phrased generically.
+3. **The RC's cases** go into a new **`## <major> RC<n> — All Cases`** table appended after the
+   previous RC's table, matching the exact column style already in the file (typically
+   **Components | Key | Summary**, every Key and Summary a clickable
+   `https://servoy-cloud.atlassian.net/browse/{KEY}` link, Components linked to the
+   project+component JQL as in the existing rows).
+4. **Do not repeat a case** that already appears elsewhere in the document (an earlier RC table
+   or a themed list). Check before adding.
+5. Only the **public** cases from the final Phase 2.5 table are included.
+
+### B. First RC of a brand-new major (the file does not exist yet)
+
+Create `release-notes/<major>.md`. Match the structure of the most recent existing major file
+(read the newest `release-notes/*.md` as a template): a title (`# Servoy <major> — Release
+Notes`), a "Changes since the **<previous major>** release." line, the headline/prose sections
+for the big features, themed sections where they help, and a first
+`## <major> RC1 — All Cases` table. Again, public cases only.
+
+In both cases, use the **Dependency Updates** findings from Phase 3 as prose (a themed section
+or bullet), not as a raw table, unless the existing file uses a table for them.
 
 ## Phase 5 — Report
 
-Tell the user the path written, the counts (bug fixes, other changes, dependency updates,
-distinct cases), and the confirmed range. **Do not commit or push** — writing the file is the
-deliverable; committing is the user's call. If the user asks to commit, follow the repo's
-commit convention (case key not applicable here; add a trailing `[ai]` marker since the notes
-are generated), and never push without explicit approval.
+Tell the user the GitBook file written (created or appended), which RC table was added, the
+counts (public cases published, restricted cases excluded, dependency/prose notes added), and
+the confirmed range. **Do not commit or push** — the GitBook repo is the user's to commit. If
+the user asks to commit, follow that repo's convention and never push without explicit
+approval.
 
 ## Notes
 
 - If a repo has no commits in the range, say so rather than omitting it silently.
 - If `git` is unavailable or a repo is missing, stop and report which one — the notes would be
   incomplete otherwise.
+- The output lives in the **GitBook repo**, one file per major release — never write release
+  notes back into the servoy-eclipse repo.
 - This skill replaces the old copy-paste `release_notes_prompt.md` that used to live in
   `servoy-eclipse/release_notes/` — it is the single source of truth for release-notes
   generation now.
