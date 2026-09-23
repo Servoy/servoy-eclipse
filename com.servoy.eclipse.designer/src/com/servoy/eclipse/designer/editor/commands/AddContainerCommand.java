@@ -508,7 +508,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		return null;
 	}
 
-	private int computeNextLayoutContainerIndex(IPersist parent)
+	public static int computeNextLayoutContainerIndex(IPersist parent)
 	{
 		if (parent.getAncestor(IRepository.CSSPOS_LAYOUTCONTAINERS) != null)
 		{
