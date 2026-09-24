@@ -318,6 +318,17 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
+		// servoy_jasperreports relies on shared libraries provided by other plugins (see WarExporter.JASPERREPORTS_REQUIRED_PLUGINS); make sure they are
+		// exported as well, otherwise the plugin fails at runtime. Mirrored here (in addition to the enforcement in WarExporter.copyPlugins) so the generated
+		// command line equivalent stays consistent with what is actually exported.
+		if (exportModel.getPlugins().contains(WarExporter.JASPERREPORTS_JAR))
+		{
+			for (String requiredPlugin : WarExporter.JASPERREPORTS_REQUIRED_PLUGINS)
+			{
+				if (!exportModel.getPlugins().contains(requiredPlugin)) exportModel.getPlugins().add(requiredPlugin);
+			}
+		}
+
 		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()

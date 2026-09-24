@@ -141,6 +141,17 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public class WarExporter
 {
+	/**
+	 * servoy_jasperreports.jar does not bundle all of its own dependencies; it relies on shared libraries provided by other Servoy plugins. This mirrors the
+	 * "libs already in Servoy core" &lt;delete&gt; section of the servoy_jasperreports build.xml, where those jars are removed because they are expected to be
+	 * present via other plugins: pdf_output -&gt; openpdf; images -&gt; metadata-extractor, xmpcore; jakarta-poi -&gt; commons-math3, curvesapi, poi,
+	 * SparseBitSet, xmlbeans. (Servoy core libs are always present in the WAR, so no extra action is needed there.) When servoy_jasperreports is exported, these
+	 * provider plugins must be included as well or the plugin fails at runtime with ClassNotFoundError / NoClassDefFoundError.
+	 */
+	public static final String JASPERREPORTS_JAR = "servoy_jasperreports.jar";
+
+	public static final String[] JASPERREPORTS_REQUIRED_PLUGINS = new String[] { "pdf_output.jar", "images.jar", "jakarta-poi.jar" };
+
 	private static final String[] WAR_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getPureVersion() + "*.jar", //
 		"servoy_base_" + ClientVersion.getPureVersion() + "*.jar", //
@@ -1437,7 +1448,20 @@ public class WarExporter
 		// copy the plugins
 		File pluginsDir = new File(tmpWarDir, "plugins");
 		pluginsDir.mkdirs();
-		List<String> plugins = exportModel.getPlugins();
+		// work on a local copy: the command line export model recomputes getPlugins() on each call, so mutating the returned list would not stick
+		List<String> plugins = new ArrayList<String>(exportModel.getPlugins());
+		if (plugins.contains(JASPERREPORTS_JAR))
+		{
+			for (String requiredPlugin : JASPERREPORTS_REQUIRED_PLUGINS)
+			{
+				if (!plugins.contains(requiredPlugin))
+				{
+					plugins.add(requiredPlugin);
+					ServoyLog.logInfo("WAR export: auto-including '" + requiredPlugin + "' because '" + JASPERREPORTS_JAR +
+						"' is selected and depends on shared libraries provided by it.");
+				}
+			}
+		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
 		Set<String> dependencies = new HashSet<String>();
 		try (Writer fw = new FileWriter(pluginProperties))
