@@ -100,9 +100,21 @@ public class Activator implements BundleActivator
 								{
 									String formName = requestParams.get("formpreview").get(0);
 
-									FormPreviewNGClient.setPendingTargetFormName(formName);
-									FormPreviewNGClient client = new FormPreviewNGClient(this, designerCallback, formName);
-									setClient(client);
+									FormPreviewNGClient existing = FormPreviewNGClient.getInstance();
+									if (existing != null && !existing.isShutDown() &&
+										existing.getWebsocketSession().getSessionKey().equals(getSessionKey()))
+									{
+										// reuse the existing preview client on the same session (mirror the debug NG client recycle):
+										// retarget it to the newly requested form instead of shutting it down and recreating it
+										existing.retarget(formName);
+										setClient(existing);
+									}
+									else
+									{
+										FormPreviewNGClient.setPendingTargetFormName(formName);
+										FormPreviewNGClient client = new FormPreviewNGClient(this, designerCallback, formName);
+										setClient(client);
+									}
 								}
 								else if (requestParams.containsKey("nodebug"))
 								{
