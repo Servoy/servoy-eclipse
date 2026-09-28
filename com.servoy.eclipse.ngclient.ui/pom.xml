@@ -54,7 +54,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node</workingDirectory>
-                            <arguments>install --legacy-peer-deps</arguments>
+                            <arguments>install</arguments>
                         </configuration>
                     </execution>
 
@@ -116,7 +116,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node/projects/servoydefault</workingDirectory>
-							<arguments>install --legacy-peer-deps</arguments>
+							<arguments>install</arguments>
 						</configuration>
 					</execution>
 
@@ -128,7 +128,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node/projects/dialogs</workingDirectory>
-							<arguments>install --legacy-peer-deps</arguments>
+							<arguments>install</arguments>
 						</configuration>
 					</execution>
 
@@ -140,7 +140,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/window</workingDirectory>
-                            <arguments>install --legacy-peer-deps</arguments>
+                            <arguments>install</arguments>
                         </configuration>
                     </execution>
 					<!-- 3. npm run build_lib <execution> <id>npm run build_lib</id> <phase>compile</phase> 

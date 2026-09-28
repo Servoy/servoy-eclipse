@@ -8,13 +8,13 @@ workspace with one application and multiple library sub-projects.
 
 | Aspect | Value |
 |--------|-------|
-| Framework | Angular 21 |
-| Language | TypeScript 5.9 |
+| Framework | Angular 22 |
+| Language | TypeScript 6.0 |
 | Build tool | Angular CLI (`@angular/build:application`, esbuild-based) |
-| Test framework | Jasmine + Karma |
-| Linter | ESLint 9 (`@angular-eslint`) |
-| Package manager | npm (with `legacy-peer-deps=true`) |
-| Version | 2026.9.0 |
+| Test framework | Vitest 4.x (with jsdom environment) |
+| Linter | ESLint 10 (`@angular-eslint`) |
+| Package manager | npm (default) / pnpm (opt-in via `servoy.jsRuntime=pnpm`, SVY-21456) |
+| Version | 2026.12.0 |
 
 ## Architecture
 
@@ -116,27 +116,26 @@ When writing code for this project, you are writing an **Angular application**:
 - Use `readonly` for signal properties
 
 ### Components
-- Use `standalone: false` for components in existing NgModules
+- All components are `standalone: true` with their own `imports` array; the app bootstraps via `bootstrapApplication()` (no root NgModule)
 - Prefer `inject()` function over constructor injection in new code (check what the file uses)
 - Follow the existing import style (barrel imports from `@servoy/public`, relative imports within same module)
 - Component selectors: `servoydefault-`, `servoycore-`, `svy-`, `testcomponents-` (kebab-case)
 
 ### Change detection
-- Components use default strategy; avoid manual `ChangeDetectorRef` unless necessary
-- The app uses Zone.js — don't introduce zoneless patterns
+- The app uses `provideZonelessChangeDetection()` (zoneless). Components use OnPush (default in Angular 22)
+- Zone.js is still present in polyfills only as a safety net but does NOT drive change detection — use signals or `markForCheck()` for async state changes (setTimeout, Promises, WebSocket messages). See `docs/zoneless-migration.spec.md`
 
 ### RxJS
 - Unsubscribe in `ngOnDestroy` or use `takeUntilDestroyed()` / `async` pipe
 - Never leave dangling subscriptions
 
 ### Template syntax
-- Use `@if`, `@for`, `@switch` (new control flow) in files that already use it
-- Use `*ngIf`/`*ngFor` in files that use the old syntax
+- Use `@if`, `@for`, `@switch` (new control flow) — all templates have been migrated (100% complete)
 
 ## Dependencies
 
 - Check `package.json` before assuming a library is available
-- Use `npm install --legacy-peer-deps` (`.npmrc` enforces this)
+- Use `npm install` (the `--legacy-peer-deps` flag and per-project `.npmrc` files were removed under SVY-21456)
 - Prefer existing libraries over introducing new ones
 - Key libraries: `lodash-es`, `luxon`, `numbro`, `bignumber.js`, `ag-grid-angular`
 
@@ -153,20 +152,14 @@ When writing code for this project, you are writing an **Angular application**:
 
 ## Testing
 
-- **Jasmine** for test authoring (`describe`/`it`/`expect`)
-- **Karma** as test runner
+- **Vitest** 4.x as test runner (with jsdom environment)
 - **Angular TestBed** for component/service testing
+- Import test functions explicitly: `import { describe, it, expect, beforeEach, vi } from 'vitest';`
 - Tests live next to their source: `my.component.ts` → `my.component.spec.ts`
-- Run specific test: `npx ng test --include="**/file.spec.ts" --watch=false --browsers=ChromeHeadless`
-- If Chrome is not installed, use `npm run test_edge` / `test_edge_nowatch` or set `CHROME_BIN`:
-  ```powershell
-  # Windows (Edge)
-  $env:CHROME_BIN = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-  # macOS (Edge)
-  export CHROME_BIN="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
-  # Linux (Chromium)
-  export CHROME_BIN=$(which chromium-browser)
-  ```
+- Run all app tests: `npm run test` (which is `ng test ngclient2 --no-watch`)
+- Watch mode: `npm run test:watch`; Vitest UI: `npm run test:ui`
+- Per-library: `npm run test_public` / `test_default` / `test_dialogs` / `test_window` / `test_ngclientutils`
+- Run a single spec: `npx ng test --include="**/my-component.spec.ts" --no-watch`
 
 ## AGENTS.md
 
@@ -187,14 +180,18 @@ Things that will trip you up if you don't know them:
 - **esbuild platform mismatch:** If `node_modules` was copied from another architecture,
   run `npm ci` to reinstall native binaries.
 
-- **Karma browser:** If Chrome is not available, use `npm run test_edge` / `test_edge_nowatch`
-  or set `CHROME_BIN` to an alternative Chromium-based browser (Edge, Chromium).
+- **No more `legacy-peer-deps`:** the `--legacy-peer-deps` flag and the per-project `.npmrc`
+  files (`legacy-peer-deps=true`) were removed under SVY-21456. Peer dependencies are aligned
+  across the component `package.json` files instead. Use plain `npm install`.
 
-- **`legacy-peer-deps=true`:** Required due to Angular 21 peer dependency conflicts.
-  Always use this flag when installing.
+- **pnpm mode (opt-in, SVY-21456):** with `servoy.jsRuntime=pnpm`, Servoy Developer builds a
+  solution's TiNG folder with the bundled pnpm instead of npm. npm remains the default. See
+  `docs/SVY-21456-ship-pnpm-runtime.spec.md`.
 
-- **Zone.js:** The app still uses Zone.js for change detection. Don't introduce
-  zoneless patterns unless the project migrates.
+- **Zoneless change detection:** the app uses `provideZonelessChangeDetection()`. Zone.js is
+  still in polyfills as a safety net but does NOT drive change detection — use signals or
+  `markForCheck()` to notify Angular of async state changes (setTimeout, Promises, WebSocket
+  messages). See `docs/zoneless-migration.spec.md`.
 
 - **SVG as text:** SVG files are loaded as text strings (configured in `angular.json`
   loader section). Import them as strings, not as image URLs.

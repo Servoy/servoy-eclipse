@@ -15,7 +15,7 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 | Build tool | Angular CLI (`@angular/build:application`, esbuild-based) |
 | Test framework | Vitest 4.x (with jsdom environment) |
 | Linter | ESLint 10 (`@angular-eslint`) |
-| Package manager | npm (with `legacy-peer-deps=true`) |
+| Package manager | npm (default) / pnpm (opt-in via `servoy.jsRuntime=pnpm`, SVY-21456) |
 | License | GNU Affero General Public License |
 
 ## 2. Workspace Structure
@@ -230,7 +230,7 @@ Feature specs live in `docs/` at the repository root (one level above this proje
 ### Adding Dependencies
 
 - Check `package.json` before assuming a library is available
-- Use `npm install --legacy-peer-deps` (`.npmrc` enforces this)
+- Use `npm install` (the `--legacy-peer-deps` flag and the per-project `.npmrc` files were removed under SVY-21456; peer deps are aligned across the component `package.json` files instead)
 - Prefer existing libraries already in the project over introducing new ones
 - Key libraries already available: `lodash-es`, `luxon`, `numbro`, `bignumber.js`, `ag-grid-angular`
 
@@ -252,7 +252,8 @@ ngclient2 (main application)
 - **`@servoy/public` is a local file dependency:** It must be built (`npm run build_lib`) before the app can compile. Changes to `projects/servoy-public/` require a library rebuild.
 - **esbuild platform mismatch:** If `node_modules` was copied from another architecture, run `npm ci` to reinstall native binaries.
 - **Karma browser:** If Chrome is not available, use `npm run test_edge` / `test_edge_nowatch` or set `CHROME_BIN` to an alternative Chromium-based browser (Edge, Chromium).
-- **`legacy-peer-deps=true`:** Required due to Angular 22 peer dependency conflicts. Always use this flag when installing.
+- **No more `legacy-peer-deps`:** the `--legacy-peer-deps` flag and the per-project `.npmrc` files (`legacy-peer-deps=true`) were removed under SVY-21456. Component-package peer dependencies are expected to be aligned across the `package.json` files instead. Plain `npm install` is used.
+- **pnpm mode (opt-in, SVY-21456):** with `servoy.jsRuntime=pnpm`, Servoy Developer builds a solution's TiNG folder with the bundled pnpm instead of npm. In that mode the solution folder is a standalone pnpm project (full core `package.json` + web packages installed as `.tgz` tarballs) with a solution-local `pnpm-workspace.yaml` (`nodeLinker: hoisted`, `shamefullyHoist: true`, `strictDepBuilds: false`). See `docs/SVY-21456-ship-pnpm-runtime.spec.md`. npm remains the default.
 - **Zone.js:** The app uses `provideZonelessChangeDetection()`. Zone.js is still in polyfills as a safety net during migration but does NOT trigger change detection. Use signals or `markForCheck()` to notify Angular of async state changes (setTimeout, Promises). See `docs/zoneless-migration.spec.md`.
 - **SVG as text:** SVG files are loaded as text strings (configured in `angular.json` loader section). Import them as strings, not as image URLs.
 

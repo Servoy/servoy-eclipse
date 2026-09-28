@@ -1,7 +1,7 @@
 cd projects
 FOR /D %%G in (*) DO (
 cd %%G
-npm install --legacy-peer-deps
+npm install
 cd..)
 cd ..
 pause
