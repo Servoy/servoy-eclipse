@@ -54,7 +54,7 @@
                 <dependency>
                     <groupId>com.auth0</groupId>
                     <artifactId>java-jwt</artifactId>
-                    <version>4.6.0</version>
+                    <version>4.6.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -144,7 +144,7 @@
                 <dependency>
                     <groupId>com.ethlo.time</groupId>
                     <artifactId>itu</artifactId>
-                    <version>1.14.0</version>
+                    <version>1.16.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -156,25 +156,25 @@
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-core</artifactId>
-                    <version>2.22.2</version>
+                    <version>2.22.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                    <version>2.22.2</version>
+                    <version>2.22.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.dataformat</groupId>
                     <artifactId>jackson-dataformat-xml</artifactId>
-                    <version>2.22.2</version>
+                    <version>2.22.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml.jackson.dataformat</groupId>
                     <artifactId>jackson-dataformat-yaml</artifactId>
-                    <version>2.22.2</version>
+                    <version>2.22.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -366,7 +366,7 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.18.12</version>
+                    <version>1.18.14</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -444,31 +444,31 @@
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpg-jdk18on</artifactId>
-                    <version>1.85</version>
+                    <version>1.86</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpkix-jdk18on</artifactId>
-                    <version>1.85</version>
+                    <version>1.86</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk18on</artifactId>
-                    <version>1.85.2</version>
+                    <version>1.86</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcutil-jdk18on</artifactId>
-                    <version>1.85</version>
+                    <version>1.86</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.codehaus.woodstox</groupId>
                     <artifactId>stax2-api</artifactId>
-                    <version>4.3.0</version>
+                    <version>4.3.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -546,19 +546,19 @@
                 <dependency>
                     <groupId>org.owasp.encoder</groupId>
                     <artifactId>encoder</artifactId>
-                    <version>1.4.0</version>
+                    <version>1.4.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
-                    <version>2.0.18</version>
+                    <version>2.0.20</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.yaml</groupId>
                     <artifactId>snakeyaml</artifactId>
-                    <version>2.6</version>
+                    <version>2.7</version>
                     <type>jar</type>
                 </dependency>
             </dependencies>
