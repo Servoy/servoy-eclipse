@@ -184,6 +184,36 @@ archive. This keeps Node + npm + pnpm delivered and versioned as one unit.
   extract it to a sibling dir and add **both** dirs to `PATH`. The requirement is only that
   `pnpm` can resolve the bundled `node` at runtime without a system install.
 
+#### 3.2.1 Which pnpm artifact we ship, and why Node is still bundled separately
+
+We ship pnpm's **standalone binary** (`pnpm-<platform>.zip` / `.tar.gz` from the pnpm GitHub
+release, e.g. `pnpm-win32-arm64.zip`). Verified facts behind this choice (pnpm 12.7.0):
+
+- The standalone binary is ~21 MB zipped / ~42 MB on disk because it has a **full Node.js +
+  V8 runtime embedded** in the executable. That embedded runtime is used **only for pnpm to
+  execute itself** — it is not exposed as a usable `node`. Verified: `pnpm node --version`
+  fails with `Command "node" not found`, and a `pnpm run <script>` that invokes bare `node`
+  fails with `'node' is not recognized` when no Node is on `PATH`. So pnpm does **not** provide
+  a Node runtime for the Angular build; the build's `ng`/`node` still resolve from `PATH`,
+  which is exactly why the bundled Node dir is put first on `PATH` (§3.5). Node therefore
+  remains a separately-bundled requirement — the two runtimes are not redundant.
+
+- We deliberately do **not** use the small (~3.86 MB) `pnpm` **npm package** instead. Since
+  pnpm 11 that package is not a self-contained JS implementation: its `bin/pnpm.mjs` is a
+  Corepack wrapper/downloader whose `dist/` holds only the `get-pnpm` downloader (+ node-gyp
+  helpers), and on first run it **downloads the same ~42 MB native binary from the registry**.
+  That breaks the offline / self-contained guarantee (the bundled runtime must work with no
+  network and no system Node), so the small package is not an option. There is no longer a
+  pure-JS `pnpm.cjs` entry point that could run on the bundled Node.
+
+- **Not pursued: `pnpm runtime` / `pnpm env` managing Node.** pnpm can download and manage a
+  Node version itself (driven by `.nvmrc` / `.node-version` / `devEngines.runtime`). We do
+  **not** use this: it is a first-run network download and moves the Node version out of our
+  explicit control. Servoy keeps bundling Node itself and pinning both Node and pnpm to fixed
+  versions that are bumped deliberately (see §4 / the version-bump commits). The ~21 MB of an
+  embedded-Node pnpm binary per platform is the accepted cost of an offline, self-contained,
+  explicitly-versioned runtime.
+
 ### 3.3 Extending the `nodejs` extension point (optional `pnpmPath`)
 
 Extend the existing schema `com.servoy.eclipse.ngclient.ui/schema/nodejs.exsd` rather than
