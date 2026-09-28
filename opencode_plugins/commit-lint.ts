@@ -1,4 +1,4 @@
-import type { Plugin } from "@opencode-ai/plugin"
+import { Plugin } from "@opencode/plugin"
 
 const JIRA_KEY_PATTERN = /^(SVY|SVYX|SERVOY)-\d+/
 const AI_SUFFIX = "[ai]"
@@ -28,20 +28,24 @@ function validateCommitMessage(message: string, options: CommitLintOptions = {})
   return errors
 }
 
-let requireJiraKey = false
+export default Plugin.define({
+  id: "servoy.commit-lint",
+  async setup(ctx) {
+    // When the sdd skill runs, commits must carry a Jira key. The skill is
+    // invoked through the skill tool, so watch for it in execute.before.
+    let requireJiraKey = false
 
-export default (async () => {
-  return {
-    "tool.execute.before": async (input, output) => {
-      if (input.tool === "skill" && output.args?.name === "sdd") {
+    await ctx.tool.hook("execute.before", (event) => {
+      const input = (event.input ?? {}) as Record<string, unknown>
+
+      if (event.tool === "skill" && input.name === "sdd") {
         requireJiraKey = true
         return
       }
 
-      if (input.tool !== "eclipse-git_gitCommit") return
+      if (event.tool !== "eclipse-git_gitCommit") return
 
-      const args = output.args as Record<string, string>
-      const message = args.message
+      const message = typeof input.message === "string" ? input.message : undefined
       if (!message) return
 
       const errors = validateCommitMessage(message, { requireJiraKey })
@@ -56,6 +60,6 @@ export default (async () => {
                 `Example: update project-context docs [ai]`)
         )
       }
-    },
-  }
-}) satisfies Plugin
+    })
+  },
+})
