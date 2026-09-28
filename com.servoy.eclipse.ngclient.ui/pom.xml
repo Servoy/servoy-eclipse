@@ -42,7 +42,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<nodeVersion>v24.18.0</nodeVersion>
+							<nodeVersion>v24.21.0</nodeVersion>
 						</configuration>
 					</execution>
 
@@ -79,7 +79,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/servoydefault</workingDirectory>
-                            <nodeVersion>v24.18.0</nodeVersion>
+                            <nodeVersion>v24.21.0</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -91,7 +91,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/dialogs</workingDirectory>
-                            <nodeVersion>v24.18.0</nodeVersion>
+                            <nodeVersion>v24.21.0</nodeVersion>
                         </configuration>
                     </execution>
 
@@ -103,7 +103,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/window</workingDirectory>
-                            <nodeVersion>v24.18.0</nodeVersion>
+                            <nodeVersion>v24.21.0</nodeVersion>
                         </configuration>
                     </execution>
 
