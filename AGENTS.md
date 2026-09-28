@@ -146,6 +146,7 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 - **Java plugin tests:** `com.servoy.eclipse.tests` (eclipse-test-plugin packaging)
 - **UI property tests (SVY-21432):** `com.servoy.eclipse.ui.tests` fragment — `com.servoy.eclipse.ui.property.RepositoryHelperShouldShowNameTest` (Form `name` shown again, other props still suppressed) and `com.servoy.eclipse.ui.property.IdentDocumentValidatorFormNameTest` (form-name validation rule the setter enforces)
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
+- **LFC per-row auto-height (SVY-21457):** `com.servoy.eclipse.ngclient.ui/node/src/servoycore/listformcomponent/listformcomponent.spec.ts` and `row-renderer.component.spec.ts` (Jasmine/Karma) — asserts that native AG Grid `autoHeight` is disabled only for the per-row auto-height path (responsive, `responsiveHeight < 0`) and unchanged elsewhere; that `getRowHeight`/`applyMeasuredRowHeight` feed each row's explicitly-measured height back into AG Grid's server-side row model; the `visibility: hidden` anti-flicker reveal; the hardened resize-observer guard (column-count only, immune to scrollbar-driven width jitter); and (in `row-renderer.component.spec.ts`) `RowRenderer`'s per-row measurement via `ngAfterViewInit` and the recursive float-collapse-safe `measureContentHeight`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/src/test.ts`
 - **WPM tests:** `com.servoy.eclipse.designer.wpm/node/src/test.ts`
 

@@ -153,8 +153,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     numberOfColumns = 1;
     resizeObserver: ResizeObserver;
     resizeTimeout: any;
-    previousWidth = 0;
-    private rowHeightMeasured = false;
+    // for the responsive auto-height (responsiveHeight < 0) path AG Grid measures each row
+    // and re-lays them out after the first paint; keep the grid hidden until that first
+    // layout settles so the double render is not visible as a flicker (SVY-21244)
+    private hideUntilFirstRender = false;
+    private firstRenderDone = false;
+    // per-row auto-height (responsiveHeight < 0): rows already measured, so a later
+    // re-render (e.g. after a filter) does not re-measure them again unnecessarily
+    private readonly measuredRowHeights = new Map<string, number>();
 
     // used for paging
     page = 0;
@@ -289,6 +295,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
 
         if (this.useScrolling) {
+            this.hideUntilFirstRender = !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0;
             this.agGridOptions = {
                 animateRows: false,
                 suppressContextMenu: true,
@@ -316,13 +323,38 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                     }
                 },
                 columnDefs: [
-                    { cellRenderer: 'row-renderer', autoHeight: !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0 ? false : true }
+                    // Native AG Grid autoHeight stays enabled for every path EXCEPT the responsive
+                    // per-row auto-height path (isPerRowAutoHeight(), i.e. !isInAbsoluteLayout() &&
+                    // responsiveHeight() < 0) - this preserves pre-existing behaviour for absolute
+                    // layout and for responsive LFCs with a fixed responsiveHeight >= 0.
+                    //
+                    // For the per-row auto-height path specifically, native autoHeight is disabled
+                    // because it attaches a ResizeObserver to each cell that re-measures/re-renders
+                    // every time the cell's content reflows. The nested responsive form inside each
+                    // row (bootstrap 12grid, float-based columns) reflows across several layout
+                    // passes before settling, so native autoHeight retriggers repeatedly and is
+                    // visible as a flicker on first show (confirmed by isolation testing during
+                    // SVY-21457). Per-row sizing for that path is done instead with one explicit
+                    // measurement per row (see RowRenderer.ngAfterViewInit), taken after the row's
+                    // own layout has settled, applied once via node.setRowHeight() +
+                    // api.onRowHeightChanged() (SVY-21244 / SVY-21457).
+                    { cellRenderer: 'row-renderer', autoHeight: !this.isPerRowAutoHeight() }
                 ],
                 rowModelType: 'serverSide',
                 cacheBlockSize: AGGRID_CACHE_BLOCK_SIZE,
                 infiniteInitialRowCount: AGGRID_CACHE_BLOCK_SIZE,
                 //maxBlocksInCache: AGGRID_MAX_BLOCKS_IN_CACHE,
                 rowHeight: this.getRowHeight(),
+                // Server-side row model re-resolves every row's height (e.g. on refreshServerSide,
+                // resize, resetRowHeights) via getRowHeight()/rowHeight, NOT the value passed to
+                // node.setRowHeight() alone - without this callback every reset clobbers the
+                // per-row heights RowRenderer measures back to a single uniform value. Return the
+                // measured height once we have it for that row (SVY-21457); fall back to a default
+                // estimate until the row has been measured for the first time.
+                getRowHeight: this.isPerRowAutoHeight() ? (params: any) => {
+                    const measured = this.measuredRowHeights.get(params.node.id);
+                    return measured != null ? measured : (this.getRowHeight() || 42);
+                } : undefined,
                 navigateToNextCell: (params: any) => {
                     const previousCell = params.previousCellPosition;
                     const suggestedNextCell = params.nextCellPosition;
@@ -349,6 +381,22 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 },
                 onFirstDataRendered: (params: any) => {
                     this.scrollToSelection();
+                    // wait one extra frame beyond the double-rAF used by RowRenderer's own
+                    // measurement (see RowRenderer.measureAndApplyRowHeight) so every row attached
+                    // during this initial render has already applied its measured height before
+                    // the grid becomes visible; avoids revealing mid-measurement (SVY-21457).
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => this.revealAfterFirstRender());
+                        });
+                    });
+                },
+                onModelUpdated: (params: any) => {
+                    // fallback for the empty-foundset case where onFirstDataRendered never fires;
+                    // reveal once the grid model has settled with no rows so it does not stay hidden
+                    if (this.hideUntilFirstRender && !this.firstRenderDone && params.api.getDisplayedRowCount() === 0) {
+                        this.revealAfterFirstRender();
+                    }
                 },
                 domLayout: this.responsiveHeight() < 0 ? 'autoHeight' : 'normal'
             };
@@ -524,29 +572,36 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         if (this.useScrolling) {
             this.agGrid().api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
             if(!this.servoyApi.isInAbsoluteLayout()) {
-                this.resizeObserver = new ResizeObserver((entries) => {
-                    const newWidth = entries[0].contentRect.width;
-                    if(newWidth !== this.previousWidth) {
-                        this.previousWidth = newWidth;
-                        const newNumberOfColumns = this.calculateNumberOfColumns();
-                        if(newNumberOfColumns !== this.numberOfColumns) {
-                            if(this.resizeTimeout) {
-                                clearTimeout(this.resizeTimeout);
-                            }
-                            this.resizeTimeout = setTimeout(() => {
-                                const agGrid = this.agGrid();
-                                if(!agGrid.api.isDestroyed()) {
-                                    this.numberOfColumns = this.calculateNumberOfColumns();
-                                    this.resizeTimeout = null;
-                                    agGrid.api.refreshServerSide({ purge: true });
-                                    const foundset = this._foundset();
-                                    agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
-                                    setTimeout(() => {
-                                        this.scrollToSelection();
-                                    }, 200);
-                                }
-                            }, 200);
+                this.resizeObserver = new ResizeObserver(() => {
+                    // Do NOT react to the observed rect width directly: with domLayout 'autoHeight'
+                    // and native per-row autoHeight, measuring rows changes the grid height, which
+                    // can toggle a vertical scrollbar and shift the element width by the scrollbar
+                    // width. Reacting to that width delta would purge the grid, remeasure, toggle the
+                    // scrollbar again and loop forever (SVY-21244 / SVY-21457). Instead we only act
+                    // when the *computed column count* actually changes; a scrollbar-only width delta
+                    // does not change the column count, so the loop cannot start.
+                    const newNumberOfColumns = this.calculateNumberOfColumns();
+                    if(newNumberOfColumns !== this.numberOfColumns) {
+                        if(this.resizeTimeout) {
+                            clearTimeout(this.resizeTimeout);
                         }
+                        this.resizeTimeout = setTimeout(() => {
+                            const agGrid = this.agGrid();
+                            if(!agGrid.api.isDestroyed()) {
+                                // re-check inside the debounce: the column count must still differ,
+                                // otherwise a transient reflow already settled and no purge is needed
+                                const settledColumns = this.calculateNumberOfColumns();
+                                this.resizeTimeout = null;
+                                if(settledColumns === this.numberOfColumns) return;
+                                this.numberOfColumns = settledColumns;
+                                agGrid.api.refreshServerSide({ purge: true });
+                                const foundset = this._foundset();
+                                agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
+                                setTimeout(() => {
+                                    this.scrollToSelection();
+                                }, 200);
+                            }
+                        }, 200);
                     }
                 });
                 this.resizeObserver.observe(this.element().nativeElement);
@@ -622,19 +677,43 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         return containedForm.formHeight ? containedForm.formHeight : null;
     }
 
-    onRowRendererAfterViewInit(elementRef: ElementRef): void {
-        if (!this.rowHeightMeasured && !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0) {
-            this.rowHeightMeasured = true;
+    /**
+     * Per-row auto-height for the responsive `responsiveHeight < 0` path (SVY-21457). Called by
+     * RowRenderer once its content has settled (see RowRenderer.measureAndApplyRowHeight).
+     * Applying the height explicitly per row (instead of AG Grid's native colDef.autoHeight)
+     * avoids attaching a ResizeObserver to every cell: the nested responsive form content
+     * (bootstrap 12grid, float-based columns) reflows across several layout passes before
+     * settling, and native autoHeight would re-measure/re-render on every one of those passes,
+     * which is visible as a flicker on first show (this is what SVY-21244 originally fixed for
+     * the single-fixed-height case, and what re-appeared when autoHeight was tried for SVY-21457).
+     */
+    applyMeasuredRowHeight(rowId: string, node: any, measuredHeight: number): void {
+        if (!this.isPerRowAutoHeight() || measuredHeight <= 0) {
+            return;
+        }
+        if (this.measuredRowHeights.get(rowId) === measuredHeight) {
+            return;
+        }
+        this.measuredRowHeights.set(rowId, measuredHeight);
+        node.setRowHeight(measuredHeight);
+        const agGrid = this.agGrid();
+        if (agGrid && !agGrid.api.isDestroyed()) {
+            agGrid.api.onRowHeightChanged();
+        }
+    }
+
+    isPerRowAutoHeight(): boolean {
+        return !this.servoyApi.isInAbsoluteLayout() && this.responsiveHeight() < 0;
+    }
+
+    private revealAfterFirstRender(): void {
+        if (this.hideUntilFirstRender && !this.firstRenderDone) {
+            // rows have been rendered and (for autoHeight) measured; reveal on the next frame
+            // so the browser has laid out the final row heights, avoiding the visible double
+            // render / flicker (SVY-21244)
             requestAnimationFrame(() => {
-                const contentEl = elementRef.nativeElement.querySelector(':first-child');
-                const measuredHeight = contentEl ? contentEl.scrollHeight : elementRef.nativeElement.scrollHeight;
-                if (measuredHeight > 0) {
-                    const agGrid = this.agGrid();
-                    if (agGrid && !agGrid.api.isDestroyed()) {
-                        agGrid.api.setGridOption('rowHeight', measuredHeight);
-                        agGrid.api.resetRowHeights();
-                    }
-                }
+                this.firstRenderDone = true;
+                this.cdRef.detectChanges();
             });
         }
     }
@@ -1011,6 +1090,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             aggridStyle['height'] = '100%';
         } else {
             aggridStyle['height.px'] = this.responsiveHeight();
+        }
+        if (this.hideUntilFirstRender && !this.firstRenderDone) {
+            aggridStyle['visibility'] = 'hidden';
         }
         return aggridStyle;
     }
