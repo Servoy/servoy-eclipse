@@ -3,6 +3,8 @@ package com.servoy.eclipse.ngclient.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -53,6 +55,7 @@ public class Activator extends Plugin
 
 	private File nodePath;
 	private File npmPath;
+	private File pnpmPath;
 	private RunNPMCommand buildCommand;
 	private File mainTargetFolder;
 	private File solutionProjectFolder;
@@ -81,8 +84,8 @@ public class Activator extends Plugin
 			File stateLocation = Activator.getInstance().getStateLocation().toFile();
 			this.mainTargetFolder = new File(stateLocation, NG2_FOLDER);
 		}
-//		new DistFolderCreatorJob(projectFolder, true).schedule();
-//		extractNode();
+		//		new DistFolderCreatorJob(projectFolder, true).schedule();
+		//		extractNode();
 	}
 
 	public synchronized IConsole getConsole()
@@ -145,10 +148,15 @@ public class Activator extends Plugin
 
 		String nodePth = getSystemOrEvironmentProperty("servoy.nodePath");
 		String npmPth = getSystemOrEvironmentProperty("servoy.npmPath");
+		String pnpmPth = getSystemOrEvironmentProperty("servoy.pnpmPath");
 		if (nodePth != null && npmPth != null)
 		{
 			nodePath = new File(nodePth);
 			npmPath = new File(npmPth);
+			if (pnpmPth != null)
+			{
+				pnpmPath = new File(pnpmPth);
+			}
 			countDown();
 		}
 		else
@@ -163,11 +171,22 @@ public class Activator extends Plugin
 					IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
 					File node = null;
 					File npm = null;
+					File pnpm = null;
 					if (cf.length > 0)
 					{
 						node = extractPath(cf[0], "nodePath", true);
 						node.setExecutable(true);
 						npm = extractPath(cf[0], "npmPath", false);
+						// in pnpm mode also extract the bundled pnpm binary next to node so pnpm can find the bundled node via PATH;
+						// pnpm uses its own extraction marker so its extract/skip decision is independent of node's .fullygenerated
+						if (isPnpmMode() && cf[0].getAttribute("pnpmPath") != null)
+						{
+							pnpm = extractPnpmPath(cf[0]);
+							if (pnpm != null)
+							{
+								pnpm.setExecutable(true);
+							}
+						}
 					}
 					else
 					{
@@ -175,12 +194,24 @@ public class Activator extends Plugin
 					}
 					nodePath = node;
 					npmPath = npm;
+					pnpmPath = pnpm;
 					countDown();
 					return Status.OK_STATUS;
 				}
 			};
 			extractingNode.schedule();
 		}
+	}
+
+	/**
+	 * @return true if Servoy Developer runs in pnpm mode (servoy.jsRuntime=pnpm), false otherwise (npm is the default).
+	 */
+	public static boolean isPnpmMode()
+	{
+		Activator instance = getInstance();
+		if (instance == null) return false;
+		String jsRuntime = instance.getSystemOrEvironmentProperty("servoy.jsRuntime");
+		return "pnpm".equalsIgnoreCase(jsRuntime);
 	}
 
 	/**
@@ -199,7 +230,28 @@ public class Activator extends Plugin
 		return mainTargetFolder;
 	}
 
+	/**
+	 * @return the bundled Node executable, or <code>null</code> if Node has not been extracted yet.
+	 */
+	public File getNodePath()
+	{
+		return nodePath;
+	}
+
+	/**
+	 * @return the bundled pnpm executable (only relevant in pnpm mode), or <code>null</code> if pnpm is not available.
+	 */
+	public File getPnpmPath()
+	{
+		return pnpmPath;
+	}
+
 	private static File extractPath(IConfigurationElement element, String attribute, boolean deletePreviousPaths)
+	{
+		return extractPath(element, attribute, "archive", deletePreviousPaths);
+	}
+
+	private static File extractPath(IConfigurationElement element, String attribute, String archiveAttribute, boolean deletePreviousPaths)
 	{
 		String pluginId = element.getNamespaceIdentifier();
 		String path = element.getAttribute(attribute);
@@ -209,7 +261,7 @@ public class Activator extends Plugin
 		File fullyGenerated = new File(baseDir, ".fullygenerated");
 		if (!file.exists() || !fullyGenerated.exists())
 		{
-			String archive = element.getAttribute("archive");
+			String archive = element.getAttribute(archiveAttribute);
 			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
 			if (archiveUrl != null)
 			{
@@ -268,12 +320,151 @@ public class Activator extends Plugin
 		return file;
 	}
 
+	/**
+	 * Extracts the bundled pnpm archive into a version-qualified sub-directory of the plugin state location
+	 * (e.g. <code>pnpm-12.5.1/</code>), keeping it out of the state-location root where the TiNG
+	 * <code>target/</code> folder lives. pnpm uses a pnpm-specific <code>.pnpmgenerated</code> marker so that its
+	 * extract/skip decision is fully independent of node's <code>.fullygenerated</code> marker.
+	 * <p>
+	 * The pnpm archive contains the pnpm binary plus a sibling <code>dist/</code> directory; both are extracted
+	 * into the version sub-dir so a single <code>pnpm-&lt;version&gt;/</code> folder holds the whole install (the
+	 * binary runs standalone, but keeping <code>dist/</code> beside it is tidy and self-contained). The version
+	 * token is the contributing bundle's version (or an optional <code>pnpmVersion</code> attribute override) and
+	 * doubles as the sub-dir name, so shipping a new pnpm version extracts into a fresh
+	 * <code>pnpm-&lt;newVersion&gt;/</code> dir and the stale one is removed.
+	 * <p>
+	 * Re-extraction is triggered when the pnpm binary is missing, the <code>.pnpmgenerated</code> marker is missing,
+	 * OR the marker's stored token differs from the current token. pnpm never touches the node install or the
+	 * <code>NG2_FOLDER</code>; on a version change it only removes its own previous <code>pnpm-&lt;oldVersion&gt;/</code>
+	 * directory. This keeps the two extractions fully independent and future-proof.
+	 *
+	 * @param element the <code>nodejs</code> extension configuration element carrying <code>pnpmPath</code> /
+	 *            <code>pnpmArchive</code>
+	 * @return the pnpm binary {@link File} inside its version sub-dir, or <code>null</code> if the pnpm archive
+	 *         could not be resolved
+	 */
+	private static File extractPnpmPath(IConfigurationElement element)
+	{
+		String pluginId = element.getNamespaceIdentifier();
+		String path = element.getAttribute("pnpmPath");
+		IPath stateLocation = plugin.getStateLocation();
+		File baseDir = stateLocation.toFile();
+
+		// The pnpm version identity: the contributing bundle's version bumps whenever the shipped pnpm payload
+		// changes, so it is a stable token for "which pnpm is on disk". An optional pnpmVersion attribute may
+		// override it if ever declared in plugin.xml.
+		String currentToken = element.getAttribute("pnpmVersion");
+		if (currentToken == null || currentToken.isBlank())
+		{
+			currentToken = Platform.getBundle(pluginId).getVersion().toString();
+		}
+
+		// extract into a version-qualified sub-dir (e.g. pnpm-12.5.1/) so pnpm and its dist/ stay out of the
+		// state-location root that holds the TiNG target/ folder
+		File pnpmDir = new File(baseDir, "pnpm-" + currentToken);
+		File file = new File(pnpmDir, path);
+		File pnpmGenerated = new File(baseDir, ".pnpmgenerated");
+
+		String storedToken = readPnpmMarkerToken(pnpmGenerated);
+
+		boolean needsExtract = !file.exists() || !pnpmGenerated.exists() || !currentToken.equals(storedToken);
+		if (needsExtract)
+		{
+			String archive = element.getAttribute("pnpmArchive");
+			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
+			if (archiveUrl != null)
+			{
+				// clean up the previous pnpm version dir (targeted: only our own pnpm-* dirs, never node dirs or
+				// the NG2_FOLDER)
+				File[] stalePnpmDirs = baseDir.listFiles(
+					oldFile -> oldFile.isDirectory() && oldFile.getName().startsWith("pnpm-") && !oldFile.getName().equals(pnpmDir.getName()));
+				if (stalePnpmDirs != null)
+				{
+					for (File stale : stalePnpmDirs)
+					{
+						try
+						{
+							FileUtils.deleteDirectory(stale);
+						}
+						catch (IOException e)
+						{
+							getInstance().getLog().error("Error deleting old pnpm dir: " + stale.getAbsolutePath(), e);
+						}
+					}
+				}
+				if (pnpmGenerated.exists())
+				{
+					pnpmGenerated.delete();
+				}
+				pnpmDir.mkdirs();
+				try
+				{
+					if (ZipUtils.isZipFile(archiveUrl))
+					{
+						ZipUtils.extractZip(archiveUrl, pnpmDir);
+					}
+					else if (ZipUtils.isTarGZFile(archiveUrl))
+					{
+						ZipUtils.extractTarGZ(archiveUrl, pnpmDir);
+					}
+					else if (ZipUtils.isTarXZFile(archiveUrl))
+					{
+						ZipUtils.extractTarXZ(archiveUrl, pnpmDir);
+					}
+					// record the version token so a later pnpm version change forces re-extraction
+					Files.writeString(pnpmGenerated.toPath(), currentToken, StandardCharsets.UTF_8);
+				}
+				catch (IOException e)
+				{
+					getInstance().getLog().error("Error extracting pnpm from " + archiveUrl, e);
+				}
+			}
+			else
+			{
+				getInstance().getLog().info("couldn't extract pnpm from plugin " + pluginId + " and archive: " + archive);
+				return null;
+			}
+		}
+		return file;
+	}
+
+	/**
+	 * Reads the version token previously stored in the <code>.pnpmgenerated</code> marker. A missing, empty or
+	 * unreadable marker yields <code>null</code> (treated as "no token" -> re-extract).
+	 */
+	private static String readPnpmMarkerToken(File pnpmGenerated)
+	{
+		if (!pnpmGenerated.exists())
+		{
+			return null;
+		}
+		try
+		{
+			String token = Files.readString(pnpmGenerated.toPath(), StandardCharsets.UTF_8).trim();
+			return token.isEmpty() ? null : token;
+		}
+		catch (IOException e)
+		{
+			getInstance().getLog().error("Error reading pnpm marker: " + pnpmGenerated.getAbsolutePath(), e);
+			return null;
+		}
+	}
+
 	public IRunNPMCommand createNPMCommand(File folder, List<String> commandArguments)
 	{
 		waitForNodeExtraction();
 		if (nodePath == null)
 		{
 			return new NoOpNPMCommand(commandArguments);
+		}
+		if (isPnpmMode())
+		{
+			if (pnpmPath == null)
+			{
+				getInstance().getLog().warn("servoy.jsRuntime=pnpm is set but no bundled pnpm binary was found; no npm/pnpm command will run.");
+				return new NoOpNPMCommand(commandArguments);
+			}
+			return new RunPNPMCommand(pnpmPath, nodePath, folder, commandArguments);
 		}
 		return new RunNPMCommand(nodePath, npmPath, folder, commandArguments);
 	}

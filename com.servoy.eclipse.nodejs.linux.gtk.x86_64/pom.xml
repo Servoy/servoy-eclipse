@@ -14,6 +14,9 @@
 	<artifactId>com.servoy.eclipse.nodejs.linux.gtk.x86_64</artifactId>
 	<version>24.18.0</version>
 	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<pnpm.version>12.5.1</pnpm.version>
+	</properties>
 	<build>
 		<plugins>
 			 <plugin>
@@ -29,6 +32,20 @@
                         <configuration>
                             <url>https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz</url>
                             <outputFileName>node.tar.xz</outputFileName>
+                            <unpack>false</unpack>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-pnpm</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://github.com/pnpm/pnpm/releases/download/v${pnpm.version}/pnpm-linux-x64.tar.gz</url>
+                            <outputFileName>pnpm.tar.gz</outputFileName>
                             <unpack>false</unpack>
                             <overwrite>true</overwrite>
                             <outputDirectory>${basedir}/</outputDirectory>

@@ -15,6 +15,9 @@
 	<artifactId>com.servoy.eclipse.nodejs.win32.win32.aarch64</artifactId>
 	<version>24.18.0</version>
 	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<pnpm.version>12.5.1</pnpm.version>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -30,6 +33,20 @@
 						<configuration>
 							<url>https://nodejs.org/dist/v${project.version}/node-v${project.version}-win-arm64.zip</url>
 							<outputFileName>node.zip</outputFileName>
+                            <overwrite>true</overwrite>
+							<unpack>false</unpack>
+							<outputDirectory>${basedir}/</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>download-pnpm</id>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<url>https://github.com/pnpm/pnpm/releases/download/v${pnpm.version}/pnpm-win32-arm64.zip</url>
+							<outputFileName>pnpm.zip</outputFileName>
                             <overwrite>true</overwrite>
 							<unpack>false</unpack>
 							<outputDirectory>${basedir}/</outputDirectory>

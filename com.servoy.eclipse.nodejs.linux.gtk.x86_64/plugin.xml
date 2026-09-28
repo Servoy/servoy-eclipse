@@ -8,7 +8,9 @@
             name="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
             nodePath="node-v24.18.0-linux-x64/bin/node"
             npmPath="node-v24.18.0-linux-x64/bin/npm"
-            archive="node.tar.xz">
+            archive="node.tar.xz"
+            pnpmPath="pnpm"
+            pnpmArchive="pnpm.tar.gz">
       </nodejs>
    </extension>
 

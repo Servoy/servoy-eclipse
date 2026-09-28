@@ -92,6 +92,23 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="pnpmPath" type="string" use="optional">
+            <annotation>
+               <documentation>
+                  Optional relative path to the pnpm binary (pnpm or pnpm.exe). When present, the system can run in pnpm mode (servoy.jsRuntime=pnpm). npm mode is unaffected when this is absent.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="pnpmArchive" type="string" use="optional">
+            <annotation>
+               <documentation>
+                  Optional zip or (compressed) tar archive within the bundle that contains the pnpm binary, separate from the required node archive. When present, this extension will unpack it into the same state location as the node install and locate the pnpm binary via pnpmPath.
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="resource"/>
+               </appinfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
