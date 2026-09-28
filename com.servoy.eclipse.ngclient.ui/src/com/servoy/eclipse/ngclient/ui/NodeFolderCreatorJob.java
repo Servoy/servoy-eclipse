@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -210,7 +211,23 @@ public class NodeFolderCreatorJob extends Job
 				{
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageJsonFile);
 					FileUtils.copyFile(new File(nodeFolder, "package.json"), packageCopyJsonFile);
-					FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
+					// npm mode: the solution folder uses the empty package_solution.json and resolves the shared core
+					// dependencies + toolchain from the root install via npm's parent node_modules lookup.
+					// pnpm mode (SVY-21456): pnpm does NOT resolve a parent's node_modules, so the solution folder must
+					// carry the FULL core package.json itself (the web-package tarballs are added into it later by
+					// WebPackagesListener); the shared root is not an install target in pnpm mode. So keep the full
+					// package.json as the solution's package.json and skip the package_solution.json swap. However the
+					// "@servoy/public": "file:dist-public" dependency must be removed for the initial install, because
+					// dist-public does not exist yet (it is produced by 'build_lib_debug_nowatch' after the toolchain is
+					// installed); WebPackagesListener re-adds @servoy/public afterwards as a real tarball.
+					if (!Activator.isPnpmMode())
+					{
+						FileUtils.copyFile(new File(nodeFolder, "package_solution.json"), new File(nodeFolder, "package.json"));
+					}
+					else
+					{
+						removePublicFileDependency(new File(nodeFolder, "package.json"), console);
+					}
 
 
 					File favicon = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "server/webapps/ROOT/favicon.ico");
@@ -237,7 +254,20 @@ public class NodeFolderCreatorJob extends Job
 		}
 		finally
 		{
-			if (executeNpmInstall) try
+			// npm mode seeds the shared root install here (parent folder) so all solutions can share it via npm's
+			// parent node_modules lookup. In pnpm mode the shared root is NOT an install target: each solution folder
+			// is a standalone pnpm project that installs its full core package.json + web-package tarballs itself
+			// (WebPackagesListener), and pnpm's global store deduplicates the bytes. So skip the root install in pnpm
+			// mode; just mark generation complete. (SVY-21456)
+			if (executeNpmInstall && Activator.isPnpmMode()) try
+			{
+				fullyGenerated.createNewFile();
+			}
+			catch (IOException e1)
+			{
+				writeErrorToConsoleAndLog(console, e1, "Exception when marking node folder generation complete: ");
+			}
+			else if (executeNpmInstall) try
 			{
 				// now do an npm install on the main, parent folder
 				IRunNPMCommand npmUninstallPublicRunner = Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(),
@@ -247,7 +277,7 @@ public class NodeFolderCreatorJob extends Job
 				if (npmUninstallPublicRunner.getExitCode() == 0)
 				{
 					IRunNPMCommand npmInstallRunner = Activator.getInstance().createNPMCommand(nodeFolder.getParentFile(),
-						Arrays.asList("install", "--legacy-peer-deps"));
+						Arrays.asList("install"));
 					npmInstallRunner.runCommand(monitor);
 					if (npmInstallRunner.getExitCode() == 0) fullyGenerated.createNewFile();
 					else
@@ -288,6 +318,36 @@ public class NodeFolderCreatorJob extends Job
 	{
 		Activator.getInstance().getLog().error(s, e);
 		writeConsole(console, "\r\n" + s + e.getMessage() + "\r\n");
+	}
+
+	/**
+	 * Removes the "@servoy/public": "file:dist-public" dependency from the solution package.json (pnpm mode only).
+	 * <p>
+	 * In pnpm mode the solution folder keeps the full core package.json, which declares
+	 * <code>"@servoy/public": "file:dist-public"</code>. But <code>dist-public</code> does not exist at the first
+	 * install (it is produced later by <code>build_lib_debug_nowatch</code>), and pnpm fails the whole install if a
+	 * <code>file:</code> directory dependency does not exist. {@link WebPackagesListener} re-adds
+	 * <code>@servoy/public</code> afterwards as a real tarball, so it is safe to drop it here.
+	 */
+	private void removePublicFileDependency(File packageJson, StringOutputStream console)
+	{
+		try
+		{
+			if (!packageJson.exists()) return;
+			String content = FileUtils.readFileToString(packageJson, "UTF-8");
+			JSONObject json = new JSONObject(content);
+			JSONObject dependencies = json.optJSONObject("dependencies");
+			if (dependencies != null && dependencies.has("@servoy/public"))
+			{
+				dependencies.remove("@servoy/public");
+				FileUtils.writeStringToFile(packageJson, json.toString(1), "UTF-8");
+				writeConsole(console, "- pnpm mode: removed '@servoy/public: file:dist-public' from the solution package.json (added later as a tarball)");
+			}
+		}
+		catch (IOException | RuntimeException e)
+		{
+			writeErrorToConsoleAndLog(console, e, "Exception while removing @servoy/public file dependency from solution package.json: ");
+		}
 	}
 
 	private void writeConsole(StringOutputStream console, String message)

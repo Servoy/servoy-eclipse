@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -727,8 +729,25 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					List<String> command = new ArrayList<>();
 					command.add("install");
 					packageToInstall.forEach(packageName -> command.add(packageName));
-					command.add("./dist-public/"); // also add the public api
-					command.add("--legacy-peer-deps");
+					// also add the public api: in pnpm mode a directory dep does not bring its transitive deps, so pack
+					// dist-public into a tarball; in npm mode keep installing the directory as before.
+					if (Activator.isPnpmMode())
+					{
+						File publicTarball = packPackage(new File(this.projectFolder, "dist-public"), "@servoy/public", console);
+						if (publicTarball != null)
+						{
+							command.add(publicTarball.getAbsolutePath());
+						}
+						else
+						{
+							writeConsole(console, "- WARNING: could not pack dist-public into a tarball; falling back to directory install");
+							command.add("./dist-public/");
+						}
+					}
+					else
+					{
+						command.add("./dist-public/");
+					}
 					IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
 					try
 					{
@@ -749,7 +768,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (cleanInstall.get())
 					{
 						cleanInstall.set(false);
-						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("ci", "--legacy-peer-deps"));
+						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("ci"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -768,7 +787,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					}
 					else
 					{
-						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("update", "--legacy-peer-deps"));
+						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("update"));
 						try
 						{
 							npmCommand.runCommand(monitor);
@@ -785,83 +804,88 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							return new Status(IStatus.WARNING, getClass(), "npm update failed: " + e.getMessage());
 						}
 					}
-					npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("dedup"));
-					try
+					// pnpm's global store + symlinked node_modules already deduplicate, so in pnpm mode neither the
+					// 'dedup' verb nor the hand-written folder-deletion pass below runs.
+					if (!Activator.isPnpmMode())
 					{
-						npmCommand.runCommand(monitor);
-						if (npmCommand.getExitCode() != 0)
+						npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("dedup"));
+						try
 						{
-							writeConsole(console,
-								"\r\n" + "Unexpected EXIT_CODE calling npm dedup: " + npmCommand.getExitCode() + "\r\n");
-							return new Status(IStatus.WARNING, getClass(), "npm dedup EXIT_CODE was: " + npmCommand.getExitCode());
-						}
-					}
-					catch (Exception e)
-					{
-						writeErrorToConsoleAndLog(console, e, "Exception while running 'npm dedup': ");
-						return new Status(IStatus.WARNING, getClass(), "npm dedup failed: " + e.getMessage());
-					}
-					long dedupTime = System.currentTimeMillis();
-					// after dedup we have to run our own dedup, but then compared to the root node_modules
-					File projectNodeModules = new File(this.projectFolder, "node_modules");
-					File rootNodeModules = new File(this.projectFolder.getParentFile(), "node_modules");
-
-					File[] projectListing = projectNodeModules.listFiles();
-					File[] rootListing = rootNodeModules.listFiles();
-
-					BiFunction<File[], File[], SortedList<File>> filterFunction = (list1, list2) -> {
-						Comparator<File> comparator = (file1, file2) -> file1.getName().compareToIgnoreCase(file2.getName());
-						SortedList<File> result = new SortedList<File>(comparator, Arrays.asList(list1));
-						result.retainAll(Arrays.asList(list2));
-						return result;
-					};
-
-					if (projectListing != null && rootListing != null)
-					{
-						SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
-
-						mainDirs.forEach(file -> {
-							if (file.isDirectory())
+							npmCommand.runCommand(monitor);
+							if (npmCommand.getExitCode() != 0)
 							{
-								if (new File(file, "package.json").exists())
-								{
-									// this is already the package (root of node modules, like rxjs)
-									try
-									{
-										Files.walkFileTree(file.toPath(), DeletePathVisitor.INSTANCE);
-									}
-									catch (IOException e)
-									{
-										writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
-									}
-								}
-								else
-								{
-									// sub dirs are the package, this is a group dir like angular/aggrid
-									SortedList<File> nestedResult = filterFunction.apply(file.listFiles(),
-										new File(rootNodeModules, file.getName()).listFiles());
-									nestedResult.forEach(nested -> {
-										if (nested.isDirectory() && new File(nested, "package.json").exists())
-										{
-											try
-											{
-												Files.walkFileTree(nested.toPath(), DeletePathVisitor.INSTANCE);
-											}
-											catch (IOException e)
-											{
-												writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
-											}
-										}
-									});
-								}
-
+								writeConsole(console,
+									"\r\n" + "Unexpected EXIT_CODE calling npm dedup: " + npmCommand.getExitCode() + "\r\n");
+								return new Status(IStatus.WARNING, getClass(), "npm dedup EXIT_CODE was: " + npmCommand.getExitCode());
 							}
-						});
-					}
+						}
+						catch (Exception e)
+						{
+							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm dedup': ");
+							return new Status(IStatus.WARNING, getClass(), "npm dedup failed: " + e.getMessage());
+						}
+						long dedupTime = System.currentTimeMillis();
+						// after dedup we have to run our own dedup, but then compared to the root node_modules
+						File projectNodeModules = new File(this.projectFolder, "node_modules");
+						File rootNodeModules = new File(this.projectFolder.getParentFile(), "node_modules");
 
-					writeConsole(console,
-						"Node NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) +
-							" s.");
+						File[] projectListing = projectNodeModules.listFiles();
+						File[] rootListing = rootNodeModules.listFiles();
+
+						BiFunction<File[], File[], SortedList<File>> filterFunction = (list1, list2) -> {
+							Comparator<File> comparator = (file1, file2) -> file1.getName().compareToIgnoreCase(file2.getName());
+							SortedList<File> result = new SortedList<File>(comparator, Arrays.asList(list1));
+							result.retainAll(Arrays.asList(list2));
+							return result;
+						};
+
+						if (projectListing != null && rootListing != null)
+						{
+							SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
+
+							mainDirs.forEach(file -> {
+								if (file.isDirectory())
+								{
+									if (new File(file, "package.json").exists())
+									{
+										// this is already the package (root of node modules, like rxjs)
+										try
+										{
+											Files.walkFileTree(file.toPath(), DeletePathVisitor.INSTANCE);
+										}
+										catch (IOException e)
+										{
+											writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
+										}
+									}
+									else
+									{
+										// sub dirs are the package, this is a group dir like angular/aggrid
+										SortedList<File> nestedResult = filterFunction.apply(file.listFiles(),
+											new File(rootNodeModules, file.getName()).listFiles());
+										nestedResult.forEach(nested -> {
+											if (nested.isDirectory() && new File(nested, "package.json").exists())
+											{
+												try
+												{
+													Files.walkFileTree(nested.toPath(), DeletePathVisitor.INSTANCE);
+												}
+												catch (IOException e)
+												{
+													writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
+												}
+											}
+										});
+									}
+
+								}
+							});
+						}
+
+						writeConsole(console,
+							"Node NPM dedup time (root node_modules/solution node_modules): " + Math.round((System.currentTimeMillis() - dedupTime) / 1000) +
+								" s.");
+					}
 
 					if (copyAngularLocales(this.projectFolder))
 					{
@@ -1012,6 +1036,186 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			writeConsole(console, "\r\n" + s + e.getMessage() + "\r\n");
 		}
 
+		/**
+		 * Resolves what to install for a Servoy web package that lives on disk as a directory (a default source
+		 * project, a workspace {@link DirPackageReader} source package, or an extracted {@link ZipPackageReader}
+		 * package).
+		 * <p>
+		 * In npm mode this returns the directory's canonical path, matching the historical behaviour where
+		 * <code>npm install &lt;dir&gt;</code> also installs the directory's transitive dependencies.
+		 * <p>
+		 * In pnpm mode (SVY-21456) a directory dependency is NOT enough: pnpm symlinks a <code>file:</code>/
+		 * <code>link:</code> directory dependency but never installs its transitive <code>dependencies</code>, so
+		 * component libraries such as <code>@servoy/servoydefault</code> would be missing
+		 * <code>@ng-bootstrap/ng-bootstrap</code>, <code>@eonasdan/tempus-dominus</code>, <code>@angular/cdk</code>
+		 * etc. and the Angular build fails. Therefore in pnpm mode the directory is packed into a real
+		 * <code>.tgz</code> tarball (via the bundled <code>pnpm pack</code>) which pnpm treats as a real package
+		 * install and for which it DOES resolve the transitive dependencies. The tarball path is returned so it is
+		 * installed via <code>pnpm add &lt;tarball&gt;</code>.
+		 *
+		 * @return the specifier to install (a directory path in npm mode, a tarball path in pnpm mode), or
+		 *         <code>null</code> if packing failed in pnpm mode (the caller then keeps the previous behaviour).
+		 */
+		private String resolveInstallSpecifier(File packageDir, String packageName, StringOutputStream console)
+		{
+			if (!Activator.isPnpmMode())
+			{
+				try
+				{
+					return packageDir.getCanonicalPath();
+				}
+				catch (IOException e)
+				{
+					writeErrorToConsoleAndLog(console, e, "Exception while resolving package dir '" + packageName + "': ");
+					return packageDir.getAbsolutePath();
+				}
+			}
+			File tarball = packPackage(packageDir, packageName, console);
+			if (tarball != null)
+			{
+				try
+				{
+					return tarball.getCanonicalPath();
+				}
+				catch (IOException e)
+				{
+					return tarball.getAbsolutePath();
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Packs the given package directory into a <code>.tgz</code> tarball under the project's
+		 * <code>.tarballs/</code> folder using the bundled <code>pnpm pack</code>, and returns the resulting file.
+		 * <p>
+		 * The tarball name embeds a content timestamp (the newest last-modified time of the package's files):
+		 * <code>&lt;sanitized-package-name&gt;-&lt;timestamp&gt;.tgz</code>. A content-unique name is REQUIRED: pnpm
+		 * v11+ treats a <code>file:</code> tarball whose path is unchanged as "already up to date" and skips
+		 * re-reading it on a plain <code>pnpm install</code>, so re-packing to a stable name would silently install
+		 * stale package contents. A changing name changes the dependency specifier, which forces pnpm to re-resolve
+		 * and install the new tarball. Older tarballs of the same package are deleted so the folder does not grow.
+		 * <p>
+		 * Only the <em>caller</em> decides whether to re-pack at all (via the existing per-package change detection
+		 * in {@link #checkPackage}); this method always produces a fresh tarball when invoked.
+		 *
+		 * @return the produced tarball file, or <code>null</code> on failure.
+		 */
+		private File packPackage(File packageDir, String packageName, StringOutputStream console)
+		{
+			try
+			{
+				File tarballsDir = new File(projectFolder, ".tarballs");
+				if (!tarballsDir.exists()) tarballsDir.mkdirs();
+
+				String sanitized = packageName.replace("@", "").replace('/', '-');
+				long contentTimestamp = newestLastModified(packageDir);
+				String tarballName = sanitized + "-" + contentTimestamp + ".tgz";
+				File tarball = new File(tarballsDir, tarballName);
+
+				// remove any previous tarballs of this package (stale timestamps) so the folder stays clean
+				deleteStaleTarballs(tarballsDir, sanitized, tarballName);
+
+				if (tarball.exists())
+				{
+					// already packed for this exact content timestamp; reuse it
+					return tarball;
+				}
+
+				// 'pnpm pack --pack-destination <tarballsDir>' produces '<name>-<version>.tgz' in tarballsDir;
+				// capture what appears and rename it to the content-unique tarballName.
+				// NOTE: do NOT pass the shared job 'console' to the pack command via setOutputStream: the runner
+				// closes the stream it is given in its finally block, which would close the shared console and swallow
+				// all later output (including the final "Total time ..." line). Let the pack command use its own
+				// console stream instead (as every other runner call in this job does).
+				Set<String> before = listTgzNames(tarballsDir);
+				IRunNPMCommand packCommand = Activator.getInstance().createNPMCommand(packageDir,
+					Arrays.asList("pack", "--pack-destination", tarballsDir.getCanonicalPath()));
+				packCommand.runCommand(new NullProgressMonitor());
+				if (packCommand.getExitCode() != 0)
+				{
+					writeConsole(console, "- WARNING: 'pnpm pack' for " + packageName + " returned EXIT_CODE " + packCommand.getExitCode());
+					return null;
+				}
+				File produced = findNewTgz(tarballsDir, before);
+				if (produced == null)
+				{
+					writeConsole(console, "- WARNING: 'pnpm pack' for " + packageName + " produced no .tgz file");
+					return null;
+				}
+				if (!produced.equals(tarball))
+				{
+					Files.move(produced.toPath(), tarball.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				}
+				return tarball;
+			}
+			catch (Exception e)
+			{
+				writeErrorToConsoleAndLog(console, e, "Exception while packing package '" + packageName + "' into a tarball: ");
+				return null;
+			}
+		}
+
+		private long newestLastModified(File dir)
+		{
+			Optional<File> newest = FileUtils.listFiles(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
+				.filter(f -> !f.getName().equals("node_modules"))
+				.max((f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+			return newest.isPresent() ? newest.get().lastModified() : dir.lastModified();
+		}
+
+		private void deleteStaleTarballs(File tarballsDir, String sanitizedName, String keepName)
+		{
+			File[] files = tarballsDir.listFiles((d, name) -> name.startsWith(sanitizedName + "-") && name.endsWith(".tgz") && !name.equals(keepName));
+			if (files != null)
+			{
+				for (File f : files)
+					f.delete();
+			}
+		}
+
+		private Set<String> listTgzNames(File dir)
+		{
+			Set<String> names = new HashSet<>();
+			File[] files = dir.listFiles((d, name) -> name.endsWith(".tgz"));
+			if (files != null)
+			{
+				for (File f : files)
+					names.add(f.getName());
+			}
+			return names;
+		}
+
+		private File findNewTgz(File dir, Set<String> before)
+		{
+			File[] files = dir.listFiles((d, name) -> name.endsWith(".tgz"));
+			if (files == null) return null;
+			for (File f : files)
+			{
+				if (!before.contains(f.getName())) return f;
+			}
+			return null;
+		}
+
+		/**
+		 * Whether the package is already installed with the given specifier. In npm mode this keeps the historical
+		 * suffix check against the directory path. In pnpm mode the tarball name embeds a content timestamp, so this
+		 * checks that the recorded specifier points at the tarball for the current content timestamp; if the content
+		 * changed the timestamp (and thus the name) differs and the package is treated as not-yet-installed, forcing
+		 * a re-pack + re-install.
+		 */
+		private boolean isAlreadyInstalled(String installedVersion, String dirSuffix, String packageName, File packageDir)
+		{
+			if (Activator.isPnpmMode())
+			{
+				if (installedVersion == null || packageDir == null) return false;
+				String sanitized = packageName.replace("@", "").replace('/', '-');
+				String currentTarballName = sanitized + "-" + newestLastModified(packageDir) + ".tgz";
+				return installedVersion.endsWith(currentTarballName);
+			}
+			return installedVersion != null && installedVersion.endsWith(dirSuffix);
+		}
+
 		private String checkPackage(JSONObject dependencies, String packageName, IPackageReader packageReader, String entryPoint, StringOutputStream console)
 		{
 			String packageVersion = packageReader.getVersion();
@@ -1037,9 +1241,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								FileUtils.write(tsConfig, json.toString(1), "UTF8", false);
 							}
 							String installedVersion = dependencies.optString(packageName);
-							if (!installedVersion.endsWith(entryPoint))
+							if (!isAlreadyInstalled(installedVersion, entryPoint, packageName, packageFolder))
 							{
-								return packageFolder.getCanonicalPath();
+								return resolveInstallSpecifier(packageFolder, packageName, console);
 							}
 							return null;
 						}
@@ -1192,9 +1396,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 
 									String installedVersion = dependencies.optString(packageName);
-									if (packageJsonChanged || !installedVersion.endsWith("packages/" + packageName))
+									if (packageJsonChanged || !isAlreadyInstalled(installedVersion, "packages/" + packageName, packageName, new File(location)))
 									{
-										return location;
+										return resolveInstallSpecifier(new File(location), packageName, console);
 									}
 								}
 								else
@@ -1314,9 +1518,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (entry.exists())
 						{
 							String installedVersion = dependencies.optString(packageName);
-							if (!exists || !installedVersion.endsWith(entryPoint))
+							if (!exists || !isAlreadyInstalled(installedVersion, entryPoint, packageName, entry))
 							{
-								return entry.getCanonicalPath();
+								return resolveInstallSpecifier(entry, packageName, console);
 							}
 							return null;
 						}
