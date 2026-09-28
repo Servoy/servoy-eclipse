@@ -82,6 +82,10 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 const node = this.editorContentService.getContentElement(selected.svyid);
                 if (!node) return selected;
                 const position = this.designerUtilsService.adjustElementRect(node, node.getBoundingClientRect());
+                const decorator = this.selectedRef().find((ref) => ref.nativeElement.getAttribute('id') === selected.svyid);
+                if (decorator) {
+                    this.applyWireframeTitle(decorator, node);
+                }
                 return {
                     ...selected,
                     style: {
@@ -407,7 +411,7 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         const position = node.getBoundingClientRect();
         if (node.classList.contains('svy-layoutcontainer') && !node.getAttribute('data-maincontainer')
             && !node.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
-            this.renderer.setAttribute(selectedNode.nativeElement, 'svytitle', node.getAttribute('svy-title')!);
+            this.applyWireframeTitle(selectedNode, node);
             if (this.editorSession.showWireframe()) {
                 this.renderer.addClass(selectedNode.nativeElement, 'showWireframe');
             }
@@ -417,6 +421,15 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
                 selectedNode.nativeElement.style.setProperty('backgroundColor', window.getComputedStyle(node).backgroundColor);
                 this.renderer.addClass(selectedNode.nativeElement, 'maxLevelDesign');
             }
+        }
+    }
+
+    private applyWireframeTitle(decorator: ElementRef<HTMLElement>, contentNode: HTMLElement) {
+        if (!this.editorSession.showWireframe()) return;
+        const position = contentNode.getBoundingClientRect();
+        if (contentNode.classList.contains('svy-layoutcontainer') && !contentNode.getAttribute('data-maincontainer')
+            && !contentNode.classList.contains('svy-responsivecontainer') && position.width > 0 && position.height > 0) {
+            this.renderer.setAttribute(decorator.nativeElement, 'svytitle', contentNode.getAttribute('svy-title')!);
         }
     }
     

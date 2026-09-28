@@ -64,7 +64,7 @@ describe('MouseSelectionComponent', () => {
     (component as any).moveFCorLFC = false;
     (component as any).mouseDownEvent = null;
     (component as any).lassoRef = { nativeElement: document.createElement('div') };
-    (component as any).selectedRef = [];
+    (component as any).selectedRef = () => [];
   });
 
   describe('rectanglesIntersect', () => {
@@ -204,6 +204,81 @@ describe('MouseSelectionComponent', () => {
       (component as any).nodes.set([{ svyid: 'missing', style: {} }]);
       component.redrawDecorators();
       expect((component as any).nodes()[0].style.height).toBeUndefined();
+    });
+
+    const createLayoutContentElement = (svyTitle: string) => {
+      const el = document.createElement('div');
+      el.classList.add('svy-layoutcontainer');
+      el.setAttribute('svy-title', svyTitle);
+      Object.defineProperty(el, 'getBoundingClientRect', { value: () => ({ height: 50, width: 100, top: 10, left: 20 }) });
+      return el;
+    };
+
+    const createDecoratorRef = (svyid: string) => {
+      const decoratorEl = document.createElement('div');
+      decoratorEl.setAttribute('id', svyid);
+      return { nativeElement: decoratorEl };
+    };
+
+    it('should refresh the decorator svytitle from the fresh svy-title when wireframe is on', () => {
+      editorSession.showWireframe.set(true);
+      const contentEl = createLayoutContentElement('md-3');
+      editorContentService.getContentElement.mockReturnValue(contentEl);
+      designerUtilsService.adjustElementRect.mockReturnValue({ height: 50, width: 100, top: 10, left: 20 });
+      const decorator = createDecoratorRef('node1');
+      (component as any).selectedRef = () => [decorator];
+      (component as any).renderer.setAttribute = vi.fn((el: HTMLElement, name: string, value: string) => el.setAttribute(name, value));
+      (component as any).nodes.set([{ svyid: 'node1', style: {} }]);
+
+      component.redrawDecorators();
+
+      expect(decorator.nativeElement.getAttribute('svytitle')).toBe('md-3');
+    });
+
+    it('should not set svytitle when wireframe is off', () => {
+      editorSession.showWireframe.set(false);
+      const contentEl = createLayoutContentElement('md-3');
+      editorContentService.getContentElement.mockReturnValue(contentEl);
+      designerUtilsService.adjustElementRect.mockReturnValue({ height: 50, width: 100, top: 10, left: 20 });
+      const decorator = createDecoratorRef('node1');
+      (component as any).selectedRef = () => [decorator];
+      (component as any).renderer.setAttribute = vi.fn((el: HTMLElement, name: string, value: string) => el.setAttribute(name, value));
+      (component as any).nodes.set([{ svyid: 'node1', style: {} }]);
+
+      component.redrawDecorators();
+
+      expect(decorator.nativeElement.getAttribute('svytitle')).toBeNull();
+      expect((component as any).renderer.setAttribute).not.toHaveBeenCalledWith(expect.anything(), 'svytitle', expect.anything());
+    });
+
+    it('should not set svytitle when the content element is not a layout container', () => {
+      editorSession.showWireframe.set(true);
+      const contentEl = document.createElement('div');
+      contentEl.setAttribute('svy-title', 'md-3');
+      Object.defineProperty(contentEl, 'getBoundingClientRect', { value: () => ({ height: 50, width: 100, top: 10, left: 20 }) });
+      editorContentService.getContentElement.mockReturnValue(contentEl);
+      designerUtilsService.adjustElementRect.mockReturnValue({ height: 50, width: 100, top: 10, left: 20 });
+      const decorator = createDecoratorRef('node1');
+      (component as any).selectedRef = () => [decorator];
+      (component as any).renderer.setAttribute = vi.fn((el: HTMLElement, name: string, value: string) => el.setAttribute(name, value));
+      (component as any).nodes.set([{ svyid: 'node1', style: {} }]);
+
+      component.redrawDecorators();
+
+      expect(decorator.nativeElement.getAttribute('svytitle')).toBeNull();
+      expect((component as any).renderer.setAttribute).not.toHaveBeenCalledWith(expect.anything(), 'svytitle', expect.anything());
+    });
+
+    it('should not throw when no decorator matches the node svyid', () => {
+      editorSession.showWireframe.set(true);
+      const contentEl = createLayoutContentElement('md-3');
+      editorContentService.getContentElement.mockReturnValue(contentEl);
+      designerUtilsService.adjustElementRect.mockReturnValue({ height: 50, width: 100, top: 10, left: 20 });
+      (component as any).selectedRef = () => [createDecoratorRef('other')];
+      (component as any).nodes.set([{ svyid: 'node1', style: {} }]);
+
+      expect(() => component.redrawDecorators()).not.toThrow();
+      expect((component as any).nodes()[0].style.height).toBe('50px');
     });
   });
 });
