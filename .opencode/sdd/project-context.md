@@ -3,16 +3,19 @@
 This project is the **Servoy Developer IDE** — a large Eclipse RCP application built
 as a multi-module Maven/Tycho project consisting of ~40+ OSGi plugin bundles.
 
+## SDD variant
+
+This repo uses the **sdd-java-eclipse** shared skill (Java / Eclipse-OSGi pipeline).
+
 ## Technology stack
 
 | Aspect | Value |
 |--------|-------|
 | Java version | 21 |
-| Build system | Maven 3.9.0+ with Eclipse Tycho 4.0.12 |
-| Platform | Eclipse 2025-12 (RCP) |
+| Build system | Maven 3.9.0+ with Eclipse Tycho |
+| Platform | Eclipse RCP (target under `launch_targets/`) |
 | Module system | OSGi (each plugin is a bundle with MANIFEST.MF) |
 | UI framework | Eclipse SWT/JFace + Angular (designer frontends) |
-| Version | 2026.6.0-SNAPSHOT |
 
 ## Eclipse plugin development essentials
 
