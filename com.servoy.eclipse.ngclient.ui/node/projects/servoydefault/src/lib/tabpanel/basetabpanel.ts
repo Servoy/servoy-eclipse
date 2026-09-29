@@ -122,6 +122,13 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         return null;
     }
 
+    /**
+     * Pure read of the currently selected tab's form name. Must NOT select a tab:
+     * it is reached from the template via getContainerStyle() -> applyOverflowFromForm()
+     * on every change detection pass, and selecting during rendering corrupts the
+     * tabpanel state (ngbNav initialises afterwards and resets selectedTabID to the
+     * first tab, while select() only compares selectedTab so it never repairs it).
+     */
     protected getSelectedFormName(): string | null {
         const selected = this.selectedTab();
         return selected ? selected.containsFormId : null;
