@@ -66,6 +66,15 @@ everything the Angular phases need to run `npm`/`ng`/`vitest`, edit files, and u
 NOT use the read-only `explore` agent for any phase that must run shell commands (Jira API,
 git, npm) or write files (triage report, spec, code, tests).
 
+**Prerequisite (one-time setup):** in OpenCode V2 the orchestrating `build` agent may
+only launch a subagent it is explicitly permitted to. `general` is a built-in subagent
+but is not launchable by default, so `subagent(agent='general', ...)` fails until the
+global config grants it. `/install-skills` adds the required rule
+(`agents.build.permissions` → `{ action: "subagent", resource: "general", effect: "allow" }`)
+to `~/.config/opencode/opencode.json`, and the change takes effect after an OpenCode
+restart. If a phase dispatch reports that `general` is not an available agent, tell the
+user to run `/install-skills` and restart, rather than falling back to `explore`.
+
 ## Input
 
 The user provides a Jira issue key or URL, optionally followed by extra context, e.g.:
@@ -269,3 +278,7 @@ After committing, display the full commit message in a formatted block.
 - If a phase produces unexpected output, show it to the user via the `question` tool.
 - If a phase subagent reports it lacks shell/write tools, you spawned the wrong agent —
   re-spawn it with `agent: general`.
+- If dispatching a phase fails because `general` is not an available agent, the global
+  `build`→`general` subagent permission is missing. Tell the user to run `/install-skills`
+  and restart OpenCode. Do NOT silently fall back to `explore` — it cannot run shell or
+  write files, so the phase would fail or produce nothing.

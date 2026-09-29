@@ -26,6 +26,11 @@ Steps to perform:
 
    **Only direct children count.** Do NOT recurse into nested directories such as `skills/<skill-name>/phases/` or `skills/<skill-name>/reference/` — those hold supporting instruction files that the skill reads at runtime. They are not commands, and copying them into `commands/` would create bogus slash commands.
 
-6. Report what was installed, grouped as **new**, **updated**, and **unchanged**, alongside the skills now on the path and the plugins now referenced in `plugins` — then remind the user to restart opencode. If everything was unchanged, the path was already registered, and the plugins were already referenced, say so explicitly (nothing to do).
+6. Enable the `general` subagent for the SDD pipeline. The SDD skill's phases (triage, PM, coding, code review, test gen, test review) are dispatched with `subagent(agent='general', ...)`, and the built-in `general` subagent already has the shell, edit/write, and Eclipse MCP tools those phases need. In V2 the parent agent's `subagent` permissions decide which children it may launch, and the default `build` agent does not grant this by default. Ensure the global config allows it:
+   - Under `agents.build.permissions` (create `agents`, `agents.build`, and `agents.build.permissions` if missing), ensure a rule `{ "action": "subagent", "resource": "general", "effect": "allow" }` is present.
+   - Treat the rule as present if any existing rule already matches `action: "subagent"` with `resource: "general"` (or `resource: "*"`) and `effect: "allow"`; in that case skip. Otherwise append it. Never add duplicates, and leave every unrelated agent setting and permission rule untouched.
+   - This lives in the **global** config (not the repo's `.opencode`) on purpose: the SDD skill is installed globally and runs in every Servoy repo, so the orchestrating `build` agent must be allowed to launch `general` regardless of which repo is open.
+
+7. Report what was installed, grouped as **new**, **updated**, and **unchanged**, alongside the skills now on the path, the plugins now referenced in `plugins`, and whether the `general` subagent permission was added or already present — then remind the user to restart opencode. If everything was unchanged, the path was already registered, the plugins were already referenced, and the `general` permission was already present, say so explicitly (nothing to do).
 
 Do NOT use platform-specific commands. Use the built-in file read/write tools which work on any OS.
