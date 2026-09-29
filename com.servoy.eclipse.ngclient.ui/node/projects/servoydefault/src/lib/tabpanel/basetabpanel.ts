@@ -101,18 +101,6 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
     }
 	
     getForm(tab?: Tab) {
-        const selectedFormName = this.getSelectedFormName();
-        if (tab) {
-            if (this.selectedTab && (tab.containsFormId === this.selectedTab.containsFormId) && (tab.relationName === this.selectedTab.relationName)) {
-                return tab.containsFormId;
-            }
-        } else if (selectedFormName) {
-            return selectedFormName;
-        }
-        return null;
-    }
-
-    protected getSelectedFormName(): string {
         if (!this.selectedTab) {
             const tabIndex = this.getRealTabIndex();
             if (tabIndex >= 0) this.select(this.tabs[tabIndex]);
@@ -121,6 +109,24 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                 this.select(this.tabs[0]);
             }
         }
+        if (tab) {
+            if (this.selectedTab && (tab.containsFormId === this.selectedTab.containsFormId) && (tab.relationName === this.selectedTab.relationName)) {
+                return tab.containsFormId;
+            }
+        } else if (this.selectedTab) {
+            return this.selectedTab.containsFormId;
+        }
+        return null;
+    }
+
+    /**
+     * Pure read of the currently selected tab's form name. Must NOT select a tab:
+     * it is reached from the template via getContainerStyle() -> applyOverflowFromForm()
+     * on every change detection pass, and selecting during rendering corrupts the
+     * tabpanel state (ngbNav initialises afterwards and resets selectedTabID to the
+     * first tab, while select() only compares selectedTab so it never repairs it).
+     */
+    protected getSelectedFormName(): string {
         return this.selectedTab ? this.selectedTab.containsFormId : null;
     }
 
