@@ -3,6 +3,7 @@
 This project is the **Servoy Developer IDE** — a large Eclipse RCP application built
 as a multi-module Maven/Tycho project consisting of ~40+ OSGi plugin bundles.
 
+<<<<<<< HEAD
 ## Technology stack
 
 | Aspect | Value |
@@ -67,6 +68,91 @@ If creating a new plugin bundle:
 | `com.servoy.eclipse.designer` | Form designer |
 | `com.servoy.eclipse.ngclient` | NG Client support |
 | `com.servoy.eclipse.tests` | Integration tests (eclipse-test-plugin) |
+=======
+## SDD variant
+
+This repo uses the **sdd-java-eclipse** shared skill (Java / Eclipse-OSGi pipeline).
+
+## Technology stack
+
+| Aspect | Value |
+|--------|-------|
+| Java version | 21 |
+| Build system | Maven 3.9.0+ with Eclipse Tycho 5.0.3 |
+| Platform | Eclipse RCP (target: `launch_targets/com.servoy.eclipse.target.target`) |
+| Module system | OSGi (each plugin is a bundle with MANIFEST.MF) |
+| UI framework | Eclipse SWT/JFace + Angular (designer frontends) |
+| Version | 2026.9.0-SNAPSHOT (release line) |
+
+## Eclipse plugin development essentials
+
+When writing code for this project, you are writing **OSGi bundles**, not plain Java:
+
+### Dependencies
+- Declare in `META-INF/MANIFEST.MF` under `Require-Bundle` or `Import-Package`
+- Tycho resolves dependencies from the **active target platform** (see `launch_targets/`)
+- Use `eclipse-pde_getActiveTarget` to check what target is currently active
+- If a dependency is already in the target platform, just add it to MANIFEST.MF
+- If a dependency is NOT in the target platform, add it as a Maven dependency in the
+  target definition file (`.target` file) — then it becomes available for MANIFEST.MF
+
+### Extension points
+- Register contributions in `plugin.xml`
+- Look at existing plugins for patterns (e.g. `com.servoy.eclipse.core/plugin.xml`)
+
+### Services & activation
+- Use OSGi Declarative Services or `BundleActivator` for lifecycle
+- Prefer lazy activation (`Bundle-ActivationPolicy: lazy`)
+
+### Packages & visibility
+- Export public API packages in MANIFEST.MF `Export-Package`
+- Keep internal packages unexported (convention: `*.internal.*`)
+- Never reference another plugin's internal packages
+
+### New plugin checklist
+If creating a new plugin bundle:
+1. Create `META-INF/MANIFEST.MF` with proper headers
+2. Create `build.properties` listing source folders and output
+3. Create `plugin.xml` if contributing extension points
+4. Add the module to the parent `pom.xml`
+5. Add to the feature (`com.servoy.eclipse.feature/feature.xml`)
+
+## Code conventions
+
+- Follow existing patterns in neighboring files — consistency over personal preference
+- Use try-with-resources for all `Closeable` resources
+- Use `volatile` or proper synchronization for shared mutable state
+- Log via the plugin's `ILog` or SLF4J (check what the module uses)
+- No `System.out.println` — use proper logging
+- Prefer existing utility classes (check `com.servoy.eclipse.model` and `com.servoy.eclipse.core`)
+
+## Key project structure
+
+| Module | Purpose |
+|--------|---------|
+| `com.servoy.eclipse.core` | Main plugin, launch configs, schemas |
+| `com.servoy.eclipse.model` | Data model layer |
+| `com.servoy.eclipse.ui` | UI components |
+| `com.servoy.eclipse.debug` | Debugger support |
+| `com.servoy.eclipse.designer` | Form designer |
+| `com.servoy.eclipse.ngclient` | NG Client support |
+| `com.servoy.eclipse.exporter.war` | WAR exporter (server-side deploy packaging) |
+| `com.servoy.eclipse.exporter.solution` | Solution exporter |
+| `com.servoy.eclipse.exporter.mobile` | Mobile exporter |
+| `com.servoy.eclipse.tests` | Integration tests (eclipse-test-plugin) |
+
+## Testing
+
+- Unit tests (pure logic, no OSGi): a `<plugin>.tests` fragment with standard
+  `eclipse-plugin` packaging, run with `eclipse-ide_runClassTests`. Class suffix `*Test`.
+- Integration/plugin tests (needs OSGi/workspace/`ServoyModel`): `eclipse-test-plugin`
+  packaging, primary project `com.servoy.eclipse.tests`, run with
+  `eclipse-pde_runJUnitPluginTestClass`. Class suffix `*IntegrationTest`.
+- Prefer the shared integration test base/utilities (`AbstractIntegrationTest`,
+  `ServoyRunnerTestBase`, `TestUtilitiesClass` — `pumpEventsUntil`, `waitForWorkspaceBuildJobs`,
+  `waitForAppServer`) over raw `Thread.sleep`.
+- See `AGENTS.md` `## Testing` for the catalogue of existing feature test classes.
+>>>>>>> refs/remotes/origin/release
 
 ## AGENTS.md
 
