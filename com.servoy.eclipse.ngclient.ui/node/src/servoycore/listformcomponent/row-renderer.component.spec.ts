@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CUSTOM_ELEMENTS_SCHEMA, ElementRef } from '@angular/core';
 import { RowRenderer } from './row-renderer.component';
 import { ICellRendererParams } from 'ag-grid-community';
-import { ListFormComponent } from './listformcomponent';
 
 describe('RowRenderer', () => {
   let component: RowRenderer;
@@ -27,7 +26,8 @@ describe('RowRenderer', () => {
       getRowClasses: vi.fn().mockReturnValue('svy-listformcomponent-row'),
       getRowStyle: vi.fn().mockReturnValue({}),
       onRowClick: vi.fn(),
-      onRowRendererAfterViewInit: vi.fn(),
+      isPerRowAutoHeight: vi.fn().mockReturnValue(false),
+      applyMeasuredRowHeight: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -54,7 +54,7 @@ describe('RowRenderer', () => {
       const params = {
         context: { componentParent: mockLfc },
         data: [{ _svyRowId: 'row0' }, { _svyRowId: 'row1' }],
-        node: { rowIndex: 2 },
+        node: { rowIndex: 2, id: 'node-2' },
       } as any;
 
       component.agInit(params);
@@ -71,7 +71,7 @@ describe('RowRenderer', () => {
       const params = {
         context: { componentParent: mockLfc },
         data: [{ _svyRowId: 'rowX' }],
-        node: { rowIndex: 4 },
+        node: { rowIndex: 4, id: 'node-4' },
       } as any;
 
       component.agInit(params);
@@ -94,10 +94,53 @@ describe('RowRenderer', () => {
   });
 
   describe('ngAfterViewInit', () => {
-    it('should call lfc.onRowRendererAfterViewInit', () => {
+    it('should not measure when not on the per-row auto-height path', () => {
+      mockLfc.isPerRowAutoHeight.mockReturnValue(false);
       component.lfc = mockLfc;
       component.ngAfterViewInit();
-      expect(mockLfc.onRowRendererAfterViewInit).toHaveBeenCalled();
+      expect(mockLfc.applyMeasuredRowHeight).not.toHaveBeenCalled();
+    });
+
+    it('should measure and report the row height on the per-row auto-height path (SVY-21457)', async () => {
+      mockLfc.isPerRowAutoHeight.mockReturnValue(true);
+      component.lfc = mockLfc;
+
+      const params = {
+        context: { componentParent: mockLfc },
+        data: [{ _svyRowId: 'row0' }],
+        node: { rowIndex: 0, id: 'node-0', detail: false },
+      } as any;
+      component.agInit(params);
+
+      // measureContentHeight takes cellGui's :first-child as the row wrapper (top edge),
+      // then recurses into its descendants and takes the lowest bottom edge relative to
+      // that top. Give the wrapper a measurable descendant so a positive height comes back.
+      const rowEl = document.createElement('div');
+      Object.defineProperty(rowEl, 'getBoundingClientRect', {
+        value: () => ({ top: 0, bottom: 0, height: 0, width: 100 }) as DOMRect,
+      });
+      const inner = document.createElement('div');
+      Object.defineProperty(inner, 'getBoundingClientRect', {
+        value: () => ({ top: 0, bottom: 120, height: 120, width: 100 }) as DOMRect,
+      });
+      rowEl.appendChild(inner);
+      const cellGui = document.createElement('div');
+      cellGui.appendChild(rowEl);
+      (component as any).elementRef = new ElementRef(cellGui);
+
+      // run the two chained requestAnimationFrame callbacks synchronously
+      const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+        cb(0);
+        return 0;
+      });
+      component.ngAfterViewInit();
+      raf.mockRestore();
+
+      expect(mockLfc.applyMeasuredRowHeight).toHaveBeenCalled();
+      const [rowId, node, measured] = mockLfc.applyMeasuredRowHeight.mock.calls[0];
+      expect(rowId).toBe('node-0');
+      expect(node.id).toBe('node-0');
+      expect(measured).toBe(120);
     });
   });
 
