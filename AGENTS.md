@@ -8,6 +8,8 @@ At the start of each session, quickly verify that the repo's global skills are i
 2. If not registered, tell the user: "This repo has global skills that aren't installed yet. Run `/install-skills` to make them available in all projects."
 3. If registered, list the `skills/*/` directories in this repo and compare against `~/.config/opencode/commands/`. For each command file (`.md` files that are NOT `SKILL.md`), check both presence and contents: it is **missing** if no file with that name exists in the global commands dir, or **out of sync** if a file exists but its contents differ from the source. If any command is missing or out of sync, tell the user: "Skill commands are missing or out of date in skills/. Run `/install-skills` to update."
 
+4. Verify the SDD pipeline can launch its worker subagents: check that the global config (`~/.config/opencode/opencode.json`) allows the `build` agent to launch the built-in `general` subagent — i.e. `agents.build.permissions` contains a rule with `action: "subagent"`, `resource: "general"` (or `"*"`), and `effect: "allow"`. The SDD phases dispatch with `subagent(agent='general', ...)` and this permission is not granted by default. If it is missing, tell the user: "The SDD pipeline needs permission to launch the `general` subagent. Run `/install-skills` to add it."
+
 This check should be fast — just a directory listing and a file read. Do not block on it.
 
 ## Project Overview
@@ -22,30 +24,66 @@ This is the **Servoy Developer IDE** source code — a large Eclipse RCP applica
 
 ## Tool Usage Policy (MCP Servers)
 
-This project has Eclipse MCP servers configured in `opencode.json`. **Always prefer the MCP server tools over built-in tools** for the following operations:
+This project has Eclipse MCP servers configured in `opencode.json`. **Always prefer the MCP server tools over built-in tools** for the operations below.
 
-### File Operations
-- **Use `eclipse-coder` tools** (`replaceString`, `replaceFileContent`, `insertIntoFile`, `createFile`, `deleteFile`, `deleteLinesInFile`) for all code edits instead of built-in file write/edit tools.
-- **Use `eclipse-ide` tools** (`readProjectResource`, `getSource`, `getFilteredSource`, `getMethodSource`, `getClassOutline`) for reading Java source files.
-- **Use `eclipse-ide` tools** (`fileSearch`, `fileSearchRegExp`, `findFiles`, `findReferences`) for searching code.
+### ⚠️ Everything runs through Code Mode — READ THIS FIRST
+
+The Eclipse MCP servers (`eclipse-coder`, `eclipse-ide`, `eclipse-git`, `eclipse-pde`, `eclipse-runner`, `eclipse-context`) and the other MCP tools (`memory`, `time`, the graph/search tools) are exposed **only through Code Mode**. There is **no direct top-level tool** for any of them.
+
+- To call any Eclipse/MCP tool you MUST write JavaScript inside the **`execute`** tool and call the tool by its exact catalog `path`, using bracket notation:
+  - `await tools["eclipse-coder"].replaceString({ ... })`
+  - `await tools["eclipse-ide"].getCompilationErrors({ ... })`
+  - `await tools["eclipse-git"].gitStatus({ ... })`
+- **NEVER** call these as if they were plain tools (e.g. `eclipse-coder_replaceString`, `eclipse-ide_getCompilationErrors`, or `tools.eclipse_ide.getCompilationErrors`). Those names do **not** exist in Code Mode; the call fails with *"No tool named ... is currently available."* When that happens, **do not fall back to the built-in `edit`/`write`** — fix the call by wrapping it in `execute` with the bracket form instead.
+- The Code Mode catalog is **partial**. If a tool is not shown, find it with `search(...)` **inside** an `execute` script (it is synchronous — call it without `await`), then call it by the returned `path`. Do not guess tool names.
+- To run a single method, still write a one-line `execute` script that `await`s it and returns the result. There is no shortcut that bypasses `execute`.
+- Throughout the rest of this document, whenever a tool is written as `eclipse-coder_replaceString` or `eclipse-ide_getCompilationErrors`, read it as shorthand for `tools["eclipse-coder"].replaceString(...)` / `tools["eclipse-ide"].getCompilationErrors(...)` called via `execute`.
+
+**The only tools called directly (not through Code Mode):** the built-in `read`, `grep`, `glob`, and `shell`. Use them only for the narrow cases noted below (reading non-workspace files, full Maven builds, etc.). Everything else goes through `execute`.
+
+### This tool list is your index
+
+Under Code Mode the MCP tools are **not** loaded into context up front — the catalog is partial and their names and parameter schemas are hidden until you `search` for them. The lists below are therefore your always-available index of which tools exist and when to use each. Trust these names directly; you only need a `search(...)` inside `execute` to look up a tool's exact **parameter signature** at call time, not to discover that a tool exists. (This list is maintained by hand, so if a call reports an unknown tool, `search` the server's namespace to get the current name.)
+
+### File Operations — MANDATORY
+
+**Every file inside an Eclipse workspace project MUST be edited through the `eclipse-coder` tools**, never the built-in `edit`/`write` tools. The built-in tools write straight to disk behind Eclipse's back, so the open editor, the JDT model, incremental compilation, and local-history undo all drift out of sync. This is a hard rule, not a preference.
+
+- Single targeted replacement → `tools["eclipse-coder"].replaceString`
+- Multi-hunk change → `tools["eclipse-coder"].applyPatch` (or `replaceFileContent` for a full rewrite)
+- Insert / delete lines → `tools["eclipse-coder"].insertIntoFile`, `tools["eclipse-coder"].deleteLinesInFile`
+- New file → `tools["eclipse-coder"].createFile`
+- Delete / rename → `tools["eclipse-coder"].deleteFile`, `tools["eclipse-coder"].renameFile`
+
+The built-in `edit`/`write` are acceptable **only** for files that are NOT inside any Eclipse project — repo-root docs (`AGENTS.md`, `README.md`), CI YAML, `opencode.json`, shell scripts, and the like. **When in doubt** — if the file lives under a `com.servoy.*/`, `j2db*/`, `servoy_*/`, or any other plugin/`*.tests` project — **use `eclipse-coder`.**
+
+- **Reading Java source:** use `tools["eclipse-ide"]` — `readProjectResource`, `getSource`, `getFilteredSource`, `getMethodSource`, `getClassOutline`, `readImageResource` (images), `getMarkdownOutline`/`getMarkdownSection` (large `.md` files).
+- **Searching code:** use `tools["eclipse-ide"]` — `fileSearch`, `fileSearchRegExp`, `findFiles`, `findReferences`. Use the built-in `grep`/`glob` only for non-code files (Dockerfiles, shell scripts, configs) or when the Eclipse search returns nothing.
+- **Understanding relationships:** `tools["eclipse-ide"].getTypeHierarchy`, `getMethodCallHierarchy`, `getJavaDoc`, `explainTypeResolution`, `getImportSuggestions`, `getProjectDependencies`, `getProjectLayout`, `getProjectProperties`.
+- **Editor / project state:** `tools["eclipse-ide"].getCurrentlyOpenedFile`, `getEditorSelection`, `listProjects`, `openProject`, `getWorkspaceOverview`.
+- **More `eclipse-coder` edit ops:** `applyTextEdits` (batched edits), `moveResource`, `createDirectories`, `refactorChangeMethodSignature`, `refactorExtractTypeToNewFile`, `refactorRenameJavaElement` (fields/methods/vars), `organizeImportsInPackage`, `undoEdit`, and `normalizeLineDelimiters`/`getLineDelimiterPreference` for line-ending issues.
+
+### Long-running operations (all Eclipse servers)
+
+Builds, tests, launches, refactors and other slow calls run asynchronously. Every Eclipse server exposes `listOperations`, `getOperationStatus`, and `cancelOperation`. When a tool returns an `operationId` instead of a final result, poll `tools["<server>"].getOperationStatus({ operationId })` (via `execute`) until it finishes, or `cancelOperation` to abort. Do not assume a call is done just because `execute` returned.
 
 ### Navigation & Discovery Tools
 
-For quick codebase orientation and type/method lookup, use the JDT-powered search tools:
+For quick codebase orientation and type/method lookup, use the JDT-powered search tools (all via `execute`):
 
-- **`eclipse-ide_searchTypes`** — Fuzzy type search via JDT SearchEngine. Supports wildcards (`*Payment*`), CamelCase (`PS` → `PaymentService`), prefix, and package-qualified patterns. Equivalent to Eclipse's Open Type (Ctrl+Shift+T). Use this instead of grep/glob when looking for a class by partial name.
-- **`eclipse-ide_searchMethods`** — Method name search with the same pattern support, plus optional declaring type filter. Use when you need to find where a method is defined without knowing the full class name.
-- **`eclipse-ide_getPackageSummary`** — Returns each type's name, kind, Javadoc first sentence, method/field counts, and interfaces for a package — a table-of-contents in one call. Use to quickly understand what a package contains.
-- **`eclipse-ide_getWorkspaceOverview`** — High-level architectural map of projects → packages → type names for immediate orientation. Use as the first step when exploring an unfamiliar part of the codebase.
+- **`tools["eclipse-ide"].searchTypes`** — Fuzzy type search via JDT SearchEngine. Supports wildcards (`*Payment*`), CamelCase (`PS` → `PaymentService`), prefix, and package-qualified patterns. Equivalent to Eclipse's Open Type (Ctrl+Shift+T). Use this instead of grep/glob when looking for a class by partial name.
+- **`tools["eclipse-ide"].searchMethods`** — Method name search with the same pattern support, plus optional declaring type filter. Use when you need to find where a method is defined without knowing the full class name.
+- **`tools["eclipse-ide"].getPackageSummary`** — Returns each type's name, kind, Javadoc first sentence, method/field counts, and interfaces for a package — a table-of-contents in one call. Use to quickly understand what a package contains.
+- **`tools["eclipse-ide"].getWorkspaceOverview`** — High-level architectural map of projects → packages → type names for immediate orientation. Use as the first step when exploring an unfamiliar part of the codebase.
 
 ### After Every Code Change
-1. **Always call `eclipse-ide_getCompilationErrors`** after modifying code to check for compilation errors.
-2. If errors are found and have quick fixes available, **use `eclipse-ide_executeQuickFix`** to resolve them automatically.
-3. **Use `eclipse-coder_organizeImports`** to fix import issues after edits.
+1. **Always call `tools["eclipse-ide"].getCompilationErrors`** after modifying code to check for compilation errors.
+2. If errors are found and have quick fixes available, **use `tools["eclipse-ide"].executeQuickFix`** to resolve them automatically.
+3. **Use `tools["eclipse-coder"].organizeImports`** to fix import issues after edits.
 4. **Spotbugs:** Spotbugs errors of the **two highest severity levels** are treated as blocking errors. Always try to fix these in any new or modified code to keep the codebase robust and clean.
 
 ### Git Operations
-- **Use `eclipse-git` tools** (`gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitBranch`, etc.) instead of command-line git.
+- **Use `tools["eclipse-git"]`** instead of command-line git. Available: `gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitLog`, `gitShow`, `gitReadFile` (read a file at a revision), `gitBranch`, `gitCreateBranch`, `gitCheckout`, `gitDeleteBranch`, `gitMerge`, `gitRebase`, `gitCherryPick`, `gitRevert`, `gitReset`, `gitResetToRevision`, `gitDiscardChanges`, `gitStagePatch`, `gitStash`/`gitStashList`/`gitStashPop`, `gitTag`/`gitTagList`/`gitDeleteTag`, `gitFetch`, `gitPull`, `gitPush`, `gitRemoteList`.
 - **NEVER COMMIT WITHOUT APPROVAL. ALWAYS ASK FOR PERMISSION** before running `gitCommit`. Approval to review a diff, a spec, or test results is NOT approval to commit — those are separate gates. Explicitly ask (e.g. "ready to commit?") and wait for the user's explicit go-ahead in their own reply before calling `gitCommit`, even if every prior step in the same task was already approved.
 - **After every `gitCommit`**, display the full commit message (subject line + body) in a formatted block so the user can verify the naming and content before moving on.
 - **Never push directly.** You may create commits (once approved), but never run `git push` until the user has explicitly reviewed and approved the commit(s). Always wait for user confirmation before pushing.
@@ -53,36 +91,41 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 - **Never create a new branch unless explicitly told to.** Default to committing and pushing on whatever branch is currently checked out (e.g. `master`). Only run `gitCreateBranch`/`gitCheckout` to a new branch when the user explicitly asks for one.
 
 ### Running and Debugging
-- **Use `eclipse-runner` tools** for launching, debugging, and testing Java applications.
-- **Use `eclipse-pde` tools** for PDE-specific operations (target platform, plugin tests).
+- **Use `tools["eclipse-runner"]`** for launching, debugging, and testing Java applications: `runJavaApplication`, `debugJavaApplication`, `launchConfiguration`, `listLaunchConfigurations`, `listActiveLaunches`, `stopApplication`.
+- **Debugger control:** `toggleBreakpoint`, `setConditionalBreakpoint`, `listBreakpoints`, `removeAllBreakpoints`, `resumeDebug`, `stepInto`, `stepOver`, `stepReturn`, `getStackTrace`, `evaluateExpression`, `hotCodeReplace`.
+- **Use `tools["eclipse-pde"]`** for PDE-specific operations: `runJUnitPluginTests`, `getActiveTarget`, `setActiveTarget`, `reloadTarget`, `reloadWorkspaceBundle`, `restartMcpServers`.
 
 ### Testing
-- **Use `eclipse-ide_runAllTests`**, `eclipse-ide_runClassTests`, or `eclipse-ide_runTestMethod` for running JUnit tests.
-- **Use `eclipse-pde_runJUnitPluginTests`** or `eclipse-pde_runJUnitPluginTestClass` for plugin integration tests.
+- **Use `tools["eclipse-ide"].runJUnitTests`** for plain JUnit tests (pass the class/method to scope the run); use `tools["eclipse-ide"].findTestClasses` to discover test classes first.
+- **Use `tools["eclipse-pde"].runJUnitPluginTests`** for plugin integration tests (PDE harness).
 - Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`
 
 ### Refactoring
-- **Use `eclipse-coder_refactorRenameJavaType`** to rename classes, interfaces, enums, or records — this updates all references across the workspace.
-- **Use `eclipse-coder_refactorRenamePackage`** to rename packages — updates all package declarations and references.
-- **Use `eclipse-coder_refactorMoveJavaType`** to move types between packages.
-- **For method, field, and variable renames:** use `eclipse-ide_findReferences` first to find all usages, then apply the rename consistently. Prefer Eclipse refactor tools over manual find-and-replace to ensure all references are updated correctly.
+- **Use `tools["eclipse-coder"].refactorRenameJavaType`** to rename classes, interfaces, enums, or records — this updates all references across the workspace.
+- **Use `tools["eclipse-coder"].refactorRenamePackage`** to rename packages — updates all package declarations and references.
+- **Use `tools["eclipse-coder"].refactorMoveJavaType`** to move types between packages.
+- **Use `tools["eclipse-coder"].refactorRenameJavaElement`** to rename methods, fields, and local variables — this updates all references. If you must do it by hand, run `tools["eclipse-ide"].findReferences` first to find every usage, then apply the rename consistently. Prefer Eclipse refactor tools over manual find-and-replace.
+- **Use `tools["eclipse-coder"].refactorChangeMethodSignature`** to change a method's parameters/return type, and `refactorExtractTypeToNewFile` to pull a type into its own file.
 
 ### Other Tools
-- **Use `eclipse-ide_formatFile`** or `eclipse-coder_formatFile` to format Java files after editing.
-- **Use `eclipse-context`** tools for workspace context, file history, and cached resources.
-- **Use `time`** for time-related operations.
+- **Formatting:** `tools["eclipse-coder"].formatFile` (a specific file) or `tools["eclipse-ide"].formatCode` after editing. `tools["eclipse-ide"].searchAndReplace` does a workspace-wide find/replace when a single-file edit is not enough.
+- **File history / undo:** `tools["eclipse-context"]` — `getFileHistory`, `getFileHistoryContent`, `compareWithHistory`, `restoreFileVersion` (Eclipse local history), plus `listCachedResources`, `getCachedResource`, `getCacheStats` for the resource cache.
+- **Maven / build:** `tools["eclipse-ide"].runMavenBuild`, `getEffectivePom`, `listMavenProjects`, `getProjectDependencies`, `updateMavenProject`. Use the built-in `shell` only for a full reactor `mvn clean verify`.
+- **Use `tools.time`** for time-related operations.
 
 ## Workflow for Code Changes
 
+All Eclipse tool calls below go through the **`execute`** tool using the bracket notation shown (never as direct `eclipse-*_*` tools, never the built-in `edit`/`write`).
+
 ```
-1. Read/understand code using eclipse-ide tools (getClassOutline, getMethodSource, getFilteredSource)
-2. Make changes using eclipse-coder tools (replaceString, insertIntoFile, etc.)
-3. Organize imports: eclipse-coder_organizeImports
-4. Format file: eclipse-coder_formatFile
-5. Check errors: eclipse-ide_getCompilationErrors
-6. If errors have quick fixes: eclipse-ide_executeQuickFix
-7. If errors remain: fix manually and repeat from step 5
-8. Run relevant tests: eclipse-ide_runClassTests or eclipse-pde_runJUnitPluginTestClass
+1. Read/understand code:      tools["eclipse-ide"].getClassOutline / getMethodSource / getFilteredSource
+2. Make changes:              tools["eclipse-coder"].replaceString / applyPatch / insertIntoFile / createFile
+3. Organize imports:          tools["eclipse-coder"].organizeImports
+4. Format file:               tools["eclipse-coder"].formatFile
+5. Check errors:              tools["eclipse-ide"].getCompilationErrors
+6. If errors have quick fixes: tools["eclipse-ide"].executeQuickFix
+7. If errors remain: fix manually (again via eclipse-coder) and repeat from step 5
+8. Run relevant tests:        tools["eclipse-ide"].runClassTests or tools["eclipse-pde"].runJUnitPluginTestClass
 ```
 
 ## Debugging CI-only Failures
