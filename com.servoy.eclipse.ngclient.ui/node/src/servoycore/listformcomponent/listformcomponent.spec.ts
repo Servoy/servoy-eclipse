@@ -384,6 +384,168 @@ describe('ListFormComponent', () => {
     });
   });
 
+  describe('SVY-21457 per-row auto-height', () => {
+    // Configure the scrolling responsive path and run svyOnInit so agGridOptions is built.
+    // isInAbsoluteLayout / responsiveHeight / containedForm drive isPerRowAutoHeight().
+    const configure = (absoluteLayout: boolean, responsiveHeight: number, formHeight: number | null = 50) => {
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(absoluteLayout);
+      mockServoyApi.getClientProperty.mockReturnValue(null); // no pagingMode -> useScrolling stays true
+      // svyOnInit does this._foundset.set(this.foundset()) then registers a change listener on it;
+      // provide the foundset input (mockFoundset has addChangeListener) so that path works.
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      fixture.componentRef.setInput('responsiveHeight', responsiveHeight);
+      fixture.componentRef.setInput('containedForm', { formHeight, formWidth: 100, absoluteLayout });
+      component.svyOnInit();
+    };
+
+    describe('isPerRowAutoHeight', () => {
+      it('is true only for responsive layout with responsiveHeight < 0', () => {
+        mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+        fixture.componentRef.setInput('responsiveHeight', -1);
+        expect(component.isPerRowAutoHeight()).toBe(true);
+      });
+
+      it('is false for responsive layout with responsiveHeight >= 0', () => {
+        mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+        fixture.componentRef.setInput('responsiveHeight', 0);
+        expect(component.isPerRowAutoHeight()).toBe(false);
+      });
+
+      it('is false for absolute layout even with responsiveHeight < 0', () => {
+        mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+        fixture.componentRef.setInput('responsiveHeight', -1);
+        expect(component.isPerRowAutoHeight()).toBe(false);
+      });
+    });
+
+    describe('columnDefs autoHeight / getRowHeight callback', () => {
+      it('disables native autoHeight and sets a getRowHeight callback on the per-row auto-height path', () => {
+        configure(false, -1);
+        const colDef = component.agGridOptions.columnDefs![0] as any;
+        expect(colDef.autoHeight).toBe(false);
+        expect(component.agGridOptions.getRowHeight).toBeInstanceOf(Function);
+      });
+
+      it('keeps native autoHeight and no getRowHeight callback for responsiveHeight >= 0', () => {
+        configure(false, 300);
+        const colDef = component.agGridOptions.columnDefs![0] as any;
+        expect(colDef.autoHeight).toBe(true);
+        expect(component.agGridOptions.getRowHeight).toBeUndefined();
+      });
+
+      it('falls back to getRowHeight()/42 before a row has been measured', () => {
+        configure(false, -1, 50);
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'r1' } } as any)).toBe(50);
+        configure(false, -1, null);
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'r1' } } as any)).toBe(42);
+      });
+    });
+
+    describe('applyMeasuredRowHeight', () => {
+      let gridApi: any;
+      let node: any;
+
+      beforeEach(() => {
+        gridApi = { isDestroyed: vi.fn().mockReturnValue(false), onRowHeightChanged: vi.fn() };
+        vi.spyOn(component, 'agGrid').mockReturnValue({ api: gridApi } as any);
+        node = { setRowHeight: vi.fn() };
+      });
+
+      it('sets the row height and notifies AG Grid on the per-row auto-height path', () => {
+        configure(false, -1);
+        component.applyMeasuredRowHeight('r1', node, 200);
+        expect(node.setRowHeight).toHaveBeenCalledWith(200);
+        expect(gridApi.onRowHeightChanged).toHaveBeenCalled();
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'r1' } } as any)).toBe(200);
+      });
+
+      it('does nothing outside the per-row auto-height path', () => {
+        configure(false, 300);
+        component.applyMeasuredRowHeight('r1', node, 200);
+        expect(node.setRowHeight).not.toHaveBeenCalled();
+      });
+
+      it('ignores a non-positive measured height', () => {
+        configure(false, -1);
+        component.applyMeasuredRowHeight('r1', node, 0);
+        expect(node.setRowHeight).not.toHaveBeenCalled();
+      });
+
+      it('is a no-op when the same height is re-applied to the same row', () => {
+        configure(false, -1);
+        component.applyMeasuredRowHeight('r1', node, 200);
+        node.setRowHeight.mockClear();
+        gridApi.onRowHeightChanged.mockClear();
+        component.applyMeasuredRowHeight('r1', node, 200);
+        expect(node.setRowHeight).not.toHaveBeenCalled();
+        expect(gridApi.onRowHeightChanged).not.toHaveBeenCalled();
+      });
+
+      it('re-applies when a different height is measured for the same row', () => {
+        configure(false, -1);
+        component.applyMeasuredRowHeight('r1', node, 200);
+        node.setRowHeight.mockClear();
+        component.applyMeasuredRowHeight('r1', node, 350);
+        expect(node.setRowHeight).toHaveBeenCalledWith(350);
+      });
+    });
+
+    describe('anti-flicker (grid hidden until first render settles)', () => {
+      it('hides the grid before the first render on the responsive auto-height path', () => {
+        configure(false, -1);
+        expect(component.getAGGridStyle().visibility).toBe('hidden');
+      });
+
+      it('reveals the grid after onFirstDataRendered fires', () => {
+        configure(false, -1);
+        expect(component.getAGGridStyle().visibility).toBe('hidden');
+        // onFirstDataRendered calls scrollToSelection(), which reads this.agGrid().api
+        vi.spyOn(component, 'agGrid').mockReturnValue({ api: { isDestroyed: () => false, getDisplayedRowCount: () => 0 } } as any);
+        const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+          cb(0);
+          return 0;
+        });
+        component.agGridOptions.onFirstDataRendered!({ api: { getDisplayedRowCount: () => 0 } } as any);
+        raf.mockRestore();
+        expect(component.getAGGridStyle().visibility).toBeUndefined();
+      });
+
+      it('does not hide the grid on the fixed-height responsive path', () => {
+        configure(false, 300);
+        expect(component.getAGGridStyle().visibility).toBeUndefined();
+      });
+
+      it('does not hide the grid in absolute layout', () => {
+        configure(true, -1);
+        expect(component.getAGGridStyle().visibility).toBeUndefined();
+      });
+
+      it('reveals via onModelUpdated when the foundset is empty', () => {
+        configure(false, -1);
+        expect(component.getAGGridStyle().visibility).toBe('hidden');
+        const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+          cb(0);
+          return 0;
+        });
+        component.agGridOptions.onModelUpdated!({ api: { getDisplayedRowCount: () => 0 } } as any);
+        raf.mockRestore();
+        expect(component.getAGGridStyle().visibility).toBeUndefined();
+      });
+    });
+
+    describe('domLayout', () => {
+      it("is 'autoHeight' when responsiveHeight < 0", () => {
+        configure(false, -1);
+        expect(component.agGridOptions.domLayout).toBe('autoHeight');
+      });
+
+      it("is 'normal' when responsiveHeight >= 0", () => {
+        configure(false, 300);
+        expect(component.agGridOptions.domLayout).toBe('normal');
+      });
+    });
+  });
+
   describe('registerComponent / unRegisterComponent', () => {
     it('should register a component at the given row index', () => {
       const mockComp = { name: () => 'btn1' } as any;
