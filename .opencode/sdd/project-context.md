@@ -3,16 +3,20 @@
 This project is the **Servoy Developer IDE** — a large Eclipse RCP application built
 as a multi-module Maven/Tycho project consisting of ~40+ OSGi plugin bundles.
 
+## SDD variant
+
+This repo uses the **sdd-java-eclipse** shared skill (Java / Eclipse-OSGi pipeline).
+
 ## Technology stack
 
 | Aspect | Value |
 |--------|-------|
 | Java version | 21 |
-| Build system | Maven 3.9.0+ with Eclipse Tycho 4.0.12 |
-| Platform | Eclipse 2025-12 (RCP) |
+| Build system | Maven 3.9.0+ with Eclipse Tycho 5.0.3 |
+| Platform | Eclipse RCP (target: `launch_targets/com.servoy.eclipse.target.target`) |
 | Module system | OSGi (each plugin is a bundle with MANIFEST.MF) |
 | UI framework | Eclipse SWT/JFace + Angular (designer frontends) |
-| Version | 2026.6.0-SNAPSHOT |
+| Version | 2026.9.0-SNAPSHOT (release line) |
 
 ## Eclipse plugin development essentials
 
@@ -66,7 +70,22 @@ If creating a new plugin bundle:
 | `com.servoy.eclipse.debug` | Debugger support |
 | `com.servoy.eclipse.designer` | Form designer |
 | `com.servoy.eclipse.ngclient` | NG Client support |
+| `com.servoy.eclipse.exporter.war` | WAR exporter (server-side deploy packaging) |
+| `com.servoy.eclipse.exporter.solution` | Solution exporter |
+| `com.servoy.eclipse.exporter.mobile` | Mobile exporter |
 | `com.servoy.eclipse.tests` | Integration tests (eclipse-test-plugin) |
+
+## Testing
+
+- Unit tests (pure logic, no OSGi): a `<plugin>.tests` fragment with standard
+  `eclipse-plugin` packaging, run with `eclipse-ide_runClassTests`. Class suffix `*Test`.
+- Integration/plugin tests (needs OSGi/workspace/`ServoyModel`): `eclipse-test-plugin`
+  packaging, primary project `com.servoy.eclipse.tests`, run with
+  `eclipse-pde_runJUnitPluginTestClass`. Class suffix `*IntegrationTest`.
+- Prefer the shared integration test base/utilities (`AbstractIntegrationTest`,
+  `ServoyRunnerTestBase`, `TestUtilitiesClass` — `pumpEventsUntil`, `waitForWorkspaceBuildJobs`,
+  `waitForAppServer`) over raw `Thread.sleep`.
+- See `AGENTS.md` `## Testing` for the catalogue of existing feature test classes.
 
 ## AGENTS.md
 

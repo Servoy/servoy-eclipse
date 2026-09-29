@@ -1,6 +1,10 @@
-# Project Context — Servoy Designer RFB (Angular Frontend)
+﻿# Project Context â€” Servoy Designer RFB (Angular Frontend)
 
-This project is the **Servoy Form Designer** frontend — an Angular single-page application
+## SDD variant
+
+This sub-project uses the **sdd-angular** shared skill (Angular pipeline).
+
+This project is the **Servoy Form Designer** frontend â€” an Angular single-page application
 embedded inside the Eclipse-based Servoy Developer IDE. It provides the visual drag-and-drop
 form editor for designing Servoy forms.
 
@@ -8,14 +12,14 @@ form editor for designing Servoy forms.
 
 | Aspect | Value |
 |--------|-------|
-| Framework | Angular 21 (NgModule-based, NOT standalone components) |
+| Framework | Angular 22 (NgModule-based, NOT standalone components) |
 | Language | TypeScript 5.9 |
 | Build system | Angular CLI with `@angular/build:application` (esbuild) |
 | CSS framework | Bootstrap 5.3 |
 | Component library | ng-bootstrap 20 |
 | Drag & drop | Angular CDK `DragDropModule` |
 | Icons | Font Awesome 7 |
-| Test framework | Jasmine 6 + Karma |
+| Test framework | Vitest 4 (Angular TestBed) |
 | Linting | ESLint 9 with `@angular-eslint` + `@typescript-eslint` |
 | Package manager | npm (with `legacy-peer-deps=true`) |
 | Node version | Bundled via `com.servoy.eclipse.nodejs.*` plugins |
@@ -32,12 +36,12 @@ The designer is embedded in Eclipse via the RFB (Remote Form Builder) mechanism:
 
 The `EditorSessionService` manages a WebSocket connection to the Eclipse `formeditor`
 service (via Sablo). Key operations:
-- `createComponent` / `createComponents` — add components to form
-- `sendChanges` — update component properties (position, size)
-- `setSelection` — sync selection state with Eclipse
-- `keyPressed` — forward keyboard events to Eclipse handlers
-- `executeAction` — run named actions (z-order, alignment, reload)
-- `openElementWizard` — open Eclipse dialogs
+- `createComponent` / `createComponents` â€” add components to form
+- `sendChanges` â€” update component properties (position, size)
+- `setSelection` â€” sync selection state with Eclipse
+- `keyPressed` â€” forward keyboard events to Eclipse handlers
+- `executeAction` â€” run named actions (z-order, alignment, reload)
+- `openElementWizard` â€” open Eclipse dialogs
 
 ### Cross-project dependencies (tsconfig path aliases)
 
@@ -87,7 +91,7 @@ Single NgModule (`DesignerModule`) bootstrapping `DesignerComponent`:
 
 | Service | Role |
 |---------|------|
-| `EditorSessionService` | Core — WebSocket session, selection state, palette data, form actions |
+| `EditorSessionService` | Core â€” WebSocket session, selection state, palette data, form actions |
 | `EditorContentService` | DOM abstraction for iframe content, glasspane, cross-frame messaging |
 | `URLParserService` | Parses designer URL query params (form name, solution, layout type) |
 | `DesignSizeService` | Manages responsive design size presets (desktop/tablet/phone) |
@@ -98,26 +102,26 @@ Single NgModule (`DesignerModule`) bootstrapping `DesignerComponent`:
 
 ```
 app-designer
-├── designer-toolbar
-├── fill-area
-│   ├── designer-variantspreview
-│   ├── designer-palette
-│   ├── designer-resizer
-│   ├── content-area
-│   │   ├── contentframe-overlay (glasspane)
-│   │   │   ├── selection-decorators (MouseSelectionComponent)
-│   │   │   ├── designer-highlight
-│   │   │   ├── designer-ghostscontainer
-│   │   │   ├── dragselection (absolute layout)
-│   │   │   ├── dragselection-responsive
-│   │   │   ├── designer-samesize-indicator
-│   │   │   ├── designer-anchoring-indicator
-│   │   │   └── dynamic-guides (absolute layout)
-│   │   └── designer-editorcontent (iframe)
-│   └── designer-autoscroll [top/bottom/left/right]
-├── designer-status-bar
-├── designer-contextmenu
-└── designer-inline-edit
+â”œâ”€â”€ designer-toolbar
+â”œâ”€â”€ fill-area
+â”‚   â”œâ”€â”€ designer-variantspreview
+â”‚   â”œâ”€â”€ designer-palette
+â”‚   â”œâ”€â”€ designer-resizer
+â”‚   â”œâ”€â”€ content-area
+â”‚   â”‚   â”œâ”€â”€ contentframe-overlay (glasspane)
+â”‚   â”‚   â”‚   â”œâ”€â”€ selection-decorators (MouseSelectionComponent)
+â”‚   â”‚   â”‚   â”œâ”€â”€ designer-highlight
+â”‚   â”‚   â”‚   â”œâ”€â”€ designer-ghostscontainer
+â”‚   â”‚   â”‚   â”œâ”€â”€ dragselection (absolute layout)
+â”‚   â”‚   â”‚   â”œâ”€â”€ dragselection-responsive
+â”‚   â”‚   â”‚   â”œâ”€â”€ designer-samesize-indicator
+â”‚   â”‚   â”‚   â”œâ”€â”€ designer-anchoring-indicator
+â”‚   â”‚   â”‚   â””â”€â”€ dynamic-guides (absolute layout)
+â”‚   â”‚   â””â”€â”€ designer-editorcontent (iframe)
+â”‚   â””â”€â”€ designer-autoscroll [top/bottom/left/right]
+â”œâ”€â”€ designer-status-bar
+â”œâ”€â”€ designer-contextmenu
+â””â”€â”€ designer-inline-edit
 ```
 
 ## Build & scripts
@@ -127,7 +131,7 @@ app-designer
 | `npm start` | `ng serve` | Dev server (localhost:4200) |
 | `npm run build` | `ng build --configuration production` | Production build |
 | `npm run build_debug` | `ng build --watch` | Debug build with watch |
-| `npm test` | `ng test` | Run unit tests (Karma/Jasmine) |
+| `npm test` | `ng test` | Run unit tests (Vitest, no watch) |
 | `npm run lint` | `ng lint` | Run ESLint |
 
 ## Code conventions
@@ -138,8 +142,8 @@ app-designer
 - Arrow functions preferred (`eslint-plugin-prefer-arrow`)
 - 2-space indentation
 - No unused imports
-- Follow existing patterns in neighboring files — consistency over preference
-- No `console.log` in production code — remove after debugging
+- Follow existing patterns in neighboring files â€” consistency over preference
+- No `console.log` in production code â€” remove after debugging
 - Use RxJS operators for async data flows
 - Use Angular CDK for drag-and-drop, not custom implementations
 
@@ -149,7 +153,7 @@ app-designer
   aliases resolve to `../../com.servoy.eclipse.ngclient.ui/node/`. If those files don't
   exist locally, the build will fail. Make sure that project is checked out.
 
-- **Build output location:** Production build outputs to `../src/rfb/angular2` — this is
+- **Build output location:** Production build outputs to `../src/rfb/angular2` â€” this is
   the Java plugin's resource folder. Don't change the `outputPath` in angular.json.
 
 - **Not standalone components:** This project uses NgModule-based architecture. All
@@ -158,7 +162,7 @@ app-designer
 
 - **iframe communication:** The designer content (the actual form) runs in an iframe.
   Cross-frame communication uses `EditorContentService`. Never directly access
-  `document` for the iframe content — always go through the service.
+  `document` for the iframe content â€” always go through the service.
 
 - **WebSocket state:** The `EditorSessionService` manages the Sablo WebSocket session.
   All commands to the Eclipse backend go through this service. Never create direct

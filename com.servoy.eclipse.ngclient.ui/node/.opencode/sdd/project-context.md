@@ -1,6 +1,10 @@
-# Project Context — Servoy TiNG (NG Client UI)
+﻿# Project Context â€” Servoy TiNG (NG Client UI)
 
-This project is the **Servoy TiNG** runtime — the Angular-based NG Client UI
+## SDD variant
+
+This sub-project uses the **sdd-angular** shared skill (Angular pipeline).
+
+This project is the **Servoy TiNG** runtime â€” the Angular-based NG Client UI
 that powers the Servoy application runtime in the browser. It is a large Angular
 workspace with one application and multiple library sub-projects.
 
@@ -8,10 +12,10 @@ workspace with one application and multiple library sub-projects.
 
 | Aspect | Value |
 |--------|-------|
-| Framework | Angular 21 |
+| Framework | Angular 22 |
 | Language | TypeScript 5.9 |
 | Build tool | Angular CLI (`@angular/build:application`, esbuild-based) |
-| Test framework | Jasmine + Karma |
+| Test framework | Vitest 4 (Angular TestBed) |
 | Linter | ESLint 9 (`@angular-eslint`) |
 | Package manager | npm (with `legacy-peer-deps=true`) |
 | Version | 2026.9.0 |
@@ -21,20 +25,20 @@ workspace with one application and multiple library sub-projects.
 The application has a layered architecture:
 
 ```
-src/sablo/         → WebSocket communication, type converters, service registry
-src/ngclient/      → Runtime services, form management, data converters
-src/servoycore/    → Core Servoy components (formcontainer, navigator, etc.)
-src/designer/      → Form designer integration (embedded in Eclipse)
-src/app/           → Bootstrap, routing, root module
+src/sablo/         â†’ WebSocket communication, type converters, service registry
+src/ngclient/      â†’ Runtime services, form management, data converters
+src/servoycore/    â†’ Core Servoy components (formcontainer, navigator, etc.)
+src/designer/      â†’ Form designer integration (embedded in Eclipse)
+src/app/           â†’ Bootstrap, routing, root module
 ```
 
 ### Library sub-projects
 
 ```
 @servoy/public (core APIs, types, base classes)
-    ↓
+    â†“
 @servoy/servoydefault, @servoy/dialogs, @servoy/window, @servoy/ngclientutils
-    ↓
+    â†“
 ngclient2 (main application)
 ```
 
@@ -46,7 +50,7 @@ ngclient2 (main application)
 | `@servoy/window` | `projects/window/` | Window service |
 | `@servoy/ngclientutils` | `projects/ngclientutils/` | Client utility services |
 
-## Sablo WebSocket architecture (server ↔ client)
+## Sablo WebSocket architecture (server â†” client)
 
 The Servoy runtime uses **Sablo** as its communication layer between Java (server)
 and Angular (client). Understanding this flow is essential for debugging service
@@ -56,20 +60,20 @@ API issues.
 
 ```
 Java (server)                          Angular (client)
-─────────────────────────────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 1. BaseWindow.sendSyncMessage()
-   → sends JSON via WebSocket
+   â†’ sends JSON via WebSocket
      with `smsgid` (expects response)
                                        2. WebsocketService receives message
-                                          → sees `smsgid` → knows server is waiting
+                                          â†’ sees `smsgid` â†’ knows server is waiting
                                        3. ServicesService.callServiceApi()
-                                          → dispatches to the plugin service
-                                          → e.g. DialogsService.showQuestionDialog()
+                                          â†’ dispatches to the plugin service
+                                          â†’ e.g. DialogsService.showQuestionDialog()
                                        4. Return value (or Promise) is captured
-                                          → Promise.resolve(returnValue).then(...)
-                                          → sends response back with same `smsgid`
+                                          â†’ Promise.resolve(returnValue).then(...)
+                                          â†’ sends response back with same `smsgid`
 5. BaseWindow.waitResponse() unblocks
-   → server code continues with result
+   â†’ server code continues with result
 ```
 
 ### Key files
@@ -77,32 +81,32 @@ Java (server)                          Angular (client)
 | File | Role |
 |------|------|
 | `src/sablo/websocket.service.ts` | WebSocket message handling, dispatches incoming calls |
-| `src/sablo/services.service.ts` | `callServiceApi()` — dispatches to service instances, handles return values |
-| Server: `BaseWindow.java` | `sendSyncMessage()` / `waitResponse()` — blocking call from Java |
+| `src/sablo/services.service.ts` | `callServiceApi()` â€” dispatches to service instances, handles return values |
+| Server: `BaseWindow.java` | `sendSyncMessage()` / `waitResponse()` â€” blocking call from Java |
 | Server: `ClientSideTypeCache.java` | Sends client-side spec info (type converters, `shouldReturnValue` flag) |
 
 ### Important concepts
 
-- **`smsgid`** — Server Message ID. When present in a message, the client MUST send
+- **`smsgid`** â€” Server Message ID. When present in a message, the client MUST send
   a response. The server thread blocks until the response arrives.
-- **`shouldReturnValue`** — Flag in the client-side spec that tells
+- **`shouldReturnValue`** â€” Flag in the client-side spec that tells
   `callServiceApi()` to await the service function's return value (including Promises)
   before responding to the server. Without this flag, fire-and-forget calls return
   `undefined` immediately.
-- **`waitForLoading()`** — Deferred pattern in `handleNormalServiceApis` that queues
+- **`waitForLoading()`** â€” Deferred pattern in `handleNormalServiceApis` that queues
   incoming API calls until the client-side service is fully loaded (introduced SVY-19700).
-- **Service specs** — `.spec` files on the server define API functions, their parameters,
+- **Service specs** â€” `.spec` files on the server define API functions, their parameters,
   return types, and whether they need type conversion. `ClientSideTypeCache` serializes
   relevant parts to the client.
 
 ### Common pitfalls
 
 - If `serviceCallSpec` is `undefined` (spec not yet loaded or no type info needed),
-  the client must still propagate the return value — otherwise the server unblocks
+  the client must still propagate the return value â€” otherwise the server unblocks
   immediately with `undefined`.
 - Async service functions (like dialogs) return a **Promise**. The websocket layer
   uses `Promise.resolve(returnValue).then(...)` to handle both sync and async returns.
-- Pre-login calls can hit timing issues where specs haven't loaded yet — the
+- Pre-login calls can hit timing issues where specs haven't loaded yet â€” the
   `|| serviceCallSpec === undefined` fallback ensures return values are still propagated.
 
 ## Angular development essentials
@@ -123,7 +127,7 @@ When writing code for this project, you are writing an **Angular application**:
 
 ### Change detection
 - Components use default strategy; avoid manual `ChangeDetectorRef` unless necessary
-- The app uses Zone.js — don't introduce zoneless patterns
+- The app uses Zone.js â€” don't introduce zoneless patterns
 
 ### RxJS
 - Unsubscribe in `ngOnDestroy` or use `takeUntilDestroyed()` / `async` pipe
@@ -153,10 +157,10 @@ When writing code for this project, you are writing an **Angular application**:
 
 ## Testing
 
-- **Jasmine** for test authoring (`describe`/`it`/`expect`)
-- **Karma** as test runner
+- **Vitest** for test authoring (`import { describe, it, expect, vi } from 'vitest'`)
+- **Vitest 4.x** as test runner (jsdom environment; `@angular/build:unit-test` AOT builder)
 - **Angular TestBed** for component/service testing
-- Tests live next to their source: `my.component.ts` → `my.component.spec.ts`
+- Tests live next to their source: `my.component.ts` â†’ `my.component.spec.ts`
 - Run specific test: `npx ng test --include="**/file.spec.ts" --watch=false --browsers=ChromeHeadless`
 - If Chrome is not installed, use `npm run test_edge` / `test_edge_nowatch` or set `CHROME_BIN`:
   ```powershell
@@ -170,14 +174,14 @@ When writing code for this project, you are writing an **Angular application**:
 
 ## AGENTS.md
 
-Always read `AGENTS.md` at the start of your work — it contains the full tool usage
+Always read `AGENTS.md` at the start of your work â€” it contains the full tool usage
 policy, workflow requirements, testing commands, and code conventions.
 
 ## Gotchas
 
 Things that will trip you up if you don't know them:
 
-- **NG0600 — Writing to signals during rendering:** Never call `signal.set()` or
+- **NG0600 â€” Writing to signals during rendering:** Never call `signal.set()` or
   `signal.update()` from a method/getter called in a template interpolation.
   Use `computed()` instead.
 
@@ -187,10 +191,10 @@ Things that will trip you up if you don't know them:
 - **esbuild platform mismatch:** If `node_modules` was copied from another architecture,
   run `npm ci` to reinstall native binaries.
 
-- **Karma browser:** If Chrome is not available, use `npm run test_edge` / `test_edge_nowatch`
+- **Test browser:** Vitest uses jsdom by default; browser-mode tests use Playwright per vitest config.
   or set `CHROME_BIN` to an alternative Chromium-based browser (Edge, Chromium).
 
-- **`legacy-peer-deps=true`:** Required due to Angular 21 peer dependency conflicts.
+- **`legacy-peer-deps=true`:** Required due to Angular 22 peer dependency conflicts.
   Always use this flag when installing.
 
 - **Zone.js:** The app still uses Zone.js for change detection. Don't introduce
