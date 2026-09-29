@@ -126,6 +126,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
         fixture.detectChanges();
         mockMO.calls.mostRecent().args[0]([{attributeName:'class', target: observerTarget}]);
+        fixture.detectChanges();
 
         const element = fixture.nativeElement.querySelector( '.svy-tabpanel' ) as HTMLElement;
         const style = fixture.componentInstance.getContainerStyle( element );
@@ -148,6 +149,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.ngOnChanges( changes );
         fixture.detectChanges();
         mockMO.calls.mostRecent().args[0]([{attributeName:'class', target: observerTarget}]);
+        fixture.detectChanges();
 
         const element = fixture.nativeElement.querySelector( '.svy-tabpanel' ) as HTMLElement;
         const style = fixture.componentInstance.getContainerStyle( element );
@@ -157,6 +159,47 @@ describe( 'ServoyDefaultTabpanel', () => {
         expect( style['overflow'] ).toBe( 'auto' );
         expect( style['overflowX'] ).toBeUndefined();
         expect( style['overflowY'] ).toBeUndefined();
+      } ) );
+
+    it( 'should not select a tab while rendering the container style', fakeAsync(() => {
+        const fixture = createComponentWithTabs();
+        servoyApi.isInAbsoluteLayout.and.returnValue( false );
+        spyOn( servoyPublicService, 'getFormCacheByName' ).and.returnValue(
+            { getBodyPartLayout: () => ({}) } as any );
+
+        const element = document.createElement( 'div' );
+        element.appendChild( document.createElement( 'ul' ) );
+        fixture.componentInstance.getContainerStyle( element );
+        tick(250);
+        discardPeriodicTasks();
+
+        // reading the container style must be side effect free: no tab may be selected yet
+        expect( fixture.componentInstance.getSelectedTab() ).toBeUndefined();
+        expect( servoyApi.formWillShow ).not.toHaveBeenCalled();
+      } ) );
+
+    it( 'should honour tabIndex when the container style was rendered first', fakeAsync(() => {
+        const fixture = createComponentWithTabs();
+        servoyApi.isInAbsoluteLayout.and.returnValue( false );
+        spyOn( servoyPublicService, 'getFormCacheByName' ).and.returnValue(
+            { getBodyPartLayout: () => ({}) } as any );
+        fixture.componentInstance.tabIndex = 2;
+
+        const element = document.createElement( 'div' );
+        element.appendChild( document.createElement( 'ul' ) );
+        fixture.componentInstance.getContainerStyle( element );
+
+        const changes: SimpleChanges = {};
+        changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
+        changes['tabIndex'] = new SimpleChange( null, 2, true );
+        fixture.componentInstance.ngOnChanges( changes );
+        fixture.detectChanges();
+        tick(250);
+        discardPeriodicTasks();
+
+        expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
+        expect( fixture.componentInstance.selectedTabID ).toBe( '1_tab_1' );
+        expect( fixture.componentInstance.tabIndex ).toBe( 2 );
       } ) );
 
 } );
