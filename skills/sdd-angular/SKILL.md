@@ -124,8 +124,8 @@ Options "No action — stop pipeline" (end) and "Redirect approach" (record as
 ### Gate for `NEEDS_INPUT`
 Present the report's "Questions for the reporter" via the `question` tool: "Answer here"
 (record answers as `USER_CONTEXT` additions, then the post-answer gate below — feed forward,
-do NOT loop back into Triage), "Post questions to Jira" (use the `servoy-jira` skill or the
-repo's `JIRA.md`; show exact reporter-facing text and get explicit confirmation before
+do NOT loop back into Triage), "Post questions to Jira" (use the `servoy-jira` skill; show
+exact reporter-facing text and get explicit confirmation before
 posting; never post internal reasoning; then pause pending a reply), or "Stop pipeline".
 
 ### Post-answer gate (after `NEEDS_INPUT` — "Answer here")

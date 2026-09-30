@@ -31,10 +31,11 @@ approach. This means:
 
 ## Jira API Access
 
-Read `JIRA.md` (in the repository root) for full API instructions — authentication,
+Load the `servoy-jira` skill first for full API instructions — authentication,
 platform-specific commands (PowerShell `Invoke-RestMethod` on Windows), error handling.
-The auth token is in `ATLASSIAN_AUTH_BASIC`. If `JIRA.md` is absent, use the `servoy-jira`
-global skill. Do not hardcode a Jira cloud-id — take it from `JIRA.md`.
+The auth token is in `ATLASSIAN_AUTH_BASIC`. Do not hardcode a Jira cloud-id — take it from
+the skill. (If you are running in an external repo that lacks the skill but ships its own
+`JIRA.md`, fall back to that.)
 
 ## Steps
 
@@ -44,7 +45,7 @@ Parse the input to get the bare issue key (e.g. `SVY-21080`).
 
 ### 2. Read the Jira issue
 
-Fetch the issue using the commands from `JIRA.md`. Parse the JSON to extract:
+Fetch the issue using the commands from the `servoy-jira` skill. Parse the JSON to extract:
 - Summary and description
 - Acceptance criteria (custom field or embedded in description)
 - Comments (especially from architects or product leads)

@@ -24,11 +24,12 @@ code lives.
 
 ## Jira API Access
 
-Read `JIRA.md` (in the repository root) for full API instructions — authentication,
+Load the `servoy-jira` skill first for full API instructions — authentication,
 platform-specific commands (PowerShell `Invoke-RestMethod` on Windows; never `curl` in
 PowerShell), error handling, and common mistakes. The auth token is in the
-`ATLASSIAN_AUTH_BASIC` environment variable. If `JIRA.md` is absent, use the `servoy-jira`
-global skill instead. Do not hardcode a Jira cloud-id — take it from `JIRA.md`.
+`ATLASSIAN_AUTH_BASIC` environment variable. Do not hardcode a Jira cloud-id — take it from
+the skill. (If you are running in an external repo that lacks the skill but ships its own
+`JIRA.md`, fall back to that.)
 
 Use the "Reading an issue" section to fetch the ticket. Use "Downloading an attachment"
 for log files or screenshots. Use "Searching issues" for JQL queries.

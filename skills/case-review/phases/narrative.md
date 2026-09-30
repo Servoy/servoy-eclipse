@@ -28,8 +28,9 @@ repository's own `AGENTS.md` or equivalent before describing its part of the cha
 
 Use the tracker identified in `REPO_CONTEXT`:
 
-- **Jira** — load the `servoy-jira` skill if available, or the repository's `JIRA.md`.
-  Fetch summary, description, comments, attachments, linked issues.
+- **Jira** — load the `servoy-jira` skill first; only in an external repo that lacks it,
+  fall back to that repo's `JIRA.md`. Fetch summary, description, comments, attachments,
+  linked issues.
 - **GitHub / GitLab** — `gh issue view <n> --comments` or `glab issue view <n>`. If no CLI
   is available and the URL is public, `webfetch` is acceptable.
 - **No tracker access** — say so explicitly and continue from the diff alone. The narrative

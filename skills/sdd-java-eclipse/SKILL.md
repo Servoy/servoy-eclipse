@@ -170,7 +170,7 @@ Handle the choice:
 - **"Answer here"** — ask the user for answers, record their answers as `USER_CONTEXT`
   additions, then present the **post-answer gate** below. The answers feed **forward** into
   the PM Agent — do **not** loop back into Triage.
-- **"Post questions to Jira"** — use the `servoy-jira` skill (or the repo's `JIRA.md`) to
+- **"Post questions to Jira"** — use the `servoy-jira` skill to
   post a clean, numbered, reporter-facing comment. Always show the exact comment text and
   get explicit confirmation before posting. Never post internal triage reasoning — only the
   reporter-facing questions. After posting, tell the user the pipeline is paused pending a

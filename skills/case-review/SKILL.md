@@ -321,8 +321,9 @@ Handling:
   "Questions for the author" section **only**. **Never** post internal risk analysis,
   security findings, or root-cause reasoning to a ticket. Show the exact text, get
   explicit approval, then post it using the tracker identified in `REPO_CONTEXT`:
-  - **Jira** — load the `servoy-jira` skill if it is available and follow its comment/API
-    guidance; otherwise read the repository's own `JIRA.md` if present. Jira comments need
+  - **Jira** — load the `servoy-jira` skill first and follow its comment/API guidance; only
+    if you are in an external repo that lacks the skill, fall back to its own `JIRA.md` if
+    present. Jira comments need
     ADF, and a numbered list requires `orderedList` + `listItem` nodes — a plain paragraph
     with newlines does not render as a list. On Windows, write the JSON body to a UTF-8
     temp file and pass it by reference rather than inline, because PowerShell quoting

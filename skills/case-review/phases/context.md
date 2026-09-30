@@ -325,7 +325,7 @@ If a later phase finds part of the change in a sibling, it should read that sibl
 - Base URL: ...
 - Auth: <env var name only>
 - CLI available: <gh / glab / none>
-- API guidance: <e.g. "servoy-jira skill", "JIRA.md in repo root", "none — use CLI">
+- API guidance: <e.g. "servoy-jira skill (preferred)", "JIRA.md in repo root (external fallback)", "none — use CLI">
 
 ### Report destination
 - `REPORT_DIR` (scratch, working files — deleted in Phase F): `<absolute path>`
