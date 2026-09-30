@@ -58,15 +58,38 @@ public class ComponentTemplateGenerator
 	 */
 	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(ITiNGExportModel model)
 	{
+		return generateHTMLTemplate(model, false);
+	}
+
+	/**
+	 *  return a pair where left is the full template string of all the components and
+	 *  right is the viewchild reference value to those components.
+	 *  When forFormTemplate is true, each component's own element also gets identifying
+	 *  attributes ([attr.data-svy-name]/[attr.data-svy-id]) so the stateless
+	 *  /formtemplate render (SVY-21460) is self-describing at the component-tag level.
+	 *  This variant is used ONLY for the formtemplate copy; runtime and designer are unchanged.
+	 * @return Pair<String,String>
+	 */
+	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(ITiNGExportModel model, boolean forFormTemplate)
+	{
 		WebObjectSpecification[] specs = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 		Map<String, PackageSpecification<WebObjectSpecification>> packageSpecs = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications();
-		return generateHTMLTemplate(specs, packageSpecs, model);
+		return generateHTMLTemplate(specs, packageSpecs, model, forFormTemplate);
 	}
 
 	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(
 		WebObjectSpecification[] specs,
 		Map<String, ? extends PackageSpecification< ? >> packageSpecs,
 		ITiNGExportModel model)
+	{
+		return generateHTMLTemplate(specs, packageSpecs, model, false);
+	}
+
+	public Pair<StringBuilder, StringBuilder> generateHTMLTemplate(
+		WebObjectSpecification[] specs,
+		Map<String, ? extends PackageSpecification< ? >> packageSpecs,
+		ITiNGExportModel model,
+		boolean forFormTemplate)
 	{
 		StringBuilder template = new StringBuilder();
 		StringBuilder viewChild = new StringBuilder();
@@ -110,12 +133,12 @@ public class ComponentTemplateGenerator
 				}
 				if (ng2Compatible.containsKey(packageName) && !ng2Compatible.get(packageName))
 					continue;
-				genereateSpec(template, viewChild, spec, spec.getName());
+				genereateSpec(template, viewChild, spec, spec.getName(), forFormTemplate);
 				if (spec.getName().equals("servoydefault-tabpanel"))
 				{
 					// also generate the tabless
-					genereateSpec(template, viewChild, spec, "servoydefault-tablesspanel");
-					genereateSpec(template, viewChild, spec, "servoydefault-accordion");
+					genereateSpec(template, viewChild, spec, "servoydefault-tablesspanel", forFormTemplate);
+					genereateSpec(template, viewChild, spec, "servoydefault-accordion", forFormTemplate);
 				}
 			}
 
@@ -125,7 +148,7 @@ public class ComponentTemplateGenerator
 		return new Pair<>(template, viewChild);
 	}
 
-	private void genereateSpec(StringBuilder template, StringBuilder viewChild, WebObjectSpecification spec, String specName)
+	private void genereateSpec(StringBuilder template, StringBuilder viewChild, WebObjectSpecification spec, String specName, boolean forFormTemplate)
 	{
 		String templateName = ClientService.convertToJSName(specName);
 		template.append("<ng-template #");
@@ -218,6 +241,13 @@ public class ComponentTemplateGenerator
 			}
 		}
 		template.append(" [servoyApi]=\"callback.getServoyApi(state)\"");
+		if (forFormTemplate)
+		{
+			// SVY-21460: stamp the Servoy component name and svyMarkupId onto the component element
+			// itself so the stateless formtemplate render is self-describing at the tag level.
+			template.append(" [attr.data-svy-name]=\"state.name\"");
+			template.append(" [attr.data-svy-id]=\"state.model.svyMarkupId\"");
+		}
 		template.append(" [name]=\"state.name\" #cmp");
 		template.append(">");
 		Collection<PropertyDescription> properties = spec.getProperties(FormPropertyType.INSTANCE);

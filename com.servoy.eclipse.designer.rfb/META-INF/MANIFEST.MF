@@ -16,7 +16,8 @@ Require-Bundle: org.apache.tomcat;bundle-version="11.0.8",
  org.eclipse.core.runtime,
  org.eclipse.jface,
  com.servoy.eclipse.ngclient,
- com.servoy.eclipse.ui
+ com.servoy.eclipse.ui,
+ com.servoy.eclipse.ngclient.ui
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: jakarta.servlet;version="[6.1.0,8.0.0)",

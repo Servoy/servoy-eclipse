@@ -481,6 +481,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 				ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
 				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate(warExportModel);
+				// SVY-21460: the stateless formtemplate copy also stamps data-svy-name/data-svy-id on the
+				// component element itself; runtime and designer copies keep using componentTemplates.
+				Pair<StringBuilder, StringBuilder> formTemplateComponentTemplates = generator.generateHTMLTemplate(warExportModel, true);
 				try
 				{
 					// adjust component templates
@@ -536,6 +539,33 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						sourceChanged = true;
 						writeConsole(console, "- editor ts file changed");
 						FileUtils.writeStringToFile(new File(projectFolder, "src/designer/designform_component.component.ts"), editorContent, "UTF-8");
+					}
+
+					// SVY-21460: keep the stateless form-template copy's component/structure/viewchild
+					// marker regions filled the same way as the runtime and designer form components
+					File formTemplateFile = new File(projectFolder, "src/formtemplate/formtemplate_component.component.ts");
+					if (formTemplateFile.exists())
+					{
+						String formTemplateContent = FileUtils.readFileToString(formTemplateFile, "UTF-8");
+						String oldFormTemplate = formTemplateContent;
+						formTemplateContent = replace(formTemplateContent, "<!-- component template generate start -->",
+							"<!-- component template generate end -->", formTemplateComponentTemplates.getLeft());
+						formTemplateContent = replace(formTemplateContent, "// component viewchild template generate start",
+							"// component viewchild template generate end", formTemplateComponentTemplates.getRight());
+						if (structureTagNames.size() > 0)
+						{
+							LayoutTemplates generateStructureTemplate = generateStructureTemplate(structureTagNames);
+							formTemplateContent = replace(formTemplateContent, "<!-- structure template generate start -->",
+								"<!-- structure template generate end -->", generateStructureTemplate.getFormComponentTemplate());
+							formTemplateContent = replace(formTemplateContent, "// structure viewchild template generate start",
+								"// structure viewchild template generate end", generateStructureTemplate.getViewChilds());
+						}
+						if (!oldFormTemplate.equals(formTemplateContent))
+						{
+							sourceChanged = true;
+							writeConsole(console, "- form template ts file changed");
+							FileUtils.writeStringToFile(formTemplateFile, formTemplateContent, "UTF-8");
+						}
 					}
 
 				}
