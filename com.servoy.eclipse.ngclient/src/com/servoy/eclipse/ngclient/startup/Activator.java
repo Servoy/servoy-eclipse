@@ -90,13 +90,27 @@ public class Activator implements BundleActivator
 						{
 							if (getClient() == null)
 							{
-//								NGClient ngClient = getNGClient(this, requestParams);
-//								if (ngClient != null)
-//								{
-//									setClient(ngClient);
-//								}
-//								else 
-								if (requestParams.containsKey("nodebug"))
+								//								NGClient ngClient = getNGClient(this, requestParams);
+								//								if (ngClient != null)
+								//								{
+								//									setClient(ngClient);
+								//								}
+								//								else 
+								if (requestParams.containsKey("formpreview"))
+								{
+									// Cypress form tests open ?formpreview=<formName>: show exactly that form and
+									// skip authentication (FormPreviewNGClient overrides showDefaultLogin()).
+									// Without this branch the request falls through to the debug/regular client
+									// below, which opens the solution's first form instead - so every form test
+									// except the one that happens to target the first form fails looking for its
+									// own data-cy elements. The headless CypressFormTestRunner installs an
+									// equivalent factory of its own; this keeps the in-Developer "Run Cypress
+									// Form Test(s)" actions behaving the same way.
+									String formName = requestParams.get("formpreview").get(0);
+									FormPreviewNGClient.setPendingTargetFormName(formName);
+									setClient(new FormPreviewNGClient(this, designerCallback, formName));
+								}
+								else if (requestParams.containsKey("nodebug"))
 								{
 									setClient(new NGClient(this, designerCallback));
 								}
@@ -155,30 +169,30 @@ public class Activator implements BundleActivator
 		}
 	}
 
-//	public NGClient getNGClient(INGClientWebsocketSession session, Map<String, List<String>> requestParams)
-//	{
-//
-//		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(NGCLIENT_DEVELOPER_ID);
-//		try
-//		{
-//			for (IConfigurationElement e : config)
-//			{
-//				System.out.println("Evaluating extension");
-//				final Object o = e.createExecutableExtension("class");
-//				if (o instanceof IDeveloperClientHandler)
-//				{
-//					NGClient ngClient = ((IDeveloperClientHandler)o).getNGClient(session, requestParams);
-//					if (ngClient != null) return ngClient;
-//
-//				}
-//			}
-//		}
-//		catch (CoreException ex)
-//		{
-//			Debug.error(ex);
-//		}
-//		return null;
-//	}
+	//	public NGClient getNGClient(INGClientWebsocketSession session, Map<String, List<String>> requestParams)
+	//	{
+	//
+	//		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(NGCLIENT_DEVELOPER_ID);
+	//		try
+	//		{
+	//			for (IConfigurationElement e : config)
+	//			{
+	//				System.out.println("Evaluating extension");
+	//				final Object o = e.createExecutableExtension("class");
+	//				if (o instanceof IDeveloperClientHandler)
+	//				{
+	//					NGClient ngClient = ((IDeveloperClientHandler)o).getNGClient(session, requestParams);
+	//					if (ngClient != null) return ngClient;
+	//
+	//				}
+	//			}
+	//		}
+	//		catch (CoreException ex)
+	//		{
+	//			Debug.error(ex);
+	//		}
+	//		return null;
+	//	}
 
 	@Override
 	public void stop(BundleContext ctx) throws Exception
