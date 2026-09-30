@@ -1,31 +1,55 @@
 ﻿package com.servoy.eclipse.cypress.headless;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.app.IApplicationContext;
-import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
-import com.servoy.eclipse.ngclient.startup.FormPreviewNGClient;
+import org.json.JSONException;
 import org.sablo.websocket.GetHttpSessionConfigurator;
 import org.sablo.websocket.IWebsocketSession;
 import org.sablo.websocket.IWebsocketSessionFactory;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.WebsocketSessionManager;
 
+import com.servoy.base.persistence.IBaseColumn;
+import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
+import com.servoy.eclipse.ngclient.startup.FormPreviewNGClient;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.DummyValidator;
+import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.extensions.ServoyServiceLoader;
 import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.starter.IWebServerStarter;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
+import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
  * Headless Eclipse application that runs Cypress form tests in CI without the
@@ -88,6 +112,16 @@ public class CypressFormTestRunner extends AbstractWorkspaceExporter<CypressForm
 	protected void checkAndExportSolutions(CypressFormTestArgumentChest configuration) {
 		installDriverAwareServiceClassLoader();
 		super.checkAndExportSolutions(configuration);
+	}
+
+	/**
+	 * Auto-creates missing in-memory test tables before the base class's build/marker
+	 * check runs, so that forms bound to those tables don't fail the build with "table
+	 * is not accessible" (see {@link #autoCreateInMemoryTestTables()}).
+	 */
+	@Override
+	protected void afterSolutionActivated(CypressFormTestArgumentChest configuration, String solutionName) {
+		autoCreateInMemoryTestTables();
 	}
 
 	private void installDriverAwareServiceClassLoader() {
@@ -179,6 +213,188 @@ public class CypressFormTestRunner extends AbstractWorkspaceExporter<CypressForm
 	}
 
 	/**
+	 * Auto-creates tables in in-memory-driver test servers (e.g. {@code servoy_test})
+	 * from cached {@code .dbi} metadata, mirroring the Developer-only convenience in
+	 * {@code com.servoy.eclipse.core.ServoyModel.updateResources()}.
+	 * <p>
+	 * The headless exporter family normally has no need for this: WAR/solution/mobile
+	 * export reads the repository/model, not live table data. This runner is
+	 * different - it renders forms live against a real (even if throwaway, in-memory)
+	 * database, so a fresh in-memory HSQLDB server with no auto-create step means any
+	 * form whose table hasn't been pre-provisioned by hand fails with "table is not
+	 * accessible". This is intentionally scoped to {@code CypressFormTestRunner} only
+	 * (not the shared {@code AbstractWorkspaceExporter}/{@code ExportServoyModel}), so
+	 * WAR/solution/mobile export behavior is unaffected.
+	 * <p>
+	 * Must run after {@code ExportServoyModel}'s resources project (and therefore its
+	 * {@code DataModelManager}) is set, but before the base class's build/problem-marker
+	 * check runs - otherwise a form bound to a not-yet-created in-memory table fails the
+	 * build with "table is not accessible" and the run is aborted before
+	 * {@code exportActiveSolution()} is ever reached. Called from
+	 * {@link #afterSolutionActivated(CypressFormTestArgumentChest, String)}, which
+	 * {@link AbstractWorkspaceExporter} invokes at exactly that point.
+	 * <p>
+	 * <b>Why this does not call {@code EclipseDatabaseUtils.createNewTableFromColumnInfo}:</b>
+	 * that method (and every other class in {@code com.servoy.eclipse.core}) throws
+	 * {@code NoClassDefFoundError}/{@code RuntimeException} the instant OSGi lazily
+	 * activates the bundle, because {@code com.servoy.eclipse.core.Activator.start()}
+	 * unconditionally calls {@code ModelUtils.assertUINotDisabled(...)}, which refuses to
+	 * start while {@code ModelUtils.setUIDisabled(true)} is in effect (set by
+	 * {@code AbstractWorkspaceExporter.start()} for every headless exporter). So this
+	 * runner creates tables itself via {@link #createTableFromColumnInfo}, using only
+	 * {@code IServerInternal}/{@code ITable}/{@code Column} APIs from {@code servoy_shared}
+	 * (no {@code com.servoy.eclipse.core} dependency) and skipping the Developer-only
+	 * {@code DataModelManager} write-back bookkeeping, which is irrelevant for a throwaway
+	 * in-memory table.
+	 */
+	private void autoCreateInMemoryTestTables() {
+		try {
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+			DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager();
+			if (dataModelManager == null) {
+				outputExtra("No active resources project's DataModelManager available; skipping in-memory test table auto-create.");
+				return;
+			}
+
+			String[] serverNames = serverManager.getServerNames(true, true, true, true);
+			for (String serverName : serverNames) {
+				try {
+					IServerInternal server = (IServerInternal) serverManager.getServer(serverName, false, false);
+					if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName())
+							&& server.getTableNames(true).size() == 0) {
+						IFolder serverInformationFolder = dataModelManager.getServerInformationFolder(server.getName());
+						if (serverInformationFolder.exists()) {
+							serverInformationFolder.accept((IResource resource) -> {
+								String extension = resource.getFileExtension();
+								if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION)) {
+									String tableName = resource.getName().substring(0,
+											resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+									IFile file = dataModelManager.getDBIFile(server.getName(), tableName);
+									if (file.exists()) {
+										try {
+											InputStream is = file.getContents(true);
+											String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+											Utils.closeInputStream(is);
+											String problems = createTableFromColumnInfo(server, tableName, dbiFileContent);
+											if (problems != null) {
+												outputExtra("Auto-created in-memory test table '" + tableName + "' on server '"
+														+ server.getName() + "' with warnings: " + problems);
+											} else {
+												outputExtra("Auto-created in-memory test table '" + tableName + "' on server '" + server.getName()
+														+ "'.");
+											}
+										} catch (CoreException e) {
+											ServoyLog.logError(e);
+										}
+									}
+								}
+								return true;
+							});
+						}
+					}
+				} catch (Exception e) {
+					ServoyLog.logError("Failed to auto-create in-memory test tables for server '" + serverName + "'.", e);
+					outputExtra("Failed to auto-create in-memory test tables for server '" + serverName + "': " + e.getMessage());
+				}
+			}
+		} catch (Exception e) {
+			ServoyLog.logError("Failed to auto-create in-memory test tables.", e);
+			outputExtra("Failed to auto-create in-memory test tables: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Minimal, headless-safe re-implementation of
+	 * {@code com.servoy.eclipse.core.util.EclipseDatabaseUtils.createNewTableFromColumnInfo}
+	 * that avoids any dependency on {@code com.servoy.eclipse.core} (see
+	 * {@link #autoCreateInMemoryTestTables()} for why that bundle cannot be touched here).
+	 * Creates the table and its columns from the given {@code .dbi} JSON content and syncs
+	 * it with the live database; deliberately does not update/write back {@code .dbi} file
+	 * column info (the {@code NO_UPDATE} behavior), since a throwaway in-memory test table
+	 * has no persisted metadata to keep in sync.
+	 *
+	 * @return null if all is OK; otherwise a newline-separated description of problems
+	 *         encountered (mirrors the original method's contract).
+	 */
+	private String createTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent) {
+		TableDef tableInfo;
+		try {
+			tableInfo = DatabaseUtils.deserializeTableInfo(dbiFileContent);
+		} catch (JSONException e) {
+			return "Corrupt .dbi file: " + e.getMessage();
+		}
+		if (!tableName.equals(tableInfo.name)) {
+			return "Table name does not match dbi file name for " + tableName;
+		}
+		if (tableInfo.columnInfoDefSet.size() == 0) {
+			return "Table " + tableName + " does not have any columns";
+		}
+
+		StringBuilder problems = new StringBuilder();
+		try {
+			ITable table = server.createNewTable(DummyValidator.INSTANCE, tableName, false, true);
+			table.setMarkedAsMetaData(Boolean.TRUE.equals(tableInfo.isMetaData));
+			server.setTableMarkedAsHiddenInDeveloper(table, tableInfo.hiddenInDeveloper, true);
+
+			List<ColumnInfoDef> columns = new ArrayList<>(tableInfo.columnInfoDefSet);
+			columns.sort((o1, o2) -> {
+				if (o1.creationOrderIndex != o2.creationOrderIndex) {
+					return Integer.compare(o1.creationOrderIndex, o2.creationOrderIndex);
+				}
+				return o1.name.compareTo(o2.name);
+			});
+			for (ColumnInfoDef columnInfoDef : columns) {
+				Column column = table.createNewColumn(DummyValidator.INSTANCE, columnInfoDef.name, columnInfoDef.columnType);
+				column.setDatabasePK((columnInfoDef.flags & IBaseColumn.PK_COLUMN) != 0);
+				column.setFlags(columnInfoDef.flags);
+				column.setAllowNull(columnInfoDef.allowNull);
+
+				if (columnInfoDef.autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER) {
+					int sequenceType = columnInfoDef.autoEnterSubType;
+					boolean supported;
+					try {
+						supported = server.supportsSequenceType(sequenceType, null);
+					} catch (Exception e) {
+						throw new RepositoryException(e);
+					}
+					if (!supported) {
+						problems.append("The import version of the column '" + columnInfoDef.name + "' of table '" + tableInfo.name
+								+ "' in server '" + server.getName() + "' has sequence type " + sequenceType
+								+ " which is not supported by the database, using the Servoy sequence type instead.\n");
+						sequenceType = ColumnInfo.SERVOY_SEQUENCE;
+					}
+					column.setSequenceType(sequenceType);
+				}
+			}
+
+			try {
+				server.syncTableObjWithDB(table, false, false);
+			} catch (Exception e) {
+				try {
+					if (!table.getExistInDB()) {
+						server.removeTable(table);
+					}
+				} catch (Exception fatal) {
+					problems.append("Fatal error: " + fatal.getMessage() + "\n");
+					ServoyLog.logError(fatal);
+				}
+				throw (e instanceof RepositoryException) ? (RepositoryException) e : new RepositoryException(e);
+			}
+
+			try {
+				server.createMissingDBSequences(table);
+			} catch (SQLException e) {
+				throw new RepositoryException("Could not create db sequences for table " + table, e);
+			}
+		} catch (RepositoryException e) {
+			ServoyLog.logError(e);
+			problems.append(e.getMessage() + "\n");
+		}
+
+		return problems.length() > 0 ? problems.toString() : null;
+	}
+
+	/**
 	 * Activates any client licenses supplied on the command line, using the same
 	 * {@code checkClientLicense} call the WAR exporter and the setup pipeline
 	 * wizard use. Each NG form-preview client needs a client license to register;
@@ -239,29 +455,29 @@ public class CypressFormTestRunner extends AbstractWorkspaceExporter<CypressForm
 	}
 
 	/**
-	 * Force-starts the {@code com.servoy.eclipse.ngclient} bundle so its activator
-	 * registers the formpreview-aware {@code WebsocketSessionFactory}. That factory
-	 * creates a {@code FormPreviewNGClient} (instead of a regular {@code NGClient})
+	 * Installs a formpreview-aware {@code IWebsocketSessionFactory} so that a
+	 * {@code FormPreviewNGClient} (instead of a regular {@code NGClient}) is created
 	 * when the WebSocket session's {@code requestParams} contain "formpreview". The
 	 * {@code FormPreviewNGClient} overrides {@code showDefaultLogin()} to bypass
-	 * authentication entirely.
+	 * authentication entirely, and its constructor/{@code shutdownExisting()} keep a
+	 * single instance so licenses are released between specs.
 	 * <p>
-	 * The registration only succeeds if
-	 * {@code ApplicationServerRegistry.getServiceRegistry()} is non-null, which it
-	 * is by the time {@code exportActiveSolution()} runs (the base class has
-	 * already called {@code ss.start(true)}). If the bundle already activated
-	 * earlier (but with a null registry), re-starting it won't re-run the activator
-	 * â€” so we call this before any lazy trigger has a chance to fire with a null
-	 * registry.
+	 * This <b>unconditionally overwrites</b> whatever factory is currently registered
+	 * for {@code CLIENT_ENDPOINT}. It must not try to detect an "already formpreview-aware"
+	 * factory: the one {@code com.servoy.eclipse.ngclient.startup.Activator} registers is
+	 * an anonymous {@code IWebsocketSessionFactory} (not a {@code WebsocketSessionFactory}
+	 * instance) whose {@code init} has no "formpreview" branch at all, so any
+	 * {@code instanceof}-based guard reads that as "already aware", bails out, and no
+	 * {@code FormPreviewNGClient} is ever created - the form then falls through to the
+	 * regular auth/debug-client path, never renders, and each spec leaks a client until
+	 * the license pool is exhausted ("No more licenses available").
+	 * <p>
+	 * Overwriting is safe: the factory below delegates to plain
+	 * {@code NGClientWebsocketSession} behaviour via {@code super.init(requestParams)}
+	 * whenever "formpreview" is absent.
 	 */
 	private void activateNgClientBundle() {
 		try {
-			IWebsocketSessionFactory existingFactory = WebsocketSessionManager
-					.getWebsocketSessionFactory(WebsocketSessionFactory.CLIENT_ENDPOINT);
-			if (existingFactory != null && !(existingFactory instanceof WebsocketSessionFactory)) {
-				outputExtra("Formpreview-aware WebSocket factory already registered.");
-				return;
-			}
 			WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.CLIENT_ENDPOINT,
 					new IWebsocketSessionFactory() {
 						@Override
@@ -430,4 +646,3 @@ public class CypressFormTestRunner extends AbstractWorkspaceExporter<CypressForm
 		output("========================================");
 	}
 }
-
