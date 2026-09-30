@@ -156,6 +156,10 @@ Feature specs and design documents live in **`docs/`** at the repository root.
 - Never place spec files inside a plugin or module subdirectory.
 - When asked to write a spec, always create it in `docs/` unless explicitly told otherwise.
 
+## Jira API
+
+When asked to create, update, or link Jira issues, use the `servoy-jira` skill (global opencode skill).
+
 ## Code Style & Conventions
 
 - Follow existing code style and conventions for each language and module
