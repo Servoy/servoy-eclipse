@@ -16,10 +16,7 @@
  */
 package com.servoy.eclipse.core;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
@@ -102,7 +99,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
-import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
@@ -115,7 +111,6 @@ import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
-import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyDeveloperProject;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -157,7 +152,6 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
-import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerConfigListener;
@@ -175,7 +169,6 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -183,7 +176,6 @@ import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.servlets.RootIndexPageFilter;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -1363,7 +1355,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								try
 								{
 									if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()) &&
-										server.getTableNames(true).size() == 0)
+										server.getTableNames(true, true).size() == 0)
 									{
 										IFolder serverInformationFolder = dataModelManager.getServerInformationFolder(server.getName());
 										if (serverInformationFolder.exists())
@@ -1374,6 +1366,20 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 												{
 													String tableName = resource.getName().substring(0,
 														resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+													// SVY-21466: only (re)create normal tables from the .dbi files. If a table with this name is
+													// already loaded on the server (e.g. an H2 INFORMATION_SCHEMA system table with the same name),
+													// do not try to recreate it.
+													try
+													{
+														if (server.hasTable(tableName))
+														{
+															return true;
+														}
+													}
+													catch (RepositoryException e)
+													{
+														ServoyLog.logError(e);
+													}
 													IFile file = dataModelManager.getDBIFile(server.getName(), tableName);
 													if (file.exists())
 													{
