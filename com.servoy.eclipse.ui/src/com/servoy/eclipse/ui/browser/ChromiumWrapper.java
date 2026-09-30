@@ -21,13 +21,20 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
+import com.equo.chromium.ChromiumBrowser;
 import com.equo.chromium.swt.Browser;
+import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * @author jcompagner
@@ -189,5 +196,87 @@ public class ChromiumWrapper implements IBrowser
 	public void execute(String string)
 	{
 		this.browser.execute(string);
+	}
+
+	@Override
+	public Object evaluate(String script)
+	{
+		return this.browser.evaluate(script);
+	}
+
+	@Override
+	public byte[] captureScreenshot()
+	{
+		// The Equo Chromium capture is asynchronous and this method blocks on the result, so it must NOT
+		// run on the SWT display thread (that would deadlock, and Equo explicitly forbids the main thread).
+		if (Display.getCurrent() != null)
+		{
+			ServoyLog.logWarning("IBrowser.captureScreenshot() was called on the SWT display thread; " +
+				"it must be called off the UI thread. Returning null.", null);
+			return null;
+		}
+		if (this.browser.isDisposed())
+		{
+			return null;
+		}
+		try
+		{
+			ChromiumBrowser chromiumBrowser = (ChromiumBrowser)this.browser.getWebBrowser();
+			if (chromiumBrowser == null)
+			{
+				return null;
+			}
+			CompletableFuture<byte[]> future = chromiumBrowser.captureScreenshot();
+			return decodeScreenshotResult(future.get(30, TimeUnit.SECONDS));
+		}
+		catch (TimeoutException e)
+		{
+			ServoyLog.logWarning("Timed out waiting for the Chromium screenshot capture.", e);
+			return null;
+		}
+		catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+			return null;
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Could not capture a screenshot from the Chromium browser.", e);
+			return null;
+		}
+	}
+
+	/**
+	 * Normalizes the raw result of {@link ChromiumBrowser#captureScreenshot()} into raw PNG bytes.
+	 * <p>
+	 * Equo returns the PNG image as Base64-encoded text (the DevTools {@code Page.captureScreenshot}
+	 * "data" string) exposed as the UTF-8 bytes of that Base64 text, so those bytes are decoded back to
+	 * the raw PNG bytes. A {@code null} or empty result becomes {@code null}. If the bytes are not valid
+	 * Base64 (e.g. a future Equo change that already yields raw PNG bytes) they are returned unchanged as
+	 * a defensive fallback.
+	 * </p>
+	 * <p>
+	 * Package-private and static so the pure decode logic can be unit-tested without a live browser.
+	 * </p>
+	 *
+	 * @param result the raw bytes produced by the Equo capture future, may be {@code null}
+	 * @return the raw PNG bytes, or {@code null} when there is nothing to decode
+	 */
+	static byte[] decodeScreenshotResult(byte[] result)
+	{
+		if (result == null || result.length == 0)
+		{
+			return null;
+		}
+		try
+		{
+			return Base64.getDecoder().decode(result);
+		}
+		catch (IllegalArgumentException notBase64)
+		{
+			// Should not happen with the current Equo contract, but if the bytes are already raw PNG
+			// (or otherwise not valid Base64) fall back to returning them unchanged.
+			return result;
+		}
 	}
 }

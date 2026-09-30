@@ -130,4 +130,19 @@ public class SwtBrowserWrapper implements IBrowser
 	{
 		this.browser.execute(string);
 	}
+
+	@Override
+	public Object evaluate(String script)
+	{
+		return this.browser.evaluate(script);
+	}
+
+	@Override
+	public byte[] captureScreenshot()
+	{
+		// The plain SWT browser has no reliable way to capture an offscreen/unshown control
+		// (a GC grab of a control that was never displayed does not produce the rendered page),
+		// so screenshot capture is unsupported on this backend and callers should degrade gracefully.
+		return null;
+	}
 }

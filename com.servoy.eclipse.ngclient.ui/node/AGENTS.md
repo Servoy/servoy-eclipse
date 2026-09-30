@@ -150,6 +150,14 @@ When facing unclear test failures (locally or on CI), **do NOT spend multiple ro
 2. **Run (or push and let CI run)** — get real data from the actual environment
 3. **Fix based on evidence** — one log statement that shows actual state is worth more than three speculative fixes
 
+### Feature-specific specs
+
+- **Stateless form-template render route (SVY-21460):** two Vitest specs under `src/formtemplate/` (standalone components; use `vi.fn()`/`vi.spyOn`, not jasmine).
+  - `formtemplate.component.spec.ts` — the route-root `ServoyFormTemplateComponent`. Highest-value assertion: `ngOnInit` MUST call `typesRegistry.addComponentClientSideSpecs(...)` BEFORE `formService.createFormCache(...)` (recorded via a shared call-order array), because the cache builder looks specs up from the registry and typed-property conversion silently breaks if the order inverts or spec registration is dropped. Also covers form-name resolution (injected `formtemplateName` marker vs. `/formtemplate/<name>.html` path parsing, `.html` stripping, URL-decode, unresolved `${formtemplateName}` fallback) and robustness of the injected inline JSON blobs (missing/malformed/whitespace).
+  - `formtemplate_component.component.spec.ts` — the `svy-formtemplate` render copy `FormTemplateComponent`, rendered through a host component with the production `FormService.createFormCache`/`walkOverChildren` + `ConverterService` + `TypesRegistry` path (mirrors `form_component.component.spec.ts`). Covers: the **NG0201 regression guard** for `AddAttributeDirective` (rendering the `[svyContainerStyle]` wrapper divs must resolve `AddAttributeDirective.parent` to the `FormTemplateComponent`, which registers itself as `AbstractFormComponent` via a component-scoped `useExisting` provider — reverting that provider makes this fail); the stateless contract (`getHandler`→null, `callApi`→null, `datachange`/`updateFormStyleClasses` inert, no `SabloService.callService`); typed-Date conversion driven by the registered specs (and the negative case proving specs drive conversion); the runtime `.svy-form`/`.svy-wrapper` DOM with no designer-only artifacts; and the design-time `ServoyApi` (in-designer flag, cached per component, `apply` does not push).
+  - Instantiate `FormTemplateComponent` only via TestBed (`TestBed.createComponent` through a host), never `new FormTemplateComponent(...)` — its `viewChild()` field initializers require an Angular injection context (NG0203 otherwise).
+  - Because release resolves the form host through the single `AbstractFormComponent` DI token (see `addattribute.directive.ts` / `listformcomponent.ts`), `FormTemplateComponent` must provide `{ provide: AbstractFormComponent, useExisting: forwardRef(() => FormTemplateComponent) }` just like `FormComponent`/`DesignFormComponent`.
+
 ---
 
 ## 5. Linting

@@ -106,6 +106,43 @@ public interface IBrowser
 	void execute(String string);
 
 	/**
+	 * Runs the given JavaScript and returns its result, unlike {@link #execute(String)}
+	 * which is fire-and-forget. The script's returned value is converted to a Java
+	 * value the same way the underlying SWT/Chromium browser converts it: a JavaScript
+	 * string/number/boolean/null becomes {@link String}/{@link Double}/{@link Boolean}/
+	 * {@code null}, and a JavaScript array becomes an {@code Object[]} of those.
+	 * <p>
+	 * Must be called on the SWT display thread. A script that fails may throw the
+	 * browser backend's {@code SWTException}; callers wanting a value back should have
+	 * the script {@code return} it.
+	 * </p>
+	 *
+	 * @param script the JavaScript to evaluate
+	 * @return the script result converted to a Java value, or {@code null}
+	 */
+	Object evaluate(String script);
+
+	/**
+	 * Captures a screenshot of the current rendered page and returns it as PNG image bytes.
+	 * <p>
+	 * This works on the Chromium backend only; other backends (e.g. the plain SWT browser)
+	 * return {@code null}. Because CEF renders offscreen, the capture succeeds even when the
+	 * hosting shell is hidden or positioned offscreen.
+	 * </p>
+	 * <p>
+	 * <b>Threading contract:</b> this method MUST be called <em>off</em> the SWT display thread.
+	 * This is the opposite of {@link #evaluate(String)}, which must be called <em>on</em> the
+	 * display thread. The underlying Chromium capture is asynchronous and this method blocks
+	 * until it completes, so calling it on the display thread would deadlock; when that is
+	 * detected the call is refused and {@code null} is returned.
+	 * </p>
+	 *
+	 * @return the PNG image bytes of the current rendered page, or {@code null} when the backend
+	 *         cannot capture (unsupported backend, wrong thread, timeout, or capture failure)
+	 */
+	byte[] captureScreenshot();
+
+	/**
 	 *
 	 */
 	void dispose();
