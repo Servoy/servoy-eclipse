@@ -207,6 +207,14 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						{
 							ServoyLog.logError(e);
 						}
+						catch (RuntimeException e)
+						{
+							// known Eclipse Platform bug: SaveManager.forEachProjectInParallel can throw an
+							// ArrayIndexOutOfBoundsException (instead of the CoreException it means to report)
+							// when exactly one project's save callback fails; log and continue shutdown rather
+							// than letting this abort the runner (see eclipse-platform/eclipse.platform#2869)
+							ServoyLog.logError(e);
+						}
 					}
 				}
 			}
@@ -311,6 +319,12 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 						if (!mustStop)
 						{
+							// let subclasses react to the freshly-activated solution/resources project
+							// before the build/marker check runs (e.g. auto-creating in-memory test
+							// tables so forms bound to those tables don't fail the build with
+							// "table is not accessible")
+							afterSolutionActivated(configuration, solutionName);
+
 							// check project markers
 							// for solution and/or (some) modules
 							List<IMarker> errors = new ArrayList<IMarker>();
@@ -503,6 +517,20 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	}
 
 	protected abstract void exportActiveSolution(T configuration);
+
+	/**
+	 * Called right after the given solution has been activated (its resources
+	 * project and {@code DataModelManager} are set) but before the build/problem-marker
+	 * check runs. No-op by default; subclasses that need live database access during
+	 * the build (unlike WAR/solution/mobile export, which only read the repository/model)
+	 * can override this to prepare data sources - for example, auto-creating in-memory
+	 * test tables from cached {@code .dbi} metadata so that forms bound to those tables
+	 * don't fail the build with "table is not accessible".
+	 */
+	protected void afterSolutionActivated(T configuration, String solutionName)
+	{
+		// no-op by default
+	}
 
 	private void splitMarkers(IProject project, List<IMarker> errors, List<IMarker> warnings)
 	{
