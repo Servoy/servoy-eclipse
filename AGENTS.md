@@ -49,6 +49,18 @@ The built-in `edit`/`write` are acceptable **only** for files that are NOT insid
 Builds, tests, launches and refactors run asynchronously. Every Eclipse server exposes `listOperations`, `getOperationStatus`, and `cancelOperation`. When a tool returns an `operationId`, poll `tools["<server>"].getOperationStatus({ operationId })` (via `execute`) until it finishes.
 
 ### Git Operations
+
+> **ALWAYS ASK PERMISSION BEFORE EVERY COMMIT. EVERY COMMIT, EVEN IN THE SAME SESSION.**
+>
+> Permission is **per commit, and never implied**. It does not carry over:
+> - An earlier "commit and push" authorises **that one commit only** — not the next one.
+> - Approval to *change code* (answering a design question, picking an option, saying "fix it")
+>   is **not** approval to commit it.
+> - Ask for **commit** and **push** separately. Never push on the strength of a "yes" to committing.
+> - Before each commit: show the staged file list and the proposed message, then wait.
+> - Pushing to a shared branch (`master`, `release`, `lts_2026`, …) always needs its own explicit yes.
+> - Never force-push or rewrite pushed history without the user confirming, in that moment, that it is safe.
+
 - **Use `tools["eclipse-git"]`** (`gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitLog`, `gitShow`, `gitReadFile`, `gitBranch`, branch/stash/tag ops, etc.) instead of command-line git.
 - **After every `gitCommit`**, display the full commit message (subject line + body) in a formatted block so the user can verify the naming and content before moving on.
 
