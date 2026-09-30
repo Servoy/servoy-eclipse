@@ -90,12 +90,12 @@ public class Activator implements BundleActivator
 						{
 							if (getClient() == null)
 							{
-								//								NGClient ngClient = getNGClient(this, requestParams);
-								//								if (ngClient != null)
-								//								{
-								//									setClient(ngClient);
-								//								}
-								//								else 
+//								NGClient ngClient = getNGClient(this, requestParams);
+//								if (ngClient != null)
+//								{
+//									setClient(ngClient);
+//								}
+//								else 
 								if (requestParams.containsKey("formpreview"))
 								{
 									// Cypress form tests open ?formpreview=<formName>: show exactly that form and
@@ -107,8 +107,22 @@ public class Activator implements BundleActivator
 									// equivalent factory of its own; this keeps the in-Developer "Run Cypress
 									// Form Test(s)" actions behaving the same way.
 									String formName = requestParams.get("formpreview").get(0);
-									FormPreviewNGClient.setPendingTargetFormName(formName);
-									setClient(new FormPreviewNGClient(this, designerCallback, formName));
+
+									FormPreviewNGClient existing = FormPreviewNGClient.getInstance();
+									if (existing != null && !existing.isShutDown() &&
+										existing.getWebsocketSession().getSessionKey().equals(getSessionKey()))
+									{
+										// reuse the existing preview client on the same session (mirror the debug NG client recycle):
+										// retarget it to the newly requested form instead of shutting it down and recreating it
+										existing.retarget(formName);
+										setClient(existing);
+									}
+									else
+									{
+										FormPreviewNGClient.setPendingTargetFormName(formName);
+										FormPreviewNGClient client = new FormPreviewNGClient(this, designerCallback, formName);
+										setClient(client);
+									}
 								}
 								else if (requestParams.containsKey("nodebug"))
 								{
