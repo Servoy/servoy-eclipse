@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { AbstractFormComponent, FormComponent } from '../../ngclient/form/form_component.component';
 import { DesignFormComponent } from '../../designer/designform_component.component';
+import { FormTemplateComponent } from '../../formtemplate/formtemplate_component.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyBaseComponent } from '@servoy/public';
 import { FormComponentValue } from '../../ngclient/converters/formcomponent_converter';
@@ -195,7 +196,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         }
 
         if (!this.parent) {
-            this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
+            try {
+                this.parent = this._injector.get<DesignFormComponent>(DesignFormComponent);
+            } catch (e) {
+                //ignore
+            }
+        }
+
+        if (!this.parent) {
+            this.parent = this._injector.get<FormTemplateComponent>(FormTemplateComponent);
         }
         this.log = logFactory.getLogger('ListFormComponent');
     }

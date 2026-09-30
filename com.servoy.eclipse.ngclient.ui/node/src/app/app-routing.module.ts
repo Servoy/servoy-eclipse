@@ -8,6 +8,10 @@ const routes: Routes = [
     loadChildren: () => import('../designer/servoydesigner.module').then(m => m.ServoyDesignerModule)
   },
   {
+    path: 'formtemplate/:formname',
+    loadChildren: () => import('../formtemplate/formtemplate.module').then(m => m.FormTemplateModule)
+  },
+  {
     path: '**',
     loadChildren: () => import('../ngclient/servoy.module').then(m => m.ServoyModule)
   }
