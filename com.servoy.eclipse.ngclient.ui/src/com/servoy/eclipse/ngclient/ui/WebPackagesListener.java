@@ -420,6 +420,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 				ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
 				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate(warExportModel);
+				// SVY-21460: the stateless formtemplate copy also stamps data-svy-name/data-svy-id on the
+				// component element itself; runtime and designer copies keep using componentTemplates.
+				Pair<StringBuilder, StringBuilder> formTemplateComponentTemplates = generator.generateHTMLTemplate(warExportModel, true);
 				try
 				{
 					// adjust component templates
@@ -485,9 +488,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						String formTemplateContent = FileUtils.readFileToString(formTemplateFile, "UTF-8");
 						String oldFormTemplate = formTemplateContent;
 						formTemplateContent = replace(formTemplateContent, "<!-- component template generate start -->",
-							"<!-- component template generate end -->", componentTemplates.getLeft());
+							"<!-- component template generate end -->", formTemplateComponentTemplates.getLeft());
 						formTemplateContent = replace(formTemplateContent, "// component viewchild template generate start",
-							"// component viewchild template generate end", componentTemplates.getRight());
+							"// component viewchild template generate end", formTemplateComponentTemplates.getRight());
 						if (structureTagNames.size() > 0)
 						{
 							LayoutTemplates generateStructureTemplate = generateStructureTemplate(structureTagNames);
