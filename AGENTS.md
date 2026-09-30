@@ -45,8 +45,19 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 4. **Spotbugs:** Spotbugs errors of the **two highest severity levels** are treated as blocking errors. Always try to fix these in any new or modified code to keep the codebase robust and clean.
 
 ### Git Operations
-- **Use `eclipse-git` tools** (`gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitBranch`, etc.) instead of command-line git.
-- **NEVER COMMIT WITHOUT APPROVAL. ALWAYS ASK FOR PERMISSION** before running `gitCommit`. Approval to review a diff, a spec, or test results is NOT approval to commit — those are separate gates. Explicitly ask (e.g. "ready to commit?") and wait for the user's explicit go-ahead in their own reply before calling `gitCommit`, even if every prior step in the same task was already approved.
+
+> **ALWAYS ASK PERMISSION BEFORE EVERY COMMIT. EVERY COMMIT, EVEN IN THE SAME SESSION.**
+>
+> Permission is **per commit, and never implied**. It does not carry over:
+> - An earlier "commit and push" authorises **that one commit only** — not the next one.
+> - Approval to *change code* (answering a design question, picking an option, saying "fix it")
+>   is **not** approval to commit it.
+> - Ask for **commit** and **push** separately. Never push on the strength of a "yes" to committing.
+> - Before each commit: show the staged file list and the proposed message, then wait.
+> - Pushing to a shared branch (`master`, `release`, `lts_2026`, …) always needs its own explicit yes.
+> - Never force-push or rewrite pushed history without the user confirming, in that moment, that it is safe.
+
+- **Use `tools["eclipse-git"]`** (`gitStatus`, `gitDiff`, `gitAdd`, `gitCommit`, `gitLog`, `gitShow`, `gitReadFile`, `gitBranch`, branch/stash/tag ops, etc.) instead of command-line git.
 - **After every `gitCommit`**, display the full commit message (subject line + body) in a formatted block so the user can verify the naming and content before moving on.
 - **Never push directly.** You may create commits (once approved), but never run `git push` until the user has explicitly reviewed and approved the commit(s). Always wait for user confirmation before pushing.
 - **Prefer new commits over `--amend`.** Only amend your own unpushed commits when explicitly asked. If in doubt, make a new commit — it's always safe.

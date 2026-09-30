@@ -425,10 +425,14 @@ keeps Developer's designer integration intact.
 - Unifying the two WebSocket session factory registrations (§2.3 / §2.4) so `formpreview`
   is handled in one place only. Both now behave identically, but the duplication remains
   and is a latent source of exactly this class of divergence. Follow-up ticket.
-- **`DataAdapterList` off-event-thread warnings** during `FormPreviewNGClient` teardown
-  (`Unexpected execution outside of the event dispatch thread in DAL code`, thrown from
-  `FormPreviewNGClient.shutdownExisting()` and its constructor). Logged and swallowed;
-  tests pass. Pre-existing, plausible flakiness source. Follow-up ticket.
+- **`DataAdapterList` off-event-thread warnings** during `FormPreviewNGClient` teardown —
+  **SVY-21529**, resolved on this branch in `97536e3a89`, which replaced this branch's
+  `FormPreviewNGClient` and ngclient `Activator` with `origin/release`'s versions. Release
+  routes `shutDown(true)` onto the old client's own event dispatcher
+  (`shutdownOnEventThread()` / `shutdownRouting()`) and reuses/retargets an existing
+  preview client on the same session instead of rebuilding it. A full 6-spec headless run
+  afterwards logs zero `Unexpected execution outside of the event dispatch thread` traces,
+  down from ~20, still 6/6.
 
 ## 7. Open questions — resolved
 
