@@ -425,8 +425,8 @@ keeps Developer's designer integration intact.
 - Unifying the two WebSocket session factory registrations (§2.3 / §2.4) so `formpreview`
   is handled in one place only. Both now behave identically, but the duplication remains
   and is a latent source of exactly this class of divergence. Follow-up ticket.
-- ~~**`DataAdapterList` off-event-thread warnings** during `FormPreviewNGClient`
-  teardown.~~ **Resolved in `97536e3a89`**, which replaced this branch's
+- **`DataAdapterList` off-event-thread warnings** during `FormPreviewNGClient` teardown —
+  **SVY-21529**, resolved on this branch in `97536e3a89`, which replaced this branch's
   `FormPreviewNGClient` and ngclient `Activator` with `origin/release`'s versions. Release
   routes `shutDown(true)` onto the old client's own event dispatcher
   (`shutdownOnEventThread()` / `shutdownRouting()`) and reuses/retargets an existing

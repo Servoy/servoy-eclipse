@@ -371,7 +371,8 @@ so auto-create is the only workable option. Confirmed by the verified green run.
 
 ## Follow-ups identified during implementation
 
-Neither is part of this reopen; both warrant separate tickets.
+Neither is part of this reopen; both warranted separate tickets. #2 has since been filed
+as SVY-21529 and is already resolved on this branch; #1 is still open.
 
 1. **Two duplicate WebSocket session factory registrations both handling `formpreview`.**
    `CypressFormTestRunner.activateNgClientBundle()` and
@@ -380,11 +381,11 @@ Neither is part of this reopen; both warrant separate tickets.
    branch (that divergence is precisely what produced defects 3 and 4). They behave
    identically today, but the duplication is a latent source of the same class of bug.
    Worth consolidating into a single registration.
-2. ~~**`DataAdapterList` off-event-thread warnings during `FormPreviewNGClient`
-   teardown.**~~ **Resolved, no ticket needed.** `Unexpected execution outside of the
-   event dispatch thread in DAL code` was logged (and swallowed) ~20 times per 6-spec run
-   from `FormPreviewNGClient.shutdownExisting()` and its constructor, because teardown ran
-   on `main`/`http-nio` threads rather than the NG event dispatch thread.
+2. **`DataAdapterList` off-event-thread warnings during `FormPreviewNGClient` teardown** —
+   tracked as **SVY-21529**, already resolved on this branch. `Unexpected execution outside
+   of the event dispatch thread in DAL code` was logged (and swallowed) ~20 times per
+   6-spec run from `FormPreviewNGClient.shutdownExisting()` and its constructor, because
+   teardown ran on `main`/`http-nio` threads rather than the NG event dispatch thread.
 
    Fixed by commit `97536e3a89`, which took `origin/release`'s `FormPreviewNGClient` and
    ngclient `Activator` onto `lts_2026`. Release's `shutdownOnEventThread()` /
