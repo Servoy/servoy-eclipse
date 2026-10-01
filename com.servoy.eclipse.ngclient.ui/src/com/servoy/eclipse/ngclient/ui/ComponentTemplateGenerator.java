@@ -270,7 +270,17 @@ public class ComponentTemplateGenerator
 		}
 		if (properties.size() > 0)
 		{
-			template.append("<ng-template let-name='name'><svy-form *ngIf=\"isFormAvailable(name)\" [name]=\"name\"></svy-form></ng-template>");
+			if (forFormTemplate)
+			{
+				// SVY-21460: the stateless formtemplate copy does not know the runtime <svy-form> element
+				// (it renders through the svy-formtemplate copy, not FormComponent), so nested forms render
+				// through its own <svy-formtemplate> selector - the self-reference, like the runtime does with <svy-form>.
+				template.append("<ng-template let-name='name'><svy-formtemplate *ngIf=\"isFormAvailable(name)\" [name]=\"name\"></svy-formtemplate></ng-template>");
+			}
+			else
+			{
+				template.append("<ng-template let-name='name'><svy-form *ngIf=\"isFormAvailable(name)\" [name]=\"name\"></svy-form></ng-template>");
+			}
 		}
 		template.append("</");
 		template.append(specName);
