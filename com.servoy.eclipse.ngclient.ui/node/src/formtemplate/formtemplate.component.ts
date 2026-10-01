@@ -1,9 +1,8 @@
 import { Component, OnInit, Renderer2, DOCUMENT, inject } from '@angular/core';
-import { WindowRefService, ServoyPublicService } from '@servoy/public';
+import { WindowRefService } from '@servoy/public';
 import { FormService } from '../ngclient/form.service';
 import { TypesRegistry } from '../sablo/types_registry';
 import { FormTemplateComponent } from './formtemplate_component.component';
-import { ServoyPublicServiceFormTemplateImpl } from './servoy_public_formtemplate_impl.service';
 
 /**
  * Route root for the stateless form-template render route (SVY-21460).
@@ -20,7 +19,9 @@ import { ServoyPublicServiceFormTemplateImpl } from './servoy_public_formtemplat
   template: `@if (formName) {
     <svy-formtemplate [name]="formName"></svy-formtemplate>
   }`,
-  providers: [ServoyPublicServiceFormTemplateImpl, { provide: ServoyPublicService, useExisting: ServoyPublicServiceFormTemplateImpl }],
+  // ServoyPublicServiceFormTemplateImpl is provided at the route level (see app.routes.ts) so it
+  // sits ABOVE this component and the whole svy-formtemplate subtree, avoiding the NG0201/NG0200
+  // that occurs when a child (FormattingService) resolves ServoyPublicService from below.
 })
 export class ServoyFormTemplateComponent implements OnInit {
   formName: string | null = null;
