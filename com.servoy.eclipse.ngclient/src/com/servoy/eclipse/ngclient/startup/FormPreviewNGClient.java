@@ -116,6 +116,23 @@ public class FormPreviewNGClient extends NGClient
 	}
 
 	/**
+	 * Runs the given refresh action on this client's own event dispatch thread.
+	 * <p>
+	 * Public event-thread seam used by the editor-change refresh orchestration (SVY-21509, in
+	 * {@code com.servoy.eclipse.core}) so it can post a scoped form-reload onto this preview client's dispatcher without
+	 * duplicating the dispatcher-resolution logic and without this bundle depending on {@code servoy_debug}. Delegates to
+	 * {@link #runOnEventThread(Runnable)}: if this client has a live event dispatcher and the current thread is not its
+	 * event dispatch thread the action is posted (fire-and-forget) via {@link IEventDispatcher#addEvent(Runnable)},
+	 * otherwise it is invoked directly on the calling thread.
+	 *
+	 * @param action the refresh action to run on this client's event thread
+	 */
+	public void runPreviewRefresh(Runnable action)
+	{
+		runOnEventThread(action);
+	}
+
+	/**
 	 * Runs the given action on this client's own event dispatch thread.
 	 * <p>
 	 * If this client has a live event dispatcher and the current thread is <b>not</b> its event dispatch thread, the

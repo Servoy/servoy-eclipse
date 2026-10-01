@@ -113,6 +113,7 @@ import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.startup.FormPreviewNGClient;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -121,6 +122,7 @@ import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDesignerCallback;
+import com.servoy.j2db.IFormController;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.dataprocessing.IDataServer;
@@ -128,19 +130,22 @@ import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.mcp.McpRuntime;
 import com.servoy.j2db.persistence.IPersistChangeListener;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
+import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.ngclient.BodyPortal;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
@@ -151,8 +156,10 @@ import com.servoy.j2db.util.CompositeIterable;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ExtendableURLClassLoader;
 import com.servoy.j2db.util.IDeveloperURLStreamHandler;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
+import com.servoy.mcp.McpRuntime;
 
 
 /**
@@ -922,6 +929,17 @@ public class Activator extends Plugin
 								}
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);
+
+								// The lightweight form-preview client (SVY-21509) is not an IDebugClient and is not
+								// registered with the DebugClientHandler, so it is not part of refreshDebugClients' fan-out.
+								// Notify it separately so a browser preview opened via "Show Form in Browser" also refreshes
+								// on an editor save. The refresh is scoped to loaded/affected forms and runs on the preview
+								// client's own event dispatch thread (see refreshFormPreview).
+								FormPreviewNGClient preview = FormPreviewNGClient.getInstance();
+								if (preview != null)
+								{
+									refreshFormPreview(preview, changes);
+								}
 							}
 						});
 					}
@@ -1035,6 +1053,78 @@ public class Activator extends Plugin
 			loadDocs.run();
 		}
 		else new Thread(loadDocs).start();
+	}
+
+	/**
+	 * Scoped, preview-only refresh for the lightweight {@link FormPreviewNGClient} (SVY-21509).
+	 * <p>
+	 * Mirrors the form-affecting subset of {@code DebugNGClient.refreshPersists} for a plain preview client (which is not
+	 * an {@code IDebugClient} and is not driven by the {@code DebugClientHandler}), reusing the shared
+	 * {@link DebugUtils#getScopesAndFormsToReload(com.servoy.j2db.ClientState, Collection)} +
+	 * {@link DebugUtils#reloadForms(com.servoy.j2db.server.ngclient.NGClient, Collection, boolean)} logic rather than
+	 * hand-rolling a parallel implementation. The whole compute-and-reload sequence is routed onto the preview client's
+	 * own event dispatch thread via {@link FormPreviewNGClient#runPreviewRefresh(Runnable)} (the SVY-21496 seam) so
+	 * {@code DataAdapterList.checkThatThisIsTheEventThread()} is not tripped.
+	 * <p>
+	 * This lives in {@code com.servoy.eclipse.core} (which already requires {@code servoy_debug},
+	 * {@code servoy_ngclient} and {@code com.servoy.eclipse.ngclient}) rather than in {@code servoy_debug}, so that no
+	 * {@code servoy_debug} dependency is added to the lightweight {@code com.servoy.eclipse.ngclient} bundle and no
+	 * dependency cycle is introduced (servoy_debug does not - and must not - require com.servoy.eclipse.ngclient).
+	 *
+	 * @param preview the live preview client (already checked non-null by the caller)
+	 * @param changes the persisted editor changes
+	 */
+	private static void refreshFormPreview(final FormPreviewNGClient preview, final Collection<IPersist> changes)
+	{
+		// a preview with no live websocket session yet has nothing to re-render (avoids an NPE in the reload path below)
+		if (preview == null || preview.isShutDown() || changes == null || preview.getWebsocketSession() == null) return;
+
+		preview.runPreviewRefresh(() -> {
+			// guard against the preview client being shut down (or losing its session) between notification and execution on the event thread
+			if (preview.isShutDown() || preview.getWebsocketSession() == null) return;
+
+			// flush the solution model cache of the form element helper when there is a solution copy,
+			// so FormComponents are recreated with the latest data once (mirrors DebugNGClient.refreshPersists).
+			Solution solutionCopy = preview.getFlattenedSolution().getSolutionCopy(false);
+			if (solutionCopy != null) solutionCopy.setRuntimeProperty(FormElementHelper.SOLUTION_MODEL_CACHE, null);
+
+			Set<IFormController>[] scopesAndFormsToReload = DebugUtils.getScopesAndFormsToReload(preview, changes);
+
+			for (IFormController controller : scopesAndFormsToReload[1])
+			{
+				if (controller.getForm() instanceof FlattenedForm)
+				{
+					((FlattenedForm)controller.getForm()).reload();
+				}
+			}
+
+			boolean forcePageReload = false;
+			if (scopesAndFormsToReload[1] == null || scopesAndFormsToReload[1].size() < 1)
+			{
+				for (IPersist persist : changes)
+				{
+					// if the solution has a css, reload for any css change, not only the one set on the solution, because
+					// that one can also have other css included, using the 'import' statement
+					if (persist instanceof Media && !PersistHelper.getOrderedStyleSheets(preview.getFlattenedSolution()).isEmpty())
+					{
+						String name = ((Media)persist).getName().toLowerCase();
+						if (name.endsWith(".less") || name.endsWith(".css"))
+						{
+							forcePageReload = true;
+							break;
+						}
+					}
+				}
+			}
+
+			// scoped to loaded/affected forms only: an unrelated save yields an empty formsToReload and no client reload
+			DebugUtils.reloadForms(preview, scopesAndFormsToReload[1], forcePageReload);
+
+			for (IFormController controller : scopesAndFormsToReload[0])
+			{
+				controller.getFormScope().reload();
+			}
+		});
 	}
 
 	private void processMethodTemplates(Map<String, IMethodTemplate> templs)

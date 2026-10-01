@@ -76,111 +76,117 @@ public class Activator implements BundleActivator
 	@Override
 	public void start(BundleContext ctx) throws Exception
 	{
-		if (ApplicationServerRegistry.getServiceRegistry() != null)
+		// SVY-21509: register the formpreview-aware session factory unconditionally.
+		// This bundle is lazily activated and can start before the application server's service registry
+		// exists (early tooling/MCP class loads trigger the activation). The registry is only consulted
+		// later, when a session is actually initialized, so guarding the registration on it meant the plain
+		// WebsocketSessionFactory registered by ResourceProvider.initSpecProvider() won the CLIENT_ENDPOINT
+		// slot and a ?formpreview= request never produced a FormPreviewNGClient at all.
+		WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.CLIENT_ENDPOINT, new IWebsocketSessionFactory()
 		{
-			WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.CLIENT_ENDPOINT, new IWebsocketSessionFactory()
+			@Override
+			public IWebsocketSession createSession(WebsocketSessionKey sessionKey) throws Exception
 			{
-				@Override
-				public IWebsocketSession createSession(WebsocketSessionKey sessionKey) throws Exception
+				NGClientWebsocketSession wsSession = new NGClientWebsocketSession(sessionKey, designerCallback)
 				{
-					NGClientWebsocketSession wsSession = new NGClientWebsocketSession(sessionKey, designerCallback)
+					@Override
+					public void init(Map<String, List<String>> requestParams) throws Exception
 					{
-						@Override
-						public void init(Map<String, List<String>> requestParams) throws Exception
+						if (getClient() == null)
 						{
-							if (getClient() == null)
+							//								NGClient ngClient = getNGClient(this, requestParams);
+							//								if (ngClient != null)
+							//								{
+							//									setClient(ngClient);
+							//								}
+							//								else 
+							if (requestParams.containsKey("formpreview"))
 							{
-//								NGClient ngClient = getNGClient(this, requestParams);
-//								if (ngClient != null)
-//								{
-//									setClient(ngClient);
-//								}
-//								else 
-								if (requestParams.containsKey("formpreview"))
-								{
-									// Cypress form tests open ?formpreview=<formName>: show exactly that form and
-									// skip authentication (FormPreviewNGClient overrides showDefaultLogin()).
-									// Without this branch the request falls through to the debug/regular client
-									// below, which opens the solution's first form instead - so every form test
-									// except the one that happens to target the first form fails looking for its
-									// own data-cy elements. The headless CypressFormTestRunner installs an
-									// equivalent factory of its own; this keeps the in-Developer "Run Cypress
-									// Form Test(s)" actions behaving the same way.
-									String formName = requestParams.get("formpreview").get(0);
+								// Cypress form tests open ?formpreview=<formName>: show exactly that form and
+								// skip authentication (FormPreviewNGClient overrides showDefaultLogin()).
+								// Without this branch the request falls through to the debug/regular client
+								// below, which opens the solution's first form instead - so every form test
+								// except the one that happens to target the first form fails looking for its
+								// own data-cy elements. The headless CypressFormTestRunner installs an
+								// equivalent factory of its own; this keeps the in-Developer "Run Cypress
+								// Form Test(s)" actions behaving the same way.
+								String formName = requestParams.get("formpreview").get(0);
 
-									FormPreviewNGClient existing = FormPreviewNGClient.getInstance();
-									if (existing != null && !existing.isShutDown() &&
-										existing.getWebsocketSession().getSessionKey().equals(getSessionKey()))
-									{
-										// reuse the existing preview client on the same session (mirror the debug NG client recycle):
-										// retarget it to the newly requested form instead of shutting it down and recreating it
-										existing.retarget(formName);
-										setClient(existing);
-									}
-									else
-									{
-										FormPreviewNGClient.setPendingTargetFormName(formName);
-										FormPreviewNGClient client = new FormPreviewNGClient(this, designerCallback, formName);
-										setClient(client);
-									}
-								}
-								else if (requestParams.containsKey("nodebug"))
+								FormPreviewNGClient existing = FormPreviewNGClient.getInstance();
+								if (existing != null && !existing.isShutDown() &&
+									existing.getWebsocketSession().getSessionKey().equals(getSessionKey()))
 								{
-									setClient(new NGClient(this, designerCallback));
-								}
-								else if (requestParams.containsKey("svy_developer"))
-								{
-									setClient(developerNGClient);
+									// reuse the existing preview client on the same session (mirror the debug NG client recycle):
+									// retarget it to the newly requested form instead of shutting it down and recreating it
+									existing.retarget(formName);
+									setClient(existing);
 								}
 								else
 								{
-									if (getWindowTimeout() == Long.valueOf(BaseWebsocketSession.DEFAULT_WINDOW_TIMEOUT))
-									{
-										// in developer increase the timeout to 15 minutes, else will expire during debugging
-										setSessionWindowTimeout(new Long(60 * 15));
-									}
-									final IDebugClientHandler service = ApplicationServerRegistry.getServiceRegistry().getService(IDebugClientHandler.class);
-									if (service != null)
-									{
-										NGClient debugNGClient = (NGClient)service.getDebugNGClient();
-										if (debugNGClient != null && !debugNGClient.isShutDown() &&
-											debugNGClient.getWebsocketSession().getSessionKey().equals(getSessionKey())) setClient(debugNGClient);
-										else setClient((NGClient)service.createDebugNGClient(this));
-									}
-									else
-									{
-										setClient(new NGClient(this, designerCallback));
-									}
+									FormPreviewNGClient.setPendingTargetFormName(formName);
+									FormPreviewNGClient client = new FormPreviewNGClient(this, designerCallback, formName);
+									setClient(client);
+								}
+							}
+							else if (requestParams.containsKey("nodebug"))
+							{
+								setClient(new NGClient(this, designerCallback));
+							}
+							else if (requestParams.containsKey("svy_developer"))
+							{
+								setClient(developerNGClient);
+							}
+							else
+							{
+								if (getWindowTimeout() == Long.valueOf(BaseWebsocketSession.DEFAULT_WINDOW_TIMEOUT))
+								{
+									// in developer increase the timeout to 15 minutes, else will expire during debugging
+									setSessionWindowTimeout(new Long(60 * 15));
+								}
+								// the service registry can still be absent when this lazily-activated bundle started very
+								// early (see start()); fall back to a plain NGClient in that case rather than throwing
+								final IDebugClientHandler service = ApplicationServerRegistry.getServiceRegistry() != null
+									? ApplicationServerRegistry.getServiceRegistry().getService(IDebugClientHandler.class) : null;
+								if (service != null)
+								{
+									NGClient debugNGClient = (NGClient)service.getDebugNGClient();
+									if (debugNGClient != null && !debugNGClient.isShutDown() &&
+										debugNGClient.getWebsocketSession().getSessionKey().equals(getSessionKey())) setClient(debugNGClient);
+									else setClient((NGClient)service.createDebugNGClient(this));
+								}
+								else
+								{
+									setClient(new NGClient(this, designerCallback));
 								}
 							}
 						}
+					}
 
-						@Override
-						protected IEventDispatcher createEventDispatcher()
+					@Override
+					protected IEventDispatcher createEventDispatcher()
+					{
+						// make sure that the command console thread is seen as the dispatch thread
+						// so it can executed command, that are api calls to the browser
+						return new NGEventDispatcher(getClient())
 						{
-							// make sure that the command console thread is seen as the dispatch thread
-							// so it can executed command, that are api calls to the browser
-							return new NGEventDispatcher(getClient())
+							@Override
+							public boolean isEventDispatchThread()
 							{
-								@Override
-								public boolean isEventDispatchThread()
-								{
-									return super.isEventDispatchThread() || Thread.currentThread().getName().equals("Debug command reader"); //$NON-NLS-1$
-								}
+								return super.isEventDispatchThread() || Thread.currentThread().getName().equals("Debug command reader"); //$NON-NLS-1$
+							}
 
-								@Override
-								protected Event getCurrentEventIfOnEventThread()
-								{
-									if (Thread.currentThread().getName().equals("Debug command reader")) return null;
-									return super.getCurrentEventIfOnEventThread();
-								}
-							};
-						}
-					};
-					return wsSession;
-				}
-			});
-		}
+							@Override
+							protected Event getCurrentEventIfOnEventThread()
+							{
+								if (Thread.currentThread().getName().equals("Debug command reader")) return null;
+								return super.getCurrentEventIfOnEventThread();
+							}
+						};
+					}
+				};
+				return wsSession;
+			}
+		});
 	}
 
 	//	public NGClient getNGClient(INGClientWebsocketSession session, Map<String, List<String>> requestParams)
