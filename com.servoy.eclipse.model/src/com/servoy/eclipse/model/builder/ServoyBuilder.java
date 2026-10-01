@@ -17,7 +17,6 @@
 package com.servoy.eclipse.model.builder;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -1775,53 +1773,44 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 		if (Utils.getAsBoolean(((AbstractBase)persist).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID)))
 		{
+			// SVY-21431: confirm the duplicate entirely from in-memory state - no sibling-file reads.
+			// Two cases, both resolved without touching the filesystem:
+			//  1) two distinct persist instances share the UUID -> the DeveloperPersistIndex already
+			//     tracks this (getDuplicateUUIDList);
+			//  2) a single persist instance was reused / re-read from another file -> deserialization
+			//     recorded that other file name in DUPLICATE_UUID_OTHER_FILE at the moment it detected it.
 			UUID uuid = persist.getUUID();
-			Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
-			IPath path = new Path(pathPair.getLeft());
-			String location = null;
-			if (path.segmentCount() == 1)
-			{
-				IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(pathPair.getLeft());
-				location = p.getLocation().toOSString();
-			}
-			else
-			{
-				IFolder folder = ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-				location = folder.getLocation().toOSString();
 
+			FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+			if (fs instanceof DeveloperFlattenedSolution)
+			{
+				Map<UUID, List<IPersist>> duplicates = ((DeveloperFlattenedSolution)fs).getDuplicateUUIDList();
+				List<IPersist> withSameUUID = duplicates != null ? duplicates.get(uuid) : null;
+				found = withSameUUID != null && withSameUUID.stream().anyMatch(other -> other != persist);
 			}
-			java.io.File file = new File(location);
-			File[] files = file.listFiles(new FileFilter()
+
+			if (!found)
 			{
-				public boolean accept(File pathname)
-				{
-					return SolutionSerializer.isJSONFile(pathname.getName()) && pathname.isFile() && !pathname.getName().equals(SolutionSerializer.MEDIAS_FILE);
-				}
-			});
-			String persistFile = ((AbstractBase)persist).getSerializableRuntimeProperty(IScriptProvider.FILENAME);
-			if (files != null)
+				found = ((AbstractBase)persist).getRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE) != null;
+			}
+
+			if (found)
 			{
-				for (File f : files)
-				{
-					UUID newUUID = SolutionDeserializer.getUUID(f);
-					if (newUUID != null && newUUID.equals(uuid) && !pathPair.getRight().equals(f.getName()))
-					{
-						found = true;
-						IFile fileForLocation = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
-							Path.fromPortableString(persistFile.replace('\\', '/')));
-						ServoyMarker mk = MarkerMessages.UUIDDuplicate.fill(persist.getUUID());
-						addMarker(ResourcesPlugin.getWorkspace().getRoot()
-							.getFile(new Path(pathPair.getLeft() + pathPair.getRight())), mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
-							IMarker.PRIORITY_HIGH, fileForLocation.toString(),
-							persist);
-						break; // only 1 marker has to be set for this persist.
-					}
-				}
+				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
+				String persistFile = ((AbstractBase)persist).getSerializableRuntimeProperty(IScriptProvider.FILENAME);
+				IFile fileForLocation = persistFile != null ? ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
+					Path.fromPortableString(persistFile.replace('\\', '/'))) : null;
+				ServoyMarker mk = MarkerMessages.UUIDDuplicate.fill(persist.getUUID());
+				addMarker(ResourcesPlugin.getWorkspace().getRoot()
+					.getFile(new Path(pathPair.getLeft() + pathPair.getRight())), mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
+					IMarker.PRIORITY_HIGH, fileForLocation != null ? fileForLocation.toString() : null,
+					persist);
 			}
 		}
 		if (!found)
 		{
 			((AbstractBase)persist).setRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID, null);
+			((AbstractBase)persist).setRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE, null);
 		}
 	}
 
@@ -1961,6 +1950,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 					public Object visit(final IPersist o)
 					{
+						reportBuildProgress(o); // SVY-21431: advance progress so the reported percentage does not appear frozen
 						if (o instanceof Form)
 						{
 							ServoyFormBuilder.addFormMarkers(servoyProject, (Form)o, methodsParsed, formsAbstractChecked);
@@ -3571,6 +3561,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			forgetLastBuiltState();
 			throw new OperationCanceledException();
+		}
+	}
+
+	/**
+	 * SVY-21431: surface build progress on the existing monitor so the reported percentage does not
+	 * appear frozen while the per-persist validation loop runs. Cancellation semantics are unchanged
+	 * (see {@link #checkCancel()}).
+	 */
+	protected void reportBuildProgress(IPersist persist)
+	{
+		if (monitor != null && persist instanceof ISupportName)
+		{
+			String name = ((ISupportName)persist).getName();
+			if (name != null && name.length() > 0)
+			{
+				monitor.subTask(name);
+			}
 		}
 	}
 

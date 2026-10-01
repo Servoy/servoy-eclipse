@@ -151,6 +151,17 @@ public class SolutionDeserializer
 	{
 
 	};
+
+	/**
+	 * SVY-21431: companion to {@link #POSSIBLE_DUPLICATE_UUID}. When deserialization already knows the
+	 * name of the other workspace file that declares the same UUID (the single-reused-instance cases
+	 * where the in-memory persist index only holds one instance), it records that file name here so the
+	 * builder can confirm the duplicate from memory instead of re-reading sibling files from disk.
+	 */
+	public static final RuntimeProperty<String> DUPLICATE_UUID_OTHER_FILE = new RuntimeProperty<String>()
+	{
+
+	};
 	private final IDeveloperRepository repository;
 	private final ErrorKeeper<File, String> errorKeeper;
 	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>(16, 0.9f);
@@ -1342,7 +1353,7 @@ public class SolutionDeserializer
 					}
 					json.put("declaration", comment.trim() + '\n' + source + '\n');
 				}
-//				json.put("filename", file.getAbsolutePath());
+				//				json.put("filename", file.getAbsolutePath());
 
 
 				int linenr = 1;
@@ -1878,6 +1889,10 @@ public class SolutionDeserializer
 								((AbstractBase)persist).resetUUID(uuid);
 							}
 							((AbstractBase)persist).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
+							// SVY-21431: record the other file that declares the same uuid so the builder can
+							// confirm the duplicate from memory (only one instance is kept here, so the in-memory
+							// duplicate index would not see it).
+							if (file != null) ((AbstractBase)persist).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, file.getName());
 						}
 						break;
 					}
@@ -1904,6 +1919,9 @@ public class SolutionDeserializer
 			if (file != null && !fileName.equals(file.getName()) && SolutionSerializer.isJSONFile(fileName))
 			{
 				((AbstractBase)retval).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
+				// SVY-21431: same persist (uuid) is read from a second file; record that other file name so
+				// the builder confirms the duplicate from memory instead of scanning sibling files on disk.
+				((AbstractBase)retval).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, file.getName());
 			}
 		}
 
@@ -2104,20 +2122,20 @@ public class SolutionDeserializer
 					if (arguments.size() > 0)
 					{
 						methodArguments = new MethodArgument[arguments.size()];
-//						String comment = obj.optString(COMMENT_JSON_ATTRIBUTE);
-//						MethodArgument[] jsDocArguments = parseJSDocArguments(comment);
+						//						String comment = obj.optString(COMMENT_JSON_ATTRIBUTE);
+						//						MethodArgument[] jsDocArguments = parseJSDocArguments(comment);
 						for (int i = 0; i < arguments.size(); i++)
 						{
 							Argument argument = arguments.get(i);
 							String name = argument.getArgumentName();
-//							for (int j = 0; j < jsDocArguments.length; j++)
-//							{
-//								if (jsDocArguments[j].getName().equals(name))
-//								{
-//									methodArguments[i] = jsDocArguments[j];
-//									continue outer;
-//								}
-//							}
+							//							for (int j = 0; j < jsDocArguments.length; j++)
+							//							{
+							//								if (jsDocArguments[j].getName().equals(name))
+							//								{
+							//									methodArguments[i] = jsDocArguments[j];
+							//									continue outer;
+							//								}
+							//							}
 
 							String paramType = paramIdToTypeMap.get(name);
 							boolean isOptional = false;
@@ -2428,7 +2446,7 @@ public class SolutionDeserializer
 			}
 			UUID rootObjectUuid = UUID.fromString(obj.getString(SolutionSerializer.PROP_UUID));
 			int objectTypeId = obj.getInt(SolutionSerializer.PROP_TYPEID);
-//			String name = obj.getString(SolutionSerializer.PROP_NAME);
+			//			String name = obj.getString(SolutionSerializer.PROP_NAME);
 			int solutionType = obj.getInt("solutionType");
 			boolean mustAuthenticate = obj.getBoolean("mustAuthenticate");
 			//int id = repository.getNewElementID(rootObjectUuid);
