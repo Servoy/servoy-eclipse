@@ -707,18 +707,22 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					writeErrorToConsoleAndLog(console, e, "Exception while checking assets: ");
 					// TODO should we return a WARNING status here as we do for other failures?
 				}
-				if (INCLUDE_ZONEJS)
+				// Only ever consider bundling zone.js on the developer-run build; a WAR export (warExportModel != null,
+				// both from Developer and from the cloud) always stays zoneless regardless of the system property.
+				// On the developer run: if -Dti.ng.includezonejs is set we honour it (including "false"); if it is not
+				// set at all it defaults to true, so a developer run restores async patching by default and NG0100
+				// ExpressionChangedAfterItHasBeenCheckedError warnings keep surfacing (debugging aid).
+				if (warExportModel == null && "true".equals(System.getProperty("ti.ng.includezonejs", "true")))
 				{
 					// The app runs zoneless, so a fresh source copy has an empty src/polyfills.ts (no zone.js).
-					// When -Dti.ng.includezonejs=true we add the zone.js import so async patching is restored and
-					// NG0100 ExpressionChangedAfterItHasBeenCheckedError warnings surface again (debugging aid).
+					// We add the zone.js import so async patching is restored.
 					try
 					{
 						File polyfills = new File(projectFolder, "src/polyfills.ts");
 						String polyfillsContents = polyfills.exists() ? FileUtils.readFileToString(polyfills, "UTF8") : "";
 						if (!polyfillsContents.contains("import 'zone.js'"))
 						{
-							writeConsole(console, "- adding zone.js import to src/polyfills.ts (ti.ng.includezonejs=true)");
+							writeConsole(console, "- adding zone.js import to src/polyfills.ts (developer run, ti.ng.includezonejs not false)");
 							sourceChanged = true;
 							FileUtils.write(polyfills, "import 'zone.js';\r\n" + polyfillsContents, "UTF8", false);
 						}
@@ -1408,12 +1412,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	}
 
 	private static boolean SOURCE_DEBUG = "true".equals(System.getProperty("ti.ng.source.debug", "false"));
-
-	// The app runs zoneless (provideZonelessChangeDetection). zone.js is NOT bundled by default
-	// (a fresh source copy has an empty src/polyfills.ts). Set -Dti.ng.includezonejs=true to add the
-	// zone.js import to src/polyfills.ts so async patching is restored and NG0100
-	// ExpressionChangedAfterItHasBeenCheckedError warnings surface again (debugging aid).
-	private static boolean INCLUDE_ZONEJS = "true".equals(System.getProperty("ti.ng.includezonejs", "false"));
 
 	private static final AtomicBoolean ignore = new AtomicBoolean(false);
 
