@@ -42,15 +42,15 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * Stateless HTTP filter for the form-template render route (SVY-21460).
  *
- * <p>Serves two resources, both statelessly (no clientnr, no solution in the URL, no websocket,
+ * <p>Serves the form-template page statelessly (no clientnr, no solution in the URL, no websocket,
  * no session); the active editing flattened solution is always used and form names are unique:
  * <ul>
  * <li><b>{@code /formtemplate/<formname>.html}</b> - the compiled Angular {@code index.html} with the
  * form-state JSON and the component client-side specs JSON injected inline as
- * {@code <script type="application/json">} blobs, a {@code <link rel="stylesheet" href="stylesheet.css">}
+ * {@code <script type="application/json">} blobs, one {@code <link rel="stylesheet">} per solution/module
+ * stylesheet (the same relative resource URLs, in the same order, the runtime NG client and the form
+ * designer use - so the browser applies the identical cascade and {@code @import} rules keep working),
  * and a {@code window.formtemplateName} marker so the Angular route knows which form to render.</li>
- * <li><b>{@code /formtemplate/stylesheet.css}</b> - the active solution's CSS as {@code text/css},
- * produced the design-time way (no running client).</li>
  * </ul>
  *
  * @author Servoy
@@ -85,11 +85,6 @@ public class FormTemplateHttpEndpoint implements Filter
 		String resource = requestURI.substring(idx + FORM_TEMPLATE_PATH.length());
 		HTTPUtils.setNoCacheHeaders(httpServletResponse);
 
-		if ("stylesheet.css".equals(resource))
-		{
-			writeStyleSheet(httpServletResponse);
-			return;
-		}
 		if (resource.endsWith(".html"))
 		{
 			String formName = resource.substring(0, resource.length() - ".html".length());
@@ -98,16 +93,6 @@ public class FormTemplateHttpEndpoint implements Filter
 		}
 
 		chain.doFilter(request, response);
-	}
-
-	private void writeStyleSheet(HttpServletResponse response) throws IOException
-	{
-		response.setContentType("text/css");
-		response.setCharacterEncoding("UTF-8");
-		PrintWriter w = response.getWriter();
-		String css = content.getSolutionStyleSheet();
-		if (css != null) w.write(css);
-		w.flush();
 	}
 
 	private void writeFormTemplatePage(HttpServletResponse response, String formName) throws IOException
@@ -152,7 +137,16 @@ public class FormTemplateHttpEndpoint implements Filter
 	private String buildInjection(String formName, String formState, String specs)
 	{
 		StringBuilder sb = new StringBuilder(formState.length() + (specs != null ? specs.length() : 0) + 512);
-		sb.append("<link rel=\"stylesheet\" href=\"" + FORM_TEMPLATE_PATH + "stylesheet.css\">\n");
+		// Emit one <link rel="stylesheet"> per solution/module sheet, exactly like the runtime NG client
+		// (ApplicationService.setStyleSheets) and the form designer (DesignerWebsocketSession.getSolutionStyleSheets)
+		// do. Letting the browser load the separate sheets - instead of concatenating them server-side -
+		// keeps the cascade identical and preserves @import rules, which are ignored unless they sit at the
+		// top of their own stylesheet. The relative "resources/..." URLs resolve against the index's <base href="/">.
+		for (String stylesheetPath : content.getSolutionStyleSheetPaths())
+		{
+			sb.append("<link rel=\"stylesheet\" svy-stylesheet=\"").append(StringEscapeUtils.escapeHtml4(stylesheetPath)).append("\" href=\"").append(
+				StringEscapeUtils.escapeHtml4(stylesheetPath)).append("\">\n");
+		}
 		sb.append("<script>window.formtemplateName = \"").append(StringEscapeUtils.escapeEcmaScript(formName)).append("\";</script>\n");
 		sb.append("<script id=\"svy-formtemplate-formstate\" type=\"application/json\">").append(escapeForInlineJson(formState)).append("</script>\n");
 		if (specs != null)
