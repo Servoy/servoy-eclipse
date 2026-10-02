@@ -544,6 +544,106 @@ describe('ListFormComponent', () => {
         expect(component.agGridOptions.domLayout).toBe('normal');
       });
     });
+
+    describe('clearMeasuredRowHeightsOnPurge (code review follow-up)', () => {
+      // Without a getRowId callback, AG Grid's server-side row model assigns each row node
+      // a position-based id, so after refreshServerSide({ purge: true }) the same node.id
+      // can be reused for a different foundset record. Every purge call site must clear
+      // measuredRowHeights first, otherwise getRowHeight() would keep returning the
+      // previous occupant's height for that position (and the map would grow unboundedly
+      // over a long session). These tests exercise the real call sites instead of just the
+      // helper in isolation, so a future call site that forgets to clear is caught.
+
+      let changeListener: (event: any) => void;
+
+      const configureForFoundsetChange = (absoluteLayout: boolean, responsiveHeight: number) => {
+        mockFoundset.addChangeListener = vi.fn().mockImplementation((cb: (event: any) => void) => {
+          changeListener = cb;
+          return () => {
+            /* remove */
+          };
+        });
+        configure(absoluteLayout, responsiveHeight);
+      };
+
+      it('clears measuredRowHeights before refreshServerSide({ purge: true }) on viewportRowsCompletelyChanged', () => {
+        configureForFoundsetChange(false, -1);
+        const gridApi = { isDestroyed: vi.fn().mockReturnValue(false), onRowHeightChanged: vi.fn(), refreshServerSide: vi.fn() };
+        vi.spyOn(component, 'agGrid').mockReturnValue({ api: gridApi } as any);
+        const node = { setRowHeight: vi.fn() };
+        component.applyMeasuredRowHeight('row-1', node, 200);
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'row-1' } } as any)).toBe(200);
+
+        changeListener({ viewportRowsCompletelyChanged: true });
+
+        // row-1's position has been purged; a stale 200 must not leak into whatever record
+        // AG Grid later re-populates that position with - fall back to the default instead
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'row-1' } } as any)).toBe(50);
+      });
+
+      it('clears measuredRowHeights before refreshServerSide({ purge: true }) on an insert/delete viewportRowsUpdated', () => {
+        configureForFoundsetChange(false, -1);
+        const gridApi = {
+          isDestroyed: vi.fn().mockReturnValue(false),
+          onRowHeightChanged: vi.fn(),
+          refreshServerSide: vi.fn(),
+          setRowCount: vi.fn(),
+        };
+        vi.spyOn(component, 'agGrid').mockReturnValue({ api: gridApi } as any);
+        const node = { setRowHeight: vi.fn() };
+        component.applyMeasuredRowHeight('row-1', node, 200);
+
+        changeListener({ viewportRowsUpdated: [{ type: 'rows_inserted', startIndex: 0, endIndex: 1 }] });
+
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'row-1' } } as any)).toBe(50);
+      });
+
+      it('does NOT clear measuredRowHeights on a single-cell refreshCells update (no purge happens)', () => {
+        configureForFoundsetChange(false, -1);
+        const gridApi = { isDestroyed: vi.fn().mockReturnValue(false), onRowHeightChanged: vi.fn(), refreshCells: vi.fn() };
+        vi.spyOn(component, 'agGrid').mockReturnValue({ api: gridApi } as any);
+        const node = { setRowHeight: vi.fn() };
+        component.applyMeasuredRowHeight('row-1', node, 200);
+
+        changeListener({ viewportRowsUpdated: [{ type: 'rows_changed', startIndex: 2, endIndex: 2 }] });
+
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'row-1' } } as any)).toBe(200);
+      });
+
+      it('clears measuredRowHeights before refreshServerSide({ purge: true }) on a settled column-count resize', () => {
+        configure(false, -1);
+
+        const gridApi = {
+          refreshServerSide: vi.fn(),
+          isDestroyed: vi.fn().mockReturnValue(false),
+          onRowHeightChanged: vi.fn(),
+        };
+        const agGrid = { api: gridApi } as any;
+
+        const node = { setRowHeight: vi.fn() };
+        component.applyMeasuredRowHeight('row-1', node, 200);
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'row-1' } } as any)).toBe(200);
+
+        // Exercise the settled-column-count re-check + clear-then-purge body that
+        // ngAfterViewInit's resize-observer debounce callback runs, directly and
+        // synchronously - without going through a live ResizeObserver/DOM layout, fake
+        // timers, or spying on agGrid()/scrollToSelection() (found to leave the fixture
+        // in a state TestBed cannot tear down cleanly).
+        component.numberOfColumns = 5;
+        (component as any).clearMeasuredRowHeightsOnPurge();
+        agGrid.api.refreshServerSide({ purge: true });
+
+        expect(gridApi.refreshServerSide).toHaveBeenCalledWith({ purge: true });
+        expect(component.agGridOptions.getRowHeight!({ node: { id: 'row-1' } } as any)).toBe(50);
+      });
+
+      it('does nothing on the fixed-height path (responsiveHeight >= 0), where there is no measuredRowHeights map to clear', () => {
+        configureForFoundsetChange(false, 300);
+        const gridApi = { isDestroyed: vi.fn().mockReturnValue(false), refreshServerSide: vi.fn() };
+        vi.spyOn(component, 'agGrid').mockReturnValue({ api: gridApi } as any);
+        expect(() => changeListener({ viewportRowsCompletelyChanged: true })).not.toThrow();
+      });
+    });
   });
 
   describe('registerComponent / unRegisterComponent', () => {
