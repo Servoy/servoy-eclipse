@@ -4,30 +4,28 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.e4.core.di.annotations.Creatable;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.ISupportFormElement;
+import com.servoy.j2db.persistence.WebComponent;
 
 @Creatable
-@SuppressWarnings("restriction")
 public class FormSpecGenerator {
 	private static final String SPEC_CY_EXTENSION = ".spec.cy.js";
 	private static final String SPEC_JS_EXTENSION = ".spec.js";
 	private static final String FORM_SPEC_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form";
 	private static final String FORM_SETUP_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form-spec";
-
-	private static final Pattern DATA_SOURCE_PATTERN = Pattern.compile("\"dataSource\"\\s*:\\s*\"([^\"]+)\"");
-	private static final Pattern ELEMENT_NAME_PATTERN = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
-	private static final Pattern TYPE_NAME_PATTERN = Pattern.compile("\"typeName\"\\s*:\\s*\"([^\"]+)\"");
-	private static final Pattern DATA_PROVIDER_PATTERN = Pattern.compile("\"dataProviderID\"\\s*:\\s*\"([^\"]+)\"");
 
 	public String generateSpec(String formName) {
 		try {
@@ -36,10 +34,14 @@ public class FormSpecGenerator {
 				return "Error: No active Servoy project.";
 			}
 
-			IProject project = activeProject.getProject();
-			IFile frmFile = project.getFile("forms/" + formName + ".frm");
-			if (!frmFile.exists()) {
-				return "Error: Form file not found: forms/" + formName + ".frm";
+			FlattenedSolution flattenedSolution = activeProject.getEditingFlattenedSolution();
+			if (flattenedSolution == null) {
+				return "Error: Could not resolve the active solution.";
+			}
+
+			Form form = flattenedSolution.getForm(formName);
+			if (form == null) {
+				return "Error: Form not found: " + formName;
 			}
 
 			Path testsDir = resolveFormSpecDir();
@@ -47,19 +49,18 @@ public class FormSpecGenerator {
 			Files.createDirectories(testsDir);
 			Files.createDirectories(setupDir);
 
-			String solutionName = activeProject.getSolution().getName();
+			String solutionName = form.getRootObject().getName();
 			Path cySpecPath = testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
 			Path setupSpecPath = setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
 
 			if (Files.exists(cySpecPath) && Files.exists(setupSpecPath)) {
-				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_CY_EXTENSION
-						+ " and " + FORM_SETUP_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_JS_EXTENSION;
+				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + solutionName + "." + formName
+						+ SPEC_CY_EXTENSION + " and " + FORM_SETUP_RELATIVE_DIR + "/" + solutionName + "." + formName
+						+ SPEC_JS_EXTENSION;
 			}
 
-			String frmContent = new String(Files.readAllBytes(frmFile.getLocation().toFile().toPath()),
-					StandardCharsets.UTF_8);
-			FormMetadata metadata = parseFrmFile(frmContent, formName);
-			metadata.solutionName = activeProject.getSolution().getName();
+			FormMetadata metadata = buildMetadata(form);
+			metadata.solutionName = solutionName;
 
 			StringBuilder result = new StringBuilder();
 
@@ -198,36 +199,39 @@ public class FormSpecGenerator {
 		}
 	}
 
-	private FormMetadata parseFrmFile(String content, String formName) {
+	private FormMetadata buildMetadata(Form form) {
 		FormMetadata metadata = new FormMetadata();
-		metadata.formName = formName;
+		metadata.formName = form.getName();
+		metadata.dataSource = form.getDataSource();
 
-		Matcher dsMatcher = DATA_SOURCE_PATTERN.matcher(content);
-		if (dsMatcher.find()) {
-			metadata.dataSource = dsMatcher.group(1);
-		}
-
-		String[] items = content.split("\\{");
-		for (String item : items) {
-			Matcher nameMatcher = ELEMENT_NAME_PATTERN.matcher(item);
-			Matcher typeMatcher = TYPE_NAME_PATTERN.matcher(item);
-			Matcher dpMatcher = DATA_PROVIDER_PATTERN.matcher(item);
-
-			if (nameMatcher.find()) {
-				String name = nameMatcher.group(1);
-				if (name.equals(formName))
-					continue;
-
-				ElementInfo elem = new ElementInfo();
-				elem.name = name;
-				elem.typeName = typeMatcher.find() ? typeMatcher.group(1) : null;
-				elem.dataProviderID = dpMatcher.find() ? dpMatcher.group(1) : null;
-				elem.isWebComponent = item.contains("\"typeid\":47");
-				elem.isButton = item.contains("\"typeid\":7") && item.contains("onActionMethodID");
-				elem.isLabel = item.contains("\"typeid\":7") && !item.contains("onActionMethodID");
-
-				metadata.namedElements.add(elem);
+		Iterator<ISupportFormElement> elements = form.getFormElementsSortedByFormIndex();
+		while (elements.hasNext()) {
+			ISupportFormElement element = elements.next();
+			if (!(element instanceof IFormElement formElement)) {
+				continue;
 			}
+			String name = formElement.getName();
+			if (name == null || name.equals(form.getName())) {
+				continue;
+			}
+			if (element instanceof BaseComponent baseComponent && !baseComponent.getVisible()) {
+				continue;
+			}
+
+			ElementInfo elem = new ElementInfo();
+			elem.name = name;
+			elem.isWebComponent = element instanceof WebComponent;
+			if (elem.isWebComponent) {
+				elem.typeName = ((WebComponent) element).getTypeName();
+			}
+			if (element instanceof GraphicalComponent gc) {
+				elem.dataProviderID = gc.getDataProviderID();
+				boolean hasAction = gc.getOnActionMethodID() != null && !gc.getOnActionMethodID().isEmpty();
+				elem.isButton = hasAction;
+				elem.isLabel = !hasAction;
+			}
+
+			metadata.namedElements.add(elem);
 		}
 
 		return metadata;
@@ -338,5 +342,10 @@ public class FormSpecGenerator {
 		boolean isWebComponent;
 		boolean isButton;
 		boolean isLabel;
+
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 }
