@@ -709,6 +709,32 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					writeErrorToConsoleAndLog(console, e, "Exception while checking assets: ");
 					// TODO should we return a WARNING status here as we do for other failures?
 				}
+				// Only ever consider bundling zone.js on the developer-run build; a WAR export (warExportModel != null,
+				// both from Developer and from the cloud) always stays zoneless regardless of the system property.
+				// On the developer run: if -Dti.ng.includezonejs is set we honour it (including "false"); if it is not
+				// set at all it defaults to true, so a developer run restores async patching by default and NG0100
+				// ExpressionChangedAfterItHasBeenCheckedError warnings keep surfacing (debugging aid).
+				if (warExportModel == null && "true".equals(System.getProperty("ti.ng.includezonejs", "true")))
+				{
+					// The app runs zoneless, so a fresh source copy has an empty src/polyfills.ts (no zone.js).
+					// We add the zone.js import so async patching is restored.
+					try
+					{
+						File polyfills = new File(projectFolder, "src/polyfills.ts");
+						String polyfillsContents = polyfills.exists() ? FileUtils.readFileToString(polyfills, "UTF8") : "";
+						if (!polyfillsContents.contains("import 'zone.js'"))
+						{
+							writeConsole(console, "- adding zone.js import to src/polyfills.ts (developer run, ti.ng.includezonejs not false)");
+							sourceChanged = true;
+							FileUtils.write(polyfills, "import 'zone.js';\r\n" + polyfillsContents, "UTF8", false);
+						}
+					}
+					catch (IOException e)
+					{
+						writeErrorToConsoleAndLog(console, e, "Exception while adding zone.js to src/polyfills.ts: ");
+						// TODO should we return a WARNING status here as we do for other failures?
+					}
+				}
 				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
 				{
 					if (warExportModel == null)

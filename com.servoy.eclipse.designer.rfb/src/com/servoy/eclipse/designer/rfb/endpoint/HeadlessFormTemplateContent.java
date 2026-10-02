@@ -34,12 +34,11 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
-import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.server.ngclient.AngularFormGenerator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
-import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -91,7 +90,9 @@ public class HeadlessFormTemplateContent
 		try
 		{
 			Settings.getInstance().setProperty(Settings.TESTING_MODE, "true");
-			AngularFormGenerator generator = new AngularFormGenerator(fs, flattenedForm, form.getName(), false, null);
+			// SVY-21460: form-template mode (isDesigner=false, formTemplate=true) so custom-array / custom-object typed
+			// properties (e.g. a datagrid's 'columns', a tabpanel's 'tabs') are written into the headless template JSON
+			AngularFormGenerator generator = new AngularFormGenerator(fs, flattenedForm, form.getName(), false, true, null);
 			// no messages manager: a stable, data-free projection with raw i18n keys
 			return generator.generateJS(new ServoyDataConverterContext(fs, null));
 		}
@@ -170,55 +171,43 @@ public class HeadlessFormTemplateContent
 	}
 
 	/**
-	 * Returns the active solution's stylesheet as plain CSS (LESS compiled), produced the same
-	 * design-time way the solution stylesheet is normally produced, concatenated in the same order
-	 * {@code PersistHelper.getOrderedStyleSheets} uses. Designer-only sheets are not included.
-	 * Returns an empty string if the solution has no stylesheets.
+	 * Returns the active solution's stylesheet references as relative resource URLs, in the exact order
+	 * and form the runtime NG client and the form designer use them: one URL per solution/module sheet,
+	 * parent-last (the {@code PersistHelper.getOrderedStyleSheets} order reversed), preferring the
+	 * {@code _ng2} variant, pointing at {@code MediaResourcesServlet}'s flattened-solution access path.
+	 * <p>
+	 * These are meant to be emitted as separate {@code <link rel="stylesheet">} elements (exactly like
+	 * {@code DesignerWebsocketSession.getSolutionStyleSheets} does and like {@code ApplicationService.setStyleSheets}
+	 * does at runtime), so the browser applies the same cascade - including {@code @import} rules, which only
+	 * work at the top of their own sheet and would be dropped if the sheets were concatenated server-side.
+	 * Designer-only sheets are not included. Returns an empty array if the solution has no stylesheets.
 	 */
-	public String getSolutionStyleSheet()
+	public String[] getSolutionStyleSheetPaths()
 	{
 		FlattenedSolution fs = getEditingFlattenedSolution();
-		if (fs == null) return "";
+		if (fs == null) return new String[0];
 		List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
-		if (styleSheets == null || styleSheets.isEmpty()) return "";
+		if (styleSheets == null || styleSheets.isEmpty()) return new String[0];
 		// getOrderedStyleSheets returns them parent-first; the runtime/designer applies them reversed
 		Collections.reverse(styleSheets);
-		StringBuilder css = new StringBuilder();
+		List<String> paths = new ArrayList<>(styleSheets.size());
+		String solutionName = fs.getSolution().getName();
 		for (String stylesheetName : styleSheets)
 		{
-			Media media = getSolutionCssMedia(fs, stylesheetName);
-			if (media == null) continue;
-			try
+			String name = stylesheetName;
+			// prefer the _ng2 variant like the designer/runtime does
+			int lastPoint = name.lastIndexOf('.');
+			if (lastPoint > 0)
 			{
-				String name = media.getName();
-				if (name.endsWith(".less"))
+				String ng2StylesheetName = name.substring(0, lastPoint) + "_ng2" + name.substring(lastPoint);
+				if (fs.getMedia(ng2StylesheetName) != null)
 				{
-					css.append(LessCompiler.compileSolutionLessFile(media, fs));
+					name = ng2StylesheetName;
 				}
-				else
-				{
-					css.append(new String(media.getMediaData(), "UTF-8"));
-				}
-				css.append("\n");
 			}
-			catch (Exception e)
-			{
-				Debug.error("Can't produce stateless solution stylesheet for '" + stylesheetName + "'", e);
-			}
+			paths.add("resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + solutionName + "/" +
+				name + "?t=" + Long.toHexString(System.currentTimeMillis()));
 		}
-		return css.toString();
-	}
-
-	private Media getSolutionCssMedia(FlattenedSolution fs, String stylesheetName)
-	{
-		// prefer the _ng2 variant like the designer/runtime does
-		int lastPoint = stylesheetName.lastIndexOf('.');
-		if (lastPoint > 0)
-		{
-			String ng2StylesheetName = stylesheetName.substring(0, lastPoint) + "_ng2" + stylesheetName.substring(lastPoint);
-			Media ng2Media = fs.getMedia(ng2StylesheetName);
-			if (ng2Media != null) return ng2Media;
-		}
-		return fs.getMedia(stylesheetName);
+		return paths.toArray(new String[0]);
 	}
 }
