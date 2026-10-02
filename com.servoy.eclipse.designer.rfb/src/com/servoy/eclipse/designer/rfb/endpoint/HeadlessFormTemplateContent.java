@@ -90,7 +90,9 @@ public class HeadlessFormTemplateContent
 		try
 		{
 			Settings.getInstance().setProperty(Settings.TESTING_MODE, "true");
-			AngularFormGenerator generator = new AngularFormGenerator(fs, flattenedForm, form.getName(), false, null);
+			// SVY-21460: form-template mode (isDesigner=false, formTemplate=true) so custom-array / custom-object typed
+			// properties (e.g. a datagrid's 'columns', a tabpanel's 'tabs') are written into the headless template JSON
+			AngularFormGenerator generator = new AngularFormGenerator(fs, flattenedForm, form.getName(), false, true, null);
 			// no messages manager: a stable, data-free projection with raw i18n keys
 			return generator.generateJS(new ServoyDataConverterContext(fs, null));
 		}
