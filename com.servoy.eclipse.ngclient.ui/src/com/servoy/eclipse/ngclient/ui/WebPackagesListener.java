@@ -707,6 +707,28 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					writeErrorToConsoleAndLog(console, e, "Exception while checking assets: ");
 					// TODO should we return a WARNING status here as we do for other failures?
 				}
+				if (INCLUDE_ZONEJS)
+				{
+					// The app runs zoneless, so a fresh source copy has an empty src/polyfills.ts (no zone.js).
+					// When -Dti.ng.includezonejs=true we add the zone.js import so async patching is restored and
+					// NG0100 ExpressionChangedAfterItHasBeenCheckedError warnings surface again (debugging aid).
+					try
+					{
+						File polyfills = new File(projectFolder, "src/polyfills.ts");
+						String polyfillsContents = polyfills.exists() ? FileUtils.readFileToString(polyfills, "UTF8") : "";
+						if (!polyfillsContents.contains("import 'zone.js'"))
+						{
+							writeConsole(console, "- adding zone.js import to src/polyfills.ts (ti.ng.includezonejs=true)");
+							sourceChanged = true;
+							FileUtils.write(polyfills, "import 'zone.js';\r\n" + polyfillsContents, "UTF8", false);
+						}
+					}
+					catch (IOException e)
+					{
+						writeErrorToConsoleAndLog(console, e, "Exception while adding zone.js to src/polyfills.ts: ");
+						// TODO should we return a WARNING status here as we do for other failures?
+					}
+				}
 				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
 				{
 					if (warExportModel == null)
@@ -1386,6 +1408,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	}
 
 	private static boolean SOURCE_DEBUG = "true".equals(System.getProperty("ti.ng.source.debug", "false"));
+
+	// The app runs zoneless (provideZonelessChangeDetection). zone.js is NOT bundled by default
+	// (a fresh source copy has an empty src/polyfills.ts). Set -Dti.ng.includezonejs=true to add the
+	// zone.js import to src/polyfills.ts so async patching is restored and NG0100
+	// ExpressionChangedAfterItHasBeenCheckedError warnings surface again (debugging aid).
+	private static boolean INCLUDE_ZONEJS = "true".equals(System.getProperty("ti.ng.includezonejs", "false"));
 
 	private static final AtomicBoolean ignore = new AtomicBoolean(false);
 
