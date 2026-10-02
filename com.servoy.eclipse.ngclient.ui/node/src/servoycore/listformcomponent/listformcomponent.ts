@@ -223,6 +223,22 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
   // re-render (e.g. after a filter) does not re-measure them again unnecessarily
   private readonly measuredRowHeights = new Map<string, number>();
 
+  /**
+   * Clears every cached measured row height. Must be called before any
+   * refreshServerSide({ purge: true }) on the per-row auto-height path: without a
+   * getRowId callback, AG Grid's server-side row model assigns each row node a
+   * position-based id (not tied to the underlying foundset record), so after a purge the
+   * same node.id can be reused for a completely different row's data. Leaving stale
+   * entries in the map would make getRowHeight() return the previous occupant's height
+   * until (if ever) that position gets re-measured, and the map would also grow
+   * unboundedly over a long session of filtering/scrolling (SVY-21457 code review).
+   */
+  private clearMeasuredRowHeightsOnPurge(): void {
+    if (this.isPerRowAutoHeight()) {
+      this.measuredRowHeights.clear();
+    }
+  }
+
   // used for paging
   page = 0;
   numberOfCells = 0;
@@ -568,6 +584,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
           agGrid.api.setRowCount(Math.ceil(event.serverFoundsetSizeChanged.newValue / this.getNumberOfColumns()));
         }
         if (event.viewportRowsCompletelyChanged || event.fullValueChanged) {
+          this.clearMeasuredRowHeightsOnPurge();
           agGrid.api.refreshServerSide({ purge: true });
         } else if (event.viewportRowsUpdated) {
           // copy the viewport data over to the cell
@@ -577,12 +594,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             insertOrDeletes = insertOrDeletes || change.type === ChangeType.ROWS_INSERTED || change.type === ChangeType.ROWS_DELETED;
           });
           if (insertOrDeletes) {
+            this.clearMeasuredRowHeightsOnPurge();
             agGrid.api.refreshServerSide({ purge: true });
             const foundset = this._foundset()!;
             agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);
           } else if (changes.length == 1 && changes[0].startIndex === changes[0].endIndex) {
             agGrid.api.refreshCells();
           } else {
+            this.clearMeasuredRowHeightsOnPurge();
             agGrid.api.refreshServerSide({ purge: true });
           }
         }
@@ -649,6 +668,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
                 this.resizeTimeout = null;
                 if (settledColumns === this.numberOfColumns) return;
                 this.numberOfColumns = settledColumns;
+                this.clearMeasuredRowHeightsOnPurge();
                 agGrid.api.refreshServerSide({ purge: true });
                 const foundset = this._foundset()!;
                 agGrid.api.setRowCount(foundset.serverSize ? Math.ceil(foundset.serverSize / this.getNumberOfColumns()) : 0);

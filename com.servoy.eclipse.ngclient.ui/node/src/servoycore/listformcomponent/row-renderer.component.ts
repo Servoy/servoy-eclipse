@@ -11,6 +11,12 @@ import { AddAttributeDirective } from '../addattribute.directive';
   selector: 'svy-row-renderer-component',
   templateUrl: './row-renderer.component.html',
   host: { '(registerCSTS)': 'registerCSTS($event)' },
+  // Eager (check-always) is deliberate, not an oversight (SVY-21457 code review). AG Grid
+  // instantiates this cell renderer outside Angular's component tree and never marks it for
+  // check; its template binds plain method calls on the parent LFC (lfc.getRowClasses(),
+  // lfc.getRowStyle(), lfc.getRowItemState(), the foundset row data) rather than signals, so
+  // under OnPush those would go stale after a row re-render with no dirty signal to refresh
+  // them. Keep Eager until the row template is migrated to signal-based inputs.
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
   imports: [SabloTabseq, NgTemplateOutlet, AddAttributeDirective],
@@ -95,6 +101,13 @@ export class RowRenderer implements AgRendererComponent, AfterViewInit {
    * true height because those children are themselves collapsed. Recurse to the deepest
    * elements (using `getBoundingClientRect` so we compare in the same coordinate space) and
    * take the lowest bottom edge relative to the row wrapper (SVY-21457).
+   *
+   * Perf note (SVY-21457 code review, item 3 - accepted tradeoff): this walks every
+   * descendant and reads `getBoundingClientRect()` on each, forcing a synchronous layout per
+   * element, once per row on first show (and again on re-measure). This is fine for the
+   * typical small nested form; for a very deep/large contained form with many rows it is a
+   * latent first-show cost. Left as-is deliberately - only revisit if a large-form case shows
+   * a real problem (see docs/SVY-21457-lfc-per-row-autoheight.spec.md §6).
    */
   private measureContentHeight(cellGui: HTMLElement): number {
     const rowEl = cellGui.querySelector(':first-child') as HTMLElement;
