@@ -248,6 +248,42 @@ the per-row auto-height path) — see §6 for why this is accepted as in-scope.
 - [x] `npx tsc --noEmit`, `npx ng lint`, and the development build all pass with no new
       errors.
 
+## 5b. Follow-up (release-branch code review)
+
+A code review on the `release`/`master` ports of this fix (commits `318e404c72` on
+`lts_2026` and the zoneless-specific follow-up `0602d9c1f0` on `release`/`master`) flagged
+three items. Disposition, re-checked against `lts_2026` specifically (the zoneless/`Eager`
+items turned out not to apply there — see below):
+
+1. **`measuredRowHeights` never cleared on a purge (medium) — fixed on `lts_2026`.** Without
+   a `getRowId` grid-options callback, AG Grid's server-side row model assigns each row node
+   a position-based id, so after any `refreshServerSide({ purge: true })` the same `node.id`
+   can be reused for a different foundset record. The map was never cleared on any of the
+   purge call sites, so `getRowHeight()` could keep returning a stale previous-occupant
+   height for a position until (or unless) that row got re-measured, and the map also grew
+   unboundedly over a long filtering/scrolling session. Fixed with
+   `clearMeasuredRowHeightsOnPurge()`, called immediately before each of the four
+   `refreshServerSide({ purge: true })` call sites (the `viewportRowsCompletelyChanged`/
+   `fullValueChanged` branch, the insert/delete branch, the "else" branch of the
+   `viewportRowsUpdated` handler, and the settled column-count resize path). Guarded by
+   `isPerRowAutoHeight()` so it is a no-op on every other path. Covered by new tests in
+   `listformcomponent.spec.ts` under `clearMeasuredRowHeightsOnPurge (code review
+   follow-up)`, which exercise the real call sites (not just the helper) so a future call
+   site that forgets to clear is caught.
+2. **`RowRenderer` `ChangeDetectionStrategy.Eager` (low) — not applicable to `lts_2026`.**
+   Introduced only by the `release`-branch zoneless-migration follow-up commit
+   (`0602d9c1f0`); `lts_2026`'s `RowRenderer` has no explicit `changeDetection` (default
+   strategy), matching the state before that commit. No action needed here; track on the
+   `release` branch separately if not already resolved there.
+3. **`measureContentHeight` full-subtree `getBoundingClientRect()` reads (low, performance)
+   — accepted, unchanged.** This is the deliberate float-collapse workaround from §3.2;
+   already called out as a tradeoff in §6 (small lists only). No action unless a real
+   large-form case reports a problem.
+4. **Zoneless Vitest assertion for the reveal — not applicable to `lts_2026`.** `lts_2026`
+   does not use zoneless change detection or Vitest (Zone.js + Jasmine/Karma per
+   `AGENTS.md`); the reveal path (`revealAfterFirstRender`/`getAGGridStyle`) was unaffected
+   by the zoneless-specific commit and needs no change here.
+
 ## 6. Out of scope
 
 - Optimising per-row auto-height for lazy-loaded / infinite-scroll large lists. The

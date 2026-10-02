@@ -246,6 +246,153 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
         });
     });
 
+    describe('clearMeasuredRowHeightsOnPurge (code review follow-up)', () => {
+
+        // Without a getRowId callback, AG Grid's server-side row model assigns each row node
+        // a position-based id, so after refreshServerSide({ purge: true }) the same node.id
+        // can be reused for a different foundset record. Every purge call site must clear
+        // measuredRowHeights first, otherwise getRowHeight() would keep returning the
+        // previous occupant's height for that position (and the map would grow unboundedly
+        // over a long session). These tests exercise the three real call sites instead of
+        // just the helper in isolation, so a future call site that forgets to clear is caught.
+
+        const buildForFoundsetChange = (absoluteLayout: boolean, responsiveHeight: number) => {
+            const component = newComponent();
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInDesigner', 'isInAbsoluteLayout', 'getClientProperty']);
+            (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(absoluteLayout);
+            (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
+            (component as any).responsiveHeight = () => responsiveHeight;
+            (component as any).containedForm = () => ({ formHeight: 50, formWidth: 100, absoluteLayout });
+
+            let changeListener: (event: any) => void;
+            const foundset = {
+                addChangeListener: (cb: (event: any) => void) => { changeListener = cb; return () => { /* remove */ }; },
+                serverSize: 10,
+                selectedRowIndexes: [] as number[],
+                viewPort: { rows: [], startIndex: 0, size: 0 }
+            };
+            (component as any).foundset = () => foundset;
+            component.svyOnInit();
+
+            const gridApi = jasmine.createSpyObj('gridApi', [
+                'isDestroyed', 'onRowHeightChanged', 'refreshServerSide', 'refreshCells', 'setRowCount', 'getDisplayedRowCount'
+            ]);
+            (gridApi.isDestroyed as jasmine.Spy).and.returnValue(false);
+            const agGrid = { api: gridApi } as any;
+            (component as any).agGrid = () => agGrid;
+            (component as any)._foundset = () => foundset;
+
+            return { component, gridApi, fireFoundsetChange: (event: any) => changeListener(event) };
+        };
+
+        it('clears measuredRowHeights before refreshServerSide({ purge: true }) on viewportRowsCompletelyChanged', () => {
+            const { component, fireFoundsetChange } = buildForFoundsetChange(false, -1);
+            const node = jasmine.createSpyObj('node', ['setRowHeight']);
+            component.applyMeasuredRowHeight('row-1', node, 200);
+            expect(component.agGridOptions.getRowHeight({ node: { id: 'row-1' } } as any)).toBe(200);
+
+            fireFoundsetChange({ viewportRowsCompletelyChanged: true });
+
+            // row-1's position has been purged; a stale 200 must not leak into whatever record
+            // AG Grid later re-populates that position with - fall back to the default instead
+            expect(component.agGridOptions.getRowHeight({ node: { id: 'row-1' } } as any)).toBe(50);
+        });
+
+        it('clears measuredRowHeights before refreshServerSide({ purge: true }) on an insert/delete viewportRowsUpdated', () => {
+            const { component, fireFoundsetChange } = buildForFoundsetChange(false, -1);
+            const node = jasmine.createSpyObj('node', ['setRowHeight']);
+            component.applyMeasuredRowHeight('row-1', node, 200);
+
+            fireFoundsetChange({
+                viewportRowsUpdated: [{ type: 'rows_inserted', startIndex: 0, endIndex: 1 }]
+            });
+
+            expect(component.agGridOptions.getRowHeight({ node: { id: 'row-1' } } as any)).toBe(50);
+        });
+
+        it('does NOT clear measuredRowHeights on a single-cell refreshCells update (no purge happens)', () => {
+            const { component, fireFoundsetChange } = buildForFoundsetChange(false, -1);
+            const node = jasmine.createSpyObj('node', ['setRowHeight']);
+            component.applyMeasuredRowHeight('row-1', node, 200);
+
+            fireFoundsetChange({
+                viewportRowsUpdated: [{ type: 'rows_changed', startIndex: 2, endIndex: 2 }]
+            });
+
+            expect(component.agGridOptions.getRowHeight({ node: { id: 'row-1' } } as any)).toBe(200);
+        });
+
+        it('clears measuredRowHeights before refreshServerSide({ purge: true }) on a settled column-count resize', () => {
+            const component = newComponent();
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInAbsoluteLayout', 'isInDesigner', 'getClientProperty']);
+            (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
+            component.useScrolling = true;
+            (component as any).responsiveHeight = () => -1;
+            (component as any).containedForm = () => ({ formWidth: 100, formHeight: 50, absoluteLayout: false });
+
+            const gridApi = jasmine.createSpyObj('gridApi', ['setGridOption', 'refreshServerSide', 'setRowCount', 'isDestroyed', 'getDisplayedRowCount', 'ensureIndexVisible', 'onRowHeightChanged']);
+            (gridApi.isDestroyed as jasmine.Spy).and.returnValue(false);
+            const agGridStub = { api: gridApi } as any;
+            const elementRef = { nativeElement: { offsetWidth: 300 } } as any;
+
+            // svyOnInit() builds agGridOptions (incl. the getRowHeight callback asserted below)
+            // via the real this._foundset signal, so it must run BEFORE _foundset is overridden
+            // below with a plain getter for the ngAfterViewInit/resize-observer path.
+            (component as any).foundset = () => ({
+                addChangeListener: (_cb: any) => (() => { /* remove listener */ }),
+                serverSize: 0,
+                selectedRowIndexes: [] as number[],
+                viewPort: { rows: [], startIndex: 0, size: 0 }
+            });
+            component.svyOnInit();
+
+            (component as any).element = () => elementRef;
+            (component as any).agGrid = () => agGridStub;
+            (component as any).containedFormMargin = () => undefined;
+            (component as any).pageLayout = () => 'tableview';
+            (component as any)._foundset = () => ({ serverSize: 0, selectedRowIndexes: [] as number[] });
+            spyOn(Object.getPrototypeOf(Object.getPrototypeOf(component)), 'ngAfterViewInit').and.stub();
+            spyOn(component, 'calculateCells').and.stub();
+
+            jasmine.clock().install();
+            let capturedCallback: (entries: any[]) => void;
+            const originalResizeObserver = (window as any).ResizeObserver;
+            (window as any).ResizeObserver = class {
+                constructor(cb: (entries: any[]) => void) { capturedCallback = cb; }
+                observe() { /* nop */ }
+                unobserve() { /* nop */ }
+                disconnect() { /* nop */ }
+            };
+            try {
+                component.ngAfterViewInit();
+                component.numberOfColumns = 3;
+
+                const node = jasmine.createSpyObj('node', ['setRowHeight']);
+                component.applyMeasuredRowHeight('row-1', node, 200);
+                expect(component.agGridOptions.getRowHeight({ node: { id: 'row-1' } } as any)).toBe(200);
+
+                // 550px -> 5 columns, differs from 3 -> triggers the debounced purge
+                elementRef.nativeElement.offsetWidth = 550;
+                capturedCallback([{ contentRect: { width: 550 } }]);
+                jasmine.clock().tick(500);
+
+                expect(gridApi.refreshServerSide).toHaveBeenCalledWith({ purge: true });
+                expect(component.agGridOptions.getRowHeight({ node: { id: 'row-1' } } as any)).toBe(50);
+            } finally {
+                (window as any).ResizeObserver = originalResizeObserver;
+                jasmine.clock().uninstall();
+            }
+        });
+
+        it('does nothing on the fixed-height path (responsiveHeight >= 0), where there is no measuredRowHeights map to clear', () => {
+            const { component, fireFoundsetChange } = buildForFoundsetChange(false, 300);
+            expect(() => fireFoundsetChange({ viewportRowsCompletelyChanged: true })).not.toThrow();
+        });
+    });
+
     describe('isPerRowAutoHeight', () => {
 
         it('is true only for responsive layout with responsiveHeight < 0', () => {
