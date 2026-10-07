@@ -292,7 +292,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
       }
       // do not move the selection for the first or last element
       if (selectedRowIndex >= 0 && selectedRowIndex < foundset.serverSize) {
-        foundset.requestSelectionUpdate([selectedRowIndex]);
+        this.requestSelectionUpdate(foundset, [selectedRowIndex]);
         this.selectionChangedByKey = true;
         const onSelectionChanged = this.onSelectionChanged();
         if (onSelectionChanged) {
@@ -313,7 +313,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         const index = i + foundset.viewPort.startIndex;
         const selected = foundset.selectedRowIndexes;
         if (!selected || selected.indexOf(index) === -1) {
-          foundset.requestSelectionUpdate([index]);
+          this.requestSelectionUpdate(foundset, [index]);
           const onSelectionChanged = this.onSelectionChanged();
           if (onSelectionChanged) {
             onSelectionChanged(event);
@@ -326,6 +326,19 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         break;
       }
     }
+  }
+
+  /**
+   * Requests a foundset selection update and swallows the expected rejection that happens when a newer
+   * selection request supersedes a still-pending one (foundset.requestSelectionUpdate rejects the previous
+   * deferred in that case). Without handling it, that rejection surfaces as an "Uncaught (in promise)" error
+   * in the browser console - e.g. when clicking a checkbox in a row whose data change triggers a server
+   * round-trip (calculation / enabled-dataprovider) that overlaps with the row-click selection request.
+   */
+  private requestSelectionUpdate(foundset: IFoundset, selectedRowIndexes: number[]) {
+    foundset.requestSelectionUpdate(selectedRowIndexes).catch(() => {
+      // expected when a newer selection request supersedes this one; nothing to handle here
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {

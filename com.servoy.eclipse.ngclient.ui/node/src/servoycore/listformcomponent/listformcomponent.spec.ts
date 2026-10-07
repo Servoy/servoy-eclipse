@@ -41,7 +41,7 @@ describe('ListFormComponent', () => {
         size: 5,
         rows: [{ _svyRowId: 'row0' }, { _svyRowId: 'row1' }, { _svyRowId: 'row2' }, { _svyRowId: 'row3' }, { _svyRowId: 'row4' }],
       },
-      requestSelectionUpdate: vi.fn(),
+      requestSelectionUpdate: vi.fn().mockReturnValue(Promise.resolve()),
       addChangeListener: vi.fn().mockReturnValue(vi.fn()),
       loadRecordsAsync: vi.fn().mockReturnValue(Promise.resolve()),
       loadExtraRecordsAsync: vi.fn().mockReturnValue(Promise.resolve()),
@@ -147,6 +147,31 @@ describe('ListFormComponent', () => {
       expect(handler).toHaveBeenCalledWith(undefined, event);
       expect(mockFoundset.getRecordRefByRowID).toHaveBeenCalledWith('row1');
     });
+
+    // SVY-21563: clicking a checkbox in a row triggers a server round-trip (calc / enabled-dataprovider)
+    // whose selection update can overlap the row-click selection request; requestSelectionUpdate then
+    // rejects the superseded deferred. That rejection must be handled so it does not surface as an
+    // "Uncaught (in promise)" error in the browser console.
+    it('SVY-21563: should swallow a superseded-selection rejection from requestSelectionUpdate', async () => {
+      mockFoundset.selectedRowIndexes = [0];
+      mockFoundset.requestSelectionUpdate = vi.fn().mockReturnValue(Promise.reject('Selection change defer cancelled because we are already sending another selection to server.'));
+
+      let unhandled: unknown;
+      const onUnhandled = (event: PromiseRejectionEvent) => {
+        unhandled = event.reason;
+      };
+      window.addEventListener('unhandledrejection', onUnhandled);
+      try {
+        component.onRowClick({ _svyRowId: 'row2' }, new Event('click'));
+        expect(mockFoundset.requestSelectionUpdate).toHaveBeenCalledWith([2]);
+        // let the microtask queue (and any unhandled-rejection detection) flush
+        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      } finally {
+        window.removeEventListener('unhandledrejection', onUnhandled);
+      }
+      expect(unhandled).toBeUndefined();
+    });
   });
 
   describe('handleKeyDown', () => {
@@ -176,6 +201,28 @@ describe('ListFormComponent', () => {
       mockFoundset.multiSelect = false;
       component.handleKeyDown({ key: 'ArrowDown' });
       expect(mockFoundset.requestSelectionUpdate).not.toHaveBeenCalled();
+    });
+
+    // SVY-21563: same superseded-selection rejection guard as onRowClick, for the keyboard path.
+    it('SVY-21563: should swallow a superseded-selection rejection from requestSelectionUpdate', async () => {
+      mockFoundset.selectedRowIndexes = [0];
+      mockFoundset.multiSelect = false;
+      mockFoundset.requestSelectionUpdate = vi.fn().mockReturnValue(Promise.reject('Selection change defer cancelled because we are already sending another selection to server.'));
+
+      let unhandled: unknown;
+      const onUnhandled = (event: PromiseRejectionEvent) => {
+        unhandled = event.reason;
+      };
+      window.addEventListener('unhandledrejection', onUnhandled);
+      try {
+        component.handleKeyDown({ key: 'ArrowDown' });
+        expect(mockFoundset.requestSelectionUpdate).toHaveBeenCalledWith([1]);
+        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      } finally {
+        window.removeEventListener('unhandledrejection', onUnhandled);
+      }
+      expect(unhandled).toBeUndefined();
     });
   });
 
