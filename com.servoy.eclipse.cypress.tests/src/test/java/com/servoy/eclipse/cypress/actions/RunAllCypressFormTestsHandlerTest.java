@@ -25,6 +25,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -443,6 +444,62 @@ public class RunAllCypressFormTestsHandlerTest {
 	}
 
 	@Nested
+	@DisplayName("global testingMode property (SVY-21510)")
+	class GlobalTestingModePropertyTests {
+
+		private static final String TESTING_MODE_PROPERTY = "servoy.ngclient.testingMode";
+
+		private CypressTestSessionManager sessionManager;
+
+		@BeforeEach
+		void injectIsolatedSession() {
+			sessionManager = CypressTestSessionManager.createForTesting();
+			handler.setSessionManager(sessionManager);
+			com.servoy.j2db.util.Settings.getInstance().remove(TESTING_MODE_PROPERTY);
+		}
+
+		@AfterEach
+		void resetGlobalProperty() {
+			com.servoy.j2db.util.Settings.getInstance().remove(TESTING_MODE_PROPERTY);
+		}
+
+		@Test
+		@DisplayName("runTestsCore does not set the global testingMode property")
+		void runTestsCoreDoesNotSetGlobalProperty() {
+			List<String> forms = List.of("formA", "formB");
+			sessionManager.startSession(forms, CypressTestResult.TestType.FORM);
+			FormSpecRunner mockRunner = new FormSpecRunner() {
+				@Override
+				public String runFormCypressTests(String formName, boolean headless) {
+					return "All tests passed for " + formName;
+				}
+			};
+
+			handler.runTestsCore(forms, mockRunner, new NullProgressMonitor());
+
+			assertNull(com.servoy.j2db.util.Settings.getInstance().getProperty(TESTING_MODE_PROPERTY));
+		}
+
+		@Test
+		@DisplayName("runTestsCore does not change an already-set global testingMode property")
+		void runTestsCoreDoesNotChangeExistingGlobalProperty() {
+			com.servoy.j2db.util.Settings.getInstance().setProperty(TESTING_MODE_PROPERTY, "false");
+			List<String> forms = List.of("formA");
+			sessionManager.startSession(forms, CypressTestResult.TestType.FORM);
+			FormSpecRunner mockRunner = new FormSpecRunner() {
+				@Override
+				public String runFormCypressTests(String formName, boolean headless) {
+					return "All tests passed for " + formName;
+				}
+			};
+
+			handler.runTestsCore(forms, mockRunner, new NullProgressMonitor());
+
+			assertEquals("false", com.servoy.j2db.util.Settings.getInstance().getProperty(TESTING_MODE_PROPERTY));
+		}
+	}
+
+	@Nested
 	@DisplayName("CypressFormTestTarget integration")
 	class TargetIntegration {
 		@Test
@@ -593,4 +650,3 @@ public class RunAllCypressFormTestsHandlerTest {
 		}
 	}
 }
-

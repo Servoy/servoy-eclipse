@@ -61,8 +61,6 @@ public class RunCypressFormTestHandler extends AbstractHandler {
 					console.clearConsole();
 					CypressConsoleUtil.showConsole(console);
 
-					enableTestingMode();
-
 					sessionManager.markRunning(targetFormName, sessionType);
 
 					long startTime = System.currentTimeMillis();
@@ -102,10 +100,6 @@ public class RunCypressFormTestHandler extends AbstractHandler {
 			return runner.runE2ECypressTests(formName, false);
 		}
 		return runner.runFormCypressTests(formName, false);
-	}
-
-	public void enableTestingMode() {
-		com.servoy.j2db.util.Settings.getInstance().setProperty("servoy.ngclient.testingMode", "true");
 	}
 
 	CypressTestDiscoveryService getDiscoveryService() {

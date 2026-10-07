@@ -21,8 +21,6 @@ public class RunSingleTestHandler {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("Running: " + testName, 1);
 
-				com.servoy.j2db.util.Settings.getInstance().setProperty("servoy.ngclient.testingMode", "true");
-
 				CypressTestSessionManager sessionManager = CypressTestSessionManager.getInstance();
 				sessionManager.startSession(java.util.List.of(testName), testType);
 				CypressTestResultsView.reveal();

@@ -118,13 +118,6 @@ public class RunCypressFormTestHandlerTest {
 		}
 
 		@Test
-		@DisplayName("has enableTestingMode method")
-		void hasEnableTestingModeMethod() throws NoSuchMethodException {
-			Method m = RunCypressFormTestHandler.class.getDeclaredMethod("enableTestingMode");
-			assertNotNull(m);
-		}
-
-		@Test
 		@DisplayName("has getDiscoveryService method")
 		void hasGetDiscoveryServiceMethod() throws NoSuchMethodException {
 			Method m = RunCypressFormTestHandler.class.getDeclaredMethod("getDiscoveryService");
@@ -375,4 +368,3 @@ public class RunCypressFormTestHandlerTest {
 		}
 	}
 }
-

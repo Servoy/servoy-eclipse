@@ -75,8 +75,6 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 
 				monitor.beginTask("Running Cypress form tests", testForms.size());
 
-				com.servoy.j2db.util.Settings.getInstance().setProperty("servoy.ngclient.testingMode", "true");
-
 				sessionManager.startSession(testForms, TestType.FORM);
 				CypressTestResultsView.reveal();
 
@@ -137,8 +135,6 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 				}
 
 				monitor.beginTask("Running Cypress form tests", testForms.size());
-
-				com.servoy.j2db.util.Settings.getInstance().setProperty("servoy.ngclient.testingMode", "true");
 
 				sessionManager.startSession(testForms, TestType.FORM);
 				CypressTestResultsView.reveal();

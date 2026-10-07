@@ -53,8 +53,6 @@ public class RunAllE2ETestsHandler {
 
 				monitor.beginTask("Running Cypress E2E tests", testNames.size());
 
-				com.servoy.j2db.util.Settings.getInstance().setProperty("servoy.ngclient.testingMode", "true");
-
 				CypressTestSessionManager sessionManager = CypressTestSessionManager.getInstance();
 				sessionManager.startSession(testNames, TestType.E2E);
 				CypressTestResultsView.reveal();
