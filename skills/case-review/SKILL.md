@@ -53,10 +53,10 @@ Four things a per-line review cannot give:
 
 ## Context isolation principle
 
-Each analysis phase runs as a `task` subagent with a **fresh context**. The regression
-analyst and the security analyst must **not** see each other's findings, and neither
-should see the narrative agent's framing — otherwise they anchor on it and stop looking.
-You control what crosses between phases.
+Each analysis phase runs as a `subagent` (`agent: general`) with a **fresh context**. The
+regression analyst and the security analyst must **not** see each other's findings, and
+neither should see the narrative agent's framing — otherwise they anchor on it and stop
+looking. You control what crosses between phases.
 
 ## Input
 
@@ -147,7 +147,7 @@ layering and module dependencies, conventions, gotchas, the accepted design deci
 security phase must not flag, available tooling and whether it covers this repository,
 sibling repositories, the issue tracker, and where reports go.
 
-Record it as `REPO_CONTEXT`. You paste this block verbatim into every subsequent `task`
+Record it as `REPO_CONTEXT`. You paste this block verbatim into every subsequent phase
 prompt. It **carries forward** the project's own context documents rather than replacing
 them — each fact is attributed to the document it came from, or marked as inspected, so the
 later phases know how much weight to give it.
@@ -202,10 +202,39 @@ Then show the confirmed scope as a short table (repository, sha, subject, files 
 
 ---
 
+## Spawning a phase
+
+You are the orchestrator and you run **in the user's own session** — never dispatch
+yourself as a subagent, because every `question` gate below must reach the user directly.
+Only the analysis phases run as subagents.
+
+**Spawn each phase with the `subagent` tool, `agent: general`.** The built-in `general`
+agent has shell, read/write/edit, and the repo's MCP tools — everything the phases need to
+read git history and the diff. A `subagent` child has a **fresh, isolated context** (which
+is exactly what the context-isolation principle below requires) and stays invisible: it is
+**not** a separate interactive session the user has to manage. Do **not** create standalone
+sessions for the phases, and do **not** use the read-only `explore` agent (the phases must
+run shell/git).
+
+**Prerequisite (one-time):** in OpenCode V2 the orchestrating `build` agent may only launch
+a subagent it is explicitly permitted to. `general` is built-in but not launchable by
+default, so `subagent(agent='general', ...)` fails until the global config grants it.
+`/install-skills` adds the rule (`agents.build.permissions` →
+`{ action: "subagent", resource: "general", effect: "allow" }`) to
+`~/.config/opencode/opencode.json`; it takes effect after an OpenCode restart. If a phase
+dispatch reports that `general` is not an available agent, tell the user to run
+`/install-skills` and restart, rather than falling back to `explore`.
+
+The prompt for every phase is the repo context, then the phase file's contents, then the
+issue reference and scope — exactly as the per-phase sections below spell out.
+
+---
+
 ## Phase C — Change narrative: what changed and why
 
+Spawn with the `subagent` tool (`agent: general`), passing this prompt:
+
 ```
-task(subagent_type='general', prompt="""
 <REPO_CONTEXT>
 
 ---
@@ -214,7 +243,6 @@ task(subagent_type='general', prompt="""
 
 Issue: ISSUE_REF
 Scope: SCOPE
-""")
 ```
 
 Pass the repo context, the issue reference and the scope. Nothing else — the narrative
@@ -227,11 +255,12 @@ Record the returned report path as `NARRATIVE_PATH`.
 
 ## Phase D — Independent analysis (run in parallel)
 
-Spawn **both** agents in a **single message** so they run concurrently and cannot see each
-other's findings.
+Spawn **both** phases with the `subagent` tool (`agent: general`), in a **single message**
+so they run concurrently and cannot see each other's findings.
+
+Regression phase prompt:
 
 ```
-task(subagent_type='general', prompt="""
 <REPO_CONTEXT>
 
 ---
@@ -240,9 +269,11 @@ task(subagent_type='general', prompt="""
 
 Issue: ISSUE_REF
 Scope: SCOPE
-""")
+```
 
-task(subagent_type='general', prompt="""
+Security phase prompt:
+
+```
 <REPO_CONTEXT>
 
 ---
@@ -251,7 +282,6 @@ task(subagent_type='general', prompt="""
 
 Issue: ISSUE_REF
 Scope: SCOPE
-""")
 ```
 
 **Do not** pass `NARRATIVE_PATH` into either. The narrative is the author's story as
@@ -263,10 +293,10 @@ Record the returned paths as `REGRESSION_PATH` and `SECURITY_PATH`.
 
 ## Phase E — Synthesis: the reviewer briefing
 
-Now — and only now — combine everything. Read all three reports yourself, then spawn:
+Now — and only now — combine everything. Read all three reports yourself, then spawn with
+the `subagent` tool (`agent: general`), passing this prompt:
 
 ```
-task(subagent_type='general', prompt="""
 <REPO_CONTEXT>
 
 ---
@@ -278,7 +308,6 @@ Scope: SCOPE
 Narrative report: NARRATIVE_PATH
 Regression report: REGRESSION_PATH
 Security report: SECURITY_PATH
-""")
 ```
 
 Record the returned path as `REVIEW_PATH`.
@@ -333,8 +362,8 @@ Handling:
   - **Neither available** — print the comment text and let the user paste it.
 
   Attribute the comment with a trailing `-- posted by review assistant` line.
-- **"Dig deeper"** — ask which finding, then spawn a fresh `task` scoped to that one
-  question, passing `REPO_CONTEXT` plus the specific finding.
+- **"Dig deeper"** — ask which finding, then spawn a fresh `subagent` (`agent: general`)
+  scoped to that one question, passing `REPO_CONTEXT` plus the specific finding.
 
 ### Phase F.0 — Condense to one committable summary, then clean up the scratch files
 
@@ -490,7 +519,7 @@ a fix applied, that is a separate task.
 
 ## Error handling
 
-- If a `task` returns a tool error, report it and ask the user how to proceed.
+- If a phase `subagent` returns a tool error, report it and ask the user how to proceed.
 - If a phase produces no findings, that is a legitimate result — say "no findings" rather
   than inventing filler. An empty security section on a two-line CSS change is correct.
 - If the issue cannot be read from the tracker, continue with the diff alone and say so

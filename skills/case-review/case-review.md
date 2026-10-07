@@ -1,6 +1,5 @@
 ---
 description: Review an issue implemented by someone else — change narrative, regression blast radius, security assessment, and a guided walkthrough with a manual test plan.
-agent: general
 ---
 
 Load the `case-review` skill and run the peer-review pipeline.

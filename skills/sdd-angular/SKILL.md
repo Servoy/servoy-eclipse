@@ -40,9 +40,15 @@ location is:
 
 The per-repo `/sdd` command normally passes this file's contents into the prompt that loaded
 this skill. **If you were given the project-context inline, use that.** Otherwise, read
-`.opencode/sdd/project-context.md` from the current working directory now. If it is missing,
-tell the user the repo has not been onboarded to SDD (it needs
-`.opencode/sdd/project-context.md`) and ask whether to proceed with generic assumptions.
+`.opencode/sdd/project-context.md` from the current working directory now.
+
+Some repos host more than one stack in one checkout (e.g. a Java backend and an Angular
+frontend) and split the context by kind instead of using the single generic file. If
+`.opencode/sdd/project-context.md` is absent, fall back to the Angular variant
+`.opencode/sdd/project-context-angular.md` (this is an Angular skill). Only if **both** are
+missing, tell the user the repo has not been onboarded to SDD (it needs
+`.opencode/sdd/project-context.md`, or a per-kind `.opencode/sdd/project-context-angular.md`)
+and ask whether to proceed with generic assumptions — do not improvise from `AGENTS.md`.
 
 Record the full project-context text as `PROJECT_CONTEXT`. You MUST pass `PROJECT_CONTEXT`
 into every phase subagent prompt — those subagents start with a fresh context and cannot see
@@ -245,10 +251,36 @@ agent with review findings + project context + spec path, re-run Phase 5. Repeat
 
 ---
 
-## Phase 6 — Commit
+## Phase 6 — Pre-commit build, then commit
 
-**HUMAN GATE — Final approval.** `question` (Header "Ready to commit"): "Commit now" or
-"Let me review first".
+**6a. Choose and run a pre-commit build.** The scoped `ng test` the earlier phases ran is
+**not** sufficient on its own: the production bundle (`ng build`) type-checks far more strictly
+than Vitest (`ng test`), so a change can pass every scoped unit test and still fail the
+production build (e.g. a `TS2322` assignability error when a widened shared type is assigned
+into a component's narrower local declaration). The production build catches this; the test
+runner does not — and it is what CI runs.
+
+Do **not** silently pick one build — a full build + full test run can be slow. Instead, before
+the commit gate, **ask the user** with a `question` what to run, tailoring the options to this
+repo (read PROJECT CONTEXT / `AGENTS.md` for the real commands and whether this is a standalone
+Angular app or a module of a Maven multi-module project built via `frontend-maven-plugin`). A
+good default set:
+
+- **Production build + all tests** — `ng build` (or the repo's root reactor build that runs it)
+  plus the full `ng test --no-watch`. Most thorough; mirrors CI.
+- **Production build + affected tests only** — run `ng build` (so the strict type-check / bundle
+  breakage is caught) but only the tests for the changed code, to save time.
+- **Production build only** — `ng build` with no test run (catches the type/bundle breakage;
+  relies on the already-run per-phase tests).
+- **Skip the pre-commit build** — commit as-is (e.g. the user will build themselves).
+
+Recommend at least a **production build** option (not test-only), because that is the step that
+catches the breakage the scoped tests miss. Run the chosen build, fix anything it surfaces
+(looping back through the relevant phase for non-trivial fixes), and re-run until green (or the
+user decides otherwise) before the gate.
+
+**6b. HUMAN GATE — Final approval.** `question` (Header "Ready to commit", noting what build was
+run/skipped and its result): "Commit now" or "Let me review first".
 
 When approved, review changes with `git status` (or `eclipse-git_gitStatus` when the Eclipse
 MCP is available). Stage every file belonging to this feature.

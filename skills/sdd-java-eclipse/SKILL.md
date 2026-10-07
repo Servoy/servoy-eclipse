@@ -38,9 +38,15 @@ module layout, conventions, and gotchas. Its canonical location is:
 
 The per-repo `/sdd` command normally inlines this file's contents into the prompt that
 loaded this skill. **If you were given the project-context inline, use that.** Otherwise,
-read `.opencode/sdd/project-context.md` from the current working directory now. If it is
-missing, tell the user the repo has not been onboarded to SDD (it needs
-`.opencode/sdd/project-context.md`) and ask whether to proceed with generic assumptions.
+read `.opencode/sdd/project-context.md` from the current working directory now.
+
+Some repos host more than one stack in one checkout (e.g. a Java backend and an Angular
+frontend) and split the context by kind instead of using the single generic file. If
+`.opencode/sdd/project-context.md` is absent, fall back to the Java variant
+`.opencode/sdd/project-context-java.md` (this is a Java skill). Only if **both** are missing,
+tell the user the repo has not been onboarded to SDD (it needs
+`.opencode/sdd/project-context.md`, or a per-kind `.opencode/sdd/project-context-java.md`)
+and ask whether to proceed with generic assumptions — do not improvise from `AGENTS.md`.
 
 Record the full project-context text as `PROJECT_CONTEXT`. You MUST pass `PROJECT_CONTEXT`
 into every phase subagent prompt (Triage, PM, Coding, Code Review, Test Gen, Test Review),
@@ -330,13 +336,47 @@ path, then re-run Phase 5. Repeat until `APPROVED`.
 
 ---
 
-## Phase 6 — Commit
+## Phase 6 — Pre-commit build, then commit
 
-**HUMAN GATE — Final approval**
+### 6a. Choose and run a pre-commit build (verification gate)
+
+Eclipse's incremental `getCompilationErrors` and the scoped per-phase checks validated the
+plugin you touched, but they did not run the whole Tycho reactor (all plugins, their tests, and
+any downstream modules). A wider build can surface cross-plugin breakage the scoped checks miss.
+
+But a **full Tycho reactor build is NOT always the right call here**, and must not be run
+blindly: an Eclipse/OSGi plugin build can depend on **other git repositories being built first**
+(a target platform, upstream plugins, p2 repos), can be slow, and may be impractical or
+impossible to run locally in this checkout. Integration/UI test suites can also take a long time.
+
+So **ask the user** with a `question` (before the commit gate) what to run, tailoring the options
+to this repo and what is actually buildable locally (read PROJECT CONTEXT / `AGENTS.md` for the
+real build command, target-platform/upstream-repo prerequisites, and any integration-test split).
+A good default set:
+
+- **Full Tycho reactor build + all tests** — the repo's documented full build from the root
+  (what CI runs). Most thorough; may require upstream repos/target platform and can be slow.
+- **Full build, skip slow/integration tests** — compile + assemble the plugins (so cross-plugin
+  breakage is caught) but skip the long integration/UI suite (use the repo's actual flag, e.g.
+  `-DskipTests` / an IT profile toggle).
+- **Build only the affected plugin(s) + their tests** — what the per-phase checks already did,
+  plus the touched plugin's own tests; fast, but cross-plugin breakage relies on CI.
+- **Rely on the Eclipse compile check only** — no Maven/Tycho build now (e.g. the full build
+  needs upstream repos not present locally); `getCompilationErrors` was already clean and CI will
+  do the full build. Note this explicitly to the user.
+- **Skip the pre-commit build** — commit as-is.
+
+Recommend the option that fits the change and what is feasible in this checkout (if the full
+Tycho build needs upstream repos that aren't present, recommend the Eclipse-compile-only or
+affected-plugin option and say why). Run the chosen build, fix anything it surfaces (looping back
+through the relevant phase for non-trivial fixes), and re-run until green (or the user decides
+otherwise) before the gate.
+
+### 6b. HUMAN GATE — Final approval
 
 Use the `question` tool:
 - Header: "Ready to commit"
-- Question: "All phases complete. Spec: `SPEC_PATH`, Implementation: `CHANGED_FILES`, Tests: `TEST_FILES`. Ready to commit?"
+- Question: "All phases complete (build: <what was run / skipped and its result>). Spec: `SPEC_PATH`, Implementation: `CHANGED_FILES`, Tests: `TEST_FILES`. Ready to commit?"
 - Options:
   - "Commit now"
   - "Let me review first"

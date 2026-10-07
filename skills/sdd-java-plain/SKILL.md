@@ -42,9 +42,15 @@ module layout, conventions, and gotchas. Its canonical location is:
 
 The per-repo `/sdd` command normally inlines this file's contents into the prompt that
 loaded this skill. **If you were given the project-context inline, use that.** Otherwise,
-read `.opencode/sdd/project-context.md` from the current working directory now. If it is
-missing, tell the user the repo has not been onboarded to SDD (it needs
-`.opencode/sdd/project-context.md`) and ask whether to proceed with generic assumptions.
+read `.opencode/sdd/project-context.md` from the current working directory now.
+
+Some repos host more than one stack in one checkout (e.g. a Java backend and an Angular
+frontend) and split the context by kind instead of using the single generic file. If
+`.opencode/sdd/project-context.md` is absent, fall back to the Java variant
+`.opencode/sdd/project-context-java.md` (this is a Java skill). Only if **both** are missing,
+tell the user the repo has not been onboarded to SDD (it needs
+`.opencode/sdd/project-context.md`, or a per-kind `.opencode/sdd/project-context-java.md`)
+and ask whether to proceed with generic assumptions — do not improvise from `AGENTS.md`.
 
 Record the full project-context text as `PROJECT_CONTEXT`. You MUST pass `PROJECT_CONTEXT`
 into every phase subagent prompt (Triage, PM, Coding, Code Review, Test Gen, Test Review),
@@ -335,13 +341,59 @@ path, then re-run Phase 5. Repeat until `APPROVED`.
 
 ---
 
-## Phase 6 — Commit
+## Phase 6 — Pre-commit build, then commit
 
-**HUMAN GATE — Final approval**
+### 6a. Choose and run a pre-commit build (verification gate)
+
+The per-phase checks only compiled/tested the module they touched. They do **not** exercise
+the whole reactor, and some failures only surface in a wider build — most importantly, in a
+multi-module project a change in one module can break the build of **another** module that the
+scoped checks never ran:
+
+- If this repo is a Maven **multi-module** project (a reactor with sibling modules, and/or a
+  bundled frontend built by a plugin such as `frontend-maven-plugin`/`ng build`), a change to a
+  shared type can compile and pass every scoped unit test yet still fail another module's build.
+  A classic case: a backend enum/model change widens a shared type that a frontend component
+  assigned into a narrower local declaration — the frontend **production build** (stricter than
+  its test runner) then fails with an assignability error that no scoped test caught. **Only a
+  build that includes that module catches it.**
+- If this repo is a **single-module** plain-Java project with no frontend, there is no
+  cross-module surface and a module build already is the full build.
+
+**Do not silently pick one build.** The right amount of building varies by repo and situation —
+a full build with all integration tests can be slow, and some suites or downstream modules may
+be impractical to run locally. So **ask the user** with a `question` (before the commit gate)
+what to run. Tailor the options to what this repo actually has (read PROJECT CONTEXT / `AGENTS.md`
+for the real commands, module layout, and whether there is a frontend / integration-test split);
+a good default set:
+
+- **Full build + all tests** — the repo's full build-and-test from the root (what CI runs; e.g.
+  `mvn clean verify`). Most thorough; may be slow.
+- **Full build, skip slow/integration tests** — compile + package every module (so cross-module
+  / frontend-production-build breakage is caught) but skip the slow integration suite (e.g.
+  `mvn clean verify -DskipITs`, or `-DskipTests` where only ITs are the concern — use the repo's
+  actual flag).
+- **Build + only affected/changed tests** — build the touched module(s) and run just the tests
+  for the changed code (what the per-phase checks already did), accepting that cross-module
+  breakage won't be caught locally and will rely on CI.
+- **Skip the pre-commit build** — commit as-is (e.g. docs-only change, or the user will build
+  themselves).
+
+Recommend the option that fits the change (for a multi-module repo where a shared type / frontend
+could be affected, recommend at least the "full build, skip slow tests" option so cross-module
+breakage is caught). Then run the chosen build. JDK requirements still apply — if the shell's
+`java -version` is not the version PROJECT CONTEXT requires, set `JAVA_HOME` first (ask the user
+for the path if unknown).
+
+If the chosen build fails, report the failure, fix it (re-running the appropriate phase/subagent
+for non-trivial fixes), and re-run until it is green (or the user decides otherwise) before the
+commit gate.
+
+### 6b. HUMAN GATE — Final approval
 
 Use the `question` tool:
 - Header: "Ready to commit"
-- Question: "All phases complete. Spec: `SPEC_PATH`, Implementation: `CHANGED_FILES`, Tests: `TEST_FILES`. Ready to commit?"
+- Question: "All phases complete (build: <what was run / skipped and its result>). Spec: `SPEC_PATH`, Implementation: `CHANGED_FILES`, Tests: `TEST_FILES`. Ready to commit?"
 - Options:
   - "Commit now"
   - "Let me review first"
