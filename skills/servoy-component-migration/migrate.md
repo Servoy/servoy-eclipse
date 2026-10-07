@@ -1,6 +1,5 @@
 ---
 description: Run the Servoy component package migration pipeline — upgrades Angular, tests, lint, standalone, signals.
-agent: general
 ---
 
 Load the `servoy-component-migration` skill and execute the full migration pipeline for this component package.

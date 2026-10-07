@@ -1,6 +1,5 @@
 ---
 description: Generate Servoy product release notes across the five-repo checkout between two tags — Bug Fixes / Other Changes / Dependency Updates tables and a case list.
-agent: general
 ---
 
 Load the `release-notes` skill and run the release-notes pipeline.

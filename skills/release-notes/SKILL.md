@@ -113,6 +113,21 @@ When in doubt about whether a case is product-relevant, keep it for now — the 
 list in Phase 2.5 and can drop it there. But obvious build/release/internal noise should be
 dropped here so the review list stays focused.
 
+**Require a real code commit in the range.** A case belongs in the notes only if at least one
+of its commits in `<PREVIOUS_TAG>..HEAD` touches actual product source. **Drop any case whose
+only commits in the range touch nothing but** `docs/**` (triage/spec/review-summary `.md`),
+`AGENTS.md`, `.gitignore`, or similar non-product files — the real fix for such a case landed
+in an earlier RC and is already documented. Verify per case with:
+
+```
+git -C "<ROOT>/<repo>" show --name-only --format="" <sha>
+```
+
+Examples seen in practice: `SVY-21299`/`SVY-21483` (only a `docs/reviews/*-review-summary.md`),
+`SVY-21529` (only `docs/SVY-21173-*.md`; its code shipped under SVY-21173). All three were
+correctly excluded. A case that touches `.java`/`.ts`/`.html`/spec component files (even if
+some commits are docs-only) stays. Test-only commits still count as real code.
+
 Keep descriptions concise — the commit subject, cleaned up (drop trailing markers like `[ai]`,
 drop the case key from the description column since it has its own column).
 
@@ -128,12 +143,13 @@ currently-public case private, or clear a private flag that should be public) *b
 notes are cut — so this phase is a full review of the whole relevant list, not just the
 already-restricted ones.
 
-1. **Fetch the security level and summary for every case in `RELEVANT_CASES`** from Jira
-   (load the `servoy-jira` skill for the base URL + `ATLASSIAN_AUTH_BASIC` auth). The field
-   is `security`:
+1. **Fetch the security level, summary and components for every case in `RELEVANT_CASES`**
+   from Jira (load the `servoy-jira` skill for the base URL + `ATLASSIAN_AUTH_BASIC` auth).
+   The security field is `security`; also pull `components` because the Phase 4 table is keyed
+   on it:
 
    ```
-   GET /rest/api/3/issue/{KEY}?fields=security,summary
+   GET /rest/api/3/issue/{KEY}?fields=security,summary,components
    ```
 
    - `security` is **`null`** → no security level set → currently **PUBLIC** (the normal state
@@ -141,19 +157,43 @@ already-restricted ones.
    - `security` is **non-null** (e.g. `security.name == "Private"`) → currently **RESTRICTED**.
 
 2. **Show the user the WHOLE relevant list** as a single table with **clickable links**, so
-   they can open any case and adjust its security level in Jira as they see fit — the user may
-   want some public ones made private and some private ones made public:
+   they can open any case and adjust its security level AND its components in Jira as they see
+   fit — the user may want some public ones made private and some private ones made public, and
+   will usually fix missing/wrong components here too:
 
    - Link format: `https://servoy-cloud.atlassian.net/browse/{KEY}`
-   - Columns: **Key (linked) | Security (Public / Private) | Summary**.
+   - Columns: **Key (linked) | Security (Public / Private) | Components | Summary**. Always
+     include the Components column — the user reviews it alongside security, and cases often
+     have no component set.
    - Tell the user plainly: "Here is the full relevant case list with its current security
-     level. Go over them and adjust the security level in Jira for any that are wrong. Tell me
-     when you're done and I'll re-query."
+     level and components. Go over them and adjust in Jira for any that are wrong. Tell me when
+     you're done and I'll re-query."
 
-3. **Wait for the user**, then **re-query the security level for every case** (same GET as
-   step 1) so the table reflects their edits — do not reuse the first result.
+   **Setting components for the user via the API.** The user may ask you to set the components
+   rather than clicking in Jira (the Jira UI sometimes fails to persist a component edit). Set
+   it with a `PUT` — valid component names come from `GET /project/SVY/components`:
 
-4. **Show the FINAL table** (same three columns, clickable links) reflecting the re-queried
+   ```
+   PUT /rest/api/3/issue/{KEY}
+   {"fields":{"components":[{"name":"NGClient"}]}}
+   ```
+
+   Then re-GET the case to confirm it stuck (API writes persist reliably where the UI edit
+   did not). **Servoy component naming rules learned in practice:**
+   - **SmartClient is retired** — never assign it. A client-side fix in NG2/TiNG is `NGClient`.
+   - A pure **public-API change valid for all client types** (not server-internal) is
+     `Runtime`, even if the code lives in a server module.
+   - MCP / headless-test / IDE-tooling work is usually `Developer` (or `Developer, Testing`).
+   - The valid SVY component list is: API, Developer, DLTK, Documentation, Extensions,
+     Installer, MobileClient, NGClient, NGDesktop, NGMobile, Runtime, Server, SmartClient
+     (retired), Testing, WebClient.
+
+3. **Wait for the user**, then **re-query security AND components for every case** (same GET as
+   step 1) so the table reflects their edits — do not reuse the first result. If the user said
+   they edited in the UI but a re-query shows no change, the UI edit did not save: offer to set
+   it via the API (see step 2) and re-query again.
+
+4. **Show the FINAL table** (same four columns, clickable links) reflecting the re-queried
    state, and confirm it with the user before writing anything.
 
 5. **Split by the final security level:**
@@ -194,7 +234,16 @@ repository**, one Markdown file per **major release**, at:
 Locate `<GITBOOK_ROOT>` — the `gitbook` checkout, usually a sibling of the product repos
 (e.g. `C:\Users\jcomp\git\gitbook`). If you cannot find it, ask the user for its path. The
 `<major>` is the marketing version the release belongs to (`2026.09`), derived from
-`NEW_VERSION` — an RC like `2026.9_RC2` belongs to the `2026.09` document.
+`NEW_VERSION` — an RC like `2026.9_RC2` or the `2026.9.0` final both belong to the `2026.09`
+document.
+
+**Path gotchas (confirm you have the right file):**
+- There can be more than one gitbook checkout (e.g. `gitbook` and `gitbook2`). Prefer the one
+  whose `release-notes/<major>.md` is the live/most-recently-edited file, and if unsure ask the
+  user which checkout is the publishing one.
+- The product release notes are `<GITBOOK_ROOT>/release-notes/<major>.md`. There is also a
+  **nested** `release-notes/release-notes/` directory holding `*-servoy-cloud*.md` files —
+  those are a different (Servoy Cloud) product and are **not** where these notes go.
 
 **Two cases:**
 
@@ -210,13 +259,19 @@ regenerating the file:
    a signing change, a cross-cutting improvement) go into the relevant existing themed section,
    or a new `## <Theme>` section if none fits. This is where non-case build/tooling notes that
    ARE worth mentioning to customers can go, phrased generically.
-3. **The RC's cases** go into a new **`## <major> RC<n> — All Cases`** table appended after the
-   previous RC's table, matching the exact column style already in the file (typically
-   **Components | Key | Summary**, every Key and Summary a clickable
+3. **The release's cases** go into a new **`## <major> RC<n> — All Cases`** table (for the
+   final build use **`## <major> Final — All Cases`**), matching the exact column style already
+   in the file (typically **Components | Key | Summary**, every Key and Summary a clickable
    `https://servoy-cloud.atlassian.net/browse/{KEY}` link, Components linked to the
    project+component JQL as in the existing rows).
-4. **Do not repeat a case** that already appears elsewhere in the document (an earlier RC table
-   or a themed list). Check before adding.
+
+   **Ordering is newest-first.** Insert the new table **above** the previous one, not appended
+   at the bottom — the latest RC/Final sits at the top of the "All Cases" stack. (Confirm by
+   reading an existing multi-RC file, e.g. `2026.06.md`, where `RC2` sits above `RC1`.) Within
+   a table, order rows by Components then Key, as the existing tables do.
+4. **Do not repeat a case** that already appears elsewhere in the document (an earlier RC/Final
+   table or a themed list) — check with a grep for each key before adding; a case fixed across
+   RCs may already be in a prose section.
 5. Only the **public** cases from the final Phase 2.5 table are included.
 
 ### B. First RC of a brand-new major (the file does not exist yet)

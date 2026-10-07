@@ -1,6 +1,5 @@
 ---
 description: Draft or publish a GitHub release for a Servoy component package — tags, builds the release zip, generates a changelog, publishes via gh.
-agent: general
 ---
 
 Load the `servoy-component-release` skill and execute the release pipeline for this component package.
