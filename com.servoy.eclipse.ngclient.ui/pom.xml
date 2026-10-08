@@ -119,7 +119,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node/projects/servoydefault</workingDirectory>
-							<!-- --omit=peer: install only this project's own deps (ng-bootstrap, cdk, tinymce, ...)
+							<!-- omit=peer: install only this project's own deps (ng-bootstrap, cdk, tinymce, ...)
 							     and NOT their Angular peers, so @angular/core is taken from the parent node/node_modules.
 							     Without this, a second @angular/core is installed here, causing INPUT_SIGNAL_BRAND
 							     mismatches when the servoydefault templates are AOT-compiled. -->
@@ -135,7 +135,7 @@
 						</goals>
 						<configuration>
 							<workingDirectory>node/projects/dialogs</workingDirectory>
-							<!-- --omit=peer so @angular/* peers come from the parent node/node_modules, not a 2nd copy. -->
+							<!-- omit=peer so @angular/* peers come from the parent node/node_modules, not a 2nd copy. -->
 							<arguments>install --omit=peer</arguments>
 						</configuration>
 					</execution>
@@ -148,7 +148,7 @@
                         </goals>
                         <configuration>
                             <workingDirectory>node/projects/window</workingDirectory>
-                            <!-- --omit=peer so @angular/* peers come from the parent node/node_modules, not a 2nd copy. -->
+                            <!-- omit=peer so @angular/* peers come from the parent node/node_modules, not a 2nd copy. -->
                             <arguments>install --omit=peer</arguments>
                         </configuration>
                     </execution>
