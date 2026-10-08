@@ -15,8 +15,9 @@ export default defineConfig({
       classnameTemplate: ({ filename }) =>
         `ngclient.ui.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
     }]],
-    outputFile: {
-      junit: '../target/vitest-results.xml'
-    }
+    // The JUnit output path is set per project via the --output-file CLI flag in the test_*
+    // npm scripts (target/vitest-<project>.xml), so each project writes its own report and
+    // Jenkins can collect them all with the target/vitest-*.xml glob. No default is set here
+    // so no stale target/vitest-results.xml is produced.
   }
 });
