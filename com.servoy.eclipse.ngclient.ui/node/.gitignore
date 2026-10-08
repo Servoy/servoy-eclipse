@@ -8,6 +8,10 @@
 # dependencies
 /node_modules
 
+# npm lockfiles are not used by the Jenkins build (it always runs plain "npm install"),
+# so they only drift. Keep them untracked for node/ and all projects/* sub-projects.
+package-lock.json
+
 # IDEs and editors
 /.idea
 .project
