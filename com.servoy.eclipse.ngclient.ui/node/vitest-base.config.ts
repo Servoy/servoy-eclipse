@@ -13,7 +13,7 @@ export default defineConfig({
     reporters: ['default', ['junit', {
       suiteName: 'ngclient.ui',
       classnameTemplate: ({ filename }) =>
-        `ngclient.ui.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
+        `angular.ngclient.ui.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
     }]],
     // The JUnit output path is set per project via the --output-file CLI flag in the test_*
     // npm scripts (target/vitest-<project>.xml), so each project writes its own report and

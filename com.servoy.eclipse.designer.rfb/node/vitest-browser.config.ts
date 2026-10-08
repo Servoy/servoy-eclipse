@@ -10,7 +10,7 @@ export default defineConfig({
     reporters: ['default', ['junit', {
       suiteName: 'designer.rfb.browser',
       classnameTemplate: ({ filename }) =>
-        `designer.rfb.browser.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
+        `angular.designer.rfb.browser.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
     }]],
     outputFile: {
       junit: '../target/vitest-browser-results.xml'
