@@ -69,10 +69,15 @@ Steps a human still has to run; the automated suites do not reach these.
 5. **The originally reported symptom**, never exercised anywhere in the change: build a
    trivial package whose Angular classes are standalone with no NgModule, declare it with
    `NG2-Components`, install it, render a component.
-6. **Missing-spec fallback**, on `master` only (the fix is SVY-21380 and `release`
-   deliberately does not take it): put a component on a form, uninstall its package, and
-   check both the NG client and the form editor show the "Component (specification) with
-   type: X not found" box.
+6. **Missing-spec fallback.** Put a component on a form and uninstall its package.
+   **Confirmed working on lts_2026, release and master** (reviewer-verified in the
+   Developer): the Error Bean is substituted and the Properties view shows
+   `Error Bean (Servoy Core)` with `error = Specification not found.`. That path does not
+   depend on the generated Angular template — `FormElement.java:191` and
+   `GhostHandler.java:207` substitute `FormElement.ERROR_BEAN` independently, and the
+   message text is the spec's own `"error"` default. SVY-21380 was the narrower case of the
+   form-editor canvas blanking, fixed on `master`; `release` keeps `"deprecated": "true"` on
+   `errorbean.spec` by decision.
 
 **Automated:** `cd com.servoy.eclipse.ngclient.ui/node` → `npm run test_all` (added by
 `e4e605b0df`; covers ngclient2, public, servoydefault, dialogs, window, ngclientutils with
@@ -126,7 +131,10 @@ the RFB/WPM Angular apps (only a dead dependency removed) or the legacy AngularJ
    deliberately in 2021 (`4322314c8f`: "we can't skip deprecated components … else we need
    an extra spec property that they can be ignored for ng2"), and that spec property now
    exists as `serveronly` / `skiptemplate`. Driving the skip from an explicit tag would stop
-   this recurring with a different component.
+   this recurring with a different component. Low urgency — the `deprecated` flags currently
+   in place are all wanted (reviewer decision: `errorbean` and `tablesspanel` stay
+   deprecated), so this is about making the generator's intent explicit rather than fixing
+   anything broken.
    Related: `WebObjectSpecification.isDeprecated()` returns true for any spec declaring a
    `replacement` key regardless of the `deprecated` flag — `!"".equals("replacement")`
    compares a literal to `""`. Pre-existing since 2019 (`dd03571c`), but the generator is
@@ -169,7 +177,7 @@ the RFB/WPM Angular apps (only a dead dependency removed) or the legacy AngularJ
 
 | Item | Outcome |
 |---|---|
-| `servoycore-errorbean` template no longer generated | **SVY-21380**, fixed on `master`; `release` deliberately does not take it |
+| `servoycore-errorbean` template no longer generated | **SVY-21380**, fixed on `master`. Narrower than it first looked: the missing-spec *diagnostic* still works on all three branches (reviewer-verified — Error Bean is substituted and the Properties view shows `error = Specification not found.`, via `FormElement.java:191` / `GhostHandler.java:207`, neither of which needs the generated template). What SVY-21380 fixed was the form-editor canvas blanking in one scenario. `release` keeps `"deprecated": "true"` on `errorbean.spec` by decision — no action wanted |
 | `model.size` undefined after `size` left the specs | **SVY-21483** |
 | Legacy `getWidth`/`getHeight` warnings | **SVY-21467** |
 | `serveronly` tags on properties with client bindings | **SVY-21341** (open) |
