@@ -8,6 +8,7 @@ export default defineConfig({
     deps: {
       inline: []
     },
+    globalSetup: ['./vitest-ng-bootstrap-link.ts'],
     setupFiles: ['./vitest-setup.ts'],
     reporters: ['default', ['junit', {
       suiteName: 'ngclient.ui',
