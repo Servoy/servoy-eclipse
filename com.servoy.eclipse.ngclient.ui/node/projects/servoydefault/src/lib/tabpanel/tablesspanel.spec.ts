@@ -70,7 +70,7 @@ class TestTablesspanelHostComponent {
 
 const defaultProviders = [
     provideZonelessChangeDetection(),
-    { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn() } },
+    { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn(), getFormCacheByName: vi.fn().mockReturnValue(null) } },
     { provide: FormattingService, useValue: {} },
     { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },
     { provide: WindowRefService, useValue: { nativeWindow: { event: null } } },

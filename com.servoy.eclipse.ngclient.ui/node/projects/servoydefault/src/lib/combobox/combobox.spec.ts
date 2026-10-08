@@ -1,8 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { Subject } from 'rxjs';
-import { signal } from '@angular/core';
 import { ServoyPublicService, FormattingService, TooltipService, ServoyApi, WindowRefService, IValuelist } from '@servoy/public';
 import { ServoyDefaultCombobox } from './combobox';
 
@@ -37,8 +36,8 @@ function createValuelist(items: Array<{ displayValue: string; realValue: any }>)
 @Component({
     selector: 'test-combobox-host',
     template: `
-        <servoydefault-combobox [servoyApi]="servoyApi" [name]="'testCombobox'" [dataProviderID]="dataProviderID"
-            [valuelistID]="valuelistID" [findmode]="findmode" [enabled]="true" [editable]="true">
+        <servoydefault-combobox [servoyApi]="servoyApi" [name]="'testCombobox'" [dataProviderID]="dataProviderID()"
+            [valuelistID]="valuelistID()" [findmode]="findmode()" [enabled]="true" [editable]="true">
         </servoydefault-combobox>
     `,
     standalone: true,
@@ -46,9 +45,9 @@ function createValuelist(items: Array<{ displayValue: string; realValue: any }>)
 })
 class TestComboboxHostComponent {
     servoyApi = createMockServoyApi();
-    dataProviderID: any = null;
-    valuelistID: IValuelist | undefined = undefined;
-    findmode = false;
+    dataProviderID = signal<any>(null);
+    valuelistID = signal<any>(undefined);
+    findmode = signal(false);
 }
 
 describe('ServoyDefaultCombobox', () => {
@@ -80,12 +79,12 @@ describe('ServoyDefaultCombobox', () => {
 
     describe('find mode with valuelist', () => {
         it('resolves formattedValue to the matching valuelist display value when findmode is true', () => {
-            host.valuelistID = createValuelist([
+            host.valuelistID.set(createValuelist([
                 { displayValue: 'Chang', realValue: 2 },
                 { displayValue: 'Other', realValue: 3 },
-            ]);
-            host.findmode = true;
-            host.dataProviderID = 2;
+            ]));
+            host.findmode.set(true);
+            host.dataProviderID.set(2);
             fixture.detectChanges();
 
             const combo = getComboComponent();
@@ -93,16 +92,16 @@ describe('ServoyDefaultCombobox', () => {
         });
 
         it('updates formattedValue to the new matching display value when dataProviderID changes while in find mode', () => {
-            host.valuelistID = createValuelist([
+            host.valuelistID.set(createValuelist([
                 { displayValue: 'Chang', realValue: 2 },
                 { displayValue: 'Other', realValue: 3 },
-            ]);
-            host.findmode = true;
-            host.dataProviderID = 2;
+            ]));
+            host.findmode.set(true);
+            host.dataProviderID.set(2);
             fixture.detectChanges();
             expect(getComboComponent().formattedValue).toBe('Chang');
 
-            host.dataProviderID = 3;
+            host.dataProviderID.set(3);
             fixture.detectChanges();
             expect(getComboComponent().formattedValue).toBe('Other');
         });
@@ -110,9 +109,9 @@ describe('ServoyDefaultCombobox', () => {
 
     describe('find mode without a valuelist', () => {
         it('falls back to the raw dataProviderID value when there is no valuelist at all', () => {
-            host.valuelistID = undefined;
-            host.findmode = true;
-            host.dataProviderID = 'searchExpr';
+            host.valuelistID.set(undefined);
+            host.findmode.set(true);
+            host.dataProviderID.set('searchExpr');
             fixture.detectChanges();
 
             const combo = getComboComponent();
@@ -122,12 +121,12 @@ describe('ServoyDefaultCombobox', () => {
 
     describe('normal mode (regression guard)', () => {
         it('still resolves formattedValue via the valuelist when not in find mode', () => {
-            host.valuelistID = createValuelist([
+            host.valuelistID.set(createValuelist([
                 { displayValue: 'Chang', realValue: 2 },
                 { displayValue: 'Other', realValue: 3 },
-            ]);
-            host.findmode = false;
-            host.dataProviderID = 2;
+            ]));
+            host.findmode.set(false);
+            host.dataProviderID.set(2);
             fixture.detectChanges();
 
             const combo = getComboComponent();

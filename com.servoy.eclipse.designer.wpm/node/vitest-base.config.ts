@@ -7,7 +7,7 @@ export default defineConfig({
     reporters: ['default', ['junit', {
       suiteName: 'designer.wpm',
       classnameTemplate: ({ filename }) =>
-        `designer.wpm.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
+        `angular.designer.wpm.${filename.replace(/\\/g, '/').replace(/\.spec\.ts$/, '').replace(/\//g, '.')}`,
     }]],
     outputFile: { junit: '../target/vitest-results.xml' }
   }

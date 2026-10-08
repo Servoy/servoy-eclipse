@@ -97,8 +97,8 @@ pipeline {
         always {
             script {
                 if (!params.WIPE_WORKSPACE) {
-                    // Vitest unit test reports (ngclient.ui + designer.rfb)
-                    junit allowEmptyResults: true, testResults: '**/target/vitest-results.xml'
+                    // Vitest unit test reports (ngclient.ui per-project files, designer.rfb incl. browser, designer.wpm)
+                    junit allowEmptyResults: true, testResults: '**/target/vitest-*.xml'
                     
                     // Tycho/Surefire Java test reports
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
