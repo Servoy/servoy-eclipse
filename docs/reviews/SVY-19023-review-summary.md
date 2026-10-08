@@ -12,6 +12,14 @@ provisional `// commented out for verification` state that is still provisional.
 `bootstrapcomponents` `872f86e`/`1e51250`/`2ae30c3`/`257205b`. All merged to `master` and
 `release`; `lts_2026` does not contain them.
 
+**Acted on during the review** (2026-10-08, all on `release`): `e4e605b0df` restored the 16
+emptied `servoydefault` specs and pointed the Maven test execution at a new `test_all`
+script covering every Angular project; `7f7f591c0e` made Jenkins collect all the vitest
+reports; `c62dac798a` prefixed vitest classnames with `angular.`. Net effect — the suite is
+green and visible (`release » servoy-eclipse #195`: 1307 tests, 0 failed, 11 pre-existing
+skips), so this area can no longer lose coverage silently. The three items below are
+decisions, not defects.
+
 ---
 
 ## What the change does
@@ -61,17 +69,25 @@ Steps a human still has to run; the automated suites do not reach these.
 5. **The originally reported symptom**, never exercised anywhere in the change: build a
    trivial package whose Angular classes are standalone with no NgModule, declare it with
    `NG2-Components`, install it, render a component.
-6. **Missing-spec fallback**, on `master` only (the fix is SVY-21380 and `release`
-   deliberately does not take it): put a component on a form, uninstall its package, and
-   check both the NG client and the form editor show the "Component (specification) with
-   type: X not found" box.
+6. **Missing-spec fallback.** Put a component on a form and uninstall its package.
+   **Confirmed working on lts_2026, release and master** (reviewer-verified in the
+   Developer): the Error Bean is substituted and the Properties view shows
+   `Error Bean (Servoy Core)` with `error = Specification not found.`. That path does not
+   depend on the generated Angular template — `FormElement.java:191` and
+   `GhostHandler.java:207` substitute `FormElement.ERROR_BEAN` independently, and the
+   message text is the spec's own `"error"` default. SVY-21380 was the narrower case of the
+   form-editor canvas blanking, fixed on `master`; `release` keeps `"deprecated": "true"` on
+   `errorbean.spec` by decision.
 
 **Automated:** `cd com.servoy.eclipse.ngclient.ui/node` → `npm run test_all` (added by
 `e4e605b0df`; covers ngclient2, public, servoydefault, dialogs, window, ngclientutils with
-per-project JUnit XML). `npm run lint` plus `npm run lint:slow` — the local `lint` script
-no longer covers `*.html`, so template and accessibility rules only run via `lint:ci`.
-Java: `ComponentTemplateGeneratorTest` and `AllComponentsModuleGeneratorTest` in
-`com.servoy.eclipse.ngclient.ui.tests` (PDE launcher ≈ 15 min here).
+per-project JUnit XML). All of it runs in Jenkins now and is green — 1307 tests, 0 failed,
+11 pre-existing skips — so a regression in this area will be visible rather than silent,
+which was not true while this case was in review. `npm run lint` plus `npm run lint:slow` —
+the local `lint` script no longer covers `*.html`, so template and accessibility rules only
+run via `lint:ci`. Java: `ComponentTemplateGeneratorTest` and
+`AllComponentsModuleGeneratorTest` in `com.servoy.eclipse.ngclient.ui.tests`
+(PDE launcher ≈ 15 min here).
 
 **Surfaces:** NG client runtime, the form-designer content iframe, the developer-time
 generation path, and **solution scripting against element geometry** — that last one is
@@ -115,7 +131,10 @@ the RFB/WPM Angular apps (only a dead dependency removed) or the legacy AngularJ
    deliberately in 2021 (`4322314c8f`: "we can't skip deprecated components … else we need
    an extra spec property that they can be ignored for ng2"), and that spec property now
    exists as `serveronly` / `skiptemplate`. Driving the skip from an explicit tag would stop
-   this recurring with a different component.
+   this recurring with a different component. Low urgency — the `deprecated` flags currently
+   in place are all wanted (reviewer decision: `errorbean` and `tablesspanel` stay
+   deprecated), so this is about making the generator's intent explicit rather than fixing
+   anything broken.
    Related: `WebObjectSpecification.isDeprecated()` returns true for any spec declaring a
    `replacement` key regardless of the `deprecated` flag — `!"".equals("replacement")`
    compares a literal to `""`. Pre-existing since 2019 (`dd03571c`), but the generator is
@@ -158,13 +177,13 @@ the RFB/WPM Angular apps (only a dead dependency removed) or the legacy AngularJ
 
 | Item | Outcome |
 |---|---|
-| `servoycore-errorbean` template no longer generated | **SVY-21380**, fixed on `master`; `release` deliberately does not take it |
+| `servoycore-errorbean` template no longer generated | **SVY-21380**, fixed on `master`. Narrower than it first looked: the missing-spec *diagnostic* still works on all three branches (reviewer-verified — Error Bean is substituted and the Properties view shows `error = Specification not found.`, via `FormElement.java:191` / `GhostHandler.java:207`, neither of which needs the generated template). What SVY-21380 fixed was the form-editor canvas blanking in one scenario. `release` keeps `"deprecated": "true"` on `errorbean.spec` by decision — no action wanted |
 | `model.size` undefined after `size` left the specs | **SVY-21483** |
 | Legacy `getWidth`/`getHeight` warnings | **SVY-21467** |
 | `serveronly` tags on properties with client bindings | **SVY-21341** (open) |
 | `bootstrapcomponents-tablesspanel` stops rendering | Accepted — deprecated may stop rendering on upgrade |
 | Properties withheld from the legacy AngularJS client | Dropped — NG1 is not a deployable target for 2026.9 |
-| 16 emptied `servoydefault` `*.spec.ts` files | **Fixed** by `e4e605b0df` (2026-10-08), which restored all 16 with the intended signal migration and added `test_all` so Maven runs every Angular project again — the narrowed test execution is why the loss went unnoticed for two months |
+| 16 emptied `servoydefault` `*.spec.ts` files | **Fixed and CI-verified** (2026-10-08). `e4e605b0df` restored all 16 with the intended signal migration and added `test_all` so Maven runs every Angular project again — the narrowed test execution is why the loss went unnoticed for two months. `7f7f591c0e` then made Jenkins collect every vitest report (per-project plus the RFB browser suite) and `c62dac798a` prefixed vitest classnames with `angular.` so they do not collide with the Java packages in the Jenkins view. Confirmed green on `release » servoy-eclipse #195`: **1307 tests, 0 failed, 11 skipped, 49 sec**, with all six Angular projects reporting separately. The 11 skips are pre-existing `it.skip`/`describe.skip` markers, not artifacts of the restore — verified against the range base `9f19aa017a`: checkgroup 2, radio 1, spinner 4, form_component 1 `describe.skip` (3 tests), identical counts before and after |
 | `viewChild('element')` missing `{ read: ElementRef }` | Already repaired by `0d90957d8a` |
 | `cssPosition` tagged `serveronly` | Already repaired to `skiptemplate` by `8246c4f01` + `1961be795d` |
 
