@@ -59,6 +59,7 @@ The version is **always** read from the 3 version files. It is never passed as a
    If any of the three disagree, **report the mismatch and stop** — do not attempt to reconcile automatically.
 
 4. **Read `Bundle-Name`** from `META-INF/MANIFEST.MF` — used for the release title.
+   - **Join OSGi continuation lines.** Manifest headers fold long values onto the next line, which begins with a single leading space. For example `Bundle-Name: Bootstrap ` followed by ` Extra Components` is the single value `Bootstrap Extra Components`. A naive single-line read would yield just `Bootstrap` and produce a wrong title like `Bootstrap  2026.9.1`. When reading `Bundle-Name` (and any header), concatenate each continuation line (strip the one leading space) onto the previous line before using the value. This applies to `Bundle-Version` too, though versions rarely wrap.
 
 5. **Compute:**
    - Tag: `v<version>` (e.g. `v2026.9.0`)
@@ -72,13 +73,15 @@ The version is **always** read from the 3 version files. It is never passed as a
 
 ## Phase 1 — Build the release zip
 
-Each Servoy component repo exposes an `npm run build` that produces the release zip.
+Each Servoy component repo exposes a script that builds **and** zips the package. **`npm run build` only runs `ng build` and does NOT produce a zip** — do not use it here. The zip-producing script is typically `make_release` (`ng build ... && node scripts/build.js`, where `build.js` writes the zip).
 
-1. Run the build (detected at runtime — do not hardcode a path):
+1. **Detect the zip-producing script** from the repo's `package.json` `scripts` — look for the one that runs the zip step (e.g. invokes `scripts/build.js` / writes a `.zip`). In the current component repos this is `make_release`:
    ```bash
-   npm run build
+   npm run make_release
    ```
-2. Locate the produced `.zip` (the single asset this skill uploads). If no zip is produced, **stop and report** — do not create a release without the asset.
+   If the repo names it differently, use the detected script. Do NOT fall back to `npm run build`.
+2. **Locate the produced zip by globbing `*.zip`** in the build output directory. The zip has a **fixed per-repo name** (e.g. `aggrid.zip`, `bootstrapcomponents.zip`, `bootstrapextracomponents.zip`, `servoyextra.zip`) that is **not derived from the version, the tag, or the Bundle-SymbolicName** — so never guess the name from the version. Glob for the zip instead. If exactly one zip is produced, that is the asset; if several match, ask the user which one.
+3. If no zip is produced (after running the correct script), **stop and report** — do not create a release without the asset.
 
 > Skipped when Phase 3 (publish) is promoting an existing draft — that draft already has its asset.
 
