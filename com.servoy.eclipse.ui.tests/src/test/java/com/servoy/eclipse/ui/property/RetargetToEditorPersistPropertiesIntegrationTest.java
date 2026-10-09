@@ -10,7 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.junit.AfterClass;
@@ -194,6 +197,77 @@ public class RetargetToEditorPersistPropertiesIntegrationTest {
 		assertTrue("second call (set) must have set=true", retarget.updateCalls.get(1).set);
 	}
 
+	// --- Command-stack wrapping (SVY-19810 quick-fix path) ---
+
+	@Test
+	public void wrapInCommandTrue_pushesCommandOntoEditorStackAndIsUndoable() {
+		// Direct caller path (e.g. the "Clear property" marker quick-fix): wrapInCommand defaults to true,
+		// so updateProperty must wrap the change in a Command and push it onto the editor's CommandStack
+		// (SVY-19810), and that Command must be undoable/redoable.
+		RecordingCommandStack stack = new RecordingCommandStack();
+		StubPropertySource source = new StubPropertySource();
+		source.propertyValues.put("dataSource", "old_ds");
+		WrappingRetargetProperties retarget = new WrappingRetargetProperties(source, stack);
+
+		retarget.setPropertyValue("dataSource", "new_ds");
+
+		// pushed onto the stack (not applied bare)
+		assertEquals(1, stack.executed.size());
+		assertEquals("new_ds", source.propertyValues.get("dataSource"));
+
+		// undo restores the previous value
+		stack.undo();
+		assertEquals("old_ds", source.propertyValues.get("dataSource"));
+
+		// redo re-applies
+		stack.redo();
+		assertEquals("new_ds", source.propertyValues.get("dataSource"));
+	}
+
+	@Test
+	public void wrapInCommandTrue_resetIsUndoableToPreviousValue() {
+		RecordingCommandStack stack = new RecordingCommandStack();
+		StubPropertySource source = new StubPropertySource();
+		source.propertyValues.put("dataSource", "old_ds");
+		WrappingRetargetProperties retarget = new WrappingRetargetProperties(source, stack);
+
+		retarget.resetPropertyValue("dataSource");
+
+		assertEquals(1, stack.executed.size());
+		assertEquals("reset was recorded", 1, source.resetCalls.size());
+
+		// undo restores the value that was there before the reset
+		stack.undo();
+		assertEquals("old_ds", source.propertyValues.get("dataSource"));
+	}
+
+	@Test
+	public void wrapInCommandTrue_appliesDirectlyWhenEditorHasNoCommandStack() {
+		// No stack on the editor: the Command must still execute (fall back to cmd.execute()).
+		StubPropertySource source = new StubPropertySource();
+		source.propertyValues.put("dataSource", "old_ds");
+		WrappingRetargetProperties retarget = new WrappingRetargetProperties(source, null);
+
+		retarget.setPropertyValue("dataSource", "new_ds");
+
+		assertEquals("new_ds", source.propertyValues.get("dataSource"));
+	}
+
+	@Test
+	public void wrapInCommandFalse_appliesDirectlyWithoutTouchingStack() {
+		// Properties view path: wrapInCommand=false, so nothing is pushed onto the stack
+		// (the caller already wrapped it); the change is applied straight to the delegate.
+		RecordingCommandStack stack = new RecordingCommandStack();
+		StubPropertySource source = new StubPropertySource();
+		source.propertyValues.put("dataSource", "old_ds");
+		WrappingRetargetProperties retarget = new WrappingRetargetProperties(source, stack, false);
+
+		retarget.setPropertyValue("dataSource", "new_ds");
+
+		assertTrue("wrapInCommand=false must not push onto the editor CommandStack", stack.executed.isEmpty());
+		assertEquals("new_ds", source.propertyValues.get("dataSource"));
+	}
+
 	// --- Test infrastructure ---
 
 	/**
@@ -234,6 +308,7 @@ public class RetargetToEditorPersistPropertiesIntegrationTest {
 	 */
 	private static class StubPropertySource implements IPropertySource {
 		final Map<Object, Object> propertyValues = new HashMap<>();
+		final List<Object> resetCalls = new ArrayList<>();
 
 		@Override
 		public Object getEditableValue() {
@@ -257,11 +332,72 @@ public class RetargetToEditorPersistPropertiesIntegrationTest {
 
 		@Override
 		public void resetPropertyValue(Object id) {
+			resetCalls.add(id);
+			propertyValues.remove(id);
 		}
 
 		@Override
 		public void setPropertyValue(Object id, Object value) {
 			propertyValues.put(id, value);
+		}
+	}
+
+	/**
+	 * {@link RetargetToEditorPersistProperties} subclass that bypasses the live workbench by returning a stubbed
+	 * editor and its CommandStack via the protected {@code resolveEditor()}/{@code resolveCommandStack()} seams. The
+	 * real {@code updateProperty()} runs, so this exercises the actual Command wrapping / undo-stack behavior.
+	 */
+	static class WrappingRetargetProperties extends RetargetToEditorPersistProperties {
+		// updateProperty() only needs resolveEditor() to be non-null to proceed; it never calls any method on the
+		// editor directly (the CommandStack is supplied via resolveCommandStack()). A JDK dynamic proxy avoids
+		// pulling Mockito onto this fragment's classpath.
+		private final IEditorPart editor = (IEditorPart)java.lang.reflect.Proxy.newProxyInstance(
+			IEditorPart.class.getClassLoader(), new Class<?>[] { IEditorPart.class },
+			(proxy, method, args) -> {
+				switch (method.getName()) {
+					case "hashCode" :
+						return System.identityHashCode(proxy);
+					case "equals" :
+						return proxy == (args == null ? null : args[0]);
+					case "toString" :
+						return "StubEditorPart";
+					default :
+						return null;
+				}
+			});
+		private final CommandStack stack;
+
+		WrappingRetargetProperties(IPropertySource delegate, CommandStack stack) {
+			this(delegate, stack, true);
+		}
+
+		WrappingRetargetProperties(IPropertySource delegate, CommandStack stack, boolean wrapInCommand) {
+			super(delegate, wrapInCommand);
+			this.stack = stack;
+		}
+
+		@Override
+		protected IEditorPart resolveEditor() {
+			return editor;
+		}
+
+		@Override
+		protected CommandStack resolveCommandStack(IEditorPart ed) {
+			return stack;
+		}
+	}
+
+	/**
+	 * A real GEF {@link CommandStack} that records executed commands so tests can assert pushes and drive undo/redo.
+	 * (GEF's CommandStack already implements execute/undo/redo over an internal stack; the override only records.)
+	 */
+	static class RecordingCommandStack extends CommandStack {
+		final List<Command> executed = new ArrayList<>();
+
+		@Override
+		public void execute(Command command) {
+			executed.add(command);
+			super.execute(command);
 		}
 	}
 }

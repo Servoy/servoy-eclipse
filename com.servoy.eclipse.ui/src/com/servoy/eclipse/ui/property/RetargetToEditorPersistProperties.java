@@ -38,9 +38,24 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 {
 	private final IPropertySource persistProperties;
 
+	/**
+	 * When <code>true</code>, {@link #updateProperty(boolean, Object, Object)} wraps the change in a GEF {@link Command}
+	 * and pushes it onto the editor's {@link CommandStack} so it is undoable (used by direct callers such as the
+	 * "Clear property" marker quick-fix - SVY-19810). When <code>false</code>, the caller (the Properties view's
+	 * UndoablePropertySheetEntry / OpenEditorUndoablePropertySheetEntry) already wraps set/reset in a proper
+	 * Set/ResetValueCommand on the stack, so wrapping again here would double-wrap and corrupt the undo stack.
+	 */
+	private final boolean wrapInCommand;
+
 	public RetargetToEditorPersistProperties(IPropertySource persistProperties)
 	{
+		this(persistProperties, true);
+	}
+
+	public RetargetToEditorPersistProperties(IPropertySource persistProperties, boolean wrapInCommand)
+	{
 		this.persistProperties = persistProperties;
+		this.wrapInCommand = wrapInCommand;
 	}
 
 	@Override
@@ -107,26 +122,101 @@ public class RetargetToEditorPersistProperties implements IPropertySource, IAdap
 	 * @param id
 	 * @param value
 	 */
-	protected void updateProperty(final boolean set, Object id, Object value)
+	protected void updateProperty(final boolean set, final Object id, final Object value)
 	{
 		// find the editor of this persist and change the value in the editor
-		final IEditorPart editor = openPersistEditor(persistProperties, false); // activate=false here otherwise the editor is activated too soon and the save editor button remains grayed out
-		if (editor != null)
+		final IEditorPart editor = resolveEditor(); // activate=false otherwise the editor is activated too soon and the save editor button remains grayed out
+		if (editor == null)
 		{
-			// Just open the editor and apply the change directly.
-			// Do NOT wrap in a Command here: the caller (UndoablePropertySheetEntry / OpenEditorUndoablePropertySheetEntry)
+			return;
+		}
+
+		if (!wrapInCommand)
+		{
+			// Properties view path: the caller (UndoablePropertySheetEntry / OpenEditorUndoablePropertySheetEntry)
 			// already wraps set/reset in a proper Command with undo support (SetValueCommand / ResetValueCommand)
 			// and pushes it onto the editor's CommandStack. Adding a second Command here would double-wrap
-			// the operation, corrupting the undo stack.
-			if (set)
-			{
-				persistProperties.setPropertyValue(id, value);
-			}
-			else
-			{
-				persistProperties.resetPropertyValue(id);
-			}
+			// the operation, corrupting the undo stack. So apply the change directly.
+			applyChange(set, id, value);
+			return;
 		}
+
+		// Direct caller path (e.g. the "Clear property" marker quick-fix - SVY-19810): nobody wraps this change in a
+		// Command, so wrap it here with proper undo()/redo() support and push it onto the editor's CommandStack so the
+		// change marks the editor dirty and can be undone/redone.
+		Command cmd = new Command(set ? "Set property" : "Reset property")
+		{
+			private Object oldValue;
+
+			@Override
+			public void execute()
+			{
+				oldValue = persistProperties.getPropertyValue(id);
+				if (oldValue instanceof IPropertySource)
+				{
+					oldValue = ((IPropertySource)oldValue).getEditableValue();
+				}
+				applyChange(set, id, value);
+			}
+
+			@Override
+			public void undo()
+			{
+				if (oldValue != null)
+				{
+					persistProperties.setPropertyValue(id, oldValue);
+				}
+				else
+				{
+					persistProperties.resetPropertyValue(id);
+				}
+			}
+
+			@Override
+			public void redo()
+			{
+				applyChange(set, id, value);
+			}
+		};
+		CommandStack commandStack = resolveCommandStack(editor);
+		if (commandStack != null)
+		{
+			commandStack.execute(cmd);
+		}
+		else
+		{
+			cmd.execute();
+		}
+	}
+
+	private void applyChange(boolean set, Object id, Object value)
+	{
+		if (set)
+		{
+			persistProperties.setPropertyValue(id, value);
+		}
+		else
+		{
+			persistProperties.resetPropertyValue(id);
+		}
+	}
+
+	/**
+	 * Opens (without activating) and returns the editor that handles this persist, or <code>null</code> when there is
+	 * none. Package-visible seam so tests can supply a fake editor without the live workbench.
+	 */
+	protected IEditorPart resolveEditor()
+	{
+		return openPersistEditor(persistProperties, false);
+	}
+
+	/**
+	 * Returns the editor's GEF {@link CommandStack}, or <code>null</code> when the editor has none. Package-visible seam
+	 * so tests can supply a real CommandStack without the live workbench.
+	 */
+	protected CommandStack resolveCommandStack(IEditorPart editor)
+	{
+		return editor.getAdapter(CommandStack.class);
 	}
 
 	public static IEditorPart openPersistEditor(IPropertySource persistProperties, boolean activate)

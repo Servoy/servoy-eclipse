@@ -427,8 +427,13 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 				if (retargetToEditor)
 				{
-					// save actions are retargeted to the editor that handles the persist type
-					return new RetargetToEditorPersistProperties(persistProperties);
+					// save actions are retargeted to the editor that handles the persist type.
+					// wrapInCommand=false: this is the Properties view path, where UndoablePropertySheetEntry /
+					// OpenEditorUndoablePropertySheetEntry already wraps set/reset in a Set/ResetValueCommand on the
+					// editor's CommandStack. Wrapping again inside RetargetToEditorPersistProperties would double-wrap
+					// and corrupt the undo stack. Direct callers (e.g. the "Clear property" quick-fix) keep the default
+					// wrapInCommand=true so their change is still undoable (SVY-19810).
+					return new RetargetToEditorPersistProperties(persistProperties, false);
 				}
 				return persistProperties;
 			}
