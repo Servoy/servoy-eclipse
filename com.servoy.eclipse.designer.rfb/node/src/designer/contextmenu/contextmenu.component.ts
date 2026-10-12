@@ -225,10 +225,12 @@ export class ContextMenuComponent implements OnInit {
 					this.menuItems.push(cypressEntry);
 				}
 				this.show(event);
+				this.cdr.detectChanges();
 				this.adjustMenuPosition(this.element().nativeElement);
 			}).catch(() => {
 				// If the backend call fails, still show the menu without the Cypress item
 				this.show(event);
+				this.cdr.detectChanges();
 				this.adjustMenuPosition(this.element().nativeElement);
 			});
 		});
