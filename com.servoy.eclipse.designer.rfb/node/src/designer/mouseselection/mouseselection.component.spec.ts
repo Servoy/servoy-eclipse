@@ -187,6 +187,129 @@ describe('MouseSelectionComponent', () => {
     });
   });
 
+  // Regression guard for SVY-21578 "Insert column is done outside the container".
+  // SVY-21248 wrapped every child of a responsive container in an intermediate
+  // `.svy-responsive-wrapper` div that carries NO svy-id. The old insertACopyAction read
+  // `htmlNode.parentNode.getAttribute('svy-id')` (the wrapper -> null) and
+  // `htmlNode.nextElementSibling` (the next wrapper -> null), so neither dropTargetUUID nor
+  // rightSibling were sent and Java created the new column on the form root. The fix resolves
+  // the drop target via `parentElement.closest('[svy-id]')` and the "after" sibling via the
+  // wrapper-safe DesignerUtilsService.getNextElementSibling. These tests build the real
+  // wrapped DOM so they FAIL on the pre-fix raw-parentNode/nextElementSibling code (payload
+  // dropTargetUUID/rightSibling null) and PASS after the fix.
+  describe('insertACopyAction', () => {
+    const PARENT_SVY_ID = 'parent-container-uuid';
+    const SELECTED_SVY_ID = 'selected-column-uuid';
+    const NEXT_SVY_ID = 'next-column-uuid';
+
+    // Faithful port of the real DesignerUtilsService.getNextElementSibling (designerutils.service.ts:379):
+    // walk up through wrapper divs lacking svy-id, take the next element sibling, and if that
+    // sibling itself lacks svy-id, read its svy-id-bearing descendant.
+    const realGetNextElementSibling = (element: Element): Element | null => {
+      const originalElement = element;
+      let current: Element = element;
+      while (current.parentElement && !current.parentElement.getAttribute('svy-id')) {
+        current = current.parentElement;
+      }
+      let sibling = current.nextElementSibling;
+      if (sibling && !sibling.getAttribute('svy-id')) {
+        sibling = sibling.querySelector('[svy-id]');
+      }
+      if (sibling === null) {
+        sibling = originalElement.nextElementSibling;
+      }
+      return sibling;
+    };
+
+    // Builds the SVY-21248 wrapped structure:
+    //   <div.svy-layoutcontainer svy-id=PARENT>            <- the real parent container
+    //     <div.svy-responsive-wrapper>                     <- wrapper, NO svy-id
+    //       <div.svy-layoutcontainer svy-id=SELECTED>      <- the selected column (htmlNode)
+    //     <div.svy-responsive-wrapper>                     <- wrapper, NO svy-id
+    //       <div.svy-layoutcontainer svy-id=NEXT>          <- the following sibling column
+    // Returns the selected column element plus the parent so tests can trim it.
+    const buildWrappedResponsiveDom = (includeNextSibling: boolean) => {
+      const parent = document.createElement('div');
+      parent.classList.add('svy-layoutcontainer');
+      parent.setAttribute('svy-id', PARENT_SVY_ID);
+
+      const selectedWrapper = document.createElement('div');
+      selectedWrapper.classList.add('svy-responsive-wrapper');
+      const selected = document.createElement('div');
+      selected.classList.add('svy-layoutcontainer');
+      selected.setAttribute('svy-id', SELECTED_SVY_ID);
+      selected.setAttribute('svy-layoutname', '12grid.column');
+      selectedWrapper.appendChild(selected);
+      parent.appendChild(selectedWrapper);
+
+      if (includeNextSibling) {
+        const nextWrapper = document.createElement('div');
+        nextWrapper.classList.add('svy-responsive-wrapper');
+        const next = document.createElement('div');
+        next.classList.add('svy-layoutcontainer');
+        next.setAttribute('svy-id', NEXT_SVY_ID);
+        next.setAttribute('svy-layoutname', '12grid.column');
+        nextWrapper.appendChild(next);
+        parent.appendChild(nextWrapper);
+      }
+
+      return { parent, selected };
+    };
+
+    beforeEach(() => {
+      designerUtilsService.getNextElementSibling = vi.fn(realGetNextElementSibling);
+    });
+
+    it('AC1: inserts BEFORE inside the parent container through the wrapper', () => {
+      const { selected } = buildWrappedResponsiveDom(true);
+      editorContentService.getContentElement.mockReturnValue(selected);
+      const node = { svyid: SELECTED_SVY_ID } as any;
+      const event = { stopPropagation: vi.fn() } as any;
+
+      component.insertACopyAction(event, node, true);
+
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(editorSession.createComponent).toHaveBeenCalledTimes(1);
+      const payload = editorSession.createComponent.mock.calls[0][0];
+      expect(payload.dropTargetUUID).toBe(PARENT_SVY_ID);
+      expect(payload.rightSibling).toBe(SELECTED_SVY_ID);
+      expect(payload.keepOldSelection).toBe(true);
+      expect(payload.packageName).toBe('12grid');
+      expect(payload.name).toBe('column');
+    });
+
+    it('AC2 + AC4: inserts AFTER inside the parent container, resolving the next sibling through the wrapper', () => {
+      const { selected } = buildWrappedResponsiveDom(true);
+      editorContentService.getContentElement.mockReturnValue(selected);
+      const node = { svyid: SELECTED_SVY_ID } as any;
+      const event = { stopPropagation: vi.fn() } as any;
+
+      component.insertACopyAction(event, node, false);
+
+      const payload = editorSession.createComponent.mock.calls[0][0];
+      // AC4: non-null dropTargetUUID in the wrapper case.
+      expect(payload.dropTargetUUID).toBe(PARENT_SVY_ID);
+      // AC2: rightSibling read through the wrapper is the NEXT column's svy-id.
+      expect(payload.rightSibling).toBe(NEXT_SVY_ID);
+      expect(payload.keepOldSelection).toBe(true);
+    });
+
+    it('AC3: inserts AFTER when selected is the last child, leaving rightSibling unset but dropTargetUUID set', () => {
+      const { selected } = buildWrappedResponsiveDom(false);
+      editorContentService.getContentElement.mockReturnValue(selected);
+      const node = { svyid: SELECTED_SVY_ID } as any;
+      const event = { stopPropagation: vi.fn() } as any;
+
+      component.insertACopyAction(event, node, false);
+
+      const payload = editorSession.createComponent.mock.calls[0][0];
+      // Still dropped into the parent container (not the form root).
+      expect(payload.dropTargetUUID).toBe(PARENT_SVY_ID);
+      // No following sibling -> rightSibling stays unset so Java appends to the end.
+      expect(payload.rightSibling).toBeUndefined();
+    });
+  });
+
   describe('redrawDecorators', () => {
     it('should update styles for existing nodes', () => {
       const mockEl = document.createElement('div');

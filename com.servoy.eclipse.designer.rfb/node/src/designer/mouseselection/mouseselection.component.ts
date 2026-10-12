@@ -506,14 +506,16 @@ export class MouseSelectionComponent implements OnInit, AfterViewInit, ISelectio
         const layoutPackage = htmlNode.getAttribute('svy-layoutname')!.split('.');
         component['packageName'] = layoutPackage[0];
         component['name'] = layoutPackage[1];
-        const droptarget = (htmlNode.parentNode as HTMLElement).getAttribute('svy-id');
+        const droptarget = htmlNode.parentElement?.closest('[svy-id]')?.getAttribute('svy-id');
         if (droptarget) component['dropTargetUUID'] = droptarget;
         if (before) {
             component['rightSibling'] = node.svyid;
-        } else
-            if (htmlNode.nextElementSibling) {
-                component['rightSibling'] = htmlNode.nextElementSibling.getAttribute('svy-id');
+        } else {
+            const nextSibling = this.designerUtilsService.getNextElementSibling(htmlNode);
+            if (nextSibling) {
+                component['rightSibling'] = nextSibling.getAttribute('svy-id');
             }
+        }
 
         component['keepOldSelection'] = true;
         this.editorSession.createComponent(component);
