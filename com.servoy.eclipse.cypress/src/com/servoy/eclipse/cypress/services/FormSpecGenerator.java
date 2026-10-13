@@ -250,7 +250,7 @@ public class FormSpecGenerator {
 			sb.append("    cy.get('.svy-form', { timeout: 30000 }).should('exist');\n");
 		} else {
 			sb.append("    cy.get('[data-cy^=\"").append(metadata.formName)
-					.append(".\"', { timeout: 30000 }).should('exist');\n");
+					.append(".\"]', { timeout: 30000 }).should('exist');\n");
 		}
 		sb.append("  });\n\n");
 
