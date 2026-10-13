@@ -66,23 +66,52 @@ pipeline {
             }
         }
 
+        stage('Integration Tests') {
+            steps {
+                wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
+                    configFileProvider([
+                        configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
+                        configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
+                    ]) {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            sh 'mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" verify -Pintegration -pl com.servoy.eclipse.core.tests,com.servoy.eclipse.cypress.tests,com.servoy.eclipse.ngclient.ui.tests,com.servoy.eclipse.ui.tests,com.servoy.eclipse.tests -am'
+                        }
+                    }
+                }
+            }
+        }
+
     }
     
     post {
         always {
-            // Karma unit testen archiveren
-            junit allowEmptyResults: false, testResults: 'com.servoy.eclipse.ngclient.ui/target/*karma.xml'
-            
-            // HTML Publisher voor Coverage rapportages
-            publishHTML([
-                allowMissing: false, 
-                alwaysLinkToLastBuild: false, 
-                keepAll: true, 
-                reportDir: 'com.servoy.eclipse.ngclient.ui/target/coverage', 
-                reportFiles: 'app/index.html,servoy-public/index.html', 
-                reportName: 'Coverage', 
-                reportTitles: ''
-            ])
+            script {
+                if (!params.WIPE_WORKSPACE) {
+                    // Karma unit testen archiveren
+                    junit allowEmptyResults: false, testResults: 'com.servoy.eclipse.ngclient.ui/target/*karma.xml'
+                    
+                    // Tycho/Surefire Java test reports
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
+                    
+                    // ESLint reports (ngclient.ui + designer.rfb)
+                    recordIssues(
+                        tools: [esLint(pattern: '**/target/eslint-checkstyle.xml')],
+                        qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
+                        enabledForFailure: true
+                    )
+                    
+                    // HTML Publisher voor Coverage rapportages
+                    publishHTML([
+                        allowMissing: true, 
+                        alwaysLinkToLastBuild: false, 
+                        keepAll: true, 
+                        reportDir: 'com.servoy.eclipse.ngclient.ui/target/coverage', 
+                        reportFiles: 'app/index.html,servoy-public/index.html', 
+                        reportName: 'Coverage', 
+                        reportTitles: ''
+                    ])
+                }
+            }
         }
         
         failure {

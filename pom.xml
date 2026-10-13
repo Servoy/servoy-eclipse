@@ -17,6 +17,7 @@
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<servoy.ai.repo.url>https://build.servoy.com/latest/servoy_ai/</servoy.ai.repo.url>
+		<servoy.install.tarball.for.appserver>/data/www/latest/servoy_lts_2026/servoy_linux.tar.gz</servoy.install.tarball.for.appserver>
 <!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
         <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
 -->
@@ -609,6 +610,7 @@
 				<module>com.servoy.eclipse.model</module>
 				<module>com.servoy.eclipse.model.exporter.mobile</module>
 				<module>com.servoy.eclipse.core</module>
+				<module>com.servoy.eclipse.core.tests</module>
 				<module>com.servoy.eclipse.cloud</module>
 				<module>com.servoy.eclipse.ui</module>
 				<module>com.servoy.eclipse.ngclient</module>
@@ -628,6 +630,7 @@
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
+				<module>com.servoy.eclipse.ngclient.ui.tests</module>
 				<module>com.servoy.eclipse.cypress</module>
 				<module>com.servoy.eclipse.cypress.tests</module>
 			</modules>	

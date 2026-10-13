@@ -2,12 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for com.servoy.eclipse.ngclient.ui
 Bundle-SymbolicName: com.servoy.eclipse.ngclient.ui.tests
-Bundle-Version: 2026.9.0.qualifier
+Bundle-Version: 2026.3.2.qualifier
 Bundle-Vendor: Servoy
-Fragment-Host: com.servoy.eclipse.ngclient.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-21
-Import-Package: org.junit.jupiter.api;version="[5.0.0,6.0.0)",
- org.junit.jupiter.api.extension;version="[5.0.0,6.0.0)",
- org.junit.jupiter.params;version="[5.0.0,6.0.0)",
- org.junit.jupiter.params.provider;version="[5.0.0,6.0.0)"
+Require-Bundle: com.servoy.eclipse.core.tests,
+ com.servoy.eclipse.core,
+ com.servoy.eclipse.ngclient.ui,
+ com.servoy.eclipse.model,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources
+Import-Package: org.junit.jupiter.api;version="[6.0.0,7.0.0)",
+ org.junit.jupiter.api.extension;version="[6.0.0,7.0.0)",
+ org.junit.jupiter.api.function;version="[6.0.0,7.0.0)",
+ org.junit.jupiter.params;version="[6.0.0,7.0.0)",
+ org.junit.jupiter.params.provider;version="[6.0.0,7.0.0)"
 Automatic-Module-Name: com.servoy.eclipse.ngclient.ui.tests
+Export-Package: com.servoy.eclipse.ngclient.ui.tests.integrationpde
