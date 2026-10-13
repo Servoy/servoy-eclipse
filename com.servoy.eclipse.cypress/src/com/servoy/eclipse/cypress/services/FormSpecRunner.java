@@ -45,17 +45,23 @@ public class FormSpecRunner
 	/**
 	 * Cancels the currently running Cypress process, if any.
 	 */
-	public void cancel() {
+	public void cancel()
+	{
 		Process p = activeProcess;
-		if (p != null && p.isAlive()) {
+		if (p != null && p.isAlive())
+		{
 			p.destroyForcibly();
 		}
 	}
 
-	private void shutdownFormPreviewClients() {
-		try {
+	private void shutdownFormPreviewClients()
+	{
+		try
+		{
 			FormPreviewNGClient.shutdownExisting();
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			ServoyLog.logWarning("shutdownFormPreviewClients: " + e.getMessage(), e);
 		}
 	}
@@ -70,8 +76,10 @@ public class FormSpecRunner
 	public static final String PRESERVED_VIDEO_MARKER = "[Preserved Video] ";
 	public static final String PRESERVED_SCREENSHOT_MARKER = "[Preserved Screenshot] ";
 
-	private String preserveArtifacts(String rawOutput, String testName) {
-		try {
+	private String preserveArtifacts(String rawOutput, String testName)
+	{
+		try
+		{
 			Path workspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile().toPath();
 			Path cypressDir = workspaceRoot.resolve("jenkins-custom").resolve("e2e-test-scripts").resolve("cypress");
 			Path preservedRoot = cypressDir.resolve("preserved-artifacts");
@@ -92,7 +100,8 @@ public class FormSpecRunner
 			// Video: cypress/videos/<spec>.mp4 (spec name usually "<base>.cy.ts" or "<base>.cy.js")
 			Path videosDir = cypressDir.resolve("videos");
 			Path video = findMatchingFile(videosDir, baseName, ".mp4");
-			if (video != null) {
+			if (video != null)
+			{
 				Files.createDirectories(destDir);
 				// Use a short, fixed filename so the full path stays under Windows MAX_PATH (260)
 				// and can be opened by browsers via file:// URLs.
@@ -104,7 +113,8 @@ public class FormSpecRunner
 			// Screenshots: cypress/screenshots/<spec>/*.png (one subfolder per spec file)
 			Path screenshotsDir = cypressDir.resolve("screenshots");
 			Path shot = findScreenshot(screenshotsDir, baseName);
-			if (shot != null) {
+			if (shot != null)
+			{
 				Files.createDirectories(destDir);
 				// Short, fixed filename (see video comment above).
 				Path dest = destDir.resolve("screenshot.png");
@@ -113,7 +123,9 @@ public class FormSpecRunner
 			}
 
 			return markers.length() > 0 ? rawOutput + markers : rawOutput;
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			// Non-fatal - return the original output if preservation fails
 			return rawOutput;
 		}
@@ -129,26 +141,31 @@ public class FormSpecRunner
 	 * the E2E and form spec filename variants. Returns null if the directory is missing or
 	 * nothing matches.
 	 */
-	private Path findMatchingFile(Path dir, String baseName, String extension) {
-		if (!Files.isDirectory(dir)) {
+	private Path findMatchingFile(Path dir, String baseName, String extension)
+	{
+		if (!Files.isDirectory(dir))
+		{
 			return null;
 		}
 		String leaf = baseName.replace('\\', '/');
 		int slash = leaf.lastIndexOf('/');
-		if (slash >= 0) {
+		if (slash >= 0)
+		{
 			leaf = leaf.substring(slash + 1);
 		}
 		String tsName = leaf + ".cy.ts" + extension;
 		String jsName = leaf + ".cy.js" + extension;
 		String formSpecSuffix = "." + leaf + ".spec.cy.js" + extension;
 		String formSpecName = leaf + ".spec.cy.js" + extension;
-		try (java.util.stream.Stream<Path> walk = Files.walk(dir)) {
+		try (java.util.stream.Stream<Path> walk = Files.walk(dir))
+		{
 			return walk.filter(Files::isRegularFile).filter(p -> {
 				String name = p.getFileName().toString();
-				return name.equals(tsName) || name.equals(jsName) || name.equals(formSpecName)
-						|| name.endsWith(formSpecSuffix);
+				return name.equals(tsName) || name.equals(jsName) || name.equals(formSpecName) || name.endsWith(formSpecSuffix);
 			}).findFirst().orElse(null);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
@@ -159,36 +176,43 @@ public class FormSpecRunner
 	 * "mysolution.login.spec.cy.js"/"login.spec.cy.js" for form specs), so we search recursively
 	 * for the first .png under a matching folder. Prefers a "(failed)" screenshot.
 	 */
-	private Path findScreenshot(Path screenshotsDir, String baseName) {
-		if (!Files.isDirectory(screenshotsDir)) {
+	private Path findScreenshot(Path screenshotsDir, String baseName)
+	{
+		if (!Files.isDirectory(screenshotsDir))
+		{
 			return null;
 		}
 		String leaf = baseName.replace('\\', '/');
 		int slash = leaf.lastIndexOf('/');
-		if (slash >= 0) {
+		if (slash >= 0)
+		{
 			leaf = leaf.substring(slash + 1);
 		}
 		String tsFolder = leaf + ".cy.ts";
 		String jsFolder = leaf + ".cy.js";
 		String formSpecSuffix = "." + leaf + ".spec.cy.js";
 		String formSpecFolder = leaf + ".spec.cy.js";
-		try (java.util.stream.Stream<Path> walk = Files.walk(screenshotsDir)) {
+		try (java.util.stream.Stream<Path> walk = Files.walk(screenshotsDir))
+		{
 			java.util.List<Path> pngs = walk.filter(Files::isRegularFile)
-					.filter(p -> p.getFileName().toString().endsWith(".png"))
-					.filter(p -> {
-						for (Path segment : p) {
-							String seg = segment.toString();
-							if (seg.equals(tsFolder) || seg.equals(jsFolder) || seg.equals(formSpecFolder)
-									|| seg.endsWith(formSpecSuffix)) {
-								return true;
-							}
+				.filter(p -> p.getFileName().toString().endsWith(".png"))
+				.filter(p -> {
+					for (Path segment : p)
+					{
+						String seg = segment.toString();
+						if (seg.equals(tsFolder) || seg.equals(jsFolder) || seg.equals(formSpecFolder) || seg.endsWith(formSpecSuffix))
+						{
+							return true;
 						}
-						return false;
-					}).toList();
+					}
+					return false;
+				}).toList();
 			// Prefer a screenshot marked "(failed)" if present
 			return pngs.stream().filter(p -> p.getFileName().toString().contains("(failed)")).findFirst()
-					.orElse(pngs.stream().findFirst().orElse(null));
-		} catch (Exception e) {
+				.orElse(pngs.stream().findFirst().orElse(null));
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
@@ -198,30 +222,40 @@ public class FormSpecRunner
 	 * JVM lifetime so artifacts created during the current session are kept (they should live
 	 * until Developer is closed), while stale ones from prior sessions are cleaned up.
 	 */
-	private static synchronized void cleanPreservedArtifactsOnce(Path preservedRoot) {
-		if (preservedArtifactsCleaned) {
+	private static synchronized void cleanPreservedArtifactsOnce(Path preservedRoot)
+	{
+		if (preservedArtifactsCleaned)
+		{
 			return;
 		}
 		preservedArtifactsCleaned = true;
-		try {
-			if (Files.exists(preservedRoot)) {
-				try (java.util.stream.Stream<Path> walk = Files.walk(preservedRoot)) {
+		try
+		{
+			if (Files.exists(preservedRoot))
+			{
+				try (java.util.stream.Stream<Path> walk = Files.walk(preservedRoot))
+				{
 					walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> {
-						try {
-							if (!p.equals(preservedRoot)) {
+						try
+						{
+							if (!p.equals(preservedRoot))
+							{
 								Files.deleteIfExists(p);
 							}
-						} catch (Exception ignored) {
+						}
+						catch (Exception ignored)
+						{
 							// ignore individual failures
 						}
 					});
 				}
 			}
-		} catch (Exception ignored) {
+		}
+		catch (Exception ignored)
+		{
 			// non-fatal
 		}
 	}
-
 
 
 	/**
@@ -343,13 +377,13 @@ public class FormSpecRunner
 				command.add("--headed");
 			}
 
-				if (extraCypressArgs != null && !extraCypressArgs.isBlank())
+			if (extraCypressArgs != null && !extraCypressArgs.isBlank())
+			{
+				for (String extra : extraCypressArgs.trim().split("\\s+"))
 				{
-					for (String extra : extraCypressArgs.trim().split("\\s+"))
-					{
-						command.add(extra);
-					}
+					command.add(extra);
 				}
+			}
 
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.directory(scriptsRoot.toFile());
@@ -367,38 +401,38 @@ public class FormSpecRunner
 			shutdownFormPreviewClients();
 			try
 			{
-			Process process = pb.start();
-			activeProcess = process;
+				Process process = pb.start();
+				activeProcess = process;
 
-			StringBuilder output = new StringBuilder();
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)))
-			{
-				String line;
-				while ((line = reader.readLine()) != null)
+				StringBuilder output = new StringBuilder();
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8)))
 				{
-					output.append(line).append("\n");
+					String line;
+					while ((line = reader.readLine()) != null)
+					{
+						output.append(line).append("\n");
+					}
 				}
-			}
 
-			boolean finished = process.waitFor(effectiveTimeout, TimeUnit.SECONDS);
-			activeProcess = null;
-			if (!finished)
-			{
-				process.destroyForcibly();
-				return "Error: Cypress test timed out after " + effectiveTimeout + " seconds.";
-			}
+				boolean finished = process.waitFor(effectiveTimeout, TimeUnit.SECONDS);
+				activeProcess = null;
+				if (!finished)
+				{
+					process.destroyForcibly();
+					return "Error: Cypress test timed out after " + effectiveTimeout + " seconds.";
+				}
 
-			String rawOutput = output.toString();
+				String rawOutput = output.toString();
 
-			if (process.exitValue() == 0)
-			{
-				return "**Form Spec Results: " + formName + "**\n\nAll tests passed!\n\n" + rawOutput;
-			}
-			else
-			{
-				rawOutput = preserveArtifacts(rawOutput, formName);
-				return "**Form Spec Results: " + formName + "**\n\nSome tests failed:\n\n" + rawOutput;
-			}
+				if (process.exitValue() == 0)
+				{
+					return "**Form Spec Results: " + formName + "**\n\nAll tests passed!\n\n" + rawOutput;
+				}
+				else
+				{
+					rawOutput = preserveArtifacts(rawOutput, formName);
+					return "**Form Spec Results: " + formName + "**\n\nSome tests failed:\n\n" + rawOutput;
+				}
 			}
 			finally
 			{
@@ -448,7 +482,7 @@ public class FormSpecRunner
 		return getCypressDir(workspaceRoot);
 	}
 
-	Path getCypressDir(Path workspaceRoot)
+	public Path getCypressDir(Path workspaceRoot)
 	{
 		Path metadataPlugins = workspaceRoot.resolve(".metadata").resolve(".plugins");
 		return metadataPlugins.resolve(MCP_PLUGIN_DIR).resolve(CYPRESS_DIR);
@@ -575,10 +609,10 @@ public class FormSpecRunner
 
 			// resolve active solution name to look in solution-specific subdirectory first
 			com.servoy.eclipse.model.nature.ServoyProject servoyProject = com.servoy.eclipse.model.ServoyModelFinder
-					.getServoyModel().getActiveProject();
+				.getServoyModel().getActiveProject();
 			String solutionName = (servoyProject != null && servoyProject.getProject() != null)
-					? servoyProject.getProject().getName()
-					: null;
+				? servoyProject.getProject().getName()
+				: null;
 			Path e2eDir = (solutionName != null) ? e2eBaseDir.resolve(solutionName) : e2eBaseDir;
 			// prefer cypress.config.ts (TypeScript project), fall back to cypress.config.js
 			Path scriptsRoot = workspaceRoot.resolve("jenkins-custom").resolve("e2e-test-scripts");
@@ -654,18 +688,18 @@ public class FormSpecRunner
 			// scriptsRoot already resolved above (for configFile detection)
 			Path scriptsDir = scriptsRoot;
 
-				// Prefer the project-local Cypress binary (node_modules/.bin/cypress) if present â
-				// this is the case for e2e-test-scripts repos that already have Cypress installed.
-				// If the project has a package.json listing Cypress but node_modules is missing,
-				// run npm install so the local binary becomes available before we try to use it.
-				// Fall back to the internal .metadata-bundled installation only if not found.
-				String localInstallError = ensureProjectCypressInstalled(scriptsDir);
-				if (localInstallError != null)
-				{
-					return localInstallError;
-				}
-				Path scriptsNodeModulesBin = scriptsDir.resolve("node_modules").resolve(".bin");
-				String localCypressCmd = resolveLocalCypressCmd(scriptsNodeModulesBin);
+			// Prefer the project-local Cypress binary (node_modules/.bin/cypress) if present â
+			// this is the case for e2e-test-scripts repos that already have Cypress installed.
+			// If the project has a package.json listing Cypress but node_modules is missing,
+			// run npm install so the local binary becomes available before we try to use it.
+			// Fall back to the internal .metadata-bundled installation only if not found.
+			String localInstallError = ensureProjectCypressInstalled(scriptsDir);
+			if (localInstallError != null)
+			{
+				return localInstallError;
+			}
+			Path scriptsNodeModulesBin = scriptsDir.resolve("node_modules").resolve(".bin");
+			String localCypressCmd = resolveLocalCypressCmd(scriptsNodeModulesBin);
 
 			List<String> command = new ArrayList<>();
 			if (localCypressCmd != null)
@@ -818,8 +852,7 @@ public class FormSpecRunner
 			{
 				npmPath = nodePath.getParent() + File.separator + "npm";
 			}
-			System.out.println("[Servoy MCP] Cypress not installed in " + scriptsDir
-				+ " - running npm install (this may take a few minutes)...");
+			System.out.println("[Servoy MCP] Cypress not installed in " + scriptsDir + " - running npm install (this may take a few minutes)...");
 
 			long x = System.currentTimeMillis();
 
@@ -846,7 +879,8 @@ public class FormSpecRunner
 				return "Error: npm install failed in e2e-test-scripts directory.\n" + npmOutput;
 			}
 
-			System.out.println("[Servoy MCP] Project Cypress installed successfully in " + String.format( "%.2f", ((System.currentTimeMillis() - x) / 1000d)) + " s");
+			System.out
+				.println("[Servoy MCP] Project Cypress installed successfully in " + String.format("%.2f", ((System.currentTimeMillis() - x) / 1000d)) + " s");
 			return null;
 		}
 		catch (Exception e)
@@ -915,7 +949,8 @@ public class FormSpecRunner
 					System.err.println("[Servoy MCP] npm install FAILED. Output:\n" + npmOutput);
 					return "Error: npm install failed in cypress directory.\n" + npmOutput;
 				}
-				System.out.println("[Servoy MCP] Cypress installed successfully in " + String.format( "%.2f", ((System.currentTimeMillis() - x) / 1000d)) + " s");
+				System.out
+					.println("[Servoy MCP] Cypress installed successfully in " + String.format("%.2f", ((System.currentTimeMillis() - x) / 1000d)) + " s");
 			}
 			return null;
 		}

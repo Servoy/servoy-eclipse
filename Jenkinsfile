@@ -91,6 +91,21 @@ pipeline {
             }
         }
 
+        stage('Integration Tests') {
+            steps {
+                wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
+                    configFileProvider([
+                        configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
+                        configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
+                    ]) {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            sh 'mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" verify -Pintegration -pl com.servoy.eclipse.core.tests,com.servoy.eclipse.cypress.tests,com.servoy.eclipse.ngclient.ui.tests,com.servoy.eclipse.ui.tests -am'
+                        }
+                    }
+                }
+            }
+        }
+
     }
     
     post {

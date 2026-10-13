@@ -21,26 +21,32 @@ import com.servoy.j2db.persistence.ISupportFormElement;
 import com.servoy.j2db.persistence.WebComponent;
 
 @Creatable
-public class FormSpecGenerator {
+public class FormSpecGenerator
+{
 	private static final String SPEC_CY_EXTENSION = ".spec.cy.js";
 	private static final String SPEC_JS_EXTENSION = ".spec.js";
 	private static final String FORM_SPEC_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form";
 	private static final String FORM_SETUP_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form-spec";
 
-	public String generateSpec(String formName) {
-		try {
+	public String generateSpec(String formName)
+	{
+		try
+		{
 			ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-			if (activeProject == null) {
+			if (activeProject == null)
+			{
 				return "Error: No active Servoy project.";
 			}
 
 			FlattenedSolution flattenedSolution = activeProject.getEditingFlattenedSolution();
-			if (flattenedSolution == null) {
+			if (flattenedSolution == null)
+			{
 				return "Error: Could not resolve the active solution.";
 			}
 
 			Form form = flattenedSolution.getForm(formName);
-			if (form == null) {
+			if (form == null)
+			{
 				return "Error: Form not found: " + formName;
 			}
 
@@ -53,10 +59,10 @@ public class FormSpecGenerator {
 			Path cySpecPath = testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
 			Path setupSpecPath = setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
 
-			if (Files.exists(cySpecPath) && Files.exists(setupSpecPath)) {
-				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + solutionName + "." + formName
-						+ SPEC_CY_EXTENSION + " and " + FORM_SETUP_RELATIVE_DIR + "/" + solutionName + "." + formName
-						+ SPEC_JS_EXTENSION;
+			if (Files.exists(cySpecPath) && Files.exists(setupSpecPath))
+			{
+				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_CY_EXTENSION + " and " +
+					FORM_SETUP_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_JS_EXTENSION;
 			}
 
 			FormMetadata metadata = buildMetadata(form);
@@ -64,168 +70,233 @@ public class FormSpecGenerator {
 
 			StringBuilder result = new StringBuilder();
 
-			if (!Files.exists(cySpecPath)) {
+			if (!Files.exists(cySpecPath))
+			{
 				String cyContent = generateCypressSpecContent(metadata);
 				Files.writeString(cySpecPath, cyContent, StandardCharsets.UTF_8);
 				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(solutionName).append(".")
-						.append(formName).append(SPEC_CY_EXTENSION).append(" (").append(metadata.namedElements.size())
-						.append(" element assertions)\n");
+					.append(formName).append(SPEC_CY_EXTENSION).append(" (").append(metadata.namedElements.size())
+					.append(" element assertions)\n");
 			}
 
-			if (!Files.exists(setupSpecPath)) {
+			if (!Files.exists(setupSpecPath))
+			{
 				String setupContent = generateSetupContent(metadata);
 				Files.writeString(setupSpecPath, setupContent, StandardCharsets.UTF_8);
 				result.append("Created: ").append(FORM_SETUP_RELATIVE_DIR).append("/").append(solutionName).append(".")
-						.append(formName).append(SPEC_JS_EXTENSION).append(" (setUp/tearDown for data setup)");
+					.append(formName).append(SPEC_JS_EXTENSION).append(" (setUp/tearDown for data setup)");
 			}
 
 			return result.toString().trim();
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return "Error generating spec: " + e.getMessage();
 		}
 	}
 
-	private Path resolveFormSpecDir() {
+	private Path resolveFormSpecDir()
+	{
 		Path workspaceRoot = org.eclipse.core.resources.ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile()
-				.toPath();
+			.toPath();
 		return workspaceRoot.resolve("jenkins-custom").resolve("e2e-test-scripts").resolve("cypress")
-				.resolve("cy-form");
+			.resolve("cy-form");
 	}
 
-	private Path resolveFormSetupDir() {
+	private Path resolveFormSetupDir()
+	{
 		Path workspaceRoot = org.eclipse.core.resources.ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile()
-				.toPath();
+			.toPath();
 		return workspaceRoot.resolve("jenkins-custom").resolve("e2e-test-scripts").resolve("cypress")
-				.resolve("cy-form-spec");
+			.resolve("cy-form-spec");
 	}
 
-	public boolean specExists(String formName) {
-		try {
+	/**
+	 * @deprecated use {@link #specExists(String, String)} instead - if you really don't mean to check the old file locations.
+	 */
+	@Deprecated
+	public boolean oldSpecExists(String formName)
+	{
+		try
+		{
 			Path testsDir = resolveFormSpecDir();
 			Path setupDir = resolveFormSetupDir();
-			return Files.exists(testsDir.resolve(formName + SPEC_CY_EXTENSION))
-					&& Files.exists(setupDir.resolve(formName + SPEC_JS_EXTENSION));
-		} catch (Exception e) {
+			return Files.exists(testsDir.resolve(formName + SPEC_CY_EXTENSION)) && Files.exists(setupDir.resolve(formName + SPEC_JS_EXTENSION));
+		}
+		catch (Exception e)
+		{
 			return false;
 		}
 	}
 
-	public Path getSpecFilePath(String formName) {
-		try {
+	public Path getFormSpecDir()
+	{
+		try
+		{
+			return resolveFormSpecDir();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+
+	public boolean specExists(String formName, String solutionName)
+	{
+		try
+		{
+			Path testsDir = resolveFormSpecDir();
+			Path setupDir = resolveFormSetupDir();
+			return (Files.exists(testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION)) &&
+				Files.exists(setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION))) || oldSpecExists(formName);
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * @deprecated Use {@link #getSpecFilePath(String, String)} instead.
+	 */
+	@Deprecated
+	public Path getOldSpecFilePath(String formName)
+	{
+		try
+		{
 			Path testsDir = resolveFormSpecDir();
 			return testsDir.resolve(formName + SPEC_CY_EXTENSION);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
 
-	public Path getSetupFilePath(String formName) {
-		try {
+	/**
+	 * @deprecated Use {@link #getOldSetupFilePath(String, String)} instead. Unless you really want the old path.
+	 */
+	@Deprecated
+	public Path getOldSetupFilePath(String formName)
+	{
+		try
+		{
 			Path setupDir = resolveFormSetupDir();
 			return setupDir.resolve(formName + SPEC_JS_EXTENSION);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
 
-	public Path getFormSpecDir() {
-		try {
-			return resolveFormSpecDir();
-		} catch (Exception e) {
-			return null;
-		}
-	}
 
-	public boolean specExists(String formName, String solutionName) {
-		try {
-			Path testsDir = resolveFormSpecDir();
-			Path setupDir = resolveFormSetupDir();
-			return Files.exists(testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION))
-					&& Files.exists(setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION));
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	public Path getSpecFilePath(String formName, String solutionName) {
-		try {
+	public Path getSpecFilePath(String formName, String solutionName)
+	{
+		try
+		{
 			Path testsDir = resolveFormSpecDir();
 			return testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
 
-	public Path getSetupFilePath(String formName, String solutionName) {
-		try {
+	public Path getSetupFilePath(String formName, String solutionName)
+	{
+		try
+		{
 			Path setupDir = resolveFormSetupDir();
 			return setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
 
-	public Path findExistingSpecFile(String formName, String solutionName) {
-		try {
+	public Path findExistingSpecFile(String formName, String solutionName)
+	{
+		try
+		{
 			Path testsDir = resolveFormSpecDir();
 			Path prefixed = testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
-			if (Files.exists(prefixed)) {
+			if (Files.exists(prefixed))
+			{
 				return prefixed;
 			}
 			Path legacy = testsDir.resolve(formName + SPEC_CY_EXTENSION);
-			if (Files.exists(legacy)) {
+			if (Files.exists(legacy))
+			{
 				return legacy;
 			}
 			return null;
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
 
-	public Path findExistingSetupFile(String formName, String solutionName) {
-		try {
+	public Path findExistingSetupFile(String formName, String solutionName)
+	{
+		try
+		{
 			Path setupDir = resolveFormSetupDir();
 			Path prefixed = setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
-			if (Files.exists(prefixed)) {
+			if (Files.exists(prefixed))
+			{
 				return prefixed;
 			}
 			Path legacy = setupDir.resolve(formName + SPEC_JS_EXTENSION);
-			if (Files.exists(legacy)) {
+			if (Files.exists(legacy))
+			{
 				return legacy;
 			}
 			return null;
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			return null;
 		}
 	}
 
-	private FormMetadata buildMetadata(Form form) {
+	private FormMetadata buildMetadata(Form form)
+	{
 		FormMetadata metadata = new FormMetadata();
 		metadata.formName = form.getName();
 		metadata.dataSource = form.getDataSource();
 
 		Iterator<ISupportFormElement> elements = form.getFormElementsSortedByFormIndex();
-		while (elements.hasNext()) {
+		while (elements.hasNext())
+		{
 			ISupportFormElement element = elements.next();
-			if (!(element instanceof IFormElement formElement)) {
+			if (!(element instanceof IFormElement formElement))
+			{
 				continue;
 			}
 			String name = formElement.getName();
-			if (name == null || name.equals(form.getName())) {
+			if (name == null || name.equals(form.getName()))
+			{
 				continue;
 			}
-			if (element instanceof BaseComponent baseComponent && !baseComponent.getVisible()) {
+			if (element instanceof BaseComponent baseComponent && !baseComponent.getVisible())
+			{
 				continue;
 			}
 
 			ElementInfo elem = new ElementInfo();
 			elem.name = name;
 			elem.isWebComponent = element instanceof WebComponent;
-			if (elem.isWebComponent) {
-				elem.typeName = ((WebComponent) element).getTypeName();
+			if (elem.isWebComponent)
+			{
+				elem.typeName = ((WebComponent)element).getTypeName();
 			}
-			if (element instanceof GraphicalComponent gc) {
-				elem.dataProviderID = gc.getDataProviderID();
+			if (element instanceof GraphicalComponent gc)
+			{
+//				elem.dataProviderID = gc.getDataProviderID();
 				boolean hasAction = gc.getOnActionMethodID() != null && !gc.getOnActionMethodID().isEmpty();
 				elem.isButton = hasAction;
 				elem.isLabel = !hasAction;
@@ -237,7 +308,8 @@ public class FormSpecGenerator {
 		return metadata;
 	}
 
-	private String generateCypressSpecContent(FormMetadata metadata) {
+	private String generateCypressSpecContent(FormMetadata metadata)
+	{
 		StringBuilder sb = new StringBuilder();
 
 		String formUrl = getFormUrl(metadata.solutionName, metadata.formName);
@@ -246,11 +318,14 @@ public class FormSpecGenerator {
 
 		sb.append("  beforeEach(() => {\n");
 		sb.append("    cy.visit('").append(formUrl).append("');\n");
-		if (metadata.namedElements.isEmpty()) {
+		if (metadata.namedElements.isEmpty())
+		{
 			sb.append("    cy.get('.svy-form', { timeout: 30000 }).should('exist');\n");
-		} else {
+		}
+		else
+		{
 			sb.append("    cy.get('[data-cy^=\"").append(metadata.formName)
-					.append(".\"', { timeout: 30000 }).should('exist');\n");
+				.append(".\"', { timeout: 30000 }).should('exist');\n");
 		}
 		sb.append("  });\n\n");
 
@@ -258,22 +333,25 @@ public class FormSpecGenerator {
 		sb.append("    cy.get('.svy-error, .error-overlay').should('not.exist');\n");
 
 		List<ElementInfo> visibleElements = metadata.namedElements.stream()
-				.filter(e -> e.isWebComponent || e.isButton || e.isLabel).limit(8).toList();
+			.filter(e -> e.isWebComponent || e.isButton || e.isLabel).limit(8).toList();
 
-		for (ElementInfo elem : visibleElements) {
+		for (ElementInfo elem : visibleElements)
+		{
 			sb.append("    cy.get('[data-cy=\"").append(metadata.formName).append(".").append(elem.name)
-					.append("\"]').should('be.visible');\n");
+				.append("\"]').should('be.visible');\n");
 		}
 		sb.append("  });\n\n");
 
 		List<ElementInfo> buttons = metadata.namedElements.stream()
-				.filter(e -> e.isButton || (e.typeName != null && e.typeName.contains("button"))).limit(3).toList();
+			.filter(e -> e.isButton || (e.typeName != null && e.typeName.contains("button"))).limit(3).toList();
 
-		if (!buttons.isEmpty()) {
+		if (!buttons.isEmpty())
+		{
 			sb.append("  it('buttons are clickable', () => {\n");
-			for (ElementInfo button : buttons) {
+			for (ElementInfo button : buttons)
+			{
 				sb.append("    cy.get('[data-cy=\"").append(metadata.formName).append(".").append(button.name)
-						.append("\"]').should('be.visible').and('be.enabled');\n");
+					.append("\"]').should('be.visible').and('be.enabled');\n");
 			}
 			sb.append("  });\n\n");
 		}
@@ -283,16 +361,19 @@ public class FormSpecGenerator {
 		return sb.toString();
 	}
 
-	private String getFormUrl(String solutionName, String formName) {
+	private String getFormUrl(String solutionName, String formName)
+	{
 		return "solution/" + solutionName + "/index.html?formpreview=" + formName + "&svy_testmode=true";
 	}
 
-	private String generateSetupContent(FormMetadata metadata) {
+	private String generateSetupContent(FormMetadata metadata)
+	{
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("/**\n");
 		sb.append(" * Form test setup/teardown for: ").append(metadata.formName).append("\n");
-		if (metadata.dataSource != null) {
+		if (metadata.dataSource != null)
+		{
 			sb.append(" * DataSource: ").append(metadata.dataSource).append("\n");
 		}
 		sb.append(" *\n");
@@ -305,14 +386,17 @@ public class FormSpecGenerator {
 		sb.append(" * @properties={typeid:24,uuid:\"").append(UUID.randomUUID()).append("\"}\n");
 		sb.append(" */\n");
 		sb.append("function spec_setUp() {\n");
-		if (metadata.dataSource != null) {
+		if (metadata.dataSource != null)
+		{
 			sb.append("\t// DataSource: ").append(metadata.dataSource).append("\n");
 			sb.append("\t// Load specific records for testing:\n");
 			sb.append("\t// foundset.loadAllRecords();\n");
 			sb.append("\t// Or filter to specific test data:\n");
 			sb.append("\t// foundset.find();\n");
 			sb.append("\t// foundset.search();\n");
-		} else {
+		}
+		else
+		{
 			sb.append("\t// No dataSource on this form - set up form variables or other state\n");
 		}
 		sb.append("}\n\n");
@@ -328,23 +412,26 @@ public class FormSpecGenerator {
 		return sb.toString();
 	}
 
-	private static class FormMetadata {
+	private static class FormMetadata
+	{
 		String formName;
 		String solutionName;
 		String dataSource;
 		List<ElementInfo> namedElements = new ArrayList<>();
 	}
 
-	private static class ElementInfo {
+	private static class ElementInfo
+	{
 		String name;
 		String typeName;
-		String dataProviderID;
+//		String dataProviderID;
 		boolean isWebComponent;
 		boolean isButton;
 		boolean isLabel;
 
 		@Override
-		public String toString() {
+		public String toString()
+		{
 			return name;
 		}
 	}
