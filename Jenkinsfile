@@ -75,6 +75,16 @@ pipeline {
             }
         }
 
+        // Remove stale test reports so tests that were moved/removed are not re-published
+        stage('Clean Test Reports') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
+            steps {
+                sh 'find . -path "*/target/surefire-reports" -type d -prune -exec rm -rf {} +'
+            }
+        }
+
         // Only runs if WIPE_WORKSPACE is FALSE
         stage('Build with Tycho') {
             when {
