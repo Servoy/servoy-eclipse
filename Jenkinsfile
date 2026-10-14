@@ -22,6 +22,9 @@ pipeline {
     }
     
     parameters {
+        // New boolean toggle for manual workspace wiping
+        booleanParam(name: 'WIPE_WORKSPACE', defaultValue: false, description: 'Check this box to completely wipe the workspace BEFORE running the build.')
+
         string(name: 'goals', defaultValue: 'clean install', trim: false)
     }
     
@@ -55,7 +58,28 @@ pipeline {
             }
         }
 
-        stage('Build with Tycho 5') {
+        // Clean workspace if requested, then automatically re-trigger without wipe
+        stage('Manual UI Workspace Wipe') {
+            when {
+                expression { params.WIPE_WORKSPACE }
+            }
+            steps {
+                echo "Manual workspace wipe requested via UI toggle. Cleaning up..."
+                cleanWs()
+                
+                echo "Re-triggering ${env.JOB_NAME} with WIPE_WORKSPACE = false..."
+                build job: env.JOB_NAME, wait: false, parameters: [
+                    booleanParam(name: 'WIPE_WORKSPACE', value: false),
+                    string(name: 'goals', value: params.goals)
+                ]
+            }
+        }
+
+        // Only runs if WIPE_WORKSPACE is FALSE
+        stage('Build with Tycho') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
             steps {
                 configFileProvider([
                     configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
@@ -67,6 +91,9 @@ pipeline {
         }
 
         stage('Integration Tests') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
             steps {
                 wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
                     configFileProvider([
@@ -120,7 +147,11 @@ pipeline {
         
         unstable {
             office365ConnectorSend webhookUrl: TEAMS_WEBHOOK, status: 'Unstable', adaptiveCards: true
-            build job: 'build', wait: false
+            script {
+                if (!params.WIPE_WORKSPACE) {
+                    build job: 'build', wait: false
+                }
+            }
         }
         
         fixed {
@@ -128,8 +159,12 @@ pipeline {
         }
         
         success {
-            // Downstream project triggeren bij succes
-            build job: 'build', wait: false
+            script {
+                if (!params.WIPE_WORKSPACE) {
+                    // Downstream project triggeren bij succes
+                    build job: 'build', wait: false
+                }
+            }
         }
     }
 }
