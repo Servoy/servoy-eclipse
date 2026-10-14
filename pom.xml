@@ -639,6 +639,8 @@
 				<module>com.servoy.eclipse.extension.compatibility</module>
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
+				<module>com.servoy.eclipse.tests</module>
+				<module>com.servoy.eclipse.ui.tests</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
