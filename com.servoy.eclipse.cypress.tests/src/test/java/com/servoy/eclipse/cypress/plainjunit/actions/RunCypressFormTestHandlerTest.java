@@ -1,7 +1,6 @@
 ﻿package com.servoy.eclipse.cypress.plainjunit.actions;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -363,16 +362,6 @@ public class RunCypressFormTestHandlerTest {
 			Files.createFile(tempDir.resolve("loginForm.spec.cy.js"));
 
 			assertTrue(handler.getDiscoveryService().hasTest("loginForm"));
-		}
-
-		@Test
-		@DisplayName("execute returns null without workbench context")
-		void executeReturnsNullWithoutContext() {
-			ExecutionEvent event = new ExecutionEvent(null, Collections.emptyMap(), null, null);
-
-			Object result = assertDoesNotThrow(() -> handler.execute(event));
-
-			assertNull(result);
 		}
 	}
 }

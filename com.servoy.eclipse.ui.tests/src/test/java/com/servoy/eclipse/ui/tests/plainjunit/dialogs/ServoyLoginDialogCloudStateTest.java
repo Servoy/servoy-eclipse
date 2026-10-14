@@ -71,28 +71,9 @@ class ServoyLoginDialogCloudStateTest {
 		ServoyLoginDialog.addCloudRestoredListener(null);
 	}
 
-	@Test
-	@DisplayName("AC7: cloud restored listeners are notified when cloud comes back")
-	void testCloudRestoredListenersNotified() throws Exception {
-		AtomicBoolean called = new AtomicBoolean(false);
-		ServoyLoginDialog.addCloudRestoredListener(() -> called.set(true));
-
-		Method notifyMethod = ServoyLoginDialog.class.getDeclaredMethod("notifyCloudRestored");
-		notifyMethod.setAccessible(true);
-		try
-		{
-			notifyMethod.invoke(null);
-		}
-		catch (Exception e)
-		{
-			// Display.getDefault() may throw in headless env — that's OK,
-			// the listener is in the list which is the contract we test
-		}
-		// In headless (no Display), asyncExec won't run the runnable,
-		// so we verify the listener was at least registered
-		CopyOnWriteArrayList<Runnable> listeners = getCloudRestoredListeners();
-		assertTrue(listeners.size() >= 1);
-	}
+	// "AC7: cloud restored listeners are notified when cloud comes back" needs a real SWT Display
+	// (notifyCloudRestored uses Display.getDefault().asyncExec), see
+	// com.servoy.eclipse.ui.tests.integrationpde.dialogs.ServoyLoginDialogCloudStateIntegrationTest
 
 	@Test
 	@DisplayName("cloudReachable field is volatile (thread visibility)")
