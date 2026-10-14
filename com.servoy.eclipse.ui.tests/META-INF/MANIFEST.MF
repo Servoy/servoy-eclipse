@@ -5,12 +5,13 @@ Bundle-SymbolicName: com.servoy.eclipse.ui.tests
 Bundle-Version: 2026.3.2.qualifier
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.core.tests
-Import-Package: com.servoy.eclipse.ui.dialogs,
+Import-Package: com.servoy.eclipse.ui.browser,
+ com.servoy.eclipse.ui.dialogs,
  com.servoy.j2db.persistence,
  com.servoy.j2db.util.docvalidator,
  org.apache.commons.io,
- org.eclipse.swt.widgets,
  org.eclipse.equinox.security.storage;version="[1.0.0,2.0.0)",
+ org.eclipse.swt.widgets,
  org.junit.jupiter.api;version="[6.0.0,7.0.0)",
  org.junit.jupiter.api.function;version="[6.0.0,7.0.0)",
  org.junit.jupiter.params;version="[6.0.0,7.0.0)",

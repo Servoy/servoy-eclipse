@@ -262,7 +262,7 @@ public class ChromiumWrapper implements IBrowser
 	 * @param result the raw bytes produced by the Equo capture future, may be {@code null}
 	 * @return the raw PNG bytes, or {@code null} when there is nothing to decode
 	 */
-	static byte[] decodeScreenshotResult(byte[] result)
+	public static byte[] decodeScreenshotResult(byte[] result)
 	{
 		if (result == null || result.length == 0)
 		{
