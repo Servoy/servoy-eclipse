@@ -21,7 +21,7 @@
                          automatic framework detection would otherwise pick the junit4 provider
                          and report "No tests found" for these pure-Jupiter tests. -->
                     <providerHint>junit6</providerHint>
-					<!-- <useUIHarness>false</useUIHarness> -->
+					<useUIHarness>true</useUIHarness>
 					<includes>
 						<include>**/plainjunit/**/*Test.java</include>
 					</includes>
