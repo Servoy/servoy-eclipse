@@ -26,6 +26,9 @@
 					<useUIHarness>false</useUIHarness>
 					<includes>
 						<include>**/plainjunit/**/*Test.java</include>
+						<!-- Two legacy tests here use the Test* prefix (TestCssValues, TestSnapCSSPosition)
+						     instead of the *Test suffix, so match that prefix too. -->
+						<include>**/plainjunit/**/Test*.java</include>
 					</includes>
 					<dependencies>
 						<dependency>
