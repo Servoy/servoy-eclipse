@@ -10,28 +10,34 @@
 	<artifactId>com.servoy.eclipse.cypress.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 	<build>
+		<!-- Tycho compiles src/test/java (source.. in build.properties) into target/classes; plain surefire looks in target/test-classes by default -->
+		<testOutputDirectory>${project.build.directory}/classes</testOutputDirectory>
 		<plugins>
+			<!-- plainjunit tests run on a flat classpath (like Eclipse "Run as JUnit"), without an OSGi runtime -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${surefire-plugin-version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit-platform</artifactId>
+						<version>${surefire-plugin-version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<includes>
+						<include>**/plainjunit/**/*Test.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<!-- tycho-surefire always starts an OSGi runtime; it is only used by the integration profile -->
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho.version}</version>
 				<configuration>
-                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
-                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
-                         automatic framework detection would otherwise pick the junit4 provider
-                         and report "No tests found" for these pure-Jupiter tests. -->
-                    <providerHint>junit6</providerHint>
-					<useUIHarness>true</useUIHarness>
-					<includes>
-						<include>**/plainjunit/**/*Test.java</include>
-					</includes>
-					<dependencies>
-						<dependency>
-							<type>eclipse-plugin</type>
-							<artifactId>com.servoy.eclipse.extension.compatibility</artifactId>
-							<version>0.0.0</version>
-						</dependency>
-					</dependencies>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -102,10 +108,19 @@
 						</executions>
 					</plugin>
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>${surefire-plugin-version}</version>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+					<plugin>
 						<groupId>org.eclipse.tycho</groupId>
 						<artifactId>tycho-surefire-plugin</artifactId>
 						<version>${tycho.version}</version>
 						<configuration>
+							<skip>false</skip>
 		                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
 		                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
 		                         automatic framework detection would otherwise pick the junit4 provider
@@ -123,7 +138,7 @@
 								-Dorg.osgi.framework.system.packages.extra=sun.security.x509
 								-Dservoy.cloud.skipCheckout=true
 								-Dservoy.application_server.dir=${servoy_install}/application_server
-								-Dproperty-file=${project.basedir}/testresources/servoy.properties
+								-Dproperty-file=${project.basedir}/../com.servoy.eclipse.core.tests/testresources/servoy.properties
 								-Dchromium.integration.eclipse.disable=true
 								-Dorg.eclipse.ui.testing=true</argLine>
 							<deleteOsgiDataDirectory>false</deleteOsgiDataDirectory>
