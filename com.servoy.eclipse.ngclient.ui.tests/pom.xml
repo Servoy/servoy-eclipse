@@ -126,7 +126,7 @@
 								-Dorg.osgi.framework.system.packages.extra=sun.security.x509
 								-Dservoy.cloud.skipCheckout=true
 								-Dservoy.application_server.dir=${servoy_install}/application_server
-								-Dproperty-file=${project.basedir}/testresources/servoy.properties
+								-Dproperty-file=${project.basedir}/../com.servoy.eclipse.core.tests/testresources/servoy.properties
 								-Dchromium.integration.eclipse.disable=true
 								-Dorg.eclipse.ui.testing=true</argLine>
 							<deleteOsgiDataDirectory>false</deleteOsgiDataDirectory>
