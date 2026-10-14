@@ -4,13 +4,12 @@ Bundle-Name: Tests for com.servoy.eclipse.ui
 Bundle-SymbolicName: com.servoy.eclipse.ui.tests
 Bundle-Version: 2026.9.1.qualifier
 Bundle-Vendor: Servoy
-Require-Bundle: com.servoy.eclipse.core.tests
-Import-Package: com.servoy.eclipse.ui.dialogs,
- com.servoy.j2db.persistence,
- com.servoy.j2db.util.docvalidator,
- org.apache.commons.io,
- org.eclipse.swt.widgets,
+Require-Bundle: com.servoy.eclipse.core.tests,
+ servoy_shared
+Import-Package: org.apache.commons.io,
+ org.eclipse.core.runtime;version="[3.7.0,4.0.0)",
  org.eclipse.equinox.security.storage;version="[1.0.0,2.0.0)",
+ org.eclipse.swt.widgets,
  org.junit.jupiter.api;version="[6.0.0,7.0.0)",
  org.junit.jupiter.api.function;version="[6.0.0,7.0.0)",
  org.junit.jupiter.params;version="[6.0.0,7.0.0)",
