@@ -120,6 +120,46 @@ curl -s -X POST \
 
 There is **no** "Improvement" issue type — use "Task" for refactoring/improvements.
 
+### Operational categorization (REQUIRED on every new case)
+
+Every case must have the **Operational categorization** field filled in. Always set it
+when creating an issue — never leave it empty. It is the cascading-select custom field
+**`customfield_10063`**; set it by option **id**:
+
+```json
+{"fields": {"customfield_10063": {"id": "<OPTION_ID>"}}}
+```
+
+| Value | Option id | Use for |
+|-------|-----------|---------|
+| Maintenance - Bug Fix | 10161 | Defects / problems in released product (type **Bug**) |
+| Maintenance - Support/Question | 10162 | Support investigations, customer questions, how-to |
+| Maintenance - Security & Compliance | 10157 | Security fixes, vulnerable deps, compliance work |
+| Maintenance - Customer Feature | 10160 | Small customer-requested feature on released product |
+| R&D - New Capability | 10156 | Brand-new feature/capability, incl. unreleased products (e.g. sqwad) |
+| R&D - General improvement | 10159 | Improvements, refactors, docs, UI modernization of existing code |
+| R&D - Platform modernization | 10158 | Framework/toolchain/platform upgrades (Angular, Eclipse, Java, build) |
+
+**AI recommendation rule:** when creating a case, the assistant picks the most likely
+value and presents it as **recommended**, then lets the user confirm or override. Classify
+from the case content, consistent with how similar existing cases are categorized:
+
+- Type **Bug** → `Maintenance - Bug Fix` (unless clearly a security/compliance issue →
+  `Maintenance - Security & Compliance`).
+- Type **New Feature** adding a new capability → `R&D - New Capability`.
+- Type **Task** → judge the intent: new API/feature surface → `R&D - New Capability`;
+  refactor / docs / UI modernization → `R&D - General improvement`; framework/toolchain
+  upgrade → `R&D - Platform modernization`.
+- **Unreleased products (sqwad / Servoy AI) are still R&D**, not Maintenance, even when the
+  work looks like a bug fix.
+- Support/question work → `Maintenance - Support/Question`.
+
+Present it to the user like: `Operational categorization: R&D - New Capability (recommended)`
+and offer the full list above so they can pick another. Verify valid options/ids live when
+unsure:
+`GET /rest/api/3/search/jql?jql='Operational categorization' is not EMPTY&fields=customfield_10063`
+reading back `.value` and `.id` from a known case.
+
 ### ADF description template
 
 Description must use ADF (Atlassian Document Format) — not plain text or markdown.
@@ -409,6 +449,9 @@ if [ "$http_code" -ge 400 ]; then echo "Error $http_code: $body"; fi
 - Do NOT pass `-Body $jsonBody` as a plain string in PowerShell — always wrap with `[System.Text.Encoding]::UTF8.GetBytes()`
 - Do NOT construct JSON via `ConvertTo-Json` on deeply nested hashtables for the request body — build the JSON string directly to avoid escaping/depth issues
 - Do NOT forget to link related issues after creation
+- Do NOT create a case without **Operational categorization** (`customfield_10063`) — it is
+  required on every new case; pick a recommended value and let the user confirm. See
+  "Operational categorization".
 - Query issue types first if unsure: `GET /rest/api/3/issue/createmeta/SVY/issuetypes`
 - Do NOT transition into `In Review` without a worklog — the SVY screen requires
   `Time Spent`; supply it as `update.worklog[].add.timeSpent` = `"1h"` (string), and never
