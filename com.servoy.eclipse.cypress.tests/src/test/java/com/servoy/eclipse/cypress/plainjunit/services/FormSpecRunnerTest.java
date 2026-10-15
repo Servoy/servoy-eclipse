@@ -109,6 +109,18 @@ public class FormSpecRunnerTest {
 	}
 
 	@Test
+	public void testFormSpecRunner_hasEnsureCypressBinaryMethod() throws NoSuchMethodException {
+		Method m = FormSpecRunner.class.getMethod("ensureCypressBinary", Path.class);
+		assertEquals(String.class, m.getReturnType(), "ensureCypressBinary must return String (null on success, error otherwise)");
+	}
+
+	@Test
+	public void testFormSpecRunner_hasConfigureCypressEnvironmentMethod() throws NoSuchMethodException {
+		Method m = FormSpecRunner.class.getMethod("configureCypressEnvironment", ProcessBuilder.class, Path.class);
+		assertEquals(void.class, m.getReturnType(), "configureCypressEnvironment must return void");
+	}
+
+	@Test
 	public void testFormSpecRunner_canBeInstantiated() {
 		FormSpecRunner runner = new FormSpecRunner();
 		assertNotNull(runner, "FormSpecRunner should be instantiable");
