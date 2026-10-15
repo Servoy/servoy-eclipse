@@ -19,6 +19,7 @@ package com.servoy.eclipse.exporter.apps.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -271,34 +272,48 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				(configuration.shouldAggregateWorkspace() ? "(checking child folders for projects as well)" : ""));
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			File wr = workspace.getRoot().getLocation().toFile();
-			importExistingAndOpenClosedProjects(wr, workspace, importedProjects, existingClosedProjects);
 
-			if (configuration.shouldAggregateWorkspace())
-			{
-				// also import existing projects in subfolders
-				for (File f : FileUtils.listFilesAndDirs(wr, FalseFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY))
-				{
-					if (f.getAbsolutePath().contains(".metadata")) continue;
-					importExistingAndOpenClosedProjects(f, workspace, importedProjects, existingClosedProjects);
-				}
-			}
-
-			outputExtra("Refreshing projects.");
-			IProject[] prjs = workspace.getRoot().getProjects();
+			// SVY-21579: opening projects triggers WST's ServerPreferenceModifyListener, which (on a fresh
+			// workspace with an empty "runtimes" preference) hands an empty string to a handler-less XML
+			// parser and prints a spurious "[Fatal Error] :1:1: Premature end of file." line to System.err.
+			// The export is unaffected; filter out only that noise line while importing/opening projects.
+			PrintStream originalErr = System.err;
+			System.setErr(new PrematureEndOfFileFilterStream(originalErr));
 			try
 			{
-				for (IProject p : prjs)
+				importExistingAndOpenClosedProjects(wr, workspace, importedProjects, existingClosedProjects);
+
+				if (configuration.shouldAggregateWorkspace())
 				{
-					if (p.isOpen() && p.exists())
+					// also import existing projects in subfolders
+					for (File f : FileUtils.listFilesAndDirs(wr, FalseFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY))
 					{
-						p.refreshLocal(IResource.DEPTH_INFINITE, null);
+						if (f.getAbsolutePath().contains(".metadata")) continue;
+						importExistingAndOpenClosedProjects(f, workspace, importedProjects, existingClosedProjects);
 					}
 				}
+
+				outputExtra("Refreshing projects.");
+				IProject[] prjs = workspace.getRoot().getProjects();
+				try
+				{
+					for (IProject p : prjs)
+					{
+						if (p.isOpen() && p.exists())
+						{
+							p.refreshLocal(IResource.DEPTH_INFINITE, null);
+						}
+					}
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+					outputError("Refresh project roots encountered a problem. Check workspace log.");
+				}
 			}
-			catch (CoreException e)
+			finally
 			{
-				ServoyLog.logError(e);
-				outputError("Refresh project roots encountered a problem. Check workspace log.");
+				System.setErr(originalErr);
 			}
 
 			ExportServoyModel sm = ServoyModelProvider.getModel();
@@ -637,6 +652,78 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		{
 			outputError("EXPORT FAILED. Cannot initialize exporter due to missing app. server starter extension.");
 			exitCode = EXIT_EXPORT_FAILED;
+		}
+	}
+
+	/**
+	 * A {@link PrintStream} wrapper that drops the single spurious line
+	 * <code>[Fatal Error] :1:1: Premature end of file.</code> that WST's
+	 * {@code ServerPreferenceModifyListener} causes a handler-less JAXP parser to write to
+	 * {@code System.err} when projects are opened on a fresh workspace (SVY-21579). Every other
+	 * byte/line is forwarded unchanged to the wrapped stream so genuine errors are never hidden.
+	 * <p>
+	 * The JAXP default error handler emits the line via {@code System.err.println(String)}, so
+	 * filtering is done line-by-line: bytes are buffered until a line terminator and the completed
+	 * line is forwarded only when it is not the known noise line.
+	 */
+	static final class PrematureEndOfFileFilterStream extends PrintStream
+	{
+		private static final String NOISE = "Premature end of file.";
+
+		private final StringBuilder lineBuffer = new StringBuilder();
+
+		PrematureEndOfFileFilterStream(PrintStream delegate)
+		{
+			super(delegate, true);
+		}
+
+		@Override
+		public void write(int b)
+		{
+			bufferByte((char)(b & 0xff));
+		}
+
+		@Override
+		public void write(byte[] buf, int off, int len)
+		{
+			for (int i = 0; i < len; i++)
+			{
+				bufferByte((char)(buf[off + i] & 0xff));
+			}
+		}
+
+		private synchronized void bufferByte(char c)
+		{
+			lineBuffer.append(c);
+			if (c == '\n')
+			{
+				flushLine();
+			}
+		}
+
+		private void flushLine()
+		{
+			String line = lineBuffer.toString();
+			lineBuffer.setLength(0);
+			// drop the known spurious "[Fatal Error] ... Premature end of file." line only
+			if (line.contains(NOISE) && line.contains("[Fatal Error]")) return;
+			super.print(line);
+		}
+
+		@Override
+		public synchronized void flush()
+		{
+			// forward any buffered partial line that was not the noise line, then flush the delegate
+			if (lineBuffer.length() > 0)
+			{
+				String line = lineBuffer.toString();
+				if (!(line.contains(NOISE) && line.contains("[Fatal Error]")))
+				{
+					super.print(line);
+				}
+				lineBuffer.setLength(0);
+			}
+			super.flush();
 		}
 	}
 
