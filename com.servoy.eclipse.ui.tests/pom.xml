@@ -115,6 +115,38 @@
 												<arg value="${timestamp_file}"/>
 											</exec>
 										</sequential>
+
+										<!-- Use non-default tomcat ports so the developer started by the tests does not clash with
+										     another Servoy/tomcat already bound to 8080/8006 on the Jenkins agent.
+										     Only done when the tarball is present (Jenkins), and then mandatory: the build fails if the
+										     ports cannot be changed. Applied on every run, also when the extraction is up-to-date. -->
+										<property name="server_xml" value="${extract_dir}/application_server/server/conf/server.xml"/>
+										<available file="${server_xml}" property="server_xml_exists"/>
+										<fail message="Cannot set the tomcat test ports: ${server_xml} does not exist"
+											if:set="tarball_exists" unless:set="server_xml_exists"/>
+										<sequential if:set="tarball_exists">
+											<replaceregexp file="${server_xml}"
+												match="(?&lt;=&lt;Connector\s{1,10}port=&quot;)\d+(?=&quot;\s+protocol=&quot;HTTP/1\.1&quot;)"
+												replace="${servoy.test.http.port}"/>
+											<replaceregexp file="${server_xml}"
+												match="(?&lt;=&lt;Server\s{1,10}port=&quot;)\d+(?=&quot;)"
+												replace="${servoy.test.shutdown.port}"/>
+											<loadfile property="server_xml_content" srcFile="${server_xml}"/>
+											<fail message="Failed to set the tomcat http port to ${servoy.test.http.port} in ${server_xml}">
+												<condition>
+													<not>
+														<matches string="${server_xml_content}" pattern="(?s).*&lt;Connector\s+port=&quot;${servoy.test.http.port}&quot;\s+protocol=&quot;HTTP/1\.1&quot;.*"/>
+													</not>
+												</condition>
+											</fail>
+											<fail message="Failed to set the tomcat shutdown port to ${servoy.test.shutdown.port} in ${server_xml}">
+												<condition>
+													<not>
+														<matches string="${server_xml_content}" pattern="(?s).*&lt;Server\s+port=&quot;${servoy.test.shutdown.port}&quot;.*"/>
+													</not>
+												</condition>
+											</fail>
+										</sequential>
 									</target>
 								</configuration>
 							</execution>
