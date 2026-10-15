@@ -49,13 +49,13 @@ class GetCypressDirTest {
 		}
 
 		@Test
-		@DisplayName("ends with com.servoy.eclipse.developer.mcp/cypress")
+		@DisplayName("ends with com.servoy.eclipse.cypress/cypress")
 		void endsWithExpectedSuffix() {
 			Path workspaceRoot = Path.of("/Users/dev/servoy-workspace");
 			Path result = runner.getCypressDir(workspaceRoot);
 
 			Path expected = workspaceRoot.resolve(".metadata").resolve(".plugins")
-					.resolve("com.servoy.eclipse.developer.mcp").resolve("cypress");
+					.resolve("com.servoy.eclipse.cypress").resolve("cypress");
 			assertEquals(expected, result);
 		}
 
@@ -69,7 +69,7 @@ class GetCypressDirTest {
 			assertTrue(result.startsWith(workspaceRoot), "Must start with workspace root for: " + root);
 			assertTrue(result.startsWith(workspaceRoot.resolve(".metadata").resolve(".plugins")),
 					"Must contain .metadata/.plugins/ for: " + root);
-			assertEquals(workspaceRoot.resolve(".metadata/.plugins/com.servoy.eclipse.developer.mcp/cypress"), result);
+			assertEquals(workspaceRoot.resolve(".metadata/.plugins/com.servoy.eclipse.cypress/cypress"), result);
 		}
 	}
 
