@@ -7,7 +7,7 @@
             <repository location="https://developer.servoy.com/sqlexplorer/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/releases/2026-06/"/>
+            <repository location="https://download.eclipse.org/releases/2026-09/"/>
             <unit id="org.eclipse.egit.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.epp.mpc.feature.group" version="0.0.0"/>
@@ -25,27 +25,24 @@
             <unit id="org.eclipse.tm4e.language_pack.feature.feature.group" version="0.0.0"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.28.0"/>
+            <repository location="https://download.eclipse.org/tools/gef/classic/release/3.29.0"/>
             <unit id="org.eclipse.draw2d.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.draw2d.sdk.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.gef.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.gef.sdk.feature.group" version="0.0.0"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="http://download.eclipse.org/nattable/releases/2.6.0/repository/"/>
+            <repository location="http://download.eclipse.org/nattable/releases/2.7.0/repository/"/>
             <unit id="org.eclipse.nebula.widgets.nattable.core.feature.feature.group" version="0.0.0"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.core.feature.source.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.feature.group" version="0.0.0"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.e4.feature.source.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.feature.group" version="0.0.0"/>
-            <unit id="org.eclipse.nebula.widgets.nattable.extension.nebula.feature.source.feature.group" version="0.0.0"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/nebula/updates/release/3.4.0"/>
             <unit id="org.eclipse.nebula.widgets.richtext.feature.feature.group" version="0.0.0"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.06/"/>
+            <repository location="https://developer.servoy.com/p2_repository/dltk_repository/2026.12/"/>
             <unit id="org.eclipse.dltk.core.servoy.feature.group" version="0.0.0"/>
             <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="0.0.0"/>
         </location>
@@ -54,7 +51,7 @@
                 <dependency>
                     <groupId>com.auth0</groupId>
                     <artifactId>java-jwt</artifactId>
-                    <version>4.6.1</version>
+                    <version>4.6.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -66,49 +63,49 @@
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.aarch64</artifactId>
-                    <version>144.0.14</version>
+                    <version>150.0.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.cocoa.macosx.x86_64</artifactId>
-                    <version>144.0.14</version>
+                    <version>150.0.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.aarch64</artifactId>
-                    <version>144.0.14</version>
+                    <version>150.0.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.gtk.linux.x86_64</artifactId>
-                    <version>144.0.14</version>
+                    <version>150.0.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.aarch64</artifactId>
-                    <version>144.0.14</version>
+                    <version>150.0.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium.cef.win32.win32.x86_64</artifactId>
-                    <version>144.0.14</version>
+                    <version>150.0.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.equo</groupId>
                     <artifactId>com.equo.chromium</artifactId>
-                    <version>144.0.14</version>
+                    <version>150.0.3</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.ethlo.time</groupId>
                     <artifactId>itu</artifactId>
-                    <version>1.16.0</version>
+                    <version>1.17.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -144,13 +141,13 @@
                 <dependency>
                     <groupId>com.fasterxml.woodstox</groupId>
                     <artifactId>woodstox-core</artifactId>
-                    <version>7.2.2</version>
+                    <version>7.3.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>com.fasterxml</groupId>
                     <artifactId>classmate</artifactId>
-                    <version>1.7.3</version>
+                    <version>1.8.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -258,7 +255,7 @@
                 <dependency>
                     <groupId>commons-codec</groupId>
                     <artifactId>commons-codec</artifactId>
-                    <version>1.22.1</version>
+                    <version>1.23.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -402,13 +399,13 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy-agent</artifactId>
-                    <version>1.18.14</version>
+                    <version>1.18.15</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.18.14</version>
+                    <version>1.18.15</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -450,7 +447,7 @@
                 <dependency>
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-lang3</artifactId>
-                    <version>3.20.0</version>
+                    <version>3.21.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -516,7 +513,7 @@
                 <dependency>
                     <groupId>org.codehaus.woodstox</groupId>
                     <artifactId>stax2-api</artifactId>
-                    <version>4.3.1</version>
+                    <version>4.3.2</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -576,13 +573,13 @@
                 <dependency>
                     <groupId>org.mockito</groupId>
                     <artifactId>mockito-core</artifactId>
-                    <version>5.23.0</version>
+                    <version>5.24.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>org.mockito</groupId>
                     <artifactId>mockito-junit-jupiter</artifactId>
-                    <version>5.23.0</version>
+                    <version>5.24.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -594,7 +591,7 @@
                 <dependency>
                     <groupId>org.owasp.encoder</groupId>
                     <artifactId>encoder</artifactId>
-                    <version>1.4.1</version>
+                    <version>1.5.0</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
