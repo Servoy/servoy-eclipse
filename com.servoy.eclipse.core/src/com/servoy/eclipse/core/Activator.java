@@ -96,7 +96,6 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.sablo.websocket.GetHttpSessionConfigurator;
 
-import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.ai.AIModelProvider;
 import com.servoy.eclipse.core.ai.ChatModel;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
@@ -132,7 +131,6 @@ import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -144,7 +142,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
-import com.servoy.j2db.server.ngclient.BodyPortal;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -897,36 +894,6 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
-								Collection<IPersist> affectedFormElements = new ArrayList<IPersist>(changes);
-								if (changes != null)
-								{
-									for (IPersist persist : changes)
-									{
-										if (persist instanceof IFormElement)
-										{
-											IPersist parent = persist.getParent();
-											while (parent instanceof IFormElement)
-											{
-												if (!affectedFormElements.contains(parent))
-												{
-													affectedFormElements.add(parent);
-												}
-												parent = parent.getParent();
-											}
-											if (parent instanceof Form && (((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE ||
-												((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
-												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST ||
-												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST_LOCKED))
-											{
-												BodyPortal hiddenPortal = new BodyPortal((Form)parent);
-												if (!affectedFormElements.contains(hiddenPortal))
-												{
-													affectedFormElements.add(hiddenPortal);
-												}
-											}
-										}
-									}
-								}
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);
 

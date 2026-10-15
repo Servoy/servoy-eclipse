@@ -25,8 +25,7 @@ class ComponentTemplateGeneratorTest {
 			+ "Bundle-SymbolicName: testpkg\n" + "NPM-PackageName: @test/testpkg\n" + "NG2-Components: TestButton\n"
 			+ "Entry-Point: projects/testpkg\n" + "\n" + "Name: button/button.spec\n" + "Web-Component: True\n" + "\n"
 			+ "Name: formcomponent/formcomponent.spec\n" + "Web-Component: True\n" + "\n"
-			+ "Name: navigator/navigator.spec\n" + "Web-Component: True\n" + "\n" + "Name: portal/portal.spec\n"
-			+ "Web-Component: True\n";
+			+ "Name: navigator/navigator.spec\n" + "Web-Component: True\n";
 
 	// A second (servoycore) package that ships the deprecated errorbean (which must
 	// still be generated because
@@ -34,7 +33,8 @@ class ComponentTemplateGeneratorTest {
 	// deprecated component (which must be skipped).
 	private static final String SERVOYCORE_MANIFEST = "Manifest-Version: 1.0\n" + "Bundle-Name: Servoy Core\n"
 			+ "Bundle-SymbolicName: servoycore\n" + "\n" + "Name: errorbean/errorbean.spec\n" + "Web-Component: True\n"
-			+ "\n" + "Name: defaultloadingindicator/defaultloadingindicator.spec\n" + "Web-Component: True\n";
+			+ "\n" + "Name: defaultloadingindicator/defaultloadingindicator.spec\n" + "Web-Component: True\n"
+			+ "\n" + "Name: portal/portal.spec\n" + "Web-Component: True\n";
 
 	private static final String ERRORBEAN_SPEC = "{\n" + "  \"name\": \"servoycore-errorbean\",\n"
 			+ "  \"deprecated\": \"true\",\n" + "  \"displayName\": \"Error Bean\",\n" + "  \"version\": 1,\n"
@@ -49,6 +49,17 @@ class ComponentTemplateGeneratorTest {
 			+ "  \"definition\": \"servoycore/defaultloadingindicator/defaultloadingindicator.js\",\n"
 			+ "  \"libraries\": [],\n" + "  \"model\": { \"showDelay\": \"int\" },\n" + "  \"handlers\": {},\n"
 			+ "  \"api\": {}\n" + "}";
+
+	// SVY-21548: a (NON-deprecated) servoycore-portal spec. The portal was removed
+	// from the
+	// ComponentTemplateGenerator skip-list, so if such a spec is present it must
+	// now be generated like
+	// any other NG2-compatible component. Re-adding the skip-list entry makes
+	// portalIsNoLongerSkipListed() fail.
+	private static final String PORTAL_SPEC = "{\n" + "  \"name\": \"servoycore-portal\",\n"
+			+ "  \"displayName\": \"Portal\",\n" + "  \"version\": 1,\n"
+			+ "  \"definition\": \"servoycore/portal/portal.js\",\n" + "  \"libraries\": [],\n"
+			+ "  \"model\": { \"relatedFoundset\": \"string\" },\n" + "  \"handlers\": {},\n" + "  \"api\": {}\n" + "}";
 
 	private static final String BUTTON_SPEC = "{\n" + "  \"name\": \"testpkg-button\",\n"
 			+ "  \"displayName\": \"Button\",\n" + "  \"version\": 1,\n"
@@ -72,11 +83,6 @@ class ComponentTemplateGeneratorTest {
 			+ "  \"definition\": \"servoycore/navigator/navigator.js\",\n" + "  \"libraries\": [],\n"
 			+ "  \"model\": { \"currentIndex\": \"int\" },\n" + "  \"handlers\": {},\n" + "  \"api\": {}\n" + "}";
 
-	private static final String PORTAL_SPEC = "{\n" + "  \"name\": \"servoycore-portal\",\n"
-			+ "  \"displayName\": \"Portal\",\n" + "  \"version\": 1,\n"
-			+ "  \"definition\": \"servoycore/portal/portal.js\",\n" + "  \"libraries\": [],\n"
-			+ "  \"model\": { \"relatedFoundset\": \"string\" },\n" + "  \"handlers\": {},\n" + "  \"api\": {}\n" + "}";
-
 	@BeforeAll
 	static void setUp() {
 		Types.getTypesInstance().registerTypes();
@@ -85,26 +91,26 @@ class ComponentTemplateGeneratorTest {
 		components.put("button/button.spec", BUTTON_SPEC);
 		components.put("formcomponent/formcomponent.spec", FORMCOMPONENT_SPEC);
 		components.put("navigator/navigator.spec", NAVIGATOR_SPEC);
-		components.put("portal/portal.spec", PORTAL_SPEC);
 		IPackageReader reader = new InMemPackageReader(MANIFEST, components);
 
 		HashMap<String, String> coreComponents = new HashMap<>();
 		coreComponents.put("errorbean/errorbean.spec", ERRORBEAN_SPEC);
 		coreComponents.put("defaultloadingindicator/defaultloadingindicator.spec", DEFAULTLOADINGINDICATOR_SPEC);
-		// The package name MUST be "servoycore": ComponentTemplateGenerator only generates templates for packages
-		// it considers NG2-compatible, and "servoycore" is treated as compatible by name (the real servoycore
-		// package has no NPM-PackageName). InMemPackageReader hardcodes "inmem" as its package name, so we override it.
-		IPackageReader coreReader = new InMemPackageReader(SERVOYCORE_MANIFEST, coreComponents)
-		{
+		coreComponents.put("portal/portal.spec", PORTAL_SPEC);
+		// The package name MUST be "servoycore": ComponentTemplateGenerator only
+		// generates templates for packages
+		// it considers NG2-compatible, and "servoycore" is treated as compatible by
+		// name (the real servoycore
+		// package has no NPM-PackageName). InMemPackageReader hardcodes "inmem" as its
+		// package name, so we override it.
+		IPackageReader coreReader = new InMemPackageReader(SERVOYCORE_MANIFEST, coreComponents) {
 			@Override
-			public String getName()
-			{
+			public String getName() {
 				return "servoycore";
 			}
 
 			@Override
-			public String getPackageName()
-			{
+			public String getPackageName() {
 				return "servoycore";
 			}
 		};
@@ -151,14 +157,35 @@ class ComponentTemplateGeneratorTest {
 	}
 
 	@Test
-	void skipsFormcomponentNavigatorPortal() {
+	void skipsFormcomponentNavigator() {
 		ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
 		Pair<StringBuilder, StringBuilder> result = generator.generateHTMLTemplate(null);
 		String template = result.getLeft().toString();
 
 		assertFalse(template.contains("<servoycore-formcomponent"));
 		assertFalse(template.contains("<servoycore-navigator"));
-		assertFalse(template.contains("<servoycore-portal"));
+	}
+
+	@Test
+	void portalIsNoLongerSkipListed() {
+		// SVY-21548: servoycore-portal was removed from the ComponentTemplateGenerator
+		// skip-list (the dead
+		// server-side portal generation path was deleted). A still-present,
+		// NON-deprecated servoycore-portal
+		// spec must therefore now be generated like any other NG2-compatible core
+		// component. Re-adding the
+		// "servoycore-portal" skip-list entry makes this test fail.
+		ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
+		Pair<StringBuilder, StringBuilder> result = generator.generateHTMLTemplate(null);
+		String template = result.getLeft().toString();
+		String viewChild = result.getRight().toString();
+
+		assertTrue(template.contains("<ng-template #servoycorePortal"),
+				"servoycore-portal is no longer skip-listed so its template must be generated; template: " + template);
+		assertTrue(template.contains("<servoycore-portal "),
+				"servoycore-portal element opening tag missing; template: " + template);
+		assertTrue(viewChild.contains("readonly servoycorePortal = viewChild<TemplateRef<any>>('servoycorePortal');"),
+				"servoycore-portal viewChild reference missing; viewChild: " + viewChild);
 	}
 
 	@Test

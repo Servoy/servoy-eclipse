@@ -400,20 +400,6 @@ public class CreateComponentCommand extends BaseRestorableCommand
 					tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 					return singlePersistWithLocationAndSize(tabPanel, args);
 				}
-				else if ("servoycore-portal".equals(name))
-				{
-					String compName = uniqueName(form, "portal");
-					Portal portal;
-					if (parentSupportingElements instanceof AbstractContainer container)
-					{
-						portal = container.createNewPortal(compName, args.getLocation());
-					}
-					else
-					{
-						portal = form.createNewPortal(compName, args.getLocation());
-					}
-					return singlePersistWithLocationAndSize(portal, args);
-				}
 				else if ("servoydefault-rectangle".equals(name))
 				{
 					RectShape shape = form.createNewRectangle(args.getLocation());

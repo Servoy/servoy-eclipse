@@ -108,8 +108,7 @@ public class ComponentTemplateGenerator
 		Map<String, Boolean> ng2Compatible = new HashMap<String, Boolean>();
 		for (WebObjectSpecification spec : specs)
 		{
-			if (spec.getName().equals("servoycore-formcomponent") || spec.getName().equals("servoycore-navigator") ||
-				spec.getName().equals("servoycore-portal"))
+			if (spec.getName().equals("servoycore-formcomponent") || spec.getName().equals("servoycore-navigator"))
 			{
 				continue; // special case for some old core components, shouldn't be generated
 			}
@@ -275,7 +274,8 @@ public class ComponentTemplateGenerator
 				// SVY-21460: the stateless formtemplate copy does not know the runtime <svy-form> element
 				// (it renders through the svy-formtemplate copy, not FormComponent), so nested forms render
 				// through its own <svy-formtemplate> selector - the self-reference, like the runtime does with <svy-form>.
-				template.append("<ng-template let-name='name'><svy-formtemplate *ngIf=\"isFormAvailable(name)\" [name]=\"name\"></svy-formtemplate></ng-template>");
+				template
+					.append("<ng-template let-name='name'><svy-formtemplate *ngIf=\"isFormAvailable(name)\" [name]=\"name\"></svy-formtemplate></ng-template>");
 			}
 			else
 			{
