@@ -39,10 +39,7 @@
 				</executions>
 				<configuration>
 					<includes>
-						<include>**/plainjunit/**/*Test.java</include>
-						<!-- Two legacy tests here use the Test* prefix (TestCssValues, TestSnapCSSPosition)
-						     instead of the *Test suffix, so match that prefix too. -->
-						<include>**/plainjunit/**/Test*.java</include>
+						<include>**/plainjunit/**/*.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -57,109 +54,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>integration</id>
-			<properties>
-				<servoy_install>${project.basedir}/testresources/servoy_lts_extracted</servoy_install>
-			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>3.1.0</version>
-						<executions>
-							<execution>
-								<id>create-artifacts-xml</id>
-								<phase>pre-integration-test</phase>
-								<goals><goal>run</goal></goals>
-								<configuration>
-									<target>
-										<mkdir dir="${project.build.directory}/work"/>
-										<touch file="${project.build.directory}/work/artifacts.xml"/>
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>prepare-servoy-install</id>
-								<phase>generate-test-resources</phase>
-								<goals><goal>run</goal></goals>
-								<configuration>
-									<target xmlns:if="ant:if" xmlns:unless="ant:unless">
-										<property name="tarball" value="${servoy.install.tarball.for.appserver}"/>
-										<property name="extract_dir" value="${project.basedir}/testresources/servoy_lts_extracted"/>
-										<property name="timestamp_file" value="${project.basedir}/testresources/servoy_lts_extracted.timestamp"/>
-
-										<!-- Only act if the tarball exists (i.e. we are on Jenkins) -->
-										<available file="${tarball}" property="tarball_exists"/>
-
-										<!-- Check if the timestamp file is at least as new as the tarball -->
-										<uptodate property="extraction_current"
-											srcfile="${tarball}" targetfile="${timestamp_file}"
-											if:set="tarball_exists"/>
-
-										<!-- If tarball exists but extraction is stale/missing: re-extract -->
-										<sequential if:set="tarball_exists" unless:set="extraction_current">
-											<delete dir="${extract_dir}" quiet="true"/>
-											<delete file="${timestamp_file}" quiet="true"/>
-											<mkdir dir="${extract_dir}"/>
-											<untar src="${tarball}" dest="${extract_dir}" compression="gzip">
-												<patternset>
-													<include name="application_server/**"/>
-													<exclude name="application_server/postgres_db/**"/>
-												</patternset>
-											</untar>
-											<!-- Stamp timestamp_file with tarball's own mtime -->
-											<exec executable="touch">
-												<arg value="-r"/>
-												<arg value="${tarball}"/>
-												<arg value="${timestamp_file}"/>
-											</exec>
-										</sequential>
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>${surefire-plugin-version}</version>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.eclipse.tycho</groupId>
-						<artifactId>tycho-surefire-plugin</artifactId>
-						<version>${tycho.version}</version>
-						<configuration>
-							<skip>false</skip>
-		                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
-		                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
-		                         automatic framework detection would otherwise pick the junit4 provider
-		                         and report "No tests found" for these pure-Jupiter tests. -->
-		                    <providerHint>junit6</providerHint>
-							<includes>
-								<include>**/integrationpde/**/*Test.java</include>
-							</includes>
-							<useUIHarness>true</useUIHarness>
-							<useUIThread>false</useUIThread>
-							<product>com.servoy.eclipse.core.ide</product>
-							<application>org.eclipse.ui.ide.workbench</application>
-							<argLine>-Xms256m -Xmx2048m -ea --add-exports=java.base/sun.security.x509=ALL-UNNAMED -Dorg.osgi.framework.system.packages.extra=sun.security.x509 -Dservoy.cloud.skipCheckout=true -Dservoy.application_server.dir=${servoy_install}/application_server -Dproperty-file=${project.basedir}/../com.servoy.eclipse.core.tests/testresources/servoy.properties -Dchromium.integration.eclipse.disable=true -Dorg.eclipse.ui.testing=true</argLine>
-							<deleteOsgiDataDirectory>false</deleteOsgiDataDirectory>
-							<dependencies>
-								<dependency>
-									<type>eclipse-plugin</type>
-									<artifactId>com.servoy.eclipse.extension.compatibility</artifactId>
-								</dependency>
-							</dependencies>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

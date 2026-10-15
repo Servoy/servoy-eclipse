@@ -37,7 +37,7 @@
 				</executions>
 				<configuration>
 					<includes>
-						<include>**/plainjunit/**/*Test.java</include>
+						<include>**/plainjunit/**/*.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -137,7 +137,7 @@
 		                         and report "No tests found" for these pure-Jupiter tests. -->
 		                    <providerHint>junit6</providerHint>
 							<includes>
-								<include>**/integrationpde/**/*Test.java</include>
+								<include>**/integrationpde/**/*.java</include>
 							</includes>
 							<useUIHarness>true</useUIHarness>
 							<useUIThread>false</useUIThread>
