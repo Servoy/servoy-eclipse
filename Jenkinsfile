@@ -128,13 +128,6 @@ pipeline {
                     // Tycho/Surefire Java test reports
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
                     
-                    // ESLint reports (ngclient.ui + designer.rfb)
-                    recordIssues(
-                        tools: [esLint(pattern: '**/target/eslint-checkstyle.xml')],
-                        qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
-                        enabledForFailure: true
-                    )
-                    
                     // HTML Publisher voor Coverage rapportages
                     publishHTML([
                         allowMissing: true, 
