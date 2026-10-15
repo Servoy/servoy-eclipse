@@ -10,6 +10,8 @@ At the start of each session, quickly verify that the repo's global skills are i
 
 4. Verify the SDD pipeline can launch its worker subagents: check that the global config (`~/.config/opencode/opencode.json`) allows the `build` agent to launch the built-in `general` subagent — i.e. `agents.build.permissions` contains a rule with `action: "subagent"`, `resource: "general"` (or `"*"`), and `effect: "allow"`. The SDD phases dispatch with `subagent(agent='general', ...)` and this permission is not granted by default. If it is missing, tell the user: "The SDD pipeline needs permission to launch the `general` subagent. Run `/install-skills` to add it."
 
+5. Verify the semantic codebase-search plugin is registered: check that the global config's `plugins` array contains an entry equal to `open-codebase-index` or starting with `open-codebase-index@`. This external package supplies the `codebase_context`/`codebase_search`/`implementation_lookup`/`call_graph`/`find_similar` tools that the `codebase-search` skill uses. If it is missing, tell the user: "The semantic codebase-search plugin (`open-codebase-index`) isn't registered. Run `/install-skills` to add it."
+
 This check should be fast — just a directory listing and a file read. Do not block on it.
 
 ## Project Overview
@@ -60,6 +62,7 @@ The built-in `edit`/`write` are acceptable **only** for files that are NOT insid
 - **Reading Java source:** use `tools["eclipse-ide"]` — `readProjectResource`, `getSource`, `getFilteredSource`, `getMethodSource`, `getClassOutline`, `readImageResource` (images), `getMarkdownOutline`/`getMarkdownSection` (large `.md` files).
 - **Searching code:** use `tools["eclipse-ide"]` — `fileSearch`, `fileSearchRegExp`, `findFiles`, `findReferences`. Use the built-in `grep`/`glob` only for non-code files (Dockerfiles, shell scripts, configs) or when the Eclipse search returns nothing.
 - **Understanding relationships:** `tools["eclipse-ide"].getTypeHierarchy`, `getMethodCallHierarchy`, `getJavaDoc`, `explainTypeResolution`, `getImportSuggestions`, `getProjectDependencies`, `getProjectLayout`, `getProjectProperties`.
+- **Code-quality analysis:** `tools["eclipse-ide"].findDeadCode` (methods with zero workspace references, excluding entry points — heuristic *candidates to review*, not proof: reflection, DI, serialization and non-Java callers can still use a "dead" method) and `tools["eclipse-ide"].getMethodMetrics` (fan-in / fan-out connectivity, for finding hubs and refactor candidates). Both read live from JDT, so they replace the old `codebase-memory` graph's dead-code and fan-out queries with always-current results.
 - **Editor / project state:** `tools["eclipse-ide"].getCurrentlyOpenedFile`, `getEditorSelection`, `listProjects`, `openProject`, `getWorkspaceOverview`.
 - **More `eclipse-coder` edit ops:** `applyTextEdits` (batched edits), `moveResource`, `createDirectories`, `refactorChangeMethodSignature`, `refactorExtractTypeToNewFile`, `refactorRenameJavaElement` (fields/methods/vars), `organizeImportsInPackage`, `undoEdit`, and `normalizeLineDelimiters`/`getLineDelimiterPreference` for line-ending issues.
 
