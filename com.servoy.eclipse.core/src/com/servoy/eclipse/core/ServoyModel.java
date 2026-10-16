@@ -1042,15 +1042,15 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			ServoyProject autoSetActiveProject = null;
 			Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 			autoSetActiveProject = getServoyProject(pluginPreferences.getString(SERVOY_ACTIVE_PROJECT));
-//			if (autoSetActiveProject == null || autoSetActiveProject.getSolution() == null)
-//			{
-//				ServoyProject[] servoyProjects = getServoyProjects();
-//				int i = 0;
-//				while ((autoSetActiveProject == null || autoSetActiveProject.getSolution() == null) && i < servoyProjects.length)
-//				{
-//					autoSetActiveProject = servoyProjects[i++];
-//				}
-//			}
+			//			if (autoSetActiveProject == null || autoSetActiveProject.getSolution() == null)
+			//			{
+			//				ServoyProject[] servoyProjects = getServoyProjects();
+			//				int i = 0;
+			//				while ((autoSetActiveProject == null || autoSetActiveProject.getSolution() == null) && i < servoyProjects.length)
+			//				{
+			//					autoSetActiveProject = servoyProjects[i++];
+			//				}
+			//			}
 			if (autoSetActiveProject != null)
 			{
 				activatingProject.set(true);
@@ -1076,7 +1076,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				pluginPreferences.setToDefault(SERVOY_ACTIVE_PROJECT);
 				updateWorkingSet();
 				fireLoadingDone();
-//				ServoyLog.logInfo("Cannot find any valid solution to activate."); // unneeded logging
+				//				ServoyLog.logInfo("Cannot find any valid solution to activate."); // unneeded logging
 			}
 		}
 	}
@@ -2776,6 +2776,42 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	}
 
 	/**
+	 * Returns true when the composite persist's OWN serialized file (its .frm, or - for a Form - its form-level .less
+	 * stylesheet) is among the changed files, meaning the full editing persist must be refreshed. Returns false when
+	 * only child files (e.g. a child script .js) changed, in which case the editing composite must not be overwritten
+	 * (SVY-21249).
+	 *
+	 * @param persist the composite persist being visited
+	 * @param solutionParentDir the parent directory of the solution project location (the workspace folder that
+	 *            contains the solution project), used as the base to resolve the relative serialized paths
+	 * @param changedFilePaths absolute paths of the files that actually changed on disk
+	 */
+	static boolean isOwnCompositeFileChanged(IPersist persist, File solutionParentDir, Set<String> changedFilePaths)
+	{
+		// the composite's own file, e.g. the form's .frm
+		String ownFilePath = new File(solutionParentDir, SolutionSerializer.getRelativeFilePath(persist, false)).getAbsolutePath();
+		if (changedFilePaths.contains(ownFilePath))
+		{
+			return true;
+		}
+
+		// a form's own stylesheet (forms/<form>.less) is serialized separately from the .frm, but a change to it still
+		// flags the Form persist changed; treat it as an own-file change so the full editing persist refresh re-pushes
+		// the recompiled form CSS to the designer preview (SVY-21576).
+		if (persist instanceof Form form)
+		{
+			String lessFilePath = new File(solutionParentDir,
+				SolutionSerializer.getRelativePath(persist, false) + form.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION).getAbsolutePath();
+			if (changedFilePaths.contains(lessFilePath))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * @param project
 	 * @param solution
 	 * @param changedFiles
@@ -2842,14 +2878,10 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// If this is a composite (e.g. Form) that is flagged changed but its own file did not change on
 						// disk (only a child script element .js changed/was added), do NOT overwrite the whole editing
 						// composite - that would discard unsaved editor changes (e.g. a just-assigned onAction). The
-						// changed script child is handled separately as an IScriptElement below.
-						boolean ownFileChanged = true;
-						if (compositeWithItems)
-						{
-							String ownFilePath = new File(solutionLocationDir.getParentFile(),
-								SolutionSerializer.getRelativeFilePath(persist, false)).getAbsolutePath();
-							ownFileChanged = changedFilePaths.contains(ownFilePath);
-						}
+						// changed script child is handled separately as an IScriptElement below. A changed form .less
+						// stylesheet does count as an own-file change so the preview is refreshed (SVY-21576).
+						boolean ownFileChanged = !compositeWithItems ||
+							isOwnCompositeFileChanged(persist, solutionLocationDir.getParentFile(), changedFilePaths);
 						if (compositeWithItems && !ownFileChanged)
 						{
 							// only the child script element(s) changed; update just those into the editing solution
