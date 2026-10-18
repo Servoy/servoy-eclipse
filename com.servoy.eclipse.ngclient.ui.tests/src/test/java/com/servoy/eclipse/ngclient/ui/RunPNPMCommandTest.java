@@ -2,6 +2,7 @@ package com.servoy.eclipse.ngclient.ui;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,12 +28,18 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
  * method. There is no package-private/public seam for it, so these tests invoke it via reflection - the smallest
  * accessible seam. No processes are spawned; this is pure list-to-list logic.
  * </p>
+ * <p>
+ * SVY-21502 retired the SVY-21456 stopgap: {@code addUnblockDepBuildsFlag} and the unconditional
+ * {@code --config.strictDepBuilds=false} appended on every package-mutating verb were removed (per-solution
+ * allow/deny lists drive {@code allowBuilds} in the generated {@code pnpm-workspace.yaml} instead). These tests
+ * therefore assert the verb translation no longer appends that unblock flag on ANY verb.
+ * </p>
  */
 class RunPNPMCommandTest
 {
 	/**
-	 * The flag {@code RunPNPMCommand} appends to every package-mutating verb so pnpm 11+'s strictDepBuilds does not
-	 * turn the "ignored build scripts" warning into a hard failure (see {@code addUnblockDepBuildsFlag}).
+	 * The flag the SVY-21456 stopgap used to append to every package-mutating verb. SVY-21502 removed that stopgap,
+	 * so the verb translation must NOT emit this flag anymore (asserted below).
 	 */
 	private static final String UNBLOCK_FLAG = "--config.strictDepBuilds=false";
 
@@ -75,27 +82,27 @@ class RunPNPMCommandTest
 	class Install
 	{
 		@Test
-		@DisplayName("bare 'install' (no package args) maps to pnpm 'install' (+ strictDepBuilds unblock flag)")
+		@DisplayName("bare 'install' (no package args) maps to pnpm 'install' with no unblock flag")
 		void bareInstallMapsToInstall()
 		{
 			List<String> result = translate(List.of("install"));
-			assertIterableEquals(List.of("install", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("install"), result);
 		}
 
 		@Test
-		@DisplayName("'install <pkg...> <path>' maps to pnpm 'add <pkg...> <path>' (+ strictDepBuilds unblock flag)")
+		@DisplayName("'install <pkg...> <path>' maps to pnpm 'add <pkg...> <path>' with no unblock flag")
 		void installWithPackagesMapsToAdd()
 		{
 			List<String> result = translate(List.of("install", "pkgA", "pkgB", "./dist-public/"));
-			assertIterableEquals(List.of("add", "pkgA", "pkgB", "./dist-public/", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("add", "pkgA", "pkgB", "./dist-public/"), result);
 		}
 
 		@Test
-		@DisplayName("'install <singlePkg>' maps to pnpm 'add <singlePkg>' (+ strictDepBuilds unblock flag)")
+		@DisplayName("'install <singlePkg>' maps to pnpm 'add <singlePkg>' with no unblock flag")
 		void installWithSinglePackageMapsToAdd()
 		{
 			List<String> result = translate(List.of("install", "@servoy/public"));
-			assertIterableEquals(List.of("add", "@servoy/public", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("add", "@servoy/public"), result);
 		}
 
 		@Test
@@ -105,7 +112,7 @@ class RunPNPMCommandTest
 			List<String> result = translate(List.of("install", "./dist-public/"));
 			assertAll(
 				() -> assertEquals("add", result.get(0)),
-				() -> assertIterableEquals(List.of("add", "./dist-public/", UNBLOCK_FLAG), result));
+				() -> assertIterableEquals(List.of("add", "./dist-public/"), result));
 		}
 	}
 
@@ -113,11 +120,11 @@ class RunPNPMCommandTest
 	class Ci
 	{
 		@Test
-		@DisplayName("'ci' maps to pnpm 'install --frozen-lockfile' (+ strictDepBuilds unblock flag)")
+		@DisplayName("'ci' maps to pnpm 'install --frozen-lockfile' with no unblock flag")
 		void ciMapsToFrozenLockfile()
 		{
 			List<String> result = translate(List.of("ci"));
-			assertIterableEquals(List.of("install", "--frozen-lockfile", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("install", "--frozen-lockfile"), result);
 		}
 
 		@Test
@@ -133,19 +140,19 @@ class RunPNPMCommandTest
 	class Update
 	{
 		@Test
-		@DisplayName("'update' maps to pnpm 'update' (+ strictDepBuilds unblock flag)")
+		@DisplayName("'update' maps to pnpm 'update' with no unblock flag")
 		void updateMapsToUpdate()
 		{
 			List<String> result = translate(List.of("update"));
-			assertIterableEquals(List.of("update", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("update"), result);
 		}
 
 		@Test
-		@DisplayName("'update <pkg>' preserves trailing package args (+ strictDepBuilds unblock flag)")
+		@DisplayName("'update <pkg>' preserves trailing package args with no unblock flag")
 		void updateKeepsPackageArgs()
 		{
 			List<String> result = translate(List.of("update", "@servoy/public"));
-			assertIterableEquals(List.of("update", "@servoy/public", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("update", "@servoy/public"), result);
 		}
 	}
 
@@ -153,19 +160,19 @@ class RunPNPMCommandTest
 	class Uninstall
 	{
 		@Test
-		@DisplayName("'uninstall <pkg>' maps to pnpm 'remove <pkg>' (+ strictDepBuilds unblock flag)")
+		@DisplayName("'uninstall <pkg>' maps to pnpm 'remove <pkg>' with no unblock flag")
 		void uninstallMapsToRemove()
 		{
 			List<String> result = translate(List.of("uninstall", "@servoy/public"));
-			assertIterableEquals(List.of("remove", "@servoy/public", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("remove", "@servoy/public"), result);
 		}
 
 		@Test
-		@DisplayName("'uninstall' preserves multiple package args (+ strictDepBuilds unblock flag)")
+		@DisplayName("'uninstall' preserves multiple package args with no unblock flag")
 		void uninstallKeepsMultiplePackages()
 		{
 			List<String> result = translate(List.of("uninstall", "pkgA", "pkgB"));
-			assertIterableEquals(List.of("remove", "pkgA", "pkgB", UNBLOCK_FLAG), result);
+			assertIterableEquals(List.of("remove", "pkgA", "pkgB"), result);
 		}
 	}
 
@@ -231,6 +238,23 @@ class RunPNPMCommandTest
 	}
 
 	@Nested
+	class NoUnblockFlag
+	{
+		@Test
+		@DisplayName("SVY-21502: no package-mutating verb appends --config.strictDepBuilds=false anymore")
+		void noVerbEmitsUnblockFlag()
+		{
+			assertAll(
+				() -> assertFalse(translate(List.of("install")).contains(UNBLOCK_FLAG), "install"),
+				() -> assertFalse(translate(List.of("install", "pkgA", "./dist-public/")).contains(UNBLOCK_FLAG), "add"),
+				() -> assertFalse(translate(List.of("ci")).contains(UNBLOCK_FLAG), "ci"),
+				() -> assertFalse(translate(List.of("update")).contains(UNBLOCK_FLAG), "update"),
+				() -> assertFalse(translate(List.of("uninstall", "@servoy/public")).contains(UNBLOCK_FLAG), "remove"),
+				() -> assertFalse(translate(List.of("run", "build_debug")).contains(UNBLOCK_FLAG), "run"));
+		}
+	}
+
+	@Nested
 	class Passthrough
 	{
 		@Test
@@ -266,14 +290,14 @@ class RunPNPMCommandTest
 
 	static java.util.stream.Stream<Arguments> verbTranslations()
 	{
-		// package-mutating verbs (install/add, ci, update, remove) get the strictDepBuilds unblock flag appended;
-		// 'run'/'run-script' do not (they only run a script, no dependency mutation).
+		// SVY-21502: no verb appends the strictDepBuilds unblock flag anymore; the generated pnpm-workspace.yaml's
+		// allowBuilds map (from the committed allow/deny lists) is what controls dependency build scripts now.
 		return java.util.stream.Stream.of(
-			Arguments.of(List.of("install"), List.of("install", UNBLOCK_FLAG)),
-			Arguments.of(List.of("install", "pkgA", "./dist-public/"), List.of("add", "pkgA", "./dist-public/", UNBLOCK_FLAG)),
-			Arguments.of(List.of("ci"), List.of("install", "--frozen-lockfile", UNBLOCK_FLAG)),
-			Arguments.of(List.of("update"), List.of("update", UNBLOCK_FLAG)),
-			Arguments.of(List.of("uninstall", "@servoy/public"), List.of("remove", "@servoy/public", UNBLOCK_FLAG)),
+			Arguments.of(List.of("install"), List.of("install")),
+			Arguments.of(List.of("install", "pkgA", "./dist-public/"), List.of("add", "pkgA", "./dist-public/")),
+			Arguments.of(List.of("ci"), List.of("install", "--frozen-lockfile")),
+			Arguments.of(List.of("update"), List.of("update")),
+			Arguments.of(List.of("uninstall", "@servoy/public"), List.of("remove", "@servoy/public")),
 			Arguments.of(List.of("run", "build_debug_nowatch"), List.of("run", "build_debug_nowatch")),
 			Arguments.of(List.of("run-script", "build_debug"), List.of("run", "build_debug")));
 	}

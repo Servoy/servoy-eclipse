@@ -1,3 +1,2 @@
 nodeLinker: hoisted
 shamefullyHoist: true
-strictDepBuilds: false

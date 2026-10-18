@@ -197,6 +197,7 @@ import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
+import com.servoy.eclipse.ngclient.ui.EditPnpmBuildApprovalsAction;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
@@ -3012,6 +3013,11 @@ public class SolutionExplorerView extends ViewPart
 		{
 			manager.add(new Separator());
 			manager.add(new CopySourceFolderAction());
+			// SVY-21502: review/edit the per-solution pnpm dependency build-script allow/deny lists
+			if (selectedTreeNode.getRealObject() instanceof Solution)
+			{
+				manager.add(new EditPnpmBuildApprovalsAction(((Solution)selectedTreeNode.getRealObject()).getName()));
+			}
 		}
 		// there is a validate menu added for stuff with a resource
 		if (selectedTreeNode.getAdapter(org.eclipse.core.resources.IResource.class) != null)

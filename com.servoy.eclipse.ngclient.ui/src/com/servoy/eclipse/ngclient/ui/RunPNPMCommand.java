@@ -64,7 +64,39 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	private Thread workerThread;
 	private boolean stillReadingOutput;
 	private static boolean ngBuildRunning;
+
+	// SVY-21502: while > 0, every pnpm command demotes strictDepBuilds for its own run only (scoped env, never
+	// persisted) so a package-mutating command that pulls in a NEW dependency with a pending build script does not
+	// hard-fail with ERR_PNPM_IGNORED_BUILDS. WebPackagesListener wraps the install block in this window, then turns
+	// it off and runs discovery + the approve/deny prompt + 'pnpm rebuild' so the approved scripts actually run.
+	// It is a bundle-static counter (not the retired blanket stopgap and not a user-facing opt-out) that only the
+	// in-process build flow toggles; the generated pnpm-workspace.yaml always keeps strictDepBuilds: true.
+	private static volatile int buildScriptDiscoveryDemotion;
 	private int exitCode = -1;
+
+	/**
+	 * SVY-21502: opens a window in which every pnpm command run (on any thread) demotes <code>strictDepBuilds</code>
+	 * for its own invocation only, so a package install that materializes a brand-new dependency with a pending
+	 * build script does not hard-fail. MUST be paired with {@link #endBuildScriptDiscoveryDemotion()} in a
+	 * try/finally. Nestable (counted). The persisted <code>pnpm-workspace.yaml</code> is unaffected.
+	 */
+	public static synchronized void beginBuildScriptDiscoveryDemotion()
+	{
+		buildScriptDiscoveryDemotion++;
+	}
+
+	/**
+	 * SVY-21502: closes a {@link #beginBuildScriptDiscoveryDemotion()} window. Safe to over-call (clamped at 0).
+	 */
+	public static synchronized void endBuildScriptDiscoveryDemotion()
+	{
+		if (buildScriptDiscoveryDemotion > 0) buildScriptDiscoveryDemotion--;
+	}
+
+	private static synchronized boolean isBuildScriptDiscoveryDemotion()
+	{
+		return buildScriptDiscoveryDemotion > 0;
+	}
 
 	private final ReentrantLock processLock = new ReentrantLock();
 
@@ -179,6 +211,13 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 			environment.put(pathkey, path);
 			environment.put("NODE_OPTIONS", "--max-old-space-size=4096");
 			environment.put("NG_PERSISTENT_BUILD_CACHE", "1");
+			// SVY-21502: during the install window, demote strictDepBuilds for THIS run only so a package install
+			// that pulls in a new dependency with a pending build script does not hard-fail; the persisted
+			// pnpm-workspace.yaml keeps strictDepBuilds: true and discovery + rebuild happen right after.
+			if (isBuildScriptDiscoveryDemotion())
+			{
+				environment.put("pnpm_config_strict_dep_builds", "false");
+			}
 			if (!extraEnvironment.isEmpty())
 			{
 				environment.putAll(extraEnvironment);
@@ -408,22 +447,18 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 					result.add("add");
 					result.addAll(rest);
 				}
-				addUnblockDepBuildsFlag(result);
 				break;
 			case "ci" :
 				result.add("install");
 				result.add("--frozen-lockfile");
-				addUnblockDepBuildsFlag(result);
 				break;
 			case "update" :
 				result.add("update");
 				result.addAll(rest);
-				addUnblockDepBuildsFlag(result);
 				break;
 			case "uninstall" :
 				result.add("remove");
 				result.addAll(rest);
-				addUnblockDepBuildsFlag(result);
 				break;
 			case "run" :
 			case "run-script" :
@@ -439,19 +474,6 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 				break;
 		}
 		return result;
-	}
-
-	/**
-	 * QUICK UNBLOCK (SVY-21456): pnpm 11+ turns the "Ignored build scripts" warning into a hard exit-1 failure
-	 * (ERR_PNPM_IGNORED_BUILDS) via strictDepBuilds when a dependency ships an install/postinstall build script that
-	 * is not on pnpm's onlyBuiltDependencies allow-list. npm never failed on this. Until proper per-solution
-	 * approval of dependency build scripts is designed (Developer UI prompt + persisted in the solution so the
-	 * headless WAR export can build unattended - tracked as a separate case), disable the strict check on the
-	 * package-mutating verbs so ignored build scripts stay a warning, matching npm's previous behaviour.
-	 */
-	private static void addUnblockDepBuildsFlag(List<String> result)
-	{
-		result.add("--config.strictDepBuilds=false");
 	}
 
 	/**
