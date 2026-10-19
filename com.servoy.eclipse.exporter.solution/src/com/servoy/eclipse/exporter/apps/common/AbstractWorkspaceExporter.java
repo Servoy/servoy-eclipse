@@ -670,17 +670,24 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 	{
 		private static final String NOISE = "Premature end of file.";
 
-		private final StringBuilder lineBuffer = new StringBuilder();
+		// the real stream we forward to; written to directly (never via super.*) so the
+		// StreamEncoder inside PrintStream cannot route bytes back into this.write (SVY-21579)
+		private final PrintStream delegate;
+
+		// raw bytes of the current (not yet terminated) line
+		private final java.io.ByteArrayOutputStream lineBuffer = new java.io.ByteArrayOutputStream();
 
 		PrematureEndOfFileFilterStream(PrintStream delegate)
 		{
-			super(delegate, true);
+			// give PrintStream a throwaway sink; we never let it reach super's buffer/encoder
+			super(java.io.OutputStream.nullOutputStream(), true);
+			this.delegate = delegate;
 		}
 
 		@Override
 		public void write(int b)
 		{
-			bufferByte((char)(b & 0xff));
+			bufferByte(b);
 		}
 
 		@Override
@@ -688,14 +695,14 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		{
 			for (int i = 0; i < len; i++)
 			{
-				bufferByte((char)(buf[off + i] & 0xff));
+				bufferByte(buf[off + i]);
 			}
 		}
 
-		private synchronized void bufferByte(char c)
+		private synchronized void bufferByte(int b)
 		{
-			lineBuffer.append(c);
-			if (c == '\n')
+			lineBuffer.write(b);
+			if (b == '\n')
 			{
 				flushLine();
 			}
@@ -703,27 +710,29 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 		private void flushLine()
 		{
-			String line = lineBuffer.toString();
-			lineBuffer.setLength(0);
+			byte[] bytes = lineBuffer.toByteArray();
+			lineBuffer.reset();
+			String line = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
 			// drop the known spurious "[Fatal Error] ... Premature end of file." line only
 			if (line.contains(NOISE) && line.contains("[Fatal Error]")) return;
-			super.print(line);
+			delegate.write(bytes, 0, bytes.length);
 		}
 
 		@Override
 		public synchronized void flush()
 		{
 			// forward any buffered partial line that was not the noise line, then flush the delegate
-			if (lineBuffer.length() > 0)
+			if (lineBuffer.size() > 0)
 			{
-				String line = lineBuffer.toString();
+				byte[] bytes = lineBuffer.toByteArray();
+				lineBuffer.reset();
+				String line = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
 				if (!(line.contains(NOISE) && line.contains("[Fatal Error]")))
 				{
-					super.print(line);
+					delegate.write(bytes, 0, bytes.length);
 				}
-				lineBuffer.setLength(0);
 			}
-			super.flush();
+			delegate.flush();
 		}
 	}
 
