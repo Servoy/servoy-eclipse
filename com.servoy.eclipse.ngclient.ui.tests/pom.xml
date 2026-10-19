@@ -51,6 +51,11 @@
 				<version>${tycho.version}</version>
 				<configuration>
 					<skip>true</skip>
+                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
+                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
+                         automatic framework detection would otherwise pick the junit4 provider
+                         and report "No tests found" for these pure-Jupiter tests. -->
+                    <providerHint>junit6</providerHint>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -29,12 +29,12 @@
     <stringAttribute key="location" value="${workspace_loc}/../tests-pde-integration-base"/>
     <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/com.servoy.eclipse.ui.tests/src/test/java/com/servoy/eclipse/ui/tests/integrationpde"/>
+        <listEntry value="/com.servoy.eclipse.developer.mcp.tests/src/test/java/com/servoy/eclipse/developer/mcp/integrationpde"/>
     </listAttribute>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="2"/>
     </listAttribute>
-    <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value="=com.servoy.eclipse.ui.tests/src\/test\/java=/test=/true=/&lt;com.servoy.eclipse.ui.tests.integrationpde"/>
+    <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value="=com.servoy.eclipse.developer.mcp.tests/src\/test\/java=/test=/true=/&lt;com.servoy.eclipse.developer.mcp.integrationpde"/>
     <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
     <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
     <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit6"/>
@@ -44,7 +44,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value=""/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl}"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.servoy.eclipse.ui.tests"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.servoy.eclipse.developer.mcp.tests"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms256m -Xmx2048m -ea --add-exports=java.base/sun.security.x509=ALL-UNNAMED -Dorg.osgi.framework.system.packages.extra=sun.security.x509 -Dservoy.cloud.skipCheckout=true -Dservoy.application_server.dir=&quot;${servoy_install}/application_server/&quot; -Dproperty-file=&quot;${workspace_loc:com.servoy.eclipse.core.tests/testresources}/servoy.properties&quot; -Dchromium.integration.eclipse.disable=true -Dorg.eclipse.ui.testing=true"/>
     <stringAttribute key="pde.version" value="3.3"/>
