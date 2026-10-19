@@ -1,7 +1,7 @@
 {
   "name": "ngclient2",
   "version": "2024.3.1",
-  "description": "Servoy NGClient2 2024.3.11",
+  "description": "Servoy NGClient2 2024.3.12",
   "license": "GNU Affero General Public License",
   "scripts": {
     "ng": "ng",
