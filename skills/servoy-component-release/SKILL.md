@@ -7,8 +7,13 @@ description: "Use when releasing a Servoy component package: create a git tag an
 
 You are the **orchestrator** for releasing a Servoy component package. This skill tags the repository, builds the release zip, generates a changelog from git commits, and publishes a GitHub release using the GitHub CLI (`gh`).
 
+## Run in the current session — do not delegate
+
+Run every phase of this pipeline **directly in the session that invoked the skill**. Do **not** spawn a subagent or child session to carry out any phase. All confirmations (version, start tag, publish, version bump) and all status output **must appear in the user's current session** so the user sees them inline, without opening a separate session. If you are already running inside a subagent when the skill is invoked, continue there — but never hand a phase off to a *further* child session. Keeping the whole flow in one session is a requirement, not a preference: the user relies on seeing each question and each step as it happens.
+
 ## Design Principles
 
+- **Visible-by-default**: The entire pipeline runs in the invoking session. No phase is delegated to a subagent, so every prompt and every status line is visible to the user inline.
 - **Draft-first**: The default action creates a *draft* release — nothing is tagged or published until a human explicitly publishes. This is fully reversible.
 - **State-aware**: Always detect what already exists at the target tag before acting, and tell the user what will happen.
 - **Confirm before irreversible steps**: Never create/push a tag or publish a release without explicit user confirmation.
@@ -68,6 +73,12 @@ The version is **always** read from the 3 version files. It is never passed as a
 6. **Ask the user to confirm the version is correct** before continuing.
 
 7. **Confirm the working tree** is clean, on the correct release branch, and pushed to the remote. If there are uncommitted changes, report them and let the user decide.
+
+8. **Capture the release branch (tag target).** Read the current branch and use it as the release target for every `gh release` call:
+   ```bash
+   git rev-parse --abbrev-ref HEAD
+   ```
+   Call this `<branch>` (e.g. `2024.3`). This is critical: `gh release create` without `--target` defaults the tag to the repository's **default branch** (usually `master`), NOT the branch you are releasing from. On a maintenance line (e.g. `2024.3`) that silently tags the wrong commit — a `master`-only commit that is not even on the release branch. **Always pass `--target <branch>`** so the tag lands on the branch tip you are actually releasing. Confirm `<branch>` is the intended release branch with the user.
 
 ---
 
@@ -160,12 +171,14 @@ This is the default action when no `publish` argument is given.
 ```bash
 gh release create v<version> \
   --draft \
+  --target <branch> \
   --title "<Bundle-Name> <version>" \
   --notes-file <changelog-file> \
   <path-to-built.zip>
 ```
 
-- `--draft` means **no git tag is created or pushed yet** — the tag is only created when the draft is published. The draft is fully reversible (delete it and nothing was tagged).
+- `--target <branch>` pins the tag to the release branch captured in Phase 0 (e.g. `2024.3`). **Never omit this** — without it GitHub targets the repository's default branch (`master`) and, when the draft is later published, tags the wrong commit. This is the single most common cause of a maintenance release being tagged on `master`.
+- `--draft` means **no git tag is created or pushed yet** — the tag is only created when the draft is published. The draft is fully reversible (delete it and nothing was tagged). The `--target` is stored on the draft and applied at publish time.
 - The built zip is attached as the asset.
 - Output the **draft edit URL** returned by `gh` so the user can review and edit it in the GitHub UI.
 - **No version bump** on draft creation — the version is not consumed until the release is actually published.
@@ -183,21 +196,37 @@ gh release view v<version>
 Determine one of three states:
 
 ### Draft exists
-Tell the user: *"A draft release for `v<version>` exists at `<url>`. Publishing will promote it: it creates and pushes the tag `v<version>` and makes the release public."* Ask for confirmation, then:
+**First verify the draft's tag target matches the release branch.** A draft created without `--target` carries `master` as its `targetCommitish`; promoting it then tags the wrong commit. Check it:
 ```bash
-gh release edit v<version> --draft=false
+gh release view v<version> --json targetCommitish --jq .targetCommitish
+```
+If it does not equal `<branch>` (the current release branch from Phase 0), **repoint it before publishing**:
+```bash
+gh release edit v<version> --target <branch>
+```
+Then tell the user: *"A draft release for `v<version>` exists at `<url>`, targeting `<branch>`. Publishing will promote it: it creates and pushes the tag `v<version>` at the tip of `<branch>` and makes the release public."* Ask for confirmation, then:
+```bash
+gh release edit v<version> --draft=false --target <branch>
 ```
 Promoting a draft is when the tag `v<version>` is created on GitHub. No rebuild — the draft already has its notes and asset.
+
+**After publishing, verify the tag landed on the release branch:**
+```bash
+git fetch origin --tags
+git merge-base --is-ancestor $(git rev-list -n1 v<version>) origin/<branch> && echo "tag on <branch>" || echo "WRONG: tag not on <branch>"
+```
+If the tag is on the wrong commit, the corrective retag is: delete the remote tag (`git push origin :refs/tags/v<version>` — the release reverts to draft), recreate the tag on the branch tip (`git tag v<version> <branch-tip-sha> && git push origin v<version>`), then `gh release edit v<version> --draft=false --target <branch>`. The release notes and zip asset are preserved throughout.
 
 ### No release exists
 Tell the user: *"No release exists for `v<version>`. I'll run a full publish: build the zip, generate the changelog, then create and push the tag `v<version>` and publish immediately."* Ask for confirmation, then run **Phase 1** and **Phase 2**, and:
 ```bash
 gh release create v<version> \
+  --target <branch> \
   --title "<Bundle-Name> <version>" \
   --notes-file <changelog-file> \
   <path-to-built.zip>
 ```
-(No `--draft` — this creates the tag and publishes in one step.)
+(No `--draft` — this creates the tag and publishes in one step. `--target <branch>` ensures the tag lands on the release branch, not the default branch.)
 
 ### Published (non-draft) release already exists
 Tell the user: *"`v<version>` is already published at `<url>`. Published assets are never overwritten."* → **HARD STOP.** Do nothing further.
@@ -209,7 +238,7 @@ Tell the user: *"`v<version>` is already published at `<url>`. Published assets 
 ## Phase 4 — Verify
 
 - **Draft:** print the draft edit URL. Note that the tag `v<version>` is **NOT** yet created, and remind the user to publish it (via the GitHub UI or `/release publish`).
-- **Published:** print the public release URL. Confirm the tag `v<version>` exists (`gh release view v<version>`) and that the zip asset uploaded successfully.
+- **Published:** print the public release URL. Confirm the tag `v<version>` exists (`gh release view v<version>`), that the zip asset uploaded successfully, and that the **tag commit is on the release branch** (`git merge-base --is-ancestor $(git rev-list -n1 v<version>) origin/<branch>`). A tag that is not an ancestor of `<branch>` means it was targeted at the wrong branch — apply the corrective retag from Phase 3 (publish).
 
 ---
 
