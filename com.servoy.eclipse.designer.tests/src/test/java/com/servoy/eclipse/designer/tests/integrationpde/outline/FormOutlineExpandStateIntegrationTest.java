@@ -28,8 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+import com.servoy.eclipse.core.tests.integration.utils.RunOnDisplayThreadExtension;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
-import com.servoy.eclipse.designer.tests.integrationpde.utils.RunOnDisplayThreadExtension;
 
 @DisplayName("FormOutlinePage expand state preservation (SVY-21202)")
 @ExtendWith(RunOnDisplayThreadExtension.class)

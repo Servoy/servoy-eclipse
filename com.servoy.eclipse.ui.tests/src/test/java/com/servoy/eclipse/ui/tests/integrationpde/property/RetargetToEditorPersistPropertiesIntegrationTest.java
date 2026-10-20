@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.servoy.eclipse.core.tests.integration.utils.RunOnDisplayThreadExtension;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 
 /**
@@ -36,48 +36,20 @@ import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
  *
  * <p>
  * {@code RetargetToEditorPersistProperties.setPropertyValue()}/{@code resetPropertyValue()}
- * call {@code Display.getCurrent()}, which requires a live SWT Display on the
- * current thread. A Display is created once for the whole class (SWT only
- * allows one Display per thread) and disposed afterwards.
+ * call {@code Display.getCurrent()}, which requires the current thread to be the
+ * SWT display thread. The tests must not create their own Display (GTK allows only
+ * one, and the running workbench already owns it), so
+ * {@link RunOnDisplayThreadExtension} runs every lifecycle/test method on the
+ * existing display thread.
  *
  */
+@ExtendWith(RunOnDisplayThreadExtension.class)
 public class RetargetToEditorPersistPropertiesIntegrationTest {
-	private static Display display;
-
 	private StubPropertySource delegate;
 	private TestableRetargetProperties retarget;
 
-	@AfterAll
-	public static void tearDownDisplay() {
-		if (display != null && !display.isDisposed()) {
-			display.dispose();
-		}
-		display = null;
-	}
-
 	@BeforeEach
 	public void setUp() {
-		// RetargetToEditorPersistProperties.setPropertyValue()/resetPropertyValue() call
-		// Display.getCurrent(), which is thread-local: it only finds a Display that was
-		// created on this exact thread. Create it here (in @BeforeEach, run on the same
-		// thread as the @Test method) rather than in @BeforeAll, since some JUnit
-		// runners are not guaranteed to run class-level fixtures on the same thread as
-		// the test method itself.
-		if (Display.getCurrent() == null) {
-			try {
-				display = new Display();
-			} catch (Throwable t) {
-				throw new RuntimeException("Display creation failed on thread "
-						+ Thread.currentThread().getName() + " (id=" + Thread.currentThread().getId() + ")", t);
-			}
-			if (Display.getCurrent() == null) {
-				throw new IllegalStateException(
-						"Display was created but Display.getCurrent() is still null on thread "
-								+ Thread.currentThread().getName() + " (id=" + Thread.currentThread().getId()
-								+ "); created display=" + display + " current-thread-of-display="
-								+ (display == null ? "n/a" : display.getThread()));
-			}
-		}
 		delegate = new StubPropertySource();
 		retarget = new TestableRetargetProperties(delegate);
 	}

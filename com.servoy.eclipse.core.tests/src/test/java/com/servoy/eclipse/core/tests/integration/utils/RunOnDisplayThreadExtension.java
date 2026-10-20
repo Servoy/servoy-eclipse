@@ -1,4 +1,4 @@
-package com.servoy.eclipse.designer.tests.integrationpde.utils;
+package com.servoy.eclipse.core.tests.integration.utils;
 
 import java.lang.reflect.Method;
 
@@ -11,9 +11,10 @@ import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
  * Runs the {@code @BeforeEach}, {@code @Test} and {@code @AfterEach} methods of the annotated test class (and of its
  * {@code @Nested} classes) on the SWT display thread.
  * <p>
- * PDE integration tests are not guaranteed to run on the UI thread (the workbench owns the display thread), while SWT
- * widgets can only be created and used on it. Without this, creating a {@code Shell} in a test fails with
- * {@code SWTException: Invalid thread access}.
+ * PDE integration tests are not guaranteed to run on the UI thread (the workbench owns the display thread, tests run on
+ * {@code WorkbenchTestable}), while SWT widgets can only be created and used on it. Tests must also never create their own
+ * {@code Display}: on GTK (Linux/Jenkins) a second Display fails with {@code SWTError: Not implemented [multiple displays]}.
+ * Code under test that uses {@code Display.getCurrent()} works because the test body runs on the display thread.
  */
 public class RunOnDisplayThreadExtension implements InvocationInterceptor
 {

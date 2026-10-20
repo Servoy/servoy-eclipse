@@ -453,9 +453,13 @@
         <setEntry value="com.servoy.eclipse.ngclient@default:default"/>
         <setEntry value="com.servoy.eclipse.nodejs.win32.win32.x86_64@default:default"/>
         <setEntry value="com.servoy.eclipse.notification@default:default"/>
+        <setEntry value="com.servoy.eclipse.opencode.skilltest.tests@default:false"/>
+        <setEntry value="com.servoy.eclipse.opencode.skilltest@default:default"/>
         <setEntry value="com.servoy.eclipse.opencode.tests@default:false"/>
         <setEntry value="com.servoy.eclipse.opencode@default:default"/>
         <setEntry value="com.servoy.eclipse.profiler@default:default"/>
+        <setEntry value="com.servoy.eclipse.servoypilot.assistenttests@default:default"/>
+        <setEntry value="com.servoy.eclipse.servoypilot.knowledgebase@default:default"/>
         <setEntry value="com.servoy.eclipse.servoypilot.langchain4j@default:default"/>
         <setEntry value="com.servoy.eclipse.servoypilot@default:default"/>
         <setEntry value="com.servoy.eclipse.ui.tests@default:false"/>
