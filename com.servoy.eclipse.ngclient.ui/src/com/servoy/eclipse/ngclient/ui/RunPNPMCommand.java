@@ -324,12 +324,17 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	 * <p>
 	 * This is primarily a Windows concern (separate drive letters = separate volumes); on macOS/Linux everything is
 	 * usually on one volume, so the volume comparison simply matches and no override is emitted.
+	 * <p>
+	 * The default store location is the one pnpm actually resolves (<code>pnpm store path</code>, which honours
+	 * <code>.npmrc</code>, the global config and any configured <code>store-dir</code>), not a guessed path, so a
+	 * user who already points their store at the working drive gets no override. Only if that query fails do we fall
+	 * back to pnpm's documented default location under the user home.
 	 */
-	private static String computeStoreDirArgIfCrossVolume(File targetFolder)
+	private String computeStoreDirArgIfCrossVolume(File targetFolder)
 	{
 		try
 		{
-			File defaultStore = getDefaultPnpmStoreDir();
+			File defaultStore = resolvePnpmDefaultStoreDir();
 			if (targetFolder == null || defaultStore == null) return null;
 
 			// Decide whether an override is needed by comparing the actual FILESYSTEM VOLUMES, not drive letters.
@@ -404,9 +409,96 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	}
 
 	/**
+	 * Resolves the store directory pnpm will actually use for the current target, used only to decide which volume
+	 * that store lives on. It asks pnpm itself - <code>pnpm store path</code> run in the target folder - so any
+	 * configured <code>store-dir</code> (from <code>.npmrc</code>, the project, the user or the global config) is
+	 * honoured; a user who already points their store at the working drive therefore gets no override. When the
+	 * query fails for any reason it falls back to pnpm's documented default location under the user home.
+	 *
+	 * @return the resolved store directory, or <code>null</code> if it cannot be determined at all.
+	 */
+	private File resolvePnpmDefaultStoreDir()
+	{
+		File fromPnpm = queryPnpmStorePath();
+		if (fromPnpm != null) return fromPnpm;
+		return getDefaultPnpmStoreDir();
+	}
+
+	/**
+	 * Runs <code>pnpm store path</code> in the target folder (with the bundled Node on <code>PATH</code>) and
+	 * returns the directory it prints, or <code>null</code> if the command fails, times out or prints nothing
+	 * usable. This is the authoritative store location: it reflects every <code>store-dir</code> configuration
+	 * source exactly as the real install/pack commands would see it.
+	 */
+	private File queryPnpmStorePath()
+	{
+		try
+		{
+			ProcessBuilder builder = new ProcessBuilder();
+			Map<String, String> environment = builder.environment();
+			String pathkey = Platform.getOS().equals(Platform.OS_WIN32) ? "Path" : "PATH";
+			String path = environment.get(pathkey);
+			String prependPaths = nodePath.getParent();
+			if (pnpmPath.getParent() != null && !pnpmPath.getParent().equals(nodePath.getParent()))
+			{
+				prependPaths = pnpmPath.getParent() + System.getProperty("path.separator") + prependPaths;
+			}
+			environment.put(pathkey, prependPaths + System.getProperty("path.separator") + path);
+			// run in the target folder so a project-level .npmrc store-dir is picked up; the folder may not exist
+			// yet at first-run time, so fall back to the nearest existing ancestor as the working directory.
+			File workingDir = projectFolder;
+			while (workingDir != null && !workingDir.exists())
+			{
+				workingDir = workingDir.getParentFile();
+			}
+			builder.directory(workingDir);
+			builder.redirectErrorStream(true);
+			builder.command(pnpmPath.getCanonicalPath(), "store", "path");
+
+			Process proc = builder.start();
+			StringBuilder out = new StringBuilder();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream())))
+			{
+				String line;
+				while ((line = reader.readLine()) != null)
+				{
+					out.append(line).append('\n');
+				}
+			}
+			if (!proc.waitFor(30, java.util.concurrent.TimeUnit.SECONDS))
+			{
+				proc.destroyForcibly();
+				return null;
+			}
+			if (proc.exitValue() != 0) return null;
+
+			// 'pnpm store path' prints the absolute store directory; take the last non-blank line to skip any
+			// warnings pnpm may emit before it.
+			String resolved = null;
+			for (String l : out.toString().split("\n"))
+			{
+				String trimmed = l.trim();
+				if (!trimmed.isEmpty()) resolved = trimmed;
+			}
+			if (resolved == null) return null;
+			return new File(resolved);
+		}
+		catch (IOException e)
+		{
+			return null;
+		}
+		catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+			return null;
+		}
+	}
+
+	/**
 	 * @return pnpm's default global store directory (<code>~/AppData/Local/pnpm/store</code> on Windows,
-	 *         <code>~/.local/share/pnpm/store</code> / <code>~/Library/pnpm/store</code> elsewhere), used only to
-	 *         determine which volume the default store is on. Returns <code>null</code> if the user home is unknown.
+	 *         <code>~/.local/share/pnpm/store</code> / <code>~/Library/pnpm/store</code> elsewhere), used only as a
+	 *         fallback for the volume check when <code>pnpm store path</code> cannot be queried. Returns
+	 *         <code>null</code> if the user home is unknown.
 	 */
 	private static File getDefaultPnpmStoreDir()
 	{
