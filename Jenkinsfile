@@ -102,6 +102,9 @@ pipeline {
         }
 
         stage('Integration Tests') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
             steps {
                 wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
                     configFileProvider([

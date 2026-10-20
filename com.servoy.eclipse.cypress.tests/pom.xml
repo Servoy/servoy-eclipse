@@ -48,6 +48,12 @@
 				<version>${tycho.version}</version>
 				<configuration>
 					<skip>true</skip>
+                    <!-- Force the JUnit Platform (junit6) provider; the Eclipse target
+                         platform always contributes JUnit 4, so auto-detection would
+                         otherwise pick junit4 and find no tests. Tests are selected by
+                         package (everything under integrationpde); there are no @Suite
+                         aggregator classes. -->
+                    <providerHint>junit6</providerHint>
 				</configuration>
 			</plugin>
 		</plugins>
