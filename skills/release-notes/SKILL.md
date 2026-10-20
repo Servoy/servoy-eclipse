@@ -113,6 +113,14 @@ When in doubt about whether a case is product-relevant, keep it for now — the 
 list in Phase 2.5 and can drop it there. But obvious build/release/internal noise should be
 dropped here so the review list stays focused.
 
+**Drop cases that were not actually delivered (resolution gate).** A case whose Jira
+**resolution** is a non-delivery outcome — `Won't Do` / `Won't Fix`, `Duplicate`,
+`Cannot Reproduce`, `Incomplete`, `Rejected` — must NOT be reported, even if it has a commit in
+the range (the commit may just revert diagnostics or back out the change). Only genuinely
+delivered cases belong in the notes (`resolution == Fixed`/`Done`, or still open/in-review but
+with a real shipping fix on the branch). Fetch the resolution together with security/components
+in Phase 2.5 and drop any non-delivery resolution there, reporting the count to the user.
+
 **Require a real code commit in the range.** A case belongs in the notes only if at least one
 of its commits in `<PREVIOUS_TAG>..HEAD` touches actual product source. **Drop any case whose
 only commits in the range touch nothing but** `docs/**` (triage/spec/review-summary `.md`),
@@ -149,7 +157,7 @@ already-restricted ones.
    on it:
 
    ```
-   GET /rest/api/3/issue/{KEY}?fields=security,summary,components
+   GET /rest/api/3/issue/{KEY}?fields=security,summary,components,status,resolution
    ```
 
    - `security` is **`null`** → no security level set → currently **PUBLIC** (the normal state
