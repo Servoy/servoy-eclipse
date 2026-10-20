@@ -37,7 +37,8 @@ class ComponentTemplateGeneratorTest {
 			+ "\n" + "Name: portal/portal.spec\n" + "Web-Component: True\n";
 
 	private static final String ERRORBEAN_SPEC = "{\n" + "  \"name\": \"servoycore-errorbean\",\n"
-			+ "  \"deprecated\": \"true\",\n" + "  \"displayName\": \"Error Bean\",\n" + "  \"version\": 1,\n"
+			+ "  \"deprecated\": \"true\",\n" + "  \"tags\": { \"alwaysGenerateTemplate\": true },\n"
+			+ "  \"displayName\": \"Error Bean\",\n" + "  \"version\": 1,\n"
 			+ "  \"definition\": \"servoycore/errorbean/errorbean.js\",\n" + "  \"libraries\": [],\n"
 			+ "  \"model\": {\n"
 			+ "    \"error\": { \"type\": \"string\", \"default\": \"Specification not found.\" },\n"

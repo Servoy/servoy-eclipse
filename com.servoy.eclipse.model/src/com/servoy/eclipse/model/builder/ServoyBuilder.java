@@ -952,7 +952,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyLog.logError("Type name not found for webcomponent " + ((WebComponent)o).getName(), null);
 				}
 			}
-			else if (spec.isDeprecated())
+			else if (spec.isDeprecated() && !spec.hasTag("alwaysGenerateTemplate"))
 			{
 				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
 				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
@@ -976,6 +976,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else
 			{
+				// a spec tagged "alwaysGenerateTemplate" (e.g. servoycore-errorbean, the designated
+				// FormElement.ERROR_BEAN fallback) is still runtime-substituted even though it is deprecated for
+				// user placement, so it must not raise a DeprecatedSpecification marker either (SVY-21571).
 				checkMissingProperties((JSONObject)((WebComponent)o).getOwnProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName()), spec, o, project,
 					"");
 			}
