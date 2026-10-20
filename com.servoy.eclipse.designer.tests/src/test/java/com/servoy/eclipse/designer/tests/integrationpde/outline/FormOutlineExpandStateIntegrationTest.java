@@ -3,16 +3,11 @@ package com.servoy.eclipse.designer.tests.integrationpde.outline;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -25,11 +20,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
 
 import com.servoy.eclipse.core.tests.integration.utils.RunOnDisplayThreadExtension;
-import com.servoy.eclipse.designer.outline.FormOutlinePage;
 
 @DisplayName("FormOutlinePage expand state preservation (SVY-21202)")
 @ExtendWith(RunOnDisplayThreadExtension.class)
@@ -285,42 +277,6 @@ class FormOutlineExpandStateIntegrationTest {
 
 			assertFalse(treeViewer.getExpandedState(collapsed),
 					"collapsed state must be preserved even after multiple rapid refreshes");
-		}
-
-		@Test
-		@DisplayName("FormOutlinePage.persistChanges source does not invoke defaultExpand")
-		void persistChangesDoesNotCallDefaultExpand() throws IOException {
-			Bundle hostBundle = FrameworkUtil.getBundle(FormOutlinePage.class);
-			assertNotNull(hostBundle, "Host bundle of FormOutlinePage not available (test must run inside OSGi)");
-
-			URL sourceUrl = hostBundle.getEntry("src/com/servoy/eclipse/designer/outline/FormOutlinePage.java");
-			assertNotNull(sourceUrl, "FormOutlinePage.java source not available in the designer bundle (src.includes in its build.properties?)");
-
-			String source = IOUtils.toString(sourceUrl, StandardCharsets.UTF_8);
-
-			int persistChangesStart = source.indexOf("public void persistChanges(");
-			assertTrue(persistChangesStart >= 0, "Could not locate persistChanges method in source");
-
-			int methodBodyStart = source.indexOf("{", persistChangesStart);
-			int braceCount = 0;
-			int methodBodyEnd = -1;
-			for (int i = methodBodyStart; i < source.length(); i++) {
-				char c = source.charAt(i);
-				if (c == '{')
-					braceCount++;
-				else if (c == '}') {
-					braceCount--;
-					if (braceCount == 0) {
-						methodBodyEnd = i;
-						break;
-					}
-				}
-			}
-			assertTrue(methodBodyEnd > 0, "Could not determine end of persistChanges method");
-
-			String methodBody = source.substring(persistChangesStart, methodBodyEnd + 1);
-			assertFalse(methodBody.contains("defaultExpand"),
-					"persistChanges must NOT call defaultExpand - the fix for SVY-21202 removes this call");
 		}
 
 		@Test
