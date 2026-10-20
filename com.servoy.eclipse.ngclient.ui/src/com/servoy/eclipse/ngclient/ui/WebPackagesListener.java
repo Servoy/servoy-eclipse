@@ -1600,7 +1600,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		}
 	}
 
-	static boolean copyAngularLocales(File projectFolder)
+	public static boolean copyAngularLocales(File projectFolder)
 	{
 		File localesDest = new File(projectFolder, "locales/angular");
 		File localesSource = new File(projectFolder.getParentFile(), "node_modules/@angular/common/locales");

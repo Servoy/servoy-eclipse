@@ -6,6 +6,8 @@ Bundle-Version: 2026.9.1.qualifier
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: com.servoy.eclipse.core.tests,
+ servoy_ngclient,
+ servoy_shared,
  com.servoy.eclipse.core,
  com.servoy.eclipse.ngclient.ui,
  com.servoy.eclipse.model,

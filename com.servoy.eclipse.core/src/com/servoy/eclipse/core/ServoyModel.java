@@ -2786,7 +2786,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 *            contains the solution project), used as the base to resolve the relative serialized paths
 	 * @param changedFilePaths absolute paths of the files that actually changed on disk
 	 */
-	static boolean isOwnCompositeFileChanged(IPersist persist, File solutionParentDir, Set<String> changedFilePaths)
+	public static boolean isOwnCompositeFileChanged(IPersist persist, File solutionParentDir, Set<String> changedFilePaths)
 	{
 		// the composite's own file, e.g. the form's .frm
 		String ownFilePath = new File(solutionParentDir, SolutionSerializer.getRelativeFilePath(persist, false)).getAbsolutePath();
