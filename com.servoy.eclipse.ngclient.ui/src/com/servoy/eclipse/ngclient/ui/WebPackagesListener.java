@@ -111,6 +111,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 {
 	// list of packages that are in node/projects folder
 	private static final String[] defaultPackages = new String[] { "@servoy/servoydefault", "@servoy/dialogs", "@servoy/ngclientutils", "@servoy/window" };
+	// SVY-21502: @servoy/public is the one internal package consumed as a real COMPILED library (no tsconfig
+	// paths alias - it resolves from node_modules). It is pre-built at the ngclient.ui Maven build into the
+	// plugin's node/tarballs/ folder and shipped; at solution-build time it is COPIED into the solution's
+	// .tarballs/ and installed from there instead of running 'ng build @servoy/public' per solution. The four
+	// default component packages above are SOURCE packages (resolved via a tsconfig paths alias to their live
+	// projects/<name>/src/public-api), so they are NOT packed or installed as tarballs - only their package.json
+	// dependencies need to be present, which they already are via the root + external component packages.
+	private static final String PUBLIC_PACKAGE = "@servoy/public";
 	private static final Map<String, String> NG1MAPPING = new HashMap<>();
 	static
 	{
@@ -118,6 +126,52 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		NG1MAPPING.put("@servoy/ngclientutils", "servoy_ng_only_services");
 		NG1MAPPING.put("@servoy/dialogs", "servoydefaultservices");
 		NG1MAPPING.put("@servoy/servoydefault", "servoydefault");
+	}
+
+	/**
+	 * SVY-21502: pure string rule behind {@code PackageCheckerJob.resolveCssLibUrl} (extracted to the outer class so
+	 * it can be unit tested without an OSGi/Activator context). Rewrites a {@link CssLib} <code>~</code>-prefixed URL
+	 * to the path used as an <code>angular.json</code> global style entry: for an INTERNAL default component in pnpm
+	 * mode, <code>~@servoy/&lt;name&gt;/&lt;rest&gt;</code> becomes <code>./projects/&lt;name&gt;/&lt;rest&gt;</code>
+	 * (the live, file-watched source, since these are not installed into <code>node_modules</code>); every other URL
+	 * keeps the <code>./node_modules/</code> mapping.
+	 *
+	 * @param url the CssLib url (may be <code>null</code>)
+	 * @param pnpmMode whether pnpm mode is active (npm mode always maps to node_modules)
+	 * @param internalDefaultPackages the SORTED set of internal default component npm names (binary-searched)
+	 * @return the rewritten url, or <code>null</code> if <code>url</code> was <code>null</code>
+	 */
+	static String rewriteCssLibUrl(String url, boolean pnpmMode, String[] internalDefaultPackages)
+	{
+		if (url == null) return null;
+		if (pnpmMode && url.startsWith("~@servoy/"))
+		{
+			String afterTilde = url.substring(1); // drop '~' -> @servoy/<name>/<rest>
+			int firstSlash = afterTilde.indexOf('/');
+			int secondSlash = afterTilde.indexOf('/', firstSlash + 1);
+			if (secondSlash > 0)
+			{
+				String npmName = afterTilde.substring(0, secondSlash); // @servoy/<name>
+				String rest = afterTilde.substring(secondSlash + 1); // <rest>
+				if (internalDefaultPackages != null && Arrays.binarySearch(internalDefaultPackages, npmName) >= 0)
+				{
+					// internal source package: CSS lives in the live projects/<name>/ source, not node_modules
+					return "./projects/" + npmName.substring(npmName.indexOf('/') + 1) + "/" + rest;
+				}
+			}
+		}
+		return url.replace("~", "./node_modules/");
+	}
+
+	/**
+	 * SVY-21502: pure name rule for the shipped <code>@servoy/public</code> tarball (extracted to the outer class for
+	 * unit testing). Named by version - <code>servoy-public-&lt;version&gt;.tgz</code> - the same name the Maven
+	 * <code>pack_public</code> script produces; falls back to the unversioned <code>servoy-public.tgz</code> when the
+	 * version is <code>null</code> (should not happen for a shipped plugin).
+	 */
+	static String publicTarballName(String version)
+	{
+		return version != null ? "servoy-public-" + version + ".tgz" : "servoy-public.tgz";
 	}
 
 	public static String generateAllComponentsModuleContent(Collection<PackageSpecification< ? >> packages)
@@ -364,6 +418,10 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 
 				boolean sourceChanged = false;
+				// SVY-21502 §4.2: in pnpm mode the shipped @servoy/public tarball copied into .tarballs/ (set by
+				// copyShippedPublicTarball below, before the install block); reused later as the specifier to install
+				// for @servoy/public.
+				File copiedPublicTarball = null;
 				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
 				{
 					File distIndexFile = new File(projectFolder, "dist/app/browser/index.html");
@@ -371,6 +429,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (sourceChanged)
 					{
 						writeConsole(console, "- build will be triggered; no previously build-generated files detected...");
+					}
+					// SVY-21502 §4.2: in pnpm mode @servoy/public is pre-built at the ngclient.ui Maven build and
+					// shipped in node/tarballs/. Copy it into .tarballs/ NOW - before the install block - so the
+					// committed lockfile's file: specifier for @servoy/public resolves against a tarball that already
+					// exists on disk before any pnpm install runs (fixes the ERR_PNPM_TARBALL_READ_LOCAL_TARBALL
+					// ordering hazard). The four default component packages are source packages (resolved via a
+					// tsconfig paths alias) and are NOT packed/installed as tarballs at all.
+					if (Activator.isPnpmMode())
+					{
+						copiedPublicTarball = copyShippedPublicTarball(console);
 					}
 					try
 					{
@@ -636,7 +704,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							for (CssLib style : cssLibs)
 							{
 								boolean[] styleFound = new boolean[] { false };
-								String styleUrl = style.getUrl().replace("~", "./node_modules/");
+								String styleUrl = resolveCssLibUrl(style);
 								styles.forEach(existingStyle -> {
 									if (existingStyle.toString().equals(styleUrl))
 									{
@@ -662,7 +730,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							if (!hasFontAwesomePro) styles.put("@fortawesome/fontawesome-free/css/all.css");
 							for (CssLib style : cssLibs)
 							{
-								styles.put(style.getUrl().replace("~", "./node_modules/"));
+								styles.put(resolveCssLibUrl(style));
 							}
 							styles.put("src/styles.css");
 							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
@@ -790,12 +858,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						applyKnownPnpmBuildApprovals(this.projectFolder, this.warExportModel, this.approvalsSolutionName, console);
 						RunPNPMCommand.beginBuildScriptDiscoveryDemotion();
 					}
+					// SVY-21502 §4.1/§4.3: in pnpm mode the internal @servoy/* tarballs were already copied from the
+					// shipped node/tarballs/ into .tarballs/ above (before the checkPackage loop), so here only npm
+					// mode still needs to build+pack dist-public.
+					boolean internalTarballsFromShipped = Activator.isPnpmMode();
 					try
 					{
-						// fist create the servoy/public dist if needed
-						String location = Activator.getInstance().getBundle().getLocation();
-						int fromSourceIndex = location.indexOf("file:/");
-						if (fromSourceIndex > 0 || !new File(this.projectFolder, "dist-public").exists() || sourceChanged)
+						// npm mode only: build the servoy/public dist. In pnpm mode the shipped public tarball is used.
+						if (!internalTarballsFromShipped && (!new File(this.projectFolder, "dist-public").exists() || sourceChanged))
 						{
 							IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
 								Arrays.asList("run", "build_lib_debug_nowatch"));
@@ -838,11 +908,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							List<String> command = new ArrayList<>();
 							command.add("install");
 							packageToInstall.forEach(packageName -> command.add(packageName));
-							// also add the public api: in pnpm mode a directory dep does not bring its transitive deps, so pack
-							// dist-public into a tarball; in npm mode keep installing the directory as before.
+							// also add the public api: in pnpm mode a directory dep does not bring its transitive deps, so
+							// install a @servoy/public tarball; in npm mode keep installing the directory as before.
 							if (Activator.isPnpmMode())
 							{
-								File publicTarball = packPackage(new File(this.projectFolder, "dist-public"), "@servoy/public", console);
+								// SVY-21502 §4.3: use the shipped @servoy/public tarball copied into .tarballs/ above.
+								File publicTarball = copiedPublicTarball;
 								if (publicTarball != null)
 								{
 									// SVY-21502: pass the tarball RELATIVE to the project folder (./.tarballs/<name>.tgz),
@@ -890,14 +961,24 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							// tarball was not packed into .tarballs) from package.json + lockfile via 'pnpm remove' - this does
 							// not re-resolve the remaining pinned versions - so package.json and the lockfile agree on the
 							// shipped subset and the following frozen 'ci' passes instead of failing ERR_PNPM_OUTDATED_LOCKFILE.
-							packPackage(new File(this.projectFolder, "dist-public"), "@servoy/public", console);
+							// SVY-21502 §4.3: in pnpm mode the shipped @servoy/public tarball was already copied into
+							// .tarballs/ above; only npm mode packs dist-public.
+							if (!Activator.isPnpmMode())
+							{
+								packPackage(new File(this.projectFolder, "dist-public"), "@servoy/public", console);
+							}
 							Status removeStatus = removeNonExportedComponents(monitor, console);
 							if (removeStatus != null) return removeStatus;
 							npmCommand = null;
 						}
-						if (cleanInstall.get() || frozenWarInstall)
+						// A "clean install" (the menu action) only means "wipe the target and regenerate from scratch";
+						// it must NOT run a frozen 'pnpm install --frozen-lockfile'. The non-frozen 'add' above already
+						// regenerated a fresh lockfile, so a clean install continues to the normal 'update' branch (and
+						// commits the fresh lockfile back). Only a WAR/CI export installs frozen against the committed
+						// pair. (SVY-21502)
+						cleanInstall.set(false);
+						if (frozenWarInstall)
 						{
-							cleanInstall.set(false);
 							npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("ci"));
 							try
 							{
@@ -1179,6 +1260,25 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			};
 		}
 
+		/**
+		 * SVY-21502: resolves a {@link CssLib}'s <code>~</code>-prefixed URL to the path the Angular build uses as an
+		 * <code>angular.json</code> global style entry.
+		 * <p>
+		 * The <code>~</code> prefix means "a package root". For a package installed into <code>node_modules</code>
+		 * (every external component package, and historically the internal ones) it maps to
+		 * <code>./node_modules/</code>. But the four INTERNAL default component packages are now SOURCE packages in
+		 * pnpm mode - they are NOT installed as a tarball (only aliased via tsconfig <code>paths</code> to their live
+		 * <code>projects/&lt;name&gt;</code> source), so their CSS does not exist under <code>node_modules</code>.
+		 * For those, <code>~@servoy/&lt;name&gt;/&lt;rest&gt;</code> is rewritten to <code>./projects/&lt;name&gt;/&lt;rest&gt;</code>
+		 * (the file-watched source), so the global CSS resolves AND a change to that CSS file in source is picked up by
+		 * an <code>ng build --watch</code> without a re-pack. Every other URL keeps the <code>./node_modules/</code>
+		 * mapping (binary/tarball packages). This only applies in pnpm mode; npm mode keeps the node_modules mapping.
+		 */
+		private String resolveCssLibUrl(CssLib style)
+		{
+			return rewriteCssLibUrl(style.getUrl(), Activator.isPnpmMode(), defaultPackages);
+		}
+
 		private void writeConsole(StringOutputStream console, String message)
 		{
 			try
@@ -1300,6 +1400,70 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			{
 				writeErrorToConsoleAndLog(console, e, "Exception while removing non-exported components on the WAR path: ");
 				return new Status(IStatus.WARNING, getClass(), "removing non-exported components failed: " + e.getMessage());
+			}
+		}
+
+		/**
+		 * SVY-21502 §4.2/§4.3: the shipped, version-named tarball file name for <code>@servoy/public</code>, e.g.
+		 * <code>servoy-public-2026.12.0.tgz</code> - the same naming the Maven <code>pack_public</code> script
+		 * produces. The version is read from the shipped <code>/node/projects/servoy-public/package.json</code>
+		 * bundle entry; falls back to the unversioned <code>servoy-public.tgz</code> if it cannot be read.
+		 */
+		private String publicTarballName()
+		{
+			return WebPackagesListener.publicTarballName(publicPackageVersion());
+		}
+
+		/** Reads the <code>version</code> from the shipped <code>/node/projects/servoy-public/package.json</code>. */
+		private String publicPackageVersion()
+		{
+			String entry = "/node/projects/servoy-public/package.json";
+			try
+			{
+				java.net.URL url = Activator.getInstance().getBundle().getEntry(entry);
+				if (url == null) return null;
+				String content = Utils.getURLContent(url);
+				if (content == null) return null;
+				return new JSONObject(content).optString("version", null);
+			}
+			catch (RuntimeException e)
+			{
+				Activator.getInstance().getLog().error("Error reading version for @servoy/public from " + entry, e);
+				return null;
+			}
+		}
+
+		/**
+		 * SVY-21502 §4.2: copies the shipped, version-named <code>@servoy/public</code> tarball from the plugin's
+		 * <code>node/tarballs/</code> bundle entry into the solution's <code>&lt;projectFolder&gt;/.tarballs/</code>,
+		 * so the committed lockfile's <code>file:</code> specifier for <code>@servoy/public</code> resolves against a
+		 * file that already exists on disk before any install runs (fixes the ERR_PNPM_TARBALL_READ_LOCAL_TARBALL
+		 * ordering hazard). Running from source the bundle is the file:/ workspace, so this reads the Maven-built
+		 * tarball straight from the checkout - no mode split. Returns the copied tarball, or <code>null</code> if it
+		 * was not shipped (the caller then falls back to building+packing dist-public).
+		 */
+		private File copyShippedPublicTarball(StringOutputStream console)
+		{
+			File tarballsDir = new File(projectFolder, ".tarballs");
+			if (!tarballsDir.exists()) tarballsDir.mkdirs();
+			String tarballName = publicTarballName();
+			java.net.URL entry = Activator.getInstance().getBundle().getEntry("/node/tarballs/" + tarballName);
+			if (entry == null)
+			{
+				writeConsole(console, "- WARNING: shipped tarball /node/tarballs/" + tarballName + " was not found in the plugin");
+				return null;
+			}
+			File target = new File(tarballsDir, tarballName);
+			try (java.io.InputStream is = entry.openStream())
+			{
+				FileUtils.copyInputStreamToFile(is, target);
+				writeConsole(console, "- pnpm mode: copied shipped @servoy/public tarball " + tarballName + " into .tarballs/ (no ng build)");
+				return target;
+			}
+			catch (IOException e)
+			{
+				writeErrorToConsoleAndLog(console, e, "Exception while copying shipped @servoy/public tarball " + tarballName + " into .tarballs/: ");
+				return null;
 			}
 		}
 
@@ -1529,6 +1693,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 								array.put(new File(packageFolder, "src/public-api").getCanonicalPath());
 								paths.put(packageName, array);
 								FileUtils.write(tsConfig, json.toString(1), "UTF8", false);
+							}
+							// SVY-21502: the four default component packages are SOURCE packages - the Angular compiler
+							// reads their code through the tsconfig 'paths' alias written above (pointing at the live,
+							// file-watched projects/<name>/src/public-api), so build_watch live editing keeps working.
+							// In pnpm mode we therefore do NOT pack/install a tarball for them (their src/** in
+							// node_modules would never be read); their package.json dependencies are already present in
+							// the solution node_modules via the root package.json + the external component packages.
+							// In npm mode keep the historical directory install so the deps are pulled in.
+							if (Activator.isPnpmMode())
+							{
+								return null;
 							}
 							String installedVersion = dependencies.optString(packageName);
 							if (!isAlreadyInstalled(installedVersion, entryPoint, packageName, packageFolder))
@@ -2089,10 +2264,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		StringOutputStream console)
 	{
 		IProject solutionProject = resolveApprovalsProject(warExportModel, approvalsSolutionName);
-		// SVY-21502 §3.10: seed the generated target/<solution>/pnpm-lock.yaml from the committed
-		// ng_web_packages/pnpm-lock.yaml (explicit step - NodeFolderCreatorJob's template copy skips lockfiles) so
-		// both the Developer build and the frozen WAR/CI install start from the committed, pinned version set.
-		PnpmBuildScriptConfig.seedLockfileFromCommitted(solutionProject, projectFolder, console);
+		// SVY-21502: a WAR export CONSUMES the committed pair - seed the generated
+		// target/<solution>/pnpm-lock.yaml (+ package.json) from the committed ng_web_packages/ ones and install
+		// frozen against them, so a WAR is built from exactly what the developer last committed. A Developer build
+		// (any trigger: copy+build, clean+build, or the startup timestamp-check) GENERATES: it must regenerate the
+		// pair from scratch and commit it back, so it must NOT seed - seeding would pre-load the committed file:
+		// specifiers (stale or no longer matching what is packed), which a non-frozen regenerate does not fully evict
+		// and which then break 'pnpm rebuild' with ERR_PNPM_TARBALL_READ_LOCAL_TARBALL. So seed ONLY for a WAR export.
+		if (warExportModel != null)
+		{
+			PnpmBuildScriptConfig.seedLockfileFromCommitted(solutionProject, projectFolder, console);
+		}
 		PnpmBuildApprovals approvals = PnpmBuildApprovals.fromWebPackagesFolder(solutionProject);
 		// apply the KNOWN allowed/denied lists so the upcoming installs run the already-approved build scripts
 		// (as an allowBuilds map, strictDepBuilds: true). Packages pulled in by the web-package tarballs that are

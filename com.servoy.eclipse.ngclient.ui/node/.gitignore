@@ -5,6 +5,9 @@
 /tmp
 /out-tsc
 
+# SVY-21502: internal @servoy/* web-package tarballs pre-built at Maven build time
+/tarballs
+
 # dependencies
 /node_modules
 

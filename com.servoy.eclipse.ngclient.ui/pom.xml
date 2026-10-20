@@ -152,6 +152,25 @@
                             <arguments>install --omit=peer</arguments>
                         </configuration>
                     </execution>
+
+                    <!-- SVY-21502: pre-build the @servoy/public web-package tarball once, at Maven build time,
+                         into node/tarballs/ (version-named, e.g. servoy-public-<version>.tgz). @servoy/public is the
+                         only internal package consumed as a compiled library (the four default component packages are
+                         source packages resolved via a tsconfig paths alias, so they are not packed). This tarball
+                         ships inside the plugin (build.properties bin.includes) and the runtime copies it into each
+                         solution's .tarballs/ instead of running 'ng build @servoy/public' per solution. -->
+                    <execution>
+                        <id>pack servoy public tarball</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node</workingDirectory>
+                            <skipTests>${maven.test.skip}</skipTests>
+                            <arguments>run pack_public</arguments>
+                        </configuration>
+                    </execution>
 					<!-- 3. npm run build_lib <execution> <id>npm run build_lib</id> <phase>compile</phase> 
 						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
 						<arguments>run build_lib</arguments> </configuration> </execution> -->

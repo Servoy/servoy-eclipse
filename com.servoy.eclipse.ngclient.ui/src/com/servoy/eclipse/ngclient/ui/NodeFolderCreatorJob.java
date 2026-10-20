@@ -440,7 +440,7 @@ public class NodeFolderCreatorJob extends Job
 	{
 		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.indexOf("/node_modules/") != -1 ||
 			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.startsWith("/dist-public/") || filename.endsWith(".spec.ts") ||
-			filename.startsWith("/.gitignore") || filename.startsWith("/.angular/");
+			filename.startsWith("/.gitignore") || filename.startsWith("/.angular/") || filename.startsWith("/tarballs/");
 	}
 
 

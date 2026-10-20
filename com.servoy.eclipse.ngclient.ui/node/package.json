@@ -13,6 +13,7 @@
     "build_lib_designer": "ng build @servoy/designer",
     "build_libs": "npm run build_lib && npm run build_lib_sablo && npm run build_lib_designer && npm run pack_libs",
     "pack_libs": "node -e \"const{execSync:r}=require('child_process'),{renameSync:m,readdirSync:d}=require('fs');['dist-public','dist-sablo','dist-designer'].forEach(dir=>{r('npm pack',{cwd:dir});const f=d(dir).find(f=>f.endsWith('.tgz'));if(f){const name=dir.replace('dist-','servoy-')+'.tgz';m(dir+'/'+f,dir+'/'+name)}})\"",
+    "pack_public": "npm run build_lib && node -e \"const{execSync:r}=require('child_process'),{mkdirSync:k,readFileSync:rf,readdirSync:rd,unlinkSync:u,renameSync:m}=require('fs'),p=require('path');const out=p.resolve('tarballs');k(out,{recursive:true});rd(out).filter(f=>f.endsWith('.tgz')).forEach(f=>u(p.join(out,f)));const pj=JSON.parse(rf('projects/servoy-public/package.json','utf8'));const name=pj.name.replace('@','').replace(/\\//g,'-')+'-'+pj.version+'.tgz';const before=new Set(rd(out).filter(f=>f.endsWith('.tgz')));r('npm pack --pack-destination '+JSON.stringify(out),{cwd:'dist-public'});const produced=rd(out).filter(f=>f.endsWith('.tgz')).find(f=>!before.has(f));if(produced&&produced!==name)m(p.join(out,produced),p.join(out,name))\"",
     "build_lib_debug_nowatch": "ng build @servoy/public --watch=false",
     "build_debug": "ng build ngclient2 --watch",
     "build_debug_nowatch": "ng build ngclient2 --watch=false",
