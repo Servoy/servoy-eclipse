@@ -112,7 +112,12 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 ### Testing
 - **Use `tools["eclipse-ide"].runJUnitTests`** for plain JUnit tests (pass the class/method to scope the run); use `tools["eclipse-ide"].findTestClasses` to discover test classes first.
 - **Use `tools["eclipse-pde"].runJUnitPluginTests`** for plugin integration tests (PDE harness).
-- Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`
+- Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`, `com.servoy.eclipse.core.tests`
+- **JUnit engine version matters — pass the right `junitVersion`.** The launcher's auto-detect can pick the wrong engine and fail with `Cannot find 'org.junit.platform.commons.annotation.Testable' on project build path. JUnit 5 tests can only be run if JUnit 5 is on the build path.` If that happens, re-run with the explicit `junitVersion` for that project. Per test fragment (from each one's `META-INF/MANIFEST.MF` `org.junit.jupiter.api` import range):
+  - `com.servoy.eclipse.ngclient.ui.tests` → **JUnit 6** (`junitVersion: "6"`, Jupiter `[6.0.0,7.0.0)`)
+  - `com.servoy.eclipse.core.tests`, `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests` → **JUnit 5** (`junitVersion: "5"`, Jupiter `[5.0.0,6.0.0)`)
+  - `j2db_test` and other plain-JUnit-4 projects → **JUnit 4** (`junitVersion: "4"`)
+  - When in doubt, read the test fragment's MANIFEST `org.junit.jupiter.api;version="[X.0.0,...)"` range — `X` is the engine version.
 
 ### Refactoring
 - **Use `tools["eclipse-coder"].refactorRenameJavaType`** to rename classes, interfaces, enums, or records — this updates all references across the workspace.
