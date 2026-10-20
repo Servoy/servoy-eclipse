@@ -21,8 +21,8 @@
 		<servoy.install.tarball.for.appserver>/data/www/latest/servoy_release/servoy_linux.tar.gz</servoy.install.tarball.for.appserver>
 		<!-- tomcat ports patched into the extracted application_server by the integration profiles, so the developer started by the
 		     integration tests does not clash with other Servoy/tomcat processes on the build agent (each repo uses its own set) -->
-		<servoy.test.http.port>19080</servoy.test.http.port>
-		<servoy.test.shutdown.port>19006</servoy.test.shutdown.port>
+		<servoy.test.http.port>13080</servoy.test.http.port>
+		<servoy.test.shutdown.port>13006</servoy.test.shutdown.port>
 <!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
         <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
 -->
