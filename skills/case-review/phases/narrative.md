@@ -30,7 +30,7 @@ Use the tracker identified in `REPO_CONTEXT`:
 
 - **Jira** — load the `servoy-jira` skill first; only in an external repo that lacks it,
   fall back to that repo's `JIRA.md`. Fetch summary, description, comments, attachments,
-  linked issues.
+  linked issues, and `fixVersions`.
 - **GitHub / GitLab** — `gh issue view <n> --comments` or `glab issue view <n>`. If no CLI
   is available and the URL is public, `webfetch` is acceptable.
 - **No tracker access** — say so explicitly and continue from the diff alone. The narrative
@@ -42,6 +42,9 @@ huge" is often only comprehensible from the screenshot or recording.
 Extract and record separately:
 
 - **Reported symptom** — what was actually observed, in the reporter's words.
+- **Fix Version** — the Jira `fixVersions` name(s) the issue targets, or "none set". Record
+  it alongside the symptom so the narrative is self-consistent; the authoritative value for
+  the release-target check is the one Phase A.0 / Phase B capture, not this one.
 - **Expected behaviour** — what they thought should happen.
 - **Reproduction** — the exact steps, or explicitly "not provided". Absent steps limit what
   the reviewer can verify manually, so it matters.

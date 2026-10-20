@@ -11,6 +11,8 @@ the rest. Put the thing that could go wrong there.
 - `REPO_CONTEXT` — repository facts, conventions, tooling, report destination (prepended)
 - `ISSUE_REF` — the issue key or range identifier
 - `SCOPE` — the per-repository commit list or diff range under review
+- `FIX_VERSIONS` — the issue's Jira Fix Version name(s), or "none" / "none (not a Jira issue)"
+- `FIX_VERSION_CHECK` — the Phase B release-target verdict (`MATCH` / `MISMATCH` / `INDETERMINATE`) with its one-line reason
 - `NARRATIVE_PATH` — the change-narrative report
 - `REGRESSION_PATH` — the regression & blast-radius report
 - `SECURITY_PATH` — the security & robustness report
@@ -85,6 +87,10 @@ someone who has never seen the issue understands it. No jargon they would have t
 | <repo> | `abc1234` | ... | 3 | +40/-12 |
 
 Branch: `<branch>` — <and whether it must merge forward>
+Fix Version: `<FIX_VERSIONS>` — **Release-target check: MATCH / MISMATCH / INDETERMINATE** — <one-line reason>
+
+<On `MATCH`, a one-line reassurance. On `INDETERMINATE`, state what could not be determined
+and ask the reviewer to confirm. On `MISMATCH`, state the disagreement plainly here too.>
 
 ## Must look yourself
 <Two to four items. Each needs product judgement, domain knowledge, or a look at the running
@@ -100,6 +106,22 @@ survived your verification. Three to five items.>
 1. **[High | Medium | Low]** <Title> — `<file>:<line>`
    - <What breaks, in which scenario>
    - <How to confirm or dismiss it>
+
+When `FIX_VERSION_CHECK` is `MISMATCH`, add it here as a **Medium** finding (a
+delivery/targeting error, not code-correctness or security), using this template:
+
+```markdown
+N. **[Medium]** Fix Version does not match the branch the commits landed on
+   - Fix Version `<FIX_VERSIONS>` targets the `<master | other line>` (release) line, but the
+     reviewed commits sit only on `<branch>`, which ships `<other line>`. As written, the fix
+     will not reach the `<FIX_VERSIONS>` release — or the stated Fix Version is wrong.
+   - Confirm with the author which release this is meant to ship in, and either re-target the
+     Fix Version or push/merge the change to the branch that carries it.
+```
+
+A `MISMATCH` alone never drives the overall rating above `MODERATE`. An `INDETERMINATE`
+result is **not** a Top risk — it lives only in the "Scope reviewed" flag, consistent with
+"flag, don't block".
 
 ## Reading order
 <The order in which to read the diff so it makes sense. Start with the entry point, then the
@@ -138,7 +160,9 @@ none. Worth surfacing because the reviewer may want it corrected while the chang
 ## Questions for the author
 <Author-facing, numbered, neutral in tone — these may be posted to the issue verbatim, so no
 internal risk language and no root-cause reasoning. Only questions the code genuinely cannot
-answer. Three to five at most. Omit the section entirely if there are none.>
+answer. Three to five at most. Omit the section entirely if there are none. When
+`FIX_VERSION_CHECK` is `MISMATCH`, the "confirm which release this is meant to ship in"
+question belongs here so the reviewer can forward it verbatim.>
 
 1. ...
 

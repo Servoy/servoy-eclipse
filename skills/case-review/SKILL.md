@@ -76,7 +76,9 @@ Record the identifier as `ISSUE_REF` and any remainder as `SCOPE_HINT` (or "None
 proceeds from the diff alone.
 
 If `ISSUE_REF` is a Jira issue key (matches `^(SVY|SVYX|SERVOY)-\d+$`), set `JIRA_KEY` to
-it and run **Phase A.0** below before anything else. Otherwise skip Phase A.0 entirely.
+it and run **Phase A.0** below before anything else. Otherwise skip Phase A.0 entirely —
+there is no Jira Fix Version, so treat `FIX_VERSIONS` as `none (not a Jira issue)` and the
+Phase B release-target check becomes a no-op (INDETERMINATE).
 
 ---
 
@@ -91,13 +93,16 @@ Load the `servoy-jira` skill for the connection details (base URL, the
 `ATLASSIAN_AUTH_BASIC` auth header, the PowerShell-vs-curl rule). All calls below use that
 same base URL and auth.
 
-1. **Read status and assignee.**
+1. **Read status, assignee and fix version.**
 
    ```
-   GET /rest/api/3/issue/{JIRA_KEY}?fields=summary,status,assignee
+   GET /rest/api/3/issue/{JIRA_KEY}?fields=summary,status,assignee,fixVersions
    ```
 
-   Note `status.name` and whether `assignee` is `null` (unassigned).
+   Note `status.name` and whether `assignee` is `null` (unassigned). Record the Fix
+   Version name(s) as `FIX_VERSIONS` — the list of `fixVersions[].name` (e.g.
+   `["2026.12"]`), which may be **empty** (no Fix Version set) or carry **more than one**
+   version. It feeds the Phase B release-target check.
 
 2. **Gate on status.** If the status is **not** `In Review`, stop and report to the user:
    the issue is in `<status>`, not `In Review`, so there is nothing to peer-review yet.
@@ -187,7 +192,55 @@ everything downstream.
    maintenance/release branch, a feature branch? A fix landing on a maintenance branch
    has a lower risk budget and will have to be merged forward.
 
-Record the resulting per-repository commit list / diff range as `SCOPE`.
+   **Release-target check.** Cross-check `FIX_VERSIONS` (from Phase A.0) against the branch
+   the commits sit on, using the **Branch → Fix Version convention** table below. Classify
+   the branch, then compare it to the Fix Version's release line, and record the result as
+   `FIX_VERSION_CHECK` — one of `MATCH`, `MISMATCH`, or `INDETERMINATE` — with a one-line
+   reason:
+
+   - **`MATCH`** — the branch is the line that actually ships the Fix Version: the
+     newest-unreleased version on `master`, or a line's own dated/LTS version on that
+     maintenance line. A maintenance-line fix with a maintenance Fix Version is a MATCH
+     even though `master` will also carry it on merge-forward — that is the intended flow.
+   - **`MISMATCH`** — they provably disagree: a newer (mainline-only) Fix Version such as
+     `2026.12` but the commits sit **only** on a maintenance line (`release` / a dated line
+     / an `lts_*` branch); or an older/LTS Fix Version but the commits sit **only** on
+     `master`. The commit branch's release line and the Fix Version's `YYYY.MM` point at
+     different releases that a normal merge-forward would not reconcile.
+   - **`INDETERMINATE`** — any uncertainty: a feature branch (eventual release depends on
+     where it merges); no Fix Version set; multiple Fix Versions where at least one matches
+     the branch; a branch name you cannot classify; the version list could not be read; or
+     `ISSUE_REF` is not a Jira issue (`FIX_VERSIONS` is "none (not a Jira issue)"), in which
+     case the check is a no-op that says so.
+
+   **This check is a flag, not a hard failure** — never abort the review over it. On any
+   doubt, default to `INDETERMINATE` and phrase it as a question for the reviewer to confirm,
+   not a verdict. Do not invent a release calendar: decide "newest unreleased version" from
+   the Jira version list where cheaply available (`GET /project/SVY/versions`,
+   `released:false`), otherwise from the branch-name signal alone, and flag rather than
+   assert when unsure.
+
+Record the resulting per-repository commit list / diff range as `SCOPE`. `FIX_VERSIONS` and
+`FIX_VERSION_CHECK` are carried into the Phase E synthesis prompt alongside `SCOPE`.
+
+### Branch → Fix Version convention
+
+The canonical rule the release-target check applies (referenced from Phase A.0 and
+`context.md`). Fix Versions are date-based `YYYY.MM`; the `YYYY.MM` number *is* the release
+the version ships in. Classify the branch, then check consistency against the Fix Version's
+release line.
+
+| Branch class | What it is | Expected Fix Version |
+|---|---|---|
+| **Mainline** — `master` (also `main`, `develop`) | The next unreleased dev line | The **newest unreleased** `YYYY.MM` version (the one not yet released, e.g. `2026.12`). |
+| **Maintenance / release line** — `release`, a dated line like `2026.03`, `lts`, `lts_latest`, `lts_2024`/`lts_2025`/`lts_2026` | A line that ships (or still patches) a specific release | A Fix Version **on that line**: the dated line's own version (`2026.03` → `2026.03`), or an LTS maintenance version carried by that LTS line. Must **not** be a newer version that only `master` ships. |
+| **Feature branch** — anything else (`SVY-xxxxx_*`, `branch_*`, `copilot/*`, …) | Work not yet merged to any release line | **Cannot be determined from the branch alone** — the eventual release depends on where it merges. Treat as **"flag for the reviewer", never a mismatch.** |
+
+**Merge-forward direction.** Servoy maintenance fixes merge forward (a `release`/LTS fix
+also reaches `master`), so a maintenance-line fix with a maintenance Fix Version is
+consistent even though `master` will also carry it. The mismatch is the *reverse*: a newer
+(mainline-only) Fix Version on a branch that will not carry it into that version, or a
+maintenance Fix Version on `master` only.
 
 **Ambiguity gate.** If you find no commits, or several plausible candidate sets (commits
 on two branches, or a mix of committed and uncommitted work), do **not** guess. Use the
@@ -305,6 +358,8 @@ the `subagent` tool (`agent: general`), passing this prompt:
 
 Issue: ISSUE_REF
 Scope: SCOPE
+Fix Version: FIX_VERSIONS
+Release-target check: FIX_VERSION_CHECK
 Narrative report: NARRATIVE_PATH
 Regression report: REGRESSION_PATH
 Security report: SECURITY_PATH
