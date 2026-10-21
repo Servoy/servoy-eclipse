@@ -73,14 +73,13 @@ If creating a new plugin bundle:
 | `com.servoy.eclipse.exporter.war` | WAR exporter (server-side deploy packaging) |
 | `com.servoy.eclipse.exporter.solution` | Solution exporter |
 | `com.servoy.eclipse.exporter.mobile` | Mobile exporter |
-| `com.servoy.eclipse.tests` | Integration tests (eclipse-test-plugin) |
 
 ## Testing
 
 - Unit tests (pure logic, no OSGi): a `<plugin>.tests` fragment with standard
   `eclipse-plugin` packaging, run with `eclipse-ide_runClassTests`. Class suffix `*Test`.
 - Integration/plugin tests (needs OSGi/workspace/`ServoyModel`): `eclipse-test-plugin`
-  packaging, primary project `com.servoy.eclipse.tests`, run with
+  packaging, run with
   `eclipse-pde_runJUnitPluginTestClass`. Class suffix `*IntegrationTest`.
 - Prefer the shared integration test base/utilities (`AbstractIntegrationTest`,
   `ServoyRunnerTestBase`, `TestUtilitiesClass` — `pumpEventsUntil`, `waitForWorkspaceBuildJobs`,
