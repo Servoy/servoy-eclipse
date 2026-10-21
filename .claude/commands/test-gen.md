@@ -29,7 +29,6 @@ can find via `eclipse-ide_fileSearch`):
 | What you're testing | Where to put tests |
 |---------------------|--------------------|
 | Pure Java logic (no OSGi, no UI) | Feature-specific tests plugin, e.g. `com.servoy.eclipse.opencode.tests` |
-| Eclipse plugin integration | `com.servoy.eclipse.tests` (eclipse-test-plugin packaging) |
 | Use `eclipse-ide_listProjects` to find existing test projects for the feature |
 
 Prefer the most lightweight option — OSGi plugin tests are slower; use them only

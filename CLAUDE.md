@@ -45,7 +45,7 @@ Target platform files are in `launch_targets/`. The main target (`com.servoy.ecl
 
 ## Testing
 
-- **Java plugin tests:** `com.servoy.eclipse.tests` (eclipse-test-plugin) — run via `eclipse-ide_runClassTests` or `eclipse-pde_runJUnitPluginTestClass`
+- **Java plugin tests:**
 - **Angular (NGClient UI):** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **Angular (Designer RFB):** `com.servoy.eclipse.designer.rfb/node/` — Karma (`karma.conf.js`)
 - **Angular (WPM):** `com.servoy.eclipse.designer.wpm/node/src/test.ts`
