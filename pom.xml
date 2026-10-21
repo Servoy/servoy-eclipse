@@ -11,12 +11,18 @@
 	<version>2026.12.0-SNAPSHOT</version>
 	<properties>
 		<tycho.version>5.0.3</tycho.version>
+		<surefire-plugin-version>3.5.6</surefire-plugin-version>
 		<rhino.version>1.9.1.s5</rhino.version>
         <osgi.version>[2026.12.0,2026.12.1)</osgi.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<servoy.ai.repo.url>https://build.servoy.com/latest/servoy_ai/</servoy.ai.repo.url>
+		<servoy.install.tarball.for.appserver>/data/www/latest/servoy_release/servoy_linux.tar.gz</servoy.install.tarball.for.appserver>
+		<!-- tomcat ports patched into the extracted application_server by the integration profiles, so the developer started by the
+		     integration tests does not clash with other Servoy/tomcat processes on the build agent (each repo uses its own set) -->
+		<servoy.test.http.port>14080</servoy.test.http.port>
+		<servoy.test.shutdown.port>14006</servoy.test.shutdown.port>
 <!--        <chromium>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/swt/80.0.15/repository/</chromium>
         <chromium.cef>https://dl.equoplatform.com/chromium-swt-ee/servoy/p2/cef/80.0.11/repository/</chromium.cef>
 -->

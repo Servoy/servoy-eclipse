@@ -141,7 +141,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 * @param internalDefaultPackages the SORTED set of internal default component npm names (binary-searched)
 	 * @return the rewritten url, or <code>null</code> if <code>url</code> was <code>null</code>
 	 */
-	static String rewriteCssLibUrl(String url, boolean pnpmMode, String[] internalDefaultPackages)
+	public static String rewriteCssLibUrl(String url, boolean pnpmMode, String[] internalDefaultPackages)
 	{
 		if (url == null) return null;
 		if (pnpmMode && url.startsWith("~@servoy/"))
@@ -169,7 +169,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 * <code>pack_public</code> script produces; falls back to the unversioned <code>servoy-public.tgz</code> when the
 	 * version is <code>null</code> (should not happen for a shipped plugin).
 	 */
-	static String publicTarballName(String version)
+	public static String publicTarballName(String version)
 	{
 		return version != null ? "servoy-public-" + version + ".tgz" : "servoy-public.tgz";
 	}
@@ -2430,7 +2430,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		return null;
 	}
 
-	static boolean copyAngularLocales(File projectFolder)
+	public static boolean copyAngularLocales(File projectFolder)
 	{
 		File localesDest = new File(projectFolder, "locales/angular");
 		File localesSource = new File(projectFolder.getParentFile(), "node_modules/@angular/common/locales");

@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
 		<maven>3.9.0</maven>
@@ -11,4 +12,52 @@
 	</parent>
 	<artifactId>j2db_documentation.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
+	<build>
+		<!-- Tycho compiles src/test/java (source.. in build.properties) into target/classes; plain surefire looks in target/test-classes by default -->
+		<testOutputDirectory>${project.build.directory}/classes</testOutputDirectory>
+		<plugins>
+			<!-- plainjunit tests run on a flat classpath (like Eclipse "Run as JUnit"), without an OSGi runtime -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${surefire-plugin-version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit-platform</artifactId>
+						<version>${surefire-plugin-version}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<!-- the eclipse-test-plugin lifecycle only binds tycho-surefire:test, so bind plain surefire explicitly -->
+					<execution>
+						<id>plainjunit-tests</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includes>
+						<include>**/plainjunit/**/*.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<!-- tycho-surefire always starts an OSGi runtime; it is only used by the integration profile -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<skip>true</skip>
+                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
+                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
+                         automatic framework detection would otherwise pick the junit4 provider
+                         and report "No tests found" for these pure-Jupiter tests. -->
+                    <providerHint>junit6</providerHint>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

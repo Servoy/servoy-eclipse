@@ -45,7 +45,15 @@ public final class CypressOutputParser {
 			String firstLine = rawOutput.lines().filter(l -> !l.isBlank()).findFirst().orElse(rawOutput);
 			return firstLine.length() > 200 ? firstLine.substring(0, 200) + "..." : firstLine;
 		}
-		String assertion = rawOutput.lines().map(String::strip)
+		String marker = findFailedMarker(rawOutput);
+		if (marker == null) {
+			return "Test failed";
+		}
+
+		int markerEnd = rawOutput.indexOf('\n', rawOutput.indexOf(marker));
+		String afterMarker = markerEnd < 0 ? "" : rawOutput.substring(markerEnd + 1);
+
+		String assertion = afterMarker.lines().map(String::strip)
 				.filter(l -> !l.isBlank())
 				.filter(l -> !isSeparatorLine(l))
 				.filter(l -> !l.startsWith("Warning:") && !l.startsWith("Learn more:"))
@@ -56,7 +64,28 @@ public final class CypressOutputParser {
 		if (assertion != null) {
 			return assertion.length() > 200 ? assertion.substring(0, 200) + "..." : assertion;
 		}
+
+		String firstAfterMarker = afterMarker.lines().map(String::strip)
+				.filter(l -> !l.isBlank())
+				.filter(l -> !isSeparatorLine(l))
+				.findFirst().orElse(null);
+		if (firstAfterMarker == null) {
+			return "Assertion failure";
+		}
+		if (firstAfterMarker.toLowerCase(java.util.Locale.ROOT).contains("fail")) {
+			return firstAfterMarker.length() > 200 ? firstAfterMarker.substring(0, 200) + "..." : firstAfterMarker;
+		}
 		return "Test failed (see details pane)";
+	}
+
+	private static String findFailedMarker(String rawOutput) {
+		if (rawOutput.contains("Some tests failed:")) {
+			return "Some tests failed:";
+		}
+		if (rawOutput.contains("Some tests failed")) {
+			return "Some tests failed";
+		}
+		return null;
 	}
 
 	private static boolean isSeparatorLine(String line) {

@@ -26,22 +26,26 @@ import com.servoy.eclipse.cypress.services.CypressTestDiscoveryService;
 import com.servoy.eclipse.cypress.services.FormSpecRunner;
 import com.servoy.eclipse.cypress.views.CypressTestResultsView;
 
-public class RunAllCypressFormTestsHandler extends AbstractHandler {
+public class RunAllCypressFormTestsHandler extends AbstractHandler
+{
 
 	private CypressTestSessionManager sessionManager = CypressTestSessionManager.getInstance();
 
-	void setSessionManager(CypressTestSessionManager sessionManager) {
+	public void setSessionManager(CypressTestSessionManager sessionManager)
+	{
 		this.sessionManager = sessionManager;
 	}
 
-	public static class TestRunResult {
-		final int passed;
-		final int failed;
-		final int total;
-		final boolean cancelled;
-		final List<String> results;
+	public static class TestRunResult
+	{
+		public final int passed;
+		public final int failed;
+		public final int total;
+		public final boolean cancelled;
+		public final List<String> results;
 
-		TestRunResult(int passed, int failed, int total, boolean cancelled, List<String> results) {
+		public TestRunResult(int passed, int failed, int total, boolean cancelled, List<String> results)
+		{
 			this.passed = passed;
 			this.failed = failed;
 			this.total = total;
@@ -51,25 +55,31 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 	}
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	public Object execute(ExecutionEvent event) throws ExecutionException
+	{
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		if (!(selection instanceof IStructuredSelection structuredSelection) || structuredSelection.isEmpty()) {
+		if (!(selection instanceof IStructuredSelection structuredSelection) || structuredSelection.isEmpty())
+		{
 			return null;
 		}
 
 		Object element = structuredSelection.getFirstElement();
 		Object adapted = Platform.getAdapterManager().getAdapter(element, CypressFormTestTarget.class);
-		if (!(adapted instanceof CypressFormTestTarget target) || !target.isSolutionLevel()) {
+		if (!(adapted instanceof CypressFormTestTarget target) || !target.isSolutionLevel())
+		{
 			return null;
 		}
 
-		Job job = new Job("Running All Cypress Form Tests") {
+		Job job = new Job("Running All Cypress Form Tests")
+		{
 			@Override
-			protected IStatus run(IProgressMonitor monitor) {
+			protected IStatus run(IProgressMonitor monitor)
+			{
 				List<String> testForms = target.getTestFormNames();
-				if (testForms.isEmpty()) {
+				if (testForms.isEmpty())
+				{
 					Display.getDefault().asyncExec(() -> MessageDialog.openInformation(null, "Cypress Form Tests",
-							"No Cypress form tests found."));
+						"No Cypress form tests found."));
 					return Status.OK_STATUS;
 				}
 
@@ -85,27 +95,34 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 				FormSpecRunner runner = new FormSpecRunner();
 				sessionManager.setActiveRunner(runner);
 
-				try (MessageConsoleStream stream = console.newMessageStream()) {
+				try (MessageConsoleStream stream = console.newMessageStream())
+				{
 					stream.println("Running " + testForms.size() + " Cypress form test(s)...\n");
 
 					TestRunResult result = runTestsCore(testForms, runner, monitor);
 
-					for (String line : result.results) {
+					for (String line : result.results)
+					{
 						stream.println(line);
 						stream.println("---\n");
 					}
 
-					if (result.cancelled) {
+					if (result.cancelled)
+					{
 						stream.println("\nTest run cancelled.");
 						return Status.CANCEL_STATUS;
 					}
 
 					stream.println("\n=== Aggregate Results ===");
 					stream.println(formatAggregateResult(result));
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 					Display.getDefault().asyncExec(() -> MessageDialog.openError(null, "Cypress Form Tests",
-							"Error running tests: " + e.getMessage()));
-				} finally {
+						"Error running tests: " + e.getMessage()));
+				}
+				finally
+				{
 					sessionManager.clearActiveRunner(runner);
 					monitor.done();
 				}
@@ -118,19 +135,24 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 		return null;
 	}
 
-	public void runAllFormTests() {
+	public void runAllFormTests()
+	{
 		runFormTests(null);
 	}
 
-	public void runFormTests(List<String> explicitForms) {
-		Job job = new Job("Running Cypress Form Tests") {
+	public void runFormTests(List<String> explicitForms)
+	{
+		Job job = new Job("Running Cypress Form Tests")
+		{
 			@Override
-			protected IStatus run(IProgressMonitor monitor) {
+			protected IStatus run(IProgressMonitor monitor)
+			{
 				List<String> testForms = explicitForms != null ? explicitForms
-						: new CypressTestDiscoveryService().discoverAllTestForms();
-				if (testForms.isEmpty()) {
+					: new CypressTestDiscoveryService().discoverAllTestForms();
+				if (testForms.isEmpty())
+				{
 					Display.getDefault().asyncExec(() -> MessageDialog.openInformation(null, "Cypress Form Tests",
-							"No Cypress form tests found."));
+						"No Cypress form tests found."));
 					return Status.OK_STATUS;
 				}
 
@@ -146,27 +168,34 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 				FormSpecRunner runner = new FormSpecRunner();
 				sessionManager.setActiveRunner(runner);
 
-				try (MessageConsoleStream stream = console.newMessageStream()) {
+				try (MessageConsoleStream stream = console.newMessageStream())
+				{
 					stream.println("Running " + testForms.size() + " Cypress form test(s)...\n");
 
 					TestRunResult result = runTestsCore(testForms, runner, monitor);
 
-					for (String line : result.results) {
+					for (String line : result.results)
+					{
 						stream.println(line);
 						stream.println("---\n");
 					}
 
-					if (result.cancelled) {
+					if (result.cancelled)
+					{
 						stream.println("\nTest run cancelled.");
 						return Status.CANCEL_STATUS;
 					}
 
 					stream.println("\n=== Aggregate Results ===");
 					stream.println(formatAggregateResult(result));
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 					Display.getDefault().asyncExec(() -> MessageDialog.openError(null, "Cypress Form Tests",
-							"Error running tests: " + e.getMessage()));
-				} finally {
+						"Error running tests: " + e.getMessage()));
+				}
+				finally
+				{
 					sessionManager.clearActiveRunner(runner);
 					monitor.done();
 				}
@@ -177,21 +206,26 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 		job.schedule();
 	}
 
-	public TestRunResult runTestsCore(List<String> testForms, FormSpecRunner runner, IProgressMonitor monitor) {
+	public TestRunResult runTestsCore(List<String> testForms, FormSpecRunner runner, IProgressMonitor monitor)
+	{
 		int passed = 0;
 		int failed = 0;
 		List<String> results = new ArrayList<>();
 
-		for (String formName : testForms) {
-			if (monitor != null && monitor.isCanceled()) {
+		for (String formName : testForms)
+		{
+			if (monitor != null && monitor.isCanceled())
+			{
 				return new TestRunResult(passed, failed, testForms.size(), true, results);
 			}
 
-			if (!sessionManager.isRunning()) {
+			if (!sessionManager.isRunning())
+			{
 				return new TestRunResult(passed, failed, testForms.size(), true, results);
 			}
 
-			if (monitor != null) {
+			if (monitor != null)
+			{
 				monitor.subTask("Testing: " + formName);
 			}
 
@@ -208,15 +242,19 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 			String videoPath = CypressOutputParser.extractVideoPath(result);
 			String screenshotPath = CypressOutputParser.extractScreenshotPath(result);
 			sessionManager.updateResult(formName, new CypressTestResult(formName, TestType.FORM, status, errorSummary,
-					result, durationMs, videoPath, screenshotPath));
+				result, durationMs, videoPath, screenshotPath));
 
-			if (isTestPassed(result)) {
+			if (isTestPassed(result))
+			{
 				passed++;
-			} else {
+			}
+			else
+			{
 				failed++;
 			}
 
-			if (monitor != null) {
+			if (monitor != null)
+			{
 				monitor.worked(1);
 			}
 		}
@@ -224,11 +262,13 @@ public class RunAllCypressFormTestsHandler extends AbstractHandler {
 		return new TestRunResult(passed, failed, testForms.size(), false, results);
 	}
 
-	public static boolean isTestPassed(String result) {
+	public static boolean isTestPassed(String result)
+	{
 		return result != null && result.contains("All tests passed");
 	}
 
-	public static String formatAggregateResult(TestRunResult result) {
+	public static String formatAggregateResult(TestRunResult result)
+	{
 		return "Total: " + result.total + " | Passed: " + result.passed + " | Failed: " + result.failed;
 	}
 }

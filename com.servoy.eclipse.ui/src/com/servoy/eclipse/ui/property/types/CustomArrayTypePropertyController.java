@@ -343,7 +343,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			((IBasicWebObject)persistContext.getPersist()).setProperty(webComponentPropertyDescription.getName(), newMainValue);
 		}
 
-		protected Object getDefaultElementProperty(Object id)
+		public Object getDefaultElementProperty(Object id)
 		{
 			Object defaultValue = getArrayElementPD().getDefaultValue();
 			if (defaultValue == null && webComponentPropertyDescription.getType() instanceof ICustomType< ? > &&

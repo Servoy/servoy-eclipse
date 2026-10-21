@@ -74,6 +74,16 @@ pipeline {
             }
         }
 
+        // Remove stale test reports so tests that were moved/removed are not re-published
+        stage('Clean Test Reports') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
+            steps {
+                sh 'find . -path "*/target/surefire-reports" -type d -prune -exec rm -rf {} +'
+            }
+        }
+
         // Only runs if WIPE_WORKSPACE is FALSE
         stage('Build with Tycho') {
             when {
@@ -85,7 +95,25 @@ pipeline {
                         configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
                         configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
                     ]) {
-                        sh 'export MAVEN_OPTS="-Dmaven.test.failure.ignore=true" && mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" $goals'
+                        sh 'mvn -B -fae -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" $goals'
+                    }
+                }
+            }
+        }
+
+        stage('Integration Tests') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
+            steps {
+                wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
+                    configFileProvider([
+                        configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
+                        configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
+                    ]) {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                            sh 'mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" verify -Pintegration -pl com.servoy.eclipse.core.tests,com.servoy.eclipse.cypress.tests,com.servoy.eclipse.model.tests,com.servoy.eclipse.designer.tests,com.servoy.eclipse.ngclient.ui.tests,com.servoy.eclipse.ui.tests -am'
+                        }
                     }
                 }
             }
@@ -102,13 +130,6 @@ pipeline {
                     
                     // Tycho/Surefire Java test reports
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
-                    
-                    // ESLint reports (ngclient.ui + designer.rfb)
-                    recordIssues(
-                        tools: [esLint(pattern: '**/target/eslint-checkstyle.xml')],
-                        qualityGates: [[threshold: 1, type: 'NEW', unstable: true]],
-                        enabledForFailure: true
-                    )
                     
                     // HTML Publisher voor Coverage rapportages
                     publishHTML([

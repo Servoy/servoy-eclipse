@@ -8,11 +8,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 
-class NoOpNPMCommand implements IRunNPMCommand
+public class NoOpNPMCommand implements IRunNPMCommand
 {
 	private final List<String> commandArguments;
 
-	NoOpNPMCommand(List<String> commandArguments)
+	public NoOpNPMCommand(List<String> commandArguments)
 	{
 		this.commandArguments = commandArguments;
 	}

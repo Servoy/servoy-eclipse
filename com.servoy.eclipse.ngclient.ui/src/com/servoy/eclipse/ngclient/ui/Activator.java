@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -38,6 +39,7 @@ public class Activator extends Plugin
 	private final static String NG2_FOLDER = "target";
 
 	private final CountDownLatch nodeReady = new CountDownLatch(1);
+	private volatile boolean extractionStarted = false;
 
 	// The shared instance
 	private static Activator plugin;
@@ -145,6 +147,18 @@ public class Activator extends Plugin
 	public void extractNode()
 	{
 		if (isNodeExtractionAndTitaniumBuildDisabled()) return;
+		if (nodeReady.getCount() == 0)
+		{
+			return;
+		}
+		synchronized (this)
+		{
+			if (extractionStarted)
+			{
+				return;
+			}
+			extractionStarted = true;
+		}
 
 		String nodePth = getSystemOrEvironmentProperty("servoy.nodePath");
 		String npmPth = getSystemOrEvironmentProperty("servoy.npmPath");
@@ -157,6 +171,7 @@ public class Activator extends Plugin
 			{
 				pnpmPath = new File(pnpmPth);
 			}
+			getLog().info("Using the configured node " + nodePath + " and npm " + npmPath + " (servoy.nodePath / servoy.npmPath)");
 			countDown();
 		}
 		else
@@ -231,11 +246,19 @@ public class Activator extends Plugin
 	}
 
 	/**
-	 * @return the bundled Node executable, or <code>null</code> if Node has not been extracted yet.
+	 * @return the configured or bundled Node executable, or <code>null</code> if Node has not been extracted yet.
 	 */
 	public File getNodePath()
 	{
 		return nodePath;
+	}
+
+	/**
+	 * @return the configured or bundled npm script (a node script run through the node executable), or <code>null</code> if not available yet.
+	 */
+	public File getNpmPath()
+	{
+		return npmPath;
 	}
 
 	/**
@@ -491,6 +514,25 @@ public class Activator extends Plugin
 		catch (InterruptedException e)
 		{
 			ServoyLog.logError(e);
+		}
+	}
+
+	/**
+	 * Waits at most the given time for the node extraction to finish. Unlike the package-private no-arg variant this never blocks forever (for example when
+	 * extraction is disabled and the latch is never counted down).
+	 *
+	 * @return true if node is ready, false if the wait timed out or was interrupted
+	 */
+	public boolean waitForNodeExtraction(long timeout, TimeUnit unit)
+	{
+		try
+		{
+			return nodeReady.await(timeout, unit);
+		}
+		catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+			return false;
 		}
 	}
 

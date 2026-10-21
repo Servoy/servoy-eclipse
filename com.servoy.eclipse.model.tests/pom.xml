@@ -12,4 +12,189 @@
 	</parent>
 	<artifactId>com.servoy.eclipse.model.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
+	<build>
+		<!-- Tycho compiles src/test/java (source.. in build.properties) into target/classes; plain surefire looks in target/test-classes by default -->
+		<testOutputDirectory>${project.build.directory}/classes</testOutputDirectory>
+		<plugins>
+			<!-- plainjunit tests run on a flat classpath (like Eclipse "Run as JUnit"), without an OSGi runtime -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${surefire-plugin-version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit-platform</artifactId>
+						<version>${surefire-plugin-version}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<!-- the eclipse-test-plugin lifecycle only binds tycho-surefire:test, so bind plain surefire explicitly -->
+					<execution>
+						<id>plainjunit-tests</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includes>
+						<include>**/plainjunit/**/*.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<!-- tycho-surefire always starts an OSGi runtime; it is only used by the integration profile -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<skip>true</skip>
+                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
+                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
+                         automatic framework detection would otherwise pick the junit4 provider
+                         and report "No tests found" for these pure-Jupiter tests. -->
+                    <providerHint>junit6</providerHint>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>integration</id>
+			<properties>
+				<servoy_install>${project.basedir}/testresources/servoy_lts_extracted</servoy_install>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>3.1.0</version>
+						<executions>
+							<execution>
+								<id>create-artifacts-xml</id>
+								<phase>pre-integration-test</phase>
+								<goals><goal>run</goal></goals>
+								<configuration>
+									<target>
+										<mkdir dir="${project.build.directory}/work"/>
+										<touch file="${project.build.directory}/work/artifacts.xml"/>
+									</target>
+								</configuration>
+							</execution>
+							<execution>
+								<id>prepare-servoy-install</id>
+								<phase>generate-test-resources</phase>
+								<goals><goal>run</goal></goals>
+								<configuration>
+									<target xmlns:if="ant:if" xmlns:unless="ant:unless">
+										<property name="tarball" value="${servoy.install.tarball.for.appserver}"/>
+										<property name="extract_dir" value="${project.basedir}/testresources/servoy_lts_extracted"/>
+										<property name="timestamp_file" value="${project.basedir}/testresources/servoy_lts_extracted.timestamp"/>
+
+										<!-- Only act if the tarball exists (i.e. we are on Jenkins) -->
+										<available file="${tarball}" property="tarball_exists"/>
+
+										<!-- Check if the timestamp file is at least as new as the tarball -->
+										<uptodate property="extraction_current"
+											srcfile="${tarball}" targetfile="${timestamp_file}"
+											if:set="tarball_exists"/>
+
+										<!-- If tarball exists but extraction is stale/missing: re-extract -->
+										<sequential if:set="tarball_exists" unless:set="extraction_current">
+											<delete dir="${extract_dir}" quiet="true"/>
+											<delete file="${timestamp_file}" quiet="true"/>
+											<mkdir dir="${extract_dir}"/>
+											<untar src="${tarball}" dest="${extract_dir}" compression="gzip">
+												<patternset>
+													<include name="application_server/**"/>
+													<exclude name="application_server/postgres_db/**"/>
+												</patternset>
+											</untar>
+											<!-- Stamp timestamp_file with tarball's own mtime -->
+											<exec executable="touch">
+												<arg value="-r"/>
+												<arg value="${tarball}"/>
+												<arg value="${timestamp_file}"/>
+											</exec>
+										</sequential>
+
+										<!-- Use non-default tomcat ports so the developer started by the tests does not clash with
+										     another Servoy/tomcat already bound to 8080/8006 on the Jenkins agent.
+										     Only done when the tarball is present (Jenkins), and then mandatory: the build fails if the
+										     ports cannot be changed. Applied on every run, also when the extraction is up-to-date. -->
+										<property name="server_xml" value="${extract_dir}/application_server/server/conf/server.xml"/>
+										<available file="${server_xml}" property="server_xml_exists"/>
+										<fail message="Cannot set the tomcat test ports: ${server_xml} does not exist"
+											if:set="tarball_exists" unless:set="server_xml_exists"/>
+										<sequential if:set="tarball_exists">
+											<replaceregexp file="${server_xml}"
+												match="(?&lt;=&lt;Connector\s{1,10}port=&quot;)\d+(?=&quot;\s+protocol=&quot;HTTP/1\.1&quot;)"
+												replace="${servoy.test.http.port}"/>
+											<replaceregexp file="${server_xml}"
+												match="(?&lt;=&lt;Server\s{1,10}port=&quot;)\d+(?=&quot;)"
+												replace="${servoy.test.shutdown.port}"/>
+											<loadfile property="server_xml_content" srcFile="${server_xml}"/>
+											<fail message="Failed to set the tomcat http port to ${servoy.test.http.port} in ${server_xml}">
+												<condition>
+													<not>
+														<matches string="${server_xml_content}" pattern="(?s).*&lt;Connector\s+port=&quot;${servoy.test.http.port}&quot;\s+protocol=&quot;HTTP/1\.1&quot;.*"/>
+													</not>
+												</condition>
+											</fail>
+											<fail message="Failed to set the tomcat shutdown port to ${servoy.test.shutdown.port} in ${server_xml}">
+												<condition>
+													<not>
+														<matches string="${server_xml_content}" pattern="(?s).*&lt;Server\s+port=&quot;${servoy.test.shutdown.port}&quot;.*"/>
+													</not>
+												</condition>
+											</fail>
+										</sequential>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>${surefire-plugin-version}</version>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>tycho-surefire-plugin</artifactId>
+						<version>${tycho.version}</version>
+						<configuration>
+							<skip>false</skip>
+		                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
+		                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
+		                         automatic framework detection would otherwise pick the junit4 provider
+		                         and report "No tests found" for these pure-Jupiter tests. -->
+		                    <providerHint>junit6</providerHint>
+							<includes>
+								<include>**/integrationpde/**/*.java</include>
+							</includes>
+							<useUIHarness>true</useUIHarness>
+							<useUIThread>false</useUIThread>
+							<product>com.servoy.eclipse.core.ide</product>
+							<application>org.eclipse.ui.ide.workbench</application>
+							<argLine>-Xms256m -Xmx2048m -ea --add-exports=java.base/sun.security.x509=ALL-UNNAMED -Dorg.osgi.framework.system.packages.extra=sun.security.x509 -Dservoy.cloud.skipCheckout=true -Dservoy.application_server.dir=${servoy_install}/application_server -Dproperty-file=${project.basedir}/../com.servoy.eclipse.core.tests/testresources/servoy.properties -Dchromium.integration.eclipse.disable=true -Dorg.eclipse.ui.testing=true</argLine>
+							<deleteOsgiDataDirectory>false</deleteOsgiDataDirectory>
+							<dependencies>
+								<dependency>
+									<type>eclipse-plugin</type>
+									<artifactId>com.servoy.eclipse.extension.compatibility</artifactId>
+								</dependency>
+							</dependencies>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

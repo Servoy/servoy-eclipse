@@ -136,7 +136,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		}
 	}
 
-	protected void handleLoginTokenResponse(LoginTokenResponse loginTokenResponse, String finalUsername, String finalPassword, boolean finalFirstLogin,
+	public void handleLoginTokenResponse(LoginTokenResponse loginTokenResponse, String finalUsername, String finalPassword, boolean finalFirstLogin,
 		Consumer<String> onLogin, ISecurePreferences node)
 	{
 		if (loginTokenResponse.status == LoginTokenResponse.Status.OK)
@@ -692,21 +692,22 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		}
 
 	}
-}
 
-class LoginTokenResponse
-{
-	enum Status
+	public static class LoginTokenResponse
 	{
-		OK, LOGIN_ERROR, ERROR
+		public enum Status
+		{
+			OK, LOGIN_ERROR, ERROR
+		}
+
+		public Status status;
+		public String response;
+
+		public LoginTokenResponse(Status status, String response)
+		{
+			this.status = status;
+			this.response = response;
+		}
 	}
 
-	Status status;
-	String response;
-
-	LoginTokenResponse(Status status, String response)
-	{
-		this.status = status;
-		this.response = response;
-	}
 }
