@@ -146,8 +146,17 @@ describe('DesignFormComponent', () => {
       document.elementFromPoint = originalElementFromPoint;
     });
 
-    it('should post onVariantMouseDown message with model size unchanged', () => {
-      const model = { size: { width: 150, height: 80 }, name: 'btn' };
+    // SVY-21504: onVariantsMouseDown in the content iframe only resolves the clicked variant and posts
+    // its model UNCHANGED - the natural-size measurement now happens in the palette (PaletteComponent,
+    // which owns the popover DOM). So these tests assert it finds the right variant and posts model as-is.
+    const makeTarget = (opts: { svyId?: string; tagName?: string; parentElement?: unknown }) => ({
+      tagName: opts.tagName ?? 'BUTTON',
+      attributes: { getNamedItem: (name: string) => (name === 'svy-id' && opts.svyId ? { nodeValue: opts.svyId } : null) },
+      parentElement: opts.parentElement ?? null,
+    });
+
+    it('should post the selected variant model unchanged', () => {
+      const model = { size: { width: 80, height: 30 }, name: 'btn' };
       const variantItem = Object.create(ComponentCache.prototype);
       variantItem.model = model;
       const variant = Object.create(StructureCache.prototype);
@@ -155,41 +164,14 @@ describe('DesignFormComponent', () => {
       variant.items = [variantItem];
       (component as any).insertedVariants = [variant];
 
-      const targetEl = {
-        tagName: 'BUTTON',
-        attributes: { getNamedItem: (name: string) => (name === 'svy-id' ? { nodeValue: 'var1' } : null) },
-        parentElement: null,
-      };
-      elementFromPointSpy.mockReturnValue(targetEl);
+      elementFromPointSpy.mockReturnValue(makeTarget({ svyId: 'var1' }));
 
       const event = { pageX: 10, pageY: 20, stopPropagation: vi.fn() } as unknown as MouseEvent;
       component.onVariantsMouseDown(event);
 
       expect(postMessageSpy).toHaveBeenCalledWith({ id: 'onVariantMouseDown', pageX: 10, pageY: 20, model }, '*');
-      expect(model.size.width).toBe(150);
-      expect(model.size.height).toBe(80);
-    });
-
-    it('should not overwrite model.size with DOM measurements', () => {
-      const model = { size: { width: 200, height: 100 }, name: 'lbl' };
-      const variantItem = Object.create(ComponentCache.prototype);
-      variantItem.model = model;
-      const variant = Object.create(StructureCache.prototype);
-      variant.id = 'v2';
-      variant.items = [variantItem];
-      (component as any).insertedVariants = [variant];
-
-      const targetEl = {
-        tagName: 'SPAN',
-        attributes: { getNamedItem: (name: string) => (name === 'svy-id' ? { nodeValue: 'v2' } : null) },
-        parentElement: null,
-      };
-      elementFromPointSpy.mockReturnValue(targetEl);
-
-      const event = { pageX: 5, pageY: 5, stopPropagation: vi.fn() } as unknown as MouseEvent;
-      component.onVariantsMouseDown(event);
-
-      expect(model.size).toEqual({ width: 200, height: 100 });
+      // content iframe does NOT touch model.size (the palette measures/sets it)
+      expect(model.size).toEqual({ width: 80, height: 30 });
     });
 
     it('should return early when clicking a DIV element', () => {
@@ -210,21 +192,9 @@ describe('DesignFormComponent', () => {
       variant.items = [variantItem];
       (component as any).insertedVariants = [variant];
 
-      const grandparent = {
-        tagName: 'DIV',
-        attributes: { getNamedItem: (name: string) => (name === 'svy-id' ? { nodeValue: 'deep-var' } : null) },
-        parentElement: null,
-      };
-      const parent = {
-        tagName: 'SPAN',
-        attributes: { getNamedItem: () => null },
-        parentElement: grandparent,
-      };
-      const target = {
-        tagName: 'INPUT',
-        attributes: { getNamedItem: () => null },
-        parentElement: parent,
-      };
+      const grandparent = makeTarget({ svyId: 'deep-var' });
+      const parent = makeTarget({ tagName: 'SPAN', parentElement: grandparent });
+      const target = makeTarget({ tagName: 'INPUT', parentElement: parent });
       elementFromPointSpy.mockReturnValue(target);
 
       const event = { pageX: 30, pageY: 40, stopPropagation: vi.fn() } as unknown as MouseEvent;

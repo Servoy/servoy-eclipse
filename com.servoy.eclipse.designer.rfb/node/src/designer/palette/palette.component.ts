@@ -137,7 +137,14 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
     onVariantMouseDown(pageX: number, pageY: number, model: Record<string, unknown>) {
         this.isDraggedVariant = true;
         this.draggedVariant.variant = model._variantName as string;
-        this.draggedVariant.size = model.size as { width: number; height: number };
+        const measuredSize = this.measureVariantSize(pageX, pageY);
+        this.draggedVariant.size = measuredSize ?? (model.size as { width: number; height: number });
+        // SVY-21504: also feed the measured natural size into the model sent for the drag preview, so the
+        // dragged ghost (createElement in designform_component) renders at the variant's real size instead of
+        // the 200x100 fallback it uses when model.size is undefined.
+        if (measuredSize) {
+            model.size = measuredSize;
+        }
         this.draggedVariant.text = model.text as string;
 
         this.dragItem.paletteItemBeingDragged = this.draggedVariant.element;
@@ -169,6 +176,94 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             attributes: this.dragItem.attributes,
             children: null
         });
+    }
+
+    // SVY-21504: the horizontal padding the bootstrap button gets ON THE FORM via its component CSS
+    // (.svy-wrapper > * > .bts-button { padding: 0 12px }). In the popover the button is NOT inside a
+    // .svy-wrapper, so it keeps its natural (smaller) bootstrap padding and never ellipsizes - which is why
+    // measuring its box in the popover and reusing that width leaves the text ~a few px short once the form
+    // re-pads it to 12px each side and turns on overflow:hidden + text-overflow:ellipsis.
+    private static readonly FORM_BUTTON_HPADDING = 12;
+
+    // SVY-21504: compute the grabbed variant's natural size directly from the popover.
+    // A variant is only a set of CSS classes - it has no server size, and model.size is undefined
+    // (the design size lives in the server-only 'designsize' since SVY-19023), so the only source of a
+    // variant's real size is its rendered element in the VariantsForm popover. pageX/pageY are the click
+    // coordinates inside that iframe. The element under the cursor is the real rendered control (e.g. a
+    // button/span carrying the bts-* class), whose own box is the natural padded size. We must NOT walk UP
+    // to a wrapper: the variant_item / svy-layoutcontainer is a flex item stretched to the (narrow) popover
+    // column, so its width is clamped and a long label ("Primary"/"Round") measures too small. Instead find
+    // the nearest control element (not a layout/structure wrapper) and measure it. Returns null when it
+    // cannot be measured so the caller can fall back.
+    private measureVariantSize(pageX: number, pageY: number): { width: number; height: number } | null {
+        const variantsDoc = this.getVariantsDocument();
+        if (!variantsDoc) {
+            return null;
+        }
+        const control = this.findVariantControl(variantsDoc.elementFromPoint(pageX, pageY));
+        if (!control) {
+            return null;
+        }
+        const rect = control.getBoundingClientRect();
+        // SVY-21504: size the dropped button for the width its TEXT actually needs plus the padding the form
+        // will apply, not the popover box. scrollWidth is the content width the text needs regardless of the
+        // popover column clamp; subtract the popover button's own padding to get the bare text width, then add
+        // the form's 12px-per-side padding + the control's borders, so once .svy-wrapper > .bts-button re-pads
+        // to 12px the text still fits (no ellipsis). Falls back to the measured box width when computed style
+        // is unavailable. A small buffer absorbs sub-pixel rounding.
+        const win = variantsDoc.defaultView;
+        let width: number;
+        if (win) {
+            const cs = win.getComputedStyle(control);
+            const popoverPad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+            const border = (parseFloat(cs.borderLeftWidth) || 0) + (parseFloat(cs.borderRightWidth) || 0);
+            const scrollWidth = (control as HTMLElement).scrollWidth || 0;
+            // bare text/content width = the scroll content minus the popover's own padding
+            const textWidth = Math.max(0, scrollWidth - popoverPad);
+            const neededWithFormPadding = textWidth + 2 * PaletteComponent.FORM_BUTTON_HPADDING + border;
+            width = Math.ceil(Math.max(rect.width, neededWithFormPadding)) + 2;
+        } else {
+            width = Math.ceil(rect.width) + 2;
+        }
+        const height = Math.ceil(rect.height);
+        if (!isFinite(width) || width <= 0 || !isFinite(height) || height <= 0) {
+            return null;
+        }
+        return { width, height };
+    }
+
+    // Resolve the real rendered control to measure, starting from the clicked node. The control is an
+    // inline-block button/label whose own box is its natural size, so it is not affected by the popover
+    // column width the way the flex-stretched layout wrappers are. Climb up past text/icon children until a
+    // control element is found, but never return one of the stretched layout wrappers
+    // (svy-layoutcontainer / svy-wrapper / svy-responsive-wrapper / variant_item / variants_container).
+    private findVariantControl(clicked: Element | null): Element | null {
+        const isWrapper = (e: Element): boolean =>
+            e.classList?.contains('svy-layoutcontainer') || e.classList?.contains('svy-wrapper') ||
+            e.classList?.contains('svy-responsive-wrapper') || e.classList?.contains('variant_item') ||
+            e.classList?.contains('variants_container');
+        const isControl = (e: Element): boolean => {
+            const cls = typeof e.className === 'string' ? e.className : '';
+            return cls.indexOf('bts-') >= 0 || e.tagName === 'BUTTON' || e.tagName === 'A' || e.tagName === 'INPUT' || e.tagName === 'LABEL';
+        };
+        let el: Element | null = clicked;
+        while (el && !isWrapper(el)) {
+            if (isControl(el)) {
+                return el;
+            }
+            el = el.parentElement;
+        }
+        return clicked && !isWrapper(clicked) ? clicked : null;
+    }
+
+    private getVariantsDocument(): Document | null {
+        const frames = this.editorContentService.getDocument().getElementsByTagName('iframe');
+        for (const frame of Array.from(frames)) {
+            if (frame.id === 'VariantsForm') {
+                return frame.contentWindow?.document ?? null;
+            }
+        }
+        return null;
     }
 
     onVariantMouseUp() {
@@ -289,8 +384,18 @@ export class PaletteComponent implements ISupportAutoscroll, ISupportRefreshPale
             }
 
             if (this.isDraggedVariant) {
-                component.w = this.draggedVariant.size!.width;
-                component.h = this.draggedVariant.size!.height;
+                // SVY-21504: only forward a finite, positive measured variant size (set at mouse-down from the
+                // rendered popover variant). If it is missing leave w/h unset so Java keeps any snapData size or
+                // applies its default, rather than sending undefined/NaN which collapses to the plain default.
+                const variantSize = this.draggedVariant.size;
+                const validWidth = !!variantSize && typeof variantSize.width === 'number' && isFinite(variantSize.width) && variantSize.width > 0;
+                const validHeight = !!variantSize && typeof variantSize.height === 'number' && isFinite(variantSize.height) && variantSize.height > 0;
+                if (validWidth) {
+                    component.w = variantSize!.width;
+                }
+                if (validHeight) {
+                    component.h = variantSize!.height;
+                }
                 component.text = this.draggedVariant.text!;
                 if (this.draggedVariant.variant) {
                     component.variant = this.draggedVariant.variant;

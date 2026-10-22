@@ -297,55 +297,162 @@ describe('PaletteComponent', () => {
     });
   });
 
-  describe('onVariantMouseDown (SVY-21294)', () => {
+  describe('onVariantMouseDown (SVY-21504)', () => {
+    // SVY-21504: a variant has no server size and model.size is undefined (design size moved to the
+    // server-only `designsize` in SVY-19023). Each variant has a different NATURAL size, which only
+    // exists once rendered. onVariantMouseDown therefore measures the grabbed variant directly in the
+    // VariantsForm popover (the real bts-*/svy-* #element under the click), and uses that measured size;
+    // it falls back to model.size only when no measurable popover element is found.
+
+    // The production measureVariantSize sizes the dropped button so its TEXT still fits after the form
+    // re-pads the button to 12px per side: it takes scrollWidth, subtracts the popover button's own
+    // padding to get the bare text width, adds 2*12 (form padding) + borders, takes max with the measured
+    // box width, Math.ceil's and adds a +2 sub-pixel buffer. This mirror computes the expected value so the
+    // tests assert the real formula rather than a hand-picked number.
+    const FORM_HPAD = 12;
+    const expectedWidth = (opts: { rectW: number; scrollW: number; popoverPad: number; border: number }) => {
+      const textWidth = Math.max(0, opts.scrollW - opts.popoverPad);
+      const needed = textWidth + 2 * FORM_HPAD + opts.border;
+      return Math.ceil(Math.max(opts.rectW, needed)) + 2;
+    };
+
+    // Build a mock element with classList + tagName + parentElement + scrollWidth, matching what
+    // findVariantControl walks and measureVariantSize reads.
+    const mkEl = (opts: { tag?: string; classes?: string[]; rect?: { width: number; height: number }; scrollWidth?: number; parent?: any }) => {
+      const classes = opts.classes ?? [];
+      const el: any = {
+        tagName: (opts.tag ?? 'DIV').toUpperCase(),
+        className: classes.join(' '),
+        classList: { contains: (c: string) => classes.includes(c) },
+        parentElement: opts.parent ?? null,
+        scrollWidth: opts.scrollWidth ?? (opts.rect ? opts.rect.width : 0),
+        getBoundingClientRect: () => opts.rect ?? { width: 0, height: 0 },
+      };
+      return el;
+    };
+
+    // Install a VariantsForm iframe whose elementFromPoint returns the clicked node, and whose defaultView
+    // getComputedStyle reports the control's popover padding/border (so measureVariantSize can convert to the
+    // bare text width and re-pad for the form). measuredRect=null means "no VariantsForm" -> fall back.
+    // When given, the clicked node is a real <button class="bts-button"> nested inside the stretched wrappers.
+    const wireVariantsDoc = (
+      measuredRect: { width: number; height: number } | null,
+      tag = 'button',
+      ctrlClass = 'bts-button',
+      style?: { scrollWidth?: number; padding?: number; border?: number },
+    ) => {
+      if (measuredRect === null) {
+        editorContentService.getDocument.mockReturnValue({ getElementsByTagName: () => [] });
+        return { clicked: null, wrapper: null };
+      }
+      const pad = style?.padding ?? 0;
+      const border = style?.border ?? 0;
+      const wrapper = mkEl({ tag: 'div', classes: ['svy-layoutcontainer', 'variant_item'], rect: { width: 400, height: 50 } });
+      const control = mkEl({ tag, classes: [ctrlClass], rect: measuredRect, scrollWidth: style?.scrollWidth, parent: wrapper });
+      const variantsContentDoc = {
+        elementFromPoint: () => control,
+        defaultView: {
+          getComputedStyle: () => ({
+            paddingLeft: pad / 2 + 'px',
+            paddingRight: pad / 2 + 'px',
+            borderLeftWidth: border / 2 + 'px',
+            borderRightWidth: border / 2 + 'px',
+          }),
+        },
+      };
+      const iframe = { id: 'VariantsForm', contentWindow: { document: variantsContentDoc } };
+      editorContentService.getDocument.mockReturnValue({ getElementsByTagName: () => [iframe] });
+      return { clicked: control, wrapper };
+    };
+
     beforeEach(() => {
       (component as any).draggedVariant = { element: document.createElement('div'), packageName: 'servoydefault', name: 'button', type: 'button' };
       (component as any).dragItem = {};
       editorContentService.getBodyElement.mockReturnValue({ appendChild: vi.fn(), addEventListener: vi.fn() });
     });
 
-    it('should extract size from model', () => {
-      const model = { _variantName: 'primary', size: { width: 120, height: 40 }, text: 'Click Me' };
+    it('should size the variant from the popover measurement (not model/designsize)', () => {
+      // popover button box 150.4 wide, text content (scrollWidth) 150, padding 20 (10/side), border 2 (1/side)
+      wireVariantsDoc({ width: 150.4, height: 44.2 }, 'button', 'bts-button', { scrollWidth: 150, padding: 20, border: 2 });
+      const model = { _variantName: 'primary', size: { width: undefined, height: undefined }, designsize: { width: 80, height: 30 }, text: 'Success' };
       component.onVariantMouseDown(100, 200, model);
-      expect((component as any).draggedVariant.size).toEqual({ width: 120, height: 40 });
+      const w = expectedWidth({ rectW: 150.4, scrollW: 150, popoverPad: 20, border: 2 });
+      expect((component as any).draggedVariant.size).toEqual({ width: w, height: 45 });
+      // text 130 (150 scroll - 20 popover pad) + 24 form pad + 2 border + 2 buffer = 158
+      expect((component as any).draggedVariant.size!.width).toBe(158);
     });
 
     it('should set isDraggedVariant to true', () => {
-      const model = { _variantName: 'primary', size: { width: 80, height: 30 }, text: 'OK' };
+      wireVariantsDoc({ width: 80, height: 30 });
+      const model = { _variantName: 'primary', size: undefined, text: 'OK' };
       component.onVariantMouseDown(50, 50, model);
       expect((component as any).isDraggedVariant).toBe(true);
     });
 
     it('should extract variant name from model', () => {
-      const model = { _variantName: 'danger', size: { width: 100, height: 36 }, text: 'Delete' };
+      wireVariantsDoc({ width: 100, height: 36 });
+      const model = { _variantName: 'danger', size: undefined, text: 'Delete' };
       component.onVariantMouseDown(10, 10, model);
       expect((component as any).draggedVariant.variant).toBe('danger');
     });
 
     it('should extract text from model', () => {
-      const model = { _variantName: 'info', size: { width: 90, height: 32 }, text: 'Info Button' };
+      wireVariantsDoc({ width: 90, height: 32 });
+      const model = { _variantName: 'info', size: undefined, text: 'Info Button' };
       component.onVariantMouseDown(10, 10, model);
       expect((component as any).draggedVariant.text).toBe('Info Button');
     });
 
-    it('should use model size with realistic button dimensions, not 3px', () => {
-      const model = { _variantName: 'primary', size: { width: 150, height: 45 }, text: 'Submit' };
+    it('should produce realistic button dimensions, not 3px', () => {
+      wireVariantsDoc({ width: 150, height: 45 }, 'button', 'bts-button', { scrollWidth: 150, padding: 20, border: 0 });
+      const model = { _variantName: 'primary', size: undefined, text: 'Submit' };
       component.onVariantMouseDown(100, 200, model);
-      expect((component as any).draggedVariant.size!.width).toBe(150);
+      const w = expectedWidth({ rectW: 150, scrollW: 150, popoverPad: 20, border: 0 });
+      expect((component as any).draggedVariant.size!.width).toBe(w);
       expect((component as any).draggedVariant.size!.width).toBeGreaterThan(3);
     });
 
-    it('should use model size for label variants', () => {
+    it('should size label variants for their text', () => {
       (component as any).draggedVariant.name = 'label';
       (component as any).draggedVariant.type = 'label';
-      const model = { _variantName: 'heading', size: { width: 200, height: 24 }, text: 'Title' };
+      wireVariantsDoc({ width: 200, height: 24 }, 'span', 'bts-label', { scrollWidth: 200, padding: 0, border: 0 });
+      const model = { _variantName: 'heading', size: undefined, text: 'Title' };
       component.onVariantMouseDown(50, 50, model);
-      expect((component as any).draggedVariant.size).toEqual({ width: 200, height: 24 });
+      const w = expectedWidth({ rectW: 200, scrollW: 200, popoverPad: 0, border: 0 });
+      expect((component as any).draggedVariant.size).toEqual({ width: w, height: 24 });
       expect((component as any).draggedVariant.size!.width).toBeGreaterThan(3);
+    });
+
+    it('should measure the control, NOT the flex-stretched wrapper (long label not clipped)', () => {
+      // control box 180 (wrapper stretched to 400). Must measure the control, never the 400 wrapper.
+      wireVariantsDoc({ width: 180, height: 38 }, 'button', 'bts-button', { scrollWidth: 180, padding: 20, border: 0 });
+      const model = { _variantName: 'primary', size: undefined, text: 'Primary' };
+      component.onVariantMouseDown(100, 200, model);
+      const w = expectedWidth({ rectW: 180, scrollW: 180, popoverPad: 20, border: 0 });
+      expect((component as any).draggedVariant.size!.width).toBe(w);
+      // never the 400px stretched wrapper
+      expect((component as any).draggedVariant.size!.width).toBeLessThan(400);
+    });
+
+    it('should also feed the measured size into the drag-preview model', () => {
+      wireVariantsDoc({ width: 150, height: 45 }, 'button', 'bts-button', { scrollWidth: 150, padding: 20, border: 0 });
+      const model: any = { _variantName: 'primary', size: undefined, text: 'Submit' };
+      component.onVariantMouseDown(100, 200, model);
+      const w = expectedWidth({ rectW: 150, scrollW: 150, popoverPad: 20, border: 0 });
+      // the model sent for the drag preview carries the measured size (not undefined)
+      expect(model.size).toEqual({ width: w, height: 45 });
+    });
+
+    it('should fall back to model.size when the variant cannot be measured in the popover', () => {
+      wireVariantsDoc(null); // no VariantsForm iframe
+      const model = { _variantName: 'primary', size: { width: 120, height: 40 }, text: 'Click' };
+      component.onVariantMouseDown(10, 10, model);
+      expect((component as any).draggedVariant.size).toEqual({ width: 120, height: 40 });
     });
 
     it('should store model on dragItem', () => {
-      const model = { _variantName: 'primary', size: { width: 120, height: 40 }, text: 'Click' };
+      wireVariantsDoc({ width: 120, height: 40 });
+      const model = { _variantName: 'primary', size: undefined, text: 'Click' };
       component.onVariantMouseDown(10, 10, model);
       expect((component as any).dragItem.model).toBe(model);
     });
@@ -421,8 +528,16 @@ describe('PaletteComponent', () => {
         }
 
         if (comp.isDraggedVariant) {
-          component.w = comp.draggedVariant.size.width;
-          component.h = comp.draggedVariant.size.height;
+          // SVY-21504: mirror the production guard - only forward a finite, positive measured variant size.
+          const variantSize = comp.draggedVariant.size;
+          const validWidth = !!variantSize && typeof variantSize.width === 'number' && isFinite(variantSize.width) && variantSize.width > 0;
+          const validHeight = !!variantSize && typeof variantSize.height === 'number' && isFinite(variantSize.height) && variantSize.height > 0;
+          if (validWidth) {
+            component.w = variantSize.width;
+          }
+          if (validHeight) {
+            component.h = variantSize.height;
+          }
           component.text = comp.draggedVariant.text;
           if (comp.draggedVariant.variant) {
             component.variant = comp.draggedVariant.variant;
@@ -543,6 +658,51 @@ describe('PaletteComponent', () => {
       const createCall = editorSession.createComponent.mock.calls[0]?.[0];
       expect(createCall.w).toBe(150);
       expect(createCall.h).toBe(40);
+    });
+
+    // SVY-21504: when the variant size could not be measured (undefined / NaN / <= 0), the drop must NOT
+    // forward w/h - sending undefined/NaN collapses to EMPTY_SIZE and the plain component default on the Java
+    // side. Leaving w/h unset lets any snapData size or the Java default stand.
+    it('should NOT set w/h when the variant size is undefined', () => {
+      (component as any).isDraggedVariant = true;
+      (component as any).draggedVariant = { size: { width: undefined, height: undefined }, text: 'NoSize', variant: 'primary', element: null };
+      (component as any).snapData = null;
+      urlParser.isAbsoluteFormLayout.mockReturnValue(true);
+
+      callOnMouseUp(component, mockEvent);
+
+      const createCall = editorSession.createComponent.mock.calls[0]?.[0];
+      expect(createCall.w).toBeUndefined();
+      expect(createCall.h).toBeUndefined();
+      // the variant is still applied, only the size is withheld
+      expect(createCall.variant).toBe('primary');
+    });
+
+    it('should NOT set w/h when the variant size is missing entirely', () => {
+      (component as any).isDraggedVariant = true;
+      (component as any).draggedVariant = { text: 'NoSizeObj', variant: 'primary', element: null };
+      (component as any).snapData = null;
+      urlParser.isAbsoluteFormLayout.mockReturnValue(true);
+
+      callOnMouseUp(component, mockEvent);
+
+      const createCall = editorSession.createComponent.mock.calls[0]?.[0];
+      expect(createCall.w).toBeUndefined();
+      expect(createCall.h).toBeUndefined();
+    });
+
+    it('should keep a snapData size when the variant size is invalid (NaN / <= 0)', () => {
+      (component as any).isDraggedVariant = true;
+      (component as any).draggedVariant = { size: { width: NaN, height: 0 }, text: 'Bad', variant: 'primary', element: null };
+      (component as any).snapData = { top: 10, left: 20, width: 300, height: 200, cssPosition: {} };
+      urlParser.isAbsoluteFormLayout.mockReturnValue(true);
+
+      callOnMouseUp(component, mockEvent);
+
+      const createCall = editorSession.createComponent.mock.calls[0]?.[0];
+      // the invalid variant size does not clobber the snapData-derived w/h
+      expect(createCall.w).toBe(300);
+      expect(createCall.h).toBe(200);
     });
   });
 });
