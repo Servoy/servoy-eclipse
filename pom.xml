@@ -18,7 +18,7 @@
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<servoy.ai.repo.url>https://build.servoy.com/latest/servoy_ai/</servoy.ai.repo.url>
-		<servoy.install.tarball.for.appserver>/data/www/latest/servoy_release/servoy_linux.tar.gz</servoy.install.tarball.for.appserver>
+		<servoy.install.tarball.for.appserver>/data/www/latest/servoy_master/servoy_linux.tar.gz</servoy.install.tarball.for.appserver>
 		<!-- tomcat ports patched into the extracted application_server by the integration profiles, so the developer started by the
 		     integration tests does not clash with other Servoy/tomcat processes on the build agent (each repo uses its own set) -->
 		<servoy.test.http.port>14080</servoy.test.http.port>
