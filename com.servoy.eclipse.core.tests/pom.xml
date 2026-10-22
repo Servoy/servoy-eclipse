@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2026.9.1-SNAPSHOT</version>
+		<version>2026.12.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.core.tests</artifactId>
 	<!-- NOT an eclipse-test-plugin: this bundle holds no test classes of its own, only
