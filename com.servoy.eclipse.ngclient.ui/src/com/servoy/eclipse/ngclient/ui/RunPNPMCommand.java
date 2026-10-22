@@ -233,16 +233,38 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 			List<String> allCmdLineArgs = new ArrayList<>();
 			allCmdLineArgs.add(pnpmPath.getCanonicalPath());
 			allCmdLineArgs.addAll(pnpmArguments);
-			// SVY-21456 §3.7.2: hardlinks cannot cross volumes. pnpm's default store lives under the user home
-			// (on Windows always C:). When the target folder is on a different drive/volume, pnpm would silently
-			// copy every file instead of hardlinking. Point the store at a generic per-drive store on the target's
-			// own volume so hardlinks work and are shared across all workspaces on that drive. When target and
-			// default store are on the same volume (the common case, e.g. a C: workspace), this returns null and
-			// pnpm keeps its default store.
-			String storeDirArg = computeStoreDirArgIfCrossVolume(projectFolder);
-			if (storeDirArg != null)
+			// SVY-21456: the store-dir and package-import-method config flags are INSTALL concerns (they govern how
+			// pnpm materializes node_modules from the store). They must only be passed to a package-managing command
+			// (install/add/update/remove/ci), NOT to 'pnpm run <script>' - pnpm forwards a 'run' command's extra args
+			// verbatim to the script, so '--config.package-import-method=hardlink' would reach 'ng build' and fail
+			// with "Unknown argument: config.package-import-method". A 'run' is identified by the translated verb.
+			boolean isRunCommand = !pnpmArguments.isEmpty() && "run".equals(pnpmArguments.get(0));
+			if (!isRunCommand)
 			{
-				allCmdLineArgs.add(storeDirArg);
+				// SVY-21456 §3.7.2: hardlinks cannot cross volumes. pnpm's default store lives under the user home
+				// (on Windows always C:). When the target folder is on a different drive/volume, pnpm would silently
+				// copy every file instead of hardlinking. Point the store at a generic per-drive store on the target's
+				// own volume so hardlinks work and are shared across all workspaces on that drive. When target and
+				// default store are on the same volume (the common case, e.g. a C: workspace), this returns null and
+				// pnpm keeps its default store.
+				String storeDirArg = computeStoreDirArgIfCrossVolume(projectFolder);
+				if (storeDirArg != null)
+				{
+					allCmdLineArgs.add(storeDirArg);
+				}
+				// SVY-21456: once we know the store and the target share a volume (either natively, or because the
+				// per-drive store-dir above was placed on the target's own volume), force package-import-method=hardlink.
+				// pnpm's default is clone-or-copy, which on some filesystems (notably a ReFS/Dev Drive formatted with a
+				// 4K cluster size) silently materializes full copies instead of sharing blocks - no dedup and slower.
+				// hardlink is faster and gives real dedup against the store on every OS/filesystem that supports it
+				// (NTFS, ReFS, ext4, APFS, ...), and it is only ever emitted when the store is guaranteed to be on the
+				// same volume as the target, so a cross-volume hardlink (which would fail) can never be requested. When
+				// the volume relationship cannot be determined this returns null and pnpm keeps its own default.
+				String importMethodArg = computeHardlinkImportMethodArgIfSameVolume(projectFolder, storeDirArg);
+				if (importMethodArg != null)
+				{
+					allCmdLineArgs.add(importMethodArg);
+				}
 			}
 			writeConsole(console, "\n---- Running pnpm command:\n" + RunNPMCommand.commandArgsToString(allCmdLineArgs));
 			writeConsole(console, "In dir: " + projectFolder);
@@ -358,6 +380,65 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 		catch (RuntimeException e)
 		{
 			// never let store-dir detection break a build; fall back to pnpm's default store
+			return null;
+		}
+	}
+
+	/**
+	 * Computes a <code>--config.package-import-method=hardlink</code> argument when the content-addressable store
+	 * pnpm will use is on the SAME filesystem volume as the target folder, otherwise <code>null</code>
+	 * (SVY-21456). Forcing hardlinks is safe exactly in that case - a hardlink cannot cross volumes - and it beats
+	 * pnpm's default <code>clone-or-copy</code>: on some filesystems clone-or-copy silently falls back to full
+	 * copies (e.g. a ReFS/Dev Drive formatted with a 4K cluster size never shares blocks), so there is no dedup and
+	 * installs are slower. A hardlink shares the file with the store on every OS/filesystem that supports it
+	 * (NTFS, ReFS, ext4, APFS), and is both faster and smaller.
+	 * <p>
+	 * The decision reuses the exact same-volume knowledge as {@link #computeStoreDirArgIfCrossVolume(File)}:
+	 * <ul>
+	 * <li>if that method emitted a <code>store-dir</code> override, the store was deliberately placed on the
+	 * target's OWN volume (the per-drive store), so target and store share a volume by construction;</li>
+	 * <li>if it returned <code>null</code> because target and the resolved default store already share a volume,
+	 * they likewise share a volume;</li>
+	 * <li>only when the volume relationship cannot be determined at all (store resolution failed) do we return
+	 * <code>null</code> and let pnpm keep its own default import method.</li>
+	 * </ul>
+	 *
+	 * @param targetFolder the folder pnpm will run in (where <code>node_modules</code> is created)
+	 * @param storeDirArg the result of {@link #computeStoreDirArgIfCrossVolume(File)} for the same target, so this
+	 *            method does not re-run the volume detection; a non-<code>null</code> value means the store was put
+	 *            on the target's own volume
+	 * @return <code>"--config.package-import-method=hardlink"</code> when hardlinking to the store is guaranteed
+	 *         safe, otherwise <code>null</code>
+	 */
+	private String computeHardlinkImportMethodArgIfSameVolume(File targetFolder, String storeDirArg)
+	{
+		try
+		{
+			// Cross-volume case already handled: the per-drive store-dir override lives on the target's own
+			// volume, so a hardlink from node_modules into that store stays within one volume.
+			if (storeDirArg != null)
+			{
+				return "--config.package-import-method=hardlink";
+			}
+
+			// No override was emitted. That is either because target and the resolved default store already share
+			// a volume (hardlink safe), or because the volume relationship could not be determined (store
+			// resolution failed - then stay on pnpm's default). Re-check explicitly so an undetermined volume does
+			// NOT force a possibly-cross-volume hardlink.
+			File defaultStore = resolvePnpmDefaultStoreDir();
+			if (targetFolder == null || defaultStore == null) return null;
+
+			FileStore targetStore = getFileStoreOfNearestExisting(targetFolder);
+			FileStore storeStore = getFileStoreOfNearestExisting(defaultStore);
+			if (targetStore != null && targetStore.equals(storeStore))
+			{
+				return "--config.package-import-method=hardlink";
+			}
+			return null;
+		}
+		catch (RuntimeException e)
+		{
+			// never let import-method detection break a build; fall back to pnpm's default
 			return null;
 		}
 	}
