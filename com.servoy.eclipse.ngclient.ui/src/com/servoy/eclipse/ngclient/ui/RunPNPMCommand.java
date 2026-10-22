@@ -233,29 +233,38 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 			List<String> allCmdLineArgs = new ArrayList<>();
 			allCmdLineArgs.add(pnpmPath.getCanonicalPath());
 			allCmdLineArgs.addAll(pnpmArguments);
-			// SVY-21456 §3.7.2: hardlinks cannot cross volumes. pnpm's default store lives under the user home
-			// (on Windows always C:). When the target folder is on a different drive/volume, pnpm would silently
-			// copy every file instead of hardlinking. Point the store at a generic per-drive store on the target's
-			// own volume so hardlinks work and are shared across all workspaces on that drive. When target and
-			// default store are on the same volume (the common case, e.g. a C: workspace), this returns null and
-			// pnpm keeps its default store.
-			String storeDirArg = computeStoreDirArgIfCrossVolume(projectFolder);
-			if (storeDirArg != null)
+			// SVY-21456: the store-dir and package-import-method config flags are INSTALL concerns (they govern how
+			// pnpm materializes node_modules from the store). They must only be passed to a package-managing command
+			// (install/add/update/remove/ci), NOT to 'pnpm run <script>' - pnpm forwards a 'run' command's extra args
+			// verbatim to the script, so '--config.package-import-method=hardlink' would reach 'ng build' and fail
+			// with "Unknown argument: config.package-import-method". A 'run' is identified by the translated verb.
+			boolean isRunCommand = !pnpmArguments.isEmpty() && "run".equals(pnpmArguments.get(0));
+			if (!isRunCommand)
 			{
-				allCmdLineArgs.add(storeDirArg);
-			}
-			// SVY-21456: once we know the store and the target share a volume (either natively, or because the
-			// per-drive store-dir above was placed on the target's own volume), force package-import-method=hardlink.
-			// pnpm's default is clone-or-copy, which on some filesystems (notably a ReFS/Dev Drive formatted with a
-			// 4K cluster size) silently materializes full copies instead of sharing blocks - no dedup and slower.
-			// hardlink is faster and gives real dedup against the store on every OS/filesystem that supports it
-			// (NTFS, ReFS, ext4, APFS, ...), and it is only ever emitted when the store is guaranteed to be on the
-			// same volume as the target, so a cross-volume hardlink (which would fail) can never be requested. When
-			// the volume relationship cannot be determined this returns null and pnpm keeps its own default.
-			String importMethodArg = computeHardlinkImportMethodArgIfSameVolume(projectFolder, storeDirArg);
-			if (importMethodArg != null)
-			{
-				allCmdLineArgs.add(importMethodArg);
+				// SVY-21456 §3.7.2: hardlinks cannot cross volumes. pnpm's default store lives under the user home
+				// (on Windows always C:). When the target folder is on a different drive/volume, pnpm would silently
+				// copy every file instead of hardlinking. Point the store at a generic per-drive store on the target's
+				// own volume so hardlinks work and are shared across all workspaces on that drive. When target and
+				// default store are on the same volume (the common case, e.g. a C: workspace), this returns null and
+				// pnpm keeps its default store.
+				String storeDirArg = computeStoreDirArgIfCrossVolume(projectFolder);
+				if (storeDirArg != null)
+				{
+					allCmdLineArgs.add(storeDirArg);
+				}
+				// SVY-21456: once we know the store and the target share a volume (either natively, or because the
+				// per-drive store-dir above was placed on the target's own volume), force package-import-method=hardlink.
+				// pnpm's default is clone-or-copy, which on some filesystems (notably a ReFS/Dev Drive formatted with a
+				// 4K cluster size) silently materializes full copies instead of sharing blocks - no dedup and slower.
+				// hardlink is faster and gives real dedup against the store on every OS/filesystem that supports it
+				// (NTFS, ReFS, ext4, APFS, ...), and it is only ever emitted when the store is guaranteed to be on the
+				// same volume as the target, so a cross-volume hardlink (which would fail) can never be requested. When
+				// the volume relationship cannot be determined this returns null and pnpm keeps its own default.
+				String importMethodArg = computeHardlinkImportMethodArgIfSameVolume(projectFolder, storeDirArg);
+				if (importMethodArg != null)
+				{
+					allCmdLineArgs.add(importMethodArg);
+				}
 			}
 			writeConsole(console, "\n---- Running pnpm command:\n" + RunNPMCommand.commandArgsToString(allCmdLineArgs));
 			writeConsole(console, "In dir: " + projectFolder);
