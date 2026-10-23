@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -60,35 +61,59 @@ class FormSpecGeneratorModelTest
 	}
 
 	/**
-	 * Characterisation of the unchanged legacy path (spec 4, step 1, item 2): the exact output of {@code parseFrmFile} followed by
-	 * {@code generateCypressSpecContent} for a fixed .frm string. The model path must not alter it.
+	 * Characterisation of the unchanged legacy path (spec 4, step 1, item 2): the exact output of {@code generateCypressSpecContent} for
+	 * a fixed {@code FormMetadata}. The model path must not alter it. The metadata is built through reflection because since SVY-21514
+	 * it is read from the {@code Form} persist by {@code buildMetadata(Form)}, which needs a live Servoy model.
 	 */
 	@Nested
 	class LegacyCharacterisation
 	{
-		private static final String FRM = "{\n\"dataSource\":\"db:/servoy_test/orders\",\n\"items\":[\n" +
-			"{\n\"name\":\"btn_save\",\n\"onActionMethodID\":\"abc\",\n\"typeid\":7\n},\n" +
-			"{\n\"name\":\"lbl_title\",\n\"typeid\":7\n},\n" +
-			"{\n\"name\":\"txt_name\",\n\"typeName\":\"bootstrapcomponents-textbox\",\n\"typeid\":47\n}\n" +
-			"],\n\"name\":\"orderForm\",\n\"typeid\":3\n}";
+		/** {name, typeName, isWebComponent, isButton, isLabel} */
+		private final Object[][] ELEMENTS = { { "btn_save", null, false, true, false }, { "lbl_title", null, false, false, true },
+			{ "txt_name", "bootstrapcomponents-textbox", true, false, false } };
 
-		private String legacyContent(String frm, String formName, String solutionName) throws Exception
+		private void set(Object target, String fieldName, Object value) throws Exception
+		{
+			Field field = target.getClass().getDeclaredField(fieldName);
+			field.setAccessible(true);
+			field.set(target, value);
+		}
+
+		@SuppressWarnings("unchecked")
+		private String legacyContent(Object[][] elements, String formName, String solutionName) throws Exception
 		{
 			FormSpecGenerator generator = new FormSpecGenerator();
-			Method parseFrmFile = FormSpecGenerator.class.getDeclaredMethod("parseFrmFile", String.class, String.class);
-			parseFrmFile.setAccessible(true);
-			Method generate = FormSpecGenerator.class.getDeclaredMethod("generateCypressSpecContent", parseFrmFile.getReturnType());
-			generate.setAccessible(true);
+			Class< ? > metadataClass = Class.forName("com.servoy.eclipse.cypress.services.FormSpecGenerator$FormMetadata");
+			Class< ? > elementClass = Class.forName("com.servoy.eclipse.cypress.services.FormSpecGenerator$ElementInfo");
+			Constructor< ? > metadataCtor = metadataClass.getDeclaredConstructor();
+			metadataCtor.setAccessible(true);
+			Constructor< ? > elementCtor = elementClass.getDeclaredConstructor();
+			elementCtor.setAccessible(true);
 
-			Object metadata = parseFrmFile.invoke(generator, frm, formName);
-			Field solution = metadata.getClass().getDeclaredField("solutionName");
-			solution.setAccessible(true);
-			solution.set(metadata, solutionName);
+			Object metadata = metadataCtor.newInstance();
+			set(metadata, "formName", formName);
+			set(metadata, "solutionName", solutionName);
+			set(metadata, "dataSource", "db:/servoy_test/orders");
+			Field namedElements = metadataClass.getDeclaredField("namedElements");
+			namedElements.setAccessible(true);
+			for (Object[] def : elements)
+			{
+				Object element = elementCtor.newInstance();
+				set(element, "name", def[0]);
+				set(element, "typeName", def[1]);
+				set(element, "isWebComponent", def[2]);
+				set(element, "isButton", def[3]);
+				set(element, "isLabel", def[4]);
+				((List<Object>)namedElements.get(metadata)).add(element);
+			}
+
+			Method generate = FormSpecGenerator.class.getDeclaredMethod("generateCypressSpecContent", metadataClass);
+			generate.setAccessible(true);
 			return (String)generate.invoke(generator, metadata);
 		}
 
 		@Test
-		@DisplayName("the legacy generator output for a fixed .frm is byte for byte the visibility-only spec")
+		@DisplayName("the legacy generator output for fixed form metadata is byte for byte the visibility-only spec")
 		void legacyOutput_isUnchanged() throws Exception
 		{
 			String expected = String.join("\n", "describe('orderForm', () => {", "", "  beforeEach(() => {",
@@ -101,7 +126,7 @@ class FormSpecGeneratorModelTest
 				"    cy.get('[data-cy=\"orderForm.txt_name\"]').should('be.visible');", "  });", "", "  it('buttons are clickable', () => {",
 				"    cy.get('[data-cy=\"orderForm.btn_save\"]').should('be.visible').and('be.enabled');", "  });", "", "});") + "\n";
 
-			assertEquals(expected, legacyContent(FRM, "orderForm", "mySolution"));
+			assertEquals(expected, legacyContent(ELEMENTS, "orderForm", "mySolution"));
 		}
 
 		@Test
@@ -114,9 +139,7 @@ class FormSpecGeneratorModelTest
 				"  it('loads without errors and all elements are visible', () => {",
 				"    cy.get('.svy-error, .error-overlay').should('not.exist');", "  });", "", "});") + "\n";
 
-			String frm = "{\n\"items\":[],\n\"name\":\"emptyForm\",\n\"typeid\":3\n}";
-
-			assertAll(() -> assertEquals(expected, legacyContent(frm, "emptyForm", "mySolution")));
+			assertAll(() -> assertEquals(expected, legacyContent(new Object[0][], "emptyForm", "mySolution")));
 		}
 	}
 }

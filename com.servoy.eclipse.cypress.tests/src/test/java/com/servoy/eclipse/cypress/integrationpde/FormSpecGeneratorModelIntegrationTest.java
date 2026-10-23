@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Dimension;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,11 +43,15 @@ import com.servoy.eclipse.cypress.services.FormSpecModel.Gesture;
 import com.servoy.eclipse.cypress.services.FormSpecModel.Handler;
 import com.servoy.eclipse.cypress.services.FormSpecModel.Kind;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * Integration tests for {@link FormSpecGenerator#generateSpec(String, FormSpecModel)} (SVY-21517).
  * <p>
- * The model path needs the active solution (it reads the {@code forms/<name>.frm}, resolves the spec directory under the workspace root and uses the
+ * The model path needs the active solution (it reads the form from the active solution, resolves the spec directory under the workspace root and uses the
  * solution name in the file name), so it must run as a PDE plug-in test. The pure emitter and the model-name mismatch check are covered by the
  * {@code plainjunit} tests {@code FormSpecModelEmitterTest} and {@code FormSpecGeneratorModelTest}.
  */
@@ -80,8 +84,13 @@ public class FormSpecGeneratorModelIntegrationTest extends TestUtilitiesClass {
 		assertNotNull(activeProject, "Active project required");
 		solutionName = activeProject.getSolution().getName();
 
-		writeProjectFile(activeProject.getProject(), "forms/" + FORM + ".frm",
-				"{\n\"items\":[],\n\"name\":\"" + FORM + "\",\n\"typeid\":3\n}", new NullProgressMonitor());
+		Solution solution = activeProject.getEditingSolution();
+		if (solution.getForm(FORM) == null) {
+			IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+			Form form = solution.createNewForm(validator, null, FORM, null, true, new Dimension(640, 480));
+			activeProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
+			waitForWorkspaceBuildJobs();
+		}
 
 		gen = new FormSpecGenerator();
 		deleteSpecFiles();
@@ -165,6 +174,6 @@ public class FormSpecGeneratorModelIntegrationTest extends TestUtilitiesClass {
 	public void testGenerateSpecWithModelForUnknownFormReturnsFormNotFound() {
 		String result = gen.generateSpec("noSuchForm_xyz", new FormSpecModel("noSuchForm_xyz", List.of()));
 
-		assertEquals("Error: Form file not found: forms/noSuchForm_xyz.frm", result);
+		assertEquals("Error: Form not found: noSuchForm_xyz", result);
 	}
 }
