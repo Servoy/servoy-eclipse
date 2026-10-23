@@ -31,6 +31,9 @@ pipeline {
     environment {
         NODE_OPTIONS = '--max_old_space_size=4096'
         TEAMS_WEBHOOK = credentials('servoy-teams-webhook')
+        SERVOY_INSTALL_TARBALL_FOR_APPSERVER = "${env.SERVOY_INSTALL_TARBALL_FOR_APPSERVER ? '-Dservoy.install.tarball.for.appserver=${env.SERVOY_INSTALL_TARBALL_FOR_APPSERVER}': ''}"
+        SERVOY_TEST_HTTP_PORT = "${env.SERVOY_TEST_HTTP_PORT ? '-Dservoy.test.http.port=${env.SERVOY_TEST_HTTP_PORT}': ''}"
+        SERVOY_TEST_SHUTDOWN_PORT = "${env.SERVOY_TEST_SHUTDOWN_PORT ? '-Dservoy.test.shutdown.port=${env.SERVOY_TEST_SHUTDOWN_PORT}': ''}"
     }
     
     tools {
@@ -111,7 +114,7 @@ pipeline {
                         configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
                     ]) {
                         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                            sh 'mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" verify -Pintegration -pl com.servoy.eclipse.cypress.tests,com.servoy.eclipse.ngclient.ui.tests,com.servoy.eclipse.ui.tests,com.servoy.eclipse.tests -am'
+                            sh 'mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" verify -Pintegration -pl com.servoy.eclipse.cypress.tests,com.servoy.eclipse.ngclient.ui.tests,com.servoy.eclipse.ui.tests,com.servoy.eclipse.tests -am $SERVOY_INSTALL_TARBALL_FOR_APPSERVER $SERVOY_TEST_HTTP_PORT $SERVOY_TEST_SHUTDOWN_PORT'
                         }
                     }
                 }
