@@ -24,13 +24,28 @@ public class FormSpecGenerator
 	private static final String FORM_SPEC_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form";
 	private static final String FORM_SETUP_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form-spec";
 
-	private static final Pattern DATA_SOURCE_PATTERN = Pattern.compile("\"dataSource\"\\s*:\\s*\"([^\"]+)\"");
-	private static final Pattern ELEMENT_NAME_PATTERN = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
-	private static final Pattern TYPE_NAME_PATTERN = Pattern.compile("\"typeName\"\\s*:\\s*\"([^\"]+)\"");
+	// Servoy writes .frm keys without quotes (name:"x", typeid:47); JSON style quoted keys are accepted too. The lookbehind keeps
+	// a key from matching inside a longer one (subname, nodataSource).
+	private static final Pattern DATA_SOURCE_PATTERN = Pattern.compile("(?<![\\w$])\"?dataSource\"?\\s*:\\s*\"([^\"]+)\"");
+	private static final Pattern ELEMENT_NAME_PATTERN = Pattern.compile("(?<![\\w$])\"?name\"?\\s*:\\s*\"([^\"]+)\"");
+	private static final Pattern TYPE_NAME_PATTERN = Pattern.compile("(?<![\\w$])\"?typeName\"?\\s*:\\s*\"([^\"]+)\"");
+	private static final Pattern TYPE_ID_PATTERN = Pattern.compile("(?<![\\w$])\"?typeid\"?\\s*:\\s*(\\d+)");
 //	private static final Pattern DATA_PROVIDER_PATTERN = Pattern.compile("\"dataProviderID\"\\s*:\\s*\"([^\"]+)\"");
 
 	public String generateSpec(String formName)
 	{
+		return generateSpec(formName, null);
+	}
+
+	/**
+	 * @param model optional neutral description of the form's handlers; when null the spec is generated from the .frm file only.
+	 */
+	public String generateSpec(String formName, FormSpecModel model)
+	{
+		if (model != null && !formName.equals(model.formName()))
+		{
+			return "Error: Model is for form '" + model.formName() + "' but spec was requested for form '" + formName + "'";
+		}
 		try
 		{
 			ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
@@ -70,11 +85,15 @@ public class FormSpecGenerator
 
 			if (!Files.exists(cySpecPath))
 			{
-				String cyContent = generateCypressSpecContent(metadata);
+				String cyContent = model == null ? generateCypressSpecContent(metadata)
+					: FormSpecModelEmitter.emit(getFormUrl(metadata.solutionName, metadata.formName), model);
 				Files.writeString(cySpecPath, cyContent, StandardCharsets.UTF_8);
 				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(solutionName).append(".")
-					.append(formName).append(SPEC_CY_EXTENSION).append(" (").append(metadata.namedElements.size())
-					.append(" element assertions)\n");
+					.append(formName).append(SPEC_CY_EXTENSION).append(" (")
+					.append(model == null ? metadata.namedElements.size() + " element assertions"
+						: FormSpecModelEmitter.countVisibilityAssertions(model) + " element visibility assertions, " +
+							FormSpecModelEmitter.countHandlerCases(model) + " handler cases")
+					.append(")\n");
 			}
 
 			if (!Files.exists(setupSpecPath))
@@ -289,9 +308,11 @@ public class FormSpecGenerator
 				elem.name = name;
 				elem.typeName = typeMatcher.find() ? typeMatcher.group(1) : null;
 //				elem.dataProviderID = dpMatcher.find() ? dpMatcher.group(1) : null;
-				elem.isWebComponent = item.contains("\"typeid\":47");
-				elem.isButton = item.contains("\"typeid\":7") && item.contains("onActionMethodID");
-				elem.isLabel = item.contains("\"typeid\":7") && !item.contains("onActionMethodID");
+				Matcher typeIdMatcher = TYPE_ID_PATTERN.matcher(item);
+				int typeId = typeIdMatcher.find() ? Integer.parseInt(typeIdMatcher.group(1)) : -1;
+				elem.isWebComponent = typeId == 47;
+				elem.isButton = typeId == 7 && item.contains("onActionMethodID");
+				elem.isLabel = typeId == 7 && !item.contains("onActionMethodID");
 
 				metadata.namedElements.add(elem);
 			}
