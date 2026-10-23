@@ -30,6 +30,18 @@ public class FormSpecGenerator
 
 	public String generateSpec(String formName)
 	{
+		return generateSpec(formName, null);
+	}
+
+	/**
+	 * @param model optional neutral description of the form's handlers; when null the spec only contains the visibility checks built from the form's elements.
+	 */
+	public String generateSpec(String formName, FormSpecModel model)
+	{
+		if (model != null && !formName.equals(model.formName()))
+		{
+			return "Error: Model is for form '" + model.formName() + "' but spec was requested for form '" + formName + "'";
+		}
 		try
 		{
 			ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
@@ -72,11 +84,15 @@ public class FormSpecGenerator
 
 			if (!Files.exists(cySpecPath))
 			{
-				String cyContent = generateCypressSpecContent(metadata);
+				String cyContent = model == null ? generateCypressSpecContent(metadata)
+					: FormSpecModelEmitter.emit(getFormUrl(metadata.solutionName, metadata.formName), model);
 				Files.writeString(cySpecPath, cyContent, StandardCharsets.UTF_8);
 				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(solutionName).append(".")
-					.append(formName).append(SPEC_CY_EXTENSION).append(" (").append(metadata.namedElements.size())
-					.append(" element assertions)\n");
+					.append(formName).append(SPEC_CY_EXTENSION).append(" (")
+					.append(model == null ? metadata.namedElements.size() + " element assertions"
+						: FormSpecModelEmitter.countVisibilityAssertions(model) + " element visibility assertions, " +
+							FormSpecModelEmitter.countHandlerCases(model) + " handler cases")
+					.append(")\n");
 			}
 
 			if (!Files.exists(setupSpecPath))
