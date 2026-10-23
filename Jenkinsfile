@@ -24,13 +24,16 @@ pipeline {
     parameters {
         // New boolean toggle for manual workspace wiping
         booleanParam(name: 'WIPE_WORKSPACE', defaultValue: false, description: 'Check this box to completely wipe the workspace BEFORE running the build.')
- 
+
         string(name: 'goals', defaultValue: 'clean install', trim: false)
     }
     
     environment {
         NODE_OPTIONS = '--max_old_space_size=4096'
         TEAMS_WEBHOOK = credentials('servoy-teams-webhook')
+        SERVOY_INSTALL_TARBALL_FOR_APPSERVER_ARG = "${env.SERVOY_INSTALL_TARBALL_FOR_APPSERVER ? "-Dservoy.install.tarball.for.appserver=${env.SERVOY_INSTALL_TARBALL_FOR_APPSERVER}" : ''}"
+        SERVOY_TEST_HTTP_PORT_ARG = "${env.SERVOY_TEST_HTTP_PORT ? "-Dservoy.test.http.port=${env.SERVOY_TEST_HTTP_PORT}" : ''}"
+        SERVOY_TEST_SHUTDOWN_PORT_ARG = "${env.SERVOY_TEST_SHUTDOWN_PORT ? "-Dservoy.test.shutdown.port=${env.SERVOY_TEST_SHUTDOWN_PORT}" : ''}"
     }
     
     tools {
@@ -112,7 +115,7 @@ pipeline {
                         configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
                     ]) {
                         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                            sh 'mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" verify -Pintegration -pl com.servoy.eclipse.core.tests,com.servoy.eclipse.cypress.tests,com.servoy.eclipse.model.tests,com.servoy.eclipse.designer.tests,com.servoy.eclipse.ngclient.ui.tests,com.servoy.eclipse.ui.tests -am'
+                            sh 'mvn -B -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" verify -Pintegration -pl com.servoy.eclipse.core.tests,com.servoy.eclipse.cypress.tests,com.servoy.eclipse.model.tests,com.servoy.eclipse.designer.tests,com.servoy.eclipse.ngclient.ui.tests,com.servoy.eclipse.ui.tests -am $SERVOY_INSTALL_TARBALL_FOR_APPSERVER_ARG $SERVOY_TEST_HTTP_PORT_ARG $SERVOY_TEST_SHUTDOWN_PORT_ARG'
                         }
                     }
                 }
