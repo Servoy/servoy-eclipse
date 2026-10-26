@@ -341,7 +341,7 @@ public class FormSpecGenerator
 		else
 		{
 			sb.append("    cy.get('[data-cy^=\"").append(metadata.formName)
-				.append(".\"', { timeout: 30000 }).should('exist');\n");
+				.append(".\"]', { timeout: 30000 }).should('exist');\n");
 		}
 		sb.append("  });\n\n");
 
