@@ -118,7 +118,7 @@ class FormSpecGeneratorModelTest
 		{
 			String expected = String.join("\n", "describe('orderForm', () => {", "", "  beforeEach(() => {",
 				"    cy.visit('solution/mySolution/index.html?formpreview=orderForm&svy_testmode=true');",
-				"    cy.get('[data-cy^=\"orderForm.\"', { timeout: 30000 }).should('exist');", "  });", "",
+				"    cy.get('[data-cy^=\"orderForm.\"]', { timeout: 30000 }).should('exist');", "  });", "",
 				"  it('loads without errors and all elements are visible', () => {",
 				"    cy.get('.svy-error, .error-overlay').should('not.exist');",
 				"    cy.get('[data-cy=\"orderForm.btn_save\"]').should('be.visible');",
