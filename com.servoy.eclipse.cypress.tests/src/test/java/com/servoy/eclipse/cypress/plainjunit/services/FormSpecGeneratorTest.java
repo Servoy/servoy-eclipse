@@ -285,6 +285,22 @@ public class FormSpecGeneratorTest
 	}
 
 	@Test
+	public void testFormSpecGenerator_generateCypressSpec_beforeEachWaitSelectorIsClosed() throws Exception
+	{
+		// SVY-21516: the beforeEach wait gate for a form with named elements must emit a
+		// valid, correctly-closed CSS attribute selector [data-cy^="<formName>."] (with the
+		// closing ]). A missing ] made querySelectorAll throw a SyntaxError, aborting the
+		// whole spec before any it() block ran.
+		Object metadata = buildMetadata("myForm", null, new Object[][] { { "elem1", null, false, false, true } });
+		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+
+		assertTrue(spec.contains("cy.get('[data-cy^=\"myForm.\"]'"),
+			"beforeEach wait selector must be the correctly-closed [data-cy^=\"myForm.\"] attribute selector");
+		assertTrue(!spec.contains("cy.get('[data-cy^=\"myForm.\"'"),
+			"beforeEach wait selector must NOT contain the malformed selector missing the closing ]");
+	}
+
+	@Test
 	public void testFormSpecGenerator_generateCypressSpec_usesDescribeAndIt() throws Exception
 	{
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "lbl1", null, false, false, true } });
