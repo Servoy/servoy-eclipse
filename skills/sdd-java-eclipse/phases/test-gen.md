@@ -10,24 +10,35 @@ MCP toolset (eclipse-coder, eclipse-ide, eclipse-pde).
 
 The **PROJECT CONTEXT** block is authoritative for this repo's test infrastructure — which
 `*.tests` projects exist, which runner to use, and any shared test-base classes. Read it and
-`AGENTS.md`'s `## Testing` section first; they list the existing test projects and their
-runners. These repos are Eclipse-plugin / OSGi (Tycho), and tests fall into two categories:
+`AGENTS.md`'s test sections (`## Testing` and the "Test types, naming convention & how to Run
+Tests" section) first; they list the existing test projects, their runners and the launcher to
+use. These repos are Eclipse-plugin / OSGi (Tycho), and tests fall into two categories that are
+separated by **package**, not by class-name suffix:
 
-### JUnit tests (lightweight, no OSGi)
+### Plain JUnit tests (lightweight, no OSGi) — package `<base>.plainjunit[.*]`
 - For pure Java logic that doesn't need the Eclipse workbench or OSGi container
-- Run with: `eclipse-ide_runClassTests` or `eclipse-ide_runAllTests`
-- Can live in any `*.tests` project with standard `eclipse-plugin` packaging
+- Run with: `eclipse-ide_runJUnitTests` (give `projectName` + `packageName`/`className`)
 - Faster, preferred when possible
 
-### Plugin JUnit tests (heavyweight, full OSGi)
+### Plugin PDE integration tests (heavyweight, full OSGi) — package `<base>.integrationpde[.*]`
 - For code that needs the OSGi container, Eclipse workspace, extension points, or platform
   services (e.g. `Platform.getBundle()`, workspace access, model/solution loading, UI)
-- Run with: `eclipse-pde_runJUnitPluginTestClass` or `eclipse-pde_runJUnitPluginTests`
-- Must live in a project with `eclipse-test-plugin` packaging
-- The primary integration-test project is named in PROJECT CONTEXT / AGENTS.md
+- Run with: `eclipse-pde_runJUnitPluginTests`, passing the shared saved launch configuration
+  as `launcherName` (named in AGENTS.md) plus `projectName` and `packageName`/`className`
+- These start a full Servoy Developer; expect 60–120 s+ startup. If the call times out, poll
+  with `eclipse-pde_getOperationStatus` using increasing waits (and `includeResults` for
+  intermediate pass/fail counts)
+- If the tests aren't found, pass `junitVersion` explicitly (`"6"` for Jupiter 6, `"4"` for
+  JUnit 4) — auto-detection depends on the target project's build path
 
 **Decision rule:** If your test needs the OSGi container, the Eclipse workspace, platform
-services, or model/solution loading → Plugin JUnit. Otherwise → regular JUnit.
+services, or model/solution loading — **or calls code that transitively needs any of those**
+(e.g. something using `Activator.getInstance()`, which is `null` outside OSGi) → `integrationpde`.
+Otherwise → `plainjunit`. Package placement depends on what the *code under test* needs, not
+on what the test method itself calls. Never mix the two kinds in the same package.
+
+**No suite classes.** Do not create `@Suite` / `AllXxxTests` aggregator classes — running a
+package or the whole project executes each test class exactly once, and suites go out of date.
 
 ## JUnit version
 
@@ -65,6 +76,21 @@ them or using raw `Thread.sleep`. Typical needs and the utility to use:
 **Never use `Thread.sleep(N)` in integration tests.** Replace with a condition-polling
 utility that exits as soon as the condition is met and still drives the SWT event loop to
 prevent deadlocks.
+
+**Shared infrastructure.** Reuse the shared base classes / helpers named in AGENTS.md (event
+pump, build-job and app-server waits, solution activation, dialog guard) from the `.tests`
+project that owns them instead of copying them. Do not add a cross-repo bundle dependency to
+get them — if AGENTS.md says a sibling repo keeps its own duplicated copies, keep both in sync.
+Helper methods meant for subclasses in other packages/bundles must be `public`, not `protected`.
+
+**Workspace is reused between runs.** PDE integration tests are normally run *without* cleaning
+the workspace (to keep node/npm/cypress caches under `.metadata`). Each integration test class
+must therefore delete the workspace projects it uses in `@BeforeAll` (`@BeforeClass` for JUnit 4)
+so every run starts from a known state.
+
+**Expensive builds stay off.** Titanium/ng/node builds are normally disabled during JUnit runs
+(system property + `NodeFolderCreatorJob.setDisabled(...)`/the repo's equivalent). Only re-enable
+them for a test that genuinely needs the build (e.g. Cypress), and only for that test.
 
 ### Test quality rules
 
@@ -116,8 +142,9 @@ logic — this drives the test-type decision.
 
 ### 4. Choose the right test project
 Use `eclipse-ide_listProjects` to find existing `*.tests` projects. If a `<plugin>.tests`
-fragment already exists for the plugin under test, use it. If not, create one following the
-repo's convention:
+project already exists for the plugin under test, use it and put the new tests in its
+`<base>.plainjunit[.*]` or `<base>.integrationpde[.*]` package (see the decision rule above).
+If not, create one following the repo's convention:
 
 ```
 <plugin>.tests/
@@ -127,20 +154,41 @@ repo's convention:
   META-INF/MANIFEST.MF (Fragment-Host: <plugin under test> — gives package-private access)
   build.properties    (source.. = test source folder)
   pom.xml             (eclipse-test-plugin packaging, parent = repo root)
-  src/test/java/
+  testresources/servoy.properties  (only if it has integrationpde tests)
+  src/test/java/      (<base>.plainjunit / <base>.integrationpde packages)
 ```
 Then add the module to the root `pom.xml` (plugins profile) and import it:
 `eclipse-ide_openProject(directoryPath="<absolute-path>")`.
+
+**Maven wiring.** Copy the `pom.xml` shape from an existing sibling `.tests` project (they are
+structurally identical): a default-build `tycho-surefire-plugin` that includes
+`**/plainjunit/**/*.java`, plus an `integration` profile (`-Pintegration`) with its own
+`tycho-surefire-plugin` execution that includes `**/integrationpde/**/*.java` and starts a
+full workbench. The tycho-surefire `<includes>` match on package path, so the package decides
+which build stage runs a test. If the repo has a CI stage that lists the integration modules
+(e.g. in the `Jenkinsfile`), add the new project to it.
+
+**Shared infrastructure projects are the exception** — a `.tests` project that other, unrelated
+bundles `Require-Bundle` for shared helpers must be a plain (non-fragment) plugin with an
+`Export-Package`; follow AGENTS.md for those.
 
 **Instantiating package-private classes from OTHER bundles:** use reflection with
 `getDeclaredConstructors()[…]` + `setAccessible(true)`. Watch out for Servoy's own types
 (e.g. `com.servoy.j2db.util.UUID`, not `java.util.UUID`) — check PROJECT CONTEXT.
 
-**Naming convention** (makes the runner obvious):
-| Test type | Suffix | Runner |
-|-----------|--------|--------|
-| Unit (pure logic) | `*Test` | `eclipse-ide_runClassTests` |
-| Integration (needs OSGi) | `*IntegrationTest` | `eclipse-pde_runJUnitPluginTestClass` |
+**Package convention** (determines the runner and the Maven stage):
+| Test type | Package | Runner |
+|-----------|---------|--------|
+| Unit (pure logic) | `<base>.plainjunit[.*]` | `eclipse-ide_runJUnitTests` |
+| Integration (needs OSGi) | `<base>.integrationpde[.*]` | `eclipse-pde_runJUnitPluginTests` (+ shared `launcherName`) |
+
+The class-name suffix does not select the runner; the package does (the old `*Test` /
+`*IntegrationTest` suffix convention is gone). Check the project's `pom.xml` surefire
+`<includes>` to see the exact patterns — they may match every class under the package (e.g.
+`**/plainjunit/**/*.java`), so shared helpers and base classes must not live in a `plainjunit` /
+`integrationpde` package directly; put them in a `...utils` sub-package that is excluded or has
+no `@Test` methods. Don't point a run at such a `utils` sub-package — it has no `@Test` classes
+and reports zero tests.
 
 ### 5. Check for spec-defined test cases and existing test files
 If the spec has a test-cases section, implement every row exactly as named. Search for the
@@ -154,22 +202,28 @@ the built-in `edit` tool). After each file: `organizeImports` → `formatFile` �
 `getCompilationErrors` (fix all).
 
 ### 7. Run the tests
-Use the runner matching the naming convention. If a test fails with
-`ClassNotFoundException`, the project may need a rebuild — ask the user to Project > Clean the
-test project. Diagnose and fix real failures; do not leave failing tests.
+Use the runner matching the package convention (see above). To run a whole project, use the PDE
+runner with the shared launcher and only `projectName` — it runs both plainjunit and
+integrationpde tests. For a quick check of plainjunit tests only, the plain runner is much
+faster. If a test fails with `ClassNotFoundException`, the project may need a rebuild — ask the
+user to Project > Clean the test project. If a JUnit 6 test fails with
+`NoSuchMethodError ... ExtensionContext$Namespace.getParts()`, see the troubleshooting entry in
+AGENTS.md (old JUnit 5 jars on the classpath). Diagnose and fix real failures; do not leave
+failing tests.
 
 ### 8. Update AGENTS.md
-Update the `## Testing` section of `AGENTS.md` to document the new test classes, their type,
-and runner, so future agents know which runner to use.
+Only if the new tests introduce a new test project, runner, launcher or convention, update the
+test sections of `AGENTS.md` (`## Testing` and "Test types, naming convention & how to Run
+Tests") so future agents know how to run them. Don't list every new test class there.
 
 ### 9. Output
 List each test file created, its type, and the acceptance criteria it covers:
 
 ```
-- <project>/.../MyIntegrationTest.java [Plugin JUnit]
+- <project>/.../integrationpde/MyFeatureTest.java [Plugin JUnit]
   - AC1: featureWorksWithValidInput
   - AC2: featureHandlesNullGracefully
-- <project>/.../MyUtilTest.java [JUnit]
+- <project>/.../plainjunit/MyUtilTest.java [JUnit]
   - Edge: boundaryCondition
   - Error: nullInputThrows
 ```

@@ -41,8 +41,9 @@ Read `AGENTS.md` and PROJECT CONTEXT for the testing approach, runners, and shar
 
 ### 3. Find and read the tests
 Use `eclipse-ide_fileSearch` with feature/class-name terms and `eclipse-ide_listProjects` to
-locate `*.tests` projects. Read each test class in full — don't just check existence, read
-the body to understand what it verifies.
+locate `*.tests` projects (tests live under their `<base>.plainjunit[.*]` and
+`<base>.integrationpde[.*]` packages). Read each test class in full — don't just check
+existence, read the body to understand what it verifies.
 
 ### 4. Read the production code
 For each test, read the production code it exercises. Verify: does it cover the real behavior
@@ -70,6 +71,27 @@ it:
       (`pumpEventsUntil` or the repo's equivalent). Raw sleeps are **blocking**.
 - [ ] Expensive node/npm/titanium/cypress builds that are normally disabled are not being
       re-enabled unnecessarily — only tests that genuinely need them should do so.
+- [ ] Every PDE integration test class deletes the workspace projects it uses in
+      `@BeforeAll` (`@BeforeClass` for JUnit 4). The workspace is reused between runs to keep
+      node/cypress caches under `.metadata`, so a missing cleanup makes results depend on
+      earlier runs. A missing cleanup is **blocking**.
+
+**Placement & structure**
+- [ ] Each test is in the right package for what the *code under test* needs, not just what the
+      test body calls: `<base>.integrationpde[.*]` if it (transitively) needs OSGi, the
+      workspace, `ServoyModel`/`Display`, or e.g. `Activator.getInstance()`; otherwise
+      `<base>.plainjunit[.*]`. The two kinds are never mixed in one package. A test in
+      `plainjunit` that only passes under the PDE runner is **blocking**.
+- [ ] Tests sit under a package the project's surefire `<includes>` actually matches
+      (`**/plainjunit/**/*.java` / `**/integrationpde/**/*.java`; check the `pom.xml`). A test
+      outside those packages is silently never run by the build. **Blocking.** Shared
+      helpers/base classes (no `@Test`) belong in a `...utils` sub-package, not mixed in with
+      the tests.
+- [ ] No `@Suite` / `AllXxxTests` aggregator classes added.
+- [ ] Shared PDE helpers (event pump, build/app-server waits, dialog guard, solution
+      activation) are reused from the project AGENTS.md names, not re-implemented or copied.
+      Where AGENTS.md says a sibling repo keeps a `Copy`-suffixed duplicate, the matching edit
+      was made in both places.
 
 **Skipping**
 - [ ] No `Assume.*` used to silently skip tests. Silent skips are **blocking**.

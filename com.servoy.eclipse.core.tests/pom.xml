@@ -8,10 +8,81 @@
 		<version>2026.12.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.core.tests</artifactId>
-	<!-- NOT an eclipse-test-plugin: this bundle holds no test classes of its own, only
-	     shared PDE integration-test infrastructure (package integration.utils:
-	     TestUtilitiesClass, ServoyRunnerTestBase, DialogGuardRule, etc.) that the real
-	     .tests projects (ui.tests, ngclient.ui.tests, cypress.tests) consume via
-	     Require-Bundle. It is therefore a plain eclipse-plugin and runs no tests. -->
-	<packaging>eclipse-plugin</packaging>
+	<!-- Holds the shared PDE integration-test infrastructure (package integration.utils:
+	     TestUtilitiesClass, ServoyRunnerTestBase, DialogGuardRule, etc.) that the other
+	     .tests projects consume via Require-Bundle, plus its own plainjunit tests.
+	     It has no integrationpde tests, so (unlike its siblings) its 'integration' profile
+	     only skips the plain surefire run (already done by the normal build) and does NOT
+	     configure a tycho-surefire PDE run - that would find no tests and fail.
+	     If integrationpde tests are ever added, replace the profile with the full one from
+	     com.servoy.eclipse.model.tests/pom.xml (and point -Dproperty-file to
+	     ${project.basedir}/testresources/servoy.properties), and add this project to the
+	     Jenkinsfile's '-Pintegration -pl' list. -->
+	<packaging>eclipse-test-plugin</packaging>
+	<build>
+		<!-- Tycho compiles src/test/java (source.. in build.properties) into target/classes; plain surefire looks in target/test-classes by default -->
+		<testOutputDirectory>${project.build.directory}/classes</testOutputDirectory>
+		<plugins>
+			<!-- plainjunit tests run on a flat classpath (like Eclipse "Run as JUnit"), without an OSGi runtime -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${surefire-plugin-version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit-platform</artifactId>
+						<version>${surefire-plugin-version}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<!-- the eclipse-test-plugin lifecycle only binds tycho-surefire:test, so bind plain surefire explicitly -->
+					<execution>
+						<id>plainjunit-tests</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includes>
+						<include>**/plainjunit/**/*.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<!-- tycho-surefire always starts an OSGi runtime; this project has no integrationpde tests, so it is skipped -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<skip>true</skip>
+					<!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
+					     always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
+					     automatic framework detection would otherwise pick the junit4 provider
+					     and report "No tests found" for these pure-Jupiter tests. -->
+					<providerHint>junit6</providerHint>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>integration</id>
+			<build>
+				<plugins>
+					<!-- the plainjunit tests already ran in the normal build; don't repeat them when this module is pulled in via -am -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>${surefire-plugin-version}</version>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

@@ -76,15 +76,30 @@ If creating a new plugin bundle:
 
 ## Testing
 
-- Unit tests (pure logic, no OSGi): a `<plugin>.tests` fragment with standard
-  `eclipse-plugin` packaging, run with `eclipse-ide_runClassTests`. Class suffix `*Test`.
-- Integration/plugin tests (needs OSGi/workspace/`ServoyModel`): `eclipse-test-plugin`
-  packaging, run with
-  `eclipse-pde_runJUnitPluginTestClass`. Class suffix `*IntegrationTest`.
-- Prefer the shared integration test base/utilities (`AbstractIntegrationTest`,
-  `ServoyRunnerTestBase`, `TestUtilitiesClass` — `pumpEventsUntil`, `waitForWorkspaceBuildJobs`,
-  `waitForAppServer`) over raw `Thread.sleep`.
-- See `AGENTS.md` `## Testing` for the catalogue of existing feature test classes.
+- Each `<plugin>.tests` project (`com.servoy.eclipse.cypress.tests`,
+  `com.servoy.eclipse.ngclient.ui.tests`, `com.servoy.eclipse.ui.tests`, ...) splits its tests by
+  **package**, not by class-name suffix (the Maven surefire includes match every class under
+  the package):
+  - Plain JUnit (pure logic, no OSGi/workspace): package `<base>.plainjunit[.*]`, run with
+    `eclipse-ide_runJUnitTests`.
+  - PDE integration (needs OSGi/workspace/`ServoyModel`/`Display`, or code that transitively
+    needs them, e.g. `Activator.getInstance()`): package `<base>.integrationpde[.*]`, run with
+    `eclipse-pde_runJUnitPluginTests` and `launcherName` =
+    `/com.servoy.eclipse.core.tests/PDEIntegrationTestsBase.launch` (starts a full Servoy
+    Developer; poll with `eclipse-pde_getOperationStatus`). Pass `junitVersion` ("6") if tests
+    aren't found.
+  - Never mix the two kinds in one package; no `@Suite`/`AllXxxTests` classes.
+- Maven: default build runs only `**/plainjunit/**/*.java`; `-Pintegration` runs
+  `**/integrationpde/**/*.java` in a full workbench (Jenkinsfile "Integration Tests" stage).
+- Integration test classes must delete the workspace projects they use in `@BeforeAll`/
+  `@BeforeClass` — the workspace is reused between runs for node/cypress caches.
+- Shared PDE test infrastructure (`TestUtilitiesClass` — `pumpEventsUntil`,
+  `waitForWorkspaceBuildJobs`, `waitForAppServer`; `ServoyRunnerTestBase`, `DialogGuardRule`,
+  `AbstractTitaniumIntegrationTest`) lives in `com.servoy.eclipse.core.tests` (non-fragment
+  plugin; it also has its own `plainjunit` tests but no `integrationpde` ones) and
+  `com.servoy.eclipse.ngclient.ui.tests`. Prefer it over raw
+  `Thread.sleep`. Servoy-Copilot keeps `Copy`-suffixed duplicates; keep them in sync.
+- See `AGENTS.md` "Test types, naming convention & how to Run Tests" for full details.
 
 ## AGENTS.md
 
