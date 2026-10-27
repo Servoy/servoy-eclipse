@@ -18,12 +18,16 @@
 package com.servoy.eclipse.ui.editors.less;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.bindings.keys.KeyStroke;
@@ -60,6 +64,7 @@ import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.CachingChildrenComposite;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
@@ -311,36 +316,70 @@ public class LessPropertiesComposite extends Composite
 		int selectionIndex = combo.getSelectionIndex();
 		if (selectionIndex > -1)
 		{
-			String selectedVersion = ThemeResourceLoader.VERSIONS[selectionIndex];
-			if (tiCheck.getSelection()) selectedVersion = selectedVersion + "_ng2";
+			String selectedVersion = ThemeResourceLoader.VERSIONS[selectionIndex] + (tiCheck.getSelection() ? "_ng2" : "");
 			String text = PropertiesLessEditorInput.getFileContent(propertiesLessEditorInput);
-			int versionIndex = text.indexOf(ThemeResourceLoader.THEME_LESS);
-			if (versionIndex != -1)
+			// solution_properties.less imports servoy_theme_properties.less, custom_servoy_theme_properties.less imports servoy_theme.less;
+			// both are rewritten, so the version switch also works for solutions created with the new solution wizard
+			if (ThemeResourceLoader.importsTheme(text))
 			{
-				int endIndex = text.indexOf("';", versionIndex);
-				if (selectedVersion == "latest") // special case
+				text = ThemeResourceLoader.setThemeVersion(text, selectedVersion);
+				writeLess(propertiesLessEditorInput.getFile(), text);
+				// the theme rules (servoy_theme.less) are imported by the other .less files of the solution, typically <solution>.less;
+				// they must follow, otherwise the new properties are combined with the rules of the old version
+				IFolder medias = propertiesLessEditorInput.getFile().getProject().getFolder(SolutionSerializer.MEDIAS_DIR);
+				if (medias.exists())
 				{
-					text = text.substring(0, versionIndex + ThemeResourceLoader.THEME_LESS.length()) + text.substring(endIndex);
-				}
-				else
-				{
-					text = text.substring(0, versionIndex + ThemeResourceLoader.THEME_LESS.length()) + "?version=" + selectedVersion +
-						text.substring(endIndex);
-				}
-				try
-				{
-					propertiesLessEditorInput.getFile().setContents(new ByteArrayInputStream(text.getBytes(Charset.forName("UTF-8"))), IResource.FORCE,
-						null);
-				}
-				catch (CoreException e1)
-				{
-					ServoyLog.logError(e1);
+					try
+					{
+						medias.accept(resource -> {
+							if (resource instanceof IFile file && "less".equalsIgnoreCase(file.getFileExtension()) &&
+								!file.equals(propertiesLessEditorInput.getFile()))
+							{
+								String other = readLess(file);
+								if (ThemeResourceLoader.importsTheme(other))
+								{
+									String updated = ThemeResourceLoader.setThemeVersion(other, selectedVersion);
+									if (!updated.equals(other)) writeLess(file, updated);
+								}
+							}
+							return true;
+						});
+					}
+					catch (CoreException e1)
+					{
+						ServoyLog.logError(e1);
+					}
 				}
 				propertiesLessEditorInput.reloadProperties(text, true);
 				area.dispose();
 				createArea();
 				sc.layout(true, true);
 			}
+		}
+	}
+
+	private static String readLess(IFile file)
+	{
+		try (InputStream is = file.getContents(true))
+		{
+			return new String(is.readAllBytes(), Charset.forName("UTF-8"));
+		}
+		catch (IOException | CoreException e)
+		{
+			ServoyLog.logError(e);
+			return null;
+		}
+	}
+
+	private static void writeLess(IFile file, String text)
+	{
+		try
+		{
+			file.setContents(new ByteArrayInputStream(text.getBytes(Charset.forName("UTF-8"))), IResource.FORCE | IResource.KEEP_HISTORY, null);
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
 		}
 	}
 
