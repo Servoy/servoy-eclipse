@@ -7,6 +7,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -19,7 +20,7 @@ public class DeleteCommand extends ContentOutlineCommand
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
 		List<Object> selection = getMixedSelection();
-		if (!selection.isEmpty())
+		if (!selection.isEmpty() && !DesignerUtil.containsReadOnlyInheritedElement(selection))
 		{
 			BaseVisualFormEditor editorPart = getEditorPart();
 			if (editorPart != null)
@@ -73,6 +74,10 @@ public class DeleteCommand extends ContentOutlineCommand
 	public boolean isEnabled()
 	{
 		List<Object> selection = getMixedSelection();
+		// an inherited element that is not overridden in this form is read-only, it cannot be deleted here; the same guard as in the
+		// keyboard/editor delete path (DeleteAction, KeyPressedHandler), so that the outline context menu does not offer a delete that
+		// cannot be persisted to the .frm
+		if (DesignerUtil.containsReadOnlyInheritedElement(selection)) return false;
 		return selection.stream().anyMatch(sel -> {
 			if (sel instanceof FormElementGroup) return true;
 			if (sel instanceof PersistContext pc) return pc.getPersist() != null;

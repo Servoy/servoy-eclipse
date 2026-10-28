@@ -75,6 +75,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -131,6 +132,22 @@ public class DesignerUtil
 
 	public static boolean containsInheritedElement(List selectedEditParts)
 	{
+		return containsInheritedElement(selectedEditParts, false);
+	}
+
+	/**
+	 * Same as {@link #containsInheritedElement(List)} but an override element - an element of the form itself that overrides an inherited one, so it has its
+	 * own extendsID - is not considered inherited, because it is editable and deletable in the current form.
+	 *
+	 * Use this for operations (like delete) that must be blocked only on genuinely read-only inherited elements.
+	 */
+	public static boolean containsReadOnlyInheritedElement(List selectedEditParts)
+	{
+		return containsInheritedElement(selectedEditParts, true);
+	}
+
+	private static boolean containsInheritedElement(List selectedEditParts, boolean allowOverrideElements)
+	{
 		if (selectedEditParts != null && !selectedEditParts.isEmpty())
 		{
 			if (selectedEditParts.get(0) instanceof EditPart)
@@ -139,7 +156,8 @@ public class DesignerUtil
 				{
 					EditPart object = (EditPart)selectedEditPart;
 					EditPart parent = object.getParent();
-					if (parent != null && parent.getModel() instanceof IPersist && Utils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel()))
+					if (parent != null && parent.getModel() instanceof IPersist &&
+						isInheritedFormElement(object.getModel(), (IPersist)parent.getModel(), allowOverrideElements))
 						return true;
 				}
 			}
@@ -161,11 +179,18 @@ public class DesignerUtil
 						context = ((FormElementGroup)selectedEditPart).getParent();
 						formElement = selectedEditPart;
 					}
-					if (Utils.isInheritedFormElement(formElement, context)) return true;
+					if (isInheritedFormElement(formElement, context, allowOverrideElements)) return true;
 				}
 			}
 		}
 		return false;
+	}
+
+	private static boolean isInheritedFormElement(Object formElement, IPersist context, boolean allowOverrideElements)
+	{
+		if (!Utils.isInheritedFormElement(formElement, context)) return false;
+		// an override element lives in the current form (it has its own extendsID), so it is not read-only
+		return !allowOverrideElements || !PersistHelper.isOverrideElement(formElement);
 	}
 
 	public static boolean containsFormComponentElement(List selectedEditParts)
@@ -504,7 +529,7 @@ public class DesignerUtil
 			for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
 			{
 				// this can't be a filter. because also row can be a top level container and needs to be able to get into a column.
-//						if (layoutSpec.isTopContainer()) continue;
+				//						if (layoutSpec.isTopContainer()) continue;
 				if (layoutSpec.isDeprecated()) continue;
 				try
 				{
