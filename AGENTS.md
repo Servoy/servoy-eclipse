@@ -112,7 +112,7 @@ For quick codebase orientation and type/method lookup, use the JDT-powered searc
 ### Testing
 - **Use `tools["eclipse-ide"].runJUnitTests`** for plain JUnit tests (pass the class/method to scope the run); use `tools["eclipse-ide"].findTestClasses` to discover test classes first.
 - **Use `tools["eclipse-pde"].runJUnitPluginTests`** for plugin integration tests (PDE harness).
-- Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`, `com.servoy.eclipse.core.tests`
+- Test projects: `com.servoy.eclipse.model.tests`, `com.servoy.eclipse.ui.tests`, `com.servoy.eclipse.designer.tests`, `j2db_documentation.tests`, `com.servoy.eclipse.ngclient.ui.tests`, `com.servoy.eclipse.core.tests`, `com.servoy.eclipse.jsunit.tests`
 - **JUnit engine version matters — pass the right `junitVersion`.** The launcher's auto-detect can pick the wrong engine and fail with `Cannot find 'org.junit.platform.commons.annotation.Testable' or report no tests found etc. on project build path.` If that happens, re-run with the explicit `junitVersion` for that project. Per test fragment (from each one's `META-INF/MANIFEST.MF` `org.junit.jupiter.api` import range):
   - all test projects in this repo use → **JUnit 6** (`junitVersion: "6"`, Jupiter `[6.0.0,7.0.0)`)
   - `j2db_test` from another repo and others might still use plain-JUnit-4 → **JUnit 4** (`junitVersion: "4"`)
@@ -284,6 +284,7 @@ When asked to create, update, or link Jira issues, use the `servoy-jira` skill (
 - **NG Client UI tests:** `com.servoy.eclipse.ngclient.ui.tests` (eclipse-test-plugin packaging)
 - **Designer tests:** `com.servoy.eclipse.designer.tests` â `TestCssValues`, `TestSnapCSSPosition` [JUnit]
 - **Cypress plugin tests:** `com.servoy.eclipse.cypress.tests` — fragment of `com.servoy.eclipse.cypress`. Split by package into `plainjunit` / `integrationpde` (see "Test types, naming convention & how to Run Tests" below); the plain ones are pure-logic, the others need the OSGi/workbench and must run as PDE plug-in tests.
+- **JSUnit tests:** `com.servoy.eclipse.jsunit.tests` — fragment of `com.servoy.eclipse.jsunit` (eclipse-test-plugin, Mockito + JUnit 6 Jupiter on the classpath). Currently `plainjunit`-only (no `integrationpde` yet): `JSUnitCoverageWriterGlobalModuleTest` exercises `JSUnitCoverageWriter.buildJson`'s per-module global-coverage grouping (SVY-21680) with a mocked `FlattenedSolution` and an inline JSON parser. Mock the persist types (`Solution`, `ScriptMethod`, `FlattenedSolution`) with `doReturn(...).when(mock).call()` rather than `when(mock.call()).thenReturn(...)` — their `AbstractBase`/`AbstractRootObject` supertypes have heavy static init, so the `when(...)` form can invoke the real method and fail stubbing.
 - **Angular tests:** `com.servoy.eclipse.ngclient.ui/node/run_tests.bat`
 - **Designer RFB tests:** `com.servoy.eclipse.designer.rfb/node/` → `npm test` (Vitest, 307 tests)
 - **WPM tests:** `com.servoy.eclipse.designer.wpm/node/` → `npm test` (Vitest, 94 tests)

@@ -34,6 +34,7 @@ import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -77,8 +78,8 @@ public class RunClientTests extends RunJSUnitTests
 		try
 		{
 			testApp.closeSolution(true);
-//					testApp.getClientInfo().clearUserInfo();
-//					testApp.setDebugMode(debugMode);
+			//					testApp.getClientInfo().clearUserInfo();
+			//					testApp.setDebugMode(debugMode);
 			final Job waitForSolutionToLoad = new Job("Running unit tests")
 			{
 				@Override
@@ -193,7 +194,8 @@ public class RunClientTests extends RunJSUnitTests
 			String outputPath = Platform.getLocation().toOSString() +
 				java.io.File.separator + "jsunit-coverage.json";
 
-			JSUnitCoverageWriter.write(suite.getLineNumbers(), suite.getReachableLines(), solutionName, outputPath);
+			FlattenedSolution fs = testApp != null ? testApp.getFlattenedSolution() : null;
+			JSUnitCoverageWriter.write(suite.getLineNumbers(), suite.getReachableLines(), solutionName, fs, outputPath);
 		}
 		catch (Exception e)
 		{
@@ -226,14 +228,23 @@ public class RunClientTests extends RunJSUnitTests
 							catch (InterruptedException e)
 							{
 							}
-							testApp.logout(null);
-							testApp.getClientInfo().clearUserInfo();
+							// Guard against clientInfo being null — happens when the
+							// solution failed to load (e.g. unresolved datasource) so
+							// the client never fully initialized.
+							if (testApp.getClientInfo() != null)
+							{
+								testApp.logout(null);
+								testApp.getClientInfo().clearUserInfo();
+							}
 						}
 					});
 				}
 				else
 				{
-					testApp.getClientInfo().clearUserInfo();
+					if (testApp.getClientInfo() != null)
+					{
+						testApp.getClientInfo().clearUserInfo();
+					}
 				}
 			}
 		}
