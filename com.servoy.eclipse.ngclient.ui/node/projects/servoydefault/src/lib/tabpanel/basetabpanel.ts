@@ -188,7 +188,18 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         const oldSelected = this.selectedTab();
         this.selectedTab.set(tab);
         this.selectedTabID.set(tab._id);
-        this.tabIndex.set(this.getTabIndex(tab));
+        // tabIndex is a model(): setting it emits tabIndexChange, which the generated form
+        // template routes into callback.datachange() and so writes back into the parent's
+        // model in the same change detection pass that delivered the tabIndex input.
+        // Defer the write out of the pass (NG0100). A microtask is not enough: zone.js
+        // drains those synchronously inside change detection, so this has to be a task.
+        const newTabIndex = this.getTabIndex(tab);
+        setTimeout(() => {
+            if (this.selectedTab() === tab) {
+                this.tabIndex.set(newTabIndex);
+                this.cdRef.markForCheck();
+            }
+        }, 0);
         if (oldSelected && oldSelected !== tab && this.onChangeMethodID()) {
             setTimeout(() => {
                 this.onChangeMethodID()(this.getTabIndex(oldSelected), event != null ? event : null);
@@ -196,13 +207,20 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
         }
     }
 
+    /**
+     * Pure resolve of the configured tabIndex (a 1-based number or a tab name) to a
+     * 0-based index into tabs(). Must NOT write the tabIndex signal: it is reached from
+     * getSelectedTabId(), which the accordion template reads on every change detection
+     * pass, and writing a model() signal during rendering is an NG0600 and also pushes
+     * the value to the server mid-render. setFormVisible() is what normalizes tabIndex
+     * to its numeric form once a tab is actually selected.
+     */
     protected getRealTabIndex(): number {
         if (this.tabIndex()) {
             if (isNaN(this.tabIndex())) {
                 if (!this.tabs()) return -1;
                 for (let i = 0; i < this.tabs().length; i++) {
                     if (this.tabs()[i].name === this.tabIndex()) {
-                        this.tabIndex.set(i + 1);
                         return i;
                     }
                 }
