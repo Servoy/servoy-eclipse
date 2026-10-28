@@ -42,11 +42,11 @@ package or the whole project executes each test class exactly once, and suites g
 
 ## JUnit version
 
-Use the JUnit version the repo standardises on (JUnit 5 / Jupiter unless PROJECT CONTEXT or
+Use the JUnit version the repo standardises on (JUnit 6 / Jupiter unless PROJECT CONTEXT or
 AGENTS.md says otherwise). Match the imports and annotations used by existing tests in the
 repo — do not mix JUnit 4 and Jupiter.
 
-Typical Jupiter imports:
+Typical Jupiter imports (the Jupiter API packages are unchanged from 5 to 6):
 ```java
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;

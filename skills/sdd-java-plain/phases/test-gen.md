@@ -8,12 +8,24 @@ You are running as the built-in `general` subagent, with shell (`mvn`, `git`) an
 ## Project context
 
 The **PROJECT CONTEXT** block is authoritative for this repo's test stack. These are standard
-Maven projects: tests are **JUnit 5 (Jupiter)** with **Mockito**, located under
+Maven projects: by default tests are **JUnit 6 (Jupiter)** with **Mockito**, located under
 `src/test/java`, run with `mvn test`. There is no OSGi container, no `eclipse-test-plugin`
 fragment, and no PDE plugin-test runner — do not use any of that here. Read PROJECT CONTEXT
 and `AGENTS.md` and match the JUnit version and mocking library the repo already uses.
 
-Typical imports:
+**PROJECT CONTEXT overrides these defaults.** If PROJECT CONTEXT (or `AGENTS.md`) names a
+different test framework, use that one and ignore the JUnit 6 / Mockito specifics below (imports,
+`@Nested`, `@ParameterizedTest`, `assertAll`, Mockito, `mvn -Dtest=`). The most common case is a
+**GWT** project: client code is compiled to JavaScript, so tests are `GWTTestCase` (JUnit 3 style
+`testXxx` methods, run in HtmlUnit by `gwt-maven-plugin:test`), and Mockito / Jupiter do not work
+for GWT-compiled code; stub collaborators by subclassing instead. In that case follow the
+runner, module, naming and caveats described in PROJECT CONTEXT / `AGENTS.md`, and still apply
+the quality rules (no green-for-the-sake-of-green tests, no silent skipping, specific
+assertions, edge cases, independent tests). If the repo has no test infrastructure yet and the
+user asked for it, set it up in the framework that fits the stack, keep it out of the default
+profile unless the user wants it in CI, and document how to run it in `AGENTS.md`.
+
+Typical imports (default JUnit 6 / Jupiter setup; the Jupiter API packages are unchanged from 5):
 ```java
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +44,8 @@ You receive a path to the spec file plus PROJECT CONTEXT.
 ## Steps
 
 ### 1. Read conventions
-Read `AGENTS.md` (esp. its testing section) and PROJECT CONTEXT — JUnit/Mockito versions, test
-source layout, and any shared test helpers.
+Read `AGENTS.md` (esp. its testing section) and PROJECT CONTEXT — test framework (JUnit/Mockito
+versions, or e.g. `GWTTestCase`), how tests are run, test source layout, and any shared test helpers.
 
 ### 2. Read the spec
 Extract every acceptance criterion and functional requirement — the test obligations.
@@ -44,8 +56,9 @@ which behavior is observable. Prefer testing real logic over trivial getters.
 
 ### 4. Choose the test location
 Tests go under the changed module's `src/test/java`, in the same package as the class under
-test (`src/test/java/<same/package>/<Class>Test.java`). Add JUnit 5 + Mockito to the module's
-`pom.xml` test-scope dependencies only if they are not already inherited from the parent.
+test (`src/test/java/<same/package>/<Class>Test.java`). Add JUnit 6 + Mockito (or the framework
+named in PROJECT CONTEXT) to the module's `pom.xml` test-scope dependencies only if they are not
+already inherited from the parent. Pin exact versions.
 
 ### 5. Check for spec-defined test cases / existing test files
 If the spec lists named test cases, implement each. If a test class already exists, add only

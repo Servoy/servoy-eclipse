@@ -38,6 +38,13 @@ object creation).
 
 ### 2. Read conventions
 Read `AGENTS.md` and PROJECT CONTEXT for the testing approach, runners, and shared utilities.
+**If PROJECT CONTEXT names a test framework other than JUnit 6 / Mockito (for example GWT
+`GWTTestCase`), review against that framework's conventions**: do not flag the absence of
+`@Nested`, `@DisplayName`, `@ParameterizedTest`, `assertAll` or Mockito where the framework cannot
+use them (GWTTestCase: JUnit 3 style `testXxx` methods, collaborators stubbed by subclassing). All
+quality rules (specific assertions, no vacuous tests, no silent skipping, independence, edge
+cases, coverage of every testable acceptance criterion) still apply. Also check that the tests
+actually run in the build the project uses (e.g. the right Maven profile/goal), and run them.
 
 ### 3. Find and read the tests
 Search under each module's `src/test/java` (with `grep`/`glob`, or `eclipse-ide_fileSearch`
@@ -81,7 +88,8 @@ it:
 
 **Naming & readability**
 - [ ] Test names describe scenario and expected outcome; bodies concise.
-- [ ] `@DisplayName` used for readable names; `@Nested` classes group related scenarios.
+- [ ] `@DisplayName` used for readable names; `@Nested` classes group related scenarios
+      (JUnit 6 / Jupiter only; not applicable to frameworks such as `GWTTestCase`).
 
 **Edge cases**
 - [ ] Null/empty inputs tested where applicable; boundary values tested; concurrent scenarios

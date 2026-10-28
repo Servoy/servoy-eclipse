@@ -1,6 +1,6 @@
 ---
 name: sdd-java-plain
-description: "Spec-Driven Development pipeline for plain-Java / standard-Maven repositories (NOT Eclipse-OSGi/Tycho — no MANIFEST/Require-Bundle, dependencies in pom.xml, JUnit 5 + Mockito, mvn build/test): Jira issue → triage → spec → implementation → code review → test generation → test review → commit. Triggered by the per-repo /sdd command (or /sdd-java in mixed repos), 'sdd', 'spec driven development', or a Jira issue key like SVY-12345 in a plain-Java repo."
+description: "Spec-Driven Development pipeline for plain-Java / standard-Maven repositories (NOT Eclipse-OSGi/Tycho — no MANIFEST/Require-Bundle, dependencies in pom.xml, JUnit 6 + Mockito by default unless the repo's project-context names another test framework such as GWTTestCase, mvn build/test): Jira issue → triage → spec → implementation → code review → test generation → test review → commit. Triggered by the per-repo /sdd command (or /sdd-java in mixed repos), 'sdd', 'spec driven development', or a Jira issue key like SVY-12345 in a plain-Java repo."
 ---
 
 # SDD — Spec-Driven Development Pipeline (plain Java / Maven)
@@ -14,8 +14,9 @@ and thread context forward **selectively** to maintain isolation between phases.
 This skill is the shared, repository-agnostic **plain-Java / standard-Maven** variant. It is
 installed globally and invoked in any Servoy Java repo that is a normal Maven project — NOT
 an Eclipse-OSGi/Tycho plugin. That means: dependencies live in `pom.xml` (no MANIFEST.MF /
-Require-Bundle / target platform), tests are standard JUnit 5 + Mockito run with `mvn test`,
-and code edits use ordinary file-editing tools (the Eclipse-specific `eclipse-coder` /
+Require-Bundle / target platform), tests are by default standard JUnit 6 (Jupiter) + Mockito run with `mvn test` (unless the
+repo's `project-context.md` names a different test framework, e.g. GWT `GWTTestCase`, which
+then takes precedence), and code edits use ordinary file-editing tools (the Eclipse-specific `eclipse-coder` /
 `eclipse-pde` workflow does not apply). Everything else project-specific comes from the repo's
 own `project-context.md` (see below) — the phase logic here never hardcodes one repo. For an
 Eclipse-OSGi/Tycho plugin repo, use the `sdd-java-eclipse` skill instead.
