@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, provideCheckNoChangesConfig } from '@angular/core';
 import { Subject } from 'rxjs';
 import { signal } from '@angular/core';
 import { ServoyPublicService, FormattingService, TooltipService, ServoyApi, WindowRefService } from '@servoy/public';
@@ -36,7 +36,8 @@ function createTabs(): Tab[] {
 @Component({
     selector: 'test-tabpanel-host',
     template: `
-        <servoydefault-tabpanel [servoyApi]="servoyApi" [name]="'testTabpanel'" [tabs]="tabs" [tabIndex]="1" [enabled]="true">
+        <servoydefault-tabpanel [servoyApi]="servoyApi" [name]="'testTabpanel'" [tabs]="tabs" [tabIndex]="tabIndex()"
+            (tabIndexChange)="onTabIndexChange($event)" [enabled]="true">
             <ng-template let-name="name">
                 <div class="form-placeholder">{{name}}</div>
             </ng-template>
@@ -48,12 +49,21 @@ function createTabs(): Tab[] {
 class TestTabpanelHostComponent {
     servoyApi = createMockServoyApi();
     tabs = createTabs();
+    readonly tabIndex = signal<any>(1);
+    emissions: any[] = [];
+
+    /** mirrors the generated template's callback.datachange(state,'tabIndex',$event) write-back */
+    onTabIndexChange(value: any) {
+        this.emissions.push(value);
+        this.tabIndex.set(value);
+    }
 }
 
 @Component({
     selector: 'test-tablesspanel-host',
     template: `
-        <servoydefault-tablesspanel [servoyApi]="servoyApi" [name]="'testTablesspanel'" [tabs]="tabs" [tabIndex]="tabIndex">
+        <servoydefault-tablesspanel [servoyApi]="servoyApi" [name]="'testTablesspanel'" [tabs]="tabs" [tabIndex]="tabIndex()"
+            (tabIndexChange)="onTabIndexChange($event)">
             <ng-template let-name="name">
                 <div class="form-placeholder">{{name}}</div>
             </ng-template>
@@ -65,16 +75,31 @@ class TestTabpanelHostComponent {
 class TestTablesspanelHostComponent {
     servoyApi = createMockServoyApi();
     tabs = createTabs();
-    tabIndex = 1;
+    readonly tabIndex = signal<any>(1);
+    emissions: any[] = [];
+
+    /** mirrors the generated template's callback.datachange(state,'tabIndex',$event) write-back */
+    onTabIndexChange(value: any) {
+        this.emissions.push(value);
+        this.tabIndex.set(value);
+    }
 }
 
 const defaultProviders = [
     provideZonelessChangeDetection(),
+    provideCheckNoChangesConfig({ exhaustive: true }),
     { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn(), getFormCacheByName: vi.fn().mockReturnValue(null) } },
     { provide: FormattingService, useValue: {} },
     { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },
-    { provide: WindowRefService, useValue: { nativeWindow: { event: null } } },
+    { provide: WindowRefService, useValue: { nativeWindow: { event: null, console } } },
 ];
+
+/** setFormVisible() defers the tabIndex write with setTimeout, which whenStable() does not await */
+const flushDeferredWrites = async (fixture: ComponentFixture<unknown>) => {
+    await fixture.whenStable();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await fixture.whenStable();
+};
 
 describe('ServoyDefaultTabpanel', () => {
     let fixture: ComponentFixture<TestTabpanelHostComponent>;
@@ -162,5 +187,35 @@ describe('ServoyDefaultTablesspanel', () => {
         const result1 = component.getForm();
         const result2 = component.getForm();
         expect(result1).toBe(result2);
+    });
+
+    describe('tabIndex writes outside change detection', () => {
+
+        it('should not write tabIndex during the pass when a tab name is set after init', async () => {
+            const host = fixture.componentInstance;
+            await flushDeferredWrites(fixture);
+            host.emissions.length = 0;
+
+            host.tabIndex.set('tab2');
+            expect(() => fixture.detectChanges()).not.toThrow();
+            expect(host.emissions).toEqual([]);
+            await flushDeferredWrites(fixture);
+            expect(host.emissions).toEqual([2]);
+            expect(host.tabIndex()).toBe(2);
+        });
+
+        it('should stay stable while tabIndex is driven through several values', async () => {
+            const host = fixture.componentInstance;
+            await flushDeferredWrites(fixture);
+
+            for (const value of [2, 'tab1', 1, 'tab2']) {
+                host.emissions.length = 0;
+                host.tabIndex.set(value);
+                expect(() => fixture.detectChanges()).not.toThrow();
+                expect(host.emissions).toEqual([]);
+                await flushDeferredWrites(fixture);
+            }
+            expect(host.tabIndex()).toBe(2);
+        });
     });
 });
