@@ -175,12 +175,13 @@ public class MobileLaunchConfigurationDelegate extends LaunchConfigurationDelega
 				if (monitor != null && monitor.isCanceled()) return;
 			}
 			if (!warDeploymentTrackingDir.exists()) throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment timeout after: " +
-				(maxWaitTime / 1000) + " seconds."));
+				(maxWaitTime / 1000) + " seconds. You can increase that if needed from the toolbar launch icon drop-down -> Organize..."));
 
 			// make sure deployed war is available over HTTP - the file system checks are not enough...
 			if (!httpCheckOK(monitor, startTimestamp, maxWaitTime, getApplicationURL(configuration)) && monitor == null || monitor.isCanceled())
 				throw new CoreException(
-					new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment http check failed after: " + (maxWaitTime / 1000) + " seconds."));
+					new Status(IStatus.ERROR, Activator.PLUGIN_ID, "War deployment http check failed after: " + (maxWaitTime / 1000) +
+						" seconds. You can increase that if needed from the toolbar launch icon drop-down -> Organize..."));
 			if (monitor != null && monitor.isCanceled()) return;
 		}
 		catch (IOException e)

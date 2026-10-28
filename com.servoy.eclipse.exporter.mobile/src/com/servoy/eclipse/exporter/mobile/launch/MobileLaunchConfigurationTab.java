@@ -2,7 +2,6 @@ package com.servoy.eclipse.exporter.mobile.launch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -28,6 +27,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.internal.browser.BrowserManager;
 import org.eclipse.ui.internal.browser.IBrowserDescriptor;
+import org.eclipse.ui.internal.browser.IBrowserExt;
 import org.eclipse.ui.internal.browser.Messages;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
@@ -46,14 +46,16 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	static final String FIREFOX = "Mozilla firefox";
 	static final String CHROME = "Google Chrome";
 	static final String IE = "Internet Explorer";
+	static final String EDGE = "Edge";
 	static final String SAFARI = "Apple Safari";
 	static final String OPERA = "Opera";
 	static final String DEFAULT = "Default System browser";
 
-	protected static BidiMap possibleBrowsersNames = new DualHashBidiMap();
+	protected static BidiMap<String, String> possibleBrowsersNames = new DualHashBidiMap<>();
 	static
 	{
 		possibleBrowsersNames.put("org.eclipse.ui.browser.ie", IE);
+		possibleBrowsersNames.put("org.eclipse.ui.browser.msedge", EDGE);
 		possibleBrowsersNames.put("org.eclipse.ui.browser.chrome", CHROME);
 		possibleBrowsersNames.put("org.eclipse.ui.browser.firefox", FIREFOX);
 		possibleBrowsersNames.put("org.eclipse.ui.browser.safari", SAFARI);
@@ -98,35 +100,33 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 
 	protected String[] getAvailableBrowsers()
 	{
-		ArrayList<String> browserList = new ArrayList<String>();
-		Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
+		ArrayList<String> browserLst = new ArrayList<String>();
 		try
 		{
-			while (iterator.hasNext())
+			for (IBrowserDescriptor ewb : BrowserManager.getInstance().getWebBrowsers())
 			{
-				final IBrowserDescriptor ewb = (IBrowserDescriptor)iterator.next();
-				org.eclipse.ui.internal.browser.IBrowserExt ext = null;
+				IBrowserExt ext = null;
 				if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
 				{
 					//ext := "org.eclipse.ui.browser." + specifiId
 					ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
 					if (ext != null)
 					{
-						browserList.add((String)possibleBrowsersNames.get(ext.getId()));
+						addBrowserWithNiceName(browserLst, ext.getId());
 					}
 					else
 					{
 						if (ewb.getLocation() != null)
 						{
 							String id = ewb.getName().toLowerCase().replace(" ", "_");
-							browserList.add((String)possibleBrowsersNames.get("org.eclipse.ui.browser." + id));
+							addBrowserWithNiceName(browserLst, "org.eclipse.ui.browser." + id);
 						}
 					}
 				}
 				else if (ewb != null && ewb.getName().equals(Messages.prefSystemBrowser))
 				{
 					// default system browser
-					browserList.add((String)possibleBrowsersNames.get("default"));
+					addBrowserWithNiceName(browserLst, "default");
 				}
 			}
 		}
@@ -134,8 +134,15 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		{
 			ServoyLog.logError(ex);
 		}
-		return browserList.toArray(new String[0]);
+		return browserLst.toArray(new String[0]);
 
+	}
+
+	private void addBrowserWithNiceName(ArrayList<String> browserLst, String id)
+	{
+		String niceName = possibleBrowsersNames.get(id);
+		if (niceName != null) browserLst.add(niceName);
+		else ServoyLog.logWarning("Can't identify correctly an available browser: " + id, new RuntimeException());
 	}
 
 	@Override
@@ -423,7 +430,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			txtServiceSolution.setText(configuration.getAttribute(IMobileLaunchConstants.SERVICE_SOLUTION, solutionName + "_service"));
 			checkNoDebug.setSelection(Boolean.valueOf(configuration.getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue());
 			String browserId = configuration.getAttribute(IMobileLaunchConstants.BROWSER_ID, "default");
-			String browserName = (String)possibleBrowsersNames.get(browserId);
+			String browserName = possibleBrowsersNames.get(browserId);
 			int comboIndexToSelect = Arrays.asList(browserList).indexOf(browserName);
 			combo.select(comboIndexToSelect == -1 ? 0 : comboIndexToSelect);
 			maxTxtWarDeployTime.setText(
@@ -447,7 +454,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 		configuration.setAttribute(IMobileLaunchConstants.APPLICATION_URL, txtStartURL.getText());
 		configuration.setAttribute(IMobileLaunchConstants.TIMEOUT, txtTimeout.getText());
 		configuration.setAttribute(IMobileLaunchConstants.NODEBUG, Boolean.toString(checkNoDebug.getSelection()));
-		String browserId = (String)possibleBrowsersNames.getKey(browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()]);
+		String browserId = possibleBrowsersNames.getKey(browserList[combo.getSelectionIndex() == -1 ? 0 : combo.getSelectionIndex()]);
 		configuration.setAttribute(IMobileLaunchConstants.BROWSER_ID, browserId);
 		configuration.setAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME, maxTxtWarDeployTime.getText());
 		configuration.setAttribute(IMobileLaunchConstants.COMPANY_NAME, txtCompanyName.getText());
