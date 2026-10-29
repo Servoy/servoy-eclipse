@@ -88,14 +88,17 @@ public class FormTemplateHttpEndpoint implements Filter
 		if (resource.endsWith(".html"))
 		{
 			String formName = resource.substring(0, resource.length() - ".html".length());
-			writeFormTemplatePage(httpServletResponse, formName);
+			// SVY-21610: sample data is ON by default - a render of an empty form is rarely what the caller wants.
+			// Pass ?sampleData=false to inspect the bare component chrome instead.
+			boolean sampleData = !"false".equalsIgnoreCase(httpServletRequest.getParameter("sampleData"));
+			writeFormTemplatePage(httpServletResponse, formName, sampleData);
 			return;
 		}
 
 		chain.doFilter(request, response);
 	}
 
-	private void writeFormTemplatePage(HttpServletResponse response, String formName) throws IOException
+	private void writeFormTemplatePage(HttpServletResponse response, String formName, boolean sampleData) throws IOException
 	{
 		File indexFile = getAngularIndexFile();
 		if (indexFile == null || !indexFile.exists())
@@ -107,7 +110,7 @@ public class FormTemplateHttpEndpoint implements Filter
 		String indexHtml;
 		try
 		{
-			String formState = content.getFormDataJS(formName);
+			String formState = content.getFormDataJS(formName, sampleData);
 			if (formState == null)
 			{
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Form not found: " + formName);
@@ -117,7 +120,7 @@ public class FormTemplateHttpEndpoint implements Filter
 			String specs = content.getComponentSpecsJSON(formName);
 
 			indexHtml = new String(Files.readAllBytes(indexFile.toPath()), StandardCharsets.UTF_8);
-			String injected = buildInjection(formName, formState, specs);
+			String injected = buildInjection(formName, formState, specs, sampleData);
 			indexHtml = insertBeforeBodyEnd(indexHtml, injected);
 		}
 		catch (IOException | RuntimeException e)
@@ -134,7 +137,7 @@ public class FormTemplateHttpEndpoint implements Filter
 		w.flush();
 	}
 
-	private String buildInjection(String formName, String formState, String specs)
+	private String buildInjection(String formName, String formState, String specs, boolean sampleData)
 	{
 		StringBuilder sb = new StringBuilder(formState.length() + (specs != null ? specs.length() : 0) + 512);
 		// Emit one <link rel="stylesheet"> per solution/module sheet, exactly like the runtime NG client
@@ -148,6 +151,9 @@ public class FormTemplateHttpEndpoint implements Filter
 				StringEscapeUtils.escapeHtml4(stylesheetPath)).append("\">\n");
 		}
 		sb.append("<script>window.formtemplateName = \"").append(StringEscapeUtils.escapeEcmaScript(formName)).append("\";</script>\n");
+		// SVY-21610: tells the Angular route that the models carry synthetic sample values, so components stop
+		// fabricating their own design-time placeholders (ServoyApi.hasSampleData()).
+		sb.append("<script>window.formtemplateSampleData = ").append(sampleData).append(";</script>\n");
 		sb.append("<script id=\"svy-formtemplate-formstate\" type=\"application/json\">").append(escapeForInlineJson(formState)).append("</script>\n");
 		if (specs != null)
 		{

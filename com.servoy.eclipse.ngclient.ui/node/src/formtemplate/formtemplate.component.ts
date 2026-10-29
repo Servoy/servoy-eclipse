@@ -14,13 +14,19 @@ import { TypesRegistry } from '../sablo/types_registry';
 @Component({
     selector: 'servoy-formtemplate',
     template: `@if (formName) {
-      <svy-formtemplate [name]="formName"></svy-formtemplate>
+      <svy-formtemplate [name]="formName" [sampleData]="sampleData"></svy-formtemplate>
     }`,
     standalone: false
 })
 export class ServoyFormTemplateComponent implements OnInit {
 
     formName: string;
+
+    /**
+     * SVY-21610: whether the injected form state carries synthetic sample values. Set from the
+     * window.formtemplateSampleData marker the Java endpoint injects; defaults to false when the marker is absent.
+     */
+    sampleData = false;
 
     constructor(private windowRef: WindowRefService,
         private formService: FormService,
@@ -37,6 +43,8 @@ export class ServoyFormTemplateComponent implements OnInit {
         if (specs) {
             this.typesRegistry.addComponentClientSideSpecs(specs);
         }
+
+        this.sampleData = (this.windowRef.nativeWindow as any).formtemplateSampleData === true;
 
         const formStateContainer = this.readJsonBlob('svy-formtemplate-formstate');
         this.formName = this.getFormName();

@@ -42,6 +42,19 @@ export abstract class ServoyApi {
     public abstract isInDesigner(): boolean;
 
     /**
+      * Returns true when this component is rendered in the stateless form-template render (getFormLayout) and the
+      * server has supplied synthetic sample values in the model - a dataprovider value, 3 foundset rows (SVY-21610).
+      *
+      * Unlike {@link isInDesigner}, the normal runtime rendering path DOES run in that render, so a component should
+      * NOT take a design-time shortcut when this is true; it should simply render the data it was given. Only a
+      * component that fabricates its own placeholder data in the designer needs to check this - to avoid replacing
+      * the server's sample data with its own - typically as isInDesigner() || hasSampleData().
+      */
+    public hasSampleData(): boolean {
+        return false;
+    }
+
+    /**
       * Returns true if this component can trust the html it wants to display (no need to sanatize it). 
       * This can be a client property set on this component itself or more application wide.  
       */

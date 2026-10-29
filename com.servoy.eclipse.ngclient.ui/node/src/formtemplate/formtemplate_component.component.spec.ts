@@ -63,6 +63,15 @@ import { By } from '@angular/platform-browser';
 })
 class TestHostComponent { }
 
+// Same host, but with [sampleData]="true" - the SVY-21610 sample-data render, where the server has put synthetic
+// values in the models and components must render them instead of their own design-time placeholders.
+@Component({
+    // eslint-disable-next-line @stylistic/ts/quotes
+    template: `<svy-formtemplate [name]="'aForm'" [sampleData]="true"></svy-formtemplate>`,
+    standalone: false
+})
+class SampleDataTestHostComponent { }
+
 describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
     let sabloService: jasmine.SpyObj<SabloService>;
     let servoyService: jasmine.SpyObj<ServoyService>;
@@ -140,7 +149,7 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
         });
 
         TestBed.configureTestingModule({
-            declarations: [TestHostComponent, FormTemplateComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean],
+            declarations: [TestHostComponent, SampleDataTestHostComponent, FormTemplateComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean],
             imports: [ServoyTestingModule, ServoyPublicModule],
             providers: [
                 { provide: SabloService, useValue: sabloService },
@@ -348,7 +357,7 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
         });
     });
 
-    describe('design-time ServoyApi', () => {
+    describe('ServoyApi: runtime rendering path, sample-data flag separate', () => {
 
         let comp: FormTemplateComponent;
         let errorBeanCache: ComponentCache;
@@ -360,12 +369,36 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
             errorBeanCache = formService.getFormCacheByName('aForm').getComponent('myErrorBean');
         });
 
-        it('getServoyApi returns a ServoyApi flagged as in-designer and caches it per component', () => {
+        // SVY-21610: isInDesigner() MUST stay false here. Reporting the designer makes components take their design
+        // branches, and several of those discard data outright (DataGrid.svyOnInit returns before initRootFoundset, the
+        // bootstrap datalabel renders the literal 'DataLabel', servoyextra-table never registers its foundset listener),
+        // so server-supplied sample data would never reach the DOM. Flipping this back to true silently re-breaks the
+        // whole getFormLayout-with-data feature, which is why it is asserted rather than assumed.
+        it('getServoyApi returns a ServoyApi on the RUNTIME path (not in-designer) and caches it per component', () => {
             const api = comp.getServoyApi(errorBeanCache) as ServoyApi;
             expect(api).toBeTruthy();
-            expect(api.isInDesigner()).toBe(true);
+            expect(api.isInDesigner()).toBe(false);
             // second call returns the SAME cached instance
             expect(comp.getServoyApi(errorBeanCache)).toBe(api);
+        });
+
+        it('reports hasSampleData() false when the render was not asked for sample data', () => {
+            // the host in renderForm() does not set [sampleData], so it defaults to false
+            expect((comp.getServoyApi(errorBeanCache) as ServoyApi).hasSampleData()).toBe(false);
+        });
+
+        it('reports hasSampleData() true when the render carries server-supplied sample values', () => {
+            // a separate host is needed because the api is built DURING render (the template binds
+            // [servoyApi]="callback.getServoyApi(state)") and cached from then on, so setting the flag
+            // on an already-rendered component would not reach the cached api
+            const fixture = TestBed.createComponent(SampleDataTestHostComponent);
+            fixture.detectChanges();
+            const sampleComp = fixture.debugElement.query(By.directive(FormTemplateComponent)).componentInstance as FormTemplateComponent;
+
+            const api = sampleComp.getServoyApi(errorBeanCache) as ServoyApi;
+            expect(api.hasSampleData()).toBe(true);
+            // still the runtime path - sample-data mode must NOT turn the designer back on
+            expect(api.isInDesigner()).toBe(false);
         });
 
         it('exposes the component markup id through the api (needed for rendering)', () => {
