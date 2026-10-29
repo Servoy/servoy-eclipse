@@ -56,6 +56,9 @@ describe('ListFormComponent', () => {
       registerComponent: vi.fn(),
       unRegisterComponent: vi.fn(),
       isInDesigner: vi.fn().mockReturnValue(false),
+      // SVY-21610: the stateless form-template render reports isInDesigner() false and signals itself through
+      // hasSampleData() instead, so the mock must answer both
+      hasSampleData: vi.fn().mockReturnValue(false),
       isInAbsoluteLayout: vi.fn().mockReturnValue(true),
       getFormName: vi.fn().mockReturnValue('testForm'),
       trustAsHtml: vi.fn(),
@@ -109,10 +112,70 @@ describe('ListFormComponent', () => {
       expect(rows).toEqual([]);
     });
 
-    it('should return designer placeholder when in designer', () => {
+    it('should return designer placeholder when in designer and the foundset has no rows', () => {
+      // SVY-21610: the placeholder row is now the fallback for "no viewport rows to show", not an unconditional
+      // designer override - a stateless sample-data render DOES get rows (3 synthetic ones) and must render those.
       mockServoyApi.isInDesigner.mockReturnValue(true);
+      mockFoundset.viewPort.rows = [];
       const rows = component.getViewportRows();
       expect(rows.length).toBe(1);
+    });
+
+    it('should return the real viewport rows in the designer when the foundset does have rows', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(true);
+      const rows = component.getViewportRows();
+      expect(rows).toBe(mockFoundset.viewPort.rows);
+    });
+
+    it('should return the sample rows in a sample-data render, not the single placeholder', () => {
+      // the SVY-21610 regression this guards: taking the placeholder path here showed one empty row instead of the
+      // server's synthetic rows, so an LFC rendered blank in getFormLayout
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(true);
+      const rows = component.getViewportRows();
+      expect(rows).toBe(mockFoundset.viewPort.rows);
+    });
+
+    it('should return the placeholder row in a sample-data render with no foundset rows', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(true);
+      mockFoundset.viewPort.rows = [];
+      const rows = component.getViewportRows();
+      expect(rows.length).toBe(1);
+    });
+  });
+
+  // SVY-21610: an LFC in the stateless form-template render must render its rows WITHOUT asking the server for
+  // anything - there is no websocket, so a load request returns a promise that can never resolve and the component
+  // would sit in waitingForLoad rendering nothing.
+  describe('sample-data render (SVY-21610)', () => {
+    beforeEach(() => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(true);
+    });
+
+    it('calculateCells uses the delivered sample rows and issues NO load request', () => {
+      component.calculateCells();
+
+      expect(component.numberOfCells).toBe(mockFoundset.viewPort.rows.length);
+      expect(mockFoundset.loadRecordsAsync).not.toHaveBeenCalled();
+      expect(mockFoundset.loadExtraRecordsAsync).not.toHaveBeenCalled();
+      expect(mockFoundset.loadLessRecordsAsync).not.toHaveBeenCalled();
+    });
+
+    it('calculateCells falls back to one cell when no sample rows arrived', () => {
+      mockFoundset.viewPort.rows = [];
+      component.calculateCells();
+
+      expect(component.numberOfCells).toBe(1);
+      expect(mockFoundset.loadRecordsAsync).not.toHaveBeenCalled();
+    });
+
+    it('svyOnInit keeps the non-scrolling markup so no AG Grid datasource loads rows', () => {
+      component.svyOnInit();
+
+      // the scrolling variant installs an AGGridDatasource whose getRows() goes through the foundset's async load
+      expect(component.useScrolling).toBe(false);
     });
   });
 

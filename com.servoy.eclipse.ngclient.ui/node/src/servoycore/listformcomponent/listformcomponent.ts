@@ -268,6 +268,20 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     this.log = inject(LoggerFactory).getLogger('ListFormComponent');
   }
 
+  /**
+   * True when this render has no live foundset data to page through: the designer, or the stateless form-template
+   * render behind getFormLayout (SVY-21610).
+   *
+   * The distinction matters because the form-template render reports isInDesigner() === false on purpose - the
+   * components must take their normal runtime path there - yet it has no websocket, so anything that would wait on
+   * the server (foundset.loadRecordsAsync / loadExtraRecordsAsync) returns a promise that can NEVER resolve and the
+   * component would sit in a permanent loading state. Everything that used to branch on isInDesigner() purely to
+   * avoid server round-trips branches on this instead.
+   */
+  private hasNoLiveFoundsetData(): boolean {
+    return this.servoyApi().isInDesigner() || this.servoyApi().hasSampleData();
+  }
+
   handleKeyDown(event: any) {
     const foundset = this._foundset()!;
     if ((!foundset.multiSelect && event.key === 'ArrowUp') || event.key === 'ArrowDown') {
@@ -364,6 +378,14 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     this.cache = this.parent.getFormCache().getFormComponent(this.name())!;
 
     if (this.servoyApi().isInDesigner()) {
+      return;
+    }
+
+    if (this.servoyApi().hasSampleData()) {
+      // SVY-21610: keep useScrolling false so the plain (non ag-grid) row markup is used. The scrolling variant
+      // installs an AGGridDatasource whose getRows() goes through the foundset's async load, which cannot complete
+      // without a websocket session - the rows would never arrive.
+      this.useScrolling = false;
       return;
     }
 
@@ -729,11 +751,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
   getViewportRows(): ViewPortRow[] {
     // this method is only used in the old - non-scrolling version
-    if (this.servoyApi().isInDesigner()) {
-      return this.designerViewportRows;
+    const foundset = this._foundset();
+    // SVY-21610: the stateless form-template render DOES get a viewport (3 synthetic rows), so prefer the real rows
+    // whenever they exist and keep the single placeholder row only for a render with no foundset value at all
+    // (the designer, or a container whose foundset is not set).
+    if (!foundset || !foundset.viewPort || foundset.viewPort.rows.length === 0) {
+      return this.hasNoLiveFoundsetData() ? this.designerViewportRows : [];
     }
     if (this.numberOfCells === 0) return [];
-    return this._foundset()!.viewPort.rows;
+    return foundset.viewPort.rows;
   }
 
   getStyleClasses(): string[] {
@@ -873,11 +899,24 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
     let cm: IChildComponentPropertyValue = null!;
     if (item instanceof ComponentCache) {
-      if (this.servoyApi().isInDesigner()) {
+      // Pick the source of the cell model by what is actually available, NOT by which render we are in.
+      //
+      // rowItems comes from containedForm().childElements, which only FormComponentSabloValue.fullToJSON writes - i.e.
+      // only at runtime. The design-time projection (FormComponentPropertyType.toTemplateJSONValue) writes just
+      // {uuid, formHeight, formWidth, absoluteLayout} with no childElements, so in the designer AND in the stateless
+      // form-template render (SVY-21610) rowItems is empty and the model has to be read from the FormCache instead.
+      // Testing availability rather than isInDesigner() covers all three renders with one rule.
+      const rowItems = this.getRowItems();
+      cm = rowItems.length > 0 ? (rowItems.find((elem) => elem.name === item.name) as IChildComponentPropertyValue) : null!;
+      if (!cm) {
         cm = this.findElement(this.cache.items, item) as IChildComponentPropertyValue;
-      } else {
-        cm = this.getRowItems().find((elem) => elem.name === item.name) as IChildComponentPropertyValue;
       }
+    }
+    if (!cm) {
+      // A component the contained form declares but that resolves to no model. Return an empty Cell rather than
+      // letting cm.name below throw, which would take the whole form render down for one unresolvable cell.
+      this.log.warn(this.log.buildMessage(() => 'ListFormComponent ' + this.name() + ': no model found for cell ' + item.name));
+      return new Cell({ name: item.name, model: {} } as unknown as IChildComponentPropertyValue, {}, row[ViewportService.ROW_ID_COL_KEY], rowIndex, rowIndex);
     }
     if (row._cache) {
       const cache = row._cache.get(cm.name);
@@ -1060,7 +1099,18 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
 
   getServoyApi(cell: Cell) {
     if (cell.api == null) {
-      cell.api = new ListFormComponentServoyApi(cell, this.servoyApi().getFormName(), this.containedForm()!.absoluteLayout, this.formservice, this.servoyService, this, this.servoyApi().isInDesigner());
+      cell.api = new ListFormComponentServoyApi(
+        cell,
+        this.servoyApi().getFormName(),
+        this.containedForm()!.absoluteLayout,
+        this.formservice,
+        this.servoyService,
+        this,
+        this.servoyApi().isInDesigner(),
+        // SVY-21610: pass sample-data mode down, so a component inside a row sees the same mode as one placed
+        // directly on the form
+        this.servoyApi().hasSampleData(),
+      );
     }
     return cell.api;
   }
@@ -1084,6 +1134,16 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     if (this.waitingForLoad) return;
     if (this.servoyApi().isInDesigner()) {
       this.numberOfCells = 1;
+      return;
+    }
+
+    if (this.servoyApi().hasSampleData()) {
+      // SVY-21610: render exactly the sample rows the server sent and issue NO load request - loadRecordsAsync /
+      // loadExtraRecordsAsync would return a promise that can never resolve without a websocket session, leaving the
+      // component stuck in waitingForLoad and rendering nothing at all.
+      const sampleFoundset = this._foundset();
+      this.numberOfCells = sampleFoundset?.viewPort?.rows?.length ?? 1;
+      if (this.numberOfCells < 1) this.numberOfCells = 1;
       return;
     }
 
@@ -1251,9 +1311,14 @@ class ListFormComponentServoyApi extends ServoyApi {
     servoyService: ServoyService,
     private fc: ListFormComponent,
     isdesigner: boolean,
+    private sampleData = false,
   ) {
     super(cell.state, formname, absolute, formservice, servoyService, isdesigner);
     this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
+  }
+
+  override hasSampleData(): boolean {
+    return this.sampleData;
   }
 
   registerComponent(comp: ServoyBaseComponent<any>) {
