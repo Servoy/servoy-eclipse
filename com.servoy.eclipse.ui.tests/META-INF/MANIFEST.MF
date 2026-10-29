@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for com.servoy.eclipse.ui
 Bundle-SymbolicName: com.servoy.eclipse.ui.tests
-Bundle-Version: 2026.3.2.qualifier
+Bundle-Version: 2026.3.3.qualifier
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.core.tests
 Import-Package: com.servoy.eclipse.ui.browser,

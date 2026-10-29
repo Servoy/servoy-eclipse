@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Cypress Testing Tests
 Bundle-SymbolicName: com.servoy.eclipse.cypress.tests
-Bundle-Version: 2026.3.2.qualifier
+Bundle-Version: 2026.3.3.qualifier
 Fragment-Host: com.servoy.eclipse.cypress;bundle-version="2026.3.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: com.servoy.eclipse.core.tests
