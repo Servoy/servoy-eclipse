@@ -194,14 +194,17 @@ describe('ServoyFormTemplateComponent (route root)', () => {
       expect(formService.createFormCache).not.toHaveBeenCalled();
     });
 
-    it('does not build a cache when the form-state has no entry for the resolved form', () => {
+    it('does not build a cache for the resolved form when the form-state has no entry for it', () => {
       addBlob(SPECS_ID, SPECS_BLOB);
       addBlob(FORMSTATE_ID, { anotherForm: FORM_STATE });
       setWindow({ formtemplateName: 'aForm' });
 
       createComponent().ngOnInit();
 
-      expect(formService.createFormCache).not.toHaveBeenCalled();
+      // 'aForm' itself has no entry, so it gets no cache; 'anotherForm' is still cached because every entry in the
+      // blob is a form the server generated for this page (SVY-21610 nested forms)
+      expect(formService.createFormCache).not.toHaveBeenCalledWith('aForm', expect.anything(), null);
+      expect(formService.createFormCache).toHaveBeenCalledWith('anotherForm', FORM_STATE, null);
     });
 
     it('does not register specs when the specs blob is missing', () => {
@@ -245,6 +248,62 @@ describe('ServoyFormTemplateComponent (route root)', () => {
 
       expect(typesRegistry.addComponentClientSideSpecs).not.toHaveBeenCalled();
       expect(formService.createFormCache).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // SVY-21610: a form shown inside another form (a tabpanel tab, tablesspanel, accordion, splitpane, formcontainer)
+  // is rendered by the generated template only when FormService.hasFormCacheEntry(name) is true - the template guards
+  // it with isFormAvailable(name). So every form the server put in the blob needs a cache entry here, or the tab body
+  // renders empty even though its state was delivered.
+  describe('nested forms', () => {
+    const NESTED_STATE = { responsive: false, size: { width: 100, height: 100 }, children: [{ name: '', model: {} }] };
+
+    it('builds a cache for every form in the blob, not only the requested one', () => {
+      addBlob(SPECS_ID, SPECS_BLOB);
+      addBlob(FORMSTATE_ID, { aForm: FORM_STATE, categories: NESTED_STATE, details: NESTED_STATE });
+      setWindow({ formtemplateName: 'aForm' });
+
+      createComponent().ngOnInit();
+
+      expect(formService.createFormCache).toHaveBeenCalledTimes(3);
+      expect(formService.createFormCache).toHaveBeenCalledWith('aForm', FORM_STATE, null);
+      expect(formService.createFormCache).toHaveBeenCalledWith('categories', NESTED_STATE, null);
+      expect(formService.createFormCache).toHaveBeenCalledWith('details', NESTED_STATE, null);
+    });
+
+    it('builds the requested form first, so a nested lookup can already resolve it', () => {
+      addBlob(SPECS_ID, SPECS_BLOB);
+      // the requested form deliberately NOT first in the blob's key order
+      addBlob(FORMSTATE_ID, { categories: NESTED_STATE, aForm: FORM_STATE });
+      setWindow({ formtemplateName: 'aForm' });
+
+      createComponent().ngOnInit();
+
+      const firstCachedForm = formService.createFormCache.mock.calls[0][0];
+      expect(firstCachedForm).toBe('aForm');
+    });
+
+    it('caches each form once even when the requested form is also listed again', () => {
+      addBlob(SPECS_ID, SPECS_BLOB);
+      addBlob(FORMSTATE_ID, { aForm: FORM_STATE, categories: NESTED_STATE });
+      setWindow({ formtemplateName: 'aForm' });
+
+      createComponent().ngOnInit();
+
+      const cachedForms = formService.createFormCache.mock.calls.map((c: unknown[]) => c[0]);
+      expect(cachedForms).toEqual(['aForm', 'categories']);
+    });
+
+    it('still renders only the requested form at the top level', () => {
+      addBlob(SPECS_ID, SPECS_BLOB);
+      addBlob(FORMSTATE_ID, { aForm: FORM_STATE, categories: NESTED_STATE });
+      setWindow({ formtemplateName: 'aForm' });
+
+      const comp = createComponent();
+      comp.ngOnInit();
+
+      // the nested forms are only in the cache; the template binds svy-formtemplate to this one name
+      expect(comp.formName).toBe('aForm');
     });
   });
 });

@@ -11,6 +11,7 @@ import {
   ChangeDetectorRef,
   ViewEncapsulation,
   DOCUMENT,
+  OnInit,
   forwardRef,
   inject,
   input,
@@ -134,7 +135,7 @@ import { ListFormComponent } from '../servoycore/listformcomponent/listformcompo
  * A stripped, stateless copy of FormComponent used to render the real runtime DOM of a form
  * without any data, handlers or server communication. See SVY-21460.
  */
-export class FormTemplateComponent extends AbstractFormComponent implements OnChanges, IFormComponent {
+export class FormTemplateComponent extends AbstractFormComponent implements OnChanges, OnInit, IFormComponent {
   readonly svyResponsiveDiv = viewChild<TemplateRef<any>>('svyResponsiveDiv');
   readonly cssPositionContainer = viewChild<TemplateRef<any>>('cssPositionContainer');
   // structure viewchild template generate start
@@ -263,6 +264,18 @@ export class FormTemplateComponent extends AbstractFormComponent implements OnCh
 
   public isFormAvailable(name: string): boolean {
     return this.formservice.hasFormCacheEntry(name);
+  }
+
+  /**
+   * SVY-21610: a NESTED svy-formtemplate (a tabpanel tab, tablesspanel, accordion, splitpane, formcontainer) is
+   * created by the generated component template, which binds only [name] - so it cannot be handed the sampleData
+   * input from here. It reads the mode from the same window marker the route root reads instead, so a tab's fields
+   * show sample values just like the outer form's do rather than rendering empty.
+   */
+  ngOnInit() {
+    if (!this.sampleData) {
+      this.sampleData = (this.document.defaultView as any)?.formtemplateSampleData === true;
+    }
   }
 
   datachange(_component: ComponentCache, _property: string, _value: any, _dataprovider: boolean) {

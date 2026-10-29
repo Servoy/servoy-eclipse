@@ -53,9 +53,19 @@ export class ServoyFormTemplateComponent implements OnInit {
     const formStateContainer = this.readJsonBlob('svy-formtemplate-formstate');
     this.formName = this.getFormName();
     if (formStateContainer && this.formName) {
+      // SVY-21610: the blob carries the requested form AND every form nested in it through a form-typed property
+      // (tabpanel tabs, tablesspanel, accordion, splitpane, formcontainer). Build a cache for each: the generated
+      // nested-form template is guarded by isFormAvailable(name) -> FormService.hasFormCacheEntry(name), so a form
+      // without a cache entry renders as an empty tab body. Only the requested form is rendered at the top level;
+      // the others are picked up from the cache by whichever component contains them.
       const formState = formStateContainer[this.formName];
       if (formState) {
+        // the requested form first, so it is the one a nested-form lookup can already resolve against
         this.formService.createFormCache(this.formName, formState, null!);
+      }
+      for (const nestedFormName of Object.keys(formStateContainer)) {
+        if (nestedFormName === this.formName) continue;
+        this.formService.createFormCache(nestedFormName, formStateContainer[nestedFormName], null!);
       }
     }
   }

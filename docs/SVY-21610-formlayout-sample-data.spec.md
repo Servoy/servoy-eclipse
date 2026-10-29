@@ -338,3 +338,80 @@ actively mislead the agent.
 | 3 | Two booleans (`formTemplate`, `sampleData`) or one enum? | Two booleans, matching the existing `designer, formTemplate` precedent; the implied invariant is asserted (§3.1). Revisit if a fourth mode appears |
 | 4 | Sample text style — lorem ipsum, or names/words seeded by column name? | Seeded words. Sean explicitly allowed lorem ipsum; seeded words read better in a specimen sheet and cost the same |
 | 5 | Should `selectedRowIndexes` be `[0]` or `[]`? | `[0]` — selected-row styling was an unverifiable defect class in SVY-21590 |
+
+---
+
+## Addendum: nested forms in the stateless render (second commit)
+
+### A.1 The gap
+
+A form shown *inside* another form through a `form`-typed property rendered as an empty body: a
+`bootstrapcomponents-tabpanel` tab, `tablesspanel`, `accordion`, `splitpane` and
+`servoycore-formcontainer`. Not caused by the sample-data work — a pre-existing SVY-21460 gap — but
+sample data made it conspicuous, since the outer form suddenly showed values while the tab stayed
+blank.
+
+The chain: `FormPropertyType.toTemplateJSONValue` *does* write the referenced form (as a name or a
+UUID) into the model, and `ComponentTemplateGenerator` emits
+`<svy-formtemplate *ngIf="isFormAvailable(name)" [name]="name">` for it. But
+`isFormAvailable()` → `FormService.hasFormCacheEntry(name)`, and the endpoint generated exactly
+**one** form, so the nested form had no cache entry and the guard was false. At runtime this works
+because `formWillShow` round-trips to the server; statelessly there is no round-trip.
+
+Form components and list-form-components were never affected — `ChildrenJSONGenerator` writes those
+inline as `children_<property>`.
+
+### A.2 Why the transport needed no change
+
+`AngularFormGenerator.generateJS()` already emits `{"<formName>": {...}}` keyed by form name, and
+the route already read `formStateContainer[this.formName]`. One blob can therefore carry several
+forms with no format change — only the producer and that one consumer line needed touching.
+
+`FormService.createFormCache` already handles the nested case too: when the newly cached form is not
+the one with a live Angular component it calls `detectChanges()` on every cached form component,
+with the comment *"1 of those could show the new form in it (as tab for example)"*.
+
+### A.3 Design
+
+**Server** (`HeadlessFormTemplateContent`):
+
+- `collectFormsToGenerate(form, fs)` — breadth-first from the requested form, de-duplicated by form
+  name, capped at `MAX_NESTED_FORM_DEPTH = 5`. The requested form is always first.
+  - A **visited set is required, not defensive**: a tabpanel whose tab shows a form that itself
+    contains a tabpanel pointing back is legal Servoy and would otherwise recurse forever.
+  - **All tabs, not just the active one.** Which tab is visible is decided client-side from the
+    model (`tabIndex`/`activeTabIndex`), so generating only tab 0 would render a form wrong whenever
+    another tab is selected by default. The cost is page size, not server round-trips.
+- `getNestedForms` / `collectFormsFromWebObject` — visits the form's persists, reads
+  `spec.getProperties(FormPropertyType.INSTANCE)` off each web object, then recurses into
+  `WebCustomType` children so a form-typed property declared *inside a custom type* is found (a
+  tabpanel's `tabs` is a custom-type array whose `containedForm` is the form-typed property). Same
+  shape as `ServoyFormBuilder.addWebComponentMissingReferences`.
+- `resolveForm` — the stored value may be a form **name or UUID** (a tabpanel tab stores the UUID),
+  so it does `fs.getForm` then `fs.searchPersist`, mirroring `FormPropertyType.getForm`.
+- The **requested** form is generated without a try/catch so its failure still surfaces as 404/500;
+  each **nested** form is best-effort, so one broken nested form renders one empty tab instead of
+  taking the page down.
+- `getComponentSpecsJSON` unions the specs across the same collected set — otherwise a component
+  appearing only inside a tab has no client-side spec and its typed properties silently fail to
+  convert.
+
+**Client**:
+
+- `ServoyFormTemplateComponent.ngOnInit` builds a cache for **every** key in the blob, requested
+  form first; only the requested form is rendered at the top level.
+- `FormTemplateComponent.ngOnInit` reads sample-data mode from the `window.formtemplateSampleData`
+  marker when the input was not set. A nested `<svy-formtemplate>` is created by the *generated*
+  template, which binds only `[name]`, so it cannot be handed the input — without this a tab's
+  fields would render empty while the outer form's showed values.
+
+### A.4 Acceptance criteria
+
+- [ ] A form with a tabpanel renders the contained form's components inside the tab body.
+- [ ] All tabs are generated, not only the active one.
+- [ ] A cyclic nesting (A contains B contains A) terminates and renders.
+- [ ] Nesting deeper than `MAX_NESTED_FORM_DEPTH` is truncated, not failed.
+- [ ] A nested form's components convert their typed properties (specs unioned).
+- [ ] Sample data reaches nested forms, not just the top-level form.
+- [ ] A form with no nested forms produces a blob with exactly one key (no behaviour change).
+- [ ] A broken nested form leaves the rest of the page rendering.

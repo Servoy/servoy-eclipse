@@ -365,6 +365,22 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
       expect((comp.getServoyApi(errorBeanCache) as ServoyApi).hasSampleData()).toBe(false);
     });
 
+    it('a nested render inherits sample-data mode from the injected window marker', () => {
+      // SVY-21610 nested forms: the generated template for a tabpanel tab creates <svy-formtemplate [name]="...">
+      // with no [sampleData] binding, so the child must pick the mode up from the same window.formtemplateSampleData
+      // marker the route root reads - otherwise a tab's fields render empty while the outer form's show values.
+      const win = window as any;
+      const previous = win.formtemplateSampleData;
+      win.formtemplateSampleData = true;
+      try {
+        const nested = renderForm().comp;
+        nested.ngOnInit();
+        expect((nested.getServoyApi(errorBeanCache) as ServoyApi).hasSampleData()).toBe(true);
+      } finally {
+        win.formtemplateSampleData = previous;
+      }
+    });
+
     it('reports hasSampleData() true when the render carries server-supplied sample values', () => {
       // a separate host is needed because the api is built DURING render (the template binds
       // [servoyApi]="callback.getServoyApi(state)") and cached from then on, so setting the flag
