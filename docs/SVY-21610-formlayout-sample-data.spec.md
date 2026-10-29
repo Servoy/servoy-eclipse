@@ -478,3 +478,21 @@ Harmless in the designer, wrong here: a sample-data render really does have 3 ro
 - [ ] The designer still shows its single placeholder row when the foundset has no rows.
 - [ ] Runtime behaviour unchanged: `rowItems` is non-empty there, so the same first branch is taken.
 - [ ] An unresolvable cell logs and renders empty without breaking the rest of the form.
+- [ ] No NG0100 (`ExpressionChangedAfterItHasBeenCheckedError`) in the browser console.
+
+### B.4 Follow-up: NG0100 on the per-row `[style]` binding
+
+Fixing B.1 surfaced one more ordering problem. `getViewportRows()` returns `[]` while
+`numberOfCells` is 0, and the LFC's own `calculateCells()` ran **after** `super.ngAfterViewInit()` —
+i.e. after that base-class call had already done its final `cdRef.detectChanges()`. The row views
+therefore appeared only once the count changed, and Angular's dev-mode re-check reported
+`NG0100 ExpressionChangedAfterItHasBeenCheckedError: Previous value: 'undefined'. Current value:
+'132px'` for the per-row `[style]="{ height: getRowHeight() ... }"` binding (132px being the
+contained form's `formHeight`).
+
+The sample-data branch now settles the count from `svyOnInit`. Note that `svyOnInit` is *not* an
+`ngOnInit`-time hook for this component: `ServoyBaseComponent.initializeComponent()` only calls it
+once `#element` exists, which for the LFC is from inside `ngAfterViewInit` — but **before** that
+method's `detectChanges()`. So the rows exist by the time the view is checked. `ngAfterViewInit`
+then skips its own `calculateCells()` in this mode, since nothing can have changed since and a
+second pass is exactly what produced the error.

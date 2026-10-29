@@ -177,6 +177,43 @@ describe('ListFormComponent', () => {
       // the scrolling variant installs an AGGridDatasource whose getRows() goes through the foundset's async load
       expect(component.useScrolling).toBe(false);
     });
+
+    it('svyOnInit already fixes the cell count, so rows exist before the first change detection pass', () => {
+      // NG0100 guard: getViewportRows() returns [] while numberOfCells is 0, so if the count were only decided in
+      // ngAfterViewInit the row views would be created from inside an after-view hook and Angular would report
+      // ExpressionChangedAfterItHasBeenCheckedError on the per-row [style] binding.
+      // svyOnInit re-reads the foundset from its input, so set that rather than only the internal signal
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      component.numberOfCells = 0;
+
+      component.svyOnInit();
+
+      expect(component.numberOfCells).toBe(mockFoundset.viewPort.rows.length);
+      expect(component.getViewportRows()).toBe(mockFoundset.viewPort.rows);
+    });
+
+    it('ngAfterViewInit adds no second cell calculation after the base class has settled the view', () => {
+      // The NG0100 this guards came from calculateCells() running AFTER super.ngAfterViewInit() - i.e. after that
+      // base-class call had already run its final cdRef.detectChanges(). The row views then appeared once the count
+      // changed, which Angular's dev-mode re-check reports as ExpressionChangedAfterItHasBeenChecked.
+      //
+      // The count is now settled from svyOnInit, which ServoyBaseComponent.initializeComponent() invokes from
+      // INSIDE super.ngAfterViewInit() (the LFC's #element only exists once the view is created, so svyOnInit cannot
+      // run at ngOnInit time) - and therefore before that detectChanges(), so the rows are already there when it
+      // runs. What must not happen is a further recalculation after it.
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      component.svyOnInit();
+      const countAfterInit = component.numberOfCells;
+      // mark the component initialized so the base class does not re-enter svyOnInit, isolating the code that runs
+      // after super.ngAfterViewInit() returns
+      (component as any).initialized = true;
+      const calculateCellsSpy = vi.spyOn(component, 'calculateCells');
+
+      component.ngAfterViewInit();
+
+      expect(calculateCellsSpy).not.toHaveBeenCalled();
+      expect(component.numberOfCells).toBe(countAfterInit);
+    });
   });
 
   describe('onRowClick', () => {
