@@ -32,7 +32,8 @@ import com.servoy.j2db.server.ngclient.NGFormManager;
 import com.servoy.j2db.util.Debug;
 
 /**
- * A lightweight NG client for form preview/testing purposes.
+ * A lightweight NG client for form preview/testing purposes: the data-bearing Cypress/browser test client,
+ * not the designer's dataless form-template preview.
  * <p>
  * This client:
  * <ul>
@@ -86,7 +87,7 @@ public class FormPreviewNGClient extends NGClient
 	/**
 	 * Returns the currently active FormPreviewNGClient singleton, or null if none is set.
 	 * <p>
-	 * Used by the session factory (Activator) to decide - mirroring the debug NG client recycle pattern - whether an
+	 * Used by NGClientWebsocketSessionFactory to decide - mirroring the debug NG client recycle pattern - whether an
 	 * existing preview client can be reused (same websocket session key) and retargeted rather than shut down and
 	 * recreated.
 	 */
