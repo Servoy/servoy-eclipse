@@ -531,8 +531,9 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
         const buildForResize = (parentWidth: number, formWidth: number) => {
             const component = newComponent();
 
-            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInAbsoluteLayout']);
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInAbsoluteLayout', 'hasSampleData']);
             (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(false); // responsive -> observer is installed
+            (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(false);
             component.useScrolling = true;
 
             const gridApi = jasmine.createSpyObj('gridApi', ['setGridOption', 'refreshServerSide', 'setRowCount', 'isDestroyed', 'getDisplayedRowCount', 'ensureIndexVisible']);
@@ -680,6 +681,43 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
 
             // the scrolling variant installs an AGGridDatasource whose getRows() goes through the foundset's async load
             expect(component.useScrolling).toBe(false);
+        });
+
+        it('svyOnInit already fixes the cell count, so rows exist before the first change detection pass', () => {
+            // NG0100 guard: getViewportRows() returns [] while numberOfCells is 0, so if the count were only decided in
+            // ngAfterViewInit the row views would be created from inside an after-view hook and Angular would report
+            // ExpressionChangedAfterItHasBeenCheckedError on the per-row [style] binding.
+            const { component, foundset } = buildSampleComponent();
+            component.numberOfCells = 0;
+
+            component.svyOnInit();
+
+            expect(component.numberOfCells).toBe(foundset.viewPort.rows.length);
+            expect(component.getViewportRows()).toBe(foundset.viewPort.rows);
+        });
+
+        it('ngAfterViewInit adds no second cell calculation after the base class has settled the view', () => {
+            // The NG0100 this guards came from calculateCells() running AFTER super.ngAfterViewInit() - i.e. after that
+            // base-class call had already run its final cdRef.detectChanges(). The row views then appeared once the count
+            // changed, which Angular's dev-mode re-check reports as ExpressionChangedAfterItHasBeenChecked.
+            //
+            // The count is now settled from svyOnInit, which ServoyBaseComponent.initializeComponent() invokes from
+            // INSIDE super.ngAfterViewInit() (the LFC's #element only exists once the view is created, so svyOnInit cannot
+            // run at ngOnInit time) - and therefore before that detectChanges(), so the rows are already there when it
+            // runs. What must not happen is a further recalculation after it.
+            const { component } = buildSampleComponent();
+            component.svyOnInit();
+            const countAfterInit = component.numberOfCells;
+            // avoid running the ServoyBaseComponent super.ngAfterViewInit() (it would re-enter svyOnInit), isolating the
+            // code that runs after super.ngAfterViewInit() returns
+            spyOn(Object.getPrototypeOf(Object.getPrototypeOf(component)), 'ngAfterViewInit').and.stub();
+            (component as any).element = () => ({ nativeElement: {} });
+            const calculateCellsSpy = spyOn(component, 'calculateCells').and.callThrough();
+
+            component.ngAfterViewInit();
+
+            expect(calculateCellsSpy).not.toHaveBeenCalled();
+            expect(component.numberOfCells).toBe(countAfterInit);
         });
     });
 });

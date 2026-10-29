@@ -329,6 +329,15 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             // installs an AGGridDatasource whose getRows() goes through the foundset's async load, which cannot complete
             // without a websocket session - the rows would never arrive.
             this.useScrolling = false;
+            // Size the rows HERE rather than from ngAfterViewInit's calculateCells(). getViewportRows() returns [] while
+            // numberOfCells is 0, and the LFC's calculateCells() used to run AFTER super.ngAfterViewInit() - i.e. after
+            // that base-class call had already done its final cdRef.detectChanges(). The row views then appeared only once
+            // the count changed, which Angular's dev-mode re-check reports as NG0100
+            // (ExpressionChangedAfterItHasBeenChecked) on the per-row [style] binding. svyOnInit is invoked by
+            // ServoyBaseComponent.initializeComponent() from inside that same super call but BEFORE its detectChanges(),
+            // so settling the count here means the rows already exist when the view is checked. There is nothing to
+            // measure or load in this render, so the count is known up front.
+            this.calculateCells();
             return;
         }
 
@@ -618,7 +627,13 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     ngAfterViewInit() {
         this.elementRef = this.element();
         super.ngAfterViewInit();
-        this.calculateCells();
+        // SVY-21610: in a sample-data render the cell count was already settled from svyOnInit, which the base class
+        // ran from inside the super.ngAfterViewInit() above - before its detectChanges(). Recomputing it here, after
+        // that, is precisely what produced NG0100 (ExpressionChangedAfterItHasBeenChecked) on the per-row [style]
+        // binding: the row views would appear only after the view had been checked.
+        if (!this.servoyApi.hasSampleData()) {
+            this.calculateCells();
+        }
         if (this.useScrolling) {
             this.agGrid().api.setGridOption('serverSideDatasource', new AGGridDatasource(this));
             if(!this.servoyApi.isInAbsoluteLayout()) {
