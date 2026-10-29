@@ -796,7 +796,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     }
 
     getRowItems(): Array<IChildComponentPropertyValue | FormComponentCache> {
-        return this.rowItems;
+        // undefined until ngOnChanges sees a containedForm WITH childElements - which the design-time/stateless
+        // projection never sends - so callers get an empty list rather than having to guard against undefined
+        return this.rowItems ?? [];
     }
 
     moveLeft() {
@@ -856,7 +858,9 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
             // {uuid, formHeight, formWidth, absoluteLayout} with no childElements, so in the designer AND in the stateless
             // form-template render (SVY-21610) rowItems is empty and the model has to be read from the FormCache instead.
             // Testing availability rather than isInDesigner() covers all three renders with one rule.
-            const rowItems = this.getRowItems();
+            // rowItems is only ASSIGNED in ngOnChanges when childElements exists, so in exactly the renders this fallback
+            // is for it is undefined, not an empty array
+            const rowItems = this.getRowItems() ?? [];
             cm = rowItems.length > 0 ? (rowItems.find((elem) => elem.name === item.name) as IChildComponentPropertyValue) : null;
             if (!cm) {
                 cm = this.findElement(this.cache.items, item) as IChildComponentPropertyValue;

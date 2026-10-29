@@ -4,6 +4,8 @@ import { TestBed } from '@angular/core/testing';
 import { ColDef, GridOptions } from 'ag-grid-community';
 import { ListFormComponent } from './listformcomponent';
 import { LoggerFactory } from '@servoy/public';
+import { ComponentCache, FormComponentCache } from '../../ngclient/types';
+import { TypesRegistry } from '../../sablo/types_registry';
 
 /**
  * SVY-21457 — per-row auto-height for the scrolling List Form Component.
@@ -672,6 +674,23 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
 
             expect(component.numberOfCells).toBe(1);
             expect(foundset.loadRecordsAsync).not.toHaveBeenCalled();
+        });
+
+        it('getRowItemState resolves a cell from the FormCache when rowItems was never assigned', () => {
+            // Reproduces the browser failure exactly: in the stateless render containedForm carries no childElements, so
+            // ngOnChanges never assigns rowItems and it stays UNDEFINED (not []). Reading .length on it threw
+            // "Cannot read properties of undefined (reading 'length')" and blanked the LFC.
+            const { component } = buildSampleComponent();
+            const textbox = new ComponentCache('textbox_1', 'bootstrapcomponents-textbox', 'textbox', [], {}, TestBed.inject(TypesRegistry));
+            (textbox.model as any).dataProviderID = 'Sample';
+            component.cache = { items: [textbox] } as unknown as FormComponentCache;
+            expect((component as any).rowItems).toBeUndefined();
+
+            const cell = component.getRowItemState(textbox, { _svyRowId: '1' } as any, 0) as any;
+
+            expect(cell).toBeTruthy();
+            expect(cell.name).toBe('textbox_1');
+            expect(cell.model.dataProviderID).toBe('Sample');
         });
 
         it('svyOnInit keeps the non-scrolling markup so no AG Grid datasource loads rows', () => {
