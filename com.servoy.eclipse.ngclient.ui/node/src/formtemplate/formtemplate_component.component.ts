@@ -1,5 +1,5 @@
 import {
-  Component, Input, OnChanges, SimpleChanges, viewChild,
+  Component, Input, OnChanges, OnInit, SimpleChanges, viewChild,
   TemplateRef, ElementRef, Renderer2, ChangeDetectionStrategy, ChangeDetectorRef, Inject, ViewEncapsulation,
   DOCUMENT
 } from '@angular/core';
@@ -108,7 +108,7 @@ import { AbstractFormComponent } from '../ngclient/form/form_component.component
  * A stripped, stateless copy of FormComponent used to render the real runtime DOM of a form
  * without any data, handlers or server communication. See SVY-21460.
  */
-export class FormTemplateComponent extends AbstractFormComponent implements OnChanges, IFormComponent {
+export class FormTemplateComponent extends AbstractFormComponent implements OnChanges, OnInit, IFormComponent {
     readonly svyResponsiveDiv = viewChild<TemplateRef<any>>('svyResponsiveDiv');
     readonly cssPositionContainer = viewChild<TemplateRef<any>>('cssPositionContainer');
     // structure viewchild template generate start
@@ -202,6 +202,18 @@ export class FormTemplateComponent extends AbstractFormComponent implements OnCh
             const index = compDirectiveName.indexOf('-');
             compDirectiveName = compDirectiveName.replace('-', '');
             return this[compDirectiveName.substring(0, index) + compDirectiveName.charAt(index).toUpperCase() + compDirectiveName.substring(index + 1)]();
+        }
+    }
+
+    /**
+     * SVY-21610: a NESTED svy-formtemplate (a tabpanel tab, tablesspanel, accordion, splitpane, formcontainer) is
+     * created by the generated component template, which binds only [name] - so it cannot be handed the sampleData
+     * input from here. It reads the mode from the same window marker the route root reads instead, so a tab's fields
+     * show sample values just like the outer form's do rather than rendering empty.
+     */
+    ngOnInit() {
+        if (!this.sampleData) {
+            this.sampleData = (this.document.defaultView as any)?.formtemplateSampleData === true;
         }
     }
 
