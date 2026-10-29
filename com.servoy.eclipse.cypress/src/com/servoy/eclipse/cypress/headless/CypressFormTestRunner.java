@@ -19,9 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.json.JSONException;
 import org.sablo.websocket.GetHttpSessionConfigurator;
-import org.sablo.websocket.IWebsocketSession;
-import org.sablo.websocket.IWebsocketSessionFactory;
-import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.base.persistence.IBaseColumn;
@@ -30,7 +27,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
-import com.servoy.eclipse.ngclient.startup.FormPreviewNGClient;
+import com.servoy.eclipse.ngclient.startup.NGClientWebsocketSessionFactory;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.DummyValidator;
@@ -40,7 +37,6 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.extensions.ServoyServiceLoader;
-import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -455,51 +451,28 @@ public class CypressFormTestRunner extends AbstractWorkspaceExporter<CypressForm
 	}
 
 	/**
-	 * Installs a formpreview-aware {@code IWebsocketSessionFactory} so that a
-	 * {@code FormPreviewNGClient} (instead of a regular {@code NGClient}) is created
-	 * when the WebSocket session's {@code requestParams} contain "formpreview". The
-	 * {@code FormPreviewNGClient} overrides {@code showDefaultLogin()} to bypass
-	 * authentication entirely, and its constructor/{@code shutdownExisting()} keep a
-	 * single instance so licenses are released between specs.
+	 * Registers the shared {@code NGClientWebsocketSessionFactory} (the same type Servoy Developer registers) with a
+	 * {@code null} designer callback and no developer NG client, so that a {@code FormPreviewNGClient} is created when
+	 * the WebSocket session's {@code requestParams} contain "formpreview". The {@code formpreview} contract is: a real
+	 * NG client showing the requested form with data, authentication bypassed through
+	 * {@code FormPreviewNGClient.showDefaultLogin()}; {@code shutdownExisting()} keeps a single instance so licenses
+	 * are released between specs.
 	 * <p>
-	 * This <b>unconditionally overwrites</b> whatever factory is currently registered
-	 * for {@code CLIENT_ENDPOINT}. It must not try to detect an "already formpreview-aware"
-	 * factory: the one {@code com.servoy.eclipse.ngclient.startup.Activator} registers is
-	 * an anonymous {@code IWebsocketSessionFactory} (not a {@code WebsocketSessionFactory}
-	 * instance) whose {@code init} has no "formpreview" branch at all, so any
-	 * {@code instanceof}-based guard reads that as "already aware", bails out, and no
-	 * {@code FormPreviewNGClient} is ever created - the form then falls through to the
-	 * regular auth/debug-client path, never renders, and each spec leaks a client until
-	 * the license pool is exhausted ("No more licenses available").
+	 * This <b>unconditionally overwrites</b> whatever factory is currently registered for {@code CLIENT_ENDPOINT}.
+	 * A guard must not be added: the previous factory may be the plain {@code ResourceProvider} fallback, which has
+	 * no "formpreview" branch.
 	 * <p>
-	 * Overwriting is safe: the factory below delegates to plain
-	 * {@code NGClientWebsocketSession} behaviour via {@code super.init(requestParams)}
-	 * whenever "formpreview" is absent.
+	 * Overwriting is safe: the shared factory handles all request parameters; the debug/developer branches are inert
+	 * headless and the default path creates a plain {@code NGClient}, as {@code NGClientWebsocketSession.init} does.
 	 */
 	private void activateNgClientBundle() {
 		try {
 			WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.CLIENT_ENDPOINT,
-					new IWebsocketSessionFactory() {
-						@Override
-						public IWebsocketSession createSession(WebsocketSessionKey sessionKey) throws Exception {
-							return new NGClientWebsocketSession(sessionKey, null) {
-								@Override
-								public void init(java.util.Map<String, java.util.List<String>> requestParams)
-										throws Exception {
-									if (getClient() == null && requestParams.containsKey("formpreview")) {
-										String formName = requestParams.get("formpreview").get(0);
-										FormPreviewNGClient.setPendingTargetFormName(formName);
-										setClient(new FormPreviewNGClient(this, null, formName));
-									}
-									super.init(requestParams);
-								}
-							};
-						}
-					});
-			outputExtra("Registered formpreview-aware WebSocket session factory for headless mode.");
+					new NGClientWebsocketSessionFactory(() -> null, () -> null));
+			outputExtra("Registered shared NG client session factory for headless mode.");
 		} catch (Exception e) {
-			ServoyLog.logError("Failed to register formpreview WebSocket factory.", e);
-			outputExtra("Failed to register formpreview WebSocket factory: " + e.getMessage());
+			ServoyLog.logError("Failed to register shared NG client session factory.", e);
+			outputExtra("Failed to register shared NG client session factory: " + e.getMessage());
 		}
 	}
 
