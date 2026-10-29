@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for com.servoy.eclipse.ngclient
 Bundle-SymbolicName: com.servoy.eclipse.ngclient.tests
-Bundle-Version: 2026.3.2.qualifier
+Bundle-Version: 2026.9.1.qualifier
 Fragment-Host: com.servoy.eclipse.ngclient;bundle-version="2026.3.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: com.servoy.eclipse.ngclient.tests
