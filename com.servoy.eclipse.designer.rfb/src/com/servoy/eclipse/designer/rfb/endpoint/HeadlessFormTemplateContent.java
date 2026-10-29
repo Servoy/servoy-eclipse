@@ -78,6 +78,19 @@ public class HeadlessFormTemplateContent
 	 */
 	public String getFormDataJS(String formName) throws IOException
 	{
+		return getFormDataJS(formName, false);
+	}
+
+	/**
+	 * Returns the {@code AngularFormGenerator.generateJS()}-shaped form-state JSON for the given form in the active
+	 * editing flattened solution, headless (no editor, no client). Returns {@code null} if the form cannot be found.
+	 *
+	 * @param sampleData SVY-21610: when true the property types additionally write synthetic, deterministic sample
+	 *            values (a dataprovider value, 3 foundset rows) so the render shows data instead of empty component
+	 *            chrome. When false the output is identical to the pre-SVY-21610 one.
+	 */
+	public String getFormDataJS(String formName, boolean sampleData) throws IOException
+	{
 		FlattenedSolution fs = getEditingFlattenedSolution();
 		if (fs == null) return null;
 		Form form = fs.getForm(formName);
@@ -92,7 +105,7 @@ public class HeadlessFormTemplateContent
 			Settings.getInstance().setProperty(Settings.TESTING_MODE, "true");
 			// SVY-21460: form-template mode (isDesigner=false, formTemplate=true) so custom-array / custom-object typed
 			// properties (e.g. a datagrid's 'columns', a tabpanel's 'tabs') are written into the headless template JSON
-			AngularFormGenerator generator = new AngularFormGenerator(fs, flattenedForm, form.getName(), false, true, null);
+			AngularFormGenerator generator = new AngularFormGenerator(fs, flattenedForm, form.getName(), false, true, sampleData, null);
 			// no messages manager: a stable, data-free projection with raw i18n keys
 			return generator.generateJS(new ServoyDataConverterContext(fs, null));
 		}

@@ -147,6 +147,13 @@ export class FormTemplateComponent extends AbstractFormComponent implements OnCh
 
   @Input() name!: string;
 
+  /**
+   * SVY-21610: true when the injected form state carries synthetic sample values (a dataprovider value, 3 foundset
+   * rows). Surfaced to components through ServoyApi.hasSampleData() so a component that fabricates its own
+   * design-time placeholder data does not replace the server's sample data with it.
+   */
+  @Input() sampleData = false;
+
   //** "injectedComponentRefs" is used only for being able to inject some test component templates inside unit tests */
   readonly injectedComponentRefs = input<Record<string, TemplateRef<any>> | undefined>(undefined);
 
@@ -277,7 +284,7 @@ export class FormTemplateComponent extends AbstractFormComponent implements OnCh
   getServoyApi(item: ComponentCache) {
     let api = this.servoyApiCache[item.name];
     if (api == null) {
-      api = new FormTemplateServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService);
+      api = new FormTemplateServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService, this.sampleData);
       this.servoyApiCache[item.name] = api;
     }
     return api;
@@ -297,8 +304,31 @@ export class FormTemplateComponent extends AbstractFormComponent implements OnCh
 }
 
 class FormTemplateServoyApi extends ServoyApi {
-  constructor(item: ComponentCache, formname: string, absolute: boolean, formservice: FormService, servoyService: ServoyService) {
-    super(item, formname, absolute, formservice, servoyService, true);
+  /**
+   * SVY-21610: isDesigner is deliberately FALSE here, even though this is a design-time render.
+   *
+   * Reporting the designer would make components take their design branches, and several of those discard data
+   * outright - DataGrid.svyOnInit() returns before initRootFoundset(), the bootstrap datalabel renders the literal
+   * string 'DataLabel', servoyextra-table never registers its foundset listener - so no amount of server-side sample
+   * data would show up. The render therefore reports the runtime path and exposes sample-data mode separately via
+   * hasSampleData().
+   *
+   * Nothing can be pushed to the server regardless: FormTemplateComponent.datachange()/apply() are inert and
+   * SabloService.callService() returns immediately with no wsSession. Do NOT reintroduce a push path here.
+   */
+  constructor(
+    item: ComponentCache,
+    formname: string,
+    absolute: boolean,
+    formservice: FormService,
+    servoyService: ServoyService,
+    private sampleData: boolean,
+  ) {
+    super(item, formname, absolute, formservice, servoyService, false);
+  }
+
+  public override hasSampleData(): boolean {
+    return this.sampleData;
   }
 
   public override formWillShow(_formname: string, _relationname?: string, _formIndex?: number): Promise<boolean> {

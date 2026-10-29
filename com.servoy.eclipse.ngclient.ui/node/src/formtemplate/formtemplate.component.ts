@@ -17,7 +17,7 @@ import { FormTemplateComponent } from './formtemplate_component.component';
   standalone: true,
   imports: [FormTemplateComponent],
   template: `@if (formName) {
-    <svy-formtemplate [name]="formName"></svy-formtemplate>
+    <svy-formtemplate [name]="formName" [sampleData]="sampleData"></svy-formtemplate>
   }`,
   // ServoyPublicServiceFormTemplateImpl is provided at the route level (see app.routes.ts) so it
   // sits ABOVE this component and the whole svy-formtemplate subtree, avoiding the NG0201/NG0200
@@ -25,6 +25,12 @@ import { FormTemplateComponent } from './formtemplate_component.component';
 })
 export class ServoyFormTemplateComponent implements OnInit {
   formName: string | null = null;
+
+  /**
+   * SVY-21610: whether the injected form state carries synthetic sample values. Set from the
+   * window.formtemplateSampleData marker the Java endpoint injects; defaults to false when the marker is absent.
+   */
+  sampleData = false;
 
   private windowRef = inject(WindowRefService);
   private formService = inject(FormService);
@@ -41,6 +47,8 @@ export class ServoyFormTemplateComponent implements OnInit {
     if (specs) {
       this.typesRegistry.addComponentClientSideSpecs(specs);
     }
+
+    this.sampleData = (this.windowRef.nativeWindow as any).formtemplateSampleData === true;
 
     const formStateContainer = this.readJsonBlob('svy-formtemplate-formstate');
     this.formName = this.getFormName();
