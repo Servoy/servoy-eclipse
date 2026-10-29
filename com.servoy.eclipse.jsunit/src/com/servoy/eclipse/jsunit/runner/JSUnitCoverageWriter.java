@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -161,6 +162,7 @@ public class JSUnitCoverageWriter
 						Set<Integer> hitLines = funcEntry.getValue().keySet();
 
 						Set<Integer> reachableForFunc = reachableForSource != null ? reachableForSource.get(funcName) : null;
+						if (reachableForFunc == null) reachableForFunc = findReachableForFunction(reachableLines, type, scopeName, funcName);
 						List<Integer> coveredList = new ArrayList<>(hitLines);
 						Collections.sort(coveredList);
 
@@ -419,6 +421,29 @@ public class JSUnitCoverageWriter
 			}
 		}
 
+		return null;
+	}
+
+	/**
+	 * Finds the reachable lines of one function when Rhino compiled it as its own source, named
+	 * "&lt;solution&gt;/scopes/&lt;scope&gt;/&lt;function&gt;" or "&lt;solution&gt;/forms/&lt;form&gt;/&lt;function&gt;" (see
+	 * ScriptEngine.compileFunction). The lines of all nested functions of that source (callbacks, inner functions) are
+	 * merged in, as their hits are recorded under the enclosing function (SVY-21638).
+	 */
+	private static Set<Integer> findReachableForFunction(
+		Map<String, Map<String, Set<Integer>>> reachableLines, String type, String scopeName, String funcName)
+	{
+		if (reachableLines == null || funcName == null || funcName.isEmpty()) return null;
+		String suffix = '/' + ("forms".equals(type) ? "forms" : "scopes") + '/' + scopeName + '/' + funcName;
+		for (Map.Entry<String, Map<String, Set<Integer>>> entry : reachableLines.entrySet())
+		{
+			if (entry.getKey().endsWith(suffix) && entry.getValue() != null)
+			{
+				Set<Integer> merged = new TreeSet<>();
+				entry.getValue().values().forEach(merged::addAll);
+				return merged;
+			}
+		}
 		return null;
 	}
 

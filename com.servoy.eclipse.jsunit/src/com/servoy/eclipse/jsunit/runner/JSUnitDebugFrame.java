@@ -52,8 +52,24 @@ public class JSUnitDebugFrame implements DebugFrame
 	public void onEnter(Context cx, Scriptable activation, Scriptable thisObj, Object[] args)
 	{
 		if (wrapper != null) wrapper.onEnter(cx, activation, thisObj, args);
-		this.currentScope = thisObj;
+		this.currentScope = findServoyScope(activation, thisObj);
+	}
 
+	/**
+	 * Finds the Servoy scope (global/scope or form) a function was declared in by walking the lexical parent chain of
+	 * its activation. The "this" object can not be used for that: inside a callback (e.g. passed to Array.map) "this" is
+	 * the top-level scope and inside a method of an object literal it is that object, so their lines would not be
+	 * attributed to any scope (SVY-21638). Falls back to thisObj when no Servoy scope is found on the parent chain.
+	 */
+	public static Scriptable findServoyScope(Scriptable activation, Scriptable thisObj)
+	{
+		Scriptable scope = activation;
+		while (scope != null)
+		{
+			if (scope instanceof GlobalScope || scope instanceof FormScope) return scope;
+			scope = scope.getParentScope();
+		}
+		return thisObj;
 	}
 
 	/*

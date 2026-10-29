@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.jsunit.runner;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class JSUnitDebugger implements Debugger
 		String sourceName = script.getSourceName();
 		if (sourceName == null) sourceName = "unknown";
 
-		String functionName = script.getFunctionName();
+		String functionName = getCoverageFunctionName(script);
 		if (functionName == null || functionName.isEmpty()) functionName = "<top-level>";
 
 		int[] lines = script.getLineNumbers();
@@ -98,8 +99,37 @@ public class JSUnitDebugger implements Debugger
 	public DebugFrame getFrame(Context cx, DebuggableScript fnOrScript)
 	{
 		collectReachableLines(fnOrScript);
-		if (wrapper != null) return new JSUnitDebugFrame(this, fnOrScript.getFunctionName(), wrapper.getFrame(cx, fnOrScript));
-		return new JSUnitDebugFrame(this, fnOrScript.getFunctionName(), null);
+		String functionName = getCoverageFunctionName(fnOrScript);
+		if (wrapper != null) return new JSUnitDebugFrame(this, functionName, wrapper.getFrame(cx, fnOrScript));
+		return new JSUnitDebugFrame(this, functionName, null);
+	}
+
+	/**
+	 * Returns the function name under which the coverage of the given script is recorded. Nested functions (anonymous
+	 * callbacks, inner functions) are attributed to their outermost enclosing function, so that their lines are counted
+	 * for the scope/form method that contains them (SVY-21638). An outermost function without a name (for example
+	 * "var onDone = function() {...}" in a scope, which is evaluated as an unnamed function expression) is named
+	 * "(anon:&lt;first line&gt;)", like the profiler names anonymous functions (ScriptEngine.getSourceName), so that its hits
+	 * and reachable lines are not mixed with those of the variable initializer. Scripts that are not functions (variable
+	 * initializers) keep their own name.
+	 */
+	public static String getCoverageFunctionName(DebuggableScript script)
+	{
+		DebuggableScript outermost = script;
+		while (outermost.getParent() != null && outermost.getParent().isFunction())
+		{
+			outermost = outermost.getParent();
+		}
+		String name = outermost.getFunctionName();
+		if (outermost.isFunction() && (name == null || name.isEmpty()))
+		{
+			int[] lines = outermost.getLineNumbers();
+			if (lines != null && lines.length > 0)
+			{
+				return "(anon:" + Arrays.stream(lines).min().getAsInt() + ')';
+			}
+		}
+		return name;
 	}
 
 	/**
