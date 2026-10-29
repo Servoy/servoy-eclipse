@@ -88,7 +88,7 @@ export class FormCache implements IFormCache {
     }
 
     public getBodyPartLayout(): { [property: string]: string } {
-        return this._parts[0]?.layout;
+        return this.getPart('body')?.layout;
     }
 
     public getLayoutContainer(id: string): StructureCache {
