@@ -640,6 +640,7 @@
 				<module>com.servoy.eclipse.ngclient.ui.tests</module>
 				<module>com.servoy.eclipse.cypress</module>
 				<module>com.servoy.eclipse.cypress.tests</module>
+				<module>com.servoy.eclipse.ngclient.tests</module>
 			</modules>	
 			<build>
 			 <plugins>
