@@ -415,3 +415,66 @@ with the comment *"1 of those could show the new form in it (as tab for example)
 - [ ] Sample data reaches nested forms, not just the top-level form.
 - [ ] A form with no nested forms produces a blob with exactly one key (no behaviour change).
 - [ ] A broken nested form leaves the rest of the page rendering.
+
+---
+
+## Addendum: list-form-component in the sample-data render (third commit)
+
+### B.1 The regression
+
+`servoycore-listformcomponent` rendered no cells at all in the form-template render. A direct
+consequence of the `isInDesigner()` flip (§2.4): three separate code paths in
+`listformcomponent.ts` branched on it, two of them for reasons that do not hold in this render.
+
+**The blocking one** — `getRowItemState` chose where to read each cell's model from:
+
+```typescript
+if (this.servoyApi().isInDesigner()) {
+  cm = this.findElement(this.cache.items, item);                   // reads the FormCache
+} else {
+  cm = this.getRowItems().find((elem) => elem.name === item.name); // reads containedForm.childElements
+}
+```
+
+With the flag false it took the second branch. `rowItems` is filled in `ngOnChanges` from
+`containedForm().childElements`, and `childElements` is written **only** by
+`FormComponentSabloValue.fullToJSON` — i.e. only at runtime. The design-time projection
+(`FormComponentPropertyType.toTemplateJSONValue`) writes `{uuid, formHeight, formWidth,
+absoluteLayout}` and no `childElements`. So `rowItems` was empty, `cm` was `undefined`, and the
+following `cm.name` threw.
+
+**The hang** — `calculateCells()` previously shortcut to `numberOfCells = 1` in the designer. Falling
+through to the real path with no `responsivePageSize` set, it reached
+`foundset.loadRecordsAsync(...)`, whose promise can never resolve without a websocket session,
+leaving `waitingForLoad` true forever. Same failure mode as the grid's `hasMoreRows` invariant
+(§3.4), reached from a different direction.
+
+**The placeholder** — `getViewportRows()` returned a single empty `designerViewportRows` entry.
+Harmless in the designer, wrong here: a sample-data render really does have 3 rows to show.
+
+### B.2 Fix
+
+- `getRowItemState` picks the model source by **what is available** (`rowItems` non-empty → use it,
+  else fall back to the `FormCache`) rather than by which render it is in. One rule covers runtime,
+  designer and form-template, and removes a flag check instead of adding one.
+- An unresolvable cell now returns an empty `Cell` and logs, instead of throwing and taking the
+  whole form render down for one bad component.
+- `getViewportRows()` prefers the real viewport rows whenever they exist; the single placeholder row
+  becomes the fallback for "no rows at all".
+- `calculateCells()` and `svyOnInit()` take a sample-data branch that renders the delivered rows and
+  issues **no** load request (`svyOnInit` also forces `useScrolling = false`, since the ag-grid
+  variant's `AGGridDatasource.getRows()` also goes through the foundset's async load).
+- `hasNoLiveFoundsetData()` names the "designer or sample data" condition once, so the intent is
+  stated rather than re-derived at each site.
+- `ListFormComponentServoyApi` carries `hasSampleData()` through to each cell, so a component inside
+  a row sees the same mode as one placed directly on the form.
+
+### B.3 Acceptance criteria
+
+- [ ] An LFC with an absolute-layout contained form renders its cells in the sample-data render.
+- [ ] Each cell's fields show sample values (the mode reaches cells, not just top-level components).
+- [ ] No `loadRecordsAsync`/`loadExtraRecordsAsync`/`loadLessRecordsAsync` call is made in that
+      render — asserted, since such a promise never resolves and the symptom is a silent blank.
+- [ ] The designer still shows its single placeholder row when the foundset has no rows.
+- [ ] Runtime behaviour unchanged: `rowItems` is non-empty there, so the same first branch is taken.
+- [ ] An unresolvable cell logs and renders empty without breaking the rest of the form.

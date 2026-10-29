@@ -69,10 +69,11 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
         const component = newComponent();
 
         component.servoyApi = jasmine.createSpyObj('ServoyApi', [
-            'isInDesigner', 'isInAbsoluteLayout', 'getClientProperty', 'getFormName',
+            'isInDesigner', 'hasSampleData', 'isInAbsoluteLayout', 'getClientProperty', 'getFormName',
             'registerComponent', 'unRegisterComponent', 'getMarkupId', 'trustAsHtml'
         ]);
         (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+        (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(false);
         (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(absoluteLayout);
         // no ListFormComponent.pagingMode client property -> useScrolling stays true
         (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
@@ -154,8 +155,9 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
 
         it('returns the measured height once applyMeasuredRowHeight has recorded one for that row id', () => {
             const component = newComponent();
-            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInDesigner', 'isInAbsoluteLayout', 'getClientProperty']);
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInDesigner', 'hasSampleData', 'isInAbsoluteLayout', 'getClientProperty']);
             (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(false);
             (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(false);
             (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
             (component as any).responsiveHeight = () => -1;
@@ -178,8 +180,9 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
 
         const buildForApply = (absoluteLayout: boolean, responsiveHeight: number) => {
             const component = newComponent();
-            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInDesigner', 'isInAbsoluteLayout', 'getClientProperty']);
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInDesigner', 'hasSampleData', 'isInAbsoluteLayout', 'getClientProperty']);
             (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(false);
             (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(absoluteLayout);
             (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
             (component as any).responsiveHeight = () => responsiveHeight;
@@ -258,8 +261,9 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
 
         const buildForFoundsetChange = (absoluteLayout: boolean, responsiveHeight: number) => {
             const component = newComponent();
-            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInDesigner', 'isInAbsoluteLayout', 'getClientProperty']);
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInDesigner', 'hasSampleData', 'isInAbsoluteLayout', 'getClientProperty']);
             (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(false);
             (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(absoluteLayout);
             (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
             (component as any).responsiveHeight = () => responsiveHeight;
@@ -325,9 +329,10 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
 
         it('clears measuredRowHeights before refreshServerSide({ purge: true }) on a settled column-count resize', () => {
             const component = newComponent();
-            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInAbsoluteLayout', 'isInDesigner', 'getClientProperty']);
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', ['isInAbsoluteLayout', 'isInDesigner', 'hasSampleData', 'getClientProperty']);
             (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(false);
             (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(false);
             (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
             component.useScrolling = true;
             (component as any).responsiveHeight = () => -1;
@@ -459,10 +464,11 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
         const configureFlicker = (absoluteLayout: boolean, responsiveHeight: number): ListFormComponent => {
             const component = newComponent();
             component.servoyApi = jasmine.createSpyObj('ServoyApi', [
-                'isInDesigner', 'isInAbsoluteLayout', 'getClientProperty', 'getFormName',
+                'isInDesigner', 'hasSampleData', 'isInAbsoluteLayout', 'getClientProperty', 'getFormName',
                 'registerComponent', 'unRegisterComponent', 'getMarkupId', 'trustAsHtml'
             ]);
             (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(false);
             (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(absoluteLayout);
             (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
             (component as any).responsiveHeight = () => responsiveHeight;
@@ -593,6 +599,87 @@ describe('ListFormComponent (SVY-21457 per-row auto-height)', () => {
             jasmine.clock().tick(500);
 
             expect(gridApi.refreshServerSide).toHaveBeenCalledWith({ purge: true });
+        });
+    });
+
+    // SVY-21610: an LFC in the stateless form-template render reports isInDesigner() === false yet has no websocket,
+    // so it must render its rows WITHOUT asking the server for anything - a load request returns a promise that can
+    // never resolve and the component would sit in waitingForLoad rendering nothing.
+    describe('sample-data render (SVY-21610)', () => {
+
+        const sampleFoundset = () => ({
+            addChangeListener: (_cb: any) => (() => { /* remove listener */ }),
+            serverSize: 3,
+            selectedRowIndexes: [] as number[],
+            viewPort: { rows: [{}, {}, {}] as any[], startIndex: 0, size: 3 },
+            loadRecordsAsync: jasmine.createSpy('loadRecordsAsync'),
+            loadExtraRecordsAsync: jasmine.createSpy('loadExtraRecordsAsync'),
+            loadLessRecordsAsync: jasmine.createSpy('loadLessRecordsAsync')
+        });
+
+        const buildSampleComponent = (): { component: ListFormComponent; foundset: ReturnType<typeof sampleFoundset> } => {
+            const component = newComponent();
+            const foundset = sampleFoundset();
+
+            component.servoyApi = jasmine.createSpyObj('ServoyApi', [
+                'isInDesigner', 'hasSampleData', 'isInAbsoluteLayout', 'getClientProperty', 'getFormName',
+                'registerComponent', 'unRegisterComponent', 'getMarkupId', 'trustAsHtml'
+            ]);
+            (component.servoyApi.isInDesigner as jasmine.Spy).and.returnValue(false);
+            // the stateless form-template render reports isInDesigner() false and signals itself through hasSampleData()
+            (component.servoyApi.hasSampleData as jasmine.Spy).and.returnValue(true);
+            (component.servoyApi.isInAbsoluteLayout as jasmine.Spy).and.returnValue(true);
+            (component.servoyApi.getClientProperty as jasmine.Spy).and.returnValue(null);
+
+            (component as any).foundset = () => foundset;
+            (component as any)._foundset.set(foundset);
+            (component as any).containedForm = () => ({ formHeight: 50, formWidth: 100, absoluteLayout: true });
+
+            return { component, foundset };
+        };
+
+        it('getViewportRows returns the sample rows, not the single placeholder', () => {
+            // the SVY-21610 regression this guards: taking the placeholder path here showed one empty row instead of
+            // the server's synthetic rows, so an LFC rendered blank in getFormLayout
+            const { component, foundset } = buildSampleComponent();
+            component.numberOfCells = foundset.viewPort.rows.length;
+            expect(component.getViewportRows()).toBe(foundset.viewPort.rows);
+        });
+
+        it('getViewportRows returns the placeholder row when no sample rows arrived', () => {
+            const { component, foundset } = buildSampleComponent();
+            foundset.viewPort.rows = [];
+            expect(component.getViewportRows().length).toBe(1);
+        });
+
+        it('calculateCells uses the delivered sample rows and issues NO load request', () => {
+            const { component, foundset } = buildSampleComponent();
+
+            component.calculateCells();
+
+            expect(component.numberOfCells).toBe(foundset.viewPort.rows.length);
+            expect(foundset.loadRecordsAsync).not.toHaveBeenCalled();
+            expect(foundset.loadExtraRecordsAsync).not.toHaveBeenCalled();
+            expect(foundset.loadLessRecordsAsync).not.toHaveBeenCalled();
+        });
+
+        it('calculateCells falls back to one cell when no sample rows arrived', () => {
+            const { component, foundset } = buildSampleComponent();
+            foundset.viewPort.rows = [];
+
+            component.calculateCells();
+
+            expect(component.numberOfCells).toBe(1);
+            expect(foundset.loadRecordsAsync).not.toHaveBeenCalled();
+        });
+
+        it('svyOnInit keeps the non-scrolling markup so no AG Grid datasource loads rows', () => {
+            const { component } = buildSampleComponent();
+
+            component.svyOnInit();
+
+            // the scrolling variant installs an AGGridDatasource whose getRows() goes through the foundset's async load
+            expect(component.useScrolling).toBe(false);
         });
     });
 });
