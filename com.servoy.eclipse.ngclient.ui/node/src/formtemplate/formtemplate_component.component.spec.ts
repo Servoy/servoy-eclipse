@@ -81,6 +81,16 @@ class TestHostComponent {
   }
 }
 
+// Same host, but with [sampleData]="true" - the SVY-21610 sample-data render, where the server has put synthetic
+// values in the models and components must render them instead of their own design-time placeholders.
+@Component({
+  template: `<svy-formtemplate [name]="'aForm'" [sampleData]="true"></svy-formtemplate>`,
+  standalone: true,
+  imports: [FormTemplateComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+})
+class SampleDataTestHostComponent { }
+
 describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
   let sabloService: any;
   let servoyService: any;
@@ -152,7 +162,7 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
     servoyService = { connect: vi.fn(), getUIProperties: vi.fn().mockReturnValue({ getUIProperty: () => null }) } as any;
 
     TestBed.configureTestingModule({
-      imports: [TestHostComponent, FormTemplateComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean, ServoyTestingModule, ServoyPublicModule],
+      imports: [TestHostComponent, SampleDataTestHostComponent, FormTemplateComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean, ServoyTestingModule, ServoyPublicModule],
       providers: [
         { provide: ServoyService, useValue: servoyService },
         ConverterService,
@@ -278,6 +288,78 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
       expect(comp.getFormCache().absolute).toBe(true);
     });
 
+    describe('ServoyApi: runtime rendering path, sample-data flag separate', () => {
+      let apiComp: FormTemplateComponent;
+      let apiErrorBeanCache: ComponentCache;
+
+      beforeEach(() => {
+        registerErrorbeanSpecs();
+        formService.createFormCache('aForm', buildFormState(), null!);
+        apiComp = renderForm().comp;
+        apiErrorBeanCache = formService.getFormCacheByName('aForm')!.getComponent('myErrorBean')!;
+      });
+
+      // SVY-21610: isInDesigner() MUST stay false here. Reporting the designer makes components take their design
+      // branches, and several of those discard data outright (DataGrid.svyOnInit returns before initRootFoundset, the
+      // bootstrap datalabel renders the literal 'DataLabel', servoyextra-table never registers its foundset listener),
+      // so server-supplied sample data would never reach the DOM. Flipping this back to true silently re-breaks the
+      // whole getFormLayout-with-data feature, which is why it is asserted rather than assumed.
+      it('getServoyApi returns a ServoyApi on the RUNTIME path (not in-designer) and caches it per component', () => {
+        const api = apiComp.getServoyApi(apiErrorBeanCache) as ServoyApi;
+        expect(api).toBeTruthy();
+        expect(api.isInDesigner()).toBe(false);
+        // second call returns the SAME cached instance
+        expect(apiComp.getServoyApi(apiErrorBeanCache)).toBe(api);
+      });
+
+      it('reports hasSampleData() false when the render was not asked for sample data', () => {
+        // the host in renderForm() does not set [sampleData], so it defaults to false
+        expect((apiComp.getServoyApi(apiErrorBeanCache) as ServoyApi).hasSampleData()).toBe(false);
+      });
+
+      it('a nested render inherits sample-data mode from the injected window marker', () => {
+        // SVY-21610 nested forms: the generated template for a tabpanel tab creates <svy-formtemplate [name]="...">
+        // with no [sampleData] binding, so the child must pick the mode up from the same window.formtemplateSampleData
+        // marker the route root reads - otherwise a tab's fields render empty while the outer form's show values.
+        const win = window as any;
+        const previous = win.formtemplateSampleData;
+        win.formtemplateSampleData = true;
+        try {
+          const nested = renderForm().comp;
+          nested.ngOnInit();
+          expect((nested.getServoyApi(apiErrorBeanCache) as ServoyApi).hasSampleData()).toBe(true);
+        } finally {
+          win.formtemplateSampleData = previous;
+        }
+      });
+
+      it('reports hasSampleData() true when the render carries server-supplied sample values', () => {
+        // a separate host is needed because the api is built DURING render (the template binds
+        // [servoyApi]="callback.getServoyApi(state)") and cached from then on, so setting the flag
+        // on an already-rendered component would not reach the cached api
+        const fixture = TestBed.createComponent(SampleDataTestHostComponent);
+        fixture.detectChanges();
+        const sampleComp = fixture.debugElement.query(By.directive(FormTemplateComponent)).componentInstance as FormTemplateComponent;
+
+        const api = sampleComp.getServoyApi(apiErrorBeanCache) as ServoyApi;
+        expect(api.hasSampleData()).toBe(true);
+        // still the runtime path - sample-data mode must NOT turn the designer back on
+        expect(api.isInDesigner()).toBe(false);
+      });
+
+      it('exposes the component markup id through the api (needed for rendering)', () => {
+        const api = apiComp.getServoyApi(apiErrorBeanCache) as ServoyApi;
+        expect(api.getMarkupId()).toBe('markup_error_1');
+      });
+
+      it('api.apply does not push to the server (stateless)', () => {
+        sabloService.callService.mockClear();
+        const api = apiComp.getServoyApi(apiErrorBeanCache) as ServoyApi;
+        api.apply('error', 'x');
+        expect(sabloService.callService).not.toHaveBeenCalled();
+      });
+    });
+
     it('getHandler returns null so NO event functions are wired (clicks do nothing)', () => {
       expect(comp.getHandler(errorBeanCache, 'onActionMethodID')).toBeNull();
     });
@@ -297,38 +379,6 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
     });
 
     it('building the cache and rendering the component never calls SabloService.callService', () => {
-      expect(sabloService.callService).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('design-time ServoyApi', () => {
-    let comp: FormTemplateComponent;
-    let errorBeanCache: ComponentCache;
-
-    beforeEach(() => {
-      registerErrorbeanSpecs();
-      formService.createFormCache('aForm', buildFormState(), null!);
-      comp = renderForm().comp;
-      errorBeanCache = formService.getFormCacheByName('aForm')!.getComponent('myErrorBean')!;
-    });
-
-    it('getServoyApi returns a ServoyApi flagged as in-designer and caches it per component', () => {
-      const api = comp.getServoyApi(errorBeanCache) as ServoyApi;
-      expect(api).toBeTruthy();
-      expect(api.isInDesigner()).toBe(true);
-      // second call returns the SAME cached instance
-      expect(comp.getServoyApi(errorBeanCache)).toBe(api);
-    });
-
-    it('exposes the component markup id through the api (needed for rendering)', () => {
-      const api = comp.getServoyApi(errorBeanCache) as ServoyApi;
-      expect(api.getMarkupId()).toBe('markup_error_1');
-    });
-
-    it('api.apply does not push to the server (stateless)', () => {
-      sabloService.callService.mockClear();
-      const api = comp.getServoyApi(errorBeanCache) as ServoyApi;
-      api.apply('error', 'x');
       expect(sabloService.callService).not.toHaveBeenCalled();
     });
   });

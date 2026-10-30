@@ -17,7 +17,7 @@ import { FormTemplateComponent } from './formtemplate_component.component';
   standalone: true,
   imports: [FormTemplateComponent],
   template: `@if (formName) {
-    <svy-formtemplate [name]="formName"></svy-formtemplate>
+    <svy-formtemplate [name]="formName" [sampleData]="sampleData"></svy-formtemplate>
   }`,
   // ServoyPublicServiceFormTemplateImpl is provided at the route level (see app.routes.ts) so it
   // sits ABOVE this component and the whole svy-formtemplate subtree, avoiding the NG0201/NG0200
@@ -25,6 +25,12 @@ import { FormTemplateComponent } from './formtemplate_component.component';
 })
 export class ServoyFormTemplateComponent implements OnInit {
   formName: string | null = null;
+
+  /**
+   * SVY-21610: whether the injected form state carries synthetic sample values. Set from the
+   * window.formtemplateSampleData marker the Java endpoint injects; defaults to false when the marker is absent.
+   */
+  sampleData = false;
 
   private windowRef = inject(WindowRefService);
   private formService = inject(FormService);
@@ -42,12 +48,24 @@ export class ServoyFormTemplateComponent implements OnInit {
       this.typesRegistry.addComponentClientSideSpecs(specs);
     }
 
+    this.sampleData = (this.windowRef.nativeWindow as any).formtemplateSampleData === true;
+
     const formStateContainer = this.readJsonBlob('svy-formtemplate-formstate');
     this.formName = this.getFormName();
     if (formStateContainer && this.formName) {
+      // SVY-21610: the blob carries the requested form AND every form nested in it through a form-typed property
+      // (tabpanel tabs, tablesspanel, accordion, splitpane, formcontainer). Build a cache for each: the generated
+      // nested-form template is guarded by isFormAvailable(name) -> FormService.hasFormCacheEntry(name), so a form
+      // without a cache entry renders as an empty tab body. Only the requested form is rendered at the top level;
+      // the others are picked up from the cache by whichever component contains them.
       const formState = formStateContainer[this.formName];
       if (formState) {
+        // the requested form first, so it is the one a nested-form lookup can already resolve against
         this.formService.createFormCache(this.formName, formState, null!);
+      }
+      for (const nestedFormName of Object.keys(formStateContainer)) {
+        if (nestedFormName === this.formName) continue;
+        this.formService.createFormCache(nestedFormName, formStateContainer[nestedFormName], null!);
       }
     }
   }

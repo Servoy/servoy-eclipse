@@ -9,7 +9,7 @@ import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
 import { ViewportService } from '../../ngclient/services/viewport.service';
 import { LoggerFactory } from '@servoy/public';
-import { FormComponentCache, StructureCache } from '../../ngclient/types';
+import { ComponentCache, FormComponentCache, StructureCache } from '../../ngclient/types';
 
 describe('ListFormComponent', () => {
   let component: ListFormComponent;
@@ -56,6 +56,7 @@ describe('ListFormComponent', () => {
       registerComponent: vi.fn(),
       unRegisterComponent: vi.fn(),
       isInDesigner: vi.fn().mockReturnValue(false),
+      hasSampleData: vi.fn().mockReturnValue(false),
       isInAbsoluteLayout: vi.fn().mockReturnValue(true),
       getFormName: vi.fn().mockReturnValue('testForm'),
       trustAsHtml: vi.fn(),
@@ -109,8 +110,9 @@ describe('ListFormComponent', () => {
       expect(rows).toEqual([]);
     });
 
-    it('should return designer placeholder when in designer', () => {
+    it('should return designer placeholder when in designer with no live foundset data', () => {
       mockServoyApi.isInDesigner.mockReturnValue(true);
+      mockFoundset.viewPort.rows = [];
       const rows = component.getViewportRows();
       expect(rows.length).toBe(1);
     });
@@ -705,6 +707,135 @@ describe('ListFormComponent', () => {
       component.registerComponent(mockComp, 0);
       component.unRegisterComponent(mockComp, 0);
       expect((component as any).componentCache[0]).toBeUndefined();
+    });
+  });
+
+  // SVY-21610: an LFC in the stateless form-template render reports isInDesigner() === false yet has no websocket,
+  // so it must render its rows WITHOUT asking the server for anything - a load request returns a promise that can
+  // never resolve and the component would sit in waitingForLoad rendering nothing.
+  describe('sample-data render (SVY-21610)', () => {
+    const sampleFoundset = () => ({
+      addChangeListener: vi.fn().mockReturnValue(vi.fn()),
+      serverSize: 3,
+      selectedRowIndexes: [] as number[],
+      viewPort: { rows: [{}, {}, {}] as any[], startIndex: 0, size: 3 },
+      loadRecordsAsync: vi.fn(),
+      loadExtraRecordsAsync: vi.fn(),
+      loadLessRecordsAsync: vi.fn(),
+    });
+
+    const configureSample = (): ReturnType<typeof sampleFoundset> => {
+      const foundset = sampleFoundset();
+
+      // the stateless form-template render reports isInDesigner() false and signals itself through hasSampleData()
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(true);
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+      mockServoyApi.getClientProperty.mockReturnValue(null);
+
+      fixture.componentRef.setInput('foundset', foundset);
+      fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: true });
+      component._foundset.set(foundset as any);
+
+      return foundset;
+    };
+
+    it('getViewportRows returns the sample rows, not the single placeholder', () => {
+      // the SVY-21610 regression this guards: taking the placeholder path here showed one empty row instead of
+      // the server's synthetic rows, so an LFC rendered blank in getFormLayout
+      const foundset = configureSample();
+      component.numberOfCells = foundset.viewPort.rows.length;
+      expect(component.getViewportRows()).toBe(foundset.viewPort.rows);
+    });
+
+    it('getViewportRows returns the placeholder row when no sample rows arrived', () => {
+      const foundset = configureSample();
+      foundset.viewPort.rows = [];
+      expect(component.getViewportRows().length).toBe(1);
+    });
+
+    it('calculateCells uses the delivered sample rows and issues NO load request', () => {
+      const foundset = configureSample();
+
+      component.calculateCells();
+
+      expect(component.numberOfCells).toBe(foundset.viewPort.rows.length);
+      expect(foundset.loadRecordsAsync).not.toHaveBeenCalled();
+      expect(foundset.loadExtraRecordsAsync).not.toHaveBeenCalled();
+      expect(foundset.loadLessRecordsAsync).not.toHaveBeenCalled();
+    });
+
+    it('calculateCells falls back to one cell when no sample rows arrived', () => {
+      const foundset = configureSample();
+      foundset.viewPort.rows = [];
+
+      component.calculateCells();
+
+      expect(component.numberOfCells).toBe(1);
+      expect(foundset.loadRecordsAsync).not.toHaveBeenCalled();
+    });
+
+    it('getRowItemState resolves a cell from the FormCache when rowItems was never assigned', () => {
+      // Reproduces the browser failure exactly: in the stateless render containedForm carries no childElements, so
+      // ngOnChanges never assigns rowItems and it stays UNDEFINED (not []). Reading .length on it threw
+      // "Cannot read properties of undefined (reading 'length')" and blanked the LFC.
+      configureSample();
+      const textbox = new ComponentCache('textbox_1', 'bootstrapcomponents-textbox', 'textbox', [], {}, TestBed.inject(TypesRegistry));
+      (textbox.model as any).dataProviderID = 'Sample';
+      component.cache = { items: [textbox] } as unknown as FormComponentCache;
+      expect((component as any).rowItems).toBeUndefined();
+
+      const cell = component.getRowItemState(textbox, { _svyRowId: '1' } as any, 0) as any;
+
+      expect(cell).toBeTruthy();
+      expect(cell.name).toBe('textbox_1');
+      expect(cell.model.dataProviderID).toBe('Sample');
+    });
+
+    it('svyOnInit keeps the non-scrolling markup so no AG Grid datasource loads rows', () => {
+      configureSample();
+
+      component.svyOnInit();
+
+      // the scrolling variant installs an AGGridDatasource whose getRows() goes through the foundset's async load
+      expect(component.useScrolling).toBe(false);
+    });
+
+    it('svyOnInit already fixes the cell count, so rows exist before the first change detection pass', () => {
+      // NG0100 guard: getViewportRows() returns [] while numberOfCells is 0, so if the count were only decided in
+      // ngAfterViewInit the row views would be created from inside an after-view hook and Angular would report
+      // ExpressionChangedAfterItHasBeenCheckedError on the per-row [style] binding.
+      const foundset = configureSample();
+      component.numberOfCells = 0;
+
+      component.svyOnInit();
+
+      expect(component.numberOfCells).toBe(foundset.viewPort.rows.length);
+      expect(component.getViewportRows()).toBe(foundset.viewPort.rows);
+    });
+
+    it('ngAfterViewInit adds no second cell calculation after the base class has settled the view', () => {
+      // The NG0100 this guards came from calculateCells() running AFTER super.ngAfterViewInit() - i.e. after that
+      // base-class call had already run its final cdRef.detectChanges(). The row views then appeared once the count
+      // changed, which Angular's dev-mode re-check reports as ExpressionChangedAfterItHasBeenChecked.
+      //
+      // The count is now settled from svyOnInit, which ServoyBaseComponent.initializeComponent() invokes from
+      // INSIDE super.ngAfterViewInit() (the LFC's #element only exists once the view is created, so svyOnInit cannot
+      // run at ngOnInit time) - and therefore before that detectChanges(), so the rows are already there when it
+      // runs. What must not happen is a further recalculation after it.
+      configureSample();
+      component.svyOnInit();
+      const countAfterInit = component.numberOfCells;
+      // avoid running the ServoyBaseComponent super.ngAfterViewInit() (it would re-enter svyOnInit), isolating the
+      // code that runs after super.ngAfterViewInit() returns
+      vi.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(component)), 'ngAfterViewInit').mockImplementation(() => {});
+      vi.spyOn(component, 'element').mockReturnValue({ nativeElement: {} } as any);
+      const calculateCellsSpy = vi.spyOn(component, 'calculateCells');
+
+      component.ngAfterViewInit();
+
+      expect(calculateCellsSpy).not.toHaveBeenCalled();
+      expect(component.numberOfCells).toBe(countAfterInit);
     });
   });
 });
