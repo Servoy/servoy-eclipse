@@ -64,7 +64,9 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 
 	private void updateTextEditorFromProperties()
 	{
-		textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput()).set(editorInput.getText());
+		org.eclipse.jface.text.IDocument document = textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
+		String patched = editorInput.getText(document.get());
+		if (!patched.equals(document.get())) document.set(patched);
 	}
 
 	@Override

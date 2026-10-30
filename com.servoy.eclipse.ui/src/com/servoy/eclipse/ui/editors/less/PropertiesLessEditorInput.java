@@ -42,6 +42,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.server.ngclient.less.resources.LessPropertiesPatcher;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 import com.servoy.j2db.util.Utils;
 
@@ -364,54 +365,27 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	}
 
 
-	public String getText()
+	/**
+	 * The text with the properties edited in the Properties page applied in place (SVY-21639): only the lines of the edited properties change.
+	 * Variables the selected theme version does not know, comments, order and rules are kept. Before, the whole tail of the file was regenerated
+	 * from the known properties, which deleted every variable the theme version did not list.
+	 *
+	 * @param text the current text of the source page
+	 */
+	public String getText(String text)
 	{
-		StringBuilder content = new StringBuilder(getFileContent(this));
-		int custom = content.indexOf("// END own custom properties");
-		if (custom > 0)
+		java.util.List<LessPropertiesPatcher.Edit> edits = new java.util.ArrayList<>();
+		String themeProperties = "latest".equals(version) ? ThemeResourceLoader.getLatestThemeProperties() : ThemeResourceLoader.getThemeProperties(version);
+		for (LessPropertyEntry prop : modified)
 		{
-			custom = content.indexOf("\n", custom) + 1;
-			if (custom > 0)
-			{
-				content.setLength(custom);
-			}
+			String category = getPropertyCategory(prop.getName(), properties).orElse(null);
+			// a variable the theme version does not declare has no theme default to fall back to: its line is never removed
+			boolean known = themeProperties != null && Pattern.compile("(?m)^@" + Pattern.quote(prop.getName()) + "\\s*:").matcher(themeProperties).find();
+			boolean atDefault = known && prop.getDefaultValue() != null && prop.getDefaultValue().equals(prop.getValue());
+			edits.add(new LessPropertiesPatcher.Edit(prop.getName(), atDefault ? null : prop.getValue(), known ? prop.getDefaultValue() : null, category));
+			prop.resetLastTxtValue();
 		}
-		else
-		{
-			int lastImport = content.lastIndexOf("@import");
-			if (lastImport > 0)
-			{
-				lastImport = content.indexOf("\n", lastImport) + 1;
-				if (lastImport > 0)
-				{
-					content.setLength(lastImport);
-				}
-			}
-		}
-
-
-		for (String category : properties.keySet())
-		{
-			LinkedHashMap<String, LessPropertyEntry> props = properties.get(category);
-			boolean outputCategory = false;
-			for (LessPropertyEntry prop : props.values())
-			{
-				if (prop.getDefaultValue() != null && !prop.getDefaultValue().equals(prop.getValue()))
-				{
-					if (!outputCategory)
-					{
-						content.append("\n\n/* START ").append(category).append(" */");
-						outputCategory = true;
-					}
-					content.append("\n\n");
-					content.append(prop.toString());
-					content.append("; // default:");
-					content.append(prop.getDefaultValue());
-				}
-				prop.resetLastTxtValue();
-			}
-		}
-		return content.toString();
+		return LessPropertiesPatcher.apply(text, edits);
 	}
 
 	public LessPropertyEntry[] getProperties(String categoryName)
@@ -425,6 +399,8 @@ public class PropertiesLessEditorInput extends FileEditorInput
 
 	public void reloadProperties(String text, boolean recreate)
 	{
+		// recreated entries replace the old ones, so pending edits of the old entries must not be applied on the next save
+		if (recreate) modified.clear();
 		properties = loadProperties(text, recreate ? null : properties);
 	}
 
