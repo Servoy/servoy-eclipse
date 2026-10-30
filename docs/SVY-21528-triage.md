@@ -199,10 +199,18 @@ below. Once answered, this is a straightforward `PROCEED` on the chosen design.
 
 1. **Design:** option (a), one shared named factory parameterised by `designerCallback` (and the developer NG client).
 2. **Does the Activator's factory run headless?** Yes. In a headless `CypressFormTestRunner` run the log shows
-   `Activator.start` finding no factory, registering one (service registry available), and then
-   `CypressFormTestRunner.activateNgClientBundle` replacing it. The runner therefore still overwrites unconditionally,
-   as designed in SVY-21173. The debug and `svy_developer` branches were not hit headless: the debug-handler service
-   is absent, `designerCallback` is `null`, and the log showed `kind=FORM_PREVIEW` for every spec.
+   `Activator.start` finding no factory and registering one (service registry available). The first implementation kept
+   the runner's own `activateNgClientBundle()`, which then replaced it. After the reporter's question (his option (b))
+   that method was deleted, because it was redundant: `Activator.start` registers the same shared factory type. A
+   headless run without it passed both specs, including `fx_twin_a`, which is not the solution's first form, so the
+   `formpreview` branch was reached. The debug and `svy_developer` branches were not hit headless: the debug-handler
+   service is absent and `designerCallback` is `null`.
+   **Dependency to be aware of:** the registration now relies on `Activator.start` seeing a non-null
+   `ApplicationServerRegistry.getServiceRegistry()`. The registry is set in `j2db_server`'s `Activator.start`, and the
+   exporter fetches `IServerStarter` from that bundle before starting the server, while the ngclient bundle activates
+   lazily afterwards. This was read from the code and observed in logs, and no test forces a different order. If
+   activation order ever changed, registration #1 (the plain fallback) would win and non-first forms would open the
+   first form.
 3. **`formpreview` contract:** a real NG client showing the requested form with data, authentication bypassed through
    `FormPreviewNGClient.showDefaultLogin()`. It is not the designer's dataless form-template preview.
 4. **Registration #1** (`ResourceProvider.initSpecProvider`) is left as the plain fallback. In both Developer and
