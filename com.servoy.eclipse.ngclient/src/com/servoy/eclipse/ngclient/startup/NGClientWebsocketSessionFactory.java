@@ -37,9 +37,10 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
 /**
- * The single {@link IWebsocketSessionFactory} registered for the NG client endpoint by both Servoy Developer
- * (real designer callback and developer NG client) and the headless Cypress runner (both null). All
- * request-parameter branches (formpreview, nodebug, svy_developer, debug client) live here.
+ * The single {@link IWebsocketSessionFactory} registered for the NG client endpoint by {@link Activator}. In Servoy
+ * Developer the suppliers return the real designer callback and developer NG client; in the headless Cypress runner
+ * those are never set, so both are null. All request-parameter branches (formpreview, nodebug, svy_developer, debug
+ * client) live here.
  * <p>
  * The suppliers are evaluated lazily at session creation / init time, because the Developer values are set
  * after the bundle activator has started.

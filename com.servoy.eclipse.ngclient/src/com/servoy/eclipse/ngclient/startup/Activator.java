@@ -66,7 +66,7 @@ public class Activator implements BundleActivator
 	{
 		if (ApplicationServerRegistry.getServiceRegistry() != null)
 		{
-			// Developer and the headless Cypress runner register the same NGClientWebsocketSessionFactory type
+			// the single factory for Servoy Developer and for the headless Cypress runner (there the suppliers return null)
 			WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.CLIENT_ENDPOINT,
 				new NGClientWebsocketSessionFactory(() -> designerCallback, () -> developerNGClient));
 		}

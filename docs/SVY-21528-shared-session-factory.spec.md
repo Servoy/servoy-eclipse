@@ -10,6 +10,10 @@ Both call sites register an instance of that class, parameterised only by what l
 `svy_developer`, debug client) then exists in exactly one place and cannot drift again (the SVY-21173 bug), and the
 factory can be recognised by type.
 
+> **Note:** this spec was written before the runner's own registration was removed. Wherever it says the runner
+> (`CypressFormTestRunner.activateNgClientBundle()`) registers the factory, read section 8 ("As built"): that method
+> was deleted afterwards and the headless runner relies on `Activator.start`.
+
 ## 2. Background
 
 Approved approach: option (a) "extract and parameterise". Triage: `docs/SVY-21528-triage.md`. Constraints come from
@@ -254,14 +258,22 @@ Status of the open questions, as built: test host project = new `com.servoy.ecli
 - **Branch selection** is extracted into `selectClientKind(params, hasDeveloperNGClient, hasDebugHandler)` returning
   `ClientKind` (`FORM_PREVIEW`, `NO_DEBUG`, `DEVELOPER`, `DEBUG`, `PLAIN`), and the reuse decision into
   `shouldReuseFormPreviewClient(exists, shutDown, sameSessionKey)`. Both are `public static` (see 4.1).
-- **`forHeadless()`** exists on the factory, but `CypressFormTestRunner` calls the constructor directly with
-  `() -> null, () -> null`.
+- **Runner registration removed (follow-up after review of the ticket comment):** `CypressFormTestRunner` no longer
+  has `activateNgClientBundle()` and registers nothing. The headless runner relies on `Activator.start`, which
+  registers the shared factory; there the suppliers return `null` because `designerCallback` and `developerNGClient`
+  are only set by the Developer-only `core` and `ui` activators. This supersedes sections 3.1 (Runner), 3.5
+  (`activateNgClientBundle` Javadoc), implementation plan step 3 and the acceptance criterion about the runner
+  registering the class. Consequence: the explicit "unconditionally overwrite" no longer exists, and the registration
+  depends on `Activator.start` seeing a non-null service registry (set earlier by `j2db_server`'s `Activator.start`,
+  while the ngclient bundle activates lazily). `forHeadless()` is no longer used by production code (only by a plain
+  test); it documents the headless configuration.
 - **Not done:** the optional one-line comment in `ResourceProvider` (registration #1 is untouched).
 - **Added beyond the spec:** a headless launch configuration,
   `com.servoy.eclipse.cypress/launch_files/Cypress Form Test Runner (headless).launch`, running solution
   `testscenario1`. It passes `-ie` (ignore build errors) because that solution has two build error markers.
 - **Verification done:** 15 plain-JUnit tests pass. In Developer, Cypress form runs and a `showFormInBrowser` request
   selected `FORM_PREVIEW` and a plain launch selected `DEBUG`. A headless runner run of two specs passed, each with its
-  own `FormPreviewNGClient`.
+  own `FormPreviewNGClient`, both with the runner registration and after removing it (the second spec, `fx_twin_a`, is
+  not the solution's first form, so it passing shows the `formpreview` branch was reached).
 - **Not verified:** the reuse/retarget path (every request so far had a new session key), `?nodebug`, and
   `?svy_developer`.
