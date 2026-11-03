@@ -38,6 +38,7 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -69,6 +70,7 @@ import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -152,6 +154,13 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  */
 public class ServoyFormBuilder
 {
+	/**
+	 * Marker attribute flag set on the {@link ServoyBuilder#PROJECT_FORM_MARKER_TYPE} marker raised by
+	 * {@link #checkCssPositionMismatch(WebComponent, IProject)}, so its quickfix can recognize this specific problem among
+	 * the other form-problem markers. See SVY-21669.
+	 */
+	public static final String CSS_POSITION_MISMATCH_PROBLEM = "cssPositionMismatch";
+
 	public static void addFormMarkers(ServoyProject servoyProject, Form form, Set<UUID> methodsParsed, Map<Form, Boolean> formsAbstractChecked)
 	{
 		IPersist context = form;
@@ -1432,6 +1441,10 @@ public class ServoyFormBuilder
 					}
 				}
 				ServoyBuilder.checkSpecs(o, servoyProject.getProject(), WebComponentSpecProvider.getSpecProviderState());
+				if (o instanceof WebComponent)
+				{
+					checkCssPositionMismatch((WebComponent)o, servoyProject.getProject());
+				}
 
 				if (o.getTypeID() == IRepository.SHAPES)
 				{
@@ -2548,6 +2561,68 @@ public class ServoyFormBuilder
 	private static boolean isUnstoredCalc(String dpid, ITable table, FlattenedSolution flattenedSolution)
 	{
 		return table != null && dpid != null && flattenedSolution.getScriptCalculation(dpid, table) != null && table.getColumn(dpid) == null;
+	}
+
+	/**
+	 * Checks whether a web component's authoritative compact cssPosition string (the one Servoy actually renders from)
+	 * disagrees with the cssPosition object echoed inside its json own-property. If it does, a warning marker is raised so
+	 * the developer sees the silently-broken layout in the Problems view. See SVY-21669.
+	 */
+	private static void checkCssPositionMismatch(WebComponent wc, IProject project)
+	{
+		CSSPosition stringPos = wc.getCssPosition();
+		if (stringPos == null) return; // legacy size/location model, nothing to compare
+
+		JSONObject json = (JSONObject)wc.getOwnProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
+		Object jsonPos = json != null ? json.opt(StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName()) : null;
+		if (!(jsonPos instanceof JSONObject)) return; // no json echo / legacy shape, avoid false positives
+
+		if (cssPositionDisagrees(stringPos, (JSONObject)jsonPos))
+		{
+			Form form = (Form)wc.getAncestor(IRepository.FORMS);
+			String compactString = PersistHelper.createCSSPositionString(stringPos);
+			ServoyMarker mk = MarkerMessages.CSSPositionMismatch.fill(wc.getName(), form.getName(), compactString, jsonPos.toString());
+			IMarker marker = ServoyBuilder.addMarker(ServoyBuilderUtils.getPersistResource(form), mk.getType(), mk.getText(), -1,
+				ServoyBuilder.CSS_POSITION_MISMATCH_SEVERITY, IMarker.PRIORITY_NORMAL, null, wc);
+			if (marker != null)
+			{
+				try
+				{
+					marker.setAttribute("Uuid", wc.getUUID().toString());
+					marker.setAttribute("SolutionName", project.getName());
+					marker.setAttribute(CSS_POSITION_MISMATCH_PROBLEM, Boolean.TRUE);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns true if the json cssPosition echo disagrees with the authoritative CSSPosition on any of its six fields.
+	 * Values are compared with {@link Utils#equalObjects(Object, Object)}, which normalizes number vs string (8, "8", 8.0
+	 * are equal) and treats null consistently. Public/static so the comparison logic can be unit-tested directly without a
+	 * live workspace. See SVY-21669.
+	 */
+	public static boolean cssPositionDisagrees(CSSPosition stringPos, JSONObject jsonPos)
+	{
+		if (stringPos == null || jsonPos == null) return false;
+		return fieldDisagrees(jsonPos, "top", stringPos.top) ||
+			fieldDisagrees(jsonPos, "right", stringPos.right) ||
+			fieldDisagrees(jsonPos, "bottom", stringPos.bottom) ||
+			fieldDisagrees(jsonPos, "left", stringPos.left) ||
+			fieldDisagrees(jsonPos, "width", stringPos.width) ||
+			fieldDisagrees(jsonPos, "height", stringPos.height);
+	}
+
+	private static boolean fieldDisagrees(JSONObject jsonPos, String name, String stringValue)
+	{
+		Object jsonValue = jsonPos.opt(name);
+		// treat JSON null the same as no value (Java null), so a null field agrees with a null authoritative value
+		if (JSONObject.NULL.equals(jsonValue)) jsonValue = null;
+		return !Utils.equalObjects(jsonValue, stringValue);
 	}
 
 	public static void deleteMarkers(Form form)

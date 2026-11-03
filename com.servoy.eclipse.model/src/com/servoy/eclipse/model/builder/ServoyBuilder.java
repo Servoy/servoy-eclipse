@@ -512,6 +512,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MISSING_PROPERTY_FROM_SPECIFICATION = new Pair<String, ProblemSeverity>("missingPropetyFromSpec",
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> CSS_POSITION_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("cssPositionMismatch",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_HANDLER = new Pair<String, ProblemSeverity>("deprecatedHandler", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> PARAMETERS_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("parametersMismatch",
 		ProblemSeverity.WARNING);

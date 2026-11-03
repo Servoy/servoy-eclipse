@@ -708,6 +708,10 @@ public class MarkerMessages
 	public static ServoyMarker MissingPropertyFromSpecification = new ServoyMarker(
 		"The component \"{0}\" in form {1} contains property {2} which is missing from spec.", ServoyBuilder.MISSING_PROPERTY_FROM_SPEC);
 
+	public static ServoyMarker CSSPositionMismatch = new ServoyMarker(
+		"Web component \"{0}\" in form \"{1}\" has a cssPosition string ({2}) that disagrees with its json cssPosition ({3}); Servoy uses the string, so the element may render in the wrong place.",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE, "Reconcile the json cssPosition with the stored cssPosition string.");
+
 	public static ServoyMarker DeprecatedHandler = new ServoyMarker("The handler \"{0}\" of the {1} is deprecated. {2}",
 		ServoyBuilder.DEPRECATED_ELEMENT_USAGE);
 

@@ -27,6 +27,7 @@ import org.eclipse.ui.IMarkerResolutionGenerator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.builder.ServoyFormBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -93,6 +94,10 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			if (type.equals(ServoyBuilder.MISSING_PROPERTY_FROM_SPEC))
 			{
 				return new IMarkerResolution[] { new RemoveJSONPropertyQuickFix(marker) };
+			}
+			if (type.equals(ServoyBuilder.PROJECT_FORM_MARKER_TYPE) && marker.getAttribute(ServoyFormBuilder.CSS_POSITION_MISMATCH_PROBLEM, false))
+			{
+				return new IMarkerResolution[] { new ReconcileCssPositionQuickFix(marker) };
 			}
 			if (type.equals(ServoyBuilder.MISSING_SPEC))
 			{
