@@ -408,8 +408,12 @@ public class ServoyFormBuilder
 								BuilderDependencies.getInstance().addDatasourceDependency(datasource, form);
 								BuilderDependencies.getInstance().addDatasourceDependency(frm.getDataSource(), form);
 
+								// SVY-21667: guard the cast; getForm(...) tolerates a bare String/UUID that this cast does not.
+								JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(propertyValue, form.getName(),
+									formComponentEl.getName(), pd.getName());
+								if (fcValue == null) continue;
 								FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd,
-									(JSONObject)propertyValue, frm, fs);
+									fcValue, frm, fs);
 								for (FormElement element : cache.getFormComponentElements())
 								{
 									checkDataProviders(markerResource, servoyProject, element.getPersistIfAvailable(), context, datasource,
