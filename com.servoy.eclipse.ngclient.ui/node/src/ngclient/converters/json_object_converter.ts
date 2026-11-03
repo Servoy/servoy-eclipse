@@ -97,7 +97,7 @@ export class CustomObjectTypeFactory implements ITypeFactory<CustomObjectValue> 
 class CustomObjectValue implements IChangeAwareValue, ICustomObjectValue, IUIDestroyAwareValue {
   [key: string]: any;
 
-  // NOTE: constructor and field initializers pf this class will never be called as this class is never instantiated;
+  // NOTE: constructor and field initializers of this class will never be called as this class is never instantiated;
   // instead, it is set on exiting objects as a prototype (to avoid server JSON creating an object and then creating another new instance and copying over the subProps...)
   // so to avoid this double object creation + copy, this class is used via Object.setPrototypeOf(objectToInitialize, CustomObjectValue.prototype);
   // that means unfortunately that fields don't work properly, especially new ECMA private class fields so we can't use #internalState to
