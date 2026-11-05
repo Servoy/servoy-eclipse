@@ -126,7 +126,9 @@ public class FormTemplateHttpEndpoint implements Filter
 		catch (IOException | RuntimeException e)
 		{
 			Debug.error("Can't generate form template page for form '" + formName + "'", e);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Can't render form template: " + formName);
+			// SVY-21670: put the cause in the response so a caller (the getFormLayout MCP tool, an AI agent) can report
+			// the real failure instead of waiting for a page that will never render
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Can't render form template: " + formName + " - " + describeFailure(e));
 			return;
 		}
 
@@ -135,6 +137,37 @@ public class FormTemplateHttpEndpoint implements Filter
 		PrintWriter w = response.getWriter();
 		w.write(indexHtml);
 		w.flush();
+	}
+
+	/**
+	 * One-line description of why the form template could not be generated: the outermost exception and, when it
+	 * differs, the root cause, each as {@code class: message}, plus where the root cause was thrown. Kept on a single
+	 * line and capped, because it is sent as the HTTP status message.
+	 */
+	static String describeFailure(Throwable t)
+	{
+		StringBuilder sb = new StringBuilder(describeThrowable(t));
+		Throwable root = t;
+		while (root.getCause() != null && root.getCause() != root)
+		{
+			root = root.getCause();
+		}
+		if (root != t)
+		{
+			sb.append(" (caused by ").append(describeThrowable(root)).append(')');
+		}
+		StackTraceElement[] trace = root.getStackTrace();
+		if (trace.length > 0)
+		{
+			sb.append(" at ").append(trace[0]);
+		}
+		String oneLine = sb.toString().replaceAll("[\\r\\n\\t]+", " ");
+		return oneLine.length() > 500 ? oneLine.substring(0, 500) + "..." : oneLine;
+	}
+
+	private static String describeThrowable(Throwable t)
+	{
+		return t.getClass().getSimpleName() + (t.getMessage() != null ? ": " + t.getMessage() : "");
 	}
 
 	private String buildInjection(String formName, String formState, String specs, boolean sampleData)
