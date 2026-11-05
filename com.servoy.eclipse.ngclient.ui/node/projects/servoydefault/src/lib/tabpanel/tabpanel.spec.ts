@@ -102,6 +102,39 @@ describe( 'ServoyDefaultTabpanel', () => {
         expect( fixture.componentInstance.getSelectedTabId() ).toBe( '1_tab_1' );
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
       } ) );
+    // SVY-21648 regression: resolving a tab NAME to its index must be a pure read.
+    // getRealTabIndex() used to rewrite this.tabIndex to the resolved number and emit
+    // tabIndexChange from inside the resolve loop. That mutation is reached on every change
+    // detection pass (via getSelectedTabId()); when a tab name was assigned twice in quick
+    // succession the first resolve clobbered tabIndex to a number, so the second change saw
+    // a number instead of the name the script set and the panel could land on the wrong tab.
+    // Resolving by name must therefore leave tabIndex untouched and emit nothing.
+    it( 'should resolve a tab name to its index without mutating or emitting tabIndex (SVY-21648)', () => {
+        const fixture = createComponentWithTabs();
+        const component = fixture.componentInstance as any;
+
+        const changes: SimpleChanges = {};
+        changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
+        fixture.componentInstance.ngOnChanges( changes );
+
+        fixture.componentInstance.tabIndex = 'tab2';
+        const emitSpy = spyOn( component.tabIndexChange, 'emit' );
+
+        // getRealTabIndex is the pure resolver reached from getSelectedTabId() during rendering
+        const resolved = component.getRealTabIndex();
+
+        expect( resolved ).toBe( 1 );
+        // the script-assigned name must survive the resolve, not be rewritten to the number 2
+        expect( fixture.componentInstance.tabIndex ).toBe( 'tab2' );
+        // and no server push may happen mid-resolve
+        expect( emitSpy ).not.toHaveBeenCalled();
+
+        // resolving again (as a quick second assignment would) still sees the name and is stable
+        expect( component.getRealTabIndex() ).toBe( 1 );
+        expect( fixture.componentInstance.tabIndex ).toBe( 'tab2' );
+        expect( emitSpy ).not.toHaveBeenCalled();
+    } );
+
 
     it( 'should apply the selected form scrollbars=never overflow to the container', fakeAsync(() => {
         const fixture = createComponentWithTabs();
