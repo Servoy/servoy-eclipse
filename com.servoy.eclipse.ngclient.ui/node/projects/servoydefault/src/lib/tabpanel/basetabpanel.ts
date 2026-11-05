@@ -202,8 +202,6 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                 if (!this.tabs) return -1;
                 for (let i = 0; i < this.tabs.length; i++) {
                     if (this.tabs[i].name === this.tabIndex) {
-                        this.tabIndex = i + 1;
-                        this.tabIndexChange.emit(i);
                         return i;
                     }
                 }
