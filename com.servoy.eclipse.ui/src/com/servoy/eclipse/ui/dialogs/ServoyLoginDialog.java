@@ -74,6 +74,8 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	public static final String SERVOY_LOGIN_USERNAME = "USERNAME";
 	public static final String SERVOY_LOGIN_PASSWORD = "PASSWORD";
 	public static final String SERVOY_LOGIN_TOKEN = "TOKEN";
+	/** Secure-store key, under SERVOY_LOGIN_STORE_KEY, holding the svyAI provider key (svy_ai_key / GENAI_API_KEY). */
+	public static final String SVY_AI_KEY = "SVY_AI_KEY"; //$NON-NLS-1$
 	/** Base URL for all Servoy Cloud REST API endpoints. */
 	public static final String SERVOY_API_BASE = System.getProperty("servoy.api.url",
 		"https://middleware-prod.unifiedui.servoy-cloud.eu") + "/servoy-service/rest_ws/api/"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -270,7 +272,15 @@ public class ServoyLoginDialog extends TitleAreaDialog
 
 				if (svyAiKey != null && !svyAiKey.isBlank())
 				{
-					System.setProperty("GENAI_API_KEY", svyAiKey);
+					try
+					{
+						ISecurePreferences node = SecurePreferencesFactory.getDefault().node(SERVOY_LOGIN_STORE_KEY);
+						node.put(SVY_AI_KEY, svyAiKey, true);
+					}
+					catch (StorageException ex)
+					{
+						ServoyLog.logError(ex);
+					}
 				}
 				String existingSkillsZip = System.getProperty("SERVOY_SKILLS_ZIP"); //$NON-NLS-1$
 				if (skillEndpoint != null && !skillEndpoint.isBlank() &&
@@ -587,7 +597,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 						String svyAiKey = loginTokenJSON.optString("svy_ai_key", null);
 						if (svyAiKey != null && !svyAiKey.isBlank())
 						{
-							System.setProperty("GENAI_API_KEY", svyAiKey);
+							node.put(SVY_AI_KEY, svyAiKey, true);
 						}
 						ServoyLog.logInfo("Servoy Cloud connection restored."); //$NON-NLS-1$
 						notifyCloudRestored();
