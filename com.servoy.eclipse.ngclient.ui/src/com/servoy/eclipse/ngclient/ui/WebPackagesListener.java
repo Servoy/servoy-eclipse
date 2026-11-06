@@ -174,6 +174,42 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		return version != null ? "servoy-public-" + version + ".tgz" : "servoy-public.tgz";
 	}
 
+	/**
+	 * SVY-21734: an explicitly configured <code>servoy.pnpmPath</code> always wins over the bundled pnpm.
+	 *
+	 * @param configuredPath the already normalized <code>servoy.pnpmPath</code> value (may be <code>null</code>)
+	 * @param bundledPnpm the extracted bundled pnpm (may be <code>null</code>)
+	 */
+	public static File preferConfiguredPnpm(String configuredPath, File bundledPnpm)
+	{
+		return configuredPath != null ? new File(configuredPath) : bundledPnpm;
+	}
+
+	/**
+	 * SVY-21734: without a usable node and pnpm, <code>Activator.createNPMCommand</code> hands out no-op commands that
+	 * "succeed" without doing anything.
+	 *
+	 * @return an error message when node or pnpm is missing (<code>null</code> or not an existing file), otherwise <code>null</code>
+	 */
+	public static String missingPnpmRuntimeMessage(File node, File pnpm)
+	{
+		if (node != null && node.isFile() && pnpm != null && pnpm.isFile()) return null;
+		return "servoy.jsRuntime=pnpm is set but node (" + node + ") or pnpm (" + pnpm +
+			") is not available; check servoy.pnpmPath / servoy.nodePath / servoy.npmPath. Titanium NG build aborted.";
+	}
+
+	/**
+	 * SVY-21734: installing without the web-package tarballs gives a broken Angular build.
+	 *
+	 * @return an error message listing the packages that could not be packed, or <code>null</code> when there are none
+	 */
+	public static String packFailuresMessage(Collection<String> failedPackages)
+	{
+		if (failedPackages == null || failedPackages.isEmpty()) return null;
+		return "pnpm mode: could not create the tarball(s) for " + failedPackages +
+			"; installing without them would give a broken Angular build. Titanium NG build aborted (see the messages above).";
+	}
+
 	public static String generateAllComponentsModuleContent(Collection<PackageSpecification< ? >> packages)
 	{
 		StringBuilder allComponentsModule = new StringBuilder(256);
@@ -247,6 +283,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// scripts. For a Developer build this is null and the active solution project is used; for a WAR export it
 		// is the exported solution name so the headless path can read the committed lists with no UI.
 		private final String approvalsSolutionName;
+		// pnpm mode: packages that could not be packed/copied into a tarball. Installing without them would silently
+		// produce a broken Angular build, so the job fails loud when this is not empty.
+		private final List<String> packFailures = new ArrayList<>();
 
 		/**
 		 * @param name
@@ -308,6 +347,22 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				long time = System.currentTimeMillis();
 				writeConsole(console,
 					"---- Starting Titanium NGClient solution/dependencies source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
+				packFailures.clear();
+				if (Activator.isPnpmMode())
+				{
+					// without node + pnpm, createNPMCommand hands out no-op commands that "succeed" without doing anything
+					Activator activator = Activator.getInstance();
+					activator.waitForNodeExtraction();
+					File node = activator.getNodePath();
+					File pnpm = activator.getPnpmPath();
+					String missingRuntime = missingPnpmRuntimeMessage(node, pnpm);
+					if (missingRuntime != null)
+					{
+						writeConsole(console, "\r\nERROR: " + missingRuntime + "\r\n");
+						Activator.getInstance().getLog().error(missingRuntime);
+						return new Status(IStatus.WARNING, getClass(), missingRuntime);
+					}
+				}
 				// modules and css of the components those are based on the Packages itself
 				CssLibSet cssLibs = new CssLibSet();
 				boolean hasFontAwesomePro = false;
@@ -422,6 +477,19 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				// copyShippedPublicTarball below, before the install block); reused later as the specifier to install
 				// for @servoy/public.
 				File copiedPublicTarball = null;
+				// SVY-21502 §4.2: in pnpm mode @servoy/public is pre-built at the ngclient.ui Maven build and
+				// shipped in node/tarballs/. Copy it into .tarballs/ NOW - before the install block - so the
+				// committed lockfile's file: specifier for @servoy/public resolves against a tarball that already
+				// exists on disk before any pnpm install runs (fixes the ERR_PNPM_TARBALL_READ_LOCAL_TARBALL
+				// ordering hazard). The four default component packages are source packages (resolved via a
+				// tsconfig paths alias) and are NOT packed/installed as tarballs at all.
+				// SVY-21734: done for every pnpm run (not only when component/service packages exist) so the install
+				// below never has to cope with a missing @servoy/public tarball; a missing one aborts the job instead.
+				if (Activator.isPnpmMode())
+				{
+					copiedPublicTarball = copyShippedPublicTarball(console);
+					if (copiedPublicTarball == null) packFailures.add("@servoy/public");
+				}
 				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
 				{
 					File distIndexFile = new File(projectFolder, "dist/app/browser/index.html");
@@ -429,16 +497,6 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					if (sourceChanged)
 					{
 						writeConsole(console, "- build will be triggered; no previously build-generated files detected...");
-					}
-					// SVY-21502 §4.2: in pnpm mode @servoy/public is pre-built at the ngclient.ui Maven build and
-					// shipped in node/tarballs/. Copy it into .tarballs/ NOW - before the install block - so the
-					// committed lockfile's file: specifier for @servoy/public resolves against a tarball that already
-					// exists on disk before any pnpm install runs (fixes the ERR_PNPM_TARBALL_READ_LOCAL_TARBALL
-					// ordering hazard). The four default component packages are source packages (resolved via a
-					// tsconfig paths alias) and are NOT packed/installed as tarballs at all.
-					if (Activator.isPnpmMode())
-					{
-						copiedPublicTarball = copyShippedPublicTarball(console);
 					}
 					try
 					{
@@ -477,6 +535,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						writeErrorToConsoleAndLog(console, e, "Exception while checking what packages should be installed: ");
 						// TODO should we return a WARNING status here as we do for other failures?
 					}
+				}
+				String packFailed = packFailuresMessage(packFailures);
+				if (packFailed != null)
+				{
+					writeConsole(console, "\r\nERROR: " + packFailed + "\r\n");
+					return new Status(IStatus.WARNING, getClass(), packFailed);
 				}
 
 				// adjust the allservices.sevice.ts
@@ -912,22 +976,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							// install a @servoy/public tarball; in npm mode keep installing the directory as before.
 							if (Activator.isPnpmMode())
 							{
-								// SVY-21502 §4.3: use the shipped @servoy/public tarball copied into .tarballs/ above.
-								File publicTarball = copiedPublicTarball;
-								if (publicTarball != null)
-								{
-									// SVY-21502: pass the tarball RELATIVE to the project folder (./.tarballs/<name>.tgz),
-									// not an absolute path. pnpm records the 'add' argument verbatim as the lockfile
-									// 'specifier:', so an absolute C:\... path would make the committed lockfile
-									// machine- and OS-specific (it must work on a Linux WAR exporter). A relative path
-									// makes the lockfile portable and identical across the dev and dist target folders.
-									command.add(relativeTarballSpecifier(publicTarball));
-								}
-								else
-								{
-									writeConsole(console, "- WARNING: could not pack dist-public into a tarball; falling back to directory install");
-									command.add("./dist-public/");
-								}
+								// SVY-21502 §4.3: use the shipped @servoy/public tarball copied into .tarballs/ above (never null
+								// here: a missing tarball aborted the job earlier, SVY-21734).
+								// SVY-21502: pass the tarball RELATIVE to the project folder (./.tarballs/<name>.tgz),
+								// not an absolute path. pnpm records the 'add' argument verbatim as the lockfile
+								// 'specifier:', so an absolute C:\... path would make the committed lockfile
+								// machine- and OS-specific (it must work on a Linux WAR exporter). A relative path
+								// makes the lockfile portable and identical across the dev and dist target folders.
+								command.add(relativeTarballSpecifier(copiedPublicTarball));
 							}
 							else
 							{
@@ -1440,7 +1496,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * file that already exists on disk before any install runs (fixes the ERR_PNPM_TARBALL_READ_LOCAL_TARBALL
 		 * ordering hazard). Running from source the bundle is the file:/ workspace, so this reads the Maven-built
 		 * tarball straight from the checkout - no mode split. Returns the copied tarball, or <code>null</code> if it
-		 * was not shipped (the caller then falls back to building+packing dist-public).
+		 * was not shipped (the caller then aborts the build, see {@link #packFailuresMessage(Collection)}).
 		 */
 		private File copyShippedPublicTarball(StringOutputStream console)
 		{
@@ -1518,13 +1574,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				packCommand.runCommand(new NullProgressMonitor());
 				if (packCommand.getExitCode() != 0)
 				{
-					writeConsole(console, "- WARNING: 'pnpm pack' for " + packageName + " returned EXIT_CODE " + packCommand.getExitCode());
+					writeConsole(console, "- ERROR: 'pnpm pack' for " + packageName + " returned EXIT_CODE " + packCommand.getExitCode());
+					packFailures.add(packageName);
 					return null;
 				}
 				File produced = findNewTgz(tarballsDir, before);
 				if (produced == null)
 				{
-					writeConsole(console, "- WARNING: 'pnpm pack' for " + packageName + " produced no .tgz file");
+					writeConsole(console, "- ERROR: 'pnpm pack' for " + packageName + " produced no .tgz file");
+					packFailures.add(packageName);
 					return null;
 				}
 				if (!produced.equals(tarball))
@@ -1536,6 +1594,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			catch (Exception e)
 			{
 				writeErrorToConsoleAndLog(console, e, "Exception while packing package '" + packageName + "' into a tarball: ");
+				packFailures.add(packageName);
 				return null;
 			}
 		}
@@ -2194,12 +2253,19 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			// create the production build
 			IStatus buildStatus = new PackageCheckerJob("production_build", distributionSource, model.getModel(), model.getSolutionName())
 				.run(model.getProgressMonitor());
-			// SVY-21502 §6: a headless WAR export fails loud when it reaches a build script for a name@version that is
-			// not in the committed approvals (the PackageCheckerJob returns an ERROR status with the exact list). Do
-			// not silently produce a WAR missing those builds; surface the error to the exporter.
-			if (buildStatus != null && buildStatus.getSeverity() == IStatus.ERROR)
+			// SVY-21502 §6 / SVY-21734: any non-OK result of the production build means the Angular build did not complete
+			// (a failed npm/pnpm command, a missing node/pnpm, a tarball that could not be created, an undecided pnpm
+			// build script - the job only returns OK after the build ran) or it was cancelled. Do not fall through to the
+			// dist check: a stale <solution>_dist from an earlier export would be packaged into the WAR without any error.
+			// The exporter turns this RuntimeException into an ExportException (or returns quietly when cancelled).
+			// CANCEL is only an abort when the user cancelled; the job also returns CANCEL_STATUS when the build is
+			// disabled for junit runs (Activator.isNodeExtractionAndTitaniumBuildDisabled), which keeps the old behaviour.
+			if (buildStatus != null && !buildStatus.isOK() &&
+				(buildStatus.getSeverity() != IStatus.CANCEL || (model.getProgressMonitor() != null && model.getProgressMonitor().isCanceled())))
 			{
-				throw new RuntimeException(buildStatus.getMessage());
+				String message = buildStatus.getMessage();
+				throw new RuntimeException(message == null || message.isBlank() ? "The Titanium NGClient production build did not complete (status: " +
+					buildStatus.getSeverity() + "), see the Titanium NGClient build console" : message);
 			}
 			// copy the production build
 			File distFolder = new File(distributionSource, "dist/app/browser");

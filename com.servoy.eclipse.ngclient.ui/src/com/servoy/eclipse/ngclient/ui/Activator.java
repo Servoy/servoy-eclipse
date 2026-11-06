@@ -207,6 +207,8 @@ public class Activator extends Plugin
 					{
 						ServoyLog.logWarning("No Node.js plugin found, npm commands will be unavailable", null);
 					}
+					// an explicitly configured servoy.pnpmPath wins over the bundled pnpm, also when node/npm are bundled
+					pnpm = WebPackagesListener.preferConfiguredPnpm(pnpmPth, pnpm);
 					nodePath = node;
 					npmPath = npm;
 					pnpmPath = pnpm;
