@@ -23,7 +23,7 @@ export class ApplicationService {
   private readonly log: LoggerService;
   private minElectronVersion = '24.4.0';
   // the Web Audio context is created lazily on first beep and reused afterwards
-  private audioContext: AudioContext = null;
+  private audioContext: AudioContext | null = null;
 
   private readonly servoyService = inject(ServoyService);
   private readonly localStorageService = inject(LocalStorageService);
