@@ -343,6 +343,16 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					fixes = new IMarkerResolution[] { new InvalidTableBecauseNoPrimaryKeyQuickFix(serverName, tableName) };
 				}
 			}
+			else if (type.equals(ServoyBuilder.PROJECT_FORM_MARKER_TYPE))
+			{
+				String uuid = marker.getAttribute("Uuid", null);
+				String solName = marker.getAttribute("SolutionName", null);
+				// only offer this fix for the css-position-no-body-part form marker (the type is shared by other form checks)
+				if (uuid != null && solName != null && marker.getAttribute(ServoyBuilder.FORM_CSS_POSITION_NO_BODY_PART_ATTRIBUTE, false))
+				{
+					fixes = new IMarkerResolution[] { new ClearFormCssPositionQuickFix(uuid, solName) };
+				}
+			}
 			else if (type.equals(ServoyBuilder.MISSING_PROJECT_REFERENCE))
 			{
 				fixes = new IMarkerResolution[] { new OpenMissingProjectReferenceQuickFix(), new DeleteMissingProjectReferenceQuickFix() };
