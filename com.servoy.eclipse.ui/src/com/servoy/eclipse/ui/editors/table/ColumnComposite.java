@@ -91,7 +91,7 @@ import com.servoy.j2db.util.Utils;
 public class ColumnComposite extends Composite
 {
 	private static int MIN_COLUMN_WIDTH = 50;
-//	private final DataBindingContext bindingContext;
+	//	private final DataBindingContext bindingContext;
 	private final TableViewer tableViewer;
 	private final ColumnDetailsComposite columnDetailsComposite;
 	private ColumnAutoEnterComposite columnAutoEnterComposite;
@@ -702,6 +702,24 @@ public class ColumnComposite extends Composite
 				id.setSequenceType(defaultFirstColumnSequenceType);
 				id.setFlag(IBaseColumn.UUID_COLUMN, keyType.isUUID());
 				id.setFlag(IBaseColumn.NATIVE_COLUMN, keyType.isNative());
+				if (keyType.isUUID())
+				{
+					// A UUID pk must be stored with its configured column type, otherwise on save it decays to
+					// the realized db type (e.g. CHAR(36)/JAVA_OBJECT) and is serialized inconsistently in the
+					// .dbi compared to a UUID column added through the dropdown (SVY-21712). createNewColumn only
+					// sets the db type field, so create the column info here and set the configured type to the
+					// logical type of the chosen UUID pk preference (MEDIA/16 for byte-array and native, TEXT/36
+					// for the string-array variant) - matching what ColumnTypeEditingSupport.setValue stores.
+					DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
+					if (dmm != null)
+					{
+						dmm.createNewColumnInfo(id, false);
+						if (id.getColumnInfo() != null)
+						{
+							id.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(keyType.getColumnType(), keyType.getLength(), 0));
+						}
+					}
+				}
 			}
 			catch (RepositoryException e)
 			{
