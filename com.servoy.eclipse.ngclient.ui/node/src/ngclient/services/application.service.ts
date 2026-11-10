@@ -22,6 +22,8 @@ export class ApplicationService {
   private userProperties!: Record<string, any>;
   private readonly log: LoggerService;
   private minElectronVersion = '24.4.0';
+  // the Web Audio context is created lazily on first beep and reused afterwards
+  private audioContext: AudioContext = null;
 
   private readonly servoyService = inject(ServoyService);
   private readonly localStorageService = inject(LocalStorageService);
@@ -231,6 +233,46 @@ export class ApplicationService {
 
   public setStatusText(text: string) {
     this.windowRefService.nativeWindow.status = text;
+  }
+
+  public beep() {
+    try {
+      const w = this.windowRefService.nativeWindow as any;
+      const Ctor = w.AudioContext || w.webkitAudioContext;
+      if (!Ctor) return;
+      const ctx: AudioContext = this.audioContext || new Ctor();
+      this.audioContext = ctx;
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      const dur = 0.2;
+      const now = ctx.currentTime;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.4, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + dur + 0.02);
+    } catch (e) {
+      this.log.warn('Could not beep: ' + e);
+    }
+  }
+
+  public playSound(url: string) {
+    if (!url || !url.trim()) return;
+    try {
+      // a media:// url needs to be converted to a real resource url that points to the media
+      const resolvedUrl = url.indexOf('media://') === 0 ? this.generateMediaDownloadUrl(url) : url;
+      const audio = new Audio(resolvedUrl);
+      audio.play().catch((e) => this.log.warn('Could not play sound ' + url + ': ' + e));
+    } catch (e) {
+      this.log.warn('Could not play sound ' + url + ': ' + e);
+    }
   }
 
   public getScreenSize() {
