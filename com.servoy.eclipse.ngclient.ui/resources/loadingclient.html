@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="3.5">
   <base href="/">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -138,5 +137,11 @@
         <div class="lii-5 lii-shape"></div>  
       </div>
     </div>
+    <script>
+      // SVY-21606: this static building page has no websocket, so the server cannot push a reload to it.
+      // Reload every 3.5s; once the build is done the reloaded request serves the freshly built client
+      // (IndexPageFilter stops serving this page when the build is no longer running).
+      setTimeout(function () { location.reload(); }, 3500);
+    </script>
 </body>
 </html>
