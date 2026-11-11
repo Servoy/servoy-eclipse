@@ -745,8 +745,20 @@ public class ServoyFormBuilder
 						if (flattenedForm != null && !flattenedForm.hasPart(Part.BODY))
 						{
 							ServoyMarker mk = MarkerMessages.FormCssPositionNoBodyPart.fill(form.getName());
-							ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.FORM_CSS_POSITION_NO_BODY_PART,
-								IMarker.PRIORITY_NORMAL, null, form);
+							IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+								ServoyBuilder.FORM_CSS_POSITION_NO_BODY_PART, IMarker.PRIORITY_NORMAL, null, form);
+							if (marker != null)
+							{
+								try
+								{
+									marker.setAttribute("Uuid", form.getUUID().toString());
+									marker.setAttribute(ServoyBuilder.FORM_CSS_POSITION_NO_BODY_PART_ATTRIBUTE, Boolean.TRUE);
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
 						}
 					}
 

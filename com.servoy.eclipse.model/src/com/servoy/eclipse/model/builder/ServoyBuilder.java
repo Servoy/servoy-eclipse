@@ -439,6 +439,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_DUPLICATE_PART = new Pair<String, ProblemSeverity>("formDuplicatePart", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_CSS_POSITION_NO_BODY_PART = new Pair<String, ProblemSeverity>("formCssPositionNoBodyPart",
 		ProblemSeverity.ERROR);
+	// marker attribute flag identifying the css-position-no-body-part form marker (PROJECT_FORM_MARKER_TYPE is shared by several form checks)
+	public final static String FORM_CSS_POSITION_NO_BODY_PART_ATTRIBUTE = "cssPositionNoBodyPart";
 	public final static Pair<String, ProblemSeverity> FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST = new Pair<String, ProblemSeverity>(
 		"formEditableComboboxCustomValuelist", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_EXTENDS_CYCLE = new Pair<String, ProblemSeverity>("formExtendsCycle", ProblemSeverity.WARNING);
