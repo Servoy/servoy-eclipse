@@ -142,6 +142,7 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -2586,12 +2587,26 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	}
 
 	/**
-	 * Returns true when the composite persist's OWN serialized file (its .frm, or - for a Form - its form-level .less
-	 * stylesheet) is among the changed files, meaning the full editing persist must be refreshed. Returns false when
-	 * only child files (e.g. a child script .js) changed, in which case the editing composite must not be overwritten
-	 * (SVY-21249).
+	 * Returns true when the persist is not serialized in a file of its own but as an item inside its container's file
+	 * (e.g. a form element in the form's .frm, a relation item in the .rel, a custom web object in its component's
+	 * form .frm). Script elements are excluded as they are stored in .js files. Mirrors
+	 * {@link SolutionSerializer#getFileName(IPersist, boolean)} (SVY-21697).
 	 *
-	 * @param persist the composite persist being visited
+	 * @param persist the persist being visited
+	 */
+	public static boolean isStoredInContainerFile(IPersist persist)
+	{
+		return !(persist instanceof IScriptElement) &&
+			(SolutionSerializer.isCompositeWithItems(persist.getParent()) || persist instanceof IChildWebObject);
+	}
+
+	/**
+	 * Returns true when the persist's OWN serialized file (for a composite its .frm, or - for a Form - its form-level
+	 * .less stylesheet; for an item stored in its container's file, that containing file) is among the changed files,
+	 * meaning the editing persist must be refreshed. Returns false when only other files (e.g. a child script .js)
+	 * changed, in which case the editing persist must not be overwritten (SVY-21249, SVY-21697).
+	 *
+	 * @param persist the composite persist, or item stored in a container's file, being visited
 	 * @param solutionParentDir the parent directory of the solution project location (the workspace folder that
 	 *            contains the solution project), used as the base to resolve the relative serialized paths
 	 * @param changedFilePaths absolute paths of the files that actually changed on disk
@@ -2685,14 +2700,18 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					try
 					{
 						boolean compositeWithItems = SolutionSerializer.isCompositeWithItems(persist);
-						// If this is a composite (e.g. Form) that is flagged changed but its own file did not change on
-						// disk (only a child script element .js changed/was added), do NOT overwrite the whole editing
-						// composite - that would discard unsaved editor changes (e.g. a just-assigned onAction). The
-						// changed script child is handled separately as an IScriptElement below. A changed form .less
-						// stylesheet does count as an own-file change so the preview is refreshed (SVY-21576).
-						boolean ownFileChanged = !compositeWithItems ||
+						boolean storedInContainerFile = isStoredInContainerFile(persist);
+						boolean guarded = compositeWithItems || storedInContainerFile;
+						// If this is a composite (e.g. Form) or an item stored in its container's file (e.g. a form
+						// element in the .frm) that is flagged changed but its own/containing file did not change on
+						// disk (only a child script element .js changed/was added), do NOT overwrite the editing
+						// persist - that would discard unsaved editor changes (e.g. a just-assigned onAction, or
+						// re-add a deleted but not yet saved component, SVY-21697). The changed script child is
+						// handled separately as an IScriptElement below. A changed form .less stylesheet does count
+						// as an own-file change so the preview is refreshed (SVY-21576).
+						boolean ownFileChanged = !guarded ||
 							isOwnCompositeFileChanged(persist, solutionLocationDir.getParentFile(), changedFilePaths);
-						if (compositeWithItems && !ownFileChanged)
+						if (guarded && !ownFileChanged)
 						{
 							// only the child script element(s) changed; update just those into the editing solution
 							persist.clearChanged();
