@@ -197,20 +197,26 @@ public class ClearFormCssPositionQuickFixIntegrationTest extends TestUtilitiesCl
 		assertTrue(Boolean.TRUE.equals(before.getUseCssPosition()),
 				"useCssPosition must be true before the quick-fix runs");
 
+		UUID formUuid = before.getUUID();
 		clearFix.run(marker);
 		waitForWorkspaceBuildJobs();
 
-		// re-resolve the form from the editing solution by UUID (as the quick-fix does)
-		// to confirm the saved state
-		UUID formUuid = before.getUUID();
-		IPersist resolved = AbstractRepository.searchPersist(activeProject().getEditingSolution(), formUuid);
-		assertTrue(resolved instanceof Form, "The flagged persist must still resolve to a Form after the fix");
-		Form after = (Form) resolved;
-
-		assertFalse(Boolean.TRUE.equals(after.getUseCssPosition()),
-				"After the quick-fix the form's useCssPosition must be cleared (not TRUE)");
-		assertFalse(after.isResponsiveLayout(),
-				"The quick-fix must not change responsiveLayout (it clears useCssPosition only)");
+		// the quick-fix saves through a background workspace job, so the persisted
+		// state may
+		// not be visible immediately - re-resolve the form from the editing solution by
+		// UUID
+		// (as the quick-fix does) and pump events until the saved state is observed, or
+		// fail
+		// with the specific assertion once the timeout is reached
+		pumpEventsUntil(10000, () -> {
+			IPersist resolved = AbstractRepository.searchPersist(activeProject().getEditingSolution(), formUuid);
+			assertTrue(resolved instanceof Form, "The flagged persist must still resolve to a Form after the fix");
+			Form after = (Form) resolved;
+			assertFalse(Boolean.TRUE.equals(after.getUseCssPosition()),
+					"After the quick-fix the form's useCssPosition must be cleared (not TRUE)");
+			assertFalse(after.isResponsiveLayout(),
+					"The quick-fix must not change responsiveLayout (it clears useCssPosition only)");
+		});
 	}
 
 	@Test
