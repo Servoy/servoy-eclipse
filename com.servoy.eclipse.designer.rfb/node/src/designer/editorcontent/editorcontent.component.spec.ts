@@ -1,4 +1,5 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { signal } from '@angular/core';
 import { EditorContentComponent } from './editorcontent.component';
 
 describe('EditorContentComponent', () => {
@@ -42,7 +43,8 @@ describe('EditorContentComponent', () => {
     (component as any).windowRef = { nativeWindow: { location: { host: 'localhost:4200' } } };
     (component as any).designSize = { setEditor: vi.fn() };
     (component as any).elementRef = { nativeElement: { clientHeight: 500, getBoundingClientRect: () => ({ width: 800 }) } };
-    (component as any).contentStyle = { position: 'absolute', top: '20px', left: '20px' };
+    // contentStyle is now a signal; production code reads it via contentStyle() and writes via .set(...)
+    (component as any).contentStyle = signal<Record<string, string>>({ position: 'absolute', top: '20px', left: '20px' });
     (component as any).contentSizeFull = false;
     (component as any).lastHeight = undefined;
     (component as any).styleVariantPreview = false;
@@ -52,15 +54,22 @@ describe('EditorContentComponent', () => {
   describe('contentMessageReceived', () => {
     it('should update content size on updateFormSize for absolute layout', () => {
       component.contentMessageReceived('updateFormSize', { property: '', width: 1024, height: 768 });
-      expect((component as any).contentStyle['width']).toBe('1024px');
-      expect((component as any).contentStyle['height']).toBe('768px');
+      expect(component.contentStyle()['width']).toBe('1024px');
+      expect(component.contentStyle()['height']).toBe('768px');
+    });
+
+    it('should set a new object reference so the signal fires change detection', () => {
+      const before = component.contentStyle();
+      component.contentMessageReceived('updateFormSize', { property: '', width: 1024, height: 768 });
+      expect(component.contentStyle()).not.toBe(before);
     });
 
     it('should not update on updateFormSize for non-absolute layout', () => {
       urlParser.isAbsoluteFormLayout.mockReturnValue(false);
-      (component as any).contentStyle['width'] = '800px';
+      (component as any).contentStyle.set({ ...component.contentStyle(), width: '800px' });
       component.contentMessageReceived('updateFormSize', { property: '', width: 1024, height: 768 });
-      expect((component as any).contentStyle['width']).toBe('800px');
+      expect(component.contentStyle()['width']).toBe('800px');
+      expect(component.contentStyle()['height']).toBeUndefined();
     });
 
     it('should call buildTiNG on buildTitaniumClient', () => {
@@ -69,29 +78,61 @@ describe('EditorContentComponent', () => {
     });
   });
 
+  describe('ngOnInit', () => {
+    it('should add width/height for absolute layout', () => {
+      component.ngOnInit();
+      expect(component.contentStyle()['position']).toBe('absolute');
+      expect(component.contentStyle()['width']).toBe('800px');
+      expect(component.contentStyle()['height']).toBe('600px');
+    });
+
+    it('should add bottom/right/minWidth for responsive layout', () => {
+      urlParser.isAbsoluteFormLayout.mockReturnValue(false);
+      component.ngOnInit();
+      expect(component.contentStyle()['bottom']).toBe('20px');
+      expect(component.contentStyle()['right']).toBe('20px');
+      expect(component.contentStyle()['minWidth']).toBe('992px');
+      expect(component.contentStyle()['width']).toBeUndefined();
+    });
+  });
+
   describe('setContentSizeFull', () => {
     it('should set content style to full and remove width/height', () => {
       component.setContentSizeFull();
-      expect((component as any).contentStyle['right']).toBe('20px');
-      expect((component as any).contentStyle['bottom']).toBe('20px');
+      expect(component.contentStyle()['right']).toBe('20px');
+      expect(component.contentStyle()['bottom']).toBe('20px');
+      expect(component.contentStyle()['position']).toBe('absolute');
       expect((component as any).contentSizeFull).toBe(true);
-      expect((component as any).contentStyle['width']).toBeUndefined();
-      expect((component as any).contentStyle['height']).toBeUndefined();
+      expect(component.contentStyle()['width']).toBeUndefined();
+      expect(component.contentStyle()['height']).toBeUndefined();
     });
   });
 
   describe('setContentSize', () => {
     it('should set width and height', () => {
       component.setContentSize('500px', '300px');
-      expect((component as any).contentStyle['width']).toBe('500px');
-      expect((component as any).contentStyle['height']).toBe('300px');
+      expect(component.contentStyle()['width']).toBe('500px');
+      expect(component.contentStyle()['height']).toBe('300px');
       expect((component as any).contentSizeFull).toBe(false);
+    });
+
+    it('should remove absolute/responsive positioning keys', () => {
+      (component as any).contentStyle.set({ position: 'absolute', top: '20px', left: '20px', minWidth: '992px', bottom: '20px', right: '20px' });
+      component.setContentSize('500px', '300px');
+      expect(component.contentStyle()['top']).toBeUndefined();
+      expect(component.contentStyle()['left']).toBeUndefined();
+      expect(component.contentStyle()['position']).toBeUndefined();
+      expect(component.contentStyle()['minWidth']).toBeUndefined();
+      expect(component.contentStyle()['bottom']).toBeUndefined();
+      expect(component.contentStyle()['right']).toBeUndefined();
+      expect(component.contentStyle()['width']).toBe('500px');
     });
 
     it('should handle auto height', () => {
       const spy = vi.spyOn(component, 'adjustFromContentSize').mockImplementation(() => undefined);
       component.setContentSize('500px', 'auto');
-      expect((component as any).contentStyle['width']).toBe('500px');
+      expect(component.contentStyle()['width']).toBe('500px');
+      expect(component.contentStyle()['height']).toBeUndefined();
       expect(spy).toHaveBeenCalled();
     });
   });

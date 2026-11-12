@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ElementRef, AfterViewInit, HostListener, OnDestroy, ChangeDetectionStrategy, inject, input, output, viewChild } from '@angular/core';
+import { Component, OnInit, Renderer2, ElementRef, AfterViewInit, HostListener, OnDestroy, ChangeDetectionStrategy, inject, input, output, viewChild, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DesignSizeService } from '../services/designsize.service';
 import { URLParserService } from '../services/urlparser.service';
@@ -19,11 +19,11 @@ import { NgStyle } from '@angular/common';
 export class EditorContentComponent implements OnInit, AfterViewInit, IContentMessageListener, OnDestroy {
 
     initialWidth!: string;
-    contentStyle: Record<string, string> = {
+    contentStyle = signal<Record<string, string>>({
         position: 'absolute',
         top: '20px',
         left: '20px'
-    };
+    });
     contentSizeFull = false;
     lastHeight!: string;
 
@@ -52,12 +52,18 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
             + '/form/' + this.urlParser.getFormName() + '/clientnr/' + this.urlParser.getContentClientNr() + '/index.html'
         );
         if (this.urlParser.isAbsoluteFormLayout()) {
-            this.contentStyle['width'] = this.urlParser.getFormWidth() + 'px';
-            this.contentStyle['height'] = this.urlParser.getFormHeight() + 'px';
+            this.contentStyle.set({
+                ...this.contentStyle(),
+                width: this.urlParser.getFormWidth() + 'px',
+                height: this.urlParser.getFormHeight() + 'px'
+            });
         } else {
-            this.contentStyle['bottom'] = '20px';
-            this.contentStyle['right'] = '20px';
-            this.contentStyle['minWidth'] = '992px';
+            this.contentStyle.set({
+                ...this.contentStyle(),
+                bottom: '20px',
+                right: '20px',
+                minWidth: '992px'
+            });
         }
     }
 
@@ -78,8 +84,7 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
      
     contentMessageReceived(id: string, data: { property: string, width? : number, height? : number, eventData?: any }) {
         if (id === 'updateFormSize' && this.urlParser.isAbsoluteFormLayout()) {
-            this.contentStyle['width'] = data.width + 'px';
-            this.contentStyle['height'] = data.height + 'px';
+            this.contentStyle.set({ ...this.contentStyle(), width: data.width + 'px', height: data.height + 'px' });
         }
         if (id === 'contentSizeChanged' && !this.urlParser.isAbsoluteFormLayout()) {
             this.adjustFromContentSize();
@@ -147,16 +152,14 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
 	}
 
     setContentSizeFull() {
-        this.contentStyle = {
+        this.contentStyle.set({
             position: 'absolute',
             top: '20px',
             left: '20px',
             right: '20px',
             bottom: '20px'
-        };
+        });
         this.contentSizeFull = true;
-        delete this.contentStyle['width'];
-        delete this.contentStyle['height'];
         
         this.editorContentService.executeOnlyAfterInit(()=>{
             const svyForm = this.editorContentService.getContentForm();
@@ -180,19 +183,16 @@ export class EditorContentComponent implements OnInit, AfterViewInit, IContentMe
     setContentSize(width: string, height: string) {
         this.contentSizeFull = false;
         this.lastHeight = height;
-        this.contentStyle['width'] = width;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { top, left, position, minWidth, bottom, right, ...rest } = this.contentStyle();
+        const newStyle: Record<string, string> = { ...rest, width };
         // if size is auto, the listener from content will set the height
         if (height != 'auto') {
-            this.contentStyle['height'] = height;
+            newStyle['height'] = height;
         } else {
             this.adjustFromContentSize();
         }
-        delete this.contentStyle['top'];
-        delete this.contentStyle['left'];
-        delete this.contentStyle['position'];
-        delete this.contentStyle['minWidth'];
-        delete this.contentStyle['bottom'];
-        delete this.contentStyle['right'];
+        this.contentStyle.set(newStyle);
 
         this.setFormWidth(width);
         //this.setMainContainerSize();
