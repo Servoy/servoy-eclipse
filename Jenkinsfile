@@ -137,25 +137,37 @@ pipeline {
                     // Angular Vitest code coverage (Cobertura) for the three Angular projects.
                     // Each project's frontend-maven-plugin run merges its suites into
                     // target/coverage/combined/cobertura-coverage.xml (ngclient.ui + designer.rfb)
-                    // or target/coverage/cobertura-coverage.xml (designer.wpm). The Coverage plugin
-                    // gives trends, per-build deltas and PR annotations. allowEmpty so a build that
-                    // skipped tests (-Dmaven.test.skip) does not fail here.
-                    // Only the merged/final report per project: ngclient.ui and designer.rfb
-                    // write per-suite reports into target/coverage/<sub>/ and a merged one into
-                    // target/coverage/combined/; designer.wpm writes a single target/coverage/
-                    // report. Matching the per-suite subfolders too would double-count lines.
-                    // ignoreParsingErrors: the istanbul cobertura reporter can still emit odd
-                    // elements (e.g. a stray duplicate <method>) that the coverage-model parser
-                    // rejects; coverage-merge.js de-duplicates method names per class, but this
-                    // keeps a single malformed entry from failing the whole build.
+                    // or target/coverage/cobertura-coverage.xml (designer.wpm).
+                    //
+                    // ONE recordCoverage PER PROJECT, each with its own id/name: every Cobertura
+                    // report presents itself as the same unnamed single module, so listing all three
+                    // as 'tools' of a single recordCoverage made the last-parsed report (wpm) overwrite
+                    // the others in the merged tree. Separate steps give three independent coverage
+                    // results, each with its own entry in the build's left menu and its own trend -
+                    // mirroring the three HTML tabs.
+                    //
+                    // ignoreParsingErrors: the istanbul cobertura reporter can still emit odd elements
+                    // (e.g. a stray duplicate <method>) that the coverage-model parser rejects;
+                    // coverage-merge.js de-duplicates method names per class, but this keeps a single
+                    // malformed entry from failing the build.
                     recordCoverage(
-                        tools: [
-                            [parser: 'COBERTURA', pattern: 'com.servoy.eclipse.ngclient.ui/target/coverage/combined/cobertura-coverage.xml'],
-                            [parser: 'COBERTURA', pattern: 'com.servoy.eclipse.designer.rfb/target/coverage/combined/cobertura-coverage.xml'],
-                            [parser: 'COBERTURA', pattern: 'com.servoy.eclipse.designer.wpm/target/coverage/cobertura-coverage.xml']
-                        ],
-                        id: 'angular-vitest',
-                        name: 'Angular Vitest Coverage',
+                        tools: [[parser: 'COBERTURA', pattern: 'com.servoy.eclipse.ngclient.ui/target/coverage/combined/cobertura-coverage.xml']],
+                        id: 'vitest-ngclient-ui',
+                        name: 'Vitest Coverage - TiNG (ngclient.ui)',
+                        ignoreParsingErrors: true,
+                        sourceCodeRetention: 'EVERY_BUILD'
+                    )
+                    recordCoverage(
+                        tools: [[parser: 'COBERTURA', pattern: 'com.servoy.eclipse.designer.rfb/target/coverage/combined/cobertura-coverage.xml']],
+                        id: 'vitest-designer-rfb',
+                        name: 'Vitest Coverage - Designer RFB',
+                        ignoreParsingErrors: true,
+                        sourceCodeRetention: 'EVERY_BUILD'
+                    )
+                    recordCoverage(
+                        tools: [[parser: 'COBERTURA', pattern: 'com.servoy.eclipse.designer.wpm/target/coverage/cobertura-coverage.xml']],
+                        id: 'vitest-designer-wpm',
+                        name: 'Vitest Coverage - WPM',
                         ignoreParsingErrors: true,
                         sourceCodeRetention: 'EVERY_BUILD'
                     )
