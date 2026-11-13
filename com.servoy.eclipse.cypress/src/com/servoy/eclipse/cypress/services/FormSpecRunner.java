@@ -188,13 +188,14 @@ public class FormSpecRunner
 		}
 		String tsName = leaf + ".cy.ts" + extension;
 		String jsName = leaf + ".cy.js" + extension;
-		String formSpecSuffix = "." + leaf + ".spec.cy.js" + extension;
-		String formSpecName = leaf + ".spec.cy.js" + extension;
+		String formSpecLeaf = leaf;
 		try (java.util.stream.Stream<Path> walk = Files.walk(dir))
 		{
 			return walk.filter(Files::isRegularFile).filter(p -> {
 				String name = p.getFileName().toString();
-				return name.equals(tsName) || name.equals(jsName) || name.equals(formSpecName) || name.endsWith(formSpecSuffix);
+				return name.equals(tsName) || name.equals(jsName) || FormSpecGenerator.SPEC_CY_EXTENSIONS.stream()
+					.anyMatch(specExtension -> name.equals(formSpecLeaf + specExtension + extension) ||
+						name.endsWith("." + formSpecLeaf + specExtension + extension));
 			}).findFirst().orElse(null);
 		}
 		catch (Exception e)
@@ -223,8 +224,7 @@ public class FormSpecRunner
 		}
 		String tsFolder = leaf + ".cy.ts";
 		String jsFolder = leaf + ".cy.js";
-		String formSpecSuffix = "." + leaf + ".spec.cy.js";
-		String formSpecFolder = leaf + ".spec.cy.js";
+		String formSpecLeaf = leaf;
 		try (java.util.stream.Stream<Path> walk = Files.walk(screenshotsDir))
 		{
 			java.util.List<Path> pngs = walk.filter(Files::isRegularFile)
@@ -233,7 +233,8 @@ public class FormSpecRunner
 					for (Path segment : p)
 					{
 						String seg = segment.toString();
-						if (seg.equals(tsFolder) || seg.equals(jsFolder) || seg.equals(formSpecFolder) || seg.endsWith(formSpecSuffix))
+						if (seg.equals(tsFolder) || seg.equals(jsFolder) || FormSpecGenerator.SPEC_CY_EXTENSIONS.stream()
+							.anyMatch(specExtension -> seg.equals(formSpecLeaf + specExtension) || seg.endsWith("." + formSpecLeaf + specExtension)))
 						{
 							return true;
 						}
@@ -334,7 +335,7 @@ public class FormSpecRunner
 			if (specFilePath == null || !Files.exists(specFilePath))
 			{
 				return "Error: Spec file not found: jenkins-custom/e2e-test-scripts/cypress/cy-form/" + formName +
-					".spec.cy.js. Use showFormInBrowser first to auto-generate it.";
+					".spec.cy.js or .spec.cy.ts. Use showFormInBrowser first to auto-generate it.";
 			}
 
 			// The form spec lives under the e2e-test-scripts project tree, so Cypress MUST

@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 public class CypressTestDiscoveryService {
-	private static final String SPEC_CY_EXTENSION = ".spec.cy.js";
 	private static final String E2E_CY_JS_EXTENSION = ".cy.js";
 	private static final String E2E_CY_TS_EXTENSION = ".cy.ts";
 
@@ -35,11 +34,14 @@ public class CypressTestDiscoveryService {
 		if (testsDir == null || !Files.isDirectory(testsDir)) {
 			return false;
 		}
-		if (Files.exists(testsDir.resolve(formName + SPEC_CY_EXTENSION))) {
-			return true;
+		for (String extension : FormSpecGenerator.SPEC_CY_EXTENSIONS) {
+			if (Files.exists(testsDir.resolve(formName + extension))) {
+				return true;
+			}
 		}
 		try (Stream<Path> files = Files.list(testsDir)) {
-			return files.anyMatch(p -> p.getFileName().toString().endsWith("." + formName + SPEC_CY_EXTENSION));
+			return files.anyMatch(p -> FormSpecGenerator.SPEC_CY_EXTENSIONS.stream()
+					.anyMatch(extension -> p.getFileName().toString().endsWith("." + formName + extension)));
 		} catch (Exception e) {
 			return false;
 		}
@@ -71,10 +73,8 @@ public class CypressTestDiscoveryService {
 			return Collections.emptyList();
 		}
 		try (Stream<Path> files = Files.list(testsDir)) {
-			return files.filter(p -> p.getFileName().toString().endsWith(SPEC_CY_EXTENSION)).map(p -> {
-				String fileName = p.getFileName().toString();
-				return fileName.substring(0, fileName.length() - SPEC_CY_EXTENSION.length());
-			}).toList();
+			return files.filter(p -> FormSpecGenerator.isFormSpecFileName(p.getFileName().toString()))
+					.map(p -> FormSpecGenerator.stripFormSpecExtension(p.getFileName().toString())).distinct().toList();
 		} catch (IOException e) {
 			return Collections.emptyList();
 		}
@@ -136,7 +136,7 @@ public class CypressTestDiscoveryService {
 		Path testsDir = specGenerator.getFormSpecDir();
 		if (testsDir != null && Files.isDirectory(testsDir)) {
 			try (Stream<Path> files = Files.list(testsDir)) {
-				if (files.anyMatch(p -> p.getFileName().toString().endsWith(SPEC_CY_EXTENSION))) {
+				if (files.anyMatch(p -> FormSpecGenerator.isFormSpecFileName(p.getFileName().toString()))) {
 					return true;
 				}
 			} catch (IOException e) {

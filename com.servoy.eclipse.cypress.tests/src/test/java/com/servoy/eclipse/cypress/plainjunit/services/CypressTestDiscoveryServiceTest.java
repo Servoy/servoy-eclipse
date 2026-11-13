@@ -295,6 +295,164 @@ public class CypressTestDiscoveryServiceTest
 		}
 	}
 
+	@Nested
+	@DisplayName("TypeScript form specs (.spec.cy.ts)")
+	class TypeScriptFormSpecs
+	{
+		@Test
+		@DisplayName("hasTest finds a .spec.cy.ts file for the form")
+		void hasTestFindsTsSpec() throws IOException
+		{
+			Files.createFile(tempDir.resolve("myForm.spec.cy.ts"));
+
+			assertTrue(service.hasTest("myForm"));
+			assertTrue(service.hasFormTest("myForm"));
+		}
+
+		@Test
+		@DisplayName("hasTest finds a solution-prefixed .spec.cy.ts file")
+		void hasTestFindsSolutionPrefixedTsSpec() throws IOException
+		{
+			Files.createFile(tempDir.resolve("mySolution.myForm.spec.cy.ts"));
+
+			assertTrue(service.hasTest("myForm"));
+		}
+
+		@Test
+		@DisplayName("hasTest does not match a different form's .spec.cy.ts file")
+		void hasTestIgnoresOtherFormTsSpec() throws IOException
+		{
+			Files.createFile(tempDir.resolve("mySolution.otherForm.spec.cy.ts"));
+
+			assertFalse(service.hasTest("myForm"));
+		}
+
+		@Test
+		@DisplayName("discoverAllTestForms lists .js and .ts specs together, extension stripped")
+		void discoversBothExtensions() throws IOException
+		{
+			Files.createFile(tempDir.resolve("formA.spec.cy.js"));
+			Files.createFile(tempDir.resolve("formB.spec.cy.ts"));
+
+			List<String> forms = service.discoverAllTestForms();
+
+			assertEquals(2, forms.size());
+			assertAll(() -> assertTrue(forms.contains("formA")), () -> assertTrue(forms.contains("formB")));
+		}
+
+		@Test
+		@DisplayName("discoverAllTestForms lists a form once when it has both a .js and a .ts spec")
+void discoversFormOnceWhenBothExtensionsExist() throws IOException
+{
+	Files.createFile(tempDir.resolve("formA.spec.cy.js"));
+	Files.createFile(tempDir.resolve("formA.spec.cy.ts"));
+
+	List<String> forms = service.discoverAllTestForms();
+
+	assertEquals(List.of("formA"), forms);
+}
+
+@Test
+@DisplayName("hasAnyTest is true when only a .spec.cy.ts file exists")
+		void hasAnyTestWithOnlyTsSpec() throws IOException
+		{
+			Files.createFile(tempDir.resolve("someForm.spec.cy.ts"));
+
+			assertTrue(service.hasAnyTest());
+		}
+	}
+
+	@Nested
+	@DisplayName("FormSpecGenerator extension detection")
+	class ExtensionDetection
+	{
+		@Test
+		@DisplayName("defaults to .spec.cy.js when the directory is null or missing")
+		void defaultsToJs()
+		{
+			assertEquals(".spec.cy.js", FormSpecGenerator.detectSpecExtension(null));
+			assertEquals(".spec.cy.js", FormSpecGenerator.detectSpecExtension(tempDir.resolve("nonexistent")));
+		}
+
+		@Test
+		@DisplayName("defaults to .spec.cy.js when the directory has no form specs")
+		void defaultsToJsWhenEmpty() throws IOException
+		{
+			Files.createFile(tempDir.resolve("README.md"));
+
+			assertEquals(".spec.cy.js", FormSpecGenerator.detectSpecExtension(tempDir));
+		}
+
+		@Test
+		@DisplayName("picks .spec.cy.ts when TypeScript form specs outnumber JavaScript ones")
+		void picksTsWhenTsDominates() throws IOException
+		{
+			Files.createFile(tempDir.resolve("a.spec.cy.ts"));
+			Files.createFile(tempDir.resolve("b.spec.cy.ts"));
+			Files.createFile(tempDir.resolve("c.spec.cy.js"));
+
+			assertEquals(".spec.cy.ts", FormSpecGenerator.detectSpecExtension(tempDir));
+		}
+
+		@Test
+		@DisplayName("keeps .spec.cy.js on a tie")
+		void keepsJsOnTie() throws IOException
+		{
+			Files.createFile(tempDir.resolve("a.spec.cy.ts"));
+			Files.createFile(tempDir.resolve("b.spec.cy.js"));
+
+			assertEquals(".spec.cy.js", FormSpecGenerator.detectSpecExtension(tempDir));
+		}
+
+		@Test
+		@DisplayName("detectSpecExtension ignores setup files and run artifacts that only look like form specs")
+void ignoresSetupFilesAndArtifacts() throws IOException
+{
+	Files.createFile(tempDir.resolve("a.spec.ts"));
+	Files.createFile(tempDir.resolve("b.spec.ts"));
+	Files.createFile(tempDir.resolve("c.spec.cy.ts.mp4"));
+	Files.createFile(tempDir.resolve("d.spec.cy.js"));
+
+	assertEquals(".spec.cy.js", FormSpecGenerator.detectSpecExtension(tempDir));
+}
+
+@Test
+@DisplayName("firstExistingSetup finds a .spec.js and a .spec.ts setup file, .js first")
+		void setupLookupFindsBothExtensions() throws IOException
+		{
+			assertEquals(null, FormSpecGenerator.firstExistingSetup(tempDir, "sol.formA"));
+
+			Files.createFile(tempDir.resolve("sol.formA.spec.ts"));
+			assertEquals("sol.formA.spec.ts", FormSpecGenerator.firstExistingSetup(tempDir, "sol.formA").getFileName().toString());
+
+			Files.createFile(tempDir.resolve("sol.formA.spec.js"));
+			assertEquals("sol.formA.spec.js", FormSpecGenerator.firstExistingSetup(tempDir, "sol.formA").getFileName().toString());
+		}
+
+		@Test
+		@DisplayName("firstExisting finds a .spec.cy.ts form spec and does not mistake a setup .spec.ts for it")
+		void formSpecLookupIgnoresSetupFiles() throws IOException
+		{
+			Files.createFile(tempDir.resolve("sol.formA.spec.ts"));
+			assertEquals(null, FormSpecGenerator.firstExisting(tempDir, "sol.formA"));
+
+			Files.createFile(tempDir.resolve("sol.formA.spec.cy.ts"));
+			assertEquals("sol.formA.spec.cy.ts", FormSpecGenerator.firstExisting(tempDir, "sol.formA").getFileName().toString());
+		}
+
+		@Test
+		@DisplayName("isFormSpecFileName and stripFormSpecExtension handle both extensions")
+		void helpersHandleBothExtensions()
+		{
+			assertTrue(FormSpecGenerator.isFormSpecFileName("f.spec.cy.js"));
+			assertTrue(FormSpecGenerator.isFormSpecFileName("f.spec.cy.ts"));
+			assertFalse(FormSpecGenerator.isFormSpecFileName("f.spec.js"));
+			assertEquals("my.form", FormSpecGenerator.stripFormSpecExtension("my.form.spec.cy.ts"));
+			assertEquals("my.form", FormSpecGenerator.stripFormSpecExtension("my.form.spec.cy.js"));
+			assertEquals("f.spec.js", FormSpecGenerator.stripFormSpecExtension("f.spec.js"));
+		}
+	}
+
 	/**
 	 * Exercises the private {@code collectE2ETestNames(Path baseDir, Path scanRoot)} helper
 	 * directly via reflection. This is the logic backing {@code discoverAllE2ETests()} and
