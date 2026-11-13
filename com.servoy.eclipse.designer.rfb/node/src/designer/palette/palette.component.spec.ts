@@ -705,6 +705,233 @@ describe('PaletteComponent', () => {
       expect(createCall.h).toBe(200);
     });
   });
+
+  describe('openPackageManager', () => {
+    it('should delegate to the editor session', () => {
+      editorSession.openPackageManager = vi.fn().mockResolvedValue(undefined);
+      component.openPackageManager();
+      expect(editorSession.openPackageManager).toHaveBeenCalled();
+    });
+  });
+
+  describe('onPaletteScroll', () => {
+    it('should emit the palette scroll position', () => {
+      editorSession.variantsScroll = signal(null);
+      editorContentService.getPallete.mockReturnValue({ scrollTop: 42 });
+      component.onPaletteScroll();
+      expect(editorSession.variantsScroll()).toEqual({ scrollPos: 42 });
+    });
+  });
+
+  describe('onFavoriteCLick', () => {
+    it('should stop propagation and update favorites', () => {
+      editorSession.updateFavoritesComponents = vi.fn();
+      const event = { stopPropagation: vi.fn() } as unknown as Event;
+      const comp = { name: 'button' } as any;
+      component.onFavoriteCLick(event, comp);
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(editorSession.updateFavoritesComponents).toHaveBeenCalledWith(comp);
+    });
+  });
+
+  describe('onVariantMouseUp', () => {
+    it('should remove the dragged palette item and reset drag state', () => {
+      const draggedEl = document.createElement('li');
+      const body = { removeChild: vi.fn() };
+      editorContentService.getBodyElement.mockReturnValue(body);
+      (component as any).dragItem = { paletteItemBeingDragged: draggedEl, contentItemBeingDragged: {} };
+      component.onVariantMouseUp();
+      expect(body.removeChild).toHaveBeenCalledWith(draggedEl);
+      expect(editorContentService.sendMessageToIframe).toHaveBeenCalledWith({ id: 'destroyElement' });
+      expect((component as any).dragItem.paletteItemBeingDragged).toBeNull();
+    });
+
+    it('should do nothing when there is no dragged palette item', () => {
+      (component as any).dragItem = {};
+      component.onVariantMouseUp();
+      expect(editorContentService.sendMessageToIframe).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onVariantsDestroy', () => {
+    it('should clear the dragged variant element when a palette item is being dragged', () => {
+      (component as any).dragItem = { paletteItemBeingDragged: document.createElement('li') };
+      (component as any).draggedVariant = { element: document.createElement('div') };
+      component.onVariantsDestroy();
+      expect((component as any).draggedVariant.element).toBeNull();
+    });
+  });
+
+  describe('findVariantControl', () => {
+    it('should return the button control under the click', () => {
+      const btn = document.createElement('button');
+      expect((component as any).findVariantControl(btn)).toBe(btn);
+    });
+
+    it('should climb from a child up to the bts- control', () => {
+      const control = document.createElement('span');
+      control.className = 'bts-button';
+      const inner = document.createElement('i');
+      control.appendChild(inner);
+      expect((component as any).findVariantControl(inner)).toBe(control);
+    });
+
+    it('should return null when only a layout wrapper is found', () => {
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('svy-layoutcontainer');
+      expect((component as any).findVariantControl(wrapper)).toBeNull();
+    });
+
+    it('should return null when clicked is null', () => {
+      expect((component as any).findVariantControl(null)).toBeNull();
+    });
+  });
+
+  describe('getVariantsDocument', () => {
+    it('should return the VariantsForm iframe document', () => {
+      const varDoc = {} as Document;
+      const iframe = { id: 'VariantsForm', contentWindow: { document: varDoc } };
+      editorContentService.getDocument.mockReturnValue({ getElementsByTagName: () => [iframe] });
+      expect((component as any).getVariantsDocument()).toBe(varDoc);
+    });
+
+    it('should return null when no VariantsForm iframe exists', () => {
+      editorContentService.getDocument.mockReturnValue({ getElementsByTagName: () => [] });
+      expect((component as any).getVariantsDocument()).toBeNull();
+    });
+  });
+
+  describe('updateLocationCallback', () => {
+    it('should scroll the content area', () => {
+      const contentArea = { scrollTop: 0, scrollLeft: 0 };
+      editorContentService.getContentArea.mockReturnValue(contentArea);
+      component.updateLocationCallback(5, 7);
+      expect(contentArea.scrollLeft).toBe(5);
+      expect(contentArea.scrollTop).toBe(7);
+    });
+  });
+
+  describe('search suggestion helpers', () => {
+    let store: Record<string, string>;
+
+    beforeEach(() => {
+      store = {};
+      vi.stubGlobal('localStorage', {
+        getItem: (k: string) => (k in store ? store[k] : null),
+        setItem: (k: string, v: string) => {
+          store[k] = v;
+        },
+        removeItem: (k: string) => {
+          delete store[k];
+        }
+      });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('openSuggestions should load history and show suggestions', () => {
+      store['searchHistory'] = JSON.stringify(['button', 'label']);
+      (component as any).searchText = '';
+      component.openSuggestions();
+      expect((component as any).showSuggestions).toBe(true);
+      expect((component as any).filteredSuggestions.length).toBeGreaterThan(0);
+    });
+
+    it('removeSuggestion should drop the entry from history', () => {
+      (component as any).searchHistory = ['a', 'b'];
+      const event = { stopPropagation: vi.fn() } as unknown as MouseEvent;
+      component.removeSuggestion(event, 'a');
+      expect((component as any).searchHistory).toEqual(['b']);
+      expect(event.stopPropagation).toHaveBeenCalled();
+    });
+
+    it('closeSuggestions should keep open when keepSuggestionsOpen is set', () => {
+      (component as any).keepSuggestionsOpen = true;
+      (component as any).showSuggestions = true;
+      component.closeSuggestions();
+      expect((component as any).showSuggestions).toBe(true);
+    });
+
+    it('closeSuggestions should add the search text to history and close', () => {
+      (component as any).keepSuggestionsOpen = false;
+      (component as any).searchText = 'newterm';
+      (component as any).searchHistory = [];
+      (component as any).filteredSuggestions = [];
+      component.closeSuggestions();
+      expect((component as any).showSuggestions).toBe(false);
+      expect((component as any).searchHistory).toContain('newterm');
+    });
+
+    it('filterSuggestions should match by substring excluding the exact value', () => {
+      (component as any).searchHistory = ['button', 'bigbutton', 'label'];
+      const result = (component as any).filterSuggestions('button');
+      expect(result).toContain('bigbutton');
+      expect(result).not.toContain('button');
+    });
+
+    it('filterSuggestions should return reversed history when no value', () => {
+      (component as any).searchHistory = ['a', 'b', 'c'];
+      expect((component as any).filterSuggestions('')).toEqual(['c', 'b', 'a']);
+    });
+  });
+
+  describe('onMouseDown', () => {
+    it('should ignore clicks on the variants trigger', () => {
+      editorSession.variantsTrigger = signal(null);
+      const target = document.createElement('i');
+      target.setAttribute('name', 'variants');
+      const event = { target, stopPropagation: vi.fn() } as unknown as MouseEvent;
+      component.onMouseDown(event, 'button', 'pkg', {}, null!);
+      expect(event.stopPropagation).not.toHaveBeenCalled();
+      expect((component as any).dragItem.elementName).toBeUndefined();
+    });
+
+    it('should start dragging a plain component and send createElement', () => {
+      editorSession.variantsTrigger = signal(null);
+      editorSession.setDragging = vi.fn();
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      li.appendChild(span);
+      const body = { appendChild: vi.fn() };
+      editorContentService.getBodyElement.mockReturnValue(body);
+      editorContentService.registerAutoscroll = vi.fn();
+      const event = { target: span, pageX: 10, pageY: 20, stopPropagation: vi.fn() } as unknown as MouseEvent;
+      component.onMouseDown(event, 'bootstrap-button', 'bootstrap', { x: 1 }, null!, undefined, undefined, 'component');
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect((component as any).dragItem.elementName).toBe('bootstrap-button');
+      expect(editorSession.setDragging).toHaveBeenCalledWith(true);
+      expect(editorContentService.sendMessageToIframe).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'createElement', name: 'bootstrapButton', type: 'component' }));
+      expect(editorSession.registerAutoscroll).toHaveBeenCalledWith(component);
+    });
+
+    it('should not send createElement when dragging a ghost', () => {
+      editorSession.variantsTrigger = signal(null);
+      const span = document.createElement('span');
+      const li = document.createElement('li');
+      li.appendChild(span);
+      editorContentService.getBodyElement.mockReturnValue({ appendChild: vi.fn() });
+      const event = { target: span, pageX: 10, pageY: 20, stopPropagation: vi.fn() } as unknown as MouseEvent;
+      component.onMouseDown(event, 'field', 'svycore', {}, { type: 'ghost' } as any, 'prop');
+      expect(editorContentService.sendMessageToIframe).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'createElement' }));
+      expect((component as any).dragItem.ghost).toEqual({ type: 'ghost' });
+    });
+  });
+
+  describe('refreshPalette', () => {
+    it('should resolve the HTTP packages and store them, then mark for check', () => {
+      const packages = [{ packageName: 'bootstrap', components: [{ name: 'button', properties: null }] }];
+      (component as any).http = { get: vi.fn().mockReturnValue(of(packages)) };
+      editorSession.packages = signal<any[]>([]);
+      (component as any).cdr = { markForCheck: vi.fn() };
+      component.refreshPalette();
+      expect(editorSession.packages().length).toBe(1);
+      expect((component as any).cdr.markForCheck).toHaveBeenCalled();
+    });
+  });
 });
 
 describe('SearchTextPipe', () => {

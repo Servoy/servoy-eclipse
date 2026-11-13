@@ -404,4 +404,184 @@ describe('MouseSelectionComponent', () => {
       expect((component as any).nodes()[0].style.height).toBe('50px');
     });
   });
+
+  describe('action helpers', () => {
+    it('zoomInAction should stop propagation and execute zoomIn', () => {
+      const event = { stopPropagation: vi.fn() } as unknown as MouseEvent;
+      component.zoomInAction(event);
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(editorSession.executeAction).toHaveBeenCalledWith('zoomIn');
+    });
+
+    it('copyAction should execute copy', () => {
+      const event = { stopPropagation: vi.fn() } as unknown as MouseEvent;
+      component.copyAction(event);
+      expect(editorSession.executeAction).toHaveBeenCalledWith('copy');
+    });
+
+    it('openWizardAction should open the configurator for the property', () => {
+      const event = { stopPropagation: vi.fn() } as unknown as MouseEvent;
+      component.openWizardAction(event, 'dataProviderID');
+      expect(editorSession.openConfigurator).toHaveBeenCalledWith('dataProviderID');
+    });
+
+    it('updateMoveFCorLFC should flag a form-component move', () => {
+      component.updateMoveFCorLFC();
+      expect((component as any).moveFCorLFC).toBe(true);
+    });
+  });
+
+  describe('onEnter / onLeave', () => {
+    it('onEnter should display the next sibling', () => {
+      const src = document.createElement('div');
+      const sibling = document.createElement('div');
+      const parent = document.createElement('div');
+      parent.appendChild(src);
+      parent.appendChild(sibling);
+      component.onEnter({ srcElement: src } as unknown as MouseEvent);
+      expect(sibling.style.display).toBe('block');
+    });
+
+    it('onLeave should hide the source element', () => {
+      const src = document.createElement('div');
+      component.onLeave({ srcElement: src } as unknown as MouseEvent);
+      expect(src.style.display).toBe('none');
+    });
+  });
+
+  describe('ngOnInit / ngAfterViewInit / ngOnDestroy', () => {
+    it('ngOnInit should request selection and attach glasspane listeners', () => {
+      const addEventListener = vi.fn();
+      editorContentService.getGlassPane.mockReturnValue({ addEventListener, style: {} });
+      component.ngOnInit();
+      expect(editorSession.requestSelection).toHaveBeenCalled();
+      expect(addEventListener).toHaveBeenCalledWith('mousedown', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('mouseup', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('mousemove', expect.any(Function));
+    });
+
+    it('ngOnDestroy should unsubscribe and remove the content listener', () => {
+      const removeSelection = vi.fn();
+      (component as any).removeSelectionChangedListener = removeSelection;
+      component.ngOnDestroy();
+      expect(removeSelection).toHaveBeenCalled();
+      expect(editorContentService.removeContentMessageListener).toHaveBeenCalledWith(component);
+    });
+  });
+
+  describe('onMouseDown', () => {
+    it('should select a found node that is not already selected', () => {
+      const node = { getAttribute: (n: string) => (n === 'svy-id' ? 'id1' : null), parentElement: { classList: { contains: () => false }, parentElement: null, style: {} } };
+      designerUtilsService.getNode.mockReturnValue(node);
+      editorSession.getSelection.mockReturnValue([]);
+      (component as any).onMouseDown({ pageX: 10, pageY: 10, ctrlKey: false, metaKey: false, shiftKey: false, button: 0 } as MouseEvent);
+      expect(editorSession.setSelection).toHaveBeenCalledWith(['id1'], component);
+    });
+
+    it('should start a lasso when no node is found', () => {
+      designerUtilsService.getNode.mockReturnValue(null);
+      editorContentService.getContentArea.mockReturnValue({ getBoundingClientRect: () => ({ left: 0, top: 0 }), scrollLeft: 0, scrollTop: 0 });
+      (component as any).lassoRef = () => ({ nativeElement: document.createElement('div') });
+      (component as any).onMouseDown({ pageX: 10, pageY: 10, button: 0, ctrlKey: false, metaKey: false, shiftKey: false } as MouseEvent);
+      expect((component as any).lassostarted).toBe(true);
+      expect(editorSession.setSelection).toHaveBeenCalledWith([], component);
+    });
+
+    it('should ignore mousedown while dragging', () => {
+      editorSession.dragging.set(true);
+      (component as any).onMouseDown({ pageX: 10, pageY: 10, button: 0 } as MouseEvent);
+      expect(editorSession.setSelection).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onMouseUp', () => {
+    const makeContentNode = (id: string, rect: DOMRect) => ({
+      getAttribute: (n: string) => (n === 'svy-id' ? id : n === 'svy-layoutname' ? null : null),
+      getBoundingClientRect: () => rect,
+      offsetParent: {},
+      parentElement: { classList: { contains: () => false }, closest: () => null, style: {} },
+      classList: { contains: () => false },
+      closest: () => null
+    });
+
+    beforeEach(() => {
+      (component as any).lassoRef = () => ({ nativeElement: document.createElement('div') });
+      (component as any).selectedRef = () => [];
+      editorContentService.getContentArea.mockReturnValue({ getBoundingClientRect: () => ({ left: 0, top: 0 }), scrollLeft: 0, scrollTop: 0, focus: vi.fn() });
+    });
+
+    it('should select the element directly under the cursor on a click (no lasso)', () => {
+      (component as any).lassostarted = false;
+      (component as any).mouseDownEvent = { x: 60, y: 60 };
+      (component as any).fieldLocation = null;
+      const node = makeContentNode('id1', new DOMRect(0, 0, 100, 100));
+      editorContentService.getAllContentElements.mockReturnValue([node]);
+      const event = { pageX: 50, pageY: 50, x: 60, y: 60, button: 0, timeStamp: 1000, ctrlKey: false, metaKey: false, shiftKey: false } as MouseEvent;
+      component['onMouseUp'](event);
+      expect(editorSession.setSelection).toHaveBeenCalledWith(['id1'], component);
+    });
+
+    it('should lasso-select intersecting elements when a lasso was dragged', () => {
+      (component as any).lassostarted = true;
+      (component as any).mousedownpoint = { x: 0, y: 0 };
+      (component as any).mouseDownEvent = { x: 0, y: 0 };
+      (component as any).fieldLocation = null;
+      const node = makeContentNode('id1', new DOMRect(10, 10, 50, 50));
+      editorContentService.getAllContentElements.mockReturnValue([node]);
+      const event = { pageX: 200, pageY: 200, x: 200, y: 200, button: 0, timeStamp: 2000, ctrlKey: false, metaKey: false, shiftKey: false } as MouseEvent;
+      component['onMouseUp'](event);
+      expect(editorSession.setSelection).toHaveBeenCalledWith(['id1'], component);
+    });
+
+    it('should update the field positioner when the click did not move', () => {
+      (component as any).lassostarted = false;
+      (component as any).fieldLocation = { x: 50, y: 50 };
+      (component as any).mouseDownEvent = { x: 50, y: 50 };
+      editorContentService.getAllContentElements.mockReturnValue([]);
+      const event = { pageX: 50, pageY: 50, x: 50, y: 50, button: 0, timeStamp: 1000, ctrlKey: false, metaKey: false, shiftKey: false } as MouseEvent;
+      component['onMouseUp'](event);
+      expect(editorSession.updateFieldPositioner).toHaveBeenCalled();
+    });
+
+    it('should trigger zoomIn on a fast double click of a maxLevelDesign node', () => {
+      (component as any).lassostarted = false;
+      (component as any).fieldLocation = null;
+      (component as any).mouseDownEvent = { x: 1, y: 1 };
+      (component as any).lastTimestamp = 1000;
+      (component as any).nodes.set([{ svyid: 'id1', maxLevelDesign: true, style: {} }]);
+      editorContentService.getAllContentElements.mockReturnValue([]);
+      const event = { pageX: 9, pageY: 9, x: 9, y: 9, button: 0, timeStamp: 1100, ctrlKey: false, metaKey: false, shiftKey: false } as MouseEvent;
+      component['onMouseUp'](event);
+      expect(editorSession.executeAction).toHaveBeenCalledWith('zoomIn');
+    });
+  });
+
+  describe('onMouseMove lasso', () => {
+    it('should grow the lasso rectangle while dragging a lasso', () => {
+      (component as any).lassostarted = true;
+      (component as any).mousedownpoint = { x: 100, y: 100 };
+      const lassoEl = document.createElement('div');
+      lassoEl.style.display = 'none';
+      (component as any).lassoRef = () => ({ nativeElement: lassoEl });
+      editorContentService.getContentArea.mockReturnValue({ getBoundingClientRect: () => ({ left: 0, top: 0 }), scrollLeft: 0, scrollTop: 0 });
+      (component as any).renderer = {
+        setStyle: (el: HTMLElement, p: string, v: string) => {
+          (el.style as any)[p] = v;
+        }
+      };
+      (component as any).onMouseMove({ pageX: 150, pageY: 160 } as MouseEvent);
+      expect(lassoEl.style.width).toBe('50px');
+      expect(lassoEl.style.height).toBe('60px');
+      expect(lassoEl.style.display).toBe('block');
+    });
+
+    it('should redraw decorators while resizing', () => {
+      editorSession.dragging.set(false);
+      editorSession.resizing.set(true);
+      (component as any).lassostarted = false;
+      const redraw = vi.spyOn(component, 'redrawDecorators').mockImplementation(() => undefined);
+      (component as any).onMouseMove({ pageX: 1, pageY: 1 } as MouseEvent);
+      expect(redraw).toHaveBeenCalled();
+    });
+  });
 });

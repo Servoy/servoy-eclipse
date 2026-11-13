@@ -75,4 +75,101 @@ describe('DesignSizeService', () => {
       expect(service.isPortrait).toBe(false);
     });
   });
+
+  describe('createItems', () => {
+    let toolbar: { add: ReturnType<typeof vi.fn> };
+
+    beforeEach(() => {
+      toolbar = { add: vi.fn() };
+      service.createItems(toolbar as any);
+    });
+
+    it('should create all five toolbar items and add them to the sticky category', () => {
+      expect(service.btnDesktopSize).toBeDefined();
+      expect(service.btnTabletSize).toBeDefined();
+      expect(service.btnMobileSize).toBeDefined();
+      expect(service.btnCustomWidth).toBeDefined();
+      expect(service.btnCustomHeight).toBeDefined();
+      expect(toolbar.add).toHaveBeenCalledTimes(5);
+    });
+
+    it('Desktop click should set the content size to full and reset to auto height', () => {
+      service.btnDesktopSize.onclick!();
+      expect(editor.setContentSizeFull).toHaveBeenCalled();
+      expect(service.lastWidth).toBe('960px');
+      expect(service.lastHeight).toBe('auto');
+      expect(editorSession.setFormFixedSize).toHaveBeenCalledWith({ width: '960px', height: 'auto' });
+    });
+
+    it('Tablet click should use portrait dimensions by default', () => {
+      service.lastClicked = '';
+      service.isPortrait = true;
+      service.btnTabletSize.onclick!();
+      expect(editor.setContentSize).toHaveBeenCalledWith('768px', '1024px');
+      expect(service.lastClicked).toBe('Tablet');
+    });
+
+    it('Tablet click should toggle to landscape when clicked again', () => {
+      service.lastClicked = 'Tablet';
+      service.isPortrait = true;
+      service.btnTabletSize.onclick!();
+      expect(editor.setContentSize).toHaveBeenCalledWith('1024px', '768px');
+    });
+
+    it('Phone click should use portrait dimensions by default', () => {
+      service.lastClicked = '';
+      service.isPortrait = true;
+      service.btnMobileSize.onclick!();
+      expect(editor.setContentSize).toHaveBeenCalledWith('320px', '568px');
+      expect(service.lastClicked).toBe('Phone');
+    });
+
+    it('Phone click should toggle to landscape when clicked again', () => {
+      service.lastClicked = 'Phone';
+      service.isPortrait = true;
+      service.btnMobileSize.onclick!();
+      expect(editor.setContentSize).toHaveBeenCalledWith('568px', '320px');
+    });
+
+    it('custom width onselection should set content size and fixed width', () => {
+      service.lastHeight = 'auto';
+      service.btnCustomWidth.onselection('480px');
+      expect(editor.setContentSize).toHaveBeenCalledWith('480px', 'auto');
+      expect(service.lastWidth).toBe('480px');
+      expect(editorSession.setFormFixedSize).toHaveBeenCalledWith({ width: '480px' });
+    });
+
+    it('custom height onselection should resize using the last width', () => {
+      service.lastWidth = '640px';
+      service.btnCustomHeight.onselection('1024px');
+      expect(editor.setContentSize).toHaveBeenCalledWith('640px', '1024px');
+    });
+  });
+
+  describe('setupItems', () => {
+    beforeEach(() => {
+      service.btnCustomWidth = { text: '', list: [] } as any;
+      service.btnCustomHeight = { text: 'auto' } as any;
+    });
+
+    it('should not configure width/height items for absolute layout forms', () => {
+      editorSession.isAbsoluteFormLayout.mockReturnValue(true);
+      service.setupItems();
+      expect(service.lastWidth).toBe('960px');
+      expect(editorSession.getFormFixedSize).not.toHaveBeenCalled();
+    });
+
+    it('should configure custom width and query the fixed size for responsive forms', async () => {
+      editorSession.isAbsoluteFormLayout.mockReturnValue(false);
+      editorSession.getFormFixedSize.mockResolvedValue({ width: '480px', height: '640px' });
+      service.setupItems();
+      expect(service.btnCustomWidth.text).toBe('960px');
+      expect(editorSession.getFormFixedSize).toHaveBeenCalled();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(service.lastHeight).toBe('640px');
+      expect(service.lastWidth).toBe('480px');
+      expect(editor.setContentSize).toHaveBeenCalledWith('480px', '640px');
+    });
+  });
 });

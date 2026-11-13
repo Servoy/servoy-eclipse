@@ -1,4 +1,4 @@
-import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { VariantsContentComponent } from './variantscontent.component';
@@ -82,6 +82,46 @@ describe('VariantsContentComponent', () => {
     it('should return 37px for other components', () => {
       (component as any).component = signal({ name: 'other-component' });
       expect(component.getVariantContentMargin()).toBe('37px');
+    });
+  });
+
+  describe('sendStylesToVariantsForm', () => {
+    let postMessage: ReturnType<typeof vi.fn>;
+    let iframe: { contentWindow: { postMessage: ReturnType<typeof vi.fn> } };
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      postMessage = vi.fn();
+      iframe = { contentWindow: { postMessage } };
+      (component as any).component = signal({ name: 'bootstrap-button', styleVariantCategory: 'btn', model: { property: 'x' } });
+      (component as any).editorSession.getVariantsForCategory = vi.fn().mockResolvedValue([{ name: 'v1' }]);
+      (component as any).editorContentService.getDocument = vi.fn().mockReturnValue({ getElementById: vi.fn().mockReturnValue(iframe) });
+      (component as any).variantsIFrame = null;
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('should resolve the iframe, destroy old variants and create the new ones', async () => {
+      component.sendStylesToVariantsForm();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(postMessage).toHaveBeenCalledWith({ id: 'destroyVariants' }, '*');
+      expect(postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'createVariants', name: 'bootstrapButton' }), '*');
+    });
+
+    it('should poll the variants form size after the first interval tick', async () => {
+      (component as any).variantsIFrame = iframe;
+      component.sendStylesToVariantsForm();
+      await Promise.resolve();
+      await Promise.resolve();
+      postMessage.mockClear();
+      // first tick is skipped (firstQuery), second tick sends sendVariantsSize
+      vi.advanceTimersByTime(50);
+      vi.advanceTimersByTime(50);
+      expect(postMessage).toHaveBeenCalledWith({ id: 'sendVariantsSize' }, '*');
     });
   });
 });

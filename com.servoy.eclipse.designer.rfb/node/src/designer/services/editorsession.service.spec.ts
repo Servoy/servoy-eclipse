@@ -291,4 +291,270 @@ describe('EditorSessionService', () => {
       expect(service.getService('unknown')).toBeNull();
     });
   });
+
+  describe('setSelection', () => {
+    it('should store selection, call the service and notify listeners', () => {
+      const listener = { selectionChanged: vi.fn() };
+      service.addSelectionChangedListener(listener);
+      service.setSelection(['a', 'b']);
+      expect(service.getSelection()).toEqual(['a', 'b']);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'setSelection', { selection: ['a', 'b'] }, true);
+      expect(listener.selectionChanged).toHaveBeenCalledWith(['a', 'b']);
+    });
+
+    it('should skip the provided listener', () => {
+      const skipped = { selectionChanged: vi.fn() };
+      const other = { selectionChanged: vi.fn() };
+      service.addSelectionChangedListener(skipped);
+      service.addSelectionChangedListener(other);
+      service.setSelection(['x'], skipped);
+      expect(skipped.selectionChanged).not.toHaveBeenCalled();
+      expect(other.selectionChanged).toHaveBeenCalledWith(['x']);
+    });
+  });
+
+  describe('callService delegating methods', () => {
+    it('connect should connect the websocket and request wizard/developer menus', () => {
+      const connectedSession = { callService: vi.fn().mockResolvedValue(null) };
+      const websocketService = {
+        connect: vi.fn().mockReturnValue(connectedSession),
+        getURLParameter: vi.fn().mockReturnValue('42'),
+      };
+      (service as any).websocketService = websocketService;
+      urlParser.isAbsoluteFormLayout.mockReturnValue(true);
+      service.connect();
+      expect(websocketService.connect).toHaveBeenCalledWith('', ['42']);
+      expect(connectedSession.callService).toHaveBeenCalledWith('formeditor', 'getWizardProperties');
+      expect(connectedSession.callService).toHaveBeenCalledWith('formeditor', 'getDeveloperMenus');
+    });
+
+    it('activated should call the activated service', () => {
+      service.activated();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'activated');
+    });
+
+    it('initialized should call the initialized service', () => {
+      service.initialized();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'initialized');
+    });
+
+    it('keyPressed should map event flags to the service payload', () => {
+      service.keyPressed({ ctrlKey: true, shiftKey: false, altKey: true, metaKey: false, keyCode: 65 });
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'keyPressed',
+        { ctrl: true, shift: false, alt: true, meta: false, keyCode: 65 }, true);
+    });
+
+    it('sendChanges should call setProperties', () => {
+      const props = { a: 1 };
+      service.sendChanges(props);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'setProperties', props, true);
+    });
+
+    it('moveResponsiveComponent should call moveComponent', () => {
+      const props = { id: 'x' };
+      service.moveResponsiveComponent(props);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'moveComponent', props, true);
+    });
+
+    it('createComponent should call createComponent', () => {
+      const comp = { name: 'button' };
+      service.createComponent(comp);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'createComponent', comp, true);
+    });
+
+    it('createComponents should call createComponents', () => {
+      const comps = [{ name: 'a' }];
+      service.createComponents(comps);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'createComponents', comps, true);
+    });
+
+    it('addStyleVariantFor should wrap the category', () => {
+      service.addStyleVariantFor('cat');
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'addStyleVariantFor', { p: 'cat' }, true);
+    });
+
+    it('editStyleVariantsFor should wrap the category', () => {
+      service.editStyleVariantsFor('cat');
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'editStyleVariantsFor', { p: 'cat' }, true);
+    });
+
+    it('getVariantsForCategory should call the service with the category', () => {
+      service.getVariantsForCategory('cat');
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getVariantsForCategory', { variantCategory: 'cat' }, false);
+    });
+
+    it('duplicateGhosts should call duplicateGhosts', () => {
+      const args = { uuids: ['a'], parentUuid: 'p', dropIndex: 0 };
+      service.duplicateGhosts(args);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'duplicateGhosts', args, true);
+    });
+
+    it('openElementWizard should wrap the element type', () => {
+      service.openElementWizard('field');
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'openElementWizard', { elementType: 'field' }, true);
+    });
+
+    it('updateFieldPositioner should wrap the location', () => {
+      service.updateFieldPositioner({ x: 1, y: 2 });
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'updateFieldPositioner', { location: { x: 1, y: 2 } }, true);
+    });
+
+    it('executeAction should pass the action name through', () => {
+      service.executeAction('myAction', { a: 1 });
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'myAction', { a: 1 }, true);
+    });
+
+    it('openContainedForm should wrap the uuid', () => {
+      service.openContainedForm('u1');
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'openContainedForm', { uuid: 'u1' }, true);
+    });
+
+    it('buildTiNG should call buildTiNG', () => {
+      service.buildTiNG();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'buildTiNG', {}, true);
+    });
+
+    it('consoleLog should wrap the message', () => {
+      service.consoleLog('hi');
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'consoleLog', { message: 'hi' }, true);
+    });
+
+    it('getComponentPropertyWithTags should wrap svyId and propertyName', () => {
+      service.getComponentPropertyWithTags('id1', 'prop');
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getComponentPropertyWithTags', { svyId: 'id1', propertyName: 'prop' }, false);
+    });
+
+    it('setCssAnchoring should wrap selection and anchors', () => {
+      const anchors = { top: '1', left: '2', bottom: '3', right: '4' };
+      service.setCssAnchoring(['a'], anchors);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'setCssAnchoring', { selection: ['a'], anchors }, true);
+    });
+
+    it('getFormFixedSize should call getFormFixedSize', () => {
+      service.getFormFixedSize();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getFormFixedSize');
+    });
+
+    it('setFormFixedSize should pass the args', () => {
+      service.setFormFixedSize({ width: '10px', height: '20px' });
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'setFormFixedSize', { width: '10px', height: '20px' });
+    });
+
+    it('getZoomLevel should call getZoomLevel', () => {
+      service.getZoomLevel();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getZoomLevel', {}, false);
+    });
+
+    it('setZoomLevel should wrap the value', () => {
+      service.setZoomLevel(3);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'setZoomLevel', { zoomLevel: 3 }, false);
+    });
+
+    it('toggleShowData should call toggleShowData', () => {
+      service.toggleShowData();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'toggleShowData', null, true);
+    });
+
+    it('toggleShowWireframe should toggle the wireframe setting', () => {
+      service.toggleShowWireframe();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'toggleShow', { show: 'showWireframeInDesigner' }, false);
+    });
+
+    it('toggleHighlight should toggle the highlight setting', () => {
+      service.toggleHighlight();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'toggleShow', { show: 'showHighlightInDesigner' }, false);
+    });
+
+    it('toggleShowDynamicGuides should toggle the dynamic guides setting', () => {
+      service.toggleShowDynamicGuides();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'toggleShow', { show: 'showDynamicGuidesInDesigner' }, false);
+    });
+
+    it('isShowData should query the showData boolean state', () => {
+      service.isShowData();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getBooleanState', { showData: true }, false);
+    });
+
+    it('isShowHighlight should query the showHighlight boolean state', () => {
+      service.isShowHighlight();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getBooleanState', { showHighlight: true }, false);
+    });
+
+    it('getShortcuts should call getShortcuts', () => {
+      service.getShortcuts();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getShortcuts');
+    });
+
+    it('getSuperForms should call getSuperForms', () => {
+      service.getSuperForms();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getSuperForms');
+    });
+
+    it('hasCypressFormTest should call hasCypressFormTest', () => {
+      service.hasCypressFormTest();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'hasCypressFormTest');
+    });
+
+    it('getSnapThreshold should call getSnapThresholds', () => {
+      service.getSnapThreshold();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'getSnapThresholds', false);
+    });
+
+    it('openPackageManager should call openPackageManager', () => {
+      service.openPackageManager();
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'openPackageManager', null, true);
+    });
+  });
+
+  describe('sameSize', () => {
+    it('should not send changes when fewer than 2 elements are selected', () => {
+      (service as any).selection = ['only-one'];
+      service.sameSize(true);
+      expect(wsSession.callService).not.toHaveBeenCalledWith('formeditor', 'setProperties', expect.anything(), true);
+    });
+
+    it('should set the width of later elements to the first element width', () => {
+      (service as any).selection = ['a', 'b'];
+      editorContentService.getContentElement.mockImplementation((id: string) => {
+        if (id === 'a') return { getBoundingClientRect: () => new DOMRect(0, 0, 100, 40) };
+        if (id === 'b') return { getBoundingClientRect: () => new DOMRect(0, 0, 60, 80) };
+        return null;
+      });
+      service.sameSize(true);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'setProperties', { b: { width: 100, height: 80 } }, true);
+    });
+
+    it('should set the height of later elements to the first element height', () => {
+      (service as any).selection = ['a', 'b'];
+      editorContentService.getContentElement.mockImplementation((id: string) => {
+        if (id === 'a') return { getBoundingClientRect: () => new DOMRect(0, 0, 100, 40) };
+        if (id === 'b') return { getBoundingClientRect: () => new DOMRect(0, 0, 60, 80) };
+        return null;
+      });
+      service.sameSize(false);
+      expect(wsSession.callService).toHaveBeenCalledWith('formeditor', 'setProperties', { b: { width: 60, height: 40 } }, true);
+    });
+  });
+
+  describe('palette refresher', () => {
+    it('setPaletteRefresher + refreshPalette should delegate', () => {
+      const refresher = { refreshPalette: vi.fn() };
+      service.setPaletteRefresher(refresher);
+      service.refreshPalette();
+      expect(refresher.refreshPalette).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('getSession', () => {
+    it('should return the websocket session', () => {
+      expect(service.getSession()).toBe(wsSession);
+    });
+  });
+
+  describe('getDeveloperMenus edge case', () => {
+    it('should return null when developerMenus has no COMPONENT entry', () => {
+      (service as any).developerMenus = { FORM: ['f'] };
+      expect(service.getDeveloperMenus(false, 'x')).toBeNull();
+    });
+  });
 });

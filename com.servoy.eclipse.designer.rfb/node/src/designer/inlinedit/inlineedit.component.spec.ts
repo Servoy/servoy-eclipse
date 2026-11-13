@@ -81,4 +81,77 @@ describe('InlineEditComponent', () => {
       expect(editorSession.setInlineEditMode).toHaveBeenCalledWith(true);
     });
   });
+
+  describe('ngAfterViewInit', () => {
+    it('should register a mouseup callback that enters inline edit on a fast double click', () => {
+      (component as any).lastTimestamp = 0;
+      component.ngAfterViewInit();
+      const cb = editorSession.registerCallback();
+      expect(cb.event).toBe('mouseup');
+      const enterSpy = vi.spyOn(component, 'enterInlineEdit').mockImplementation(() => undefined);
+      editorSession.isInlineEditMode.mockReturnValue(false);
+      cb.function({ timeStamp: 100 } as MouseEvent);
+      expect(enterSpy).toHaveBeenCalled();
+      expect((component as any).lastTimestamp).toBe(100);
+    });
+
+    it('should not enter inline edit when already in inline edit mode', () => {
+      component.ngAfterViewInit();
+      const cb = editorSession.registerCallback();
+      const enterSpy = vi.spyOn(component, 'enterInlineEdit').mockImplementation(() => undefined);
+      editorSession.isInlineEditMode.mockReturnValue(true);
+      cb.function({ timeStamp: 100 } as MouseEvent);
+      expect(enterSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('enterInlineEdit', () => {
+    it('should do nothing when there is no selection', () => {
+      editorSession.getSelection.mockReturnValue([]);
+      const handleSpy = vi.spyOn(component, 'handleDirectEdit');
+      component.enterInlineEdit({} as MouseEvent);
+      expect(handleSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle a direct edit for a matching selected node', async () => {
+      editorSession.getSelection.mockReturnValue(['node1']);
+      const eventNode = {
+        getAttribute: (n: string) => (n === 'svy-id' ? 'node1' : n === 'directEditPropertyName' ? 'dataProviderID' : null),
+        clientHeight: 20,
+        clientWidth: 100,
+        getBoundingClientRect: () => ({ x: 5, y: 6, width: 100, height: 20 })
+      };
+      (component as any).designerUtilsService.getNode = vi.fn().mockReturnValue(eventNode);
+      (component as any).designerUtilsService.convertToAbsolutePoint = vi.fn((p: any) => p);
+      editorSession.getComponentPropertyWithTags.mockResolvedValue('value');
+      const handleSpy = vi.spyOn(component, 'handleDirectEdit').mockImplementation(() => undefined);
+      component.enterInlineEdit({} as MouseEvent);
+      await Promise.resolve();
+      expect(handleSpy).toHaveBeenCalledWith('node1', expect.objectContaining({ width: 100, height: 20 }), 'dataProviderID', 'value');
+    });
+
+    it('should not call handleDirectEdit when the node has no direct edit property', () => {
+      editorSession.getSelection.mockReturnValue(['node1']);
+      const eventNode = {
+        getAttribute: (n: string) => (n === 'svy-id' ? 'node1' : null)
+      };
+      (component as any).designerUtilsService.getNode = vi.fn().mockReturnValue(eventNode);
+      const handleSpy = vi.spyOn(component, 'handleDirectEdit');
+      component.enterInlineEdit({} as MouseEvent);
+      expect(handleSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addListeners', () => {
+    it('should register keyup, keydown and blur listeners once', () => {
+      const listen = vi.fn().mockReturnValue(() => undefined);
+      (component as any).renderer = { listen };
+      (component as any).keyupListener = null;
+      (component as any).addListeners();
+      expect(listen).toHaveBeenCalledTimes(3);
+      listen.mockClear();
+      (component as any).addListeners();
+      expect(listen).not.toHaveBeenCalled();
+    });
+  });
 });

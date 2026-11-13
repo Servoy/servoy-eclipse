@@ -87,6 +87,55 @@ describe('KeyboardLayoutDirective', () => {
       expect(result).toBe(false);
       expect(editorSession.updateSelection).toHaveBeenCalledWith(['uuid-1'], true, true);
     });
+
+    it('should move the element left by 1px for the left arrow', () => {
+      editorSession.getFixedKeyEvent.mockReturnValue({ keyCode: 37, ctrlKey: false, shiftKey: false, altKey: false, metaKey: false });
+      editorSession.getSelection.mockReturnValue(['uuid-1']);
+      const element = document.createElement('div');
+      element.classList.add('svy-wrapper');
+      element.style.left = '10px';
+      element.style.top = '20px';
+      editorContentService.getContentElement.mockReturnValue(element);
+      directive.onKeyDown({ keyCode: 37 } as KeyboardEvent);
+      expect(element.style.left).toBe('9px');
+    });
+
+    it('should resize the element with shift + right arrow', () => {
+      editorSession.getFixedKeyEvent.mockReturnValue({ keyCode: 39, ctrlKey: false, shiftKey: true, altKey: false, metaKey: false });
+      editorSession.getSelection.mockReturnValue(['uuid-1']);
+      const element = document.createElement('div');
+      element.classList.add('svy-wrapper');
+      Object.defineProperty(element, 'getBoundingClientRect', { value: () => ({ width: 100, height: 50 }) });
+      Object.defineProperty(element, 'offsetLeft', { value: 0 });
+      Object.defineProperty(element, 'offsetTop', { value: 0 });
+      editorContentService.getContentElement.mockReturnValue(element);
+      directive.onKeyDown({ keyCode: 39 } as KeyboardEvent);
+      expect(element.style.width).toBe('101px');
+    });
+
+    it('should apply a magnitude of 20 when the alt key is held', () => {
+      editorSession.getFixedKeyEvent.mockReturnValue({ keyCode: 40, ctrlKey: false, shiftKey: false, altKey: true, metaKey: false });
+      editorSession.getSelection.mockReturnValue(['uuid-1']);
+      const element = document.createElement('div');
+      element.classList.add('svy-wrapper');
+      element.style.top = '100px';
+      element.style.left = '10px';
+      editorContentService.getContentElement.mockReturnValue(element);
+      directive.onKeyDown({ keyCode: 40 } as KeyboardEvent);
+      expect(element.style.top).toBe('120px');
+    });
+
+    it('should apply a magnitude of 10 when the ctrl key is held', () => {
+      editorSession.getFixedKeyEvent.mockReturnValue({ keyCode: 38, ctrlKey: true, shiftKey: false, altKey: false, metaKey: false });
+      editorSession.getSelection.mockReturnValue(['uuid-1']);
+      const element = document.createElement('div');
+      element.classList.add('svy-wrapper');
+      element.style.top = '100px';
+      element.style.left = '10px';
+      editorContentService.getContentElement.mockReturnValue(element);
+      directive.onKeyDown({ keyCode: 38 } as KeyboardEvent);
+      expect(element.style.top).toBe('90px');
+    });
   });
 
   describe('onKeyup', () => {

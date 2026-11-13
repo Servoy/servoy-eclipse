@@ -174,5 +174,72 @@ describe('AutoscrollComponent', () => {
       expect((component as any).isAutoscrollActive).toBe(false);
       vi.useRealTimers();
     });
+
+    it('should use the horizontal step for left/right placement', () => {
+      (component as any).scrollTarget = scrollTarget;
+      (component as any).placement = signal('right');
+      (component as any).direction = 1;
+      (component as any).mousePoint = { x: 100, y: 100 };
+      component.onMouseMove({ pageX: 101, pageY: 100 } as MouseEvent);
+      // step = 100 - 101 = -1, step*direction = -1 < 0 -> forward -> starts autoscroll
+      expect(scrollTarget.onMouseMove).toHaveBeenCalled();
+      component.stopAutoscroll();
+    });
+
+    it('should do nothing when there is no scroll target', () => {
+      (component as any).scrollTarget = null;
+      component.onMouseMove({ pageX: 10, pageY: 10 } as MouseEvent);
+      expect(scrollTarget.onMouseMove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ngOnInit', () => {
+    it('should set direction to -1 for top placement', () => {
+      (component as any).placement = signal('top');
+      component.ngOnInit();
+      expect((component as any).direction).toBe(-1);
+    });
+
+    it('should set direction to 1 for bottom placement', () => {
+      (component as any).placement = signal('bottom');
+      component.ngOnInit();
+      expect((component as any).direction).toBe(1);
+    });
+
+    it('should set direction to -1 for left placement', () => {
+      (component as any).placement = signal('left');
+      component.ngOnInit();
+      expect((component as any).direction).toBe(-1);
+    });
+  });
+
+  describe('setPosition', () => {
+    it('should position the left autoscroll area beside the palette', () => {
+      (component as any).placement = signal('left');
+      const autoscrollEl = { nativeElement: document.createElement('div') };
+      (component as any).autoscrollElement = () => autoscrollEl;
+      (component as any).editorContent.getDesignerElementById = vi.fn().mockReturnValue({ offsetWidth: 200, offsetLeft: 10 });
+      (component as any).editorContent.getBodyElement = vi.fn().mockReturnValue({
+        getElementsByClassName: (cls: string) => ({
+          item: () => (cls === 'top' ? { offsetTop: 0, offsetHeight: 40 } : { offsetTop: 500 })
+        })
+      });
+      component.setPosition();
+      expect((component as any).renderer.setStyle).toHaveBeenCalledWith(autoscrollEl.nativeElement, 'left', '210px');
+    });
+
+    it('should set the height for a non top/bottom placement', () => {
+      (component as any).placement = signal('right');
+      const autoscrollEl = { nativeElement: document.createElement('div') };
+      (component as any).autoscrollElement = () => autoscrollEl;
+      (component as any).editorContent.getBodyElement = vi.fn().mockReturnValue({
+        getElementsByClassName: (cls: string) => ({
+          item: () => (cls === 'top' ? { offsetTop: 0, offsetHeight: 40 } : { offsetTop: 500 })
+        })
+      });
+      component.setPosition();
+      // height = 500 - (0 + 40) - 10 = 450
+      expect((component as any).renderer.setStyle).toHaveBeenCalledWith(autoscrollEl.nativeElement, 'height', '450px');
+    });
   });
 });

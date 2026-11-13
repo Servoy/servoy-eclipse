@@ -245,4 +245,160 @@ describe('DragselectionResponsiveComponent', () => {
       );
     });
   });
+
+  describe('findAncestor', () => {
+    it('should return the ancestor matching the class', () => {
+      const ancestor = document.createElement('div');
+      ancestor.classList.add('svy-responsivecontainer');
+      const child = document.createElement('div');
+      ancestor.appendChild(child);
+      expect((component as any).findAncestor(child, 'svy-responsivecontainer')).toBe(ancestor);
+    });
+
+    it('should return null when there is no matching ancestor', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('div');
+      parent.appendChild(child);
+      expect((component as any).findAncestor(child, 'nomatch')).toBeNull();
+    });
+  });
+
+  describe('adjustPoint', () => {
+    it('should subtract padding and glasspane offset', () => {
+      const glasspane = document.createElement('div');
+      const parent = document.createElement('div');
+      parent.appendChild(glasspane);
+      glasspane.getBoundingClientRect = vi.fn().mockReturnValue({ left: 10, top: 20 });
+      vi.spyOn(window, 'getComputedStyle').mockReturnValue({ paddingLeft: '5px' } as unknown as CSSStyleDeclaration);
+      editorContentService.getGlassPane.mockReturnValue(glasspane);
+      const point = (component as any).adjustPoint(100, 200);
+      expect(point.x).toBe(100 - 5 - 10);
+      expect(point.y).toBe(200 - 5 - 20);
+    });
+  });
+
+  describe('onKeyup', () => {
+    it('should remove the drag copy when control is released during a copy drag', () => {
+      const node = document.createElement('div');
+      node.setAttribute('svy-id', 'drag-id');
+      (component as any).dragNode = node;
+      (component as any).dragCopy = true;
+      (component as any).dragStartEvent = { ctrlKey: true } as MouseEvent;
+      (component as any).canDrop = { beforeChild: null };
+      component.onKeyup({ code: 'ControlLeft' } as KeyboardEvent);
+      expect(editorContentService.sendMessageToIframe).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'removeDragCopy', uuid: 'drag-id' }));
+      expect((component as any).dragCopy).toBe(false);
+    });
+
+    it('should do nothing when not in a copy drag', () => {
+      (component as any).dragCopy = false;
+      component.onKeyup({ code: 'ControlLeft' } as KeyboardEvent);
+      expect(editorContentService.sendMessageToIframe).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getDropNode', () => {
+    it('should forbid a drop of an inherited element outside its initial parent', () => {
+      const node = document.createElement('div');
+      node.classList.add('inheritedElement');
+      (component as any).dragNode = node;
+      (component as any).initialParent = { getAttribute: () => 'parent-a' };
+      (component as any).designerUtilsService.getDropNode = vi.fn().mockReturnValue({
+        dropAllowed: true,
+        dropTarget: { getAttribute: () => 'parent-b' }
+      });
+      const result = (component as any).getDropNode('component', false, 'row', {} as MouseEvent, 'svy1');
+      expect(result.dropAllowed).toBe(false);
+    });
+
+    it('should allow a normal drop', () => {
+      const node = document.createElement('div');
+      (component as any).dragNode = node;
+      (component as any).initialParent = null;
+      (component as any).designerUtilsService.getDropNode = vi.fn().mockReturnValue({
+        dropAllowed: true,
+        dropTarget: { getAttribute: () => 'parent-b' }
+      });
+      const result = (component as any).getDropNode('component', false, 'row', {} as MouseEvent, 'svy1');
+      expect(result.dropAllowed).toBe(true);
+    });
+  });
+
+  describe('onMouseDown', () => {
+    it('should not start dragging while another drag is active', () => {
+      editorSession.dragging.set(true);
+      component.onMouseDown({ buttons: 1 } as MouseEvent);
+      expect((component as any).dragNode).toBeNull();
+    });
+
+    it('should bail out when no node is found', () => {
+      editorSession.dragging.set(false);
+      (component as any).designerUtilsService.getNodeBasedOnSelectionFCorLFC.mockReturnValue(null);
+      (component as any).designerUtilsService.getNode.mockReturnValue(null);
+      component.onMouseDown({ buttons: 1, button: 0 } as MouseEvent);
+      expect((component as any).dragStartEvent).toBeNull();
+    });
+
+    it('should capture drag state and register autoscroll for a responsive node', () => {
+      editorSession.dragging.set(false);
+      const node = document.createElement('div');
+      node.setAttribute('svy-layoutname', 'row');
+      Object.defineProperty(node, 'clientWidth', { value: 100, configurable: true });
+      Object.defineProperty(node, 'clientHeight', { value: 40, configurable: true });
+      const parent = document.createElement('div');
+      parent.classList.add('svy-responsivecontainer');
+      parent.appendChild(node);
+      (component as any).designerUtilsService.getNodeBasedOnSelectionFCorLFC.mockReturnValue(null);
+      (component as any).designerUtilsService.getNode.mockReturnValue(node);
+      (component as any).designerUtilsService.getParent.mockReturnValue(parent);
+      (component as any).designerUtilsService.isTopContainer.mockReturnValue(true);
+      vi.spyOn(window, 'getComputedStyle').mockReturnValue({ paddingLeft: '0px' } as unknown as CSSStyleDeclaration);
+      editorContentService.getGlassPane.mockReturnValue({
+        style: {},
+        getBoundingClientRect: () => ({ left: 0, top: 0 }),
+        parentElement: {}
+      });
+
+      component.onMouseDown({ buttons: 1, button: 0, pageX: 10, pageY: 10, ctrlKey: false, metaKey: false } as MouseEvent);
+
+      expect((component as any).dragStartEvent).not.toBeNull();
+      expect((component as any).dragItem.layoutName).toBe('row');
+      expect((component as any).dragItem.componentType).toBe('layout');
+      expect(editorSession.registerAutoscroll).toHaveBeenCalledWith(component);
+    });
+  });
+
+  describe('onMouseUp', () => {
+    it('should reset drag state and unregister autoscroll', () => {
+      editorSession.dragging.set(true);
+      const node = document.createElement('div');
+      node.setAttribute('svy-id', 'n1');
+      (component as any).dragNode = node;
+      (component as any).dragStartEvent = {} as MouseEvent;
+      (component as any).canDrop = { dropAllowed: false };
+      (component as any).dragItem = {};
+      component.onMouseUp({ ctrlKey: false, metaKey: false } as MouseEvent);
+      expect((component as any).dragStartEvent).toBeNull();
+      expect((component as any).dragNode).toBeNull();
+      expect(editorSession.setDragging).toHaveBeenCalledWith(false);
+      expect(editorSession.unregisterAutoscroll).toHaveBeenCalledWith(component);
+    });
+
+    it('should move the component when a valid drop target exists', () => {
+      editorSession.dragging.set(true);
+      const node = document.createElement('div');
+      node.setAttribute('svy-id', 'n1');
+      (component as any).dragNode = node;
+      (component as any).dragStartEvent = {} as MouseEvent;
+      (component as any).dragCopy = false;
+      (component as any).canDrop = { dropAllowed: true, dropTarget: { getAttribute: () => 'target' }, beforeChild: null, append: true };
+      (component as any).dragItem = {};
+      editorSession.getSelection.mockReturnValue(['n1']);
+      const callService = vi.fn();
+      editorSession.getSession.mockReturnValue({ callService });
+      component.onMouseUp({ ctrlKey: false, metaKey: false } as MouseEvent);
+      expect(callService).toHaveBeenCalledWith('formeditor', 'moveComponent', expect.anything(), true);
+    });
+  });
 });
