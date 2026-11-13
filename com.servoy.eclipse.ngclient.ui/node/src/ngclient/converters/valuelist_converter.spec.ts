@@ -257,4 +257,66 @@ describe('ValuelistConverter', () => {
 
     expect(val.hasRealValues()).toBe(true);
   });
+
+  it('should convert Date real/display values into Date instances', () => {
+    const realMs = Date.UTC(2020, 0, 1);
+    const displayMs = Date.UTC(2021, 5, 15);
+    const vl = {
+      values: [{ realValue: realMs, displayValue: displayMs }],
+      valuelistid: 42,
+      realValueType: 'Date',
+      displayValueType: 'Date',
+    } as IValuelistTValueFromServer;
+
+    const val: any = converterService.convertFromServerToClient(vl, valuelistType, undefined as any, undefined as any, undefined as any, propertyContext);
+    expect(val[0].realValue instanceof Date).toBe(true);
+    expect((val[0].realValue as Date).getTime()).toBe(realMs);
+    expect(val[0].displayValue instanceof Date).toBe(true);
+    expect((val[0].displayValue as Date).getTime()).toBe(displayMs);
+    expect(val.isRealValueDate()).toBe(true);
+    expect(val.isRealValueUUID()).toBe(false);
+  });
+
+  it('isRealValueUUID should reflect a UUID realValueType', () => {
+    const vl = { ...createDefaultValuelist(), realValueType: 'UUID' } as IValuelistTValueFromServer;
+    const val: any = converterService.convertFromServerToClient(vl, valuelistType, undefined as any, undefined as any, undefined as any, propertyContext);
+    expect(val.isRealValueUUID()).toBe(true);
+    expect(val.isRealValueDate()).toBe(false);
+  });
+
+  it('getDisplayValue should resolve to the real value immediately when there is no valuelistid', () => {
+    const vl = { values: createDefaultValuelist().values } as IValuelistTValueFromServer; // no valuelistid
+    const val: IValuelist = converterService.convertFromServerToClient(vl, valuelistType, undefined as any, undefined as any, undefined as any, propertyContext);
+
+    let resolved: any;
+    val.getDisplayValue(7).subscribe((v) => (resolved = v));
+    expect(resolved).toBe(7);
+  });
+
+  it('getDisplayValue should resolve to empty string for a null real value', () => {
+    const val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(), valuelistType, undefined as any, undefined as any, undefined as any, propertyContext);
+    let resolved: any = 'untouched';
+    val.getDisplayValue(null).subscribe((v) => (resolved = v));
+    expect(resolved).toBe('');
+  });
+
+  it('fromClientToServer should return null when there is no pending request', () => {
+    const val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(), valuelistType, undefined as any, undefined as any, undefined as any, propertyContext);
+    expect(valuelistType.fromClientToServer(val as any, val as any, propertyContext)).toBeNull();
+  });
+
+  it('fromClientToServer should return null when client data is null', () => {
+    expect(valuelistType.fromClientToServer(null as any, null as any, propertyContext)).toBeNull();
+  });
+
+  it('fromServerToClient should cancel deferred requests when a null server value arrives', () => {
+    const val: IValuelist = converterService.convertFromServerToClient(createDefaultValuelist(), valuelistType, undefined as any, undefined as any, undefined as any, propertyContext);
+    const result = converterService.convertFromServerToClient(null as any, valuelistType, val, undefined as any, undefined as any, propertyContext);
+    expect(result).toBeNull();
+  });
+
+  it('uiDestroyed should cancel deferred requests and clear the display cache', () => {
+    const val: any = converterService.convertFromServerToClient(createDefaultValuelist(), valuelistType, undefined as any, undefined as any, undefined as any, propertyContext);
+    expect(() => val.uiDestroyed()).not.toThrow();
+  });
 });

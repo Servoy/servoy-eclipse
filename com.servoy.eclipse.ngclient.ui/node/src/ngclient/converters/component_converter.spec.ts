@@ -226,6 +226,88 @@ describe('ComponentConverter', () => {
     expect(comp.getInternalState().hasChanges()).toEqual(false);
   });
 
+  it('Should return null from fromServerToClient when the server value is null/undefined', () => {
+    const value = converterService.convertFromServerToClient(
+      null,
+      typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      propertyContextWithReject,
+    );
+    expect(value).toBeNull();
+  });
+
+  it('Should keep the current client value unchanged for a NO_OPERATION (.n) server update', () => {
+    comp = converterService.convertFromServerToClient(
+      initialChildComponentServerValue(),
+      typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      propertyContextWithAllow,
+    );
+    const same = converterService.convertFromServerToClient(
+      { n: true },
+      typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+      comp,
+      undefined as any,
+      undefined as any,
+      propertyContextWithAllow,
+    );
+    expect(same).toBe(comp);
+  });
+
+  it('fromClientToServer should return an empty changes array when there is nothing to send', () => {
+    comp = converterService.convertFromServerToClient(
+      initialChildComponentServerValue(),
+      typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      propertyContextWithAllow,
+    );
+    expect(comp.getInternalState().hasChanges()).toEqual(false);
+    const result = converterService.convertFromClientToServer(comp, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, propertyContextWithAllow);
+    expect(result[0]).toEqual([]);
+    expect(result[1]).toBe(comp);
+  });
+
+  it('startEdit should queue an svyStartEdit request that is sent to the server', () => {
+    comp = converterService.convertFromServerToClient(
+      initialChildComponentServerValue(),
+      typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      propertyContextWithAllow,
+    );
+    comp.getInternalState().setChangeListener(() => {
+      changeNotified = true;
+    });
+
+    comp.startEdit('nonRecDepProp', '5.ANATR;_1');
+    expect(getAndClearNotified()).toEqual(true);
+    expect(comp.getInternalState().hasChanges()).toEqual(true);
+
+    const sent = converterService.convertFromClientToServer(comp, typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME), comp, propertyContextWithAllow)[0];
+    expect(sent.length).toBe(1);
+    expect(sent[0].svyStartEdit).toBeDefined();
+    expect(sent[0].svyStartEdit.pn).toBe('nonRecDepProp');
+  });
+
+  it('uiDestroyed should not throw for a converted child component', () => {
+    comp = converterService.convertFromServerToClient(
+      initialChildComponentServerValue(),
+      typesRegistry.getAlreadyRegisteredType(ComponentType.TYPE_NAME),
+      undefined as any,
+      undefined as any,
+      undefined as any,
+      propertyContextWithAllow,
+    );
+    expect(() => comp.uiDestroyed()).not.toThrow();
+  });
+
   it('Should work when inserting one record above (it should not restore "original unproxied" value of record that slided down on top of the newly added record)', () => {
     comp = converterService.convertFromServerToClient(
       initialChildComponentServerValue(),

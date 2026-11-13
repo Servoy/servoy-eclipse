@@ -30,8 +30,22 @@ const commonExcludes = [
   '**/testing/**'
 ];
 
+// The ngclient2 application contains, besides the runtime (sablo/ngclient/servoycore),
+// pure bootstrap/glue and the in-IDE form-designer integration that are not worth unit
+// testing and only drag the percentage down:
+//   - src/app, polyfills.ts, main.ts  -> Angular bootstrap wiring
+//   - src/designer/**                 -> the designer runs only embedded in Eclipse,
+//                                        glue around a live iframe/websocket to the Java side
+// These are excluded from the ngclient2 coverage include so the number reflects testable
+// runtime code. (The libraries have no such glue, so they keep the common excludes only.)
+const ngclient2Excludes = commonExcludes.concat([
+  '**/src/app/**',
+  '**/src/polyfills.ts',
+  '**/src/designer/**'
+]);
+
 const projects = [
-  { name: 'ngclient2', ngProject: 'ngclient2', include: 'src/**/*.ts', junit: 'vitest-ngclient2.xml' },
+  { name: 'ngclient2', ngProject: 'ngclient2', include: 'src/**/*.ts', junit: 'vitest-ngclient2.xml', excludes: ngclient2Excludes },
   { name: 'public', ngProject: '@servoy/public', include: 'projects/servoy-public/**/*.ts', junit: 'vitest-public.xml' },
   { name: 'servoydefault', ngProject: '@servoy/servoydefault', include: 'projects/servoydefault/**/*.ts', junit: 'vitest-servoydefault.xml' },
   { name: 'dialogs', ngProject: '@servoy/dialogs', include: 'projects/dialogs/**/*.ts', junit: 'vitest-dialogs.xml' },
@@ -47,7 +61,7 @@ function run(cmd, extraEnv) {
 const lcovFiles = [];
 for (const p of projects) {
   const outDir = path.join(coverageRoot, p.name);
-  const excludeFlags = commonExcludes.map((g) => `--coverage-exclude "${g}"`).join(' ');
+  const excludeFlags = (p.excludes || commonExcludes).map((g) => `--coverage-exclude "${g}"`).join(' ');
   const cmd =
     `ng test ${p.ngProject} --no-watch --output-file=../target/${p.junit} ` +
     `--coverage --coverage-include "${p.include}" ${excludeFlags}`;

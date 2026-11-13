@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { TestBed } from '@angular/core/testing';
 
 import { ReconnectingWebSocket } from './reconnecting.websocket';
 
@@ -54,6 +53,34 @@ describe('ReconnectionWebsocket', () => {
     expect(socket.__latestEvent.name).toBe('connecting');
     expect(WebSocketMock.instance.url).toBe('ws://localhost/');
   });
+
+  it('send throws when there is no underlying socket', () => {
+    vi.useFakeTimers();
+    const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()));
+    vi.advanceTimersByTime(10); // open
+    // forced close removes the internal socket
+    socket.close();
+    expect(() => socket.send('data')).toThrow(/Pausing to reconnect/);
+    vi.useRealTimers();
+  });
+
+  it('refresh closes the underlying socket if present', () => {
+    vi.useFakeTimers();
+    const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()));
+    vi.advanceTimersByTime(10);
+    const closeSpy = vi.spyOn(WebSocketMock.instance, 'close');
+    socket.refresh();
+    expect(closeSpy).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('honors options passed to the constructor', () => {
+    vi.useFakeTimers();
+    const socket = new TestReconnectingWebSocket('ws://localhost/', new LoggerFactory(new WindowRefService()), { reconnectInterval: 123, automaticOpen: false } as any);
+    expect((socket as any).reconnectInterval).toBe(123);
+    expect((socket as any).automaticOpen).toBe(false);
+    vi.useRealTimers();
+  });
 });
 
 class WebSocketMock {
@@ -61,7 +88,7 @@ class WebSocketMock {
   public static instance: WebSocketMock;
   public url: string;
   public closed = false;
-  constructor(url: string, protocols?: string | string[]) {
+  constructor(url: string, _protocols?: string | string[]) {
     this.url = url;
     WebSocketMock.instance = this;
     setTimeout(() => {

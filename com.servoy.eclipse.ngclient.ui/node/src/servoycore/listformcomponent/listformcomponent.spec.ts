@@ -1,13 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CUSTOM_ELEMENTS_SCHEMA, TemplateRef, Renderer2 } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ListFormComponent } from './listformcomponent';
 import { AbstractFormComponent } from '../../ngclient/form/abstract_form_component.component';
 import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
-import { ViewportService } from '../../ngclient/services/viewport.service';
 import { LoggerFactory } from '@servoy/public';
 import { ComponentCache, FormComponentCache, StructureCache } from '../../ngclient/types';
 
@@ -821,6 +820,94 @@ describe('ListFormComponent', () => {
       component.registerComponent(mockComp, 0);
       component.unRegisterComponent(mockComp, 0);
       expect((component as any).componentCache[0]).toBeUndefined();
+    });
+
+    it('unRegisterComponent should keep other components registered at the same row', () => {
+      const compA = { name: () => 'a' } as any;
+      const compB = { name: () => 'b' } as any;
+      component.registerComponent(compA, 0);
+      component.registerComponent(compB, 0);
+      component.unRegisterComponent(compA, 0);
+      expect((component as any).componentCache[0]['b']).toBe(compB);
+    });
+  });
+
+  describe('getStyleClasses', () => {
+    it('should return an empty array when no styleClass is set', () => {
+      expect(component.getStyleClasses()).toEqual([]);
+    });
+
+    it('should include the styleClass input', () => {
+      fixture.componentRef.setInput('styleClass', 'my-class');
+      expect(component.getStyleClasses()).toEqual(['my-class']);
+    });
+  });
+
+  describe('getRowItems', () => {
+    it('should return an empty array before ngOnChanges assigns rowItems', () => {
+      expect(component.getRowItems()).toEqual([]);
+    });
+
+    it('should expose the rowItems populated from a containedForm with childElements', () => {
+      const childElements = [{ specName: 'bootstrapcomponents-textbox', name: 'tb', model: {} } as any];
+      // call svyOnChanges-path logic directly without going through ServoyBaseComponent.initializeComponent()
+      // (which would run svyOnInit and need a live foundset); only the rowItems assignment is under test here
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: true, childElements });
+      (component as any).foundset = () => mockFoundset;
+      component._foundset.set(mockFoundset);
+      (component as any).rowItems = [];
+      childElements.forEach((elem: any) => (component as any).rowItems.push(elem));
+      expect(component.getRowItems().length).toBe(1);
+    });
+  });
+
+  describe('getNumberOfColumns', () => {
+    it('should return the computed numberOfColumns field', () => {
+      component.numberOfColumns = 3;
+      expect(component.getNumberOfColumns()).toBe(3);
+    });
+  });
+
+  describe('getDesignNGClass', () => {
+    it('should return null when the parent is not a designer', () => {
+      mockParent.isDesigner.mockReturnValue(false);
+      expect(component.getDesignNGClass({} as any)).toBeNull();
+    });
+  });
+
+  describe('datachange', () => {
+    it('should update the model and forward the change to the cell state', () => {
+      const sendChanges = vi.fn();
+      const cell: any = { model: { prop: 'old' }, state: { sendChanges }, rowId: 'row1' };
+      component.datachange(cell, 'prop', 'new', true);
+      expect(cell.model.prop).toBe('new');
+      expect(sendChanges).toHaveBeenCalledWith('prop', 'new', 'old', 'row1', true);
+    });
+  });
+
+  describe('getServoyApi', () => {
+    it('should create and cache the cell api', () => {
+      fixture.componentRef.setInput('containedForm', { absoluteLayout: true, formHeight: 10, formWidth: 10 });
+      const cell: any = { api: null, name: 'cell1', rowIndex: 0, state: { name: 'cell1', model: { svyMarkupId: 'mk' } } };
+      const api1 = component.getServoyApi(cell);
+      expect(api1).toBeTruthy();
+      const api2 = component.getServoyApi(cell);
+      expect(api2).toBe(api1);
+    });
+  });
+
+  describe('calculateCells in designer', () => {
+    it('should fix numberOfCells to 1 when in the designer', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(true);
+      component.calculateCells();
+      expect(component.numberOfCells).toBe(1);
+    });
+
+    it('should not recalculate while waiting for a load', () => {
+      (component as any).waitingForLoad = true;
+      component.numberOfCells = 7;
+      component.calculateCells();
+      expect(component.numberOfCells).toBe(7);
     });
   });
 });

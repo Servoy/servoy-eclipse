@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
@@ -1327,5 +1327,127 @@ describe('FoundsetConverter', () => {
     // the old record that was replaced by reference should no trigger send to server anymore, in case component keeps an obsolete reference to it
     recThatWillBeFullyReplaced['i'] = 7531;
     expect(getAndClearNotified()).toEqual(false);
+  });
+
+  describe('public API requests', () => {
+    const getType = () => typesRegistry.getAlreadyRegisteredType(FoundsetType.TYPE_NAME);
+    const toServer = () => converterService.convertFromClientToServer(fs, getType(), fs, propertyContextWithReject)[0];
+
+    beforeEach(() => {
+      fs = converterService.convertFromServerToClient(createDefaultFoundset(), getType(), undefined as any, undefined as any, undefined as any, propertyContextWithReject);
+      fs.getInternalState().setChangeListener(() => {
+        changeNotified = true;
+      });
+    });
+
+    it('getId should return the foundsetId', () => {
+      expect(fs.getId()).toBe(1);
+    });
+
+    it('loadExtraRecordsAsync should queue a loadExtraRecords request', () => {
+      fs.loadExtraRecordsAsync(3);
+      expect(getAndClearNotified()).toBe(true);
+      const req = toServer();
+      expect(req[0].loadExtraRecords).toBe(3);
+    });
+
+    it('loadExtraRecordsAsync should not notify when dontNotifyYet is true', () => {
+      fs.loadExtraRecordsAsync(2, true);
+      expect(getAndClearNotified()).toBe(false);
+      const req = toServer();
+      expect(req[0].loadExtraRecords).toBe(2);
+    });
+
+    it('loadExtraRecordsAsync should throw for a non-number count', () => {
+      expect(() => fs.loadExtraRecordsAsync(NaN)).toThrow();
+    });
+
+    it('loadLessRecordsAsync should queue a loadLessRecords request', () => {
+      fs.loadLessRecordsAsync(-2);
+      expect(getAndClearNotified()).toBe(true);
+      const req = toServer();
+      expect(req[0].loadLessRecords).toBe(-2);
+    });
+
+    it('loadLessRecordsAsync should throw for a non-number count', () => {
+      expect(() => fs.loadLessRecordsAsync(NaN)).toThrow();
+    });
+
+    it('loadRecordsAsync should throw when start or size is not a number', () => {
+      expect(() => fs.loadRecordsAsync(NaN, 5)).toThrow();
+      expect(() => fs.loadRecordsAsync(0, NaN)).toThrow();
+    });
+
+    it('sort should queue a sort request with the given columns', () => {
+      const columns = [{ name: 'col1', direction: 'asc' }];
+      fs.sort(columns);
+      expect(getAndClearNotified()).toBe(true);
+      const req = toServer();
+      expect(req[0].sort).toEqual(columns);
+    });
+
+    it('setPreferredViewportSize should queue a preferredViewportSize request with optional flags', () => {
+      fs.setPreferredViewportSize(15, true, false);
+      expect(getAndClearNotified()).toBe(true);
+      const req = toServer();
+      expect(req[0].preferredViewportSize).toBe(15);
+      expect(req[0].sendSelectionViewportInitially).toBe(true);
+      expect(req[0].initialSelectionViewportCentered).toBe(false);
+    });
+
+    it('setPreferredViewportSize should throw for a non-number size', () => {
+      expect(() => fs.setPreferredViewportSize(NaN)).toThrow();
+    });
+
+    it('requestSelectionUpdate should queue a newClientSelectionRequest', () => {
+      fs.requestSelectionUpdate([2, 3]);
+      expect(getAndClearNotified()).toBe(true);
+      const req = toServer();
+      expect(req[0].newClientSelectionRequest).toEqual([2, 3]);
+    });
+
+    it('notifyChanged should only notify when there are pending changes', () => {
+      fs.notifyChanged();
+      expect(getAndClearNotified()).toBe(false);
+
+      fs.loadRecordsAsync(0, 2);
+      getAndClearNotified();
+      fs.notifyChanged();
+      expect(getAndClearNotified()).toBe(true);
+    });
+
+    it('getRecordRefByRowID should build a record ref for a known rowId and null otherwise', () => {
+      const ref = fs.getRecordRefByRowID('5.ALFKI;_0');
+      expect(ref).not.toBeNull();
+      expect(ref!._svyRowId).toBe('5.ALFKI;_0');
+      expect(ref!.foundsetId).toBe(1);
+      expect(fs.getRecordRefByRowID('')).toBeNull();
+    });
+
+    it('columnDataChanged should delegate to columnDataChangedByRowId using the row at the given index', () => {
+      const spy = vi.spyOn(fs, 'columnDataChangedByRowId');
+      fs.columnDataChanged(1, 'i', 42, 7);
+      expect(spy).toHaveBeenCalledWith('5.ANATR;_1', 'i', 42, 7);
+    });
+
+    it('addChangeListener should register a listener that can be removed via the returned function and removeChangeListener', () => {
+      const listener = vi.fn();
+      const unregister = fs.addChangeListener(listener);
+      expect(typeof unregister).toBe('function');
+      unregister();
+      // registering and removing again directly should not throw
+      fs.addChangeListener(listener);
+      expect(() => fs.removeChangeListener(listener)).not.toThrow();
+    });
+
+    it('uiDestroyed should not throw', () => {
+      expect(() => fs.uiDestroyed()).not.toThrow();
+    });
+
+    it('fromClientToServer should return an empty changes array when there is no client data', () => {
+      const type = getType()!;
+      const result = type.fromClientToServer(null as any, null as any, propertyContextWithReject)!;
+      expect(result[0]).toEqual([]);
+    });
   });
 });

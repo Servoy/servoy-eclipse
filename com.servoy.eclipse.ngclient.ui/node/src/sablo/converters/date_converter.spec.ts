@@ -10,7 +10,7 @@ describe('DateType', () => {
   });
 
   const offsetString = (wantedOffset: any) => {
-    let offsetStr = '';
+    let offsetStr: string;
     const offset = currentOffset + wantedOffset;
     if (offset < 0) {
       if (offset > -10) {
@@ -78,5 +78,30 @@ describe('DateType', () => {
     date.setHours(0, 0, 0, 0);
     const dateString = dateType.fromClientToServer(date)![0];
     expect(dateString).toBe('2018-01-01T00:00:00.000' + offsetString(0));
+  });
+
+  it('fromServerToClient returns null/undefined values unchanged', () => {
+    expect(dateType.fromServerToClient(null as any)).toBeNull();
+    expect(dateType.fromServerToClient(undefined as any)).toBeUndefined();
+  });
+
+  it('fromClientToServer returns null for a falsy client value', () => {
+    expect(dateType.fromClientToServer(null as any)).toBeNull();
+    expect(dateType.fromClientToServer(undefined as any)).toBeNull();
+  });
+
+  it('fromClientToServer accepts a numeric timestamp and returns an ISO string', () => {
+    const ms = new Date(2018, 0, 1, 0, 0, 0, 0).getTime();
+    const result = dateType.fromClientToServer(ms as any)![0];
+    expect(result).toBe('2018-01-01T00:00:00.000' + offsetString(0));
+  });
+
+  it('fromClientToServer accepts a date string', () => {
+    const result = dateType.fromClientToServer('2018-01-01T00:00:00' as any)![0];
+    expect(result).toContain('2018-01-01T00:00:00.000');
+  });
+
+  it('fromClientToServer throws on an invalid date value', () => {
+    expect(() => dateType.fromClientToServer('not a date' as any)).toThrow(/Invalid date/);
   });
 });
