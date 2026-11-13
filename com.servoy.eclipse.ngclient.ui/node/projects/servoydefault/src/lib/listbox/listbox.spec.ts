@@ -135,4 +135,46 @@ describe('ServoyDefaultListBox', () => {
      expect( component.servoyApi().getMarkupId ).toHaveBeenCalled();
   });
 
+  describe('multiUpdate', () => {
+    it('joins the selected values with newlines and pushes the update', () => {
+      const pushSpy = vi.spyOn(component, 'pushUpdate');
+      component.selectedValues = [1, 2];
+      component.multiUpdate();
+      expect(component.dataProviderID()).toBe('1\n2');
+      expect(pushSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('setSelectionFromDataprovider', () => {
+    it('marks the matching valuelist index as selected', () => {
+      component.dataProviderID.set(2);
+      component.setSelectionFromDataprovider();
+      expect(component.selection[1]).toBe(true);
+    });
+
+    it('resets the selection when the dataProviderID is null', () => {
+      component.dataProviderID.set(null);
+      component.setSelectionFromDataprovider();
+      expect(component.selection).toEqual([]);
+    });
+  });
+
+  describe('getSelectedElements', () => {
+    it('returns the real values for the selected entries', () => {
+      component.dataProviderID.set(3);
+      component.setSelectionFromDataprovider();
+      expect(component.getSelectedElements()).toContain(3);
+    });
+  });
+
+  describe('onValuelistChange', () => {
+    it('sets allowNullinc to 1 when the first valuelist entry is the null entry', () => {
+      fixture.componentRef.setInput('valuelistID', [{ realValue: null, displayValue: '' }, { realValue: 1, displayValue: 'x' }] as any);
+      fixture.detectChanges();
+      component.allowNullinc = 0;
+      component.onValuelistChange();
+      expect(component.allowNullinc).toBe(1);
+    });
+  });
+
 });

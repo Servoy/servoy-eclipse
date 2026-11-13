@@ -52,4 +52,55 @@ describe('ServoyDefaultCalendar', () => {
             expect(el.value).toBe('10-11-2020');
         });
     });
+
+    it('getNativeChild and getFocusElement return the inner input element', () => {
+        expect(component.getNativeChild()).toBe(component.getFocusElement());
+        expect(component.getFocusElement().tagName).toBe('INPUT');
+    });
+
+    describe('dateChanged', () => {
+        it('sets the dataProviderID to the event date for a change.td event and emits the change', () => {
+            const emitSpy = vi.spyOn(component.dataProviderIDChange, 'emit');
+            const date = new Date(2021, 5, 15);
+            component.dataProviderID.set(null);
+            component.dateChanged({ type: 'change.td', date });
+            expect(component.dataProviderID()).toBe(date);
+            expect(emitSpy).toHaveBeenCalled();
+        });
+
+        it('clears the dataProviderID for a non change.td event', () => {
+            component.dataProviderID.set(new Date());
+            component.dateChanged({ type: 'other' });
+            expect(component.dataProviderID()).toBeNull();
+        });
+
+        it('does nothing (no change) when the new date equals the current one', () => {
+            const date = new Date(2021, 5, 15);
+            component.dataProviderID.set(date);
+            const emitSpy = vi.spyOn(component.dataProviderIDChange, 'emit');
+            component.dateChanged({ type: 'change.td', date: new Date(2021, 5, 15) });
+            // same time -> early return before pushUpdate
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('modelChange', () => {
+        it('sets the dataProviderID and emits in findmode', () => {
+            fixture.componentRef.setInput('findmode', true);
+            fixture.detectChanges();
+            const emitSpy = vi.spyOn(component.dataProviderIDChange, 'emit');
+            component.modelChange('searchText');
+            expect(component.dataProviderID()).toBe('searchText');
+            expect(emitSpy).toHaveBeenCalled();
+        });
+
+        it('reverts the format directive value for an invalid date when not in findmode', () => {
+            fixture.componentRef.setInput('findmode', false);
+            fixture.detectChanges();
+            const writeSpy = vi.spyOn(component.svyFormat()!, 'writeValue');
+            component.dataProviderID.set(new Date(2020, 0, 1));
+            component.modelChange('Invalid Date');
+            expect(writeSpy).toHaveBeenCalledWith(component.dataProviderID());
+        });
+    });
 });

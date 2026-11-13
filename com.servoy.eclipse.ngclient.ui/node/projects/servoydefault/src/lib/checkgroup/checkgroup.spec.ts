@@ -111,5 +111,53 @@ describe('ServoyDefaultCheckGroup', () => {
     vi.useRealTimers();
   });
 
+  it('returns null from getDataproviderFromSelection when nothing is selected', () => {
+    component.dataProviderID.set(null);
+    component.setSelectionFromDataprovider();
+    expect(component.getDataproviderFromSelection()).toBeNull();
+  });
+
+  it('getFocusElement falls back to the native element when there is no input', () => {
+    // no #input rendered, so super.getFocusElement() returns null and it falls back
+    const focusElement = component.getFocusElement();
+    expect(focusElement).toBeTruthy();
+  });
+
+  describe('itemClicked', () => {
+    it('updates the selection array and pushes the derived dataprovider when changed', () => {
+      vi.useFakeTimers();
+      fixture.detectChanges();
+      vi.advanceTimersByTime(0);
+      const baseSpy = vi.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(component)), 'baseItemClicked');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = true;
+      component.itemClicked({ target: checkbox } as any, 0);
+      expect(component.selection[0]).toBe(true);
+      expect(baseSpy).toHaveBeenCalled();
+      vi.useRealTimers();
+    });
+  });
+
+  describe('attachEventHandlers', () => {
+    it('invokes itemClicked and onActionMethodID on click when enabled and not readOnly', () => {
+      const action = vi.fn();
+      fixture.componentRef.setInput('onActionMethodID', action);
+      fixture.componentRef.setInput('enabled', true);
+      fixture.componentRef.setInput('readOnly', false);
+      fixture.detectChanges();
+      const itemClickedSpy = vi.spyOn(component, 'itemClicked').mockImplementation(() => undefined);
+      let clickCb: (e: any) => void = () => undefined;
+      vi.spyOn(component.getRenderer(), 'listen').mockImplementation((_t: any, evt: any, cb: any) => {
+        if (evt === 'click') clickCb = cb;
+        return () => undefined;
+      });
+      component.attachEventHandlers(document.createElement('input'), 0);
+      const evt = { target: {} };
+      clickCb(evt);
+      expect(itemClickedSpy).toHaveBeenCalledWith(evt, 0);
+      expect(action).toHaveBeenCalledWith(evt);
+    });
+  });
 
 });

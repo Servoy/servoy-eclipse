@@ -132,5 +132,72 @@ describe('ServoyDefaultCombobox', () => {
             const combo = getComboComponent();
             expect(combo.formattedValue).toBe('Chang');
         });
+
+        it('falls back to the placeholder text when the resolved value is empty', () => {
+            host.findmode.set(false);
+            fixture.detectChanges();
+            const combo = getComboComponent();
+            (combo as any).placeholderText = () => 'pick one';
+            combo.formattedValue = null;
+            combo.svyOnChanges({ placeholderText: { currentValue: 'pick one', previousValue: undefined, firstChange: false, isFirstChange: () => false } } as any);
+            expect(combo.formattedValue).toBe('pick one');
+        });
+    });
+
+    describe('isPrintableChar', () => {
+        it('returns true for a normal letter', () => {
+            fixture.detectChanges();
+            expect(getComboComponent().isPrintableChar('a')).toBe(true);
+        });
+
+        it('returns false for a non printable key', () => {
+            fixture.detectChanges();
+            expect(getComboComponent().isPrintableChar('Shift')).toBe(false);
+        });
+    });
+
+    describe('updateValue', () => {
+        it('sets the dataProviderID, emits and calls onActionMethodID', () => {
+            const action = vi.fn();
+            fixture.detectChanges();
+            const combo = getComboComponent();
+            (combo as any).onActionMethodID = () => action;
+            const emitSpy = vi.spyOn(combo.dataProviderIDChange, 'emit');
+            const evt = new Event('click');
+            combo.updateValue(42, evt);
+            expect(combo.dataProviderID()).toBe(42);
+            expect(emitSpy).toHaveBeenCalledWith(42);
+            expect(action).toHaveBeenCalledWith(evt);
+        });
+    });
+
+    describe('highlight helpers', () => {
+        it('splits the display value around the last select value when the popup is open', () => {
+            fixture.detectChanges();
+            const combo = getComboComponent();
+            combo.openState = true;
+            combo.lastSelectValue = 'ha';
+            expect(combo.getRemainingValueBefore('Chang')).toBe('C');
+            expect(combo.getStrongValue('Chang')).toBe('ha');
+            expect(combo.getRemainingValueAfter('Chang')).toBe('ng');
+        });
+
+        it('returns neutral values when the popup is closed', () => {
+            fixture.detectChanges();
+            const combo = getComboComponent();
+            combo.openState = false;
+            combo.lastSelectValue = 'ha';
+            expect(combo.getRemainingValueBefore('Chang')).toBe('');
+            expect(combo.getStrongValue('Chang')).toBe('');
+            expect(combo.getRemainingValueAfter('Chang')).toBe('Chang');
+        });
+    });
+
+    describe('getDropDownWidth', () => {
+        it('returns the input client width', () => {
+            fixture.detectChanges();
+            const combo = getComboComponent();
+            expect(combo.getDropDownWidth()).toBe(combo.getFocusElement().clientWidth);
+        });
     });
 });

@@ -96,6 +96,84 @@ describe('CheckComponent', () => {
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
   });
 
+  it('getSelectionFromDP uses the valuelist first real value when present', () => {
+      fixture.componentRef.setInput('valuelistID', [{ realValue: 9, displayValue: 'nine' }] as any);
+      component.dataProviderID.set(9);
+      fixture.detectChanges();
+      expect(component.getSelectionFromDataprovider()).toBe(true);
+  });
+
+  it('does not need scrollbar information', () => {
+      expect(component.needsScrollbarInformation()).toBe(false);
+  });
+
+  describe('itemClicked value toggling', () => {
+      it('toggles a numeric dataProviderID from 0 to 1 and pushes update', () => {
+          vi.useFakeTimers();
+          const pushSpy = vi.spyOn(component, 'pushUpdate');
+          component.dataProviderID.set(0);
+          component.itemClicked({ target: { localName: 'input' } });
+          expect(component.dataProviderID()).toBe(1);
+          vi.advanceTimersByTime(0);
+          expect(pushSpy).toHaveBeenCalled();
+          vi.useRealTimers();
+      });
+
+      it('toggles a string dataProviderID from "1" to "0"', () => {
+          vi.useFakeTimers();
+          component.dataProviderID.set('1');
+          component.itemClicked({ target: { localName: 'input' } });
+          expect(component.dataProviderID()).toBe('0');
+          vi.useRealTimers();
+      });
+
+      it('uses the valuelist real value when a valuelist is present', () => {
+          vi.useFakeTimers();
+          fixture.componentRef.setInput('valuelistID', [{ realValue: 7, displayValue: 'seven' }] as any);
+          fixture.detectChanges();
+          component.dataProviderID.set(null);
+          component.itemClicked({ target: { localName: 'input' } });
+          expect(component.dataProviderID()).toBe(7);
+          vi.useRealTimers();
+      });
+
+      it('fires onActionMethodID after the deferred push', () => {
+          vi.useFakeTimers();
+          const action = vi.fn();
+          fixture.componentRef.setInput('onActionMethodID', action);
+          fixture.detectChanges();
+          component.dataProviderID.set(0);
+          const evt = { target: { localName: 'input' } };
+          component.itemClicked(evt);
+          vi.advanceTimersByTime(0);
+          expect(action).toHaveBeenCalledWith(evt);
+          vi.useRealTimers();
+      });
+  });
+
+  describe('setHorizontalAlignmentFlexbox', () => {
+      it('centers for alignment 0', () => {
+          const spy = vi.spyOn(component.getRenderer(), 'setStyle');
+          const el = document.createElement('div');
+          component.setHorizontalAlignmentFlexbox(el, component.getRenderer(), 0);
+          expect(spy).toHaveBeenCalledWith(el, 'justify-content', 'center');
+      });
+
+      it('aligns to flex-end for alignment 4', () => {
+          const spy = vi.spyOn(component.getRenderer(), 'setStyle');
+          const el = document.createElement('div');
+          component.setHorizontalAlignmentFlexbox(el, component.getRenderer(), 4);
+          expect(spy).toHaveBeenCalledWith(el, 'justify-content', 'flex-end');
+      });
+
+      it('does not set a style for alignment -1', () => {
+          const spy = vi.spyOn(component.getRenderer(), 'setStyle');
+          const el = document.createElement('div');
+          component.setHorizontalAlignmentFlexbox(el, component.getRenderer(), -1);
+          expect(spy).not.toHaveBeenCalled();
+      });
+  });
+
 });
 
 async function clickOnElement(element: any, fixture: ComponentFixture<ServoyDefaultCheck>, checkInput: any, toTestFlag: any) {

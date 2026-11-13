@@ -88,4 +88,44 @@ describe('ServoyDefaultTextField', () => {
       // textField.triggerEventHandler('blur', null);
       // expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(1);
   });
+
+  describe('onModelChange', () => {
+    it('sets a plain value directly', () => {
+      component.onModelChange('hello');
+      expect(component.dataProviderID()).toBe('hello');
+    });
+
+    it('resets then re-applies an invalid date so the display is refreshed', () => {
+      const invalidDate = new Date('invalid');
+      component.onModelChange(invalidDate);
+      expect(component.dataProviderID()).toBe(invalidDate);
+    });
+
+    it('keeps a valid date value', () => {
+      const validDate = new Date(2020, 0, 1);
+      component.onModelChange(validDate);
+      expect(component.dataProviderID()).toBe(validDate);
+    });
+  });
+
+  describe('onClick', () => {
+    it('fires onActionMethodID when the field is not editable', () => {
+      const action = vi.fn();
+      fixture.componentRef.setInput('onActionMethodID', action);
+      fixture.componentRef.setInput('editable', false);
+      fixture.detectChanges();
+      const evt = new Event('click');
+      component.onClick(evt);
+      expect(action).toHaveBeenCalledWith(evt);
+    });
+
+    it('does nothing when the field is editable', () => {
+      const action = vi.fn();
+      fixture.componentRef.setInput('onActionMethodID', action);
+      fixture.componentRef.setInput('editable', true);
+      fixture.detectChanges();
+      component.onClick(new Event('click'));
+      expect(action).not.toHaveBeenCalled();
+    });
+  });
 });

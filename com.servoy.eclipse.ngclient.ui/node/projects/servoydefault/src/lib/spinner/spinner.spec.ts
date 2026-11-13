@@ -59,12 +59,6 @@ describe('ServoyDefaultCheckGroup', () => {
     expect(component).toBeTruthy();
   });
 
-  it.skip('should click change value', () => {
-    const input = fixture.debugElement.query(By.css('input')).nativeElement;
-  });
-
-
-
   it('should got undefined dp if dp is not present in valuelist', () => {
     component.dataProviderID.set('Salut');
     const selection = component.getSelectionFromDataprovider();
@@ -97,40 +91,97 @@ describe('ServoyDefaultCheckGroup', () => {
     vi.useRealTimers();
   });
 
-  it.skip('should change dp when press the down button', () => {
-    vi.useFakeTimers();
-    const input = fixture.debugElement.query(By.css('input'));
-    input.nativeElement.focus();
-    input.triggerEventHandler('keyup', { key: 'ArrowDown' });
-    fixture.detectChanges();
-    vi.advanceTimersByTime(0);
-    const selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe('Bucharest');
-    vi.useRealTimers();
+  describe('getFocusElement/requestFocus', () => {
+    it('returns the inner input as the focus element', () => {
+      expect(component.getFocusElement()).toBe(component.child()!.nativeElement);
+    });
+
+    it('requestFocus sets mustExecuteOnFocus and focuses the element', () => {
+      const focusSpy = vi.spyOn(component.getFocusElement(), 'focus');
+      component.requestFocus(false);
+      expect(component.mustExecuteOnFocus).toBe(false);
+      expect(focusSpy).toHaveBeenCalled();
+    });
   });
 
-  it.skip('should change dp when press the up button', () => {
-    vi.useFakeTimers();
-    const input = fixture.debugElement.query(By.css('input'));
-    input.nativeElement.focus();
-    input.triggerEventHandler('keyup', { key: 'ArrowUp' });
-    fixture.detectChanges();
-    vi.advanceTimersByTime(0);
-    const selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe('Amsterdam');
-    vi.useRealTimers();
+  describe('isDisabled', () => {
+    it('is disabled when not enabled', () => {
+      fixture.componentRef.setInput('enabled', false);
+      fixture.detectChanges();
+      expect(component.isDisabled()).toBe(true);
+    });
+
+    it('is disabled when not editable', () => {
+      fixture.componentRef.setInput('editable', false);
+      fixture.detectChanges();
+      expect(component.isDisabled()).toBe(true);
+    });
+
+    it('is enabled when both enabled and editable', () => {
+      expect(component.isDisabled()).toBe(false);
+    });
   });
 
-  it.skip('should change dp when scroll  ', () => {
-    vi.useFakeTimers();
-    const input = fixture.debugElement.query(By.css('input'));
-    input.nativeElement.scroll();
-    fixture.detectChanges();
-    vi.advanceTimersByTime(0);
-    const selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe('Amsterdam');
-    vi.useRealTimers();
+  describe('increment/decrement', () => {
+    it('increment moves to the next valuelist entry and wraps around', () => {
+      component.dataProviderID.set(3); // counter 0
+      component.getSelectionFromDataprovider();
+      component.increment();
+      expect(component.dataProviderID()).toBe(1); // index 1 realValue
+    });
+
+    it('decrement wraps to the last valuelist entry from the first', () => {
+      component.dataProviderID.set(3); // counter 0
+      component.getSelectionFromDataprovider();
+      component.decrement();
+      expect(component.dataProviderID()).toBe(2); // last entry realValue
+    });
   });
 
+  describe('scroll/keydown callbacks', () => {
+    it('scrollCallback increments when scrolling up', () => {
+      const incSpy = vi.spyOn(component, 'increment');
+      component.scrollCallback({ wheelDelta: 10, preventDefault: vi.fn() });
+      expect(incSpy).toHaveBeenCalled();
+    });
+
+    it('scrollCallback decrements when scrolling down', () => {
+      const decSpy = vi.spyOn(component, 'decrement');
+      component.scrollCallback({ deltaY: 10, preventDefault: vi.fn() });
+      expect(decSpy).toHaveBeenCalled();
+    });
+
+    it('scrollCallback does nothing when disabled', () => {
+      fixture.componentRef.setInput('enabled', false);
+      fixture.detectChanges();
+      const incSpy = vi.spyOn(component, 'increment');
+      const decSpy = vi.spyOn(component, 'decrement');
+      component.scrollCallback({ wheelDelta: 10, preventDefault: vi.fn() });
+      expect(incSpy).not.toHaveBeenCalled();
+      expect(decSpy).not.toHaveBeenCalled();
+    });
+
+    it('keydownKeypressCallback decrements on arrow down (40)', () => {
+      const decSpy = vi.spyOn(component, 'decrement');
+      component.keydownKeypressCallback({ which: 40 });
+      expect(decSpy).toHaveBeenCalled();
+    });
+
+    it('keydownKeypressCallback increments on arrow up (38)', () => {
+      const incSpy = vi.spyOn(component, 'increment');
+      component.keydownKeypressCallback({ which: 38 });
+      expect(incSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('isScrollingUp', () => {
+    it('detects scroll up via wheelDelta', () => {
+      expect(component.isScrollingUp({ wheelDelta: 120 })).toBeTruthy();
+    });
+
+    it('detects scroll down via deltaY', () => {
+      expect(component.isScrollingUp({ deltaY: 120 })).toBeFalsy();
+    });
+  });
 
 });
