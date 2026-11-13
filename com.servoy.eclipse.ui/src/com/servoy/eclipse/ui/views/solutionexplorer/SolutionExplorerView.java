@@ -389,6 +389,8 @@ public class SolutionExplorerView extends ViewPart
 
 	private AddModuleAction addModuleAction;
 	private AddDevSolutionAction addDevSolutionAction;
+	private RemoveDevSolutionAction removeDevSolutionAction;
+	private DeleteDevSolutionAction deleteDevSolutionAction;
 	private AddRemovePackageProjectAction addRemovePackageProjectAction;
 
 	private MoveTextAction moveCode;
@@ -2847,6 +2849,8 @@ public class SolutionExplorerView extends ViewPart
 		if (removePackageProjectAction.isEnabled()) manager.add(removePackageProjectAction);
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
 		if (addDevSolutionAction.isEnabled()) manager.add(addDevSolutionAction);
+		if (removeDevSolutionAction.isEnabled()) manager.add(removeDevSolutionAction);
+		if (deleteDevSolutionAction.isEnabled()) manager.add(deleteDevSolutionAction);
 		if (addRemovePackageProjectAction.isEnabled()) manager.add(addRemovePackageProjectAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
@@ -3623,7 +3627,9 @@ public class SolutionExplorerView extends ViewPart
 		removeModuleAction = new RemoveModuleAction(shell);
 		removePackageProjectAction = new RemovePackageProjectReferenceAction(shell);
 		addModuleAction = new AddModuleAction(shell);
-		addDevSolutionAction = new AddDevSolutionAction(shell);
+		addDevSolutionAction = new AddDevSolutionAction(shell, this);
+		removeDevSolutionAction = new RemoveDevSolutionAction(shell, this);
+		deleteDevSolutionAction = new DeleteDevSolutionAction(getSite(), this);
 		addRemovePackageProjectAction = new AddRemovePackageProjectAction(shell);
 
 		expandNodeAction = new ExpandNodeAction(tree);
@@ -3678,6 +3684,8 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(removePackageProjectAction);
 		addTreeSelectionChangedListener(addModuleAction);
 		addTreeSelectionChangedListener(addDevSolutionAction);
+		addTreeSelectionChangedListener(removeDevSolutionAction);
+		addTreeSelectionChangedListener(deleteDevSolutionAction);
 		addTreeSelectionChangedListener(addRemovePackageProjectAction);
 		addTreeSelectionChangedListener(setActive);
 		addTreeSelectionChangedListener(replaceActionInTree);

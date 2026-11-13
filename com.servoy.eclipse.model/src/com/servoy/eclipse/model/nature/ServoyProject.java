@@ -864,10 +864,39 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 			description.setReferencedProjects(
 				newProjects.toArray(new IProject[newProjects.size()]));
 			project.setDescription(description, null);
+			ServoyModelFinder.getServoyModel().refreshServoyProjects();
 		}
 		catch (CoreException e)
 		{
 			ServoyLog.logError("Exception while adding developer project " + newDeveloperProject.getName() + " to " + project.getName(), e);
+		}
+
+	}
+
+	/**
+	 * Removes the given developer-solution project from this (active) solution's referenced projects. The developer-solution project itself is left in the
+	 * workspace on disk.
+	 *
+	 * @param developerProject the developer-solution project to un-reference
+	 */
+	public void removeDeveloperProject(IProject developerProject)
+	{
+		try
+		{
+			IProjectDescription description = project.getDescription();
+			IProject[] referencedProjects = description.getReferencedProjects();
+			ArrayList<IProject> newProjects = new ArrayList<IProject>(Arrays.asList(referencedProjects));
+			if (newProjects.remove(developerProject))
+			{
+				description.setReferencedProjects(
+					newProjects.toArray(new IProject[newProjects.size()]));
+				project.setDescription(description, null);
+				ServoyModelFinder.getServoyModel().refreshServoyProjects();
+			}
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError("Exception while removing developer project " + developerProject.getName() + " from " + project.getName(), e);
 		}
 
 	}

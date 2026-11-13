@@ -95,6 +95,7 @@ public class NewDeveloperSolutionAction extends Action
 				{
 					ServoyLog.logError(e);
 				}
+				viewer.refreshTreeCompletely();
 			}
 			catch (CoreException e)
 			{

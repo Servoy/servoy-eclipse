@@ -48,15 +48,18 @@ import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 
 public class AddDevSolutionAction extends Action implements ISelectionChangedListener
 {
 	private final Shell shell;
+	private final SolutionExplorerView viewer;
 
-	public AddDevSolutionAction(Shell shell)
+	public AddDevSolutionAction(Shell shell, SolutionExplorerView viewer)
 	{
 		this.shell = shell;
+		this.viewer = viewer;
 		setText("Add developer solution");
 		setToolTipText("Add a developer solution");
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.png"));
@@ -125,6 +128,7 @@ public class AddDevSolutionAction extends Action implements ISelectionChangedLis
 			ServoyLog.logError(e);
 			return;
 		}
+		if (viewer != null) viewer.refreshTreeCompletely();
 
 	}
 
