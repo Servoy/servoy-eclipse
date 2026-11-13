@@ -58,6 +58,7 @@ import com.servoy.eclipse.cypress.actions.CypressTestResult.TestType;
 import com.servoy.eclipse.cypress.actions.CypressTestSessionManager;
 import com.servoy.eclipse.cypress.actions.RunAllCypressFormTestsHandler;
 import com.servoy.eclipse.cypress.actions.RunAllE2ETestsHandler;
+import com.servoy.eclipse.cypress.services.FormSpecGenerator;
 
 public class CypressTestResultsView extends ViewPart implements PropertyChangeListener {
 	public static final String VIEW_ID = "com.servoy.eclipse.cypress.views.cypressTestResults";
@@ -607,7 +608,13 @@ public class CypressTestResultsView extends ViewPart implements PropertyChangeLi
 	private Path resolveTestFile(Path workspaceRoot, CypressTestResult result) {
 		Path base = workspaceRoot.resolve("jenkins-custom").resolve("e2e-test-scripts").resolve("cypress");
 		if (result.testType() == TestType.FORM) {
-			return base.resolve("cy-form").resolve(result.testName() + ".spec.cy.js");
+			Path formDir = base.resolve("cy-form");
+			for (String extension : FormSpecGenerator.SPEC_CY_EXTENSIONS) {
+				Path candidate = formDir.resolve(result.testName() + extension);
+				if (Files.exists(candidate))
+					return candidate;
+			}
+			return formDir.resolve(result.testName() + FormSpecGenerator.SPEC_CY_JS_EXTENSION);
 		}
 		Path e2eDir = base.resolve("e2e");
 		Path direct = e2eDir.resolve(result.testName() + ".cy.js");
