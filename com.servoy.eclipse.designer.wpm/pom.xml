@@ -75,7 +75,7 @@
 						</configuration>
 					</execution>
 
-					<!-- 5. Run vitest tests -->
+					<!-- 5. Run vitest tests with coverage (writes ../target/coverage: cobertura + lcov + html) -->
 					<execution>
 						<id>angular vitest</id>
 						<phase>test</phase>
@@ -84,7 +84,7 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
-							<arguments>test</arguments>
+							<arguments>run test:coverage</arguments>
 						</configuration>
 					</execution>
 				</executions>

@@ -134,15 +134,36 @@ pipeline {
                     // Tycho/Surefire Java test reports
                     junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
                     
-                    // HTML Publisher voor Coverage rapportages
+                    // Angular Vitest code coverage (Cobertura) for the three Angular projects.
+                    // Each project's frontend-maven-plugin run merges its suites into
+                    // target/coverage/combined/cobertura-coverage.xml (ngclient.ui + designer.rfb)
+                    // or target/coverage/cobertura-coverage.xml (designer.wpm). The Coverage plugin
+                    // gives trends, per-build deltas and PR annotations. allowEmpty so a build that
+                    // skipped tests (-Dmaven.test.skip) does not fail here.
+                    // Only the merged/final report per project: ngclient.ui and designer.rfb
+                    // write per-suite reports into target/coverage/<sub>/ and a merged one into
+                    // target/coverage/combined/; designer.wpm writes a single target/coverage/
+                    // report. Matching the per-suite subfolders too would double-count lines.
+                    recordCoverage(
+                        tools: [
+                            [parser: 'COBERTURA', pattern: 'com.servoy.eclipse.ngclient.ui/target/coverage/combined/cobertura-coverage.xml'],
+                            [parser: 'COBERTURA', pattern: 'com.servoy.eclipse.designer.rfb/target/coverage/combined/cobertura-coverage.xml'],
+                            [parser: 'COBERTURA', pattern: 'com.servoy.eclipse.designer.wpm/target/coverage/cobertura-coverage.xml']
+                        ],
+                        id: 'angular-vitest',
+                        name: 'Angular Vitest Coverage',
+                        sourceCodeRetention: 'EVERY_BUILD'
+                    )
+                    
+                    // Browsable HTML coverage reports (one tab per Angular project).
                     publishHTML([
                         allowMissing: true, 
                         alwaysLinkToLastBuild: false, 
                         keepAll: true, 
-                        reportDir: 'com.servoy.eclipse.ngclient.ui/target/coverage', 
-                        reportFiles: 'app/index.html,servoy-public/index.html', 
-                        reportName: 'Coverage', 
-                        reportTitles: ''
+                        reportDir: '.', 
+                        reportFiles: 'com.servoy.eclipse.ngclient.ui/target/coverage/combined/index.html,com.servoy.eclipse.designer.rfb/target/coverage/combined/index.html,com.servoy.eclipse.designer.wpm/target/coverage/lcov-report/index.html', 
+                        reportName: 'Angular Coverage', 
+                        reportTitles: 'TiNG,Designer RFB,WPM'
                     ])
                 }
             }

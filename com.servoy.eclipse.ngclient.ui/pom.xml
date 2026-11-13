@@ -15,7 +15,11 @@
 	<artifactId>com.servoy.eclipse.ngclient.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
-		<test.script>test_all</test.script>
+		<!-- coverage:all runs every test_* project with coverage into
+		     ../target/coverage/<project> and merges them into ../target/coverage/combined
+		     (cobertura + lcov + html) for Jenkins. Override with -Dtest.script=test_all to
+		     run the tests without coverage. -->
+		<test.script>coverage:all</test.script>
 	</properties>
 	<build>
 		<plugins>
