@@ -140,9 +140,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		replaceTagInFile(new File(packageFile, "project/package.json"), PROJECT_NAME_TAG, projectName);
 		replaceTagInFile(new File(packageFile, "project/ng-package.json"), PROJECT_NAME_TAG, projectName);
 		replaceTagInFile(new File(packageFile, "project/karma.conf.js"), PROJECT_NAME_TAG, projectName);
-		replaceTagInFile(new File(packageFile, "project/src/ng2package.module.ts"), PROJECT_NAME_TAG, projectName);
 		replaceTagInFile(new File(packageFile, "project/src/public-api.ts"), PROJECT_NAME_TAG, projectName);
-		new File(packageFile, "project/src/ng2package.module.ts").renameTo(new File(packageFile, "project/src/" + projectName + ".module.ts"));
 		ignoreNodeModules(project);
 		try
 		{

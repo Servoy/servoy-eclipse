@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -158,12 +160,12 @@ public class NewWebObjectAction extends Action
 
 			folder.create(IResource.FORCE, true, new NullProgressMonitor());
 			Bundle bundle = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle();
-//			if (elementType.equals(IPackageReader.WEB_COMPONENT))
-//			{
-//				in = bundle.getEntry("/component-templates/web-component.html").openStream();
-//				createFile(componentOrServiceName + ".html", folder, in);
-//				in.close();
-//			}
+			//			if (elementType.equals(IPackageReader.WEB_COMPONENT))
+			//			{
+			//				in = bundle.getEntry("/component-templates/web-component.html").openStream();
+			//				createFile(componentOrServiceName + ".html", folder, in);
+			//				in.close();
+			//			}
 			if (!elementType.equals(IPackageReader.WEB_LAYOUT))
 			{
 				if (elementType.equals(IPackageReader.WEB_SERVICE))
@@ -174,14 +176,14 @@ public class NewWebObjectAction extends Action
 				{
 					fullName = packageRoot.getName() + "-" + getDashedName(componentOrServiceName);
 				}
-//				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".js")
-//					.openStream();
-//				String text = IOUtils.toString(in, "UTF-8");
-//				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-//				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
-//				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
-//				createFile(componentOrServiceName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
-//				in.close();
+				//				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".js")
+				//					.openStream();
+				//				String text = IOUtils.toString(in, "UTF-8");
+				//				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
+				//				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
+				//				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
+				//				createFile(componentOrServiceName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+				//				in.close();
 				in = bundle.getEntry("/component-templates/" + elementType.toLowerCase() + ".spec")
 					.openStream();
 				String text = IOUtils.toString(in, "UTF-8");
@@ -276,6 +278,13 @@ public class NewWebObjectAction extends Action
 			String className = componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
 			String charset = "UTF-8";
 			Bundle bundle = com.servoy.eclipse.ngclient.ui.Activator.getInstance().getBundle();
+
+			// Decide at runtime whether this is a modern standalone package (NG2-Components) or a legacy
+			// module-based package (NG2-Module). Modern creation always produces NG2-Components, so the
+			// standalone path is the common one; the legacy branch is a defensive back-compat path.
+			IFile moduleFile = getModuleFile(packageRoot, moduleName);
+			boolean legacyModulePackage = isLegacyModulePackage(packageRoot) && moduleFile != null && moduleFile.exists();
+
 			if (elementType.equals(IPackageReader.WEB_COMPONENT))
 			{
 				compDirectory = new File(compDirectory, componentOrServiceName);
@@ -304,26 +313,16 @@ public class NewWebObjectAction extends Action
 
 				modifyBuildFile(packageRoot, componentOrServiceName, charset);
 
-				IFile moduleFile = null;
-				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
-				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
-				InputStream is = moduleFile.getContents(true);
-				String moduleFileContent = null;
-				try
+				if (legacyModulePackage)
 				{
-					moduleFileContent = Utils.getTXTFileContent(is, Charset.forName(charset));
+					editLegacyModuleFile(moduleFile, charset,
+						"import { " + className + " } from './" + componentOrServiceName + "/" + componentOrServiceName + "';\n",
+						new String[] { "declarations:", "exports:" }, className);
 				}
-				finally
+				else
 				{
-					Utils.closeInputStream(is);
-				}
-				if (moduleFileContent != null)
-				{
-					moduleFileContent = "import { " + className + " } from './" + componentOrServiceName + "/" + componentOrServiceName + "';\n" +
-						moduleFileContent;
-					moduleFileContent = addToModuleFileContent(moduleFileContent, "declarations:", className);
-					moduleFileContent = addToModuleFileContent(moduleFileContent, "exports:", className);
-					moduleFile.setContents(new ByteArrayInputStream(moduleFileContent.getBytes(charset)), true, false, null);
+					// modern standalone package: register the component class name in the NG2-Components manifest attribute
+					addComponentToNG2ComponentsManifest(packageRoot, className);
 				}
 			}
 			if (elementType.equals(IPackageReader.WEB_SERVICE))
@@ -338,32 +337,78 @@ public class NewWebObjectAction extends Action
 
 				modifyBuildFile(packageRoot, componentOrServiceName, charset);
 
-				IFile moduleFile = null;
-				if (packageRoot instanceof IFolder) moduleFile = ((IFolder)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
-				if (packageRoot instanceof IProject) moduleFile = ((IProject)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
-				InputStream is = moduleFile.getContents(true);
-				String moduleFileContent = null;
-				try
+				// Services are never listed in NG2-Components (that attribute is for components only);
+				// a standalone service is made available via @Injectable({ providedIn: 'root' }) + the public-api.ts export.
+				if (legacyModulePackage)
 				{
-					moduleFileContent = Utils.getTXTFileContent(is, Charset.forName(charset));
-				}
-				finally
-				{
-					Utils.closeInputStream(is);
-				}
-				if (moduleFileContent != null)
-				{
-					className = componentOrServiceName + "Service";
-					moduleFileContent = "import { " + className + " } from './" + componentOrServiceName + ".service';\n" +
-						moduleFileContent;
-					moduleFileContent = addToModuleFileContent(moduleFileContent, "providers:", className);
-					moduleFile.setContents(new ByteArrayInputStream(moduleFileContent.getBytes(charset)), true, false, null);
+					String serviceClassName = componentOrServiceName + "Service";
+					editLegacyModuleFile(moduleFile, charset,
+						"import { " + serviceClassName + " } from './" + componentOrServiceName + ".service';\n",
+						new String[] { "providers:" }, serviceClassName);
 				}
 			}
 		}
 		catch (Exception ex)
 		{
 			ServoyLog.logError(ex);
+		}
+	}
+
+	private static IFile getModuleFile(IResource packageRoot, String moduleName)
+	{
+		if (packageRoot instanceof IFolder) return ((IFolder)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
+		if (packageRoot instanceof IProject) return ((IProject)packageRoot).getFile("project/src/" + moduleName + ".module.ts");
+		return null;
+	}
+
+	/**
+	 * A package is a legacy module-based package when its manifest declares NG2-Module but not NG2-Components.
+	 */
+	private static boolean isLegacyModulePackage(IResource packageRoot)
+	{
+		try
+		{
+			Manifest manifest = readPackageManifest(packageRoot);
+			if (manifest == null) return false;
+			Attributes attr = manifest.getMainAttributes();
+			String ng2Module = attr.getValue("NG2-Module");
+			String ng2Components = attr.getValue("NG2-Components");
+			return ng2Module != null && ng2Module.trim().length() > 0 && (ng2Components == null || ng2Components.trim().length() == 0);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+			return false;
+		}
+	}
+
+	private static void editLegacyModuleFile(IFile moduleFile, String charset, String importStatement, String[] properties, String className)
+		throws CoreException, IOException
+	{
+		if (moduleFile == null || !moduleFile.exists())
+		{
+			ServoyLog.logWarning("Cannot register '" + className +
+				"' in the package module: the *.module.ts file is missing for this legacy NG2-Module package.", null);
+			return;
+		}
+		InputStream is = moduleFile.getContents(true);
+		String moduleFileContent = null;
+		try
+		{
+			moduleFileContent = Utils.getTXTFileContent(is, Charset.forName(charset));
+		}
+		finally
+		{
+			Utils.closeInputStream(is);
+		}
+		if (moduleFileContent != null)
+		{
+			moduleFileContent = importStatement + moduleFileContent;
+			for (String property : properties)
+			{
+				moduleFileContent = addToModuleFileContent(moduleFileContent, property, className);
+			}
+			moduleFile.setContents(new ByteArrayInputStream(moduleFileContent.getBytes(charset)), true, false, null);
 		}
 	}
 
@@ -399,6 +444,88 @@ public class NewWebObjectAction extends Action
 			}
 			buildFile.setContents(new ByteArrayInputStream(buildFileContent.getBytes(charset)), true, false, null);
 		}
+	}
+
+	/**
+	 * Reads the META-INF/MANIFEST.MF of the given package root (IFolder/IProject), or returns null if it cannot be read.
+	 */
+	private static Manifest readPackageManifest(IResource packageRoot) throws CoreException, IOException
+	{
+		IFile m = getManifestFile(packageRoot);
+		if (m == null || !m.exists()) return null;
+		m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+		try (InputStream contents = m.getContents())
+		{
+			return new Manifest(contents);
+		}
+	}
+
+	private static IFile getManifestFile(IResource packageRoot)
+	{
+		if (packageRoot instanceof IFolder) return ((IFolder)packageRoot).getFile("META-INF/MANIFEST.MF");
+		if (packageRoot instanceof IProject) return ((IProject)packageRoot).getFile("META-INF/MANIFEST.MF");
+		return null;
+	}
+
+	/**
+	 * Appends a component class name to the package manifest's NG2-Components attribute, idempotently
+	 * (no duplicates, order preserved). The rest of the manifest (including the per-component Name: sub-sections
+	 * added by {@link #addToManifest}) is preserved by round-tripping through {@link java.util.jar.Manifest}.
+	 */
+	static void addComponentToNG2ComponentsManifest(IResource packageRoot, String className) throws CoreException, IOException
+	{
+		if (className == null || className.trim().length() == 0) return;
+		IFile m = getManifestFile(packageRoot);
+		if (m == null) return;
+		m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+
+		Manifest manifest;
+		try (InputStream contents = m.getContents())
+		{
+			manifest = new Manifest(contents);
+		}
+
+		if (!addComponentToNG2ComponentsAttribute(manifest, className)) return; // idempotent / blank: nothing to do
+
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream())
+		{
+			manifest.write(out);
+			try (InputStream in = new ByteArrayInputStream(out.toByteArray()))
+			{
+				m.setContents(in, IResource.FORCE, new NullProgressMonitor());
+			}
+		}
+	}
+
+	/**
+	 * Adds a component class name to the NG2-Components main attribute of the given manifest, idempotently: the value is
+	 * parsed into an ordered, de-duplicated list, the trimmed class name is appended if not already present, and the
+	 * attribute is written back comma-separated with no spaces. This is the pure in-memory part of
+	 * {@link #addComponentToNG2ComponentsManifest(IResource, String)} (no file I/O), so it can be unit-tested directly.
+	 *
+	 * @return <code>true</code> when the manifest was modified, <code>false</code> when the class name was blank or
+	 *         already present (nothing changed).
+	 */
+	public static boolean addComponentToNG2ComponentsAttribute(Manifest manifest, String className)
+	{
+		if (className == null || className.trim().length() == 0) return false;
+
+		String current = manifest.getMainAttributes().getValue("NG2-Components");
+		List<String> components = new ArrayList<>();
+		if (current != null)
+		{
+			for (String part : current.split(","))
+			{
+				String trimmed = part.trim();
+				if (trimmed.length() > 0 && !components.contains(trimmed)) components.add(trimmed);
+			}
+		}
+		String newClassName = className.trim();
+		if (components.contains(newClassName)) return false; // idempotent: nothing to do
+
+		components.add(newClassName);
+		manifest.getMainAttributes().put(new Attributes.Name("NG2-Components"), String.join(",", components));
+		return true;
 	}
 
 	private void addToManifest(String componentOrServiceName, String elementType, IResource packageRoot)

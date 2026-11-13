@@ -288,7 +288,8 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		if (IPackageReader.WEB_COMPONENT.equals(packageType))
 		{
 			manifest.getMainAttributes().put(new Attributes.Name("NPM-PackageName"), packageName);
-			manifest.getMainAttributes().put(new Attributes.Name("NG2-Module"), packageName + "Module");
+			// a brand-new package has no components yet; populated as components are added (NG2-Components, not NG2-Module)
+			manifest.getMainAttributes().put(new Attributes.Name("NG2-Components"), "");
 			manifest.getMainAttributes().put(new Attributes.Name("Entry-Point"), "dist");
 		}
 

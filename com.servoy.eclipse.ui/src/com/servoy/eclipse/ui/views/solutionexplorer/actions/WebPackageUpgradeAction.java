@@ -82,7 +82,9 @@ public class WebPackageUpgradeAction extends Action implements ISelectionChanged
 			{
 				Manifest manifest = reader.getManifest();
 				manifest.getMainAttributes().put(new Attributes.Name("NPM-PackageName"), project.getName());
-				manifest.getMainAttributes().put(new Attributes.Name("NG2-Module"), project.getName() + "Module");
+				// emit the modern standalone syntax; the per-component addNG2Code calls below populate NG2-Components
+				manifest.getMainAttributes().put(new Attributes.Name("NG2-Components"), "");
+				manifest.getMainAttributes().remove(new Attributes.Name("NG2-Module"));
 				manifest.getMainAttributes().put(new Attributes.Name("Entry-Point"), "dist");
 				File manifestFile = new File(reader.getResource(), "META-INF/MANIFEST.MF");
 				try (FileOutputStream fos = new FileOutputStream(manifestFile))
