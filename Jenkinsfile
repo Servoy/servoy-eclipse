@@ -144,6 +144,10 @@ pipeline {
                     // write per-suite reports into target/coverage/<sub>/ and a merged one into
                     // target/coverage/combined/; designer.wpm writes a single target/coverage/
                     // report. Matching the per-suite subfolders too would double-count lines.
+                    // ignoreParsingErrors: the istanbul cobertura reporter can still emit odd
+                    // elements (e.g. a stray duplicate <method>) that the coverage-model parser
+                    // rejects; coverage-merge.js de-duplicates method names per class, but this
+                    // keeps a single malformed entry from failing the whole build.
                     recordCoverage(
                         tools: [
                             [parser: 'COBERTURA', pattern: 'com.servoy.eclipse.ngclient.ui/target/coverage/combined/cobertura-coverage.xml'],
@@ -152,6 +156,7 @@ pipeline {
                         ],
                         id: 'angular-vitest',
                         name: 'Angular Vitest Coverage',
+                        ignoreParsingErrors: true,
                         sourceCodeRetention: 'EVERY_BUILD'
                     )
                     

@@ -113,4 +113,41 @@ reports.create('lcovonly').execute(context);
 reports.create('cobertura').execute(context);
 reports.create('html').execute(context);
 
+// Istanbul's cobertura reporter emits one <method> per function, keyed by name. TypeScript
+// sources routinely declare several functions with the SAME name (two field arrow functions,
+// overloads, nested closures, repeated 'constructor'), producing duplicate <method name="...">
+// entries under a single <class>. Jenkins' Coverage plugin (coverage-model CoberturaParser)
+// rejects duplicate elements and fails the whole recordCoverage step
+// ("A duplicate element was detected ... while parsing this coverage report"). We post-process
+// the generated XML to make each <method> unique within its <class> by suffixing repeats, which
+// keeps every method's line data (so the totals are unchanged) while satisfying the parser.
+dedupeCoberturaMethods(path.join(outDir, 'cobertura-coverage.xml'));
+
 console.log(`Merged ${merged} lcov file(s) into ${outDir} (coverage-summary.json, lcov.info, cobertura-coverage.xml, html report)`);
+
+// Rewrite cobertura-coverage.xml so that, within each <class>, no two <method> elements share
+// the same name+signature. Text-based (no XML dependency): we walk <class>...</class> blocks and
+// rename duplicate method name="..." attributes to name="...#2", "...#3", etc. Line/hit data is
+// untouched, so coverage percentages do not change.
+function dedupeCoberturaMethods(xmlPath) {
+    if (!fs.existsSync(xmlPath)) {
+        console.warn(`cobertura-coverage.xml not found at ${xmlPath}; skipping method de-duplication.`);
+        return;
+    }
+    let xml = fs.readFileSync(xmlPath, 'utf8');
+
+    xml = xml.replace(/<class\b[\s\S]*?<\/class>/g, (classBlock) => {
+        const seen = new Map();
+        return classBlock.replace(/(<method\b[^>]*\bname=")([^"]*)(")/g, (full, pre, name, post) => {
+            const count = (seen.get(name) || 0) + 1;
+            seen.set(name, count);
+            if (count === 1) {
+                return full;
+            }
+            // Suffix with a zero-width-safe marker the parser treats as a distinct method.
+            return `${pre}${name}#${count}${post}`;
+        });
+    });
+
+    fs.writeFileSync(xmlPath, xml);
+}
