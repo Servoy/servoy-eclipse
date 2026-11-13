@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BehaviorSubject, Observable, Observer } from 'rxjs';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { BehaviorSubject, Observable, Observer, Subject } from 'rxjs';
 import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 
 import { WpmService, ALL_PACKAGE_TYPES, PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE } from './wpm.service';
-import { Package, Repository } from './websocket.service';
+import { Package, Repository, WebsocketService } from './websocket.service';
 import { PackageList } from './content/content.component';
 
 describe('WpmService', () => {
@@ -295,5 +296,169 @@ describe('WpmService', () => {
       expect(repoEmitted[repoEmitted.length - 1]).toEqual(repos);
       expect(emitted.length).toBeGreaterThan(0);
     });
+  });
+
+  describe('callRemoteMethod', () => {
+    it('should send a command with the given method name', () => {
+      service.callRemoteMethod('getRepositories');
+      expect(messageSender.next).toHaveBeenCalledWith({ method: 'getRepositories' });
+    });
+  });
+
+  describe('getPackages', () => {
+    it('should return the packages observable', () => {
+      expect(service.getPackages()).toBe((service as any).packagesObservable);
+    });
+  });
+
+  describe('getAllRepositories', () => {
+    it('should return the repositories observable', () => {
+      expect(service.getAllRepositories()).toBe((service as any).repositoriesObservable);
+    });
+  });
+
+  describe('getRepositories', () => {
+    it('should emit the repositories to the observer', () => {
+      const repoEmitted: Repository[][] = [];
+      service.getAllRepositories().subscribe(r => repoEmitted.push(r));
+
+      const repos: Repository[] = [{ name: 'Repo1', selected: true }];
+      service.getRepositories(repos);
+
+      expect(repoEmitted[repoEmitted.length - 1]).toEqual(repos);
+    });
+  });
+
+  describe('removeRepository', () => {
+    it('should emit the remaining repositories', () => {
+      const repoEmitted: Repository[][] = [];
+      service.getAllRepositories().subscribe(r => repoEmitted.push(r));
+
+      const repos: Repository[] = [{ name: 'Default', selected: true }];
+      service.removeRepository(repos);
+
+      expect(repoEmitted[repoEmitted.length - 1]).toEqual(repos);
+    });
+  });
+
+  describe('setSelectedRepository', () => {
+    it('should forward packages to requestAllInstalledPackages', () => {
+      const emitted: any[] = [];
+      service.getPackages().subscribe(p => emitted.push(p));
+
+      const packages = [createPackage({ name: 'pkg1', packageType: PACKAGE_TYPE_WEB_COMPONENT })];
+      service.setSelectedRepository(packages);
+
+      const componentEmit = emitted.find(e => e.packageType === PACKAGE_TYPE_WEB_COMPONENT);
+      expect(componentEmit.packages).toHaveLength(1);
+    });
+  });
+
+  describe('getAllSolutions', () => {
+    it('should return the stored solutions array', () => {
+      service.getSolutionList(['a', 'b']);
+      expect(service.getAllSolutions()).toEqual(['a', 'b']);
+    });
+  });
+});
+
+describe('WpmService (constructed via DI)', () => {
+  let openSubject: Subject<Event>;
+  let messageSubject: Subject<MessageEvent>;
+  let messageSender: { next: ReturnType<typeof vi.fn> };
+  let wsService: { connect: ReturnType<typeof vi.fn> };
+  let realService: WpmService;
+
+  const buildService = (search = ''): WpmService => {
+    // Restrict any location mutation to the search part only, and restore it after.
+    const historyUrl = `${window.location.pathname}${search}`;
+    window.history.replaceState(null, '', historyUrl);
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        WpmService,
+        { provide: WebsocketService, useValue: wsService },
+      ],
+    });
+    return TestBed.inject(WpmService);
+  };
+
+  beforeEach(() => {
+    openSubject = new Subject<Event>();
+    messageSubject = new Subject<MessageEvent>();
+    messageSender = { next: vi.fn() };
+    wsService = {
+      connect: vi.fn(() => ({
+        open: openSubject.asObservable(),
+        messageSender,
+        messageObservable: messageSubject.asObservable(),
+      })),
+    };
+  });
+
+  afterEach(() => {
+    window.history.replaceState(null, '', window.location.pathname);
+  });
+
+  it('should connect to the websocket on construction', () => {
+    realService = buildService();
+    expect(wsService.connect).toHaveBeenCalledTimes(1);
+    const uri = wsService.connect.mock.calls[0][0] as string;
+    expect(uri).toContain('/wpm/angular2/websocket');
+  });
+
+  it('should request installed packages, solutions and repositories when the connection opens', () => {
+    realService = buildService();
+
+    openSubject.next(new Event('open'));
+
+    expect(messageSender.next).toHaveBeenCalledWith(
+      expect.objectContaining({ method: 'requestAllInstalledPackages' })
+    );
+    expect(messageSender.next).toHaveBeenCalledWith({ method: 'getSolutionList' });
+    expect(messageSender.next).toHaveBeenCalledWith({ method: 'getRepositories' });
+  });
+
+  it('should include the solution name from the query string in the installed-packages request', () => {
+    realService = buildService('?solution=mySol');
+
+    openSubject.next(new Event('open'));
+
+    const installedCall = messageSender.next.mock.calls
+      .map(c => c[0])
+      .find((m: { method: string }) => m.method === 'requestAllInstalledPackages');
+    expect(installedCall.solution).toBe('mySol');
+  });
+
+  it('should dispatch incoming messages to the matching service method', () => {
+    realService = buildService();
+    const spy = vi.spyOn(realService, 'getSolutionList');
+
+    messageSubject.next({ data: JSON.stringify({ method: 'getSolutionList', result: ['solA', 'solB'] }) } as MessageEvent);
+
+    expect(spy).toHaveBeenCalledWith(['solA', 'solB']);
+    expect(realService.getAllSolutions()).toEqual(['solA', 'solB']);
+  });
+
+  it('should set needRefresh when refreshRemotePackages is invoked', () => {
+    realService = buildService();
+    expect(realService.isNeedRefresh()).toBe(false);
+    realService.refreshRemotePackages();
+    expect(realService.isNeedRefresh()).toBe(true);
+  });
+
+  it('should set contentAvailable to false when contentNotAvailable is invoked', () => {
+    realService = buildService();
+    expect(realService.isContentAvailable()).toBe(true);
+    realService.contentNotAvailable();
+    expect(realService.isContentAvailable()).toBe(false);
+  });
+
+  it('should set contentAvailable to false when installError is invoked', () => {
+    realService = buildService();
+    expect(realService.isContentAvailable()).toBe(true);
+    realService.installError();
+    expect(realService.isContentAvailable()).toBe(false);
   });
 });
