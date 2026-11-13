@@ -325,4 +325,45 @@ public class FormSpecRunnerTest {
 
 		assertNull(found);
 	}
+
+@Test
+public void testFindMatchingFile_matchesTypeScriptFormSpecVideo() throws Exception {
+	Files.createFile(tempDir.resolve("mysolution.myform.spec.cy.ts.mp4"));
+
+	Path found = invokeFindMatchingFile(new FormSpecRunner(), tempDir, "myform", ".mp4");
+
+	assertNotNull(found, "video named after a solution-prefixed .spec.cy.ts form spec must be found");
+	assertEquals("mysolution.myform.spec.cy.ts.mp4", found.getFileName().toString());
+}
+
+@Test
+public void testFindMatchingFile_matchesBareTypeScriptFormSpecVideo() throws Exception {
+	Files.createFile(tempDir.resolve("myform.spec.cy.ts.mp4"));
+
+	assertNotNull(invokeFindMatchingFile(new FormSpecRunner(), tempDir, "myform", ".mp4"));
+}
+
+@Test
+public void testFindMatchingFile_typeScriptFormSpecDoesNotFalsePositiveOnSubstringFormName() throws Exception {
+	Files.createFile(tempDir.resolve("adminlogin.spec.cy.ts.mp4"));
+
+	assertNull(invokeFindMatchingFile(new FormSpecRunner(), tempDir, "login", ".mp4"));
+}
+
+@Test
+public void testFindScreenshot_matchesTypeScriptFormSpecScreenshotFolder() throws Exception {
+	Path specFolder = Files.createDirectories(tempDir.resolve("mysolution.myform.spec.cy.ts"));
+	Files.createFile(specFolder.resolve("test -- should work.png"));
+
+	assertNotNull(invokeFindScreenshot(new FormSpecRunner(), tempDir, "myform"),
+		"screenshot under a .spec.cy.ts form spec folder must be found");
+}
+
+@Test
+public void testFindScreenshot_ignoresOtherFormsTypeScriptSpecFolder() throws Exception {
+	Path specFolder = Files.createDirectories(tempDir.resolve("otherform.spec.cy.ts"));
+	Files.createFile(specFolder.resolve("test.png"));
+
+	assertNull(invokeFindScreenshot(new FormSpecRunner(), tempDir, "myform"));
+}
 }

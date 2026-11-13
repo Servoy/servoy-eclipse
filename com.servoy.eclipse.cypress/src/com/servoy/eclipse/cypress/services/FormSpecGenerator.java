@@ -23,8 +23,14 @@ import com.servoy.j2db.persistence.WebComponent;
 @Creatable
 public class FormSpecGenerator
 {
-	private static final String SPEC_CY_EXTENSION = ".spec.cy.js";
+	public static final String SPEC_CY_JS_EXTENSION = ".spec.cy.js";
+	public static final String SPEC_CY_TS_EXTENSION = ".spec.cy.ts";
+	/** Form spec extensions the tooling understands; a repo may keep its form tests in either language. */
+	public static final List<String> SPEC_CY_EXTENSIONS = List.of(SPEC_CY_JS_EXTENSION, SPEC_CY_TS_EXTENSION);
 	private static final String SPEC_JS_EXTENSION = ".spec.js";
+	private static final String SPEC_TS_EXTENSION = ".spec.ts";
+	/** Setup/tearDown file extensions recognised in cy-form-spec/. A NEW setup file is always written as .spec.js (a Servoy scope file). */
+	public static final List<String> SPEC_SETUP_EXTENSIONS = List.of(SPEC_JS_EXTENSION, SPEC_TS_EXTENSION);
 	private static final String FORM_SPEC_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form";
 	private static final String FORM_SETUP_RELATIVE_DIR = "jenkins-custom/e2e-test-scripts/cypress/cy-form-spec";
 
@@ -68,13 +74,15 @@ public class FormSpecGenerator
 			Files.createDirectories(setupDir);
 
 			String solutionName = form.getRootObject().getName();
-			Path cySpecPath = testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
-			Path setupSpecPath = setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
+			Path existingCySpec = firstExisting(testsDir, solutionName + "." + formName);
+			Path cySpecPath = existingCySpec != null ? existingCySpec : testsDir.resolve(solutionName + "." + formName + resolveSpecExtension());
+			Path existingSetupSpec = firstExistingSetup(setupDir, solutionName + "." + formName);
+			Path setupSpecPath = existingSetupSpec != null ? existingSetupSpec : setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
 
 			if (Files.exists(cySpecPath) && Files.exists(setupSpecPath))
 			{
-				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_CY_EXTENSION + " and " +
-					FORM_SETUP_RELATIVE_DIR + "/" + solutionName + "." + formName + SPEC_JS_EXTENSION;
+				return "Spec files already exist: " + FORM_SPEC_RELATIVE_DIR + "/" + cySpecPath.getFileName() + " and " +
+					FORM_SETUP_RELATIVE_DIR + "/" + setupSpecPath.getFileName();
 			}
 
 			FormMetadata metadata = buildMetadata(form);
@@ -87,8 +95,7 @@ public class FormSpecGenerator
 				String cyContent = model == null ? generateCypressSpecContent(metadata)
 					: FormSpecModelEmitter.emit(getFormUrl(metadata.solutionName, metadata.formName), model);
 				Files.writeString(cySpecPath, cyContent, StandardCharsets.UTF_8);
-				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(solutionName).append(".")
-					.append(formName).append(SPEC_CY_EXTENSION).append(" (")
+				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(cySpecPath.getFileName()).append(" (")
 					.append(model == null ? metadata.namedElements.size() + " element assertions"
 						: FormSpecModelEmitter.countVisibilityAssertions(model) + " element visibility assertions, " +
 							FormSpecModelEmitter.countHandlerCases(model) + " handler cases")
@@ -99,8 +106,8 @@ public class FormSpecGenerator
 			{
 				String setupContent = generateSetupContent(metadata);
 				Files.writeString(setupSpecPath, setupContent, StandardCharsets.UTF_8);
-				result.append("Created: ").append(FORM_SETUP_RELATIVE_DIR).append("/").append(solutionName).append(".")
-					.append(formName).append(SPEC_JS_EXTENSION).append(" (setUp/tearDown for data setup)");
+				result.append("Created: ").append(FORM_SETUP_RELATIVE_DIR).append("/").append(setupSpecPath.getFileName())
+					.append(" (setUp/tearDown for data setup)");
 			}
 
 			return result.toString().trim();
@@ -128,6 +135,93 @@ public class FormSpecGenerator
 	}
 
 	/**
+	 * @return true when {@code fileName} is a form spec file name (.spec.cy.js or .spec.cy.ts).
+	 */
+	public static boolean isFormSpecFileName(String fileName)
+	{
+		return SPEC_CY_EXTENSIONS.stream().anyMatch(fileName::endsWith);
+	}
+
+	/**
+	 * @return {@code fileName} without its form spec extension, or unchanged when it has none.
+	 */
+	public static String stripFormSpecExtension(String fileName)
+	{
+		for (String extension : SPEC_CY_EXTENSIONS)
+		{
+			if (fileName.endsWith(extension))
+			{
+				return fileName.substring(0, fileName.length() - extension.length());
+			}
+		}
+		return fileName;
+	}
+
+	/**
+	 * @return the first existing file named {@code baseName} plus a supported form spec extension, or null.
+	 */
+	public static Path firstExisting(Path dir, String baseName)
+	{
+		for (String extension : SPEC_CY_EXTENSIONS)
+		{
+			Path candidate = dir.resolve(baseName + extension);
+			if (Files.exists(candidate))
+			{
+				return candidate;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @return the first existing setup file named {@code baseName} plus a supported setup extension (.spec.js or .spec.ts), or null.
+	 */
+	public static Path firstExistingSetup(Path dir, String baseName)
+	{
+		for (String extension : SPEC_SETUP_EXTENSIONS)
+		{
+			Path candidate = dir.resolve(baseName + extension);
+			if (Files.exists(candidate))
+			{
+				return candidate;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The extension for a NEW form spec: .spec.cy.ts when cy-form/ already holds more TypeScript form specs than JavaScript ones, else
+	 * .spec.cy.js (also when the folder does not exist yet).
+	 */
+	private String resolveSpecExtension()
+	{
+		return detectSpecExtension(resolveFormSpecDir());
+	}
+
+	/**
+	 * @return {@link #SPEC_CY_TS_EXTENSION} when {@code dir} holds more TypeScript form specs than JavaScript ones, else
+	 *         {@link #SPEC_CY_JS_EXTENSION} (also when {@code dir} is null or does not exist).
+	 */
+	public static String detectSpecExtension(Path dir)
+	{
+		if (dir == null || !Files.isDirectory(dir))
+		{
+			return SPEC_CY_JS_EXTENSION;
+		}
+		try (java.util.stream.Stream<Path> files = Files.list(dir))
+		{
+			List<String> names = files.map(p -> p.getFileName().toString()).toList();
+			long ts = names.stream().filter(n -> n.endsWith(SPEC_CY_TS_EXTENSION)).count();
+			long js = names.stream().filter(n -> n.endsWith(SPEC_CY_JS_EXTENSION)).count();
+			return ts > js ? SPEC_CY_TS_EXTENSION : SPEC_CY_JS_EXTENSION;
+		}
+		catch (Exception e)
+		{
+			return SPEC_CY_JS_EXTENSION;
+		}
+	}
+
+	/**
 	 * @deprecated use {@link #specExists(String, String)} instead - if you really don't mean to check the old file locations.
 	 */
 	@Deprecated
@@ -137,7 +231,7 @@ public class FormSpecGenerator
 		{
 			Path testsDir = resolveFormSpecDir();
 			Path setupDir = resolveFormSetupDir();
-			return Files.exists(testsDir.resolve(formName + SPEC_CY_EXTENSION)) && Files.exists(setupDir.resolve(formName + SPEC_JS_EXTENSION));
+			return firstExisting(testsDir, formName) != null && firstExistingSetup(setupDir, formName) != null;
 		}
 		catch (Exception e)
 		{
@@ -163,8 +257,8 @@ public class FormSpecGenerator
 		{
 			Path testsDir = resolveFormSpecDir();
 			Path setupDir = resolveFormSetupDir();
-			return (Files.exists(testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION)) &&
-				Files.exists(setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION))) || oldSpecExists(formName);
+			return (firstExisting(testsDir, solutionName + "." + formName) != null &&
+				firstExistingSetup(setupDir, solutionName + "." + formName) != null) || oldSpecExists(formName);
 		}
 		catch (Exception e)
 		{
@@ -181,7 +275,8 @@ public class FormSpecGenerator
 		try
 		{
 			Path testsDir = resolveFormSpecDir();
-			return testsDir.resolve(formName + SPEC_CY_EXTENSION);
+			Path existing = firstExisting(testsDir, formName);
+			return existing != null ? existing : testsDir.resolve(formName + resolveSpecExtension());
 		}
 		catch (Exception e)
 		{
@@ -198,7 +293,8 @@ public class FormSpecGenerator
 		try
 		{
 			Path setupDir = resolveFormSetupDir();
-			return setupDir.resolve(formName + SPEC_JS_EXTENSION);
+			Path existing = firstExistingSetup(setupDir, formName);
+			return existing != null ? existing : setupDir.resolve(formName + SPEC_JS_EXTENSION);
 		}
 		catch (Exception e)
 		{
@@ -212,7 +308,8 @@ public class FormSpecGenerator
 		try
 		{
 			Path testsDir = resolveFormSpecDir();
-			return testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
+			Path existing = firstExisting(testsDir, solutionName + "." + formName);
+			return existing != null ? existing : testsDir.resolve(solutionName + "." + formName + resolveSpecExtension());
 		}
 		catch (Exception e)
 		{
@@ -225,7 +322,8 @@ public class FormSpecGenerator
 		try
 		{
 			Path setupDir = resolveFormSetupDir();
-			return setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
+			Path existing = firstExistingSetup(setupDir, solutionName + "." + formName);
+			return existing != null ? existing : setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
 		}
 		catch (Exception e)
 		{
@@ -238,17 +336,12 @@ public class FormSpecGenerator
 		try
 		{
 			Path testsDir = resolveFormSpecDir();
-			Path prefixed = testsDir.resolve(solutionName + "." + formName + SPEC_CY_EXTENSION);
-			if (Files.exists(prefixed))
+			Path prefixed = firstExisting(testsDir, solutionName + "." + formName);
+			if (prefixed != null)
 			{
 				return prefixed;
 			}
-			Path legacy = testsDir.resolve(formName + SPEC_CY_EXTENSION);
-			if (Files.exists(legacy))
-			{
-				return legacy;
-			}
-			return null;
+			return firstExisting(testsDir, formName);
 		}
 		catch (Exception e)
 		{
@@ -261,17 +354,12 @@ public class FormSpecGenerator
 		try
 		{
 			Path setupDir = resolveFormSetupDir();
-			Path prefixed = setupDir.resolve(solutionName + "." + formName + SPEC_JS_EXTENSION);
-			if (Files.exists(prefixed))
+			Path prefixed = firstExistingSetup(setupDir, solutionName + "." + formName);
+			if (prefixed != null)
 			{
 				return prefixed;
 			}
-			Path legacy = setupDir.resolve(formName + SPEC_JS_EXTENSION);
-			if (Files.exists(legacy))
-			{
-				return legacy;
-			}
-			return null;
+			return firstExistingSetup(setupDir, formName);
 		}
 		catch (Exception e)
 		{

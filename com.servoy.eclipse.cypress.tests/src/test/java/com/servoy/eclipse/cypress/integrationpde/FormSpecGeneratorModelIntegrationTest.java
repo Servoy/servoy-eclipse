@@ -171,6 +171,58 @@ public class FormSpecGeneratorModelIntegrationTest extends TestUtilitiesClass {
 	}
 
 	@Test
+	public void testGenerateSpecWithExistingTypeScriptSpecDoesNotCreateJavaScriptDuplicate() throws Exception {
+		Path cyDir = gen.getFormSpecDir();
+		Path setupDir = cyDir.resolveSibling("cy-form-spec");
+		Path cyTs = cyDir.resolve(solutionName + "." + FORM + ".spec.cy.ts");
+		Path setupTs = setupDir.resolve(solutionName + "." + FORM + ".spec.ts");
+		Path cyJs = cyDir.resolve(solutionName + "." + FORM + ".spec.cy.js");
+		Path setupJs = setupDir.resolve(solutionName + "." + FORM + ".spec.js");
+		try {
+			Files.createDirectories(cyDir);
+			Files.createDirectories(setupDir);
+			Files.writeString(cyTs, "describe('x', () => {});", StandardCharsets.UTF_8);
+			Files.writeString(setupTs, "function spec_setUp() {}", StandardCharsets.UTF_8);
+
+			String result = gen.generateSpec(FORM, model());
+
+			assertEquals("Spec files already exist: jenkins-custom/e2e-test-scripts/cypress/cy-form/" + solutionName + "." + FORM
+					+ ".spec.cy.ts and jenkins-custom/e2e-test-scripts/cypress/cy-form-spec/" + solutionName + "." + FORM + ".spec.ts", result);
+			assertTrue(!Files.exists(cyJs), "No .spec.cy.js duplicate may be created next to an existing .spec.cy.ts");
+			assertTrue(!Files.exists(setupJs), "No .spec.js duplicate may be created next to an existing .spec.ts");
+			assertTrue(gen.specExists(FORM, solutionName), "specExists must see the .ts spec + .ts setup pair");
+			assertEquals(cyTs, gen.findExistingSpecFile(FORM, solutionName));
+			assertEquals(setupTs, gen.findExistingSetupFile(FORM, solutionName));
+		} finally {
+			for (Path p : new Path[] { cyTs, setupTs, cyJs, setupJs }) {
+				Files.deleteIfExists(p);
+			}
+		}
+	}
+
+	@Test
+	public void testGenerateSpecWithExistingTypeScriptSpecButNoSetupCreatesOnlyTheSetupFile() throws Exception {
+		Path cyDir = gen.getFormSpecDir();
+		Path cyTs = cyDir.resolve(solutionName + "." + FORM + ".spec.cy.ts");
+		Path cyJs = cyDir.resolve(solutionName + "." + FORM + ".spec.cy.js");
+		try {
+			Files.createDirectories(cyDir);
+			Files.writeString(cyTs, "describe('x', () => {});", StandardCharsets.UTF_8);
+
+			String result = gen.generateSpec(FORM, model());
+
+			assertTrue(result.contains("cy-form-spec/" + solutionName + "." + FORM + ".spec.js"), "A missing setup file is created as .spec.js: " + result);
+			assertTrue(!result.contains("Created: jenkins-custom/e2e-test-scripts/cypress/cy-form/"), "The existing form spec must not be recreated: " + result);
+			assertTrue(!Files.exists(cyJs), "No .spec.cy.js duplicate may be created next to an existing .spec.cy.ts");
+			assertEquals("describe('x', () => {});", Files.readString(cyTs, StandardCharsets.UTF_8), "The existing .ts spec must be left untouched");
+		} finally {
+			Files.deleteIfExists(cyTs);
+			Files.deleteIfExists(cyJs);
+			Files.deleteIfExists(gen.getSetupFilePath(FORM, solutionName));
+		}
+	}
+
+	@Test
 	public void testGenerateSpecWithModelForUnknownFormReturnsFormNotFound() {
 		String result = gen.generateSpec("noSuchForm_xyz", new FormSpecModel("noSuchForm_xyz", List.of()));
 
