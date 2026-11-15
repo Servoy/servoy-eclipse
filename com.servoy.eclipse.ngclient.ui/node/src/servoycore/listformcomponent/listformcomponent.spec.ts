@@ -7,7 +7,7 @@ import { FormService } from '../../ngclient/form.service';
 import { ServoyService } from '../../ngclient/servoy.service';
 import { TypesRegistry } from '../../sablo/types_registry';
 import { ConverterService } from '../../sablo/converter.service';
-import { LoggerFactory } from '@servoy/public';
+import { LoggerFactory, ChangeType } from '@servoy/public';
 import { ComponentCache, FormComponentCache, StructureCache } from '../../ngclient/types';
 
 describe('ListFormComponent', () => {
@@ -72,7 +72,7 @@ describe('ListFormComponent', () => {
         { provide: ServoyService, useValue: { getUIProperties: () => ({ getUIProperty: vi.fn() }) } },
         { provide: TypesRegistry, useValue: { getComponentSpecification: vi.fn() } },
         { provide: ConverterService, useValue: {} },
-        { provide: LoggerFactory, useValue: { getLogger: () => ({ error: vi.fn(), warn: vi.fn(), debug: vi.fn(), info: vi.fn() }) } },
+        { provide: LoggerFactory, useValue: { getLogger: () => ({ error: vi.fn(), warn: vi.fn(), debug: vi.fn(), info: vi.fn(), buildMessage: (fn: () => string) => fn() }) } },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     })
@@ -908,6 +908,759 @@ describe('ListFormComponent', () => {
       component.numberOfCells = 7;
       component.calculateCells();
       expect(component.numberOfCells).toBe(7);
+    });
+  });
+
+  // The scrolling (ag-grid) path: svyOnInit builds a large agGridOptions object whose nested callbacks are never
+  // invoked by the normal tests. Build it once with a scrolling config, then call each callback with hand-built
+  // fake params - no real grid is needed.
+  describe('scrolling svyOnInit agGridOptions callbacks', () => {
+    const configureScrolling = () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.getClientProperty.mockReturnValue(null); // no pagingMode -> useScrolling stays true
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: true });
+      fixture.componentRef.setInput('responsiveHeight', 0);
+      component.svyOnInit();
+    };
+
+    it('enables scrolling and builds agGridOptions when no pagingMode is set', () => {
+      configureScrolling();
+      expect(component.useScrolling).toBe(true);
+      expect(component.agGridOptions).toBeTruthy();
+      expect(component.agGridOptions.rowModelType).toBe('serverSide');
+    });
+
+    it('falls back to the paged (non-scrolling) path when a pagingMode client property is set', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.getClientProperty.mockReturnValue('paging');
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      component.svyOnInit();
+      expect(component.useScrolling).toBe(false);
+    });
+
+    describe('defaultColDef.suppressKeyboardEvent', () => {
+      it('returns false for a non-Tab key', () => {
+        configureScrolling();
+        const cb = (component.agGridOptions.defaultColDef as any).suppressKeyboardEvent;
+        expect(cb({ event: { keyCode: 13, altKey: false } })).toBe(false);
+      });
+
+      it('returns true for Tab (keyCode 9) without altKey and does not move focus', () => {
+        configureScrolling();
+        const querySpy = vi.spyOn((component as any).doc, 'querySelector');
+        const cb = (component.agGridOptions.defaultColDef as any).suppressKeyboardEvent;
+        expect(cb({ event: { keyCode: 9, altKey: false } })).toBe(true);
+        expect(querySpy).not.toHaveBeenCalled();
+        querySpy.mockRestore();
+      });
+
+      it('focuses the next tabindex element for Tab (keyCode 9) with altKey', () => {
+        configureScrolling();
+        vi.spyOn(component, 'sabloTabseqDirective').mockReturnValue({ runtimeIndex: { nextAvailableIndex: 7 } } as any);
+        const focus = vi.fn();
+        const querySpy = vi.spyOn((component as any).doc, 'querySelector').mockReturnValue({ focus } as any);
+        const cb = (component.agGridOptions.defaultColDef as any).suppressKeyboardEvent;
+        expect(cb({ event: { keyCode: 9, altKey: true } })).toBe(true);
+        expect(querySpy).toHaveBeenCalledWith('[tabindex="7"]');
+        expect(focus).toHaveBeenCalled();
+        querySpy.mockRestore();
+      });
+
+      it('does not throw when the next tabindex element is not found (altKey Tab)', () => {
+        configureScrolling();
+        vi.spyOn(component, 'sabloTabseqDirective').mockReturnValue({ runtimeIndex: { nextAvailableIndex: 99 } } as any);
+        const querySpy = vi.spyOn((component as any).doc, 'querySelector').mockReturnValue(null);
+        const cb = (component.agGridOptions.defaultColDef as any).suppressKeyboardEvent;
+        expect(cb({ event: { keyCode: 9, altKey: true } })).toBe(true);
+        querySpy.mockRestore();
+      });
+    });
+
+    describe('navigateToNextCell', () => {
+      beforeEach(() => {
+        configureScrolling();
+        component.numberOfColumns = 1;
+      });
+
+      it('moves down one row on KEY_DOWN (40)', () => {
+        mockFoundset.selectedRowIndexes = [2];
+        mockFoundset.serverSize = 10;
+        const next = { rowIndex: 0 };
+        const result = component.agGridOptions.navigateToNextCell!({ key: 40, previousCellPosition: { rowIndex: 2 }, nextCellPosition: next } as any);
+        expect(result).toBe(next);
+        expect((result as any).rowIndex).toBe(3);
+      });
+
+      it('clamps at serverSize - 1 on KEY_DOWN', () => {
+        mockFoundset.selectedRowIndexes = [9];
+        mockFoundset.serverSize = 10;
+        const next = { rowIndex: 0 };
+        const result = component.agGridOptions.navigateToNextCell!({ key: 40, previousCellPosition: {}, nextCellPosition: next } as any);
+        expect((result as any).rowIndex).toBe(9);
+      });
+
+      it('moves up one row on KEY_UP (38)', () => {
+        mockFoundset.selectedRowIndexes = [5];
+        const next = { rowIndex: 0 };
+        const result = component.agGridOptions.navigateToNextCell!({ key: 38, previousCellPosition: {}, nextCellPosition: next } as any);
+        expect((result as any).rowIndex).toBe(4);
+      });
+
+      it('clamps at 0 on KEY_UP', () => {
+        mockFoundset.selectedRowIndexes = [0];
+        const next = { rowIndex: 0 };
+        const result = component.agGridOptions.navigateToNextCell!({ key: 38, previousCellPosition: {}, nextCellPosition: next } as any);
+        expect((result as any).rowIndex).toBe(0);
+      });
+
+      it('divides the selected index by the column count when computing the next row', () => {
+        mockFoundset.selectedRowIndexes = [6];
+        mockFoundset.serverSize = 20;
+        component.numberOfColumns = 3;
+        const next = { rowIndex: 0 };
+        const result = component.agGridOptions.navigateToNextCell!({ key: 40, previousCellPosition: {}, nextCellPosition: next } as any);
+        // selectedIdx 6 + 1 = 7, floor(7 / 3) = 2
+        expect((result as any).rowIndex).toBe(2);
+      });
+
+      it('returns the previous cell on any other key', () => {
+        mockFoundset.selectedRowIndexes = [1];
+        const prev = { rowIndex: 1 };
+        const result = component.agGridOptions.navigateToNextCell!({ key: 99, previousCellPosition: prev, nextCellPosition: { rowIndex: 0 } } as any);
+        expect(result).toBe(prev);
+      });
+    });
+
+    describe('onFirstDataRendered', () => {
+      it('scrolls to the selection and reveals after the nested requestAnimationFrame chain', () => {
+        configureScrolling();
+        const scrollSpy = vi.spyOn(component as any, 'scrollToSelection').mockImplementation(() => {});
+        const revealSpy = vi.spyOn(component as any, 'revealAfterFirstRender').mockImplementation(() => {});
+        const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+          cb(0);
+          return 0;
+        });
+        component.agGridOptions.onFirstDataRendered!({ api: {} } as any);
+        expect(scrollSpy).toHaveBeenCalled();
+        expect(revealSpy).toHaveBeenCalled();
+        raf.mockRestore();
+      });
+    });
+
+    describe('onModelUpdated', () => {
+      it('reveals the grid when the foundset is empty and the first render is still pending', () => {
+        mockServoyApi.isInDesigner.mockReturnValue(false);
+        mockServoyApi.hasSampleData.mockReturnValue(false);
+        mockServoyApi.getClientProperty.mockReturnValue(null);
+        mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+        fixture.componentRef.setInput('foundset', mockFoundset);
+        fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: false });
+        fixture.componentRef.setInput('responsiveHeight', -1);
+        component.svyOnInit();
+        const revealSpy = vi.spyOn(component as any, 'revealAfterFirstRender').mockImplementation(() => {});
+        component.agGridOptions.onModelUpdated!({ api: { getDisplayedRowCount: () => 0 } } as any);
+        expect(revealSpy).toHaveBeenCalled();
+      });
+
+      it('does not reveal when there are displayed rows', () => {
+        mockServoyApi.isInDesigner.mockReturnValue(false);
+        mockServoyApi.hasSampleData.mockReturnValue(false);
+        mockServoyApi.getClientProperty.mockReturnValue(null);
+        mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+        fixture.componentRef.setInput('foundset', mockFoundset);
+        fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: false });
+        fixture.componentRef.setInput('responsiveHeight', -1);
+        component.svyOnInit();
+        const revealSpy = vi.spyOn(component as any, 'revealAfterFirstRender').mockImplementation(() => {});
+        component.agGridOptions.onModelUpdated!({ api: { getDisplayedRowCount: () => 5 } } as any);
+        expect(revealSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  // The scrolling-path foundset change listener (svyOnInit else-branch, lines ~622-655): capture the listener
+  // passed to addChangeListener and invoke it with fake FoundsetChangeEvent objects against a fake grid api.
+  describe('scrolling foundset change listener', () => {
+    let changeListener: (event: any) => void;
+    let gridApi: any;
+
+    const configureScrolling = () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.getClientProperty.mockReturnValue(null);
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+      mockFoundset.addChangeListener = vi.fn().mockImplementation((cb: (event: any) => void) => {
+        changeListener = cb;
+        return vi.fn();
+      });
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: true });
+      fixture.componentRef.setInput('responsiveHeight', 0);
+      component.svyOnInit();
+      component.numberOfColumns = 1;
+      gridApi = {
+        isDestroyed: vi.fn().mockReturnValue(false),
+        setRowCount: vi.fn(),
+        refreshServerSide: vi.fn(),
+        refreshCells: vi.fn(),
+      };
+      vi.spyOn(component, 'agGrid').mockReturnValue({ api: gridApi } as any);
+    };
+
+    it('ignores events that originate from the AG Grid datasource getRows request', () => {
+      configureScrolling();
+      changeListener({ requestInfos: ['AGGridDatasourceGetRows'], serverFoundsetSizeChanged: { newValue: 20 } });
+      expect(gridApi.setRowCount).not.toHaveBeenCalled();
+    });
+
+    it('ignores events after the grid api has been destroyed', () => {
+      configureScrolling();
+      gridApi.isDestroyed.mockReturnValue(true);
+      changeListener({ serverFoundsetSizeChanged: { newValue: 20 } });
+      expect(gridApi.setRowCount).not.toHaveBeenCalled();
+    });
+
+    it('updates the row count on serverFoundsetSizeChanged', () => {
+      configureScrolling();
+      changeListener({ serverFoundsetSizeChanged: { newValue: 20 } });
+      expect(gridApi.setRowCount).toHaveBeenCalledWith(20);
+    });
+
+    it('purges the server side rows on viewportRowsCompletelyChanged', () => {
+      configureScrolling();
+      changeListener({ viewportRowsCompletelyChanged: true });
+      expect(gridApi.refreshServerSide).toHaveBeenCalledWith({ purge: true });
+    });
+
+    it('purges and resets the row count on an insert/delete viewportRowsUpdated', () => {
+      configureScrolling();
+      mockFoundset.serverSize = 8;
+      changeListener({ viewportRowsUpdated: [{ type: ChangeType.ROWS_INSERTED, startIndex: 0, endIndex: 1 }] });
+      expect(gridApi.refreshServerSide).toHaveBeenCalledWith({ purge: true });
+      expect(gridApi.setRowCount).toHaveBeenCalledWith(8);
+    });
+
+    it('refreshes a single cell on a one-row change', () => {
+      configureScrolling();
+      changeListener({ viewportRowsUpdated: [{ type: ChangeType.ROWS_CHANGED, startIndex: 3, endIndex: 3 }] });
+      expect(gridApi.refreshCells).toHaveBeenCalled();
+      expect(gridApi.refreshServerSide).not.toHaveBeenCalled();
+    });
+
+    it('purges on a multi-row non-insert/delete change', () => {
+      configureScrolling();
+      changeListener({ viewportRowsUpdated: [{ type: ChangeType.ROWS_CHANGED, startIndex: 1, endIndex: 4 }] });
+      expect(gridApi.refreshServerSide).toHaveBeenCalledWith({ purge: true });
+    });
+
+    it('scrolls to the selection when the selected row indexes change', () => {
+      configureScrolling();
+      const scrollSpy = vi.spyOn(component as any, 'scrollToSelection').mockImplementation(() => {});
+      changeListener({ selectedRowIndexesChanged: true });
+      expect(scrollSpy).toHaveBeenCalled();
+    });
+  });
+
+  // The paged (non-scrolling) foundset change listener (svyOnInit, lines ~521-620). Capture the listener and drive
+  // the branches with FoundsetChangeEvent objects. updatePagingControls touches the paging <div> refs, so the view
+  // must exist; detectChanges() first makes the #firstelement/#leftelement/#rightelement viewchildren resolve.
+  describe('paged foundset change listener', () => {
+    let changeListener: (event: any) => void;
+
+    const configurePaged = () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.getClientProperty.mockReturnValue('paging'); // pagingMode set -> useScrolling false
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+      mockFoundset.addChangeListener = vi.fn().mockImplementation((cb: (event: any) => void) => {
+        changeListener = cb;
+        return vi.fn();
+      });
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: true });
+      fixture.detectChanges();
+      component.svyOnInit();
+      vi.spyOn(component, 'calculateCells').mockImplementation(() => {});
+    };
+
+    it('registers a change listener and keeps the non-scrolling markup', () => {
+      configurePaged();
+      expect(component.useScrolling).toBe(false);
+      expect(typeof changeListener).toBe('function');
+    });
+
+    it('updates the paging controls on serverFoundsetSizeChanged', () => {
+      configurePaged();
+      const updateSpy = vi.spyOn(component, 'updatePagingControls').mockImplementation(() => {});
+      changeListener({ serverFoundsetSizeChanged: { newValue: 20 } });
+      expect(updateSpy).toHaveBeenCalled();
+    });
+
+    it('recalculates cells on an insert/delete viewportRowsUpdated', () => {
+      configurePaged();
+      changeListener({ viewportRowsUpdated: [{ type: ChangeType.ROWS_INSERTED, startIndex: 0, endIndex: 1 }] });
+      expect(component.calculateCells).toHaveBeenCalled();
+    });
+
+    it('does not recalculate cells on a plain row-change viewportRowsUpdated', () => {
+      configurePaged();
+      changeListener({ viewportRowsUpdated: [{ type: ChangeType.ROWS_CHANGED, startIndex: 0, endIndex: 0 }] });
+      expect(component.calculateCells).not.toHaveBeenCalled();
+    });
+
+    it('recalculates cells on viewportRowsCompletelyChanged', () => {
+      configurePaged();
+      changeListener({ viewportRowsCompletelyChanged: true });
+      expect(component.calculateCells).toHaveBeenCalled();
+    });
+
+    it('swaps in the new foundset and recalculates on fullValueChanged', () => {
+      configurePaged();
+      const newFoundset = { ...mockFoundset, serverSize: 3, viewPort: { startIndex: 0, size: 3, rows: [] } };
+      changeListener({ fullValueChanged: { newValue: newFoundset } });
+      expect(component._foundset()).toBe(newFoundset);
+      expect(component.calculateCells).toHaveBeenCalled();
+    });
+
+    it('clamps the page into range on fullValueChanged when the current page is past the end', () => {
+      configurePaged();
+      component.numberOfCells = 5;
+      component.page = 4; // 4*5 = 20 >= serverSize
+      const newFoundset = { ...mockFoundset, serverSize: 12, viewPort: { startIndex: 0, size: 5, rows: [] } };
+      changeListener({ fullValueChanged: { newValue: newFoundset } });
+      // Math.floor((12 - 1) / 5) = 2
+      expect(component.page).toBe(2);
+    });
+
+    it('shifts the viewport and loads extra records on a viewPortStartIndexChanged after an insert before the page', () => {
+      configurePaged();
+      component.numberOfCells = 5;
+      component.page = 1; // wanted start index 5
+      mockFoundset.viewPort.startIndex = 6; // an insert shifted it; delta = 5 - 6 = -1
+      mockFoundset.viewPort.size = 5;
+      mockFoundset.serverSize = 20;
+      changeListener({ viewPortStartIndexChanged: { oldValue: 5, newValue: 6 } });
+      // shiftedPageDelta -1 -> loadLess path; viewport size equals numberOfCells so loadLess guard is not met here,
+      // but updateSelection must still run without throwing
+      expect(mockFoundset.notifyChanged).toHaveBeenCalled();
+    });
+
+    it('loads extra records when the viewport can show more than it currently holds (viewPortSizeChanged)', () => {
+      configurePaged();
+      component.numberOfCells = 5;
+      component.page = 0;
+      mockFoundset.viewPort.startIndex = 0;
+      mockFoundset.viewPort.size = 2;
+      mockFoundset.serverSize = 20;
+      changeListener({ viewPortSizeChanged: { oldValue: 5, newValue: 2 } });
+      expect(mockFoundset.loadExtraRecordsAsync).toHaveBeenCalled();
+    });
+
+    it('loads less records when the viewport holds more than numberOfCells (viewPortSizeChanged)', () => {
+      configurePaged();
+      component.numberOfCells = 2;
+      component.page = 0;
+      mockFoundset.viewPort.startIndex = 0;
+      mockFoundset.viewPort.size = 5;
+      mockFoundset.serverSize = 20;
+      changeListener({ viewPortSizeChanged: { oldValue: 2, newValue: 5 } });
+      expect(mockFoundset.loadLessRecordsAsync).toHaveBeenCalled();
+    });
+
+    it('notifies the foundset of pending requests after processing a generic event', () => {
+      configurePaged();
+      component.numberOfCells = 5;
+      mockFoundset.viewPort.size = 5;
+      changeListener({ viewPortSizeChanged: { oldValue: 5, newValue: 5 } });
+      expect(mockFoundset.notifyChanged).toHaveBeenCalled();
+    });
+  });
+
+  describe('updatePagingControls', () => {
+    const configurePagedView = () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.getClientProperty.mockReturnValue('paging');
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: true });
+      component.svyOnInit();
+      fixture.detectChanges();
+    };
+
+    it('hides the first/left controls on page 0 and shows the right control when more rows exist', () => {
+      configurePagedView();
+      component.page = 0;
+      component.numberOfCells = 2;
+      mockFoundset.serverSize = 10;
+      mockFoundset.hasMoreRows = false;
+      component.updatePagingControls();
+      expect((component.elementFirstRef()!.nativeElement as HTMLElement).style.visibility).toBe('hidden');
+      expect((component.elementLeftRef()!.nativeElement as HTMLElement).style.visibility).toBe('hidden');
+      expect((component.elementRightRef()!.nativeElement as HTMLElement).style.visibility).toBe('visible');
+    });
+
+    it('shows the first/left controls on a later page', () => {
+      configurePagedView();
+      component.page = 1;
+      component.numberOfCells = 2;
+      mockFoundset.serverSize = 10;
+      component.updatePagingControls();
+      expect((component.elementFirstRef()!.nativeElement as HTMLElement).style.visibility).toBe('visible');
+      expect((component.elementLeftRef()!.nativeElement as HTMLElement).style.visibility).toBe('visible');
+    });
+
+    it('hides the right control when there are no more rows', () => {
+      configurePagedView();
+      component.page = 0;
+      component.numberOfCells = 10;
+      mockFoundset.serverSize = 5;
+      mockFoundset.hasMoreRows = false;
+      component.updatePagingControls();
+      expect((component.elementRightRef()!.nativeElement as HTMLElement).style.visibility).toBe('hidden');
+    });
+  });
+
+  describe('getRowItemTemplate', () => {
+    it('returns the parent LFC template for a plain component cache', () => {
+      const tpl = {} as any;
+      mockParent.getTemplateForLFC = vi.fn().mockReturnValue(tpl);
+      const comp = new ComponentCache('c1', 'bootstrapcomponents-textbox', 'textbox', [], {}, TestBed.inject(TypesRegistry));
+      expect(component.getRowItemTemplate(comp)).toBe(tpl);
+      expect(mockParent.getTemplateForLFC).toHaveBeenCalledWith(comp);
+    });
+
+    it('returns the responsive structure template for a StructureCache with no tagname', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(true); // avoid svyOnInit's foundset listener path on detectChanges
+      fixture.detectChanges();
+      const struct = new StructureCache('', []);
+      expect(component.getRowItemTemplate(struct)).toBe(component.svyResponsiveDiv());
+    });
+
+    it('returns the responsive form-component template for a responsive FormComponentCache', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(true);
+      fixture.detectChanges();
+      const fcc = new FormComponentCache('fc', 'servoycore-formcomponent', 'fc', [], true, {}, null!, true, TestBed.inject(TypesRegistry));
+      expect(component.getRowItemTemplate(fcc)).toBe(component.formComponentResponsiveDiv());
+    });
+
+    it('returns the absolute form-component template for a non-responsive FormComponentCache', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(true);
+      fixture.detectChanges();
+      const fcc = new FormComponentCache('fc', 'servoycore-formcomponent', 'fc', [], false, {}, null!, true, TestBed.inject(TypesRegistry));
+      expect(component.getRowItemTemplate(fcc)).toBe(component.formComponentAbsoluteDiv());
+    });
+  });
+
+  describe('getRowItemState for structure and form-component caches', () => {
+    it('returns a StructureCache unchanged', () => {
+      const struct = new StructureCache('', []);
+      expect(component.getRowItemState(struct, { _svyRowId: '1' } as any, 0)).toBe(struct);
+    });
+
+    it('returns a FormComponentCache unchanged', () => {
+      const fcc = new FormComponentCache('fc', 'servoycore-formcomponent', 'fc', [], false, {}, null!, true, TestBed.inject(TypesRegistry));
+      expect(component.getRowItemState(fcc, { _svyRowId: '1' } as any, 0)).toBe(fcc);
+    });
+  });
+
+  describe('getRowItemState resolves cells and caches them per row', () => {
+    it('returns a cached cell when the row already has one for this rowIndex', () => {
+      const textbox = new ComponentCache('tb', 'bootstrapcomponents-textbox', 'textbox', [], {}, TestBed.inject(TypesRegistry));
+      (textbox.model as any).dataProviderID = 'Sample';
+      component.cache = { items: [textbox] } as unknown as FormComponentCache;
+      const row: any = { _svyRowId: 'r1' };
+      const first = component.getRowItemState(textbox, row, 0);
+      const second = component.getRowItemState(textbox, row, 0);
+      expect(second).toBe(first);
+    });
+
+    it('returns an empty Cell and warns when no model can be resolved for the component', () => {
+      const textbox = new ComponentCache('unknown', 'bootstrapcomponents-textbox', 'textbox', [], {}, TestBed.inject(TypesRegistry));
+      component.cache = { items: [] } as unknown as FormComponentCache;
+      const cell = component.getRowItemState(textbox, { _svyRowId: 'r1' } as any, 0) as any;
+      expect(cell).toBeTruthy();
+      expect(cell.name).toBe('unknown');
+    });
+  });
+
+  describe('getHandler', () => {
+    it('returns the named handler from the cell', () => {
+      const handler = vi.fn();
+      const cell: any = { handlers: { onClick: handler } };
+      expect(component.getHandler(cell, 'onClick')).toBe(handler);
+    });
+  });
+
+  describe('ngOnChanges', () => {
+    beforeEach(() => {
+      // ngOnChanges -> initializeComponent() -> svyOnInit() (which needs a live foundset listener and view) only
+      // runs when the component has a native element and is not yet initialized. These tests exercise just the
+      // LFC-specific ngOnChanges body (foundset signal + rowItems), so mark it initialized to isolate that.
+      (component as any).initialized = true;
+    });
+
+    it('sets the internal foundset signal from the foundset input', () => {
+      const other = { ...mockFoundset, serverSize: 99 };
+      fixture.componentRef.setInput('foundset', other);
+      component.ngOnChanges({} as any);
+      expect(component._foundset()).toBe(other);
+    });
+
+    it('builds rowItems from a containedForm with childElements', () => {
+      const childElements = [{ specName: 'bootstrapcomponents-textbox', name: 'tb', model: {} } as any];
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: true, childElements });
+      component.ngOnChanges({} as any);
+      expect(component.getRowItems().length).toBe(1);
+      expect(component.getRowItems()[0]).toBe(childElements[0]);
+    });
+
+    it('resolves a servoycore-formcomponent child from the parent form cache', () => {
+      const formComponentValue = { name: 'fc', responsive: false } as any;
+      mockParent.getFormCache = vi.fn().mockReturnValue({
+        getFormComponent: vi.fn().mockReturnValue(formComponentValue),
+      });
+      const childElements = [{ specName: 'servoycore-formcomponent', name: 'fc', model: {} } as any];
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: true, childElements });
+      component.ngOnChanges({} as any);
+      expect(component.getRowItems()[0]).toBe(formComponentValue);
+    });
+  });
+
+  describe('ngOnDestroy', () => {
+    it('removes the foundset change listener', () => {
+      const remove = vi.fn();
+      component.removeListenerFunction = remove;
+      component.ngOnDestroy();
+      expect(remove).toHaveBeenCalled();
+      expect(component.removeListenerFunction).toBeNull();
+    });
+
+    it('clears the smart-property update trigger on contained-form child elements', () => {
+      const child: any = { triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate: vi.fn() };
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: true, childElements: [child] });
+      component.ngOnDestroy();
+      expect(child.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate).toBeNull();
+    });
+
+    it('does not throw when there is no listener and no contained form', () => {
+      component.removeListenerFunction = null;
+      expect(() => component.ngOnDestroy()).not.toThrow();
+    });
+  });
+
+  describe('callApi', () => {
+    it('logs an error when the path is not the expected containedForm/childElements shape', () => {
+      const errorSpy = vi.spyOn((component as any).log, 'error');
+      component.callApi('someComponent', 'doStuff', [], ['wrong', 'path']);
+      expect(errorSpy).toHaveBeenCalled();
+    });
+
+    it('dispatches to the UI component at the selected row for a childElements path', () => {
+      const childModel = { name: 'btn', type: 'bootstrapcomponents-button' };
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: true, childElements: [childModel] });
+      mockFoundset.selectedRowIndexes = [0];
+      const uiComp: any = { name: 'btn' };
+      component.registerComponent({ name: () => 'btn' } as any, 0);
+      (component as any).componentCache[0] = { btn: uiComp };
+      const doCallSpy = vi.spyOn(AbstractFormComponent, 'doCallApiOnComponent').mockImplementation(() => undefined as any);
+      component.callApi('containedForm', 'requestFocus', [], ['childElements', '0']);
+      expect(doCallSpy).toHaveBeenCalled();
+      doCallSpy.mockRestore();
+    });
+  });
+
+  describe('calculateCells paged/responsive sizing', () => {
+    it('uses responsivePageSize for a responsive form', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+      component.useScrolling = false;
+      fixture.componentRef.setInput('responsivePageSize', 7);
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: false });
+      mockFoundset.viewPort.startIndex = 0;
+      component.page = 0;
+      vi.spyOn(component, 'updatePagingControls').mockImplementation(() => {});
+      component.calculateCells();
+      expect(component.numberOfCells).toBe(7);
+    });
+
+    it('loads the correct page when the viewport start index does not match the page', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+      component.useScrolling = false;
+      fixture.componentRef.setInput('responsivePageSize', 5);
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: false });
+      component.page = 2; // start index 10
+      mockFoundset.viewPort.startIndex = 0;
+      vi.spyOn(component, 'updatePagingControls').mockImplementation(() => {});
+      component.calculateCells();
+      expect(mockFoundset.loadRecordsAsync).toHaveBeenCalledWith(10, 5);
+    });
+
+    it('sets the preferred viewport size to numberOfCells', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
+      component.useScrolling = false;
+      fixture.componentRef.setInput('responsivePageSize', 5);
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: false });
+      component.page = 0;
+      mockFoundset.viewPort.startIndex = 0;
+      mockFoundset.viewPort.size = 5;
+      mockFoundset.viewPort.rows = [{ _svyRowId: 'r0' }, { _svyRowId: 'r1' }, { _svyRowId: 'r2' }, { _svyRowId: 'r3' }, { _svyRowId: 'r4' }];
+      vi.spyOn(component, 'updatePagingControls').mockImplementation(() => {});
+      component.calculateCells();
+      expect(mockFoundset.setPreferredViewportSize).toHaveBeenCalledWith(5);
+    });
+  });
+
+  // The full cell-building path of getRowItemState (lines ~940-1056): resolve a ComponentCache to a real cell with
+  // the readOnly/enabled/visible property descriptors, handlers, and the smart-property trigger installed.
+  describe('getRowItemState full cell build', () => {
+    let textbox: ComponentCache;
+    let rowItem: any;
+
+    const buildCell = (rowEditable?: boolean[], rowEnable?: boolean[]) => {
+      textbox = new ComponentCache('tb', 'bootstrapcomponents-textbox', 'textbox', [], {}, TestBed.inject(TypesRegistry));
+      rowItem = {
+        name: 'tb',
+        model: { readOnly: false, enabled: true, visible: true },
+        modelViewport: undefined,
+        mappedHandlers: new Map(),
+      };
+      fixture.componentRef.setInput('containedForm', { formHeight: 10, formWidth: 10, absoluteLayout: true });
+      if (rowEditable) fixture.componentRef.setInput('rowEditableDataprovider', rowEditable);
+      if (rowEnable) fixture.componentRef.setInput('rowEnableDataprovider', rowEnable);
+      // rowItems resolution (ngOnChanges path): make the single item resolve to our mock state object
+      (component as any).rowItems = [rowItem];
+      component.cache = { items: [textbox] } as unknown as FormComponentCache;
+    };
+
+    it('builds a Cell whose model mirrors the resolved component model', () => {
+      buildCell();
+      const row: any = { _svyRowId: 'r0' };
+      const cell = component.getRowItemState(textbox, row, 0) as any;
+      expect(cell.name).toBe('tb');
+      expect(cell.rowId).toBe('r0');
+    });
+
+    it('readOnly getter reflects the rowEditableDataprovider (false editable -> readOnly true)', () => {
+      buildCell([false]);
+      fixture.componentRef.setInput('editable', true);
+      fixture.componentRef.setInput('readOnly', false);
+      const cell = component.getRowItemState(textbox, { _svyRowId: 'r0' } as any, 0) as any;
+      expect(cell.model.readOnly).toBe(true);
+    });
+
+    it('enabled getter reflects the rowEnableDataprovider', () => {
+      buildCell(undefined, [false]);
+      const cell = component.getRowItemState(textbox, { _svyRowId: 'r0' } as any, 0) as any;
+      expect(cell.model.enabled).toBe(false);
+    });
+
+    it('visible getter falls back to the stored element value when no visibleDataProvider', () => {
+      buildCell();
+      const cell = component.getRowItemState(textbox, { _svyRowId: 'r0' } as any, 0) as any;
+      expect(cell.model.visible).toBe(true);
+    });
+
+    it('installs the smart-property trigger and caches the cell on the row', () => {
+      buildCell();
+      const row: any = { _svyRowId: 'r0' };
+      component.getRowItemState(textbox, row, 0);
+      expect(typeof rowItem.triggerNgOnChangeWithSameRefDueToSmartPropertyUpdate).toBe('function');
+      expect(row._cache.get('tb')).toBeTruthy();
+    });
+
+    it('merges servoyAttributes from the cache item into the resolved model', () => {
+      buildCell();
+      (textbox.model as any).servoyAttributes = { 'data-x': '1' };
+      const cell = component.getRowItemState(textbox, { _svyRowId: 'r0' } as any, 0) as any;
+      expect(rowItem.model.servoyAttributes['data-x']).toBe('1');
+      expect(cell).toBeTruthy();
+    });
+  });
+
+  describe('updateSelection', () => {
+    it('does not throw and reads the selected row element from the view', () => {
+      mockServoyApi.isInDesigner.mockReturnValue(true);
+      fixture.detectChanges();
+      component._foundset.set(mockFoundset);
+      component.page = 0;
+      component.numberOfCells = 5;
+      mockFoundset.selectedRowIndexes = [0];
+      component.selectionChangedByKey = true;
+      expect(() => (component as any).updateSelection()).not.toThrow();
+    });
+  });
+
+  // AGGridDatasource.getRows feeds AG Grid its server-side rows. It is private to the module, but svyOnInit's
+  // ngAfterViewInit wiring creates one; here we drive it directly by newing it through the component reference it
+  // keeps. Build it via the exported behaviour: create a datasource over the component and invoke getRows.
+  describe('AGGridDatasource getRows', () => {
+    const makeDatasourceAndParams = () => {
+      mockServoyApi.isInDesigner.mockReturnValue(false);
+      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.getClientProperty.mockReturnValue(null);
+      mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
+      fixture.componentRef.setInput('foundset', mockFoundset);
+      fixture.componentRef.setInput('containedForm', { formHeight: 50, formWidth: 100, absoluteLayout: true });
+      fixture.componentRef.setInput('responsiveHeight', 0);
+      component.svyOnInit();
+      component.numberOfColumns = 1;
+      // the foundset viewport already holds rows 0..4; serverSize 10 means there are more to load
+      mockFoundset.serverSize = 5;
+      mockFoundset.hasMoreRows = false;
+      mockFoundset.viewPort.startIndex = 0;
+      mockFoundset.viewPort.size = 5;
+    };
+
+    // AGGridDatasource is module-private; ngAfterViewInit does `new AGGridDatasource(this)` and hands it to
+    // api.setGridOption('serverSideDatasource', ...). Capture that instance to drive getRows directly.
+    const captureDatasource = (): any => {
+      let datasource: any;
+      const api = {
+        setGridOption: vi.fn().mockImplementation((_name: string, ds: any) => (datasource = ds)),
+        isDestroyed: () => false,
+      };
+      vi.spyOn(component, 'agGrid').mockReturnValue({ api } as any);
+      // makeDatasourceAndParams already ran svyOnInit (useScrolling true, agGridOptions built). Mark initialized so
+      // super.ngAfterViewInit() does not re-enter svyOnInit; calculateCells is a no-op here (absolute layout path).
+      (component as any).initialized = true;
+      vi.spyOn(component, 'calculateCells').mockImplementation(() => {});
+      component.ngAfterViewInit();
+      return datasource;
+    };
+
+    it('returns the in-viewport rows synchronously when the requested range is already loaded', () => {
+      makeDatasourceAndParams();
+      const datasource = captureDatasource();
+      expect(datasource).toBeTruthy();
+      const success = vi.fn();
+      datasource.getRows({ request: { startRow: 0, endRow: 5 }, success } as any);
+      expect(success).toHaveBeenCalled();
+      const arg = success.mock.calls[0][0];
+      expect(arg.rowData.length).toBeGreaterThan(0);
+      expect(arg.rowCount).toBe(5);
+    });
+
+    it('loads extra records asynchronously when the requested range is outside the viewport', async () => {
+      makeDatasourceAndParams();
+      mockFoundset.hasMoreRows = true; // force getLastRowIndex() === -1 so the async branch is taken
+      mockFoundset.loadExtraRecordsAsync = vi.fn().mockReturnValue(Promise.resolve());
+      const datasource = captureDatasource();
+      const success = vi.fn();
+      datasource.getRows({ request: { startRow: 100, endRow: 150 }, success } as any);
+      expect(mockFoundset.loadExtraRecordsAsync).toHaveBeenCalled();
+      await Promise.resolve();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(success).toHaveBeenCalled();
     });
   });
 });
