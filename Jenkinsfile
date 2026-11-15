@@ -182,6 +182,20 @@ pipeline {
                         reportName: 'Angular Coverage', 
                         reportTitles: 'TiNG,Designer RFB,WPM'
                     ])
+                    
+                    // Java (JaCoCo) code coverage - Phase 1: the plain-JUnit test modules only.
+                    // jacoco:prepare-agent instruments each .tests module's plain-surefire JVM and
+                    // jacoco:report (verify phase) writes target/site/jacoco/jacoco.xml per module.
+                    // One recordCoverage aggregates all of them into a single Java coverage trend.
+                    // allowEmpty so a build that ran no Java tests (or skipped them) does not fail.
+                    // The forked-workbench PDE integration tests are not yet instrumented (Phase 2),
+                    // so this reflects plainjunit coverage only.
+                    recordCoverage(
+                        tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml']],
+                        id: 'java-jacoco',
+                        name: 'Java Coverage (JaCoCo, plainjunit)',
+                        sourceCodeRetention: 'EVERY_BUILD'
+                    )
                 }
             }
         }

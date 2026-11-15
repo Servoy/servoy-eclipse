@@ -12,6 +12,11 @@
 	<properties>
 		<tycho.version>5.0.3</tycho.version>
 		<surefire-plugin-version>3.5.6</surefire-plugin-version>
+		<jacoco.version>0.8.12</jacoco.version>
+		<!-- Default so a plain surefire execution that does NOT go through jacoco:prepare-agent
+		     (or a module where coverage is skipped) still has a valid, empty argLine token. The
+		     jacoco prepare-agent goal overrides this with the -javaagent argument. -->
+		<jacocoArgLine></jacocoArgLine>
 		<rhino.version>1.9.1.s5</rhino.version>
         <osgi.version>[2026.12.0,2026.12.1)</osgi.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -122,6 +127,39 @@
 				<configuration>
 					<defaultP2Metadata>false</defaultP2Metadata>
 				</configuration>
+			</plugin>
+			<!-- JaCoCo code coverage for the Java tests. prepare-agent sets the ${jacocoArgLine}
+			     property (the -javaagent that instruments classes as the test JVM loads them);
+			     each .tests module's plain-surefire execution injects it via <argLine>, and the
+			     report goal writes target/site/jacoco/jacoco.xml which Jenkins' Coverage plugin
+			     reads (JACOCO parser). Harmless in non-test modules: with no tests, prepare-agent
+			     produces no .exec and report is a no-op. The forked-workbench PDE integration
+			     tests are a later phase (they need the agent inside the Tycho surefire argLine
+			     and OSGi bundle instrumentation), so only the plainjunit runs are wired for now. -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>jacoco-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<!-- expose the agent arg as this property; the .tests poms reference
+							     it in their surefire <argLine> -->
+							<propertyName>jacocoArgLine</propertyName>
+						</configuration>
+					</execution>
+					<execution>
+						<id>jacoco-report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>

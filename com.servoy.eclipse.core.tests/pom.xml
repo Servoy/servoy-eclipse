@@ -46,6 +46,9 @@
 					</execution>
 				</executions>
 				<configuration>
+					<!-- ${jacocoArgLine} is set by jacoco:prepare-agent (parent pom); it instruments
+					     the classes under test as this JVM loads them and writes target/jacoco.exec -->
+					<argLine>${jacocoArgLine}</argLine>
 					<includes>
 						<include>**/plainjunit/**/*.java</include>
 					</includes>
