@@ -19,9 +19,14 @@ const coverageRoot = path.join(nodeRoot, '..', 'target', 'coverage');
 
 // Source globs per project. Include is the project's own sources; exclude drops specs,
 // type decls, and non-code entry points so the percentages reflect real code.
+// *.module.ts are pure @NgModule barrels (no logic, just import/provider wiring; being
+// removed in the Angular 22 Phase 6b NgModule cleanup) - the instrumenter counts their
+// decorator metadata but it never executes in a unit test, so they report 0% and only
+// drag the number down. Excluded here. (**/testing/** already drops the test-harness modules.)
 const commonExcludes = [
   '**/*.spec.ts',
   '**/*.d.ts',
+  '**/*.module.ts',
   '**/public-api.ts',
   '**/public_api.ts',
   '**/index.ts',
