@@ -582,4 +582,32 @@ describe('FormattingService', () => {
 
     });
 
+    // SVY-21678 (family A, defensive guard): a NUMBER format whose display is not a string
+    // used to throw 'TypeError: patchedFormat.indexOf is not a function' out of formatNumbers.
+    // The service must now return the data unformatted instead of throwing.
+    describe('SVY-21678 non-string NUMBER format display guard', () => {
+        beforeEach(() => {
+            numbro.setLanguage('en-GB');
+        });
+
+        it('returns the data unformatted (does not throw) when display is undefined', () => {
+            const myformat = { type: 'NUMBER', display: undefined } as unknown as Format;
+            expect(() => service.format(5, myformat, false)).not.toThrow();
+            expect(service.format(5, myformat, false)).toBe(5);
+        });
+
+        it('returns the data unformatted (does not throw) when display is a non-string object', () => {
+            const myformat = { type: 'NUMBER', display: { not: 'a string' } } as unknown as Format;
+            expect(() => service.format(42, myformat, false)).not.toThrow();
+            expect(service.format(42, myformat, false)).toBe(42);
+        });
+
+        it('still formats correctly for a valid string display (no regression)', () => {
+            const myformat: Format = new Format();
+            myformat.type = 'NUMBER';
+            myformat.display = '#,##0.00';
+            expect(service.format(1234.5, myformat, false)).toBe('1,234.50');
+        });
+    });
+
 });

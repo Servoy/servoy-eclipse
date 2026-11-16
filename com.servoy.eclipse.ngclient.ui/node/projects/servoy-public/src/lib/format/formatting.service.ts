@@ -391,6 +391,10 @@ export class FormattingService {
             return data;
         if (data === '')
             return data;
+        if (typeof servoyFormat !== 'string') {
+            // no usable format string -> return the data unformatted rather than throwing
+            return data;
+        }
 
         let nmbr = Number(data);
         if (typeof data === 'string' && nmbr.toString() != data) {
