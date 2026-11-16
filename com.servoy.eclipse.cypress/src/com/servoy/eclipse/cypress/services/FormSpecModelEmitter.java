@@ -24,9 +24,24 @@ final class FormSpecModelEmitter
 
 	static String emit(String formUrl, FormSpecModel model)
 	{
+		return emit(formUrl, model, List.of());
+	}
+
+	/**
+	 * Emits the spec and, for SVY-21619, an always-on default-viewport measurement plus one opt-in measurement block per requested viewport width.
+	 * Widths are emitted in the given order (the list is already deduped by the shared {@link ViewportWidths} parser); no sorting is applied to them so
+	 * the caller controls the order, and the rest of the output keeps its deterministic sorting. No timestamps or random values enter the text.
+	 *
+	 * @param formUrl the relative form URL to visit
+	 * @param model the form spec model
+	 * @param viewportWidths ordered, deduped widths to cross-check; empty for default behaviour (always-on reporting only)
+	 */
+	static String emit(String formUrl, FormSpecModel model, List<Integer> viewportWidths)
+	{
 		String form = model.formName();
 		List<Element> elements = model.elements().stream().sorted(Comparator.comparing(Element::name, Comparator.nullsFirst(Comparator.naturalOrder())))
 			.toList();
+		List<Integer> widths = viewportWidths == null ? List.of() : viewportWidths;
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("describe('").append(js(form)).append("', () => {\n\n");
@@ -35,7 +50,7 @@ final class FormSpecModelEmitter
 		sb.append("    cy.visit('").append(js(formUrl)).append("');\n");
 		if (elements.isEmpty())
 		{
-			sb.append("    cy.get('.svy-form', { timeout: 30000 }).should('exist');\n");
+			sb.append("    cy.get('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("', { timeout: 30000 }).should('exist');\n");
 		}
 		else
 		{
@@ -52,7 +67,19 @@ final class FormSpecModelEmitter
 				sb.append("    cy.get('").append(js(selector(form, element.name()))).append("').should('be.visible');\n");
 			}
 		}
+		// Always-on (SVY-21619): report innerWidth + root-container width at the default viewport after layout settles.
+		sb.append("    cy.measureContainer('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("');\n");
 		sb.append("  });\n\n");
+
+		// Opt-in responsive cross-check: one deterministic it(...) per requested width, in the given order.
+		for (Integer width : widths)
+		{
+			int w = width.intValue();
+			sb.append("  it('responds at ").append(w).append("px', () => {\n");
+			sb.append("    cy.measureAtViewport('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("', ").append(w).append(", ")
+				.append(CypressSupportScaffold.DEFAULT_VIEWPORT_HEIGHT).append(");\n");
+			sb.append("  });\n\n");
+		}
 
 		for (Element element : elements)
 		{

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +69,16 @@ class FormSpecModelEmitterTest
 		{
 			sb.append("    cy.get('[data-cy=\"").append(form).append(".").append(name).append("\"]').should('be.visible');\n");
 		}
+		// SVY-21619: the load block always ends with the default-viewport measure-only call.
+		sb.append("    cy.measureContainer('.svy-form');\n");
 		sb.append("  });\n\n");
 		return sb.toString();
+	}
+
+	/** One opt-in responsive block, as emitted per requested width (SVY-21619), including its trailing blank line. */
+	private static String responsiveBlock(int width)
+	{
+		return block("  it('responds at " + width + "px', () => {", "    cy.measureAtViewport('.svy-form', " + width + ", 1080);", "  });");
 	}
 
 	private static Element element(String name, Kind kind, Handler... handlers)
@@ -150,7 +159,7 @@ class FormSpecModelEmitterTest
 				"    cy.get('[data-cy^=\"myForm.\"]', { timeout: 30000 }).should('exist');", "  });", "",
 				"  it('loads without errors and all elements are visible', () => {", OVERLAY,
 				"    cy.get('[data-cy=\"myForm.btn\"]').should('be.visible');", "    cy.get('[data-cy=\"myForm.txt\"]').should('be.visible');",
-				"  });", "", "});");
+				"    cy.measureContainer('.svy-form');", "  });", "", "});");
 
 			assertEquals(expected, emit(model));
 		}
@@ -161,7 +170,8 @@ class FormSpecModelEmitterTest
 		{
 			String expected = lines("describe('myForm', () => {", "", "  beforeEach(() => {", "    cy.visit('" + URL + "');",
 				"    cy.get('.svy-form', { timeout: 30000 }).should('exist');", "  });", "",
-				"  it('loads without errors and all elements are visible', () => {", OVERLAY, "  });", "", "});");
+				"  it('loads without errors and all elements are visible', () => {", OVERLAY, "    cy.measureContainer('.svy-form');", "  });", "",
+				"});");
 
 			assertEquals(expected, emit(model()));
 		}
@@ -574,6 +584,104 @@ class FormSpecModelEmitterTest
 				element("b", Kind.STATIC, new Handler("onActionMethodID", null, null, Gesture.CLICK, true, false, List.of())), element("c", Kind.INPUT));
 
 			assertEquals(3, FormSpecModelEmitterAccess.countHandlerCases(model));
+		}
+	}
+
+	// ------------------------------------------------------------ SVY-21619 viewport measurement
+
+	@Nested
+	class ViewportMeasurement
+	{
+		private String emitWithWidths(FormSpecModel model, Integer... widths)
+		{
+			return FormSpecModelEmitterAccess.emit(URL, model, List.of(widths));
+		}
+
+		@Test
+		@DisplayName("default generation emits exactly one always-on measureContainer and no viewport-set or measureAtViewport")
+		void defaultGeneration_onlyMeasureContainer()
+		{
+			String out = emit(singleButton(Gesture.CLICK));
+
+			assertAll(() -> assertEquals(1, out.lines().filter(l -> l.equals("    cy.measureContainer('.svy-form');")).count(),
+				"exactly one always-on measureContainer in the load block"),
+				() -> assertFalse(out.contains("cy.measureAtViewport"), "no responsive block without widths"),
+				() -> assertFalse(out.contains("cy.viewport"), "no viewport set without widths"),
+				() -> assertFalse(out.contains("responds at"), "no responsive it(...) without widths"));
+		}
+
+		@Test
+		@DisplayName("the 2-arg emit delegates to empty widths and already carries the always-on measureContainer line")
+		void twoArgEmit_matchesEmptyWidths()
+		{
+			FormSpecModel model = singleButton(Gesture.CLICK);
+
+			assertEquals(FormSpecModelEmitterAccess.emit(URL, model), emitWithWidths(model),
+				"emit(url, model) must equal emit(url, model, []) - the always-on measure line is in both");
+			assertTrue(FormSpecModelEmitterAccess.emit(URL, model).contains("cy.measureContainer('.svy-form');"),
+				"the 2-arg form must include the always-on measure line");
+		}
+
+		@Test
+		@DisplayName("with [375, 1024] it emits one measureAtViewport block per width, in that order")
+		void twoWidths_emitsBlockPerWidthInOrder()
+		{
+			String expected = prefix(FORM, "btn") + responsiveBlock(375) + responsiveBlock(1024) +
+				expectedCase(".click();") + FOOTER;
+
+			assertEquals(expected, emitWithWidths(singleButton(Gesture.CLICK), 375, 1024));
+		}
+
+		@Test
+		@DisplayName("each responsive block calls measureAtViewport(root, width, 1080) and the blocks keep the given order")
+		void responsiveBlocks_callMeasureAtViewportAtDefaultHeight()
+		{
+			String out = emitWithWidths(model(element("btn", Kind.CONTROL)), 375, 1024);
+
+			assertAll(() -> assertTrue(out.contains("    cy.measureAtViewport('.svy-form', 375, 1080);"), "375 block present"),
+				() -> assertTrue(out.contains("    cy.measureAtViewport('.svy-form', 1024, 1080);"), "1024 block present"),
+				() -> assertTrue(out.indexOf("375, 1080") < out.indexOf("1024, 1080"), "375 must be emitted before 1024"),
+				() -> assertEquals(1, out.lines().filter(l -> l.equals("    cy.measureContainer('.svy-form');")).count(),
+					"the always-on measureContainer is still emitted exactly once alongside the responsive blocks"));
+		}
+
+		@Test
+		@DisplayName("a single width emits exactly one responsive block")
+		void singleWidth_oneBlock()
+		{
+			String out = emitWithWidths(model(element("btn", Kind.CONTROL)), 768);
+
+			assertEquals(1, out.lines().filter(l -> l.startsWith("  it('responds at ")).count(), "one responsive it(...) for one width");
+			assertTrue(out.contains("  it('responds at 768px', () => {"));
+		}
+
+		@Test
+		@DisplayName("identical input yields byte-identical output (determinism) with and without widths")
+		void determinism_byteIdentical()
+		{
+			FormSpecModel model = singleButton(Gesture.CLICK, new Effect(EffectKind.VISIBLE, "lbl", "false"));
+
+			assertAll(() -> assertEquals(emitWithWidths(model, 375, 1024), emitWithWidths(model, 375, 1024), "same input -> byte-identical"),
+				() -> assertEquals(emit(model), emit(model), "default generation is deterministic too"));
+		}
+
+		@Test
+		@DisplayName("widths are emitted in the given order and are not sorted")
+		void widths_notSorted()
+		{
+			String out = emitWithWidths(model(element("btn", Kind.CONTROL)), 1024, 375);
+
+			assertTrue(out.indexOf("1024, 1080") < out.indexOf("375, 1080"), "the caller's order (1024 before 375) must be preserved, not sorted");
+		}
+
+		@Test
+		@DisplayName("a null widths list behaves as empty (always-on reporting only)")
+		void nullWidths_behavesAsEmpty()
+		{
+			FormSpecModel model = singleButton(Gesture.CLICK);
+
+			assertEquals(FormSpecModelEmitterAccess.emit(URL, model), FormSpecModelEmitterAccess.emit(URL, model, null),
+				"null widths must behave exactly like the empty-widths default");
 		}
 	}
 }
