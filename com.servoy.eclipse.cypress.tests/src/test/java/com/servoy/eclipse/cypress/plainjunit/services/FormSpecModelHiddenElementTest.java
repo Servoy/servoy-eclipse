@@ -64,7 +64,7 @@ class FormSpecModelHiddenElementTest
 		String expected = String.join("\n", "describe('myForm', () => {", "", "  beforeEach(() => {", "    cy.visit('" + URL + "');",
 			"    cy.get('[data-cy^=\"myForm.\"]', { timeout: 30000 }).should('exist');", "  });", "",
 			"  it('loads without errors and all elements are visible', () => {", OVERLAY,
-			"    cy.get('[data-cy=\"myForm.btn\"]').should('be.visible');", "  });", "",
+			"    cy.get('[data-cy=\"myForm.btn\"]').should('be.visible');", "    cy.measureContainer('.svy-form');", "  });", "",
 			"  // btn.onActionMethodID -> forms.myForm.hide", "  it('btn: onActionMethodID (hide)', () => {",
 			"    cy.get('[data-cy=\"myForm.btn\"]').click();", OVERLAY, "  });", "",
 			"  it.skip('secret: onActionMethodID (element is hidden by design)', () => {});", "", "});", "");

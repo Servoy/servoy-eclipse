@@ -109,6 +109,15 @@ public class FormSpecRunner
 	public static final String PRESERVED_VIDEO_MARKER = "[Preserved Video] ";
 	public static final String PRESERVED_SCREENSHOT_MARKER = "[Preserved Screenshot] ";
 
+	/**
+	 * Marker prefix the generated Cypress specs log via {@code cy.log} for every measured layout (SVY-21619). {@link #hoistMeasurementMarkers(String)}
+	 * scans the captured output for lines containing this marker and prepends a readable "Measured layout" summary to the returned result, so the
+	 * measured {@code window.innerWidth} and container width are visible without hunting through Cypress noise - on every run, pass or fail. Mirrors
+	 * the {@link #PRESERVED_VIDEO_MARKER}/{@link #PRESERVED_SCREENSHOT_MARKER} precedent. Must stay identical to
+	 * {@link CypressSupportScaffold#SVY_MEASURE_MARKER}.
+	 */
+	public static final String SVY_MEASURE_MARKER = CypressSupportScaffold.SVY_MEASURE_MARKER;
+
 	private String preserveArtifacts(String rawOutput, String testName)
 	{
 		try
@@ -162,6 +171,43 @@ public class FormSpecRunner
 			// Non-fatal - return the original output if preservation fails
 			return rawOutput;
 		}
+	}
+
+	/**
+	 * Extracts the measured-layout lines (those containing {@link #SVY_MEASURE_MARKER}) from the raw Cypress output and builds a compact, readable
+	 * "Measured layout" summary block to prepend to the returned result (SVY-21619). This runs on <b>every</b> run, pass or fail - unlike
+	 * {@link #preserveArtifacts}, which only fires on failure - so the measured {@code window.innerWidth} and container width are always surfaced.
+	 * Returns an empty string when the output carries no marker (nothing changes for callers then).
+	 *
+	 * @param rawOutput the captured, merged Cypress stdout/stderr
+	 * @return a "Measured layout" summary block ending in a blank line, or an empty string when no marker was found
+	 */
+	private String hoistMeasurementMarkers(String rawOutput)
+	{
+		if (rawOutput == null || rawOutput.isEmpty())
+		{
+			return "";
+		}
+		StringBuilder summary = new StringBuilder();
+		for (String line : rawOutput.split("\n", -1))
+		{
+			int idx = line.indexOf(SVY_MEASURE_MARKER);
+			if (idx < 0)
+			{
+				continue;
+			}
+			// keep only from the marker onwards, dropping Cypress's log decoration/prefix, and trim trailing CR/space
+			String measurement = line.substring(idx + SVY_MEASURE_MARKER.length()).trim();
+			if (!measurement.isEmpty())
+			{
+				summary.append("  ").append(measurement).append("\n");
+			}
+		}
+		if (summary.length() == 0)
+		{
+			return "";
+		}
+		return "**Measured layout:**\n" + summary + "\n";
 	}
 
 	/**
@@ -348,12 +394,20 @@ public class FormSpecRunner
 			Path configFile = Files.exists(scriptsRoot.resolve("cypress.config.ts"))
 				? scriptsRoot.resolve("cypress.config.ts")
 				: scriptsRoot.resolve("cypress.config.js");
-			if (!Files.exists(configFile))
+			// SVY-21619: (re)write the config when it is missing OR stale - a config left by an earlier session
+			// may still carry supportFile:false or lack the svyMeasure setupNodeEvents registration, which would
+			// silently drop the SVY_MEASURE markers from stdout. Rewrite in that case so the task is always present.
+			if (!Files.exists(configFile) || isConfigStale(configFile))
 			{
 				int port = ApplicationServerRegistry.get().getWebServerPort();
 				ensureCypressConfig(scriptsRoot, "http://localhost:" + port);
 				configFile = scriptsRoot.resolve("cypress.config.js");
 			}
+
+			// SVY-21619: guarantee the viewport-measurement support (cypress/support/e2e.js + commands.js)
+			// is on disk even when the spec already existed and the generator was not run this session,
+			// so the always-on cy.measureContainer(...) in every form spec resolves. Idempotent.
+			CypressSupportScaffold.ensureMeasurementSupport(scriptsRoot);
 
 			CypressInvocation invocation = prepareInvocation(scriptsRoot);
 			if (invocation.error() != null)
@@ -415,15 +469,17 @@ public class FormSpecRunner
 				}
 
 				String rawOutput = output.toString();
+				// Always-on (SVY-21619): surface the measured innerWidth/container width on both pass and fail.
+				String measured = hoistMeasurementMarkers(rawOutput);
 
 				if (process.exitValue() == 0)
 				{
-					return "**Form Spec Results: " + formName + "**\n\nAll tests passed!\n\n" + rawOutput;
+					return "**Form Spec Results: " + formName + "**\n\n" + measured + "All tests passed!\n\n" + rawOutput;
 				}
 				else
 				{
 					rawOutput = preserveArtifacts(rawOutput, formName);
-					return "**Form Spec Results: " + formName + "**\n\nSome tests failed:\n\n" + rawOutput;
+					return "**Form Spec Results: " + formName + "**\n\n" + measured + "Some tests failed:\n\n" + rawOutput;
 				}
 			}
 			finally
@@ -439,6 +495,11 @@ public class FormSpecRunner
 
 	/**
 	 * Writes cypress.config.js with baseUrl for the running Servoy solution.
+	 * <p>
+	 * SVY-21619: the support file is set to the default {@code cypress/support/e2e.js} (which does {@code import './commands'}) so the
+	 * {@code cy.measureAtViewport}/{@code cy.measureContainer} custom commands scaffolded by {@link CypressSupportScaffold} are loaded. Disabling the
+	 * support file (the old {@code supportFile: false}) made every form spec crash with "cy.measureContainer is not a function" in the form-only
+	 * workflow.
 	 */
 	private void ensureCypressConfig(Path cypressDir, String baseUrl)
 	{
@@ -446,18 +507,24 @@ public class FormSpecRunner
 		{
 			Files.createDirectories(cypressDir);
 			Path configFile = cypressDir.resolve("cypress.config.js");
+			// SVY-21619: the config MUST register the svyMeasure task via setupNodeEvents, so the browser-side
+			// cy.task('svyMeasure', ...) reaches a Node handler whose console.log is printed by `cypress run`
+			// (cy.log is not). Always (re)write the canonical content here so a STALE config left by an earlier
+			// session - e.g. one with supportFile:false, or one from before the task existed - is refreshed; the
+			// config is generated output under jenkins-custom and is safe to overwrite.
 			String config = "// Auto-generated by Servoy MCP - do not edit manually\n" +
 				"const { defineConfig } = require('cypress');\n\n" +
 				"module.exports = defineConfig({\n" +
 				"  e2e: {\n" +
 				"    baseUrl: '" + baseUrl + "',\n" +
-				"    supportFile: false,\n" +
+				"    supportFile: 'cypress/support/e2e.js',\n" +
 				"    specPattern: '**/*.cy.{js,ts}',\n" +
 				"    testIsolation: true,\n" +
 				"    defaultCommandTimeout: 10000,\n" +
 				"    pageLoadTimeout: 30000,\n" +
 				"    video: true,\n" +
 				"    screenshotOnRunFailure: true,\n" +
+				CypressSupportScaffold.setupNodeEventsDeclaration() +
 				"  },\n" +
 				"});\n";
 			Files.writeString(configFile, config, StandardCharsets.UTF_8);
@@ -465,6 +532,33 @@ public class FormSpecRunner
 		catch (Exception e)
 		{
 			// Non-fatal
+		}
+	}
+
+	/**
+	 * Whether an existing cypress.config file must be rewritten for SVY-21619: a config is stale when it lacks the svyMeasure task registration (so the
+	 * SVY_MEASURE markers would never reach stdout) or still disables the support file ({@code supportFile: false}, which disabled the measurement
+	 * commands entirely). A config that cannot be read is treated as stale so it gets regenerated. The config is generated output under jenkins-custom
+	 * and is safe to overwrite.
+	 *
+	 * @param configFile the cypress.config.js/ts to inspect
+	 * @return {@code true} when the config should be (re)written to the current canonical content
+	 */
+	private boolean isConfigStale(Path configFile)
+	{
+		try
+		{
+			if (!Files.exists(configFile))
+			{
+				return false;
+			}
+			String content = Files.readString(configFile, StandardCharsets.UTF_8);
+			return !content.contains(CypressSupportScaffold.SVY_MEASURE_TASK_NAME) || content.contains("supportFile: false");
+		}
+		catch (Exception e)
+		{
+			// Unreadable -> regenerate to be safe.
+			return true;
 		}
 	}
 
@@ -882,7 +976,9 @@ public class FormSpecRunner
 					"Searched recursively under " + e2eBaseDir + " for '" + targetForm + ".cy.js' or '" + targetForm + ".cy.ts'. " +
 					"Use generateCypressE2ETest to create a new one, or pass the relative path (e.g. 'applications/environment/queryPerformance.cy.ts').";
 			}
-			if (!Files.exists(configFile))
+			// SVY-21619: rewrite a missing OR stale config so the svyMeasure setupNodeEvents registration is present
+			// (a pre-task or supportFile:false config would silently drop the SVY_MEASURE markers from stdout).
+			if (!Files.exists(configFile) || isConfigStale(configFile))
 			{
 				int port = ApplicationServerRegistry.get().getWebServerPort();
 				ensureCypressConfig(scriptsRoot, "http://localhost:" + port);
@@ -892,6 +988,11 @@ public class FormSpecRunner
 			{
 				return "Error: cypress.config.ts/js not found at " + scriptsRoot + ". Use generateCypressE2ETest first to scaffold the E2E test structure.";
 			}
+
+			// SVY-21619: make the run self-sufficient - guarantee the viewport-measurement support
+			// (cypress/support/e2e.js + commands.js) is present even if the generator was not run this
+			// session, rather than relying on it having scaffolded them. Idempotent.
+			CypressSupportScaffold.ensureMeasurementSupport(scriptsRoot);
 
 			CypressInvocation invocation = prepareInvocation(scriptsRoot);
 			if (invocation.error() != null)
@@ -938,16 +1039,18 @@ public class FormSpecRunner
 			}
 
 			String rawOutput = output.toString();
+			// Always-on (SVY-21619): surface the measured innerWidth/container width on both pass and fail.
+			String measured = hoistMeasurementMarkers(rawOutput);
 
 			if (process.exitValue() == 0)
 			{
-				return "**E2E Spec Results: " + targetForm + "**\n\nAll tests passed!\n\n" + rawOutput;
+				return "**E2E Spec Results: " + targetForm + "**\n\n" + measured + "All tests passed!\n\n" + rawOutput;
 			}
 			else
 			{
 				// Preserve videos/screenshots before the next run wipes them
 				rawOutput = preserveArtifacts(rawOutput, targetForm);
-				return "**E2E Spec Results: " + targetForm + "**\n\nSome tests failed:\n\n" + rawOutput;
+				return "**E2E Spec Results: " + targetForm + "**\n\n" + measured + "Some tests failed:\n\n" + rawOutput;
 			}
 		}
 		catch (Exception e)

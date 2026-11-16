@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target includeMode="feature" name="eclipse_sources" sequenceNumber="60">
+<target includeMode="feature" name="eclipse_sources" sequenceNumber="61">
     <locations>    
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
@@ -366,7 +366,37 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.18.14</version>
+                    <version>1.18.17</version>
+                    <type>jar</type>
+                </dependency>
+                <!-- Mockito for plain-JUnit unit tests of the MCP service layer (Servoy-Copilot
+                     com.servoy.eclipse.developer.mcp.tests / com.servoy.eclipse.opencode.tests):
+                     stub the Servoy/Eclipse core at the boundary so our own logic is tested without
+                     a live workbench. byte-buddy-agent + objenesis are Mockito's runtime deps, listed
+                     explicitly because this Maven location pulls no transitive deps; byte-buddy itself
+                     is already present above (1.18.17), so it is not re-declared. -->
+                <dependency>
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy-agent</artifactId>
+                    <version>1.18.17</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
+                    <version>5.24.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-junit-jupiter</artifactId>
+                    <version>5.24.0</version>
+                    <type>jar</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
+                    <version>3.6</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>

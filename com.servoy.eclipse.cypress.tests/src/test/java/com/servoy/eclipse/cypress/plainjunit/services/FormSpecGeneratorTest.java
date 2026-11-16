@@ -74,10 +74,17 @@ public class FormSpecGeneratorTest
 
 	private Method getGenerateCypressSpecContentMethod() throws Exception
 	{
+		// SVY-21619: generateCypressSpecContent now takes the parsed viewport widths as a second argument.
 		Class< ? > metadataClass = Class.forName("com.servoy.eclipse.cypress.services.FormSpecGenerator$FormMetadata");
-		Method m = FormSpecGenerator.class.getDeclaredMethod("generateCypressSpecContent", metadataClass);
+		Method m = FormSpecGenerator.class.getDeclaredMethod("generateCypressSpecContent", metadataClass, java.util.List.class);
 		m.setAccessible(true);
 		return m;
+	}
+
+	/** Invokes the legacy fallback content builder with the given (possibly empty) widths. */
+	private String invokeGenerateCypressSpecContent(Object metadata, java.util.List<Integer> widths) throws Exception
+	{
+		return (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata, widths);
 	}
 
 	private Method getGenerateSetupContentMethod() throws Exception
@@ -260,7 +267,7 @@ public class FormSpecGeneratorTest
 	public void testFormSpecGenerator_generateCypressSpec_noPropertiesAnnotation() throws Exception
 	{
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "btn1", null, false, true, false } });
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(!spec.contains("@properties"), "Generated spec must NOT contain @properties annotation");
 	}
@@ -269,7 +276,7 @@ public class FormSpecGeneratorTest
 	public void testFormSpecGenerator_generateCypressSpec_usesCyVisit() throws Exception
 	{
 		Object metadata = buildMetadata("myForm", null);
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(spec.contains("cy.visit("), "Generated spec must use cy.visit()");
 	}
@@ -278,7 +285,7 @@ public class FormSpecGeneratorTest
 	public void testFormSpecGenerator_generateCypressSpec_usesCyGet() throws Exception
 	{
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "btn1", null, false, true, false } });
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(spec.contains("cy.get('[data-cy=\"myForm.btn1\"]')"),
 			"Generated spec must use cy.get() with data-cy selectors");
@@ -292,7 +299,7 @@ public class FormSpecGeneratorTest
 		// closing ]). A missing ] made querySelectorAll throw a SyntaxError, aborting the
 		// whole spec before any it() block ran.
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "elem1", null, false, false, true } });
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(spec.contains("cy.get('[data-cy^=\"myForm.\"]'"),
 			"beforeEach wait selector must be the correctly-closed [data-cy^=\"myForm.\"] attribute selector");
@@ -304,7 +311,7 @@ public class FormSpecGeneratorTest
 	public void testFormSpecGenerator_generateCypressSpec_usesDescribeAndIt() throws Exception
 	{
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "lbl1", null, false, false, true } });
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(spec.contains("describe('myForm"), "Generated spec must use describe()");
 		assertTrue(spec.contains("it('"), "Generated spec must use it()");
@@ -314,7 +321,7 @@ public class FormSpecGeneratorTest
 	public void testFormSpecGenerator_generateCypressSpec_usesRelativeUrl() throws Exception
 	{
 		Object metadata = buildMetadata("myForm", null);
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(spec.contains("?formpreview=myForm&svy_testmode=true"),
 			"Generated spec must use relative URL with formpreview param");
@@ -325,7 +332,7 @@ public class FormSpecGeneratorTest
 	public void testFormSpecGenerator_generateCypressSpec_checksErrorOverlay() throws Exception
 	{
 		Object metadata = buildMetadata("myForm", null, new Object[][] { { "lbl1", null, false, false, true } });
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(spec.contains(".svy-error, .error-overlay"), "Generated spec must check for error overlay");
 	}
@@ -335,10 +342,53 @@ public class FormSpecGeneratorTest
 	{
 		Object metadata = buildMetadata("myForm", null,
 			new Object[][] { { "btn_save", null, false, true, false } });
-		String spec = (String)getGenerateCypressSpecContentMethod().invoke(new FormSpecGenerator(), metadata);
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
 
 		assertTrue(spec.contains("buttons are clickable"), "Generated spec must have buttons are clickable test");
 		assertTrue(spec.contains("'be.enabled'"), "Generated spec must check button is enabled");
+	}
+
+	// --- SVY-21619: legacy fallback measurement reporting ---
+
+	@Test
+	public void testFormSpecGenerator_legacyFallback_hasAlwaysOnMeasureContainer() throws Exception
+	{
+		// The legacy (model == null) content builder must emit exactly one always-on default-viewport
+		// measureContainer call and no responsive block when no widths are supplied.
+		Object metadata = buildMetadata("myForm", null, new Object[][] { { "lbl1", null, false, false, true } });
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
+
+		assertEquals(1, spec.lines().filter(l -> l.equals("    cy.measureContainer('.svy-form');")).count(),
+			"legacy fallback must emit exactly one always-on measureContainer: " + spec);
+		assertTrue(!spec.contains("cy.measureAtViewport"), "no responsive block without widths");
+		assertTrue(!spec.contains("responds at"), "no responsive it(...) without widths");
+	}
+
+	@Test
+	public void testFormSpecGenerator_legacyFallback_emitsOneBlockPerWidthInOrder() throws Exception
+	{
+		Object metadata = buildMetadata("myForm", null, new Object[][] { { "lbl1", null, false, false, true } });
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of(375, 1024));
+
+		assertTrue(spec.contains("  it('responds at 375px', () => {"), "375 responsive block present");
+		assertTrue(spec.contains("    cy.measureAtViewport('.svy-form', 375, 1080);"), "375 measureAtViewport call present");
+		assertTrue(spec.contains("  it('responds at 1024px', () => {"), "1024 responsive block present");
+		assertTrue(spec.contains("    cy.measureAtViewport('.svy-form', 1024, 1080);"), "1024 measureAtViewport call present");
+		assertTrue(spec.indexOf("375, 1080") < spec.indexOf("1024, 1080"), "375 must be emitted before 1024");
+		assertEquals(1, spec.lines().filter(l -> l.equals("    cy.measureContainer('.svy-form');")).count(),
+			"the always-on measureContainer is still emitted alongside the responsive blocks");
+	}
+
+	@Test
+	public void testFormSpecGenerator_legacyFallback_nullWidthsBehaveLikeNoWidths() throws Exception
+	{
+		Object metadata = buildMetadata("myForm", null, new Object[][] { { "btn1", null, false, true, false } });
+
+		String withNull = invokeGenerateCypressSpecContent(metadata, null);
+
+		assertEquals(invokeGenerateCypressSpecContent(metadata, java.util.List.of()), withNull,
+			"a null widths list must be treated as empty, not throw");
+		assertTrue(!withNull.contains("cy.measureAtViewport"), "no responsive block for null widths");
 	}
 
 	@Test

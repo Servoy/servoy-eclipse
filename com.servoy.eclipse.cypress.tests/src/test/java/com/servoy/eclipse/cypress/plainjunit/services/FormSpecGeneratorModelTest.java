@@ -107,9 +107,10 @@ class FormSpecGeneratorModelTest
 				((List<Object>)namedElements.get(metadata)).add(element);
 			}
 
-			Method generate = FormSpecGenerator.class.getDeclaredMethod("generateCypressSpecContent", metadataClass);
+			// SVY-21619: generateCypressSpecContent now takes the parsed viewport widths as a second argument.
+			Method generate = FormSpecGenerator.class.getDeclaredMethod("generateCypressSpecContent", metadataClass, java.util.List.class);
 			generate.setAccessible(true);
-			return (String)generate.invoke(generator, metadata);
+			return (String)generate.invoke(generator, metadata, java.util.List.of());
 		}
 
 		@Test
@@ -123,7 +124,8 @@ class FormSpecGeneratorModelTest
 				"    cy.get('.svy-error, .error-overlay').should('not.exist');",
 				"    cy.get('[data-cy=\"orderForm.btn_save\"]').should('be.visible');",
 				"    cy.get('[data-cy=\"orderForm.lbl_title\"]').should('be.visible');",
-				"    cy.get('[data-cy=\"orderForm.txt_name\"]').should('be.visible');", "  });", "", "  it('buttons are clickable', () => {",
+				"    cy.get('[data-cy=\"orderForm.txt_name\"]').should('be.visible');", "    cy.measureContainer('.svy-form');", "  });", "",
+				"  it('buttons are clickable', () => {",
 				"    cy.get('[data-cy=\"orderForm.btn_save\"]').should('be.visible').and('be.enabled');", "  });", "", "});") + "\n";
 
 			assertEquals(expected, legacyContent(ELEMENTS, "orderForm", "mySolution"));
@@ -137,7 +139,7 @@ class FormSpecGeneratorModelTest
 				"    cy.visit('solution/mySolution/index.html?formpreview=emptyForm&svy_testmode=true');",
 				"    cy.get('.svy-form', { timeout: 30000 }).should('exist');", "  });", "",
 				"  it('loads without errors and all elements are visible', () => {",
-				"    cy.get('.svy-error, .error-overlay').should('not.exist');", "  });", "", "});") + "\n";
+				"    cy.get('.svy-error, .error-overlay').should('not.exist');", "    cy.measureContainer('.svy-form');", "  });", "", "});") + "\n";
 
 			assertAll(() -> assertEquals(expected, legacyContent(new Object[0][], "emptyForm", "mySolution")));
 		}
