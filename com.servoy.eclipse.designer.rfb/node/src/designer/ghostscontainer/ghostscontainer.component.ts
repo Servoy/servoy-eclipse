@@ -6,13 +6,14 @@ import { EditorContentService, IContentMessageListener } from '../services/edito
 import { NgStyle } from '@angular/common';
 import { ResizeEditorWidthComponent } from '../resizeeditorwidth/resizeeditorwidth.component';
 import { ResizeEditorHeightComponent } from '../resizeeditorheight/resizeeditorheight.component';
+import { ResizeEditorCornerComponent } from '../resizeeditorcorner/resizeeditorcorner.component';
 
 @Component({
     selector: 'designer-ghostscontainer',
     templateUrl: './ghostscontainer.component.html',
     styleUrls: ['./ghostscontainer.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgStyle, ResizeEditorWidthComponent, ResizeEditorHeightComponent]
+    imports: [NgStyle, ResizeEditorWidthComponent, ResizeEditorHeightComponent, ResizeEditorCornerComponent]
 })
 export class GhostsContainerComponent implements OnInit, ISelectionChangedListener, OnDestroy, IContentMessageListener, ISupportAutoscroll {
 

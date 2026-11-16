@@ -7,6 +7,34 @@
     left: 100%;
 }
 
+.resize-editor-width::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -3px;
+    right: -3px;
+    cursor: ew-resize;
+}
+
+.resize-editor-width::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(255, 187, 55);
+    cursor: ew-resize;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    border-radius: 50%
+}
+
 .resize-editor-width:HOVER {
     background-color: #CCC;
+}
+
+.resize-editor-width:HOVER::after {
+    background-color: rgb(27 187 91);
 }

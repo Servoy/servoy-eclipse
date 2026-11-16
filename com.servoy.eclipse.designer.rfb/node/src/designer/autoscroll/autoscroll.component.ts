@@ -1,5 +1,5 @@
 import { Point } from './../mouseselection/mouseselection.component';
-import { Component, OnInit, Renderer2, AfterViewInit, ElementRef, ChangeDetectionStrategy, effect, inject, input, viewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2, AfterViewInit, ElementRef, ChangeDetectionStrategy, effect, inject, input, viewChild, signal } from '@angular/core';
 import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 import { NgStyle } from '@angular/common';
@@ -12,17 +12,18 @@ import { NgStyle } from '@angular/common';
     imports: [NgStyle]
 })
 
-export class AutoscrollComponent implements OnInit, AfterViewInit {
+export class AutoscrollComponent implements OnInit, AfterViewInit, OnDestroy {
 
     readonly autoscrollElement = viewChild.required<ElementRef<HTMLElement>>('autoscroll');
     placement = input<string>();
+    readonly pointerEvents = signal('none');
 
     private scrollTarget: ISupportAutoscroll | null | undefined;
     private handler!: ReturnType<typeof setInterval>;
     private direction!: number;
     private mousePoint!: Point;
     private isAutoscrollActive = false;
-    private stopAutoscrollOffset = 3; 
+    private stopAutoscrollOffset = 3;
     private step = 0;
     private speed = 0;
 
@@ -34,10 +35,11 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
         effect(() => {
             const scrollTarget = this.editorSession.autoscrollTarget();
             this.scrollTarget = scrollTarget;
-            this.editorSession.pointerEvents.set('none');
             if (scrollTarget) {
-                this.editorSession.pointerEvents.set('all');
                 this.setPosition();
+            } else {
+                this.pointerEvents.set('none');
+                this.stopAutoscroll();
             }
         });
     }
@@ -53,24 +55,47 @@ export class AutoscrollComponent implements OnInit, AfterViewInit {
                 this.direction = 1;
                 break;
         }
+        this.editorContent.getDocument().addEventListener('mousemove', this.onDocumentMouseMove);
+    }
+
+    ngOnDestroy() {
+        this.editorContent.getDocument().removeEventListener('mousemove', this.onDocumentMouseMove);
+        this.stopAutoscroll();
     }
 
     ngAfterViewInit() {
         this.autoscrollElement().nativeElement.addEventListener('mouseenter', (event) => {
-this.onMouseEnter(event)
-})
+            this.onMouseEnter(event);
+        });
         this.autoscrollElement().nativeElement.addEventListener('mouseleave', (event) => {
-this.onMouseLeave(event)
-})
+            this.onMouseLeave(event);
+        });
         this.autoscrollElement().nativeElement.addEventListener('mouseup', (event) => {
-this.onMouseUp(event)
-})
+            this.onMouseUp(event);
+        });
         this.autoscrollElement().nativeElement.addEventListener('mousedown', (event) => {
-this.onMouseDown(event)
-})
+            this.onMouseDown(event);
+        });
         this.autoscrollElement().nativeElement.addEventListener('mousemove', (event) => {
-this.onMouseMove(event)
-})
+            this.onMouseMove(event);
+        });
+    }
+
+    private onDocumentMouseMove = (event: MouseEvent) => {
+        if (!this.scrollTarget) return;
+        if (this.isInBand(event)) {
+            if (this.pointerEvents() !== 'all') {
+                this.pointerEvents.set('all');
+            }
+        } else if (this.pointerEvents() !== 'none') {
+            this.pointerEvents.set('none');
+        }
+    }
+
+    private isInBand(event: MouseEvent): boolean {
+        const rect = this.autoscrollElement().nativeElement.getBoundingClientRect();
+        return event.clientX >= rect.left && event.clientX <= rect.right &&
+            event.clientY >= rect.top && event.clientY <= rect.bottom;
     }
 
     public onMouseEnter(event: MouseEvent) {
@@ -80,7 +105,7 @@ this.onMouseMove(event)
         }
     }
 
-     
+
     public onMouseLeave(_event: MouseEvent) {
         if (this.scrollTarget && this.isAutoscrollActive) {
             this.stopAutoscroll();
@@ -112,7 +137,7 @@ this.onMouseMove(event)
                 case 'right':
                     this.step = (this.mousePoint.x - event.pageX);
                     break;
-            } 
+            }
             if (this.step * this.direction > 0) {//moving backward
                 if (this.step * this.direction > this.stopAutoscrollOffset) {// stop autoscroll
                     this.stopAutoscroll();
@@ -126,7 +151,7 @@ this.onMouseMove(event)
                 this.mousePoint.x = event.pageX;
                 this.mousePoint.y = event.pageY;
             }
-            this.scrollTarget.onMouseMove(event);  
+            this.scrollTarget.onMouseMove(event);
         }
     }
 
@@ -165,8 +190,8 @@ this.onMouseMove(event)
         if (!this.isAutoscrollActive) {
             this.isAutoscrollActive = true;
             this.handler = setInterval(() => {
-this.autoscroll()
-}, 50);
+                this.autoscroll();
+            }, 50);
         }
     }
 

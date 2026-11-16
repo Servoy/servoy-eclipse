@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { signal } from '@angular/core';
+import { signal, provideZonelessChangeDetection } from '@angular/core';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 
 import { AutoscrollComponent } from './autoscroll.component';
+import { EditorSessionService } from '../services/editorsession.service';
+import { EditorContentService } from '../services/editorcontent.service';
 
 describe('AutoscrollComponent', () => {
   let component: AutoscrollComponent;
@@ -16,7 +19,7 @@ describe('AutoscrollComponent', () => {
 
     component = Object.create(AutoscrollComponent.prototype);
     (component as any).editorSession = editorSession;
-    (component as any).editorContent = { getDesignerElementById: vi.fn(), getBodyElement: vi.fn() };
+    (component as any).editorContent = { getDocument: vi.fn().mockReturnValue({ addEventListener: vi.fn(), removeEventListener: vi.fn() }), getDesignerElementById: vi.fn(), getBodyElement: vi.fn() };
     (component as any).renderer = { setStyle: vi.fn() };
     (component as any).scrollTarget = null;
     (component as any).isAutoscrollActive = false;
@@ -145,6 +148,66 @@ describe('AutoscrollComponent', () => {
       component.stopAutoscroll();
       expect((component as any).isAutoscrollActive).toBe(false);
       vi.useRealTimers();
+    });
+  });
+
+  describe('onDocumentMouseMove band gating', () => {
+    const bandRect = { left: 100, right: 300, top: 400, bottom: 460 };
+    let bandComponent: AutoscrollComponent;
+    let fixture: ComponentFixture<AutoscrollComponent>;
+    let nativeElement: any;
+    let documentMouseMove: (event: MouseEvent) => void;
+
+    beforeEach(async () => {
+      const autoscrollTarget = signal<any>(null);
+      const mockEditorSession = { autoscrollTarget };
+      const mockEditorContent = {
+        getDocument: vi.fn().mockReturnValue({ addEventListener: vi.fn(), removeEventListener: vi.fn() }),
+        getDesignerElementById: vi.fn(),
+        getBodyElement: vi.fn(),
+      };
+
+      await TestBed.configureTestingModule({
+        imports: [AutoscrollComponent],
+        providers: [
+          provideZonelessChangeDetection(),
+          { provide: EditorSessionService, useValue: mockEditorSession },
+          { provide: EditorContentService, useValue: mockEditorContent },
+        ],
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(AutoscrollComponent);
+      bandComponent = fixture.componentInstance;
+
+      nativeElement = { getBoundingClientRect: vi.fn().mockReturnValue(bandRect) };
+      (bandComponent as any).autoscrollElement = signal({ nativeElement });
+      documentMouseMove = (bandComponent as any).onDocumentMouseMove;
+    });
+
+    afterEach(() => {
+      bandComponent.stopAutoscroll();
+      TestBed.resetTestingModule();
+    });
+
+    it('should set pointerEvents to all when pointer is inside the band rect', () => {
+      (bandComponent as any).scrollTarget = scrollTarget;
+      documentMouseMove({ clientX: 200, clientY: 430 } as MouseEvent);
+      expect(bandComponent.pointerEvents()).toBe('all');
+      expect(nativeElement.getBoundingClientRect).toHaveBeenCalled();
+    });
+
+    it('should set pointerEvents back to none when pointer is outside the band rect', () => {
+      (bandComponent as any).scrollTarget = scrollTarget;
+      bandComponent.pointerEvents.set('all');
+      documentMouseMove({ clientX: 500, clientY: 430 } as MouseEvent);
+      expect(bandComponent.pointerEvents()).toBe('none');
+    });
+
+    it('should no-op and stay none when there is no active scrollTarget', () => {
+      (bandComponent as any).scrollTarget = null;
+      documentMouseMove({ clientX: 200, clientY: 430 } as MouseEvent);
+      expect(bandComponent.pointerEvents()).toBe('none');
+      expect(nativeElement.getBoundingClientRect).not.toHaveBeenCalled();
     });
   });
 
