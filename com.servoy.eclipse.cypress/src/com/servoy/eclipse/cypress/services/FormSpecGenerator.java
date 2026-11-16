@@ -36,7 +36,7 @@ public class FormSpecGenerator
 
 	public String generateSpec(String formName)
 	{
-		return generateSpec(formName, null);
+		return generateSpec(formName, null, java.util.List.of());
 	}
 
 	/**
@@ -44,6 +44,21 @@ public class FormSpecGenerator
 	 */
 	public String generateSpec(String formName, FormSpecModel model)
 	{
+		return generateSpec(formName, model, java.util.List.of());
+	}
+
+	/**
+	 * Generates the form spec, threading the optional SVY-21619 viewport widths through to the emitter (and the legacy fallback). The always-on
+	 * default-viewport measurement and, when {@code viewportWidths} is non-empty, one measurement block per width are added by the emitter / legacy
+	 * content builder. Also scaffolds the shared {@code cy.measureAtViewport}/{@code cy.measureContainer} support so form specs can call the command
+	 * even when the E2E generator was never run.
+	 *
+	 * @param model optional neutral description of the form's handlers; when null the spec only contains the visibility checks built from the form's elements.
+	 * @param viewportWidths ordered, deduped widths to cross-check; empty for default behaviour (always-on reporting only).
+	 */
+	public String generateSpec(String formName, FormSpecModel model, java.util.List<Integer> viewportWidths)
+	{
+		java.util.List<Integer> widths = viewportWidths == null ? java.util.List.of() : viewportWidths;
 		if (model != null && !formName.equals(model.formName()))
 		{
 			return "Error: Model is for form '" + model.formName() + "' but spec was requested for form '" + formName + "'";
@@ -88,12 +103,16 @@ public class FormSpecGenerator
 			FormMetadata metadata = buildMetadata(form);
 			metadata.solutionName = solutionName;
 
+			// Scaffold the shared measureAtViewport/measureContainer support (SVY-21619) so the form spec can
+			// call it even when the E2E generator was never run. Idempotent and never clobbers an existing commands.js.
+			CypressSupportScaffold.ensureMeasurementSupport(testsDir.getParent().getParent());
+
 			StringBuilder result = new StringBuilder();
 
 			if (!Files.exists(cySpecPath))
 			{
-				String cyContent = model == null ? generateCypressSpecContent(metadata)
-					: FormSpecModelEmitter.emit(getFormUrl(metadata.solutionName, metadata.formName), model);
+				String cyContent = model == null ? generateCypressSpecContent(metadata, widths)
+					: FormSpecModelEmitter.emit(getFormUrl(metadata.solutionName, metadata.formName), model, widths);
 				Files.writeString(cySpecPath, cyContent, StandardCharsets.UTF_8);
 				result.append("Created: ").append(FORM_SPEC_RELATIVE_DIR).append("/").append(cySpecPath.getFileName()).append(" (")
 					.append(model == null ? metadata.namedElements.size() + " element assertions"
@@ -400,7 +419,7 @@ public class FormSpecGenerator
 			}
 			if (element instanceof GraphicalComponent gc)
 			{
-//				elem.dataProviderID = gc.getDataProviderID();
+				//				elem.dataProviderID = gc.getDataProviderID();
 				boolean hasAction = gc.getOnActionMethodID() != null && !gc.getOnActionMethodID().isEmpty();
 				elem.isButton = hasAction;
 				elem.isLabel = !hasAction;
@@ -412,8 +431,9 @@ public class FormSpecGenerator
 		return metadata;
 	}
 
-	private String generateCypressSpecContent(FormMetadata metadata)
+	private String generateCypressSpecContent(FormMetadata metadata, java.util.List<Integer> viewportWidths)
 	{
+		java.util.List<Integer> widths = viewportWidths == null ? java.util.List.of() : viewportWidths;
 		StringBuilder sb = new StringBuilder();
 
 		String formUrl = getFormUrl(metadata.solutionName, metadata.formName);
@@ -424,7 +444,7 @@ public class FormSpecGenerator
 		sb.append("    cy.visit('").append(formUrl).append("');\n");
 		if (metadata.namedElements.isEmpty())
 		{
-			sb.append("    cy.get('.svy-form', { timeout: 30000 }).should('exist');\n");
+			sb.append("    cy.get('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("', { timeout: 30000 }).should('exist');\n");
 		}
 		else
 		{
@@ -444,7 +464,19 @@ public class FormSpecGenerator
 			sb.append("    cy.get('[data-cy=\"").append(metadata.formName).append(".").append(elem.name)
 				.append("\"]').should('be.visible');\n");
 		}
+		// Always-on (SVY-21619): report innerWidth + root-container width at the default viewport after layout settles.
+		sb.append("    cy.measureContainer('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("');\n");
 		sb.append("  });\n\n");
+
+		// Opt-in responsive cross-check: one it(...) per requested width, in the given order.
+		for (Integer width : widths)
+		{
+			int w = width.intValue();
+			sb.append("  it('responds at ").append(w).append("px', () => {\n");
+			sb.append("    cy.measureAtViewport('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("', ").append(w).append(", ")
+				.append(CypressSupportScaffold.DEFAULT_VIEWPORT_HEIGHT).append(");\n");
+			sb.append("  });\n\n");
+		}
 
 		List<ElementInfo> buttons = metadata.namedElements.stream()
 			.filter(e -> e.isButton || (e.typeName != null && e.typeName.contains("button"))).limit(3).toList();
@@ -528,7 +560,7 @@ public class FormSpecGenerator
 	{
 		String name;
 		String typeName;
-//		String dataProviderID;
+		//		String dataProviderID;
 		boolean isWebComponent;
 		boolean isButton;
 		boolean isLabel;

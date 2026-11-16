@@ -1,6 +1,7 @@
 package com.servoy.eclipse.cypress.plainjunit.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -366,4 +367,180 @@ public void testFindScreenshot_ignoresOtherFormsTypeScriptSpecFolder() throws Ex
 
 	assertNull(invokeFindScreenshot(new FormSpecRunner(), tempDir, "myform"));
 }
+
+	// --- hoistMeasurementMarkers (SVY-21619) -----------------------------------
+	// Private helper that both runners call on the captured Cypress output (pass AND fail)
+	// to surface the SVY_MEASURE lines into a readable "Measured layout" summary. Exercised
+	// via reflection since it is private, the same technique as findMatchingFile above.
+
+	private static String invokeHoistMeasurementMarkers(FormSpecRunner runner, String rawOutput) throws Exception {
+		Method m = FormSpecRunner.class.getDeclaredMethod("hoistMeasurementMarkers", String.class);
+		m.setAccessible(true);
+		return (String) m.invoke(runner, rawOutput);
+	}
+
+	@Test
+	public void testSvyMeasureMarker_isTheSharedLiteral() {
+		assertEquals("SVY_MEASURE ", FormSpecRunner.SVY_MEASURE_MARKER,
+				"the runner marker must be the same literal the generated specs log");
+	}
+
+	@Test
+	public void testHoistMeasurementMarkers_extractsSummaryWithNumbers() throws Exception {
+		String rawOutput = "some cypress noise\n"
+				+ "SVY_MEASURE innerWidth=375 container=.svy-form containerWidth=373 requested=375\n"
+				+ "more noise\n"
+				+ "SVY_MEASURE innerWidth=1024 container=.svy-form containerWidth=1022 requested=1024\n"
+				+ "trailing noise\n";
+
+		String summary = invokeHoistMeasurementMarkers(new FormSpecRunner(), rawOutput);
+
+		assertNotNull(summary);
+		assertFalse(summary.isBlank(), "a summary must be produced when markers are present");
+		assertTrue(summary.contains("Measured layout"), "summary must carry the 'Measured layout' heading: " + summary);
+		assertTrue(summary.contains("innerWidth=375") && summary.contains("containerWidth=373"),
+				"summary must surface the first measurement's numbers: " + summary);
+		assertTrue(summary.contains("innerWidth=1024") && summary.contains("containerWidth=1022"),
+				"summary must surface the second measurement's numbers: " + summary);
+	}
+
+	@Test
+	public void testHoistMeasurementMarkers_matchesCypressPrefixedMarkerLine() throws Exception {
+		// cy.log output appears with a Cypress log prefix; the helper must match on contains, not startsWith.
+		String rawOutput = "  cy:log  ✓  SVY_MEASURE innerWidth=480 container=.svy-form containerWidth=478\n";
+
+		String summary = invokeHoistMeasurementMarkers(new FormSpecRunner(), rawOutput);
+
+		assertFalse(summary.isBlank(), "a Cypress-prefixed marker line must still be matched (contains, not startsWith)");
+		assertTrue(summary.contains("innerWidth=480") && summary.contains("containerWidth=478"),
+				"the prefixed line's numbers must be surfaced: " + summary);
+		assertFalse(summary.contains("cy:log"), "the Cypress log decoration before the marker must be dropped: " + summary);
+	}
+
+	@Test
+	public void testHoistMeasurementMarkers_noMarker_returnsEmpty() throws Exception {
+		String rawOutput = "Running form spec\n2 passing\nAll good\n";
+
+		String summary = invokeHoistMeasurementMarkers(new FormSpecRunner(), rawOutput);
+
+		assertNotNull(summary);
+		assertTrue(summary.isEmpty(), "with no SVY_MEASURE line the helper must return an empty string so the caller output is unchanged");
+	}
+
+	@Test
+	public void testHoistMeasurementMarkers_nullOrEmpty_returnsEmpty() throws Exception {
+		assertEquals("", invokeHoistMeasurementMarkers(new FormSpecRunner(), null));
+		assertEquals("", invokeHoistMeasurementMarkers(new FormSpecRunner(), ""));
+	}
+
+	@Test
+	public void testHoistMeasurementMarkers_isDeclaredPrivate() throws Exception {
+		// The hoisting helper that both runFormCypressTests and runE2ECypressTests prepend on
+		// pass and fail must exist as a private helper (the marker-append precedent, SVY-21619).
+		Method m = FormSpecRunner.class.getDeclaredMethod("hoistMeasurementMarkers", String.class);
+		assertEquals(String.class, m.getReturnType(), "hoistMeasurementMarkers must return the summary String");
+		assertTrue(java.lang.reflect.Modifier.isPrivate(m.getModifiers()), "hoistMeasurementMarkers must be a private helper");
+	}
+
+	@Test
+	public void testHoistMeasurementMarkers_markerWithNoPayload_returnsEmpty() throws Exception {
+		// A bare marker line carries no measurement: it must not produce a "Measured layout" heading with no rows.
+		assertEquals("", invokeHoistMeasurementMarkers(new FormSpecRunner(), "SVY_MEASURE \nSVY_MEASURE    \n"));
+	}
+
+	@Test
+	public void testHoistMeasurementMarkers_dropsTrailingCarriageReturn() throws Exception {
+		String summary = invokeHoistMeasurementMarkers(new FormSpecRunner(),
+				"SVY_MEASURE innerWidth=375 container=.svy-form containerWidth=375 requested=375\r\n");
+
+		assertTrue(summary.contains("requested=375\n"), "the CR from a Windows line ending must be trimmed: " + summary.replace("\r", "\\r"));
+		assertFalse(summary.contains("\r"));
+	}
+
+	// --- ensureCypressConfig / isConfigStale (SVY-21619) -----------------------
+	// Private helpers that keep the generated cypress.config.js able to carry the svyMeasure task to stdout.
+
+	private static void invokeEnsureCypressConfig(FormSpecRunner runner, Path cypressDir, String baseUrl) throws Exception {
+		Method m = FormSpecRunner.class.getDeclaredMethod("ensureCypressConfig", Path.class, String.class);
+		m.setAccessible(true);
+		m.invoke(runner, cypressDir, baseUrl);
+	}
+
+	private static boolean invokeIsConfigStale(FormSpecRunner runner, Path configFile) throws Exception {
+		Method m = FormSpecRunner.class.getDeclaredMethod("isConfigStale", Path.class);
+		m.setAccessible(true);
+		return (Boolean) m.invoke(runner, configFile);
+	}
+
+	@Test
+	public void testEnsureCypressConfig_writesConfigRegisteringTheMeasureTask() throws Exception {
+		Path cypressDir = tempDir.resolve("cypress");
+
+		invokeEnsureCypressConfig(new FormSpecRunner(), cypressDir, "http://localhost:8183");
+
+		String config = Files.readString(cypressDir.resolve("cypress.config.js"));
+		assertTrue(config.contains("baseUrl: 'http://localhost:8183'"), config);
+		assertTrue(config.contains("supportFile: 'cypress/support/e2e.js'"), "the support file must be enabled so the commands load: " + config);
+		assertTrue(config.contains("setupNodeEvents"), config);
+		assertTrue(config.contains("svyMeasure"), "the svyMeasure task must be registered so the marker reaches stdout: " + config);
+		assertFalse(invokeIsConfigStale(new FormSpecRunner(), cypressDir.resolve("cypress.config.js")),
+				"a freshly written config is never stale");
+	}
+
+	@Test
+	public void testEnsureCypressConfig_overwritesAStaleConfig() throws Exception {
+		Path cypressDir = Files.createDirectories(tempDir.resolve("cypress"));
+		Path config = cypressDir.resolve("cypress.config.js");
+		Files.writeString(config, "module.exports = { e2e: { supportFile: false } };\n");
+
+		invokeEnsureCypressConfig(new FormSpecRunner(), cypressDir, "http://localhost:8183");
+
+		assertTrue(Files.readString(config).contains("svyMeasure"), "the stale config must be refreshed to the canonical content");
+	}
+
+	@Test
+	public void testEnsureCypressConfig_isNonFatalWhenTheDirectoryCannotBeCreated() throws Exception {
+		Path blocker = Files.createFile(tempDir.resolve("not-a-directory"));
+
+		invokeEnsureCypressConfig(new FormSpecRunner(), blocker.resolve("cypress"), "http://localhost:8183");
+
+		assertFalse(Files.exists(blocker.resolve("cypress")), "nothing can be created below a regular file, and no exception may escape");
+	}
+
+	@Test
+	public void testIsConfigStale_missingFile_isNotStale() throws Exception {
+		assertFalse(invokeIsConfigStale(new FormSpecRunner(), tempDir.resolve("absent.config.js")),
+				"a missing config is created by the caller's own branch, it is not 'stale'");
+	}
+
+	@Test
+	public void testIsConfigStale_configWithoutTheMeasureTask_isStale() throws Exception {
+		Path config = Files.writeString(tempDir.resolve("cypress.config.js"), "module.exports = { e2e: { supportFile: 'cypress/support/e2e.js' } };\n");
+
+		assertTrue(invokeIsConfigStale(new FormSpecRunner(), config));
+	}
+
+	@Test
+	public void testIsConfigStale_configThatDisablesTheSupportFile_isStale() throws Exception {
+		Path config = Files.writeString(tempDir.resolve("cypress.config.js"),
+				"// svyMeasure\nmodule.exports = { e2e: { supportFile: false } };\n");
+
+		assertTrue(invokeIsConfigStale(new FormSpecRunner(), config), "supportFile: false disables the measurement commands entirely");
+	}
+
+	@Test
+	public void testIsConfigStale_currentConfig_isNotStale() throws Exception {
+		Path config = Files.writeString(tempDir.resolve("cypress.config.js"),
+				"// svyMeasure\nmodule.exports = { e2e: { supportFile: 'cypress/support/e2e.js' } };\n");
+
+		assertFalse(invokeIsConfigStale(new FormSpecRunner(), config));
+	}
+
+	@Test
+	public void testIsConfigStale_unreadableConfig_isTreatedAsStale() throws Exception {
+		Path directoryNamedLikeAConfig = Files.createDirectory(tempDir.resolve("cypress.config.js"));
+
+		assertTrue(invokeIsConfigStale(new FormSpecRunner(), directoryNamedLikeAConfig),
+				"a config that cannot be read must be regenerated, never trusted");
+	}
 }

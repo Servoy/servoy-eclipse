@@ -119,7 +119,9 @@ public class FormSpecGeneratorModelIntegrationTest extends TestUtilitiesClass {
 				"    cy.get('[data-cy^=\"" + FORM + ".\"]', { timeout: 30000 }).should('exist');", "  });", "",
 				"  it('loads without errors and all elements are visible', () => {",
 				"    cy.get('.svy-error, .error-overlay').should('not.exist');",
-				"    cy.get('[data-cy=\"" + FORM + ".btn\"]').should('be.visible');", "  });", "",
+				"    cy.get('[data-cy=\"" + FORM + ".btn\"]').should('be.visible');",
+				// SVY-21619: always-on report of innerWidth + root container width at the default viewport
+				"    cy.measureContainer('.svy-form');", "  });", "",
 				"  // btn.onActionMethodID -> forms." + FORM + ".hide", "  it('btn: onActionMethodID (hide)', () => {",
 				"    cy.get('[data-cy=\"" + FORM + ".btn\"]').click();",
 				"    cy.get('[data-cy=\"" + FORM + ".lbl\"]').should('not.be.visible');",

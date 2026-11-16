@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target includeMode="feature" name="eclipse_sources" sequenceNumber="60">
+<target includeMode="feature" name="eclipse_sources" sequenceNumber="61">
     <locations>    
         <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
@@ -399,13 +399,13 @@
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy-agent</artifactId>
-                    <version>1.18.15</version>
+                    <version>1.18.17</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
                     <groupId>net.bytebuddy</groupId>
                     <artifactId>byte-buddy</artifactId>
-                    <version>1.18.15</version>
+                    <version>1.18.17</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>

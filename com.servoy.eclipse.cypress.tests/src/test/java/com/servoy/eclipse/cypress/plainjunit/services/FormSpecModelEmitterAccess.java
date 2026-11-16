@@ -2,6 +2,7 @@ package com.servoy.eclipse.cypress.plainjunit.services;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import com.servoy.eclipse.cypress.services.FormSpecModel;
 
@@ -20,6 +21,11 @@ final class FormSpecModelEmitterAccess
 	static String emit(String formUrl, FormSpecModel model)
 	{
 		return (String)call("emit", new Class< ? >[] { String.class, FormSpecModel.class }, formUrl, model);
+	}
+
+	static String emit(String formUrl, FormSpecModel model, List<Integer> viewportWidths)
+	{
+		return (String)call("emit", new Class< ? >[] { String.class, FormSpecModel.class, List.class }, formUrl, model, viewportWidths);
 	}
 
 	static int countVisibilityAssertions(FormSpecModel model)
