@@ -2776,39 +2776,64 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	}
 
 	/**
-	 * Returns true when the composite persist's OWN serialized file (its .frm, or - for a Form - its form-level .less
-	 * stylesheet) is among the changed files, meaning the full editing persist must be refreshed. Returns false when
-	 * only child files (e.g. a child script .js) changed, in which case the editing composite must not be overwritten
-	 * (SVY-21249).
+	 * Classifies why a composite-with-items persist (e.g. a Form) was flagged changed, by looking at which of its
+	 * serialized files actually changed on disk. This decides how the editing (in-memory) copy must be refreshed in
+	 * {@link #handleChangedFiles}:
+	 * <ul>
+	 * <li>{@link OwnFileChange#OWN_FILE} - the composite's own file (a form's .frm) changed: the full editing persist
+	 * must be refreshed from disk via {@code updateEditingPersist(persist, true)}.</li>
+	 * <li>{@link OwnFileChange#FORM_CSS_ONLY} - only the form's stylesheet (forms/&lt;form&gt;.less) changed, not its
+	 * .frm: refresh ONLY the editing form's {@code formCss} so the designer preview re-paints, WITHOUT overwriting the
+	 * rest of the editing form from disk - that would discard unsaved editor changes (component moves/deletes/adds)
+	 * made since the last form save (SVY-21576, keeping the SVY-21249/SVY-21697 no-data-loss guarantee).</li>
+	 * <li>{@link OwnFileChange#NONE} - neither the .frm nor the .less changed (only a child script .js did): the
+	 * editing composite must not be overwritten at all; the changed script child is handled separately via the
+	 * {@code IScriptElement} path (SVY-21249).</li>
+	 * </ul>
 	 *
 	 * @param persist the composite persist being visited
 	 * @param solutionParentDir the parent directory of the solution project location (the workspace folder that
 	 *            contains the solution project), used as the base to resolve the relative serialized paths
 	 * @param changedFilePaths absolute paths of the files that actually changed on disk
 	 */
-	public static boolean isOwnCompositeFileChanged(IPersist persist, File solutionParentDir, Set<String> changedFilePaths)
+	public static OwnFileChange classifyOwnCompositeFileChange(IPersist persist, File solutionParentDir, Set<String> changedFilePaths)
 	{
 		// the composite's own file, e.g. the form's .frm
 		String ownFilePath = new File(solutionParentDir, SolutionSerializer.getRelativeFilePath(persist, false)).getAbsolutePath();
 		if (changedFilePaths.contains(ownFilePath))
 		{
-			return true;
+			return OwnFileChange.OWN_FILE;
 		}
 
 		// a form's own stylesheet (forms/<form>.less) is serialized separately from the .frm, but a change to it still
-		// flags the Form persist changed; treat it as an own-file change so the full editing persist refresh re-pushes
-		// the recompiled form CSS to the designer preview (SVY-21576).
+		// flags the Form persist changed. Treat it as a form-CSS-only change so ONLY the editing form's formCss is
+		// refreshed (re-pushing the recompiled CSS to the designer preview) without overwriting unsaved editor state
+		// on that form (SVY-21576).
 		if (persist instanceof Form form)
 		{
 			String lessFilePath = new File(solutionParentDir,
 				SolutionSerializer.getRelativePath(persist, false) + form.getName() + SolutionSerializer.FORM_LESS_FILE_EXTENSION).getAbsolutePath();
 			if (changedFilePaths.contains(lessFilePath))
 			{
-				return true;
+				return OwnFileChange.FORM_CSS_ONLY;
 			}
 		}
 
-		return false;
+		return OwnFileChange.NONE;
+	}
+
+	/**
+	 * Why a composite-with-items persist was flagged changed, as classified by
+	 * {@link #classifyOwnCompositeFileChange(IPersist, File, Set)}.
+	 */
+	public enum OwnFileChange
+	{
+		/** The composite's own file (a form's .frm) changed: refresh the whole editing persist from disk. */
+		OWN_FILE,
+		/** Only the form's .less stylesheet changed: refresh only the editing form's formCss (SVY-21576). */
+		FORM_CSS_ONLY,
+		/** Neither the .frm nor the .less changed (only a child script .js): do not overwrite the editing composite. */
+		NONE
 	}
 
 	/**
@@ -2875,18 +2900,37 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					try
 					{
 						boolean compositeWithItems = SolutionSerializer.isCompositeWithItems(persist);
-						// If this is a composite (e.g. Form) that is flagged changed but its own file did not change on
-						// disk (only a child script element .js changed/was added), do NOT overwrite the whole editing
-						// composite - that would discard unsaved editor changes (e.g. a just-assigned onAction). The
-						// changed script child is handled separately as an IScriptElement below. A changed form .less
-						// stylesheet does count as an own-file change so the preview is refreshed (SVY-21576).
-						boolean ownFileChanged = !compositeWithItems ||
-							isOwnCompositeFileChanged(persist, solutionLocationDir.getParentFile(), changedFilePaths);
-						if (compositeWithItems && !ownFileChanged)
+						// If this is a composite (e.g. Form) that is flagged changed, decide how to refresh the editing
+						// (in-memory) copy based on which of its files actually changed on disk. Overwriting the whole
+						// editing composite would discard unsaved editor changes (e.g. a just-assigned onAction, or
+						// moved/deleted/added components), so that is only done when the composite's own file (.frm)
+						// changed (SVY-21249/SVY-21697).
+						OwnFileChange ownFileChange = compositeWithItems
+							? classifyOwnCompositeFileChange(persist, solutionLocationDir.getParentFile(), changedFilePaths)
+							: OwnFileChange.OWN_FILE;
+						if (ownFileChange == OwnFileChange.NONE)
 						{
-							// only the child script element(s) changed; update just those into the editing solution
+							// only the child script element(s) changed; update just those into the editing solution.
+							// The changed script child is handled separately as an IScriptElement below.
 							persist.clearChanged();
 							changed.put(persist.getUUID(), persist);
+						}
+						else if (ownFileChange == OwnFileChange.FORM_CSS_ONLY)
+						{
+							// only the form's .less stylesheet changed: refresh ONLY the editing form's formCss so the
+							// designer preview re-paints, without overwriting the rest of the editing form from disk
+							// (which would discard unsaved editor changes on it) (SVY-21576).
+							IPersist editingPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), persist);
+							if (editingPersist instanceof Form editingForm && persist instanceof Form realForm)
+							{
+								editingForm.setFormCss(realForm.getFormCss());
+							}
+							persist.clearChanged();
+							changed.put(persist.getUUID(), persist);
+							if (editingPersist != null)
+							{
+								changedEditing.put(persist.getUUID(), editingPersist);
+							}
 						}
 						else
 						{
