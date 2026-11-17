@@ -24,8 +24,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
@@ -78,6 +80,10 @@ public class CalculationLabelProvider extends LabelProvider implements ITableLab
 				case CalculationsComposite.CI_NAME :
 					return calculation.getName();
 				case CalculationsComposite.CI_TYPE :
+					if (Column.mapToDefaultType(calculation.getType()) == IColumnTypes.MEDIA && (calculation.getFlags() & IBaseColumn.UUID_COLUMN) != 0)
+					{
+						return "UUID";
+					}
 					return Column.getDisplayTypeString(Column.mapToDefaultType(calculation.getType()));
 				case CalculationsComposite.CI_CALCULATION :
 					return calculation.getMethodCode();

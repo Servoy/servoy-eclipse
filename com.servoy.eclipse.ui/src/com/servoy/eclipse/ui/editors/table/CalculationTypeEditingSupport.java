@@ -28,21 +28,26 @@ import org.eclipse.swt.SWT;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ScriptCalculation;
 
 public class CalculationTypeEditingSupport extends EditingSupport
 {
+	private static final int UUID_INDEX = Column.allDefinedTypes.length;
+
 	private final CellEditor editor;
 	private final ChangeSupportObservable observable;
 
 	public CalculationTypeEditingSupport(TreeViewer tv)
 	{
 		super(tv);
-		String[] types = new String[Column.allDefinedTypes.length];
-		for (int i = 0; i < types.length; i++)
+		String[] types = new String[Column.allDefinedTypes.length + 1];
+		for (int i = 0; i < Column.allDefinedTypes.length; i++)
 		{
 			types[i] = Column.getDisplayTypeString(Column.allDefinedTypes[i]);
 		}
+		types[UUID_INDEX] = "UUID";
 		editor = new FixedComboBoxCellEditor(tv.getTree(), types, SWT.READ_ONLY);
 		observable = new ChangeSupportObservable(new SimpleChangeSupport());
 	}
@@ -65,7 +70,17 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			ScriptCalculation calculation = (ScriptCalculation)element;
 			int index = Integer.parseInt(value.toString());
 			int type = calculation.getType();
-			calculation.setTypeAndCheck(Column.allDefinedTypes[index], Activator.getDefault().getDesignClient());
+			boolean uuid = index == UUID_INDEX;
+			calculation.setTypeAndCheck(uuid ? IColumnTypes.MEDIA : Column.allDefinedTypes[index], Activator.getDefault().getDesignClient());
+			if (!isStored(calculation))
+			{
+				String declaration = calculation.getDeclaration();
+				String newDeclaration = CalculationUuidMarker.setUuidMarker(declaration, uuid);
+				if (!newDeclaration.equals(declaration))
+				{
+					calculation.setDeclaration(newDeclaration);
+				}
+			}
 			Matcher m = Pattern.compile("return+.+;").matcher(calculation.getDeclaration());
 
 			if (m.find() && m.group().equals(ScriptCalculation.getDefaultReturnMethodString(type)))
@@ -86,6 +101,10 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			ScriptCalculation calculation = (ScriptCalculation)element;
 			int type = calculation.getType();
 			int index = 0;
+			if (type == IColumnTypes.MEDIA && !isStored(calculation) && CalculationUuidMarker.hasUuidMarker(calculation.getDeclaration()))
+			{
+				return Integer.valueOf(UUID_INDEX);
+			}
 			for (int i = 0; i < Column.allDefinedTypes.length; i++)
 			{
 				if (Column.allDefinedTypes[i] == type)
@@ -97,6 +116,22 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			return new Integer(index);
 		}
 		return null;
+	}
+
+	/**
+	 * A stored calculation follows the type of its backing column, the UUID marker is only for unstored calculations.
+	 */
+	private static boolean isStored(ScriptCalculation calculation)
+	{
+		try
+		{
+			ITable table = calculation.getTable();
+			return table != null && table.getColumn(calculation.getName()) != null;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
 
 	@Override
