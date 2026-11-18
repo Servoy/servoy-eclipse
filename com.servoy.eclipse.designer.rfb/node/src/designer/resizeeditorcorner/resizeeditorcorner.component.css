@@ -2,13 +2,14 @@
     width: 10px;
     height: 10px;
     cursor: nwse-resize;
-    background-color: rgb(255, 187, 55);
+    background-color: rgb(255, 255, 255);
     position: absolute;
     left: calc(100% - 5px);
     top: calc(100% - 5px);
-    border-radius: 50%
+    border-radius: 50%;
+    border: 1px solid gray;
 }
 
-.resize-editor-corner:HOVER {
-    background-color: rgb(27 187 91);
+.resize-editor-corner:hover {
+    background-color: rgb(255, 187, 55);
 }

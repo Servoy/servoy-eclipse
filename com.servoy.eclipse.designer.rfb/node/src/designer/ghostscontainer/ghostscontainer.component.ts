@@ -258,6 +258,10 @@ export class GhostsContainerComponent implements OnInit, ISelectionChangedListen
         this.ghostContainers.set(ghostContainers);
     }
 
+    isFormContainer(container: GhostContainer): boolean {
+        return container.ghosts?.some(ghost => ghost.type === GHOST_TYPES.GHOST_TYPE_FORM) ?? false;
+    }
+
     openContainedForm(ghost: Ghost) {
         if (ghost.type != GHOST_TYPES.GHOST_TYPE_PART) {
             this.editorSession.openContainedForm(ghost.uuid);

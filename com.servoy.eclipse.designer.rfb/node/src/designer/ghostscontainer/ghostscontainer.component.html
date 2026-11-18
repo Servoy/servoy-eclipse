@@ -4,7 +4,7 @@
     @if (container.propertyName) {
       <div class="ghostContainerPropName">property '{{container.propertyName}}'</div>
     }
-    @if (!container.propertyName) {
+    @if (!container.propertyName && isFormContainer(container)) {
       <designer-resizeeditorwidth></designer-resizeeditorwidth>
     }
     @for (ghost of container.ghosts; track ghost) {
@@ -18,7 +18,7 @@
         {{ghost.text}}&nbsp;
       </div>
     }
-    @if (!container.propertyName) {
+    @if (!container.propertyName  && isFormContainer(container)) {
       <designer-resizeeditorheight></designer-resizeeditorheight>
       <designer-resizeeditorcorner></designer-resizeeditorcorner>
     }

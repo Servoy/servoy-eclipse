@@ -24,17 +24,18 @@
     left: 50%;
     width: 10px;
     height: 10px;
-    background-color: rgb(255, 187, 55);
+    background-color: rgb(255, 255, 255);
     cursor: ew-resize;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    border-radius: 50%
+    border-radius: 50%;
+    border: 1px solid gray;
 }
 
-.resize-editor-width:HOVER {
+.resize-editor-width:hover {
     background-color: #CCC;
 }
 
-.resize-editor-width:HOVER::after {
-    background-color: rgb(27 187 91);
+.resize-editor-width:hover::after {
+    background-color: rgb(255, 187, 55);
 }
