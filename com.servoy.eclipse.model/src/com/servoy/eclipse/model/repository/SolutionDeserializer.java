@@ -153,10 +153,11 @@ public class SolutionDeserializer
 	};
 
 	/**
-	 * SVY-21431: companion to {@link #POSSIBLE_DUPLICATE_UUID}. When deserialization already knows the
-	 * name of the other workspace file that declares the same UUID (the single-reused-instance cases
-	 * where the in-memory persist index only holds one instance), it records that file name here so the
-	 * builder can confirm the duplicate from memory instead of re-reading sibling files from disk.
+	 * SVY-21431: companion to {@link #POSSIBLE_DUPLICATE_UUID}. Set only when the same persist (uuid) is
+	 * re-read from a second file (the single-reused-instance case where the in-memory persist index only
+	 * holds one instance). Holds the absolute path of that other file so the builder can confirm the
+	 * duplicate from memory instead of re-reading sibling files from disk. The builder treats it as
+	 * confirmed only while that file still exists in the workspace, so it does not outlive the duplicate.
 	 */
 	public static final RuntimeProperty<String> DUPLICATE_UUID_OTHER_FILE = new RuntimeProperty<String>()
 	{
@@ -1889,10 +1890,9 @@ public class SolutionDeserializer
 								((AbstractBase)persist).resetUUID(uuid);
 							}
 							((AbstractBase)persist).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
-							// SVY-21431: record the other file that declares the same uuid so the builder can
-							// confirm the duplicate from memory (only one instance is kept here, so the in-memory
-							// duplicate index would not see it).
-							if (file != null) ((AbstractBase)persist).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, file.getName());
+							// SVY-21431: deliberately no DUPLICATE_UUID_OTHER_FILE here. This is the same-file / same-name /
+							// other-uuid case, so no other file declares this uuid; the previous sibling-file scan found nothing
+							// here either, and recording this file would raise a duplicate marker that never existed before.
 						}
 						break;
 					}
@@ -1919,9 +1919,9 @@ public class SolutionDeserializer
 			if (file != null && !fileName.equals(file.getName()) && SolutionSerializer.isJSONFile(fileName))
 			{
 				((AbstractBase)retval).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
-				// SVY-21431: same persist (uuid) is read from a second file; record that other file name so
+				// SVY-21431: same persist (uuid) is read from a second file; record that other file's path so
 				// the builder confirms the duplicate from memory instead of scanning sibling files on disk.
-				((AbstractBase)retval).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, file.getName());
+				((AbstractBase)retval).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, file.getAbsolutePath());
 			}
 		}
 

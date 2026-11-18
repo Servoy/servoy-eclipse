@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.function.Predicate;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -51,6 +52,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONArray;
@@ -638,6 +640,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	@Override
 	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor progressMonitor) throws CoreException
 	{
+		// SVY-21431: give the whole build a progress total once, so worked() below moves the reported percentage
+		progressMonitor = SubMonitor.convert(progressMonitor, "Servoy build", 1000);
 		// make sure the IServoyModel is initialized
 		getServoyModel();
 		referencedProjectsSet.clear();
@@ -1780,26 +1784,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 		if (Utils.getAsBoolean(((AbstractBase)persist).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID)))
 		{
-			// SVY-21431: confirm the duplicate entirely from in-memory state - no sibling-file reads.
-			// Two cases, both resolved without touching the filesystem:
-			//  1) two distinct persist instances share the UUID -> the DeveloperPersistIndex already
-			//     tracks this (getDuplicateUUIDList);
-			//  2) a single persist instance was reused / re-read from another file -> deserialization
-			//     recorded that other file name in DUPLICATE_UUID_OTHER_FILE at the moment it detected it.
-			UUID uuid = persist.getUUID();
-
+			// SVY-21431: confirm the duplicate entirely from in-memory state - no sibling-file reads
+			// (see isDuplicateConfirmedInMemory for the two cases).
 			FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
-			if (fs instanceof DeveloperFlattenedSolution)
-			{
-				Map<UUID, List<IPersist>> duplicates = ((DeveloperFlattenedSolution)fs).getDuplicateUUIDList();
-				List<IPersist> withSameUUID = duplicates != null ? duplicates.get(uuid) : null;
-				found = withSameUUID != null && withSameUUID.stream().anyMatch(other -> other != persist);
-			}
-
-			if (!found)
-			{
-				found = ((AbstractBase)persist).getRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE) != null;
-			}
+			Map<UUID, List<IPersist>> duplicates = fs instanceof DeveloperFlattenedSolution dfs ? dfs.getDuplicateUUIDList() : null;
+			found = isDuplicateConfirmedInMemory(persist, duplicates, ServoyBuilder::workspaceFileExists);
 
 			if (found)
 			{
@@ -1819,6 +1808,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			((AbstractBase)persist).setRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID, null);
 			((AbstractBase)persist).setRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE, null);
 		}
+	}
+
+	/**
+	 * SVY-21431: decides, from in-memory state only, whether a persist flagged POSSIBLE_DUPLICATE_UUID really is a duplicate.
+	 * <ol>
+	 * <li>two distinct persist instances share the UUID: the developer persist index lists a persist other than this one;
+	 * <li>the same persist instance was re-read from a second file: deserialization recorded that file's path in
+	 * DUPLICATE_UUID_OTHER_FILE. It only counts while that file still exists, so the marker goes away once the copy is
+	 * deleted or renamed instead of staying until the solution is reloaded.
+	 * </ol>
+	 *
+	 * @param indexDuplicates the developer persist index duplicate map (may be null)
+	 * @param otherFileExists whether a recorded file path still exists (a workspace resource-tree lookup, not file I/O)
+	 */
+	static boolean isDuplicateConfirmedInMemory(IPersist persist, Map<UUID, List<IPersist>> indexDuplicates, Predicate<String> otherFileExists)
+	{
+		List<IPersist> withSameUUID = indexDuplicates != null ? indexDuplicates.get(persist.getUUID()) : null;
+		if (withSameUUID != null && withSameUUID.stream().anyMatch(other -> other != persist)) return true;
+
+		String otherFile = ((AbstractBase)persist).getRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE);
+		return otherFile != null && otherFileExists.test(otherFile);
+	}
+
+	private static boolean workspaceFileExists(String absolutePath)
+	{
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(Path.fromOSString(absolutePath));
+		return file != null && file.exists();
 	}
 
 	private boolean hasDeletedMarkers = false;
@@ -1950,6 +1966,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 				}
 				final FlattenedSolution flattenedSolution = ServoyBuilderUtils.getReferenceFlattenedSolution(solution);
+				// SVY-21431: the persists visited below are the unit of progress (an in-memory count, no file reads)
+				if (monitor != null) SubMonitor.convert(monitor, countPersistsToValidate(solution));
 				solution.acceptVisitor(new IPersistVisitor()
 				{
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
@@ -3578,7 +3596,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	 */
 	protected void reportBuildProgress(IPersist persist)
 	{
-		if (monitor != null && persist instanceof ISupportName)
+		if (monitor == null) return;
+		if (persist instanceof ISupportName)
 		{
 			String name = ((ISupportName)persist).getName();
 			if (name != null && name.length() > 0)
@@ -3586,6 +3605,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				monitor.subTask(name);
 			}
 		}
+		monitor.worked(1);
+	}
+
+	/**
+	 * Counts the persists {@link #checkServoyProject} visits, using the same traversal rule (forms are visited but not entered),
+	 * so it can be used as the progress total. Walks the in-memory solution only.
+	 */
+	static int countPersistsToValidate(Solution solution)
+	{
+		int[] count = { 0 };
+		solution.acceptVisitor(o -> {
+			count[0]++;
+			return o instanceof Form ? IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER : IPersistVisitor.CONTINUE_TRAVERSAL;
+		});
+		return Math.max(count[0], 1);
 	}
 
 	/**

@@ -124,9 +124,13 @@ builder can confirm the duplicate from memory:
 
 - Add `SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE` — a
   `RuntimeProperty<String>` declared next to `POSSIBLE_DUPLICATE_UUID`.
-- At **Site 1** and **Site 3**, in addition to setting `POSSIBLE_DUPLICATE_UUID`, set
-  `DUPLICATE_UUID_OTHER_FILE` to the conflicting `file.getName()` (free — the file is in hand
-  there; no extra I/O). Site 2 does not need it; the index already covers that case.
+- At **Site 3 only** (same persist re-read from a second file), in addition to setting
+  `POSSIBLE_DUPLICATE_UUID`, set `DUPLICATE_UUID_OTHER_FILE` to the other file's **absolute
+  path** (`file.getAbsolutePath()` — the file is in hand there; no extra I/O).
+- **Site 1 deliberately does not set it** (peer review correction). Site 1 is the same-file /
+  same-name / other-UUID case: no other file declares the UUID, and the old sibling-file scan
+  found nothing there. Recording this file would raise a "UUID duplicate found" error that never
+  appeared before. Site 2 does not need it either; the index already covers that case.
 
 `checkDuplicateUUID` then confirms from two in-memory sources, in order:
 
@@ -135,8 +139,14 @@ builder can confirm the duplicate from memory:
    and, when `fs instanceof DeveloperFlattenedSolution`,
    `((DeveloperFlattenedSolution) fs).getDuplicateUUIDList().get(uuid)` — a collision exists
    if the list holds a persist other than this one.
-2. **Site 1 / Site 3** — if the index reported nothing, treat the presence of a non-null
-   `DUPLICATE_UUID_OTHER_FILE` as the confirmation.
+2. **Site 3** — if the index reported nothing, a non-null `DUPLICATE_UUID_OTHER_FILE` confirms
+   the duplicate **only while that file still exists** in the workspace (an `IFile.exists()`
+   resource-tree lookup, not file I/O). Once the copy is deleted or renamed the check returns
+   false and the not-found tail clears both flags, so the marker does not outlive the duplicate
+   (peer review: the flag used to be a latch that only a restart could clear).
+
+The decision lives in the package-private, unit-testable helper
+`ServoyBuilder.isDuplicateConfirmedInMemory(persist, indexDuplicates, otherFileExists)`.
 
 On confirmation, emit the existing `MarkerMessages.UUIDDuplicate` marker on the flagged
 persist's file, preserving the current marker type, id `DUPLICATION_UUID_DUPLICATE`,
@@ -160,11 +170,13 @@ persists that deserialization actually flagged as suspect (set at
 Advance the existing `IProgressMonitor` so the build percentage moves during the
 per-persist marker/duplicate-UUID work:
 
-- Use `SubMonitor.convert(monitor, ...)` (or `monitor.subTask(...)` + `worked(...)`) around
-  the persist-visiting loops driven from `checkServoyProject`
-  (`ServoyBuilder.java:1957` visitor) and/or `ServoyFormBuilder.addFormMarkers`.
-- Report a short `subTask` label (e.g. the form/solution object being validated) and call
-  `worked(1)` per processed persist so the reported percentage advances.
+- `build(...)` wraps the incoming monitor once with `SubMonitor.convert(progressMonitor,
+  "Servoy build", 1000)`. `checkServoyProject` then sets the work total to the number of persists
+  it will visit (`ServoyBuilder.countPersistsToValidate`, an in-memory walk that mirrors the
+  visitor's "forms are visited, not entered" rule) before `solution.acceptVisitor(...)`.
+- The visitor calls `reportBuildProgress(persist)` for every persist: a short `subTask` label
+  plus `worked(1)`, so the reported **percentage advances** and not only the label (peer review:
+  label-only left the percentage frozen).
 - Must not change cancellation semantics — `checkCancel()` (line 3568) continues to work.
 - Keep it lightweight: no new long operations, just surfacing progress on the existing loop.
 
@@ -179,26 +191,28 @@ persists backed by different workspace files share a UUID) must be unchanged. On
 1. **`SolutionDeserializer.java`** (`com.servoy.eclipse.model/src/com/servoy/eclipse/model/repository/SolutionDeserializer.java`):
    - Declare `public static final RuntimeProperty<String> DUPLICATE_UUID_OTHER_FILE` next to
      `POSSIBLE_DUPLICATE_UUID`.
-   - At the Site 1 set-site (`~:1880`, same-name/different-UUID reused instance) and the
-     Site 3 set-site (`~:1906`, existing node re-read from another file), after setting
-     `POSSIBLE_DUPLICATE_UUID`, also set `DUPLICATE_UUID_OTHER_FILE` to the conflicting
-     `file.getName()` (guard for `file != null`). Leave Site 2 (`~:1896`) unchanged — the
+   - At the Site 3 set-site only (`~:1906`, existing node re-read from another file; Site 1
+     at `~:1880` must NOT set it, see §3.1), after setting
+     `POSSIBLE_DUPLICATE_UUID`, also set `DUPLICATE_UUID_OTHER_FILE` to
+     `file.getAbsolutePath()`. Leave Site 2 (`~:1896`) unchanged — the
      in-memory index covers it.
 2. **`ServoyBuilder.checkDuplicateUUID(IPersist, IProject)`**
    (`com.servoy.eclipse.model/src/com/servoy/eclipse/model/builder/ServoyBuilder.java`, ~1772):
    - Remove the `file.listFiles(...)` + `SolutionDeserializer.getUUID(File)` loop (and any
      helper); introduce no disk-scan fallback.
-   - Confirm from memory: first `DeveloperFlattenedSolution.getDuplicateUUIDList().get(uuid)`
+   - Confirm from memory via `isDuplicateConfirmedInMemory`: first `DeveloperFlattenedSolution.getDuplicateUUIDList().get(uuid)`
      (Site 2 — a persist other than this one in the list); if that reports nothing, treat a
-     non-null `DUPLICATE_UUID_OTHER_FILE` runtime property as confirmation (Site 1 / Site 3).
+     non-null `DUPLICATE_UUID_OTHER_FILE` counts as confirmation only while that file still
+     exists in the workspace (Site 3).
    - On confirmation emit the existing `MarkerMessages.UUIDDuplicate` marker with the current
      type/id (`DUPLICATION_UUID_DUPLICATE`)/priority/file-for-location arguments.
    - Keep the `POSSIBLE_DUPLICATE_UUID` guard; in the "not found" tail clear **both**
      `POSSIBLE_DUPLICATE_UUID` and `DUPLICATE_UUID_OTHER_FILE`.
-3. **Progress reporting** — add `reportBuildProgress(IPersist)` on `ServoyBuilder` that calls
-   `monitor.subTask(name)` for named persists, invoked at the top of the
-   `checkServoyProject` persist visitor (`solution.acceptVisitor`, ~1957). Preserve
-   `checkCancel()` behavior; introduce no new long operations.
+3. **Progress reporting** — wrap the monitor once in `build(...)` with `SubMonitor.convert`; in
+   `checkServoyProject` set the total from `countPersistsToValidate(solution)` before
+   `solution.acceptVisitor`; add `reportBuildProgress(IPersist)` (`subTask(name)` + `worked(1)`)
+   at the top of the persist visitor. Preserve `checkCancel()` behavior; introduce no new long
+   operations.
 4. **Imports / cleanup:** remove now-unused `FileFilter` / `java.io.File` usage tied to the
    deleted scan if no longer referenced elsewhere in the class. Run organize-imports.
 5. **Post-edit checklist (AGENTS.md):** `getCompilationErrors`, quick-fix, organize imports,
@@ -211,12 +225,15 @@ persists backed by different workspace files share a UUID) must be unchanged. On
       fallback. It confirms duplicates only from in-memory state.
 - [ ] **Site 2** (two distinct in-memory persists share a UUID): a duplicate-UUID problem
       marker is produced via `getDuplicateUUIDList()`.
-- [ ] **Site 1 / Site 3** (single reused/re-read instance): a duplicate-UUID problem marker
-      is produced via the `DUPLICATE_UUID_OTHER_FILE` runtime property recorded by
-      `SolutionDeserializer` — so detection coverage matches the old file scan.
-- [ ] `SolutionDeserializer` sets `DUPLICATE_UUID_OTHER_FILE` to the conflicting file name at
-      the Site 1 and Site 3 set-sites, alongside `POSSIBLE_DUPLICATE_UUID`.
-- [ ] When no duplicate exists, **both** `POSSIBLE_DUPLICATE_UUID` and
+- [ ] **Site 3** (same persist re-read from a second file): a duplicate-UUID problem marker is
+      produced via the `DUPLICATE_UUID_OTHER_FILE` runtime property recorded by
+      `SolutionDeserializer`, so detection coverage matches the old file scan.
+- [ ] **Site 1** (same file, same name, other UUID) raises **no** new marker, as with the old
+      file scan; `SolutionDeserializer` does not set `DUPLICATE_UUID_OTHER_FILE` there.
+- [ ] `SolutionDeserializer` sets `DUPLICATE_UUID_OTHER_FILE` to the other file's absolute path
+      at the Site 3 set-site, alongside `POSSIBLE_DUPLICATE_UUID`.
+- [ ] The marker does not outlive the duplicate: once the recorded other file is deleted or
+      renamed, the check no longer confirms it, and **both** `POSSIBLE_DUPLICATE_UUID` and
       `DUPLICATE_UUID_OTHER_FILE` are cleared, so the persist is not re-checked next build.
 - [ ] The duplicate-UUID validation is **not** removed; unflagged persists still do no work
       (the `POSSIBLE_DUPLICATE_UUID` gate is preserved at both call sites and in the method).
@@ -225,9 +242,12 @@ persists backed by different workspace files share a UUID) must be unchanged. On
 - [ ] Build cancellation still works (`checkCancel()` unaffected).
 - [ ] `com.servoy.eclipse.model` compiles with no new errors; no new top-two-severity SpotBugs
       in the changed code.
-- [ ] A test pins the detection sources the builder relies on: the in-memory duplicate index
-      reports a genuine same-UUID collision and nothing for a unique persist, and the
-      `DUPLICATE_UUID_OTHER_FILE` property is readable/clearable (Site 1/Site 3 confirmation).
+- [ ] Tests cover the decision: `ServoyBuilderDuplicateUUIDTest` (index-confirmed without
+      consulting files, only-self-in-index, other file exists, other file deleted, nothing
+      recorded) and `DeveloperPersistIndexDuplicateUUIDTest` (the index contract). Both are in
+      `com.servoy.eclipse.model.tests` under the `plainjunit` package. The deserializer set-sites
+      themselves have no automated test; they are covered by the manual test plan in
+      `docs/reviews/SVY-21431-review-summary.md`.
 
 ## 6. Out of scope
 
@@ -246,6 +266,7 @@ persists backed by different workspace files share a UUID) must be unchanged. On
 
 | Question | Owner | Status |
 |----------|-------|--------|
-| Does the in-memory `duplicatesUUIDs` index cover every case the file scan caught? **Resolved:** verified empirically that it covers only Site 2; Site 1 and Site 3 keep a single instance and are missed. Addressed by recording `DUPLICATE_UUID_OTHER_FILE` at those set-sites so no disk fallback is needed. | implementer | resolved |
+| Does the in-memory `duplicatesUUIDs` index cover every case the file scan caught? **Resolved:** verified empirically that it covers only Site 2; Site 1 and Site 3 keep a single instance and are missed. Addressed by recording `DUPLICATE_UUID_OTHER_FILE` at Site 3 so no disk fallback is needed. Peer review then showed Site 1 must not record it: no other file declares that UUID and the old scan raised nothing there. | implementer | resolved |
 | Should the per-persist `checkDuplicateUUID` be folded into `checkPersistDuplicateUUID`? **Resolved:** kept as a thin per-persist confirmation (index + flag); its `MarkerMessages.UUIDDuplicate` marker and the index-wide `UUIDDuplicateIn` marker already coexisted before this change, so marker behavior is unchanged. | implementer | resolved |
-| Progress granularity: a per-persist `subTask(name)` is used (label advances; no `worked` re-plumbing of the monitor's total). Sufficient to show the build is progressing. | implementer | resolved |
+| Progress granularity: per-persist `subTask(name)` **and** `worked(1)` against a persist-count total (see §3.3), so the percentage moves. Forms are one tick each (the visitor does not enter them); the slow `ServoyFormBuilder.addFormMarkers` work therefore shows as the label of the current form. | implementer | resolved |
+| Runtime-only checks from the peer review not verified in the IDE: build-time comparison on the ticket's solution, cross-module `UUIDDuplicate` + `UUIDDuplicateIn` double marker, incremental-build detection, quick-fix attributes. | reviewer / QA | open |
