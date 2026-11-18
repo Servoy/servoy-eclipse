@@ -49,9 +49,9 @@ export abstract class ServoyApi {
       * Unlike {@link isInDesigner}, the normal runtime rendering path DOES run in that render, so a component should
       * NOT take a design-time shortcut when this is true; it should simply render the data it was given. Only a
       * component that fabricates its own placeholder data in the designer needs to check this - to avoid replacing
-      * the server's sample data with its own - typically as isInDesigner() || hasSampleData().
+      * the server's sample data with its own - typically as isInDesigner() || isInSampleDataMode().
       */
-    public hasSampleData(): boolean {
+    public isInSampleDataMode(): boolean {
         return false;
     }
 

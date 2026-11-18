@@ -80,7 +80,7 @@ Across `bootstrapcomponents`, `aggridcomponents`, `servoy-extra-components` and 
 If the form-template render keeps `isInDesigner() === true` and we add an extra flag that each
 design branch must additionally consult, then **all ~32 sites** become sites that need updating,
 and any component package not updated stays broken. If instead the render reports
-`isInDesigner() === false` and we add a *separate* `hasSampleData()` that only group C consults,
+`isInDesigner() === false` and we add a *separate* `isInSampleDataMode()` that only group C consults,
 group B is unblocked for free, group A simply stops running, and only **group C (6 sites)** needs
 code changes. We take the second option.
 
@@ -252,7 +252,7 @@ package can supply its own sample value for its own property type without a core
 - `FormTemplateComponent` / `FormTemplateServoyApi` — pass `isDesigner = false` to `ServoyApi`
   (§2.4) and carry the sample-data flag.
 
-### 3.8 `ServoyApi.hasSampleData()` (`@servoy/public`)
+### 3.8 `ServoyApi.isInSampleDataMode()` (`@servoy/public`)
 
 ```typescript
 /**
@@ -260,7 +260,7 @@ package can supply its own sample value for its own property type without a core
  * synthetic sample data supplied by the server (SVY-21610). Components that fabricate their
  * own placeholder data in the designer should not do so when this is true.
  */
-public hasSampleData(): boolean { return false; }
+public isInSampleDataMode(): boolean { return false; }
 ```
 
 Added as a **concrete method with a default**, not an abstract one, so `ServoyApiTesting` and any
@@ -270,7 +270,7 @@ external implementor keep compiling. `FormTemplateServoyApi` overrides it.
 
 | Component | Repo | Change |
 |-----------|------|--------|
-| `aggrid-*` editor hint (`datagrid.ts:3807`, `powergrid.ts`) | aggridcomponents | `isInDesigner()` → `isInDesigner() \|\| hasSampleData()` — the "drop columns here" hint is still wanted for a column-less grid |
+| `aggrid-*` editor hint (`datagrid.ts:3807`, `powergrid.ts`) | aggridcomponents | `isInDesigner()` → `isInDesigner() \|\| isInSampleDataMode()` — the "drop columns here" hint is still wanted for a column-less grid |
 | `bootstrapcomponents-imagemedia` (`imagemedia.ts:79`) | bootstrapcomponents | same widening — sample media is out of scope, keep the placeholder image |
 | `bootstrapcomponents-choicegroup` (`choicegroup.ts:41`) | bootstrapcomponents | **remove** the hardcoded `Item1..3`; §3.6 now supplies it server-side |
 | `servoyextra-treeview` (`treeview.ts:114`) | servoy-extra-components | widening — `dataset` sample data out of scope (§2.5) |
@@ -288,7 +288,7 @@ actively mislead the agent.
 
 1. `servoy-client` — flag threading (§3.1), `SampleDataProvider` (§3.2), the three property types
    (§3.3–3.5), the `ChildrenJSONGenerator` gate (§3.6).
-2. `servoy-eclipse` — endpoint + page marker (§3.7), `hasSampleData()` on `ServoyApi` (§3.8), the
+2. `servoy-eclipse` — endpoint + page marker (§3.7), `isInSampleDataMode()` on `ServoyApi` (§3.8), the
    `isInDesigner` flip (§2.4).
 3. Tests (§5).
 4. Component repos (§3.9) — separate repos, separate commits.
@@ -466,7 +466,7 @@ Harmless in the designer, wrong here: a sample-data render really does have 3 ro
   variant's `AGGridDatasource.getRows()` also goes through the foundset's async load).
 - `hasNoLiveFoundsetData()` names the "designer or sample data" condition once, so the intent is
   stated rather than re-derived at each site.
-- `ListFormComponentServoyApi` carries `hasSampleData()` through to each cell, so a component inside
+- `ListFormComponentServoyApi` carries `isInSampleDataMode()` through to each cell, so a component inside
   a row sees the same mode as one placed directly on the form.
 
 ### B.3 Acceptance criteria

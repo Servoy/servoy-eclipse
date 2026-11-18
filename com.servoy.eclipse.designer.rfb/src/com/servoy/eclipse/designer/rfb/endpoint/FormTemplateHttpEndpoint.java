@@ -185,7 +185,7 @@ public class FormTemplateHttpEndpoint implements Filter
 		}
 		sb.append("<script>window.formtemplateName = \"").append(StringEscapeUtils.escapeEcmaScript(formName)).append("\";</script>\n");
 		// SVY-21610: tells the Angular route that the models carry synthetic sample values, so components stop
-		// fabricating their own design-time placeholders (ServoyApi.hasSampleData()).
+		// fabricating their own design-time placeholders (ServoyApi.isInSampleDataMode()).
 		sb.append("<script>window.formtemplateSampleData = ").append(sampleData).append(";</script>\n");
 		sb.append("<script id=\"svy-formtemplate-formstate\" type=\"application/json\">").append(escapeForInlineJson(formState)).append("</script>\n");
 		if (specs != null)

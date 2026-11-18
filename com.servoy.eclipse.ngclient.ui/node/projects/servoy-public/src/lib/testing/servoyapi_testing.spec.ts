@@ -18,7 +18,7 @@ describe('ServoyApiTesting', () => {
 
     it('returns the fixed designer / layout / markup / form values', () => {
         expect(api.isInDesigner()).toBe(false);
-        expect(api.hasSampleData()).toBe(false);
+        expect(api.isInSampleDataMode()).toBe(false);
         expect(api.trustAsHtml()).toBe(false);
         expect(api.isInAbsoluteLayout()).toBe(true);
         expect(api.getMarkupId()).toBe('testid');

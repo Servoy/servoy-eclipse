@@ -360,9 +360,9 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
       expect(comp.getServoyApi(errorBeanCache)).toBe(api);
     });
 
-    it('reports hasSampleData() false when the render was not asked for sample data', () => {
+    it('reports isInSampleDataMode() false when the render was not asked for sample data', () => {
       // the host in renderForm() does not set [sampleData], so it defaults to false
-      expect((comp.getServoyApi(errorBeanCache) as ServoyApi).hasSampleData()).toBe(false);
+      expect((comp.getServoyApi(errorBeanCache) as ServoyApi).isInSampleDataMode()).toBe(false);
     });
 
     it('a nested render inherits sample-data mode from the injected window marker', () => {
@@ -375,13 +375,13 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
       try {
         const nested = renderForm().comp;
         nested.ngOnInit();
-        expect((nested.getServoyApi(errorBeanCache) as ServoyApi).hasSampleData()).toBe(true);
+        expect((nested.getServoyApi(errorBeanCache) as ServoyApi).isInSampleDataMode()).toBe(true);
       } finally {
         win.formtemplateSampleData = previous;
       }
     });
 
-    it('reports hasSampleData() true when the render carries server-supplied sample values', () => {
+    it('reports isInSampleDataMode() true when the render carries server-supplied sample values', () => {
       // a separate host is needed because the api is built DURING render (the template binds
       // [servoyApi]="callback.getServoyApi(state)") and cached from then on, so setting the flag
       // on an already-rendered component would not reach the cached api
@@ -390,7 +390,7 @@ describe('FormTemplateComponent (svy-formtemplate render copy)', () => {
       const sampleComp = fixture.debugElement.query(By.directive(FormTemplateComponent)).componentInstance as FormTemplateComponent;
 
       const api = sampleComp.getServoyApi(errorBeanCache) as ServoyApi;
-      expect(api.hasSampleData()).toBe(true);
+      expect(api.isInSampleDataMode()).toBe(true);
       // still the runtime path - sample-data mode must NOT turn the designer back on
       expect(api.isInDesigner()).toBe(false);
     });

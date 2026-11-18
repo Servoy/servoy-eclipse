@@ -279,7 +279,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
    * avoid server round-trips branches on this instead.
    */
   private hasNoLiveFoundsetData(): boolean {
-    return this.servoyApi().isInDesigner() || this.servoyApi().hasSampleData();
+    return this.servoyApi().isInDesigner() || this.servoyApi().isInSampleDataMode();
   }
 
   handleKeyDown(event: any) {
@@ -381,7 +381,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
       return;
     }
 
-    if (this.servoyApi().hasSampleData()) {
+    if (this.servoyApi().isInSampleDataMode()) {
       // SVY-21610: keep useScrolling false so the plain (non ag-grid) row markup is used. The scrolling variant
       // installs an AGGridDatasource whose getRows() goes through the foundset's async load, which cannot complete
       // without a websocket session - the rows would never arrive.
@@ -690,7 +690,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
     // ran from inside the super.ngAfterViewInit() above - before its detectChanges(). Recomputing it here, after
     // that, is precisely what produced NG0100 (ExpressionChangedAfterItHasBeenChecked) on the per-row [style]
     // binding: the row views would appear only after the view had been checked.
-    if (!this.servoyApi().hasSampleData()) {
+    if (!this.servoyApi().isInSampleDataMode()) {
       this.calculateCells();
     }
     if (this.useScrolling) {
@@ -1128,7 +1128,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
         this.servoyApi().isInDesigner(),
         // SVY-21610: pass sample-data mode down, so a component inside a row sees the same mode as one placed
         // directly on the form
-        this.servoyApi().hasSampleData(),
+        this.servoyApi().isInSampleDataMode(),
       );
     }
     return cell.api;
@@ -1156,7 +1156,7 @@ export class ListFormComponent extends ServoyBaseComponent<HTMLDivElement> imple
       return;
     }
 
-    if (this.servoyApi().hasSampleData()) {
+    if (this.servoyApi().isInSampleDataMode()) {
       // SVY-21610: render exactly the sample rows the server sent and issue NO load request - loadRecordsAsync /
       // loadExtraRecordsAsync would return a promise that can never resolve without a websocket session, leaving the
       // component stuck in waitingForLoad and rendering nothing at all.
@@ -1336,7 +1336,7 @@ class ListFormComponentServoyApi extends ServoyApi {
     this.markupId = super.getMarkupId() + '_' + this.cell.rowIndex;
   }
 
-  override hasSampleData(): boolean {
+  override isInSampleDataMode(): boolean {
     return this.sampleData;
   }
 

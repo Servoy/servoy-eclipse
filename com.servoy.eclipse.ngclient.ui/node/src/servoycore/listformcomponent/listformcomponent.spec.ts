@@ -56,8 +56,8 @@ describe('ListFormComponent', () => {
       unRegisterComponent: vi.fn(),
       isInDesigner: vi.fn().mockReturnValue(false),
       // SVY-21610: the stateless form-template render reports isInDesigner() false and signals itself through
-      // hasSampleData() instead, so the mock must answer both
-      hasSampleData: vi.fn().mockReturnValue(false),
+      // isInSampleDataMode() instead, so the mock must answer both
+      isInSampleDataMode: vi.fn().mockReturnValue(false),
       isInAbsoluteLayout: vi.fn().mockReturnValue(true),
       getFormName: vi.fn().mockReturnValue('testForm'),
       trustAsHtml: vi.fn(),
@@ -130,14 +130,14 @@ describe('ListFormComponent', () => {
       // the SVY-21610 regression this guards: taking the placeholder path here showed one empty row instead of the
       // server's synthetic rows, so an LFC rendered blank in getFormLayout
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(true);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(true);
       const rows = component.getViewportRows();
       expect(rows).toBe(mockFoundset.viewPort.rows);
     });
 
     it('should return the placeholder row in a sample-data render with no foundset rows', () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(true);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(true);
       mockFoundset.viewPort.rows = [];
       const rows = component.getViewportRows();
       expect(rows.length).toBe(1);
@@ -150,7 +150,7 @@ describe('ListFormComponent', () => {
   describe('sample-data render (SVY-21610)', () => {
     beforeEach(() => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(true);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(true);
     });
 
     it('calculateCells uses the delivered sample rows and issues NO load request', () => {
@@ -917,7 +917,7 @@ describe('ListFormComponent', () => {
   describe('scrolling svyOnInit agGridOptions callbacks', () => {
     const configureScrolling = () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.getClientProperty.mockReturnValue(null); // no pagingMode -> useScrolling stays true
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
       fixture.componentRef.setInput('foundset', mockFoundset);
@@ -935,7 +935,7 @@ describe('ListFormComponent', () => {
 
     it('falls back to the paged (non-scrolling) path when a pagingMode client property is set', () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.getClientProperty.mockReturnValue('paging');
       fixture.componentRef.setInput('foundset', mockFoundset);
       component.svyOnInit();
@@ -1054,7 +1054,7 @@ describe('ListFormComponent', () => {
     describe('onModelUpdated', () => {
       it('reveals the grid when the foundset is empty and the first render is still pending', () => {
         mockServoyApi.isInDesigner.mockReturnValue(false);
-        mockServoyApi.hasSampleData.mockReturnValue(false);
+        mockServoyApi.isInSampleDataMode.mockReturnValue(false);
         mockServoyApi.getClientProperty.mockReturnValue(null);
         mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
         fixture.componentRef.setInput('foundset', mockFoundset);
@@ -1068,7 +1068,7 @@ describe('ListFormComponent', () => {
 
       it('does not reveal when there are displayed rows', () => {
         mockServoyApi.isInDesigner.mockReturnValue(false);
-        mockServoyApi.hasSampleData.mockReturnValue(false);
+        mockServoyApi.isInSampleDataMode.mockReturnValue(false);
         mockServoyApi.getClientProperty.mockReturnValue(null);
         mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
         fixture.componentRef.setInput('foundset', mockFoundset);
@@ -1090,7 +1090,7 @@ describe('ListFormComponent', () => {
 
     const configureScrolling = () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.getClientProperty.mockReturnValue(null);
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
       mockFoundset.addChangeListener = vi.fn().mockImplementation((cb: (event: any) => void) => {
@@ -1173,7 +1173,7 @@ describe('ListFormComponent', () => {
 
     const configurePaged = () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.getClientProperty.mockReturnValue('paging'); // pagingMode set -> useScrolling false
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
       mockFoundset.addChangeListener = vi.fn().mockImplementation((cb: (event: any) => void) => {
@@ -1283,7 +1283,7 @@ describe('ListFormComponent', () => {
   describe('updatePagingControls', () => {
     const configurePagedView = () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.getClientProperty.mockReturnValue('paging');
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
       fixture.componentRef.setInput('foundset', mockFoundset);
@@ -1477,7 +1477,7 @@ describe('ListFormComponent', () => {
   describe('calculateCells paged/responsive sizing', () => {
     it('uses responsivePageSize for a responsive form', () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
       component.useScrolling = false;
       fixture.componentRef.setInput('responsivePageSize', 7);
@@ -1491,7 +1491,7 @@ describe('ListFormComponent', () => {
 
     it('loads the correct page when the viewport start index does not match the page', () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
       component.useScrolling = false;
       fixture.componentRef.setInput('responsivePageSize', 5);
@@ -1505,7 +1505,7 @@ describe('ListFormComponent', () => {
 
     it('sets the preferred viewport size to numberOfCells', () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(false);
       component.useScrolling = false;
       fixture.componentRef.setInput('responsivePageSize', 5);
@@ -1606,7 +1606,7 @@ describe('ListFormComponent', () => {
   describe('AGGridDatasource getRows', () => {
     const makeDatasourceAndParams = () => {
       mockServoyApi.isInDesigner.mockReturnValue(false);
-      mockServoyApi.hasSampleData.mockReturnValue(false);
+      mockServoyApi.isInSampleDataMode.mockReturnValue(false);
       mockServoyApi.getClientProperty.mockReturnValue(null);
       mockServoyApi.isInAbsoluteLayout.mockReturnValue(true);
       fixture.componentRef.setInput('foundset', mockFoundset);

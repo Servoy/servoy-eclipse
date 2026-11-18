@@ -20,7 +20,7 @@ export class ServoyApiTesting implements ServoyApi {
     public isInDesigner(): boolean {
        return false;
     }
-    public hasSampleData(): boolean {
+    public isInSampleDataMode(): boolean {
        return false;
     }
     public trustAsHtml(): boolean {
