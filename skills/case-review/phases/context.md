@@ -42,8 +42,8 @@ Note the repository name, the current branch, and whether the branch looks like 
 mainline (`main`, `master`, `develop`) or a maintenance/release line (`release`, `lts_*`, a
 version number). This calibrates the risk budget later, and the branch class recorded here
 is the input to Phase B's release-target check (which cross-references it against the
-issue's Jira Fix Version using the canonical **Branch → Fix Version convention** table in
-`SKILL.md`).
+issue's Jira Fix Version using the canonical **Fix Version → branch resolution** procedure
+in `SKILL.md`, which reads each branch's version from the source rather than assuming it).
 
 ## 2. Harvest the project's own description of itself
 

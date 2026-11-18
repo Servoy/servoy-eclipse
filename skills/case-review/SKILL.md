@@ -96,13 +96,13 @@ same base URL and auth.
 1. **Read status, assignee and fix version.**
 
    ```
-   GET /rest/api/3/issue/{JIRA_KEY}?fields=summary,status,assignee,fixVersions
+   GET /rest/api/3/issue/{JIRA_KEY}?fields=summary,status,assignee,fixVersions,comment
    ```
 
    Note `status.name` and whether `assignee` is `null` (unassigned). Record the Fix
-   Version name(s) as `FIX_VERSIONS` — the list of `fixVersions[].name` (e.g.
-   `["2026.12"]`), which may be **empty** (no Fix Version set) or carry **more than one**
-   version. It feeds the Phase B release-target check.
+   Version name(s) as `FIX_VERSIONS` (`fixVersions[].name`; may be empty or hold several).
+   Jira rarely lists extension-package versions, so for a fix in an extension package also
+   look for them in the comments. It feeds the Phase B release-target check.
 
 2. **Gate on status.** If the status is **not** `In Review`, stop and report to the user:
    the issue is in `<status>`, not `In Review`, so there is nothing to peer-review yet.
@@ -192,55 +192,57 @@ everything downstream.
    maintenance/release branch, a feature branch? A fix landing on a maintenance branch
    has a lower risk budget and will have to be merged forward.
 
-   **Release-target check.** Cross-check `FIX_VERSIONS` (from Phase A.0) against the branch
-   the commits sit on, using the **Branch → Fix Version convention** table below. Classify
-   the branch, then compare it to the Fix Version's release line, and record the result as
-   `FIX_VERSION_CHECK` — one of `MATCH`, `MISMATCH`, or `INDETERMINATE` — with a one-line
-   reason:
+   **Release-target check.** Each Fix Version names a release, and the fix must be in it.
+   Resolve every Fix Version with **Fix Version → branch resolution** below (never assume
+   which branch ships what; that changes every release) and record `FIX_VERSION_CHECK` with
+   a one-line reason per Fix Version. Run it on the **confirmed** scope, i.e. after the
+   Ambiguity gate.
 
-   - **`MATCH`** — the branch is the line that actually ships the Fix Version: the
-     newest-unreleased version on `master`, or a line's own dated/LTS version on that
-     maintenance line. A maintenance-line fix with a maintenance Fix Version is a MATCH
-     even though `master` will also carry it on merge-forward — that is the intended flow.
-   - **`MISMATCH`** — they provably disagree: a newer (mainline-only) Fix Version such as
-     `2026.12` but the commits sit **only** on a maintenance line (`release` / a dated line
-     / an `lts_*` branch); or an older/LTS Fix Version but the commits sit **only** on
-     `master`. The commit branch's release line and the Fix Version's `YYYY.MM` point at
-     different releases that a normal merge-forward would not reconcile.
-   - **`INDETERMINATE`** — any uncertainty: a feature branch (eventual release depends on
-     where it merges); no Fix Version set; multiple Fix Versions where at least one matches
-     the branch; a branch name you cannot classify; the version list could not be read; or
-     `ISSUE_REF` is not a Jira issue (`FIX_VERSIONS` is "none (not a Jira issue)"), in which
-     case the check is a no-op that says so.
+   - **`MATCH`** — every Fix Version's release contains the fix.
+   - **`MISMATCH`** — at least one does not: a forward merge/backport still pending, or that
+     release shipped before the commit. If only some fail, call it partial and list both
+     groups.
+   - **`INDETERMINATE`** — feature branch (eventual release unknown), no Fix Version, version
+     source unreadable, a Fix Version that cannot be placed, or `ISSUE_REF` is not a Jira
+     issue (`FIX_VERSIONS` = "none (not a Jira issue)", the check is a no-op).
 
-   **This check is a flag, not a hard failure** — never abort the review over it. On any
-   doubt, default to `INDETERMINATE` and phrase it as a question for the reviewer to confirm,
-   not a verdict. Do not invent a release calendar: decide "newest unreleased version" from
-   the Jira version list where cheaply available (`GET /project/SVY/versions`,
-   `released:false`), otherwise from the branch-name signal alone, and flag rather than
-   assert when unsure.
+   This is a flag, not a hard failure: never abort over it, and on doubt use
+   `INDETERMINATE`, phrased as a question for the reviewer.
 
 Record the resulting per-repository commit list / diff range as `SCOPE`. `FIX_VERSIONS` and
 `FIX_VERSION_CHECK` are carried into the Phase E synthesis prompt alongside `SCOPE`.
 
-### Branch → Fix Version convention
+### Fix Version → branch resolution
 
-The canonical rule the release-target check applies (referenced from Phase A.0 and
-`context.md`). Fix Versions are date-based `YYYY.MM`; the `YYYY.MM` number *is* the release
-the version ships in. Classify the branch, then check consistency against the Fix Version's
-release line.
+The canonical rule for the check above (also referenced from `context.md`). No version
+numbers are hard-coded: after a release the source version is bumped, so a branch's version
+is the **next** release it will produce.
 
-| Branch class | What it is | Expected Fix Version |
-|---|---|---|
-| **Mainline** — `master` (also `main`, `develop`) | The next unreleased dev line | The **newest unreleased** `YYYY.MM` version (the one not yet released, e.g. `2026.12`). |
-| **Maintenance / release line** — `release`, a dated line like `2026.03`, `lts`, `lts_latest`, `lts_2024`/`lts_2025`/`lts_2026` | A line that ships (or still patches) a specific release | A Fix Version **on that line**: the dated line's own version (`2026.03` → `2026.03`), or an LTS maintenance version carried by that LTS line. Must **not** be a newer version that only `master` ships. |
-| **Feature branch** — anything else (`SVY-xxxxx_*`, `branch_*`, `copilot/*`, …) | Work not yet merged to any release line | **Cannot be determined from the branch alone** — the eventual release depends on where it merges. Treat as **"flag for the reviewer", never a mismatch.** |
+1. **Read the version from source** (remote branch `origin/<B>`, not just the local checkout):
+   - *Core Java repos:* `com.servoy.j2db.ClientVersion` in `servoy-client`
+     (`majorVersion`, `middleVersion`, `minorVersion`, `lts`; ignore `versionPostfix`).
+     Branch names are the same across the Java repos, so for branch `B` of any of them read
+     `git -C "<servoy-client>" show origin/<B>:servoy_shared/src/com/servoy/j2db/ClientVersion.java`.
+   - *Extension packages (components, services):* `Bundle-Version` in
+     `<some dir>/META-INF/MANIFEST.MF` (locate it with `git ls-files "*META-INF/MANIFEST.MF"`;
+     the layout varies per repo). The root `webpackage.json` declares core compatibility.
+2. **Normalise** Jira and source versions to `major.middle.minor` (missing minor = `0`; drop
+   ` LTS`, `versionPostfix`, `-SNAPSHOT`), e.g. `2026.3.3 LTS` = `2026.3.3`. Never compare raw strings.
+3. **Which Fix Versions.** For a fix in an extension package, Jira usually has no extension
+   versions, so take them from the issue comments instead (A.0 reads them); if none are
+   there, `INDETERMINATE`.
+4. **Resolve and verify.** Find the remote branch whose current version equals the Fix
+   Version and check the fix is on it. Pick the git commands yourself, e.g.
+   `git branch -r --contains <sha>`, or `git log origin/<branch> --grep="<ISSUE_REF>"` for
+   cherry-picks and forward merges with a different sha. A fix on a maintenance branch whose
+   Fix Version belongs to a later line is a `MISMATCH` until the forward merge happens.
+5. **Already released.** If no branch reports the Fix Version any more, it has shipped. Use
+   the source version **at the time of the commit** (same file at the commit's sha), never
+   today's: greater than the Fix Version means it shipped before the fix (`MISMATCH`); equal
+   means the fix went into it (`MATCH`). Git tags (`git tag --contains <sha>`, tag dates)
+   pin the release more exactly when available.
 
-**Merge-forward direction.** Servoy maintenance fixes merge forward (a `release`/LTS fix
-also reaches `master`), so a maintenance-line fix with a maintenance Fix Version is
-consistent even though `master` will also carry it. The mismatch is the *reverse*: a newer
-(mainline-only) Fix Version on a branch that will not carry it into that version, or a
-maintenance Fix Version on `master` only.
+Feature branches (`SVY-xxxxx_*`, `copilot/*`, ...) have no release line yet: `INDETERMINATE`.
 
 **Ambiguity gate.** If you find no commits, or several plausible candidate sets (commits
 on two branches, or a mix of committed and uncommitted work), do **not** guess. Use the
@@ -450,6 +452,8 @@ On **"Yes"** or **"Write but don't commit"**:
      human still has to run (the highest-value thing to preserve on the issue);
    - **Possible improvements / follow-ups** — any non-blocking suggestions or open
      questions worth revisiting later;
+   - the release-target verdict (`FIX_VERSION_CHECK`) with its per-Fix-Version reasons, when
+     it is `MISMATCH` or `INDETERMINATE`;
    - a one-line pointer to the reviewed scope (repo + commit sha(s)).
 
    Omit internal root-cause reasoning, dropped-findings bookkeeping, and reading order —

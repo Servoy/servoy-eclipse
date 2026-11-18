@@ -26,15 +26,11 @@ There is no proposed *implementation* in the ticket — it states the desired be
 
 **This is a missing-feature bug in the `case-review` skill, not a regression.**
 
-> ⚠️ **Location note (important).** Despite the PROJECT CONTEXT handed to this triage
-> describing the **Servoy-Copilot** Java bundles, SVY-21527 is about neither
-> `com.servoy.eclipse.developer.mcp` nor `com.servoy.eclipse.opencode`. The "reviewer
-> skill" is the **`case-review`** skill, which lives in the **servoy-eclipse** repo at
-> `C:\Users\Cristian\git\servoy\master\servoy-eclipse\skills\case-review\` (SKILL.md +
-> `phases/context.md`, `narrative.md`, `regression.md`, `security.md`, `synthesis.md`).
-> This triage report is written into `Servoy-Copilot/docs/` only because the orchestrator
-> pins the report path there; the **actual fix must be made in servoy-eclipse**. Any
-> downstream spec/implementation phase must target that repository, not Servoy-Copilot.
+> **Location note.** SVY-21527 is about the **`case-review`** skill, which lives in the
+> **servoy-eclipse** repo at `skills/case-review/` (SKILL.md + `phases/context.md`,
+> `narrative.md`, `regression.md`, `security.md`, `synthesis.md`). It is not about the
+> Servoy-Copilot bundles (`com.servoy.eclipse.developer.mcp`, `com.servoy.eclipse.opencode`).
+> The fix is made in servoy-eclipse.
 
 The case-review skill already knows both halves of the check independently — it just never
 joins them:

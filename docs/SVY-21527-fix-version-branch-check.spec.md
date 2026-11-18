@@ -1,10 +1,9 @@
 # Spec: SVY-21527 — reviewer skill should check fix version against the branches it was pushed against
 
 > **Target repository:** this is a prose/markdown change to the **`case-review`** skill in
-> **servoy-eclipse**, at `C:\Users\Cristian\git\servoy\master\servoy-eclipse\skills\case-review\`
-> (`SKILL.md` + `phases/context.md`, `phases/narrative.md`, `phases/synthesis.md`). There is
-> **no** Java / Eclipse / Tycho work. The spec is written into the Servoy-Copilot repo's
-> `docs/` only because the orchestrator reads it from there.
+> **servoy-eclipse**, at `skills/case-review/` (`SKILL.md` + `phases/context.md`,
+> `phases/narrative.md`, `phases/synthesis.md`). There is **no** Java / Eclipse / Tycho work.
+> This spec lives in the repository's `docs/` directory.
 >
 > **Fix Version of this issue:** `2026.12` (unreleased). **Type:** Bug, Minor, In Progress.
 
@@ -12,9 +11,10 @@
 
 Teach the `case-review` peer-review skill to cross-check an issue's Jira **Fix Version**
 against the **branch** the reviewed commits actually sit on, and to **report a mismatch** when
-the two disagree — so a reviewer catches, during review, a fix that is targeted at the wrong
-release line (e.g. a `2026.x` mainline version whose commits only landed on a maintenance
-branch, or an LTS Fix Version whose commits only landed on `master`). The skill already
+the two disagree — so a reviewer catches, during review, a fix that is targeted at a release
+that the commits have not reached (e.g. a Fix Version shipped by the mainline whose commits
+only landed on a maintenance branch and were not merged forward yet, or an LTS Fix Version
+whose commits only landed on the mainline). The skill already
 computes the branch topology and already has access to `fixVersions` through the sibling
 `servoy-jira` skill; it simply never fetches the field nor joins the two. The check must be a
 **flag, not a hard failure**: when the branch→version mapping cannot be determined with
@@ -51,11 +51,13 @@ confidence, surface it for the reviewer rather than blocking the review.
 
 ### 2.2 The branch lines in play
 
-The servoy-eclipse checkout carries these long-lived lines (confirmed via `git branch -a`):
-`master`, `release`, `2026.03`, `lts`, `lts_latest` locally, plus the convention-named
-`lts_2024` / `lts_2025` / `lts_2026` the triage cites. Fix Versions are **date-based**
-(`2026.12`, `2026.03`, …): the `YYYY.MM` number *is* the release the version ships in. The
-current issue's Fix Version `2026.12` is unreleased and, by convention, belongs on `master`.
+The Java repositories share long-lived branch names: the mainline (`master`), `release`,
+`lts`, `lts_latest`, `lts_<year>` and dated lines such as `2026.03`. Which release each of
+them ships is **not** fixed: it changes every time a release is cut (the mainline moves on to
+the next version, `release` moves to a new line, and so on). The skill therefore never
+hard-codes a version-to-branch mapping. It reads the version from the source of each branch
+(see 3.2). Jira Fix Version names also do not match the source format one-to-one (`2026.12`
+vs `2026.12.0`, `2026.3.3 LTS` vs `2026.3.3` with `lts = true`), so they are normalised first.
 
 ### 2.3 Not a regression
 
@@ -76,7 +78,7 @@ Add `fixVersions` to the two places the issue is already read:
 
 1. **Phase A.0 gate (`SKILL.md:96-98`).** Change the field list to
    `fields=summary,status,assignee,fixVersions`. Record the result as `FIX_VERSIONS` — the
-   list of version `name`s (e.g. `["2026.12"]`), or **empty** when the issue has no Fix
+   list of version `name`s (e.g. `["<version A>", "<version B>"]`), or **empty** when the issue has no Fix
    Version set. Note that an issue may carry **more than one** Fix Version (multiple release
    lines), and that a feature-branch review may legitimately have none yet.
    - This read only runs for Jira issue keys (`JIRA_KEY` set). When `ISSUE_REF` is a plain
@@ -92,49 +94,36 @@ Add `fixVersions` to the two places the issue is already read:
 `FIX_VERSIONS` is carried in `REPO_CONTEXT`/`SCOPE` the same way the branch already is, so the
 synthesis phase receives it without a new channel.
 
-### 3.2 Branch → Fix Version convention (the mapping rule)
+### 3.2 Fix Version → branch resolution (the rule)
 
-The rule the skill encodes. Fix Versions are date-based `YYYY.MM`; branches are either the
-mainline, a dated/LTS maintenance line, or an in-flight feature branch. **Classify the branch,
-then check consistency against the Fix Version's release line.**
+No hard-coded version numbers and no assumption such as "the mainline ships the newest
+version". After a release is made, the version in the source is bumped, so the value on a
+branch is the **next** release that branch will produce. The skill resolves every Fix Version
+to a branch by reading that value, then verifies the fix is on that branch.
 
-| Branch class | What it is | Expected Fix Version |
-|---|---|---|
-| **Mainline** — `master` (also `main`, `develop`) | The next unreleased dev line | The **newest unreleased** `YYYY.MM` version (the one not yet released, e.g. `2026.12`). |
-| **Maintenance / release line** — `release`, a dated line like `2026.03`, `lts`, `lts_latest`, `lts_2024`/`lts_2025`/`lts_2026` | A line that ships (or still patches) a specific release | A Fix Version **on that line**: the dated line's own version (`2026.03` → `2026.03`), or an LTS maintenance version carried by that LTS line. Must **not** be a newer version that only `master` ships. |
-| **Feature branch** — anything else (`SVY-xxxxx_*`, `branch_*`, `copilot/*`, …) | Work not yet merged to any release line | **Cannot be determined from the branch alone** — the eventual release depends on where it merges. Treat as **"flag for the reviewer", never a mismatch.** |
+1. **Read the version from source** (remote branch `origin/B`):
+   - *Core Java repos:* `com.servoy.j2db.ClientVersion` in `servoy-client`
+     (`servoy_shared/src/com/servoy/j2db/ClientVersion.java`). Branch names are the same across
+     the Java repos, so branch `B` of any of them is read from branch `B` of `servoy-client`.
+   - *Extension packages:* `Bundle-Version` in `<some dir>/META-INF/MANIFEST.MF` (the layout
+     varies per repo); the root `webpackage.json` declares core compatibility.
+2. **Normalise** Jira and source versions to `major.middle.minor` (missing minor = `0`; ignore
+   ` LTS`, `versionPostfix`, `-SNAPSHOT`).
+3. **Which Fix Versions.** Jira usually has no extension-package versions, so for a fix in an
+   extension package they are taken from the issue comments (none found = `INDETERMINATE`).
+4. **Resolve and verify.** Find the remote branch whose version equals the Fix Version and check
+   the fix is on it (agent's choice of git commands). A pending forward merge is a `MISMATCH`.
+5. **Already released.** If no branch reports the Fix Version any more, compare against the
+   source version **at the commit's sha** (never today's): greater than the Fix Version =
+   shipped before the fix (`MISMATCH`), equal = `MATCH`. Git tags refine when a release was cut.
 
-**The mismatch rule, stated plainly:**
+**Verdicts:** `MATCH` = every Fix Version's release contains the fix. `MISMATCH` = at least one
+does not (partial when others are satisfied; list both groups). `INDETERMINATE` = feature
+branch, no Fix Version, unreadable source, a Fix Version that cannot be placed, or a non-Jira
+`ISSUE_REF`. Always a flag, never a failure.
 
-- A Fix Version is a **match** for a branch when the branch is the line that actually ships
-  that version: the newest-unreleased version on `master`; a line's own dated/LTS version on
-  that maintenance line.
-- A **mismatch** is when they provably disagree — e.g. Fix Version `2026.12` (a mainline,
-  not-yet-released version) but the commits sit **only** on a maintenance line such as
-  `release` / `2026.03` / an `lts_*` branch; or an older/LTS Fix Version but the commits sit
-  **only** on `master`. In date terms: the commit branch's release line and the Fix Version's
-  `YYYY.MM` point at different releases, and neither is an ancestor relationship that a
-  normal merge-forward would reconcile.
-- **Indeterminate** (→ flag, do not call it a mismatch): a feature branch; no Fix Version set;
-  multiple Fix Versions where at least one matches the branch; a branch name the skill cannot
-  classify; or the version list could not be read. The default on any uncertainty is
-  **"flag for the reviewer to confirm"**, phrased as a question, not a verdict.
-
-**Merge-forward awareness.** Servoy maintenance fixes are expected to merge forward (a
-`release`/LTS fix also reaches `master`). So a fix *on a maintenance line* with a maintenance
-Fix Version is **consistent even though `master` will also carry it** — that is the intended
-flow, already noted at `regression.md:149-157` / `synthesis.md:87` ("whether it must merge
-forward"). The mismatch is the *reverse direction*: a **newer** (mainline-only) Fix Version on
-a branch that will **not** carry it into that version, or a maintenance Fix Version on
-`master` only (never back-ported to the line that version names).
-
-**Confidence / conservatism.** The skill must not invent a release calendar. It decides
-"newest unreleased version" from the Jira version list where available
-(`GET /project/SVY/versions`, `released:false`), and otherwise from the branch-name signal
-alone. If it cannot tell with confidence which line a Fix Version belongs to (unfamiliar
-version string, ambiguous branch name), it **flags** rather than asserting a mismatch. This is
-the one explicit design choice the triage left open, and it resolves to: **document the table
-above in the skill, apply it, and degrade to "flag for reviewer" on any doubt.**
+The check runs on the **confirmed** scope, i.e. after the Ambiguity gate, and the agent is free
+to choose the git commands used to find which branches contain the commits.
 
 ### 3.3 The mismatch check and how it is reported
 
@@ -155,7 +144,7 @@ The **synthesis phase reports it in two places**, matching the existing structur
    | servoy-eclipse | `abc1234` | ... | 3 | +40/-12 |
 
    Branch: `<branch>` (<mainline | maintenance line | feature branch>) — <merge-forward note>
-   Fix Version: `<2026.12>` — **Release-target check: MATCH / MISMATCH / INDETERMINATE** — <one-line reason>
+   Fix Version: `<FIX_VERSIONS>` — **Release-target check: MATCH / MISMATCH / INDETERMINATE** — <one-line reason>
    ```
 
    On `MATCH` this is a one-line reassurance. On `INDETERMINATE` it states what could not be
@@ -165,12 +154,11 @@ The **synthesis phase reports it in two places**, matching the existing structur
 2. **"Top risks" (`phases/synthesis.md:96-102`) — only on `MISMATCH`.** Add a finding, e.g.:
 
    ```markdown
-   N. **[Medium]** Fix Version does not match the branch the commits landed on
-      - Fix Version `2026.12` targets the `master` (next-release) line, but the reviewed
-        commits sit only on `<branch>`, which ships `<other line>`. As written, the fix will
-        not reach the `2026.12` release — or the stated Fix Version is wrong.
-      - Confirm with the author which release this is meant to ship in, and either re-target
-        the Fix Version or push/merge the change to the branch that carries it.
+   N. **[Medium]** Fix Version(s) not covered by the commits
+      - Fix Version `<v>`: <branch `<b>` (source version `<x.y.z>`) does not contain the fix yet
+        | that release shipped before the commit>. Satisfied: `<versions>`; not satisfied:
+        `<versions>` (mark "partial" if some are satisfied).
+      - Likely cause: merge/backport pending, or wrong Fix Version. Confirm with the author.
    ```
 
    Severity is **Medium by default** (a delivery/targeting error, not a code-correctness or
@@ -183,7 +171,7 @@ the Phase F "Questions for the author" list, so the reviewer can forward it verb
 
 ## 4. Implementation plan
 
-All edits are in `C:\Users\Cristian\git\servoy\master\servoy-eclipse\skills\case-review\`.
+All edits are in `skills/case-review/` of this repository.
 Use the generic `read`/`edit`/`write` tools (markdown, not Java).
 
 1. **`SKILL.md`, Phase A.0 step 1 (around lines 96-100).**
@@ -240,11 +228,14 @@ Use the generic `read`/`edit`/`write` tools (markdown, not Java).
       (including the empty and multi-value cases).
 - [ ] Phase B classifies the branch and computes a `FIX_VERSION_CHECK` of `MATCH`,
       `MISMATCH`, or `INDETERMINATE` using the documented branch→version convention.
-- [ ] A concrete branch → Fix Version convention table is written into the skill (one
-      canonical copy), covering mainline, maintenance/LTS lines, and feature branches.
-- [ ] The convention encodes merge-forward direction: a maintenance-line fix with a
-      maintenance Fix Version is a MATCH even though `master` will also carry it; a
-      newer/mainline-only Fix Version on a branch that won't carry it is a MISMATCH.
+- [ ] A Fix Version → branch resolution procedure is written into the skill (one canonical
+      copy): where each project type keeps its version (`ClientVersion`, extension
+      `MANIFEST.MF` / `webpackage.json`), normalisation, resolution and verification. It
+      contains no hard-coded version numbers or "mainline ships the newest version" rule.
+- [ ] Merge-forward direction is encoded: a fix on a maintenance branch whose Fix Version
+      belongs to a later line is a MISMATCH until the forward merge has happened.
+- [ ] With several Fix Versions, every one is checked; any unsatisfied one gives a MISMATCH,
+      reported as partial when others are satisfied.
 - [ ] On uncertainty (feature branch, no Fix Version, unclassifiable branch, unreadable
       version list, non-Jira `ISSUE_REF`), the result is `INDETERMINATE` and is **flagged, not
       failed** — the skill never aborts the review over this check.
@@ -267,10 +258,8 @@ Use the generic `read`/`edit`/`write` tools (markdown, not Java).
   never mutates `fixVersions`.
 - Blocking, failing, or auto-transitioning the review on a mismatch — the check is advisory
   and always "flag for the reviewer".
-- Verifying *merge-forward completion* across branches (whether a maintenance fix has actually
-  been merged up yet) — the check reasons about targeting, not merge state.
-- Teaching the skill the full Servoy release calendar; it uses the Jira version list's
-  `released` flag and branch-name signals, and degrades to a flag when unsure.
+- Teaching the skill a Servoy release calendar; it reads versions from the source of each
+  branch and degrades to a flag when unsure.
 - Generalising the convention to GitHub/GitLab milestones — the rule is Servoy/Jira-specific;
   non-Jira refs make the check a no-op.
 
@@ -278,6 +267,9 @@ Use the generic `read`/`edit`/`write` tools (markdown, not Java).
 
 | Question | Owner | Status |
 |----------|-------|--------|
-| Exact expected mapping for the `release` branch vs the newest dated maintenance line (e.g. is `release` always the single newest maintenance version, or can it trail?) — the spec treats `release` as "a maintenance line; its Fix Version must be a maintenance version, not a mainline-only one", which is enough for the flag, but a precise `release`→version identity would tighten MATCH detection. | Servoy release process owner | Assumed: `release` = maintenance line, flag on doubt |
-| Should the check try `GET /project/SVY/versions` live to identify the "newest unreleased" version, or rely on branch-name signals only to avoid an extra API call per review? Spec allows either; defaults to using the version list when cheaply available, branch-name signal otherwise. | Implementer | Assumed: use version list when available, else branch signal |
-| For an issue with **multiple** Fix Versions spanning lines, is "at least one matches the branch" sufficient for MATCH, or should every version be reconciled? Spec assumes at-least-one-matches → not a mismatch (flag only). | Reviewer/process owner | Assumed: at-least-one-match ⇒ not a mismatch |
+| Which branch ships which version (e.g. what `release` ships)? | Servoy release process owner | Resolved: not hard-coded; read from `ClientVersion` / `MANIFEST.MF` on each branch (see 3.2) |
+| Already-released Fix Versions? | Servoy release process owner | Resolved: use the source version at the commit's sha (tags refine); shipped before the commit = MISMATCH |
+| Extension-package fixes (no Jira versions)? | Servoy release process owner | Resolved: Fix Versions are taken from the issue comments |
+| Should a maintenance-branch fix whose forward merge is pending be a MISMATCH? | Servoy release process owner | Resolved: yes, until the forward merge has happened |
+| How to find which branches contain the commits? | Implementer | Resolved: agent's choice using git (suggestions in 3.2) |
+| Multiple Fix Versions: is one match enough? | Servoy release process owner | Resolved: every Fix Version is checked; any unsatisfied one gives MISMATCH (partial) |

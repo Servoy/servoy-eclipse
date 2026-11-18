@@ -111,13 +111,15 @@ When `FIX_VERSION_CHECK` is `MISMATCH`, add it here as a **Medium** finding (a
 delivery/targeting error, not code-correctness or security), using this template:
 
 ```markdown
-N. **[Medium]** Fix Version does not match the branch the commits landed on
-   - Fix Version `<FIX_VERSIONS>` targets the `<master | other line>` (release) line, but the
-     reviewed commits sit only on `<branch>`, which ships `<other line>`. As written, the fix
-     will not reach the `<FIX_VERSIONS>` release — or the stated Fix Version is wrong.
-   - Confirm with the author which release this is meant to ship in, and either re-target the
-     Fix Version or push/merge the change to the branch that carries it.
+N. **[Medium]** Fix Version(s) not covered by the commits
+   - Fix Version `<v>`: <branch `<b>` (source version `<x.y.z>`) does not contain the fix yet
+     | that release shipped before the commit>. Satisfied: `<versions>`; not satisfied:
+     `<versions>` (mark "partial" if some are satisfied).
+   - Likely cause: merge/backport pending, or wrong Fix Version. Confirm with the author.
 ```
+
+Take branch and source version from the check's per-Fix-Version reasons; never assume which
+branch ships which version.
 
 A `MISMATCH` alone never drives the overall rating above `MODERATE`. An `INDETERMINATE`
 result is **not** a Top risk — it lives only in the "Scope reviewed" flag, consistent with
@@ -161,8 +163,10 @@ none. Worth surfacing because the reviewer may want it corrected while the chang
 <Author-facing, numbered, neutral in tone — these may be posted to the issue verbatim, so no
 internal risk language and no root-cause reasoning. Only questions the code genuinely cannot
 answer. Three to five at most. Omit the section entirely if there are none. When
-`FIX_VERSION_CHECK` is `MISMATCH`, the "confirm which release this is meant to ship in"
-question belongs here so the reviewer can forward it verbatim.>
+`FIX_VERSION_CHECK` is `MISMATCH`, add a neutral question here so the reviewer can forward
+it verbatim, e.g. "Is the merge/backport to `<branch>` (Fix Version `<v>`) still pending, or
+should the Fix Version be changed?", or, when the release had already shipped before the
+commit, "Fix Version `<v>` shipped before this commit; which release is this meant for?".>
 
 1. ...
 
