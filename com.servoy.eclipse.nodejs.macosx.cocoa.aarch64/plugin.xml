@@ -4,11 +4,13 @@
    <extension
          point="com.servoy.eclipse.ngclient.ui.nodejs">
       <nodejs
-            id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
-            name="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
-            nodePath="node-v24.22.3-darwin-arm64/bin/node"
-            npmPath="node-v24.22.3-darwin-arm64/bin/npm"
-            archive="node.tar.gz">
+            id="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
+            name="com.servoy.eclipse.nodejs.macosx.cocoa.aarch64"
+            nodePath="node-v26.13.1-darwin-arm64/bin/node"
+            npmPath="node-v26.13.1-darwin-arm64/bin/npm"
+            archive="node.tar.gz"
+            pnpmPath="pnpm"
+            pnpmArchive="pnpm.tar.gz">
       </nodejs>
    </extension>
 
