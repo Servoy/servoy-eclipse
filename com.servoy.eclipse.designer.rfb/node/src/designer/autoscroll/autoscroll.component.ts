@@ -37,6 +37,7 @@ export class AutoscrollComponent implements OnInit, AfterViewInit, OnDestroy {
             this.scrollTarget = scrollTarget;
             if (scrollTarget) {
                 this.setPosition();
+                this.pointerEvents.set(this.isResizeTarget(scrollTarget) ? 'none' : 'all');
             } else {
                 this.pointerEvents.set('none');
                 this.stopAutoscroll();
@@ -81,8 +82,12 @@ export class AutoscrollComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
+    private isResizeTarget(target: ISupportAutoscroll): boolean {
+        return target.getAutoscrollLockId().startsWith('resize-editor-');
+    }
+
     private onDocumentMouseMove = (event: MouseEvent) => {
-        if (!this.scrollTarget) return;
+        if (!this.scrollTarget || !this.isResizeTarget(this.scrollTarget)) return;
         if (this.isInBand(event)) {
             if (this.pointerEvents() !== 'all') {
                 this.pointerEvents.set('all');
@@ -161,6 +166,14 @@ export class AutoscrollComponent implements OnInit, AfterViewInit, OnDestroy {
             const left =  this.editorContent.getDesignerElementById('palette').offsetWidth + 
                 this.editorContent.getDesignerElementById('palette').offsetLeft;
             this.renderer.setStyle(autoscrollElement.nativeElement, 'left', left + 'px');
+        }
+        if (this.placement() == 'bottom') {
+            const contentRect = this.editorContent.getContentArea().getBoundingClientRect();
+            const bandHeight = autoscrollElement.nativeElement.offsetHeight || 30;
+            this.renderer.setStyle(autoscrollElement.nativeElement, 'bottom', 'auto');
+            this.renderer.setStyle(autoscrollElement.nativeElement, 'top', (contentRect.bottom - bandHeight) + 'px');
+            this.renderer.setStyle(autoscrollElement.nativeElement, 'left', contentRect.left + 'px');
+            this.renderer.setStyle(autoscrollElement.nativeElement, 'width', contentRect.width + 'px');
         }
         if (this.placement() != 'top' && this.placement() != 'bottom') {
             const top = this.editorContent.getBodyElement().getElementsByClassName('top').item(0);

@@ -189,15 +189,25 @@ describe('AutoscrollComponent', () => {
       TestBed.resetTestingModule();
     });
 
+    const resizeTarget = () => ({ ...scrollTarget, getAutoscrollLockId: vi.fn().mockReturnValue('resize-editor-width') });
+
     it('should set pointerEvents to all when pointer is inside the band rect', () => {
-      (bandComponent as any).scrollTarget = scrollTarget;
+      (bandComponent as any).scrollTarget = resizeTarget();
       documentMouseMove({ clientX: 200, clientY: 430 } as MouseEvent);
       expect(bandComponent.pointerEvents()).toBe('all');
       expect(nativeElement.getBoundingClientRect).toHaveBeenCalled();
     });
 
-    it('should set pointerEvents back to none when pointer is outside the band rect', () => {
+    it('should not gate the band for a non-resize target (element drag keeps the band active)', () => {
       (bandComponent as any).scrollTarget = scrollTarget;
+      bandComponent.pointerEvents.set('all');
+      documentMouseMove({ clientX: 500, clientY: 430 } as MouseEvent);
+      expect(bandComponent.pointerEvents()).toBe('all');
+      expect(nativeElement.getBoundingClientRect).not.toHaveBeenCalled();
+    });
+
+    it('should set pointerEvents back to none when pointer is outside the band rect', () => {
+      (bandComponent as any).scrollTarget = resizeTarget();
       bandComponent.pointerEvents.set('all');
       documentMouseMove({ clientX: 500, clientY: 430 } as MouseEvent);
       expect(bandComponent.pointerEvents()).toBe('none');
@@ -289,6 +299,21 @@ describe('AutoscrollComponent', () => {
       });
       component.setPosition();
       expect((component as any).renderer.setStyle).toHaveBeenCalledWith(autoscrollEl.nativeElement, 'left', '210px');
+    });
+
+    it('should place the bottom band on the last 30px of the content area, not at the window bottom', () => {
+      (component as any).placement = signal('bottom');
+      const autoscrollEl = { nativeElement: document.createElement('div') };
+      (component as any).autoscrollElement = () => autoscrollEl;
+      (component as any).editorContent.getContentArea = vi.fn().mockReturnValue({
+        getBoundingClientRect: () => ({ left: 300, bottom: 540, width: 720 })
+      });
+      component.setPosition();
+      const setStyle = (component as any).renderer.setStyle;
+      expect(setStyle).toHaveBeenCalledWith(autoscrollEl.nativeElement, 'bottom', 'auto');
+      expect(setStyle).toHaveBeenCalledWith(autoscrollEl.nativeElement, 'top', '510px');
+      expect(setStyle).toHaveBeenCalledWith(autoscrollEl.nativeElement, 'left', '300px');
+      expect(setStyle).toHaveBeenCalledWith(autoscrollEl.nativeElement, 'width', '720px');
     });
 
     it('should set the height for a non top/bottom placement', () => {
