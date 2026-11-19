@@ -7,41 +7,53 @@ import { EditorSessionService } from '../services/editorsession.service';
 import { EditorContentService } from '../services/editorcontent.service';
 
 /**
- * Browser spec: onMouseMove/onMouseUp/updateLocationCallback are arrow-function instance
- * fields, so they only exist on a constructed instance. This exercises the REAL arrow
- * functions (not reimplementations) through a TestBed-created component.
+ * Browser spec: onMouseMove/onMouseUp are arrow-function instance fields, so they only exist on a
+ * constructed instance. The component delegates the actual resizing to WidthResizer (which keeps
+ * its own state), so these tests drive the real component + real WidthResizer through TestBed and
+ * assert on the observable effects (styles, scroll position, sendChanges), not on internal fields.
  */
 describe('ResizeEditorWidthComponent (browser)', () => {
   let fixture: ComponentFixture<ResizeEditorWidthComponent>;
   let component: ResizeEditorWidthComponent;
   let editorSession: any;
-  let docListeners: { mousemove?: EventListener; mouseup?: EventListener };
+  let ghostContainer: HTMLElement;
+  let contentEl: HTMLElement;
+  let glassPane: HTMLElement;
+  let formGhost: HTMLElement;
+  let contentArea: { getElementsByClassName: () => HTMLCollection; scrollLeft: number };
+
+  /** dispatches a real mousedown on the resize handle and returns it (its pageX is the drag start) */
+  const startDrag = (): MouseEvent => {
+    const el = fixture.nativeElement.querySelector('.resize-editor-width') as HTMLElement;
+    const down = new MouseEvent('mousedown', { bubbles: true, clientX: 100 });
+    el.dispatchEvent(down);
+    return down;
+  };
 
   beforeEach(async () => {
-    docListeners = {};
     editorSession = {
       dragging: signal(false),
       sendChanges: vi.fn(),
       registerAutoscroll: vi.fn(),
       unregisterAutoscroll: vi.fn()
     };
-    const fakeDoc = {
-      addEventListener: vi.fn((type: string, cb: EventListener) => {
-        (docListeners as any)[type] = cb;
-      }),
-      removeEventListener: vi.fn()
-    };
-    const ghostContainer = document.createElement('div');
+    formGhost = document.createElement('div');
+    formGhost.className = 'ghost';
+    formGhost.setAttribute('svy-ghosttype', 'form');
+    formGhost.setAttribute('svy-id', 'form-id');
+
+    const fakeDoc = { addEventListener: vi.fn(), removeEventListener: vi.fn() };
+    ghostContainer = document.createElement('div');
     Object.defineProperty(ghostContainer, 'offsetWidth', { value: 400, configurable: true });
-    const contentEl = document.createElement('div');
-    // use a plain object with a writable scrollLeft - a jsdom/chromium div keeps scrollLeft at 0
-    const contentArea = { getElementsByClassName: () => ([] as unknown as HTMLCollection), scrollLeft: 0 };
-    const glassPane = document.createElement('div');
+    contentEl = document.createElement('div');
+    // use a plain object with a writable scrollLeft - a chromium div keeps scrollLeft at 0 when not scrollable
+    contentArea = { getElementsByClassName: () => ([] as unknown as HTMLCollection), scrollLeft: 0 };
+    glassPane = document.createElement('div');
     Object.defineProperty(glassPane, 'offsetWidth', { value: 600, configurable: true });
     const editorContentService = {
       getDocument: () => fakeDoc,
       getContentArea: () => contentArea,
-      querySelector: () => contentEl,
+      querySelector: (sel: string) => (sel.indexOf('form') >= 0 ? formGhost : contentEl),
       querySelectorAll: () => [ghostContainer],
       getGlassPane: () => glassPane
     };
@@ -65,49 +77,42 @@ describe('ResizeEditorWidthComponent (browser)', () => {
   afterEach(() => fixture?.destroy());
 
   it('mousedown should register the drag and autoscroll', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-width') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    startDrag();
     expect(editorSession.dragging()).toBe(true);
     expect(editorSession.registerAutoscroll).toHaveBeenCalledWith(component);
-    expect(typeof docListeners.mousemove).toBe('function');
   });
 
   it('onMouseMove should grow the content width while dragging', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-width') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100 }));
-    (component as any).mousePoint = { x: 100, y: 0 };
-    (component as any).currentPosition = 200;
-    // step = pageX(215) - mousePoint.x(100) = 115 -> 200 + 115 = 315
-    component.onMouseMove({ pageX: 215, stopPropagation: vi.fn() } as unknown as MouseEvent);
-    expect((component as any).currentPosition).toBe(315);
+    const down = startDrag();
+    // step = 115 -> starts at the ghost container width (400) -> 515
+    component.onMouseMove({ pageX: down.pageX + 115, stopPropagation: vi.fn() } as unknown as MouseEvent);
+    expect(ghostContainer.style.width).toBe('515px');
+    expect(contentEl.style.width).toBe('515px');
   });
 
   it('onMouseUp should send width changes and clear the drag', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-width') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    (component as any).currentPosition = 320;
-    const formGhost = document.createElement('div');
-    formGhost.className = 'ghost';
-    formGhost.setAttribute('svy-ghosttype', 'form');
-    formGhost.setAttribute('svy-id', 'form-id');
-    document.body.appendChild(formGhost);
-    try {
-      component.onMouseUp({ stopPropagation: vi.fn() } as unknown as MouseEvent);
-      expect(editorSession.sendChanges).toHaveBeenCalledWith({ 'form-id': { width: 320 } });
-      expect(editorSession.dragging()).toBe(false);
-      expect(editorSession.unregisterAutoscroll).toHaveBeenCalledWith(component);
-    } finally {
-      document.body.removeChild(formGhost);
-    }
+    const down = startDrag();
+    component.onMouseMove({ pageX: down.pageX + 115, stopPropagation: vi.fn() } as unknown as MouseEvent);
+    component.onMouseUp({ stopPropagation: vi.fn() } as unknown as MouseEvent);
+    expect(editorSession.sendChanges).toHaveBeenCalledWith({ 'form-id': { width: 515 } });
+    expect(editorSession.dragging()).toBe(false);
+    expect(editorSession.unregisterAutoscroll).toHaveBeenCalledWith(component);
+  });
+
+  it('onMouseUp without a prior mousedown should not send anything', () => {
+    component.onMouseUp({ stopPropagation: vi.fn() } as unknown as MouseEvent);
+    expect(editorSession.sendChanges).not.toHaveBeenCalled();
+    expect(editorSession.unregisterAutoscroll).not.toHaveBeenCalled();
   });
 
   it('updateLocationCallback should scroll and advance the position', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-width') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    (component as any).currentPosition = 100;
-    const before = (component as any).contentArea.scrollLeft;
+    startDrag();
     component.updateLocationCallback(10, 0);
-    expect((component as any).currentPosition).toBe(110);
-    expect((component as any).contentArea.scrollLeft).toBe(before + 10);
+    expect(ghostContainer.style.width).toBe('400px');
+    expect(contentArea.scrollLeft).toBe(10);
+    // the position advanced by 10 on the previous call, so the second call applies 410
+    component.updateLocationCallback(10, 0);
+    expect(ghostContainer.style.width).toBe('410px');
+    expect(contentArea.scrollLeft).toBe(20);
   });
 });

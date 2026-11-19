@@ -8,13 +8,26 @@ import { EditorContentService } from '../services/editorcontent.service';
 
 /**
  * Browser spec that drives the REAL arrow-function handlers of the height resizer through a
- * constructed component (the jsdom unit spec only reimplements them).
+ * constructed component. The component delegates the resizing to HeightResizer (which keeps its
+ * own state), so the tests assert on observable effects (styles, scroll position, sendChanges)
+ * and not on internal component fields.
  */
 describe('ResizeEditorHeightComponent (browser)', () => {
   let fixture: ComponentFixture<ResizeEditorHeightComponent>;
   let component: ResizeEditorHeightComponent;
   let editorSession: any;
   let formGhost: HTMLElement;
+  let ghostContainer: HTMLElement;
+  let contentEl: HTMLElement;
+  let contentArea: { getElementsByClassName: () => HTMLCollection; scrollTop: number };
+
+  /** dispatches a real mousedown on the resize handle and returns it (its pageY is the drag start) */
+  const startDrag = (): MouseEvent => {
+    const el = fixture.nativeElement.querySelector('.resize-editor-height') as HTMLElement;
+    const down = new MouseEvent('mousedown', { bubbles: true, clientY: 100 });
+    el.dispatchEvent(down);
+    return down;
+  };
 
   beforeEach(async () => {
     editorSession = {
@@ -29,12 +42,13 @@ describe('ResizeEditorHeightComponent (browser)', () => {
     formGhost.setAttribute('svy-id', 'form-id');
 
     const fakeDoc = { addEventListener: vi.fn(), removeEventListener: vi.fn() };
-    const ghostContainer = document.createElement('div');
+    ghostContainer = document.createElement('div');
     Object.defineProperty(ghostContainer, 'offsetHeight', { value: 400, configurable: true });
-    const contentEl = document.createElement('div');
+    contentEl = document.createElement('div');
     const glassPane = document.createElement('div');
     Object.defineProperty(glassPane, 'offsetHeight', { value: 600, configurable: true });
-    const contentArea = { getElementsByClassName: () => ([] as unknown as HTMLCollection), scrollTop: 0 };
+    // plain object with a writable scrollTop - a chromium div keeps scrollTop at 0 when not scrollable
+    contentArea = { getElementsByClassName: () => ([] as unknown as HTMLCollection), scrollTop: 0 };
     const editorContentService = {
       getDocument: () => fakeDoc,
       getContentArea: () => contentArea,
@@ -66,39 +80,42 @@ describe('ResizeEditorHeightComponent (browser)', () => {
   });
 
   it('mousedown should register the drag and autoscroll', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-height') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    startDrag();
     expect(editorSession.dragging()).toBe(true);
     expect(editorSession.registerAutoscroll).toHaveBeenCalledWith(component);
   });
 
   it('onMouseMove should grow the content height while dragging', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-height') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    (component as any).mousePoint = { x: 0, y: 100 };
-    (component as any).currentPosition = 200;
-    // step = pageY(210) - mousePoint.y(100) = 110 -> 200 + 110 = 310
-    component.onMouseMove({ pageY: 210, stopPropagation: vi.fn() } as unknown as MouseEvent);
-    expect((component as any).currentPosition).toBe(310);
+    const down = startDrag();
+    // step = 110 -> starts at the ghost container height (400) -> 510
+    component.onMouseMove({ pageY: down.pageY + 110, stopPropagation: vi.fn() } as unknown as MouseEvent);
+    expect(ghostContainer.style.height).toBe('510px');
+    expect(contentEl.style.height).toBe('510px');
   });
 
   it('onMouseUp should send height changes and clear the drag', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-height') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    (component as any).currentPosition = 350;
+    const down = startDrag();
+    component.onMouseMove({ pageY: down.pageY + 110, stopPropagation: vi.fn() } as unknown as MouseEvent);
     component.onMouseUp({ stopPropagation: vi.fn() } as unknown as MouseEvent);
-    expect(editorSession.sendChanges).toHaveBeenCalledWith({ 'form-id': { height: 350 } });
+    expect(editorSession.sendChanges).toHaveBeenCalledWith({ 'form-id': { height: 510 } });
     expect(editorSession.dragging()).toBe(false);
     expect(editorSession.unregisterAutoscroll).toHaveBeenCalledWith(component);
   });
 
+  it('onMouseUp without a prior mousedown should not send anything', () => {
+    component.onMouseUp({ stopPropagation: vi.fn() } as unknown as MouseEvent);
+    expect(editorSession.sendChanges).not.toHaveBeenCalled();
+    expect(editorSession.unregisterAutoscroll).not.toHaveBeenCalled();
+  });
+
   it('updateLocationCallback should scroll and advance the position', () => {
-    const el = fixture.nativeElement.querySelector('.resize-editor-height') as HTMLElement;
-    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    (component as any).currentPosition = 100;
-    const before = (component as any).contentArea.scrollTop;
+    startDrag();
     component.updateLocationCallback(0, 10);
-    expect((component as any).currentPosition).toBe(110);
-    expect((component as any).contentArea.scrollTop).toBe(before + 10);
+    expect(ghostContainer.style.height).toBe('400px');
+    expect(contentArea.scrollTop).toBe(10);
+    // the position advanced by 10 on the previous call, so the second call applies 410
+    component.updateLocationCallback(0, 10);
+    expect(ghostContainer.style.height).toBe('410px');
+    expect(contentArea.scrollTop).toBe(20);
   });
 });
