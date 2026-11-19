@@ -9,10 +9,10 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2026.9.1-SNAPSHOT</version>
+		<version>2026.3.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>com.servoy.eclipse.nodejs.linux.gtk.x86_64</artifactId>
-	<version>24.18.0</version>
+	<version>24.22.3</version>
 	<packaging>eclipse-plugin</packaging>
 	<build>
 		<plugins>
