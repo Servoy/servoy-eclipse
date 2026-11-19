@@ -193,6 +193,15 @@
 									<type>eclipse-plugin</type>
 									<artifactId>com.servoy.eclipse.extension.compatibility</artifactId>
 								</dependency>
+								<!-- model.tests is a fragment of com.servoy.eclipse.model, so Tycho only resolves model's own
+								     dependencies into the test runtime. The IServoyModel implementation is contributed by
+								     com.servoy.eclipse.core (extension point com.servoy.eclipse.model.modelProvider), which
+								     depends on model and not the other way around; without it ServoyModelFinder.getServoyModel()
+								     returns null (e.g. ServoyProject.addDeveloperProject NPE in ServoyProjectDeveloperReferenceTest). -->
+								<dependency>
+									<type>eclipse-plugin</type>
+									<artifactId>com.servoy.eclipse.core</artifactId>
+								</dependency>
 							</dependencies>
 						</configuration>
 					</plugin>
