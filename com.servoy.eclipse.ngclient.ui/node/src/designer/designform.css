@@ -28,6 +28,11 @@
     display: contents;
 }
 
+/* SVY-21625: the layout container being moved keeps its measured height while it is previewed in other positions */
+.svy-layoutcontainer.svy-dragged-layout {
+    min-height: var(--svy-dragged-layout-height) !important;
+}
+
 .svy-responsive-wrapper.invisible_element > * {
     opacity: 0.3;
     outline: 2px dotted;

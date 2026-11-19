@@ -492,4 +492,127 @@ describe('DesignerUtilsService', () => {
       expect(result).toBe(allowed);
     });
   });
+
+  describe('SVY-21625 responsive wrapper (svy-responsive-wrapper)', () => {
+    let form: HTMLElement;
+    let container: HTMLElement;
+    let wrappers: HTMLElement[];
+    let row1: HTMLElement;
+    let row2: HTMLElement;
+    let row3: HTMLElement;
+
+    const makeEl = (cls: string, attrs: Record<string, string>, rect?: DOMRect): HTMLElement => {
+      const el = document.createElement('div');
+      el.className = cls;
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      if (rect) {
+        el.getBoundingClientRect = () => rect;
+        Object.defineProperty(el, 'clientWidth', { value: rect.width });
+        Object.defineProperty(el, 'clientHeight', { value: rect.height });
+      }
+      return el;
+    };
+
+    beforeEach(() => {
+      // real SVY-21248 DOM: container > wrapper > rowN (top-level container itself is not wrapped)
+      form = makeEl('svy-form', {});
+      container = makeEl('svy-layoutcontainer', { 'svy-id': 'container', 'svy-layoutname': '12grid.container' }, new DOMRect(0, 0, 100, 150));
+      row1 = makeEl('svy-layoutcontainer', { 'svy-id': 'row1', 'svy-layoutname': '12grid.row' }, new DOMRect(0, 0, 100, 50));
+      row2 = makeEl('svy-layoutcontainer', { 'svy-id': 'row2', 'svy-layoutname': '12grid.row' }, new DOMRect(0, 50, 100, 50));
+      row3 = makeEl('svy-layoutcontainer', { 'svy-id': 'row3', 'svy-layoutname': '12grid.row' }, new DOMRect(0, 100, 100, 50));
+      wrappers = [row1, row2, row3].map(row => {
+        const w = makeEl('svy-responsive-wrapper', {});
+        w.appendChild(row);
+        container.appendChild(w);
+        return w;
+      });
+      form.appendChild(container);
+
+      // the wrapper has no svy-layoutname -> null -> 'topContainer' fallback list that contains the row
+      editorSession.getAllowedChildrenForContainer.mockImplementation((name: string | null) =>
+        name === '12grid.container' ? ['12grid.row'] : (name == null ? ['12grid.row'] : null));
+      editorContentService.getContent.mockReturnValue({ getBoundingClientRect: () => new DOMRect(0, 0, 800, 600) });
+      service.getNode = vi.fn().mockReturnValue(row2);
+    });
+
+    it('getParent should skip the wrapper and return the container, not the wrapper', () => {
+      const result = service.getParent(row2, '12grid.row');
+      expect(result).toBe(container);
+      expect(result).not.toBe(wrappers[1]);
+    });
+
+    it('getParent should return the form root for a top-level element without wrapper', () => {
+      const topRow = makeEl('svy-layoutcontainer', { 'svy-id': 'top', 'svy-layoutname': '12grid.row' });
+      form.appendChild(topRow);
+      // row rejects a row, parent is the form (no layoutname -> fallback list accepts the row)
+      expect(service.getParent(topRow, '12grid.row')).toBe(form);
+    });
+
+    it('getDropNode should resolve the container with row2 as beforeChild when dragging row3 over the upper part of row2', () => {
+      const event = { pageX: 10, pageY: 60 } as MouseEvent;
+      const result = service.getDropNode(false, 'layout', true, '12grid.row', event, undefined, undefined, row3);
+      expect(result.dropAllowed).toBe(true);
+      expect(result.dropTarget).toBe(container);
+      expect(result.dropTarget!.getAttribute('svy-id')).toBe('container');
+      expect(result.beforeChild).toBe(row2);
+    });
+
+    it('getDropNode for a palette drop (no dragged node) should resolve the container, not the wrapper', () => {
+      const event = { pageX: 10, pageY: 60 } as MouseEvent;
+      const result = service.getDropNode(false, 'layout', true, '12grid.row', event);
+      expect(result.dropAllowed).toBe(true);
+      expect(result.dropTarget).toBe(container);
+      expect(result.dropTarget).not.toBe(wrappers[1]);
+      expect(result.beforeChild).toBe(row2);
+    });
+
+    it('getDropNode in the lower 30% band of row2 should still target the container (never the wrapper) with the next row as beforeChild', () => {
+      // spec 3.2: the next sibling of row2 is the dragged row3, so beforeChild === dragged row (drop before itself = in-place no-op inside the container)
+      const event = { pageX: 10, pageY: 95 } as MouseEvent;
+      const result = service.getDropNode(false, 'layout', true, '12grid.row', event, undefined, undefined, row3);
+      expect(result.dropAllowed).toBe(true);
+      expect(result.dropTarget).toBe(container);
+      expect(result.dropTarget!.getAttribute('svy-id')).toBe('container');
+      expect(result.beforeChild).toBe(row3);
+    });
+
+    describe('component under the pointer while dragging a layout container', () => {
+      let column: HTMLElement;
+      let button: HTMLElement;
+
+      beforeEach(() => {
+        // row2 > wrapper > column > wrapper > button (the button has no svy-layoutname and no svy-types)
+        column = makeEl('svy-layoutcontainer', { 'svy-id': 'col2', 'svy-layoutname': '12grid.column' });
+        const columnWrapper = makeEl('svy-responsive-wrapper', {});
+        columnWrapper.appendChild(column);
+        row2.appendChild(columnWrapper);
+        button = makeEl('', { 'svy-id': 'button33' });
+        const buttonWrapper = makeEl('svy-responsive-wrapper', {});
+        buttonWrapper.appendChild(button);
+        column.appendChild(buttonWrapper);
+        editorSession.getAllowedChildrenForContainer.mockImplementation((name: string | null) => {
+          if (name === '12grid.container') return ['12grid.row'];
+          if (name === '12grid.column') return ['12grid.row', 'component'];
+          if (name == null) return ['12grid.row', 'component'];
+          return null;
+        });
+      });
+
+      it('getParent should climb from a component to the nearest container that accepts the row, not return the component', () => {
+        const result = service.getParent(button, '12grid.row');
+        expect(result).toBe(column);
+        expect(result).not.toBe(button);
+      });
+
+      it('getParent should keep returning the component itself when a component is dragged over it', () => {
+        expect(service.getParent(button, 'component')).toBe(button);
+      });
+
+      it('getParent should still return an element with svy-types (custom container) for a layout container', () => {
+        const typed = makeEl('', { 'svy-id': 'tabpanel', 'svy-types': '12grid.row' });
+        column.appendChild(typed);
+        expect(service.getParent(typed, '12grid.row')).toBe(typed);
+      });
+    });
+  });
 });

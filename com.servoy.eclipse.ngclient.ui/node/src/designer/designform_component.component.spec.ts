@@ -321,6 +321,88 @@ describe('DesignFormComponent', () => {
     });
   });
 
+  describe('SVY-21625 dragged layout container keeps its measured height in the preview', () => {
+    let messageListener: (event: MessageEvent) => void;
+    let host: HTMLElement;
+    let layoutContainer: StructureCache;
+    let otherContainer: StructureCache;
+
+    beforeEach(() => {
+      layoutContainer = new StructureCache('div', ['row'], { 'svy-id': 'row3', designclass: 'rowDesign' }, [], 'row3');
+      otherContainer = new StructureCache('div', ['row'], { 'svy-id': 'row1', designclass: 'rowDesign' }, [], 'row1');
+      const parent = new StructureCache('div', ['container'], {}, [otherContainer, layoutContainer], 'container');
+      layoutContainer.parent = parent;
+      otherContainer.parent = parent;
+
+      host = document.createElement('svy-designform');
+
+      const formCache: any = {
+        getLayoutContainer: vi.fn((id: string) => (id === 'row3' ? layoutContainer : undefined)),
+        getComponent: vi.fn().mockReturnValue(undefined),
+      };
+      const windowRefService: any = {
+        nativeWindow: {
+          addEventListener: vi.fn((_type: string, listener: (event: MessageEvent) => void) => {
+            messageListener = listener;
+          }),
+          parent: { postMessage: vi.fn() },
+        },
+      };
+      const logFactory: any = { getLogger: () => ({ warn: vi.fn(), error: vi.fn(), debug: vi.fn(), info: vi.fn() }) };
+      const renderer: any = { setStyle: vi.fn(), removeStyle: vi.fn() };
+      const changeHandler: any = { detectChanges: vi.fn(), markForCheck: vi.fn() };
+
+      component = TestBed.runInInjectionContext(
+        () => new DesignFormComponent({ setDesignerMode: vi.fn() } as any, {} as any, logFactory, changeHandler, { nativeElement: host } as any, renderer, document, windowRefService, {} as any),
+      );
+      (component as any).formCache = formCache;
+      (component as any).name = 'aForm';
+    });
+
+    const send = (data: Record<string, unknown>) => messageListener({ data } as MessageEvent);
+
+    const draggedClass = (item: StructureCache) => component.getNGClass(item)['svy-dragged-layout'];
+    const heightVar = () => host.style.getPropertyValue('--svy-dragged-layout-height');
+
+    it('should mark only the moved layout container and expose its measured height while dragging', () => {
+      send({ id: 'createDraggedComponent', uuid: 'row3', dragCopy: false, size: { width: 900, height: 373 } });
+
+      expect(draggedClass(layoutContainer)).toBe(true);
+      expect(draggedClass(otherContainer)).toBe(false);
+      expect(heightVar()).toBe('373px');
+    });
+
+    it('should keep the mark after a preview move', () => {
+      send({ id: 'createDraggedComponent', uuid: 'row3', dragCopy: false, size: { width: 900, height: 373 } });
+      send({ id: 'insertDraggedComponent', dropTarget: 'container', insertBefore: null });
+
+      expect(draggedClass(layoutContainer)).toBe(true);
+      expect(heightVar()).toBe('373px');
+    });
+
+    it('should clear the mark and the height when the drag ends', () => {
+      send({ id: 'createDraggedComponent', uuid: 'row3', dragCopy: false, size: { width: 900, height: 373 } });
+      send({ id: 'destroyElement', existingElement: true });
+
+      expect(draggedClass(layoutContainer)).toBe(false);
+      expect(heightVar()).toBe('');
+    });
+
+    it('should not mark anything without a measured size', () => {
+      send({ id: 'createDraggedComponent', uuid: 'row3', dragCopy: false });
+
+      expect(draggedClass(layoutContainer)).toBe(false);
+      expect(heightVar()).toBe('');
+    });
+
+    it('should not mark the original when dragging a copy', () => {
+      send({ id: 'createDraggedComponent', uuid: 'row3', dragCopy: true, size: { width: 900, height: 373 } });
+
+      expect(draggedClass(layoutContainer)).toBe(false);
+      expect(heightVar()).toBe('');
+    });
+  });
+
   describe('getTemplate - missing template ref (SVY-21380)', () => {
     // SVY-21380: getTemplate() must never evaluate undefined() / never throw for a
     // component whose per-instance template ref is missing (e.g. a missing spec

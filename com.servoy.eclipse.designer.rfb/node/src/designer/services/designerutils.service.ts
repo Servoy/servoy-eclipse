@@ -255,6 +255,15 @@ export class DesignerUtilsService {
 
     public getParent(dt: Element, realName?: string): Element {
         if (!dt) return null!;
+        // SVY-21625: the responsive wrapper (SVY-21248) is a transparent element, never a drop target
+        if (dt.classList.contains('svy-responsive-wrapper') && dt.parentElement) {
+            return this.getParent(dt.parentElement, realName);
+        }
+        // SVY-21625: a component is never a parent for a layout container; only the form root uses the 'topContainer' list
+        if (realName !== 'component' && !dt.getAttribute('svy-layoutname') && !dt.getAttribute('svy-types')
+            && !dt.classList.contains('svy-form') && dt.parentElement) {
+            return this.getParent(dt.parentElement, realName);
+        }
         let allowedChildren = this.editorSession.getAllowedChildrenForContainer(dt.getAttribute('svy-layoutname')!);
         if (!allowedChildren || !(allowedChildren.indexOf(realName!) >= 0)) {
             const svytypes = dt.getAttribute('svy-types');

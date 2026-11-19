@@ -206,6 +206,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
   draggedElementItem: ComponentCache | StructureCache | null = null;
   insertedCloneParent: StructureCache | null = null;
   insertedClone: ComponentCache | StructureCache | null = null;
+  private draggedLayoutUUID: string | null = null;
   dragItem!: Element;
   isVariantForm!: boolean;
   variantsContainer!: StructureCache;
@@ -327,8 +328,15 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.windowRefService.nativeWindow.parent.postMessage({ id: 'onDestroyVariants' }, '*');
       }
       if (event.data.id === 'createDraggedComponent') {
+        this.setDraggedLayout(null);
         this.insertedClone = this.formCache.getLayoutContainer(event.data.uuid)!;
         if (this.insertedClone) {
+          // SVY-21625: keep the moved layout container at its measured height while it is previewed in other positions,
+          // its content (e.g. a grid) re-renders with 0 height first and collapses the layout under the pointer
+          const measuredHeight = event.data.size?.height;
+          if (!event.data.dragCopy && typeof measuredHeight === 'number' && measuredHeight > 0) {
+            this.setDraggedLayout(event.data.uuid, measuredHeight);
+          }
           if (event.data.dragCopy) {
             const parent = this.insertedClone.parent;
             this.insertedClone = new StructureCache(
@@ -437,6 +445,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
         this.insertedCloneParent!.addChild(this.insertedClone, event.data.insertBefore);
       }
       if (event.data.id === 'destroyElement') {
+        this.setDraggedLayout(null);
         if (this.draggedElementItem || this.insertedCloneParent || this.insertedClone) {
           this.draggedElementItem = null;
           if (!event.data.existingElement && this.insertedCloneParent) this.insertedCloneParent.removeChild(this.insertedClone!);
@@ -470,6 +479,17 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
       }
       this.detectChanges();
     });
+  }
+
+  private setDraggedLayout(uuid: string | null, height?: number) {
+    this.draggedLayoutUUID = uuid;
+    const host = this.el?.nativeElement as HTMLElement | undefined;
+    if (!host?.style) return;
+    if (uuid && height) {
+      host.style.setProperty('--svy-dragged-layout-height', height + 'px');
+    } else {
+      host.style.removeProperty('--svy-dragged-layout-height');
+    }
   }
 
   sendVariantSizes() {
@@ -668,6 +688,7 @@ export class DesignFormComponent extends AbstractFormComponent implements OnDest
       ngclass['containerChildren10'] = this.showWireframe && item.getDepth() === this.maxLevel;
     }
     ngclass['drop_highlight'] = this.canContainDraggedElement(item.attributes!['svy-layoutname'], item.attributes!['svy-id']);
+    ngclass['svy-dragged-layout'] = this.draggedLayoutUUID !== null && item.attributes!['svy-id'] === this.draggedLayoutUUID;
     return ngclass;
   }
 
