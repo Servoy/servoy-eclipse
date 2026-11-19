@@ -198,7 +198,10 @@
 						</configuration>
 					</execution>
 
-					<!-- 7. Run vitest tests --> 
+					<!-- 7. Run vitest tests.
+					     testFailureIgnore: failing tests must not stop the reactor here (all modules that
+					     depend on ngclient.ui would be SKIPPED); the failures are in target/vitest-*.xml and
+					     the Jenkins junit step marks the build UNSTABLE instead. -->
 					<execution>
 						<id>angular vitest</id>
 						<phase>test</phase>
@@ -208,7 +211,7 @@
 						<configuration>
 							<workingDirectory>node</workingDirectory>
 							<skipTests>${maven.test.skip}</skipTests>
-							<testFailureIgnore>false</testFailureIgnore>
+							<testFailureIgnore>true</testFailureIgnore>
 							<arguments>run ${test.script}</arguments>
 						</configuration>
 					</execution>

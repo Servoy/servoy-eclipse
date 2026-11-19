@@ -63,14 +63,22 @@ function run(cmd, extraEnv) {
   execSync(cmd, { stdio: 'inherit', cwd: nodeRoot, env: { ...process.env, ...extraEnv } });
 }
 
+// A project with failing tests must not stop the others: run them all (so every
+// target/vitest-*.xml and coverage report is produced), merge, and only then exit non-zero.
 const lcovFiles = [];
+const failedProjects = [];
 for (const p of projects) {
   const outDir = path.join(coverageRoot, p.name);
   const excludeFlags = (p.excludes || commonExcludes).map((g) => `--coverage-exclude "${g}"`).join(' ');
   const cmd =
     `ng test ${p.ngProject} --no-watch --output-file=../target/${p.junit} ` +
     `--coverage --coverage-include "${p.include}" ${excludeFlags}`;
-  run(cmd, { VITEST_COVERAGE_DIR: outDir });
+  try {
+    run(cmd, { VITEST_COVERAGE_DIR: outDir });
+  } catch (e) {
+    console.error(`Tests failed for ${p.name} (exit code ${e.status}), continuing with the other projects.`);
+    failedProjects.push(p.name);
+  }
 
   const lcov = path.join(outDir, 'lcov.info');
   if (fs.existsSync(lcov)) {
@@ -87,3 +95,8 @@ if (lcovFiles.length === 0) {
 
 const combinedDir = path.join(coverageRoot, 'combined');
 run(`node scripts/coverage-merge.js ${lcovFiles.map((f) => `"${f}"`).join(' ')} "${combinedDir}"`);
+
+if (failedProjects.length > 0) {
+  console.error(`\nTest failures in: ${failedProjects.join(', ')}`);
+  process.exit(1);
+}

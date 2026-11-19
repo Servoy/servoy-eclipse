@@ -1,5 +1,18 @@
 const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : global);
 
+// Node 25+ enables its own Web Storage globals by default. Node's localStorage is undefined
+// without --localstorage-file and its sessionStorage is a Node Storage (not jsdom's), and both
+// shadow the jsdom ones, so specs calling localStorage.clear() or spying on Storage.prototype
+// break. Point the globals back at the jsdom window's storage when vitest exposes it.
+const jsdomWindow = (g as any).jsdom?.window;
+if (jsdomWindow) {
+  for (const name of ['localStorage', 'sessionStorage', 'Storage']) {
+    Object.defineProperty(g, name, { value: jsdomWindow[name], configurable: true, writable: true });
+  }
+} else {
+  console.warn('[vitest-setup] no jsdom window found on globalThis.jsdom, Web Storage globals left as is');
+}
+
 if (typeof g.ResizeObserver === 'undefined') {
   (g as any).ResizeObserver = class ResizeObserver {
     observe() {}

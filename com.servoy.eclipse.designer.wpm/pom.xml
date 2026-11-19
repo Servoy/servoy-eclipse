@@ -84,6 +84,8 @@
 						</goals>
 						<configuration>
 							<skipTests>${maven.test.skip}</skipTests>
+							<!-- test failures are reported via target/vitest-*.xml (Jenkins junit -> UNSTABLE), they must not stop the reactor -->
+							<testFailureIgnore>true</testFailureIgnore>
 							<arguments>run test:coverage</arguments>
 						</configuration>
 					</execution>
