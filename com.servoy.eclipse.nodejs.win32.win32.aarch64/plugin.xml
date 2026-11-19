@@ -6,11 +6,9 @@
       <nodejs
             id="com.servoy.eclipse.nodejs.win32.win32.aarch64"
             name="com.servoy.eclipse.nodejs.win32.win32.aarch64"
-            nodePath="node-v24.22.0-win-arm64/node.exe"
-            npmPath="node-v24.22.0-win-arm64/node_modules/npm/bin/npm-cli.js"
-            archive="node.zip"
-            pnpmPath="pnpm.exe"
-            pnpmArchive="pnpm.zip">
+            nodePath="node-v24.22.3-win-arm64/node.exe"
+            npmPath="node-v24.22.3-win-arm64/node_modules/npm/bin/npm-cli.js"
+            archive="node.zip">
       </nodejs>
    </extension>
 

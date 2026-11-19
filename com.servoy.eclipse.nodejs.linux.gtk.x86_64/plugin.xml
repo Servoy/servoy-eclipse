@@ -6,11 +6,9 @@
       <nodejs
             id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
             name="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
-            nodePath="node-v24.22.0-linux-x64/bin/node"
-            npmPath="node-v24.22.0-linux-x64/bin/npm"
-            archive="node.tar.xz"
-            pnpmPath="pnpm"
-            pnpmArchive="pnpm.tar.gz">
+            nodePath="node-v24.22.3-linux-x64/bin/node"
+            npmPath="node-v24.22.3-linux-x64/bin/npm"
+            archive="node.tar.xz">
       </nodejs>
    </extension>
 
