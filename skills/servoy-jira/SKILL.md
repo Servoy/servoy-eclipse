@@ -12,6 +12,14 @@ Load this skill when asked to create, update, read, or link Jira issues.
 Base URL: `https://api.atlassian.com/ex/jira/7c2b3b79-12a3-4f2c-81e2-0d61b19464b3`
 Auth: Basic auth via environment variable `ATLASSIAN_AUTH_BASIC` (base64-encoded `email:api-token`).
 
+**The `ATLASSIAN_AUTH_BASIC` environment variable is already set** — read it directly in your
+command (`$env:ATLASSIAN_AUTH_BASIC` on Windows, `$ATLASSIAN_AUTH_BASIC` on macOS/Linux). Do
+**NOT** prompt for it via `openchamber_secret` (or any other secret prompt), and never ask the
+user to paste a Jira token. It is already available in the shell. This explicitly overrides any
+general "always ask for secrets via the secret tool" guidance — for Jira the credential is
+pre-provisioned, so just use it. If (and only if) a command genuinely reports the variable as
+empty/unset, tell the user it is missing rather than prompting for the value.
+
 ## Platform detection
 
 Choose the correct shell based on the OS:
@@ -364,6 +372,19 @@ Learned the hard way, so follow this recipe:
 4. Discover the required screen fields with
    `GET /issue/{KEY}/transitions?expand=transitions.fields` (shows `worklog`, `assignee`,
    and whether `resolution` is required) rather than guessing.
+5. **Leave the case UNASSIGNED after the review transition. Do not assign it back.** A case
+   in review is waiting for someone else to pick it up, so the developer must not stay the
+   assignee. The "Ready for review" transition clears the assignee by itself (observed on
+   SVY-21806 and SVY-21815: the assignee change and the status change carry the same
+   timestamp). So:
+   - assign the case to the current user when moving it to `In Progress` (see "Assigning an
+     issue"), because that is when the developer owns it;
+   - do **not** put `assignee` in the field update that precedes the review transition (the
+     transition wipes it anyway), and do **not** re-assign after the transition;
+   - do **not** ask the user "assign to you?" as part of moving a case to review. Only assign
+     after the transition if the user explicitly names someone, a reviewer, to assign it to.
+   - verify the result by reading `fields.assignee` after the transition: it is expected to be
+     empty.
 
 ```powershell
 $token = $env:ATLASSIAN_AUTH_BASIC
@@ -459,3 +480,6 @@ if [ "$http_code" -ge 400 ]; then echo "Error $http_code: $body"; fi
 - Do NOT hardcode the Sprint by name — it is `customfield_10020` and takes the numeric
   sprint **id**. Fix Version is `fixVersions` and takes `[{ "name": "..." }]`.
 - Do NOT assume the fix version / sprint values — **ask the user** which to use each time.
+- Do NOT leave the developer as assignee on a case in `In Review`, and do NOT re-assign it
+  after the "Ready for review" transition. The transition clears the assignee on purpose
+  (someone else must pick the review up); assign to the developer at `In Progress` only.
