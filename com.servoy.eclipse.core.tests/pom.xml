@@ -175,6 +175,10 @@
 						<version>${tycho.version}</version>
 						<configuration>
 							<skip>false</skip>
+							<!-- core.tests has no integrationpde tests of its own (only the shared integration.utils
+							     infra and plainjunit tests), but the Jenkins integration stage still builds it via -am;
+							     without this tycho-surefire fails with "No tests found" and SKIPS every other .tests project. -->
+							<failIfNoTests>false</failIfNoTests>
 		                    <!-- Force the JUnit Platform (junit6) provider. The Eclipse target platform
 		                         always contributes org.junit (JUnit 4) to the test runtime, so Tycho's
 		                         automatic framework detection would otherwise pick the junit4 provider
