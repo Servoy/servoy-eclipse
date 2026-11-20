@@ -12,7 +12,7 @@ the rest. Put the thing that could go wrong there.
 - `ISSUE_REF` — the issue key or range identifier
 - `SCOPE` — the per-repository commit list or diff range under review
 - `FIX_VERSIONS` — the issue's Jira Fix Version name(s), or "none" / "none (not a Jira issue)"
-- `FIX_VERSION_CHECK` — the Phase B release-target verdict (`MATCH` / `MISMATCH` / `INDETERMINATE`) with its one-line reason
+- `FIX_VERSION_CHECK` — the Phase B release-target verdict (`MATCH` / `MISMATCH` / `INDETERMINATE` / `NOT_APPLICABLE`) with one reason line per (Fix Version, repository) pair
 - `NARRATIVE_PATH` — the change-narrative report
 - `REGRESSION_PATH` — the regression & blast-radius report
 - `SECURITY_PATH` — the security & robustness report
@@ -90,7 +90,9 @@ Branch: `<branch>` — <and whether it must merge forward>
 Fix Version: `<FIX_VERSIONS>` — **Release-target check: MATCH / MISMATCH / INDETERMINATE** — <one-line reason>
 
 <On `MATCH`, a one-line reassurance. On `INDETERMINATE`, state what could not be determined
-and ask the reviewer to confirm. On `MISMATCH`, state the disagreement plainly here too.>
+and ask the reviewer to confirm. On `MISMATCH`, state the disagreement plainly here too. For
+a multi-repository scope, give the per-repository reasons. When `FIX_VERSION_CHECK` is
+`NOT_APPLICABLE` (not a Jira issue), omit the Fix Version line entirely.>
 
 ## Must look yourself
 <Two to four items. Each needs product judgement, domain knowledge, or a look at the running
@@ -112,14 +114,16 @@ delivery/targeting error, not code-correctness or security), using this template
 
 ```markdown
 N. **[Medium]** Fix Version(s) not covered by the commits
-   - Fix Version `<v>`: <branch `<b>` (source version `<x.y.z>`) does not contain the fix yet
-     | that release shipped before the commit>. Satisfied: `<versions>`; not satisfied:
-     `<versions>` (mark "partial" if some are satisfied).
+   - Fix Version `<v>` in `<repo>`: <branch `<b>` (source version `<x.y.z>`) does not
+     contain the fix yet | release tag `<T>` shipped without the fix>. Satisfied:
+     `<version/repo pairs>`; not satisfied: `<version/repo pairs>` (mark "partial" if some
+     are satisfied).
    - Likely cause: merge/backport pending, or wrong Fix Version. Confirm with the author.
 ```
 
-Take branch and source version from the check's per-Fix-Version reasons; never assume which
-branch ships which version.
+Take branch, tag and source version from the check's reasons; never assume which branch
+ships which version, and never name a frozen branch (one whose version is already tagged) as
+a merge target.
 
 A `MISMATCH` alone never drives the overall rating above `MODERATE`. An `INDETERMINATE`
 result is **not** a Top risk — it lives only in the "Scope reviewed" flag, consistent with
@@ -164,9 +168,10 @@ none. Worth surfacing because the reviewer may want it corrected while the chang
 internal risk language and no root-cause reasoning. Only questions the code genuinely cannot
 answer. Three to five at most. Omit the section entirely if there are none. When
 `FIX_VERSION_CHECK` is `MISMATCH`, add a neutral question here so the reviewer can forward
-it verbatim, e.g. "Is the merge/backport to `<branch>` (Fix Version `<v>`) still pending, or
-should the Fix Version be changed?", or, when the release had already shipped before the
-commit, "Fix Version `<v>` shipped before this commit; which release is this meant for?".>
+it verbatim, e.g. "Is the merge/backport to `<branch>` in `<repo>` (Fix Version `<v>`) still
+pending, or should the Fix Version be changed?", or, when release tag `<T>` shipped without
+the fix, "Fix Version `<v>` was released without this change; which release is it meant
+for?".>
 
 1. ...
 
