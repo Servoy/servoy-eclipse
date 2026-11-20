@@ -1,5 +1,5 @@
 import { Component, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject, untracked } from '@angular/core';
-import { EditorSessionService, ISupportAutoscroll } from 'src/designer/services/editorsession.service';
+import { EditorSessionService, ISupportAutoscroll } from '../services/editorsession.service';
 import { URLParserService } from '../services/urlparser.service';
 import { ElementInfo } from '../directives/resizeknob.directive';
 import { DesignerUtilsService } from '../services/designerutils.service';

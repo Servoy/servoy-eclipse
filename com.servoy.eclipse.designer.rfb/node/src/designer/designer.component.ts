@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, Renderer2, ChangeDetectionStrategy, effect, inject, untracked, viewChild } from '@angular/core';
 import { EditorSessionService } from './services/editorsession.service';
-import { URLParserService } from 'src/designer/services/urlparser.service';
+import { URLParserService } from './services/urlparser.service';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { VariantsPreviewComponent } from './variantspreview/variantspreview.component';
 import { PaletteComponent } from './palette/palette.component';
