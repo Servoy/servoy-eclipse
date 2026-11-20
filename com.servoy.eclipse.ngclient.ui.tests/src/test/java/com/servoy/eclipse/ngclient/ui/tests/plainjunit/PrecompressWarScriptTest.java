@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ import org.junit.jupiter.api.io.TempDir;
  * SVY-21642 - runs the real resources/precompress-war.mjs with a real node
  * against a fabricated WAR tree. Node is resolved from system property/env
  * servoy.nodePath, then a bundled com.servoy.eclipse.nodejs.* plugin node, then
- * PATH. The test fails (it never skips) when no working node is found.
+ * PATH. When no working node is found the whole class is skipped (assumption).
  */
 class PrecompressWarScriptTest {
 	private static String node;
@@ -96,8 +97,10 @@ class PrecompressWarScriptTest {
 				tried.append(c).append(" (").append(e.getMessage()).append(") ");
 			}
 		}
-		throw new AssertionError(
-				"No working node found for PrecompressWarScriptTest. Set -Dservoy.nodePath=<node executable> or put node on PATH. Tried: "
+		// no node on this machine (e.g. a CI agent without node on PATH): skip the
+		// whole class
+		Assumptions.assumeTrue(false,
+				"No working node found, skipping PrecompressWarScriptTest. Set -Dservoy.nodePath=<node executable> or put node on PATH. Tried: "
 						+ tried);
 	}
 
