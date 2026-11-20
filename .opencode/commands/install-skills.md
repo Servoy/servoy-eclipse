@@ -33,6 +33,13 @@ Steps to perform:
    - Treat the rule as present if any existing rule already matches `action: "subagent"` with `resource: "general"` (or `resource: "*"`) and `effect: "allow"`; in that case skip. Otherwise append it. Never add duplicates, and leave every unrelated agent setting and permission rule untouched.
    - This lives in the **global** config (not the repo's `.opencode`) on purpose: the SDD skill is installed globally and runs in every Servoy repo, so the orchestrating `build` agent must be allowed to launch `general` regardless of which repo is open.
 
-8. Report what was installed, grouped as **new**, **updated**, and **unchanged**, alongside the skills now on the path, the plugins now referenced in `plugins` (including whether `open-codebase-index` was added or already present), and whether the `general` subagent permission was added or already present — then remind the user to restart opencode. If everything was unchanged, the path was already registered, all plugins (repo plugins and `open-codebase-index`) were already referenced, and the `general` permission was already present, say so explicitly (nothing to do).
+8. Register the shared global instructions. List the `*.md` files directly inside this repo's `opencode_instructions/` directory (it sits beside `skills/` at the repo root; these are rules that apply to every project, such as how to handle `build.servoy.com` Jenkins links). Ensure the config has an `instructions` array, then for each file make sure it is referenced by its **absolute path** (forward slashes):
+   - If an existing `instructions` entry is a string ending in `/opencode_instructions/<filename>` (same filename from any checkout path), **replace** it with the freshly resolved absolute path so it points at this checkout.
+   - Otherwise, append the absolute path.
+   - Never add duplicates, and leave every unrelated `instructions` entry untouched.
+
+   Like the plugins this is a reference, not a copy: the text stays in git and is picked up by every project after a `git pull`. Do NOT copy these into the user's global `AGENTS.md`.
+
+9. Report what was installed, grouped as **new**, **updated**, and **unchanged**, alongside the skills now on the path, the plugins now referenced in `plugins` (including whether `open-codebase-index` was added or already present), whether the `general` subagent permission was added or already present, and the instruction files now referenced in `instructions` — then remind the user to restart opencode. If everything was unchanged, the path was already registered, all plugins (repo plugins and `open-codebase-index`) were already referenced, the `general` permission was already present, and all instruction files were already referenced, say so explicitly (nothing to do).
 
 Do NOT use platform-specific commands. Use the built-in file read/write tools which work on any OS.
