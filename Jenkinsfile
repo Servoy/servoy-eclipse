@@ -1,3 +1,10 @@
+// True when a newer build of this job is waiting in the queue (e.g. a push during this build).
+// NonCPS: the Jenkins queue objects are not serializable.
+@NonCPS
+boolean newerBuildQueued(String jobName) {
+    return jenkins.model.Jenkins.get().queue.items.any { it.task.ownerTask?.fullName == jobName }
+}
+
 pipeline {
     agent any
     
@@ -6,8 +13,11 @@ pipeline {
         quietPeriod(120)
         buildDiscarder(logRotator(daysToKeepStr: '40', numToKeepStr: '70'))
         
-        // Annuleer een eventueel al LOPENDE build als er een nieuwe start
-        disableConcurrentBuilds(abortPrevious: true)
+        // Nooit twee builds tegelijk (gedeelde workspace). Een nieuwe build wacht in de queue tot de
+        // lopende klaar is; we breken de lopende NIET meer automatisch af (abortPrevious), want dat
+        // gebeurde ook als hij al bijna klaar was (bv. #517 tijdens de post-acties). Alleen tijdens
+        // 'Build with Tycho' (het begin) maakt de lopende build plaats voor een nieuwere, zie daar.
+        disableConcurrentBuilds()
     }
     
     triggers {
@@ -88,18 +98,42 @@ pipeline {
         }
 
         // Only runs if WIPE_WORKSPACE is FALSE
+        // While the main Maven build runs, a 'supersede' branch watches the queue: if a newer build of this
+        // job gets queued (a new push), this build is still early and stops itself as NOT_BUILT so the newer
+        // one can start. Once 'Build with Tycho' is done the build is far along and always finishes
+        // (integration tests, coverage, post actions); a newer build then simply waits in the queue.
         stage('Build with Tycho') {
             when {
                 expression { !params.WIPE_WORKSPACE }
             }
             steps {
-                wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
-                    configFileProvider([
-                        configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
-                        configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
-                    ]) {
-                        sh 'mvn -B -fae -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" $goals'
-                    }
+                script {
+                    def tychoDone = false
+                    parallel(
+                        failFast: true,
+                        'maven build': {
+                            wrap([$class: 'Xvfb', installationName: 'xvfb', autoDisplayName: true]) {
+                                configFileProvider([
+                                    configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
+                                    configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
+                                ]) {
+                                    sh 'mvn -B -fae -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" $goals'
+                                }
+                            }
+                            tychoDone = true
+                        },
+                        'supersede': {
+                            // polls with a growing interval (max 15 s)
+                            waitUntil(initialRecurrencePeriod: 15000, quiet: true) {
+                                tychoDone || newerBuildQueued(env.JOB_NAME)
+                            }
+                            if (!tychoDone) {
+                                // NOT_BUILT (like the former abortPrevious); failFast then stops the maven branch
+                                currentBuild.result = 'NOT_BUILT'
+                                error('Superseded by a newer queued build while still in Build with Tycho')
+                            }
+                        }
+                    )
                 }
             }
         }
