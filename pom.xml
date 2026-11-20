@@ -290,6 +290,15 @@
 							<destFile>${project.build.directory}/jacoco-merged.exec</destFile>
 							<dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
 							<outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+							<!-- 'report' only: do not analyze archives that end up in target/classes. JaCoCo opens
+							     them recursively, e.g. model.exporter.mobile ships servoy_mobile(_jsunit).war whose
+							     embedded gwt jars contain duplicate class names ("Can't add different class with
+							     same name"), which failed the report and SKIPPED every bundle depending on it. -->
+							<excludes>
+								<exclude>**/*.jar</exclude>
+								<exclude>**/*.war</exclude>
+								<exclude>**/*.zip</exclude>
+							</excludes>
 						</configuration>
 					</plugin>
 				</plugins>

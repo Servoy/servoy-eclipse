@@ -217,11 +217,14 @@ pipeline {
                         sourceCodeRetention: 'EVERY_BUILD'
                     )
 
-                    // Archive the raw coverage data so it can be read per build (also via the Jenkins MCP).
-                    // The exec files are kept separately so unit vs integration can be split offline:
-                    // jacoco.exec = plainjunit, jacoco-it.exec = integrationpde, jacoco-merged.exec = both
-                    // (what the published number reflects). The cobertura files are the Angular Vitest coverage.
-                    archiveArtifacts artifacts: '**/target/site/jacoco/jacoco.xml, **/target/jacoco.exec, **/target/jacoco-it.exec, **/target/jacoco-merged.exec, com.servoy.eclipse.ngclient.ui/target/coverage/combined/cobertura-coverage.xml, com.servoy.eclipse.designer.rfb/target/coverage/combined/cobertura-coverage.xml, com.servoy.eclipse.designer.wpm/target/coverage/cobertura-coverage.xml', allowEmptyArchive: true, fingerprint: false
+                    // Archive the coverage reports so they can be read per build (also via the Jenkins MCP).
+                    // Jenkins keeps the workspace-relative path, so each file shows up under <module>/target/.
+                    // jacoco.xml = the per-bundle JaCoCo report (per class/method/line/branch counters, what the
+                    // published number reflects); the cobertura files are the Angular Vitest coverage.
+                    // The binary jacoco*.exec files are deliberately NOT archived: they can only be turned into a
+                    // report again together with the exact class files of this build (which are not archived),
+                    // and everything readable is already in jacoco.xml.
+                    archiveArtifacts artifacts: '**/target/site/jacoco/jacoco.xml, com.servoy.eclipse.ngclient.ui/target/coverage/combined/cobertura-coverage.xml, com.servoy.eclipse.designer.rfb/target/coverage/combined/cobertura-coverage.xml, com.servoy.eclipse.designer.wpm/target/coverage/cobertura-coverage.xml', allowEmptyArchive: true, fingerprint: false
                 }
             }
         }
