@@ -551,6 +551,24 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public boolean isPrecompressBrotli()
+		{
+			return cmdLineArguments.isPrecompressBrotli();
+		}
+
+		@Override
+		public boolean isPrecompressGzip()
+		{
+			return cmdLineArguments.isPrecompressGzip();
+		}
+
+		@Override
+		public boolean isInjectTomcatPrecompressed()
+		{
+			return cmdLineArguments.isInjectTomcatPrecompressed();
+		}
+
+		@Override
 		public boolean isClearReferencesStatic()
 		{
 			return cmdLineArguments.isClearReferencesStatic();

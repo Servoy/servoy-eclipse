@@ -184,7 +184,7 @@ public class WarExporter
 		"org.apache.logging.log4j.core_*.jar", //
 		"org.apache.logging.log4j.slf4j2.impl_*.jar", //
 		"org.apache.logging.log4j.jakarta.web_*.jar", //
-//		"org.apache.logging.log4j.jcl_*.jar", //
+		//		"org.apache.logging.log4j.jcl_*.jar", //
 		"jakarta.persistence-api_*.jar", //
 		"jakarta.mail-api_*.jar", //
 		"jakarta.activation-api_*.jar", //
@@ -412,6 +412,19 @@ public class WarExporter
 
 		monitor.worked(1);
 		if (monitor.isCanceled()) return null;
+		if (exportModel.isPrecompressBrotli() || exportModel.isPrecompressGzip())
+		{
+			if (exportModel.exportNG2Mode() != null && exportModel.exportNG2Mode().equals("false"))
+			{
+				ServoyLog.logInfo("Skipping precompression: no Titanium NGClient resources were exported (-ng2 false)");
+			}
+			else
+			{
+				monitor.subTask("Precompressing static resources (" + SDF.format(new Date()) + ")");
+				runPrecompression(monitor);
+				if (monitor.isCanceled()) return null;
+			}
+		}
 		monitor.subTask("Creating/zipping the WAR file (" + SDF.format(new Date()) + ")");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
@@ -1318,6 +1331,80 @@ public class WarExporter
 		}
 	}
 
+	/**
+	 * Tomcat DefaultServlet override that serves precompressed .br/.gz siblings. Redeclaring the 'default' servlet in a web application's web.xml replaces
+	 * the container declaration entirely (init-params are not merged), so the container defaults that matter (debug, listings) are repeated here.
+	 */
+	static final String PRECOMPRESSED_SERVLET_SNIPPET = "\n  <!-- SVY-21642: serve precompressed .br/.gz siblings (Tomcat DefaultServlet) -->\n" + //
+		"  <servlet>\n" + //
+		"    <servlet-name>default</servlet-name>\n" + //
+		"    <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>\n" + //
+		"    <init-param>\n" + //
+		"      <param-name>debug</param-name>\n" + //
+		"      <param-value>0</param-value>\n" + //
+		"    </init-param>\n" + //
+		"    <init-param>\n" + //
+		"      <param-name>listings</param-name>\n" + //
+		"      <param-value>false</param-value>\n" + //
+		"    </init-param>\n" + //
+		"    <init-param>\n" + //
+		"      <param-name>precompressed</param-name>\n" + //
+		"      <param-value>br=.br,gzip=.gz</param-value>\n" + //
+		"    </init-param>\n" + //
+		"    <load-on-startup>1</load-on-startup>\n" + //
+		"  </servlet>\n\n";
+
+	/**
+	 * Inserts the Tomcat precompressed DefaultServlet configuration just before the last closing web-app tag.
+	 */
+	static String injectPrecompressedServlet(String webXml)
+	{
+		int index = webXml.lastIndexOf("</web-app>");
+		if (index == -1) throw new IllegalArgumentException("web.xml has no closing web-app tag");
+		return webXml.substring(0, index) + PRECOMPRESSED_SERVLET_SNIPPET + webXml.substring(index);
+	}
+
+	private void runPrecompression(final IProgressMonitor monitor) throws ExportException
+	{
+		final boolean brotli = exportModel.isPrecompressBrotli();
+		final boolean gzip = exportModel.isPrecompressGzip();
+		try
+		{
+			Activator.getDefault().precompressWar(new IWarPrecompressModel()
+			{
+				@Override
+				public File getWarDirectory()
+				{
+					return tmpWarDir;
+				}
+
+				@Override
+				public boolean isBrotli()
+				{
+					return brotli;
+				}
+
+				@Override
+				public boolean isGzip()
+				{
+					return gzip;
+				}
+
+				@Override
+				public IProgressMonitor getProgressMonitor()
+				{
+					return monitor;
+				}
+			});
+		}
+		catch (RuntimeException e)
+		{
+			if (monitor.isCanceled()) return;
+			throw new ExportException("could not precompress the WAR resources: " + e.getMessage(), e);
+		}
+		monitor.worked(1);
+	}
+
 	private void copyWebXml() throws ExportException
 	{
 		// copy war web.xml
@@ -1340,6 +1427,26 @@ public class WarExporter
 		catch (FileNotFoundException fnfe)
 		{
 			throw new ExportException("Can't create the web.xml file, couldn't read" + name, fnfe);
+		}
+		if (exportModel.isInjectTomcatPrecompressed())
+		{
+			if (name != null)
+			{
+				ServoyLog.logInfo("A custom web.xml is used, the Tomcat precompressed configuration is not injected into it.");
+			}
+			else
+			{
+				try (InputStream is = webXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
+				{
+					String content = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+					bos.write(injectPrecompressedServlet(content).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+				}
+				catch (Exception e)
+				{
+					throw new ExportException("Can't create the web.xml file: " + webXMLFile.getAbsolutePath(), e);
+				}
+				return;
+			}
 		}
 		try (InputStream is = webXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
 		{
@@ -1431,8 +1538,8 @@ public class WarExporter
 		targetLibDir.mkdirs();
 		copyDir(libDir, targetLibDir, false);
 
-//		// copy the template handler
-//		copyFile(new File(appServerDir, "server/lib/template-handler.jar"), new File(targetLibDir, "template-handler.jar"));
+		//		// copy the template handler
+		//		copyFile(new File(appServerDir, "server/lib/template-handler.jar"), new File(targetLibDir, "template-handler.jar"));
 
 		// delete the servlet.jar that one isn't allowed.
 		new File(targetLibDir, "servlet-api.jar").delete();

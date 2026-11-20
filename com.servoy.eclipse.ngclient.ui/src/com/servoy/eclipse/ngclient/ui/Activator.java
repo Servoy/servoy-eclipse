@@ -75,6 +75,7 @@ public class Activator extends Plugin
 		plugin = this;
 
 		com.servoy.eclipse.model.Activator.getDefault().setNG2WarExporter(WebPackagesListener::exportNG2ToWar);
+		com.servoy.eclipse.model.Activator.getDefault().setWarPrecompressor(WebPackagesListener::precompressWar);
 
 		String targetFolder = getSystemOrEvironmentProperty("servoy.ng2.target.folder");
 		if (targetFolder != null)

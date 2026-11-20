@@ -78,6 +78,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	private static final String contextFileName = "contextFileName";
 	private static final String createTomcatContextXML = "createTomcatContextXML";
+	private static final String precompressBrotli = "precompressBrotli";
+	private static final String precompressGzip = "precompressGzip";
+	private static final String injectTomcatPrecompressed = "injectTomcatPrecompressed";
 	private static final String antiResourceLocking = "antiResourceLocking";
 	private static final String clearReferencesStatic = "clearReferencesStatic";
 	private static final String clearReferencesStopThreads = "clearReferencesStopThreads";
@@ -265,6 +268,14 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             included nstead of the default one.\n"
 			+ "        -" + webXmlFileName + " ... a path to a web.xml  that should be included instead  of default\n"
 			+ "             one; it should be a web.xml file previously generated via a Servoy WAR export.\n"
+			+ "        -" + precompressBrotli + " ... create .br files for the static resources of the WAR just before it\n"
+			+ "             is zipped. The precompression step runs when this and/or -" + precompressGzip + " is given;\n"
+			+ "             requires -ng2 other than false (otherwise skipped). Uses maximum compression\n"
+			+ "             (brotli 11) so the export takes longer.\n"
+			+ "        -" + precompressGzip + " ... create .gz files (same rules as -" + precompressBrotli + "; gzip 9).\n"
+			+ "        -" + injectTomcatPrecompressed + " ... add the Tomcat DefaultServlet 'precompressed' config to the\n"
+			+ "             generated web.xml (ignored when -" + webXmlFileName + " is used). Applied even without\n"
+			+ "             -" + precompressBrotli + " / -" + precompressGzip + ". Tomcat specific: other containers may ignore or reject it.\n"
 			+ "        -ng2 true / false / sourcemaps / dev ... export Titanium client. If 'sourcemaps' is\n"
 			+ "             given, then sourcemaps will be generated for .ts files - useful for debugging.\n"
 			+ "             If 'dev' is given,  then the client side code  will be compiled in development\n"
@@ -617,6 +628,21 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isCreateTomcatContextXML()
 	{
 		return argumentsMap.containsKey(createTomcatContextXML);
+	}
+
+	public boolean isPrecompressBrotli()
+	{
+		return argumentsMap.containsKey(precompressBrotli);
+	}
+
+	public boolean isPrecompressGzip()
+	{
+		return argumentsMap.containsKey(precompressGzip);
+	}
+
+	public boolean isInjectTomcatPrecompressed()
+	{
+		return argumentsMap.containsKey(injectTomcatPrecompressed);
 	}
 
 	public boolean isClearReferencesStatic()

@@ -19,7 +19,9 @@ package com.servoy.eclipse.ngclient.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,6 +58,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -97,6 +100,7 @@ import com.servoy.eclipse.model.util.IEditorRefresh;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
+import com.servoy.eclipse.model.war.exporter.IWarPrecompressModel;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
@@ -2284,6 +2288,90 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		catch (IOException e)
 		{
 			throw new RuntimeException("Error generating NGClient2 production resources", e);
+		}
+	}
+
+	/**
+	 * Builds the argument list for the bundled precompress-war.mjs script (the script path itself is not part of it).
+	 */
+	static List<String> buildPrecompressArgs(File warDir, boolean brotli, boolean gzip)
+	{
+		List<String> args = new ArrayList<>();
+		try
+		{
+			args.add(warDir.getCanonicalPath());
+		}
+		catch (IOException e)
+		{
+			args.add(warDir.getAbsolutePath());
+		}
+		if (brotli) args.add("--brotli");
+		if (gzip) args.add("--gzip");
+		return args;
+	}
+
+	/**
+	 * Precompresses (brotli/gzip) the static resources of an assembled WAR directory using the bundled Node and the bundled precompress-war.mjs script.
+	 * Throws a RuntimeException on failure; returns quietly when cancelled.
+	 */
+	public static void precompressWar(IWarPrecompressModel model)
+	{
+		Activator activator = Activator.getInstance();
+		activator.waitForNodeExtraction();
+		File node = activator.getNodePath();
+		if (node == null) throw new RuntimeException("Node.js is not available, cannot precompress the WAR resources");
+
+		File tempScript = null;
+		try
+		{
+			URL entry = activator.getBundle().getEntry("/resources/precompress-war.mjs");
+			if (entry == null) throw new RuntimeException("The precompress-war.mjs script was not found in the bundle");
+			File script = null;
+			try
+			{
+				URL fileUrl = FileLocator.toFileURL(entry);
+				if ("file".equals(fileUrl.getProtocol()))
+				{
+					File f = new File(fileUrl.toURI());
+					if (f.isFile()) script = f;
+				}
+			}
+			catch (IOException | URISyntaxException e)
+			{
+				// fall back to a temp copy below
+			}
+			if (script == null)
+			{
+				tempScript = Files.createTempFile("precompress-war", ".mjs").toFile();
+				try (InputStream is = entry.openStream())
+				{
+					Files.copy(is, tempScript.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				}
+				script = tempScript;
+			}
+
+			File warDir = model.getWarDirectory();
+			RunNPMCommand cmd = new RunNPMCommand(node, script, warDir, buildPrecompressArgs(warDir, model.isBrotli(), model.isGzip()));
+			cmd.runCommand(model.getProgressMonitor());
+			int exitCode = cmd.getExitCode();
+			if (exitCode == RunNPMCommand.EXIT_CODE_CANCELLED) return;
+			if (exitCode != 0)
+			{
+				throw new RuntimeException("The precompression script failed with exit code " + exitCode + ", see the Titanium NG Build Console");
+			}
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Error precompressing the WAR resources", e);
+		}
+		catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+			throw new RuntimeException("Interrupted while precompressing the WAR resources", e);
+		}
+		finally
+		{
+			if (tempScript != null) tempScript.delete();
 		}
 	}
 

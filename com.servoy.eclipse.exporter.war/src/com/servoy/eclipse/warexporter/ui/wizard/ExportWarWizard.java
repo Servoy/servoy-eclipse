@@ -865,6 +865,10 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
 
+		appendToBuilder(sb, " -precompressBrotli", exportModel.isPrecompressBrotli());
+		appendToBuilder(sb, " -precompressGzip", exportModel.isPrecompressGzip());
+		appendToBuilder(sb, " -injectTomcatPrecompressed", exportModel.isInjectTomcatPrecompressed());
+
 		if (!Arrays.asList(null, "", "true").contains(exportModel.exportNG2Mode())) appendToBuilder(sb, " -ng2 ", exportModel.exportNG2Mode());
 		sb.append("\"");
 

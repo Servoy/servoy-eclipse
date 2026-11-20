@@ -126,6 +126,15 @@ public interface IWarExportModel extends IExportSolutionModel, ITiNGExportModel
 
 	public String checkWebXML();
 
+	/** Produce .br (brotli) siblings when precompressing. */
+	public boolean isPrecompressBrotli();
+
+	/** Produce .gz (gzip) siblings when precompressing. */
+	public boolean isPrecompressGzip();
+
+	/** Inject the Tomcat DefaultServlet precompressed config in the generated web.xml. */
+	public boolean isInjectTomcatPrecompressed();
+
 	public String checkLog4jConfigurationFile();
 
 	public List<String> getNonActiveSolutions();

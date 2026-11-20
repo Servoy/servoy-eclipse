@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -56,14 +57,17 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 	private Button overwriteAllPropertiesBtn;
 	private Text userHomeText;
 	private Button automaticallyUpgradeRepository;
-//	private Button createTomcatContextXML;
-//	private Button antiResourceLocking;
-//	private Button clearReferencesStatic;
-//	private Button clearReferencesStopThreads;
-//	private Button clearReferencesStopTimerThreads;
+	//	private Button createTomcatContextXML;
+	//	private Button antiResourceLocking;
+	//	private Button clearReferencesStatic;
+	//	private Button clearReferencesStopThreads;
+	//	private Button clearReferencesStopTimerThreads;
 	private Text fileContextNameText;
 	private Button browseContextButton;
 	private Combo exportTitaniumSourceMaps;
+	private Button precompressBrotliBtn;
+	private Button precompressGzipBtn;
+	private Button injectTomcatPrecompressedBtn;
 
 
 	public DeployConfigurationPage(String title, ExportWarModel exportModel)
@@ -108,103 +112,103 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		gd.horizontalSpan = 4;
 		new Label(composite, SWT.NONE).setLayoutData(gd); // just an empty vertical space
 
-//		createTomcatContextXML = new Button(composite, SWT.CHECK);
-//		createTomcatContextXML.setText("Create Tomcat META-INF/context.xml");
-//		createTomcatContextXML.setSelection(exportModel.isCreateTomcatContextXML());
-//		createTomcatContextXML.setToolTipText("Adds a Tomcat specific META-INF/context.xml file in the war file which allows enabling the options below.\n" +
-//			"Please note that the file is copied (and renamed) to $CATALINA_BASE/conf/[enginename]/[hostname]/ only the first time the war is deployed.\n" +
-//			"Subsequent updates of META-INF/context.xml in the war file will be ignored by tomcat.");
-//		createTomcatContextXML.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
-//				clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
-//				clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
-//				antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
-//				exportModel.setCreateTomcatContextXML(createTomcatContextXML.getSelection());
-//			}
-//		});
-//		createTomcatContextXML.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
-//
-//		new Label(composite, SWT.NONE);
-//		new Label(composite, SWT.NONE);
-//		antiResourceLocking = new Button(composite, SWT.CHECK);
-//		antiResourceLocking.setText("Set antiResourceLocking to true");
-//		antiResourceLocking.setSelection(exportModel.isAntiResourceLocking());
-//		antiResourceLocking.setToolTipText(
-//			"Recomended for Tomcat instalations running on Windows. It avoids a file locking issue when undeploying the war. \n" +
-//				"This will impact the startup time of the application.");
-//		antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
-//		antiResourceLocking.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				exportModel.setAntiResourceLocking(antiResourceLocking.getSelection());
-//			}
-//		});
-//		antiResourceLocking.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-//
-//		new Label(composite, SWT.NONE);
-//		new Label(composite, SWT.NONE);
-//		clearReferencesStatic = new Button(composite, SWT.CHECK);
-//		clearReferencesStatic.setText("Set clearReferencesStatic to true");
-//		clearReferencesStatic.setSelection(exportModel.isClearReferencesStatic());
-//		clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
-//		clearReferencesStatic.setToolTipText(
-//			"In order to avoid memory leaks, Tomcat will null out static fields from loaded classes after the application has been stopped.");
-//		clearReferencesStatic.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				exportModel.setClearReferencesStatic(clearReferencesStatic.getSelection());
-//			}
-//		});
-//		clearReferencesStatic.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-//
-//
-//		new Label(composite, SWT.NONE);
-//		new Label(composite, SWT.NONE);
-//		clearReferencesStopThreads = new Button(composite, SWT.CHECK);
-//		clearReferencesStopThreads.setText("Set clearReferencesStopThreads to true (USE WITH CARE)");
-//		clearReferencesStopThreads.setSelection(exportModel.isClearReferencesStopThreads());
-//		clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
-//		clearReferencesStopThreads.setToolTipText(
-//			"In order to avoid memory leaks, Tomcat will attempt to terminate threads that have been started by the web application.\n" +
-//				"Still running threads are stopped via the deprecated Thread.stop() method.");
-//		clearReferencesStopThreads.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				exportModel.setClearReferencesStopThreads(clearReferencesStopThreads.getSelection());
-//			}
-//		});
-//		clearReferencesStopThreads.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-//
-//		new Label(composite, SWT.NONE);
-//		new Label(composite, SWT.NONE);
-//		clearReferencesStopTimerThreads = new Button(composite, SWT.CHECK);
-//		clearReferencesStopTimerThreads.setText("Set clearReferencesStopTimerThreads to true");
-//		clearReferencesStopTimerThreads.setSelection(exportModel.isClearReferencesStopTimerThreads());
-//		clearReferencesStopTimerThreads.setToolTipText(
-//			"In order to avoid memory leaks, Tomcat attempts to terminate java.util.Timer threads that have been started by the web application.\n" +
-//				"Unlike standard threads, timer threads can be stopped safely although there may still be side-effects for the application.");
-//
-//		clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
-//
-//		clearReferencesStopTimerThreads.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				exportModel.setClearReferencesStopTimerThreads(clearReferencesStopTimerThreads.getSelection());
-//			}
-//		});
-//		clearReferencesStopTimerThreads.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		//		createTomcatContextXML = new Button(composite, SWT.CHECK);
+		//		createTomcatContextXML.setText("Create Tomcat META-INF/context.xml");
+		//		createTomcatContextXML.setSelection(exportModel.isCreateTomcatContextXML());
+		//		createTomcatContextXML.setToolTipText("Adds a Tomcat specific META-INF/context.xml file in the war file which allows enabling the options below.\n" +
+		//			"Please note that the file is copied (and renamed) to $CATALINA_BASE/conf/[enginename]/[hostname]/ only the first time the war is deployed.\n" +
+		//			"Subsequent updates of META-INF/context.xml in the war file will be ignored by tomcat.");
+		//		createTomcatContextXML.addSelectionListener(new SelectionAdapter()
+		//		{
+		//			@Override
+		//			public void widgetSelected(SelectionEvent e)
+		//			{
+		//				clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
+		//				clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
+		//				clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
+		//				antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
+		//				exportModel.setCreateTomcatContextXML(createTomcatContextXML.getSelection());
+		//			}
+		//		});
+		//		createTomcatContextXML.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+		//
+		//		new Label(composite, SWT.NONE);
+		//		new Label(composite, SWT.NONE);
+		//		antiResourceLocking = new Button(composite, SWT.CHECK);
+		//		antiResourceLocking.setText("Set antiResourceLocking to true");
+		//		antiResourceLocking.setSelection(exportModel.isAntiResourceLocking());
+		//		antiResourceLocking.setToolTipText(
+		//			"Recomended for Tomcat instalations running on Windows. It avoids a file locking issue when undeploying the war. \n" +
+		//				"This will impact the startup time of the application.");
+		//		antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
+		//		antiResourceLocking.addSelectionListener(new SelectionAdapter()
+		//		{
+		//			@Override
+		//			public void widgetSelected(SelectionEvent e)
+		//			{
+		//				exportModel.setAntiResourceLocking(antiResourceLocking.getSelection());
+		//			}
+		//		});
+		//		antiResourceLocking.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		//
+		//		new Label(composite, SWT.NONE);
+		//		new Label(composite, SWT.NONE);
+		//		clearReferencesStatic = new Button(composite, SWT.CHECK);
+		//		clearReferencesStatic.setText("Set clearReferencesStatic to true");
+		//		clearReferencesStatic.setSelection(exportModel.isClearReferencesStatic());
+		//		clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
+		//		clearReferencesStatic.setToolTipText(
+		//			"In order to avoid memory leaks, Tomcat will null out static fields from loaded classes after the application has been stopped.");
+		//		clearReferencesStatic.addSelectionListener(new SelectionAdapter()
+		//		{
+		//			@Override
+		//			public void widgetSelected(SelectionEvent e)
+		//			{
+		//				exportModel.setClearReferencesStatic(clearReferencesStatic.getSelection());
+		//			}
+		//		});
+		//		clearReferencesStatic.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		//
+		//
+		//		new Label(composite, SWT.NONE);
+		//		new Label(composite, SWT.NONE);
+		//		clearReferencesStopThreads = new Button(composite, SWT.CHECK);
+		//		clearReferencesStopThreads.setText("Set clearReferencesStopThreads to true (USE WITH CARE)");
+		//		clearReferencesStopThreads.setSelection(exportModel.isClearReferencesStopThreads());
+		//		clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
+		//		clearReferencesStopThreads.setToolTipText(
+		//			"In order to avoid memory leaks, Tomcat will attempt to terminate threads that have been started by the web application.\n" +
+		//				"Still running threads are stopped via the deprecated Thread.stop() method.");
+		//		clearReferencesStopThreads.addSelectionListener(new SelectionAdapter()
+		//		{
+		//			@Override
+		//			public void widgetSelected(SelectionEvent e)
+		//			{
+		//				exportModel.setClearReferencesStopThreads(clearReferencesStopThreads.getSelection());
+		//			}
+		//		});
+		//		clearReferencesStopThreads.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		//
+		//		new Label(composite, SWT.NONE);
+		//		new Label(composite, SWT.NONE);
+		//		clearReferencesStopTimerThreads = new Button(composite, SWT.CHECK);
+		//		clearReferencesStopTimerThreads.setText("Set clearReferencesStopTimerThreads to true");
+		//		clearReferencesStopTimerThreads.setSelection(exportModel.isClearReferencesStopTimerThreads());
+		//		clearReferencesStopTimerThreads.setToolTipText(
+		//			"In order to avoid memory leaks, Tomcat attempts to terminate java.util.Timer threads that have been started by the web application.\n" +
+		//				"Unlike standard threads, timer threads can be stopped safely although there may still be side-effects for the application.");
+		//
+		//		clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
+		//
+		//		clearReferencesStopTimerThreads.addSelectionListener(new SelectionAdapter()
+		//		{
+		//			@Override
+		//			public void widgetSelected(SelectionEvent e)
+		//			{
+		//				exportModel.setClearReferencesStopTimerThreads(clearReferencesStopTimerThreads.getSelection());
+		//			}
+		//		});
+		//		clearReferencesStopTimerThreads.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 
 		automaticallyUpgradeRepository = new Button(composite, SWT.CHECK);
 		automaticallyUpgradeRepository.setSelection(exportModel.isAutomaticallyUpgradeRepository());
@@ -301,7 +305,54 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		});
 		exportTitaniumSourceMaps.setLayoutData(gd);
 
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 3;
+		new Label(composite, SWT.NONE).setLayoutData(gd); // just an empty vertical space
+
+		createPrecompressGroup(composite);
+
 		setControl(composite);
+	}
+
+	private void createPrecompressGroup(Composite composite)
+	{
+		Group group = new Group(composite, SWT.NONE);
+		group.setText("Precompress static resources");
+		group.setLayout(new GridLayout(1, false));
+		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+
+		precompressBrotliBtn = new Button(group, SWT.CHECK);
+		precompressBrotliBtn.setText("Create brotli (.br) files");
+		precompressBrotliBtn.setToolTipText("Creates .br files next to the compressible static resources of the war.\n" +
+			"Needs the Titanium NGClient export. Uses maximum compression (brotli 11), so the export takes longer.");
+		precompressBrotliBtn.setSelection(exportModel.isPrecompressBrotli());
+
+		precompressGzipBtn = new Button(group, SWT.CHECK);
+		precompressGzipBtn.setText("Create gzip (.gz) files");
+		precompressGzipBtn.setToolTipText("Creates .gz files next to the compressible static resources of the war.\n" +
+			"Needs the Titanium NGClient export. Uses maximum compression (gzip 9), so the export takes longer.");
+		precompressGzipBtn.setSelection(exportModel.isPrecompressGzip());
+
+		injectTomcatPrecompressedBtn = new Button(group, SWT.CHECK);
+		injectTomcatPrecompressedBtn.setText("Inject Tomcat precompressed config in web.xml");
+		injectTomcatPrecompressedBtn
+			.setToolTipText("Adds the Tomcat DefaultServlet 'precompressed' configuration to the generated web.xml so the .br/.gz files are served.\n" +
+				"Not used when a custom web.xml is given. This references a Tomcat class: other containers may ignore or reject it.");
+		injectTomcatPrecompressedBtn.setSelection(exportModel.isInjectTomcatPrecompressed());
+
+		SelectionListener precompressListener = new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setPrecompressBrotli(precompressBrotliBtn.getSelection());
+				exportModel.setPrecompressGzip(precompressGzipBtn.getSelection());
+				exportModel.setInjectTomcatPrecompressed(injectTomcatPrecompressedBtn.getSelection());
+			}
+		};
+		precompressBrotliBtn.addSelectionListener(precompressListener);
+		precompressGzipBtn.addSelectionListener(precompressListener);
+		injectTomcatPrecompressedBtn.addSelectionListener(precompressListener);
 	}
 
 	@Override
@@ -405,23 +456,30 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 
 		fileContextNameText.setText("");
 		exportModel.setTomcatContextXMLFileName("");
-//		createTomcatContextXML.setSelection(false);
+		//		createTomcatContextXML.setSelection(false);
 		exportModel.setCreateTomcatContextXML(false);
-//		antiResourceLocking.setSelection(false);
-//		antiResourceLocking.setEnabled(false);
+		//		antiResourceLocking.setSelection(false);
+		//		antiResourceLocking.setEnabled(false);
 		exportModel.setAntiResourceLocking(false);
-//		clearReferencesStatic.setSelection(false);
-//		clearReferencesStatic.setEnabled(false);
+		//		clearReferencesStatic.setSelection(false);
+		//		clearReferencesStatic.setEnabled(false);
 		exportModel.setClearReferencesStatic(false);
-//		clearReferencesStopThreads.setEnabled(false);
-//		clearReferencesStopThreads.setSelection(false);
+		//		clearReferencesStopThreads.setEnabled(false);
+		//		clearReferencesStopThreads.setSelection(false);
 		exportModel.setClearReferencesStopThreads(false);
-//		clearReferencesStopTimerThreads.setSelection(false);
-//		clearReferencesStopTimerThreads.setEnabled(false);
+		//		clearReferencesStopTimerThreads.setSelection(false);
+		//		clearReferencesStopTimerThreads.setEnabled(false);
 		exportModel.setClearReferencesStopTimerThreads(false);
 
 		exportTitaniumSourceMaps.select(0);
 		exportModel.setExportNG2Mode("true");
+
+		precompressBrotliBtn.setSelection(false);
+		precompressGzipBtn.setSelection(false);
+		injectTomcatPrecompressedBtn.setSelection(false);
+		exportModel.setPrecompressBrotli(false);
+		exportModel.setPrecompressGzip(false);
+		exportModel.setInjectTomcatPrecompressed(false);
 	}
 
 	@Override

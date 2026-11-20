@@ -28,6 +28,7 @@ import org.eclipse.dltk.javascript.parser.JavascriptParserPreferences;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.IWarPrecompressModel;
 import com.servoy.j2db.IApplication;
 
 /**
@@ -48,6 +49,8 @@ public class Activator extends Plugin
 	private static Activator plugin;
 
 	private Consumer<ING2WarExportModel> exporter;
+
+	private volatile Consumer<IWarPrecompressModel> precompressor;
 
 	/**
 	 * The constructor
@@ -167,6 +170,23 @@ public class Activator extends Plugin
 	public void setNG2WarExporter(Consumer<ING2WarExportModel> exporter)
 	{
 		this.exporter = exporter;
+	}
+
+	/**
+	 * Precompresses the static resources of an assembled WAR directory.
+	 *
+	 * @throws IllegalStateException if no precompressor was registered
+	 */
+	public void precompressWar(IWarPrecompressModel model)
+	{
+		Consumer<IWarPrecompressModel> compressor = this.precompressor;
+		if (compressor == null) throw new IllegalStateException("Couldn't precompress the WAR because the precompressor was not configured");
+		compressor.accept(model);
+	}
+
+	public void setWarPrecompressor(Consumer<IWarPrecompressModel> precompressor)
+	{
+		this.precompressor = precompressor;
 	}
 
 }

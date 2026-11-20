@@ -113,6 +113,9 @@ public class ExportWarModel extends AbstractWarExportModel
 	private Set<String> servicesToExportWithoutUnderTheHoodOnes;
 	private boolean upgradeRepository;
 	private boolean createTomcatContextXML;
+	private boolean precompressBrotli;
+	private boolean precompressGzip;
+	private boolean injectTomcatPrecompressed;
 	private boolean antiResourceLocking;
 	private boolean clearReferencesStatic;
 	private boolean clearReferencesStopThreads;
@@ -217,6 +220,9 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		contextFileName = settings.get("export.tomcat.contextFileName");
 		createTomcatContextXML = Utils.getAsBoolean(settings.get("export.tomcat.createTomcatContextXML"));
+		precompressBrotli = Utils.getAsBoolean(settings.get("export.precompress.brotli"));
+		precompressGzip = Utils.getAsBoolean(settings.get("export.precompress.gzip"));
+		injectTomcatPrecompressed = Utils.getAsBoolean(settings.get("export.precompress.tomcat"));
 		antiResourceLocking = Utils.getAsBoolean(settings.get("export.tomcat.antiResourceLocking"));
 		clearReferencesStatic = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStatic"));
 		clearReferencesStopThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopThreads"));
@@ -434,6 +440,9 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.skipDatabaseViewsUpdate", isSkipDatabaseViewsUpdate());
 		settings.put("export.tomcat.contextFileName", contextFileName);
 		settings.put("export.tomcat.createTomcatContextXML", createTomcatContextXML);
+		settings.put("export.precompress.brotli", precompressBrotli);
+		settings.put("export.precompress.gzip", precompressGzip);
+		settings.put("export.precompress.tomcat", injectTomcatPrecompressed);
 		settings.put("export.tomcat.antiResourceLocking", antiResourceLocking);
 		settings.put("export.tomcat.clearReferencesStatic", clearReferencesStatic);
 		settings.put("export.tomcat.clearReferencesStopThreads", clearReferencesStopThreads);
@@ -963,6 +972,39 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		this.contextFileName = contextFileName;
 		if (this.createTomcatContextXML) this.createTomcatContextXML = contextFileName != null;
+	}
+
+	@Override
+	public boolean isPrecompressBrotli()
+	{
+		return precompressBrotli;
+	}
+
+	public void setPrecompressBrotli(boolean precompressBrotli)
+	{
+		this.precompressBrotli = precompressBrotli;
+	}
+
+	@Override
+	public boolean isPrecompressGzip()
+	{
+		return precompressGzip;
+	}
+
+	public void setPrecompressGzip(boolean precompressGzip)
+	{
+		this.precompressGzip = precompressGzip;
+	}
+
+	@Override
+	public boolean isInjectTomcatPrecompressed()
+	{
+		return injectTomcatPrecompressed;
+	}
+
+	public void setInjectTomcatPrecompressed(boolean injectTomcatPrecompressed)
+	{
+		this.injectTomcatPrecompressed = injectTomcatPrecompressed;
 	}
 
 	public boolean isCreateTomcatContextXML()
