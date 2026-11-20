@@ -332,7 +332,8 @@ Spec file: SPEC_PATH
 Response must begin with `APPROVED` or `CHANGES NEEDED`.
 
 **If `CHANGES NEEDED`:** spawn a fix agent with review findings + project context + spec
-path, then re-run Phase 5. Repeat until `APPROVED`.
+path. It fixes only those findings; anything else it sees in existing tests it does not fix, it
+lists it under "Problems in existing tests" in its output. Then re-run Phase 5. Repeat until `APPROVED`.
 
 ---
 

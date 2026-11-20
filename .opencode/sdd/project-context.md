@@ -89,6 +89,10 @@ If creating a new plugin bundle:
     Developer; poll with `eclipse-pde_getOperationStatus`). Pass `junitVersion` ("6") if tests
     aren't found.
   - Never mix the two kinds in one package; no `@Suite`/`AllXxxTests` classes.
+- Mockito 5 is in the target platform. A test bundle that uses it imports `org.mockito` (and
+  `org.mockito.stubbing`) in its MANIFEST.MF; add the import if it is missing. Mockito 5 uses the inline mock maker by default,
+  so `mockStatic` / `mockConstruction` (static classes, `final` classes, objects created with
+  `new`) need no extra setup.
 - Maven: default build runs only `**/plainjunit/**/*.java`; `-Pintegration` runs
   `**/integrationpde/**/*.java` in a full workbench (Jenkinsfile "Integration Tests" stage).
 - Integration test classes must delete the workspace projects they use in `@BeforeAll`/

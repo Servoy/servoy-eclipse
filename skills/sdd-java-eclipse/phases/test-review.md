@@ -43,7 +43,16 @@ Read `AGENTS.md` and PROJECT CONTEXT for the testing approach, runners, and shar
 Use `eclipse-ide_fileSearch` with feature/class-name terms and `eclipse-ide_listProjects` to
 locate `*.tests` projects (tests live under their `<base>.plainjunit[.*]` and
 `<base>.integrationpde[.*]` packages). Read each test class in full — don't just check
-existence, read the body to understand what it verifies.
+existence, read the body to understand what it verifies. Review only the tests this change
+created or modified (check `git status` / `git diff`); tests that existed before and were not
+touched are out of scope, even in a file you read — a separate audit covers them.
+If this change fixed something in an existing test that the change does not need (its content:
+an assertion, a comment, a name; reformatting does not count), that is **Blocking**: revert it
+and report the problem instead. Problems you notice in existing tests go under "Problems in
+existing tests (report only)": they never affect the verdict; the user decides.
+
+For each test, state in one line which defect in the production code it would catch. A test for
+which the answer is "none" (it would pass whatever the code does) is a bug in the test.
 
 ### 4. Read the production code
 For each test, read the production code it exercises. Verify: does it cover the real behavior
@@ -88,6 +97,51 @@ it:
       helpers/base classes (no `@Test`) belong in a `...utils` sub-package, not mixed in with
       the tests.
 - [ ] No `@Suite` / `AllXxxTests` aggregator classes added.
+- [ ] **Reflection only as the last resort.** For every reflective access to a non-public member of
+      Servoy code (`setAccessible`, `getDeclared*` + `invoke`/`newInstance`/`get`), redo the
+      generator's check yourself before you read its comment: find the member's callers (grep) up to
+      the first public method, and judge whether a test through that method is reasonable — with the
+      class's own API, or with a simple mock of what that method depends on (a `protected` getter +
+      Mockito, or `mockStatic` for a static singleton such as `Plugin.getDefault()` when there is no
+      instance to override; including the data it receives). "It needs plugin X" does not mean
+      "cannot run in plain JUnit". Write one line per member under "Reflection check":
+      the public caller (`Class#method`, `File:line`) and why it can or cannot be driven.
+      Can be driven → **Blocking** ("test through <caller>"), whatever the comment says.
+      Cannot (it would need real runtime built through mocks: a JavaScript scope, a loaded solution,
+      workspace resources) → acceptable, with a comment on the reflective helper that says so and
+      holds up; missing or wrong → **Blocking**, ask only for the comment.
+      Adding a `protected` getter is a normal test seam. Widening a member's visibility is a
+      production decision: mention it, never make it the blocking fix. Package access only from a
+      `Fragment-Host` test project in the same package; never propose moving the test.
+      Always **Blocking**: reflection on an accessible member, reflection to check that a member
+      exists, setting a `private final` field by reflection, constructor reflection on persistence objects (use `new ChangeHandler(new
+      SimplePersistFactory())` set on a small `AbstractRootObject` subclass via `setChangeHandler`,
+      then `getChangeHandler().createNewObject(...)`; works in plain JUnit).
+      Allowed: `Proxy`, annotations a framework reads at runtime, production code that itself works
+      by reflection; third-party/JDK/Eclipse internals with a comment saying why.
+- [ ] A test of a utility class's private constructor (asserting it is private, and/or invoking it
+      once, also by reflection): not a finding, whoever wrote it and whenever — leave it, do not
+      suggest removing it. This covers the constructor only: a test asserting that the class is
+      `final` is structural (next item), **Blocking**.
+- [ ] No structural tests: tests that only check that a class, constructor, method, field or
+      modifier exists or has a given signature (`getMethod`, `getDeclaredConstructor`,
+      `Modifier.isFinal`, …), or that a member does NOT exist (a removed method). The compiler
+      already guarantees it and it executes no production code. **Blocking.** Exception:
+      metadata a framework reads at runtime (e.g. `@Tool` / `@McpServer` annotations).
+- [ ] MCP server tests: the tool metadata should be one invariant test over all `@Tool` methods
+      (registered, unique names, non-blank descriptions, every parameter a described `@ToolParam`),
+      reporting the tool count without asserting it. Per-tool count/arity tests → Blocking (see
+      brittle); missing invariant test → non-blocking suggestion.
+- [ ] No brittle tests that pin values changing with every unrelated addition (number of
+      registered tools, full list of contributions). **Blocking.** Counting is never covered by
+      the runtime-metadata exception: the number of tools, methods, or parameters of a `@Tool`
+      (`getParameterCount()`, `ps.length`, `toolCount`) is brittle even when the framework reads
+      those annotations. The exception covers asserting the specific values the feature relies on
+      (a tool's name, a parameter's name/description/required flag), not how many there are.
+- [ ] A new PDE integration test is right when it tests the real platform itself (an end-to-end
+      flow, the real persistence model, rendering/browser, the JSUnit/debug runtime, DLTK, a
+      database, real workspace resources) or states the mock it tried and how it failed.
+      Otherwise **Blocking**: it belongs in plain JUnit with mocks.
 - [ ] Shared PDE helpers (event pump, build/app-server waits, dialog guard, solution
       activation) are reused from the project AGENTS.md names, not re-implemented or copied.
       Where AGENTS.md says a sibling repo keeps a `Copy`-suffixed duplicate, the matching edit
@@ -103,7 +157,7 @@ it:
 **Naming & readability**
 - [ ] Test names describe scenario and expected outcome; bodies concise.
 - [ ] `@DisplayName` only on `@Test` methods, NOT on test classes or `@Nested` classes
-      (class-level `@DisplayName` breaks Jenkins package grouping — tests land in `(root)`).
+      (class-level `@DisplayName` breaks Jenkins package grouping — tests land in `(root)`). **Blocking.**
 
 **Edge cases**
 - [ ] Null/empty inputs tested where applicable; boundary values tested; concurrent scenarios
@@ -117,6 +171,8 @@ it:
 Your response **must begin** with exactly one of:
 - `APPROVED`
 - `CHANGES NEEDED`
+
+`CHANGES NEEDED` only when there is at least one Blocking item; suggestions alone mean `APPROVED`.
 
 Then produce the full review:
 
@@ -139,14 +195,20 @@ Then produce the full review:
 
 1. Consider adding a test for <scenario> — <why it matters>
 
+### Problems in existing tests (report only)
+
+1. `ExistingTest#method` — <problem; not fixed, for the user to decide>
+
 ### Summary
 <Two-sentence verdict focusing on the most critical gap.>
 ```
 
 ### Severity guidelines
 
-**Blocking** — an acceptance criterion has zero behavioral coverage, or a test has a bug that
-makes it vacuous (always passes). Must fix.
+**Blocking** — an acceptance criterion has zero behavioral coverage, a test has a bug that
+makes it vacuous (always passes), or a test breaks a checklist item marked **Blocking** above
+(reflection that is not the last resort or lacks its justification, structural or brittle
+tests). Must fix.
 
 **Non-blocking** — could add more edge cases, better naming, or structural improvements. Nice
 to have.

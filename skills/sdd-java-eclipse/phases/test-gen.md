@@ -105,6 +105,27 @@ assertions that accept anything (e.g. `result.contains("passed") || result.conta
 assertion, note it as an open question in the spec and ask the user — exposing the extra
 observable state is usually the right call.
 
+**No structural tests.** Do not test that a class, constructor, method, field or modifier exists or
+has a given signature (`getMethod`, `getDeclaredConstructor`, `Modifier.isFinal`, …): if any of
+that is wrong, the code does not compile or the compiler already enforces it. Do not write a test
+for a utility class's private constructor either (an existing one may stay).
+A test that a member does NOT exist (e.g. a removed method) is structural too. Such tests execute
+no production line, so they add no coverage either. Call the member and assert on what it does
+instead. The one exception is metadata the compiler cannot check and a framework reads at runtime
+(e.g. the `@Tool` / `@McpServer` annotations an MCP server is discovered by).
+
+**MCP servers.** Cover the tool methods by calling them (guards, validation, delegation through a
+seam + mock, result formatting). For the tool metadata, write one invariant test over ALL `@Tool`
+methods of the server, through the real registration path where possible: every tool is
+registered, names are unique, descriptions are not blank, every parameter has a `@ToolParam`
+with a description. Report the number of tools (log it or put it in the display name) but never
+assert it, so adding a tool never breaks the test.
+
+**No brittle tests.** Do not count tools, methods or `@Tool` parameters (not even as runtime
+metadata), and do not pin values that change with every unrelated addition — the number
+of registered tools, the full list of extension contributions, the size of a menu. Assert on the
+entries the feature under test adds or relies on.
+
 **No expensive end-to-end tests as a substitute for unit tests.** If a test needs `npm
 install`, a full titanium/ng build, or a browser to assert on a string, it is an integration
 smoke test, not a unit test. Write those only when the end-to-end outcome is what needs
@@ -172,9 +193,45 @@ which build stage runs a test. If the repo has a CI stage that lists the integra
 bundles `Require-Bundle` for shared helpers must be a plain (non-fragment) plugin with an
 `Export-Package`; follow AGENTS.md for those.
 
-**Instantiating package-private classes from OTHER bundles:** use reflection with
-`getDeclaredConstructors()[…]` + `setAccessible(true)`. Watch out for Servoy's own types
-(e.g. `com.servoy.j2db.util.UUID`, not `java.util.UUID`) — check PROJECT CONTEXT.
+**Reaching the code under test — reflection only as the last resort.** Test the code the way
+production code uses it:
+- **Through the public API.** For a private or package-private member, find who calls it (search
+  the production sources, follow non-public callers up to the first public method) and test it
+  through that public method.
+- **Replace what that method depends on, not the code.** When the public method needs something
+  heavy (the Servoy model, a plugin singleton, a running client, the workspace), give the test a
+  mock of it: preferably a small `protected` getter in the production class, overridden in a test
+  subclass to return a Mockito mock (a behaviour-preserving change; name it in your Output);
+  `mockStatic` only where there is no instance to override (static utilities, singletons reached
+  inside platform classes). Drive the branches you need through those mocks, including the data
+  the method receives from them. Never mock the class under test. Mockito 5 is in the target
+  platform: import `org.mockito` in the test bundle's MANIFEST.MF as `com.servoy.eclipse.model.tests` does.
+- **Persistence objects** (`Form`, `Relation`, …) only through the factories in PROJECT CONTEXT —
+  without a recipe there: `new ChangeHandler(new SimplePersistFactory())` on a small
+  `AbstractRootObject` subclass, then `getChangeHandler().createNewObject(parent, IRepository.FORMS / ...)`.
+  Never `new` them and never reach their constructors by reflection.
+- **A fragment** test project (`Fragment-Host:` the defining bundle) may call package-private
+  members, but only from exactly the same package.
+- **Reflection** on a non-public member of Servoy code is the last resort: only when testing
+  through the public method would need real runtime built up through mocks (a JavaScript scope, a
+  loaded solution, real workspace resources). Then put a short comment on the reflective helper
+  that a reviewer can check: the public caller you checked (`Class#method`, `File.java:line`) and
+  what it needs that a simple mock cannot give. A claim that does not hold makes the test a defect.
+- **Stop and ask** in your Output when the only clean way is to change a member's visibility, or
+  when you are not sure. Never move a test into the production package to gain access.
+
+Use a PDE integration test when the test is about the real platform itself: an end-to-end flow,
+the real persistence model, rendering/browser, the JSUnit/debug runtime, DLTK, a database, real
+workspace resources, or a mock you wrote and ran that failed (quote the failure). Everything else
+is plain JUnit with mocks.
+Never: reflection on a member that is already accessible (create objects with `new X()`), or to
+check that a member exists. Never set a `private final` field by reflection (it stops working on
+newer Java): use a constructor that takes the dependency, or a `protected` method the test can override. Allowed: `Proxy` test doubles, reading annotations a framework reads at
+runtime, production code that itself works by reflection; third-party/JDK/Eclipse internals with
+no other way in, with a comment saying why.
+
+Watch out for Servoy's own types (e.g. `com.servoy.j2db.util.UUID`, not `java.util.UUID`) —
+check PROJECT CONTEXT.
 
 **Package convention** (determines the runner and the Maven stage):
 | Test type | Package | Runner |
@@ -193,6 +250,9 @@ and reports zero tests.
 ### 5. Check for spec-defined test cases and existing test files
 If the spec has a test-cases section, implement every row exactly as named. Search for the
 expected test class name (`eclipse-ide_fileSearch`); if it exists, add only missing cases.
+Do not fix anything in existing tests that this change does not need (an assertion, a comment, a
+name, a weak test): list it under "Problems in existing tests" in your Output; the user decides.
+Reformatting by `formatFile` is fine.
 
 ### 6. Write the tests
 Cover: **happy path** (one per acceptance criterion), **edge cases** (null/empty/boundary —
@@ -227,3 +287,4 @@ List each test file created, its type, and the acceptance criteria it covers:
   - Edge: boundaryCondition
   - Error: nullInputThrows
 ```
+Then "Problems in existing tests" (not fixed): one line each, or "none".

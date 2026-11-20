@@ -86,6 +86,12 @@ For each item in the Implementation plan, verify it was actually done.
 - No unused imports; consistent formatting; public API methods have Javadoc
 - Eclipse/OSGi: new public-API packages exported in MANIFEST.MF; new deps declared in
   `Require-Bundle`; no use of another bundle's internal packages without good reason
+- No access-bypassing reflection (`setAccessible`, or `getDeclared*` + `invoke`/`newInstance`/`get`)
+  on Servoy's own code in production code — use or add a proper API. In tests it is the last
+  resort and must carry its justification (see the test-review checklist). Reflection that
+  bypasses nothing (`Proxy`, annotations read at runtime), production code that itself works by
+  reflection, and third-party/JDK/Eclipse-platform internals with no other way in (with a comment
+  saying why), are fine
 
 ### 7. Output
 
