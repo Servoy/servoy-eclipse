@@ -39,9 +39,12 @@
 					</execution>
 				</executions>
 				<configuration>
-					<!-- ${jacocoArgLine} is set by jacoco:prepare-agent (parent pom); it instruments
-					     the classes under test as this JVM loads them and writes target/jacoco.exec -->
-					<argLine>${jacocoArgLine}</argLine>
+					<!-- @{jacocoArgLine} is set by jacoco:prepare-agent (parent pom); it instruments
+					     the classes under test as this JVM loads them and writes target/jacoco.exec.
+					     Late @{...} evaluation is required: a ${jacocoArgLine} reference is resolved when the
+					     pom is loaded, before prepare-agent runs, so the fork got the empty default and no
+					     jacoco.exec was ever written. -->
+					<argLine>@{jacocoArgLine}</argLine>
 					<includes>
 						<include>**/plainjunit/**/*.java</include>
 					</includes>
@@ -68,6 +71,10 @@
 			<id>integration</id>
 			<properties>
 				<servoy_install>${project.basedir}/testresources/servoy_lts_extracted</servoy_install>
+				<!-- tycho/jacoco double indirection: holds the literal ${tycho.testArgLine}, expanded only when the
+				     tycho-surefire argLine dereferences ${additionalTestArgLine}, after jacoco:prepare-agent (below)
+				     has set tycho.testArgLine. A direct reference would be resolved too early and stay empty. -->
+				<additionalTestArgLine>${tycho.testArgLine}</additionalTestArgLine>
 			</properties>
 			<build>
 				<plugins>
@@ -168,6 +175,25 @@
 							<skip>true</skip>
 						</configuration>
 					</plugin>
+					<!-- JaCoCo agent for the integrationpde PDE tests: for an eclipse-test-plugin prepare-agent sets
+					     tycho.testArgLine by default; only the destFile is redirected so it does not collide with the
+					     plainjunit target/jacoco.exec. Flushed on the workbench JVM's clean shutdown. -->
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.version}</version>
+						<executions>
+							<execution>
+								<id>jacoco-prepare-agent-it</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+								<configuration>
+									<destFile>${project.build.directory}/jacoco-it.exec</destFile>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>org.eclipse.tycho</groupId>
 						<artifactId>tycho-surefire-plugin</artifactId>
@@ -186,7 +212,7 @@
 							<useUIThread>false</useUIThread>
 							<product>com.servoy.eclipse.core.ide</product>
 							<application>org.eclipse.ui.ide.workbench</application>
-							<argLine>-Xms256m -Xmx2048m -ea --add-exports=java.base/sun.security.x509=ALL-UNNAMED -Dorg.osgi.framework.system.packages.extra=sun.security.x509 -Dservoy.cloud.skipCheckout=true -Dservoy.application_server.dir=${servoy_install}/application_server -Dproperty-file=${project.basedir}/../com.servoy.eclipse.core.tests/testresources/servoy.properties -Dchromium.integration.eclipse.disable=true -Dorg.eclipse.ui.testing=true</argLine>
+							<argLine>${additionalTestArgLine} -Xms256m -Xmx2048m -ea --add-exports=java.base/sun.security.x509=ALL-UNNAMED -Dorg.osgi.framework.system.packages.extra=sun.security.x509 -Dservoy.cloud.skipCheckout=true -Dservoy.application_server.dir=${servoy_install}/application_server -Dproperty-file=${project.basedir}/../com.servoy.eclipse.core.tests/testresources/servoy.properties -Dchromium.integration.eclipse.disable=true -Dorg.eclipse.ui.testing=true</argLine>
 							<deleteOsgiDataDirectory>false</deleteOsgiDataDirectory>
 							<dependencies>
 								<dependency>

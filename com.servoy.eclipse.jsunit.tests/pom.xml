@@ -39,40 +39,14 @@
 					</execution>
 				</executions>
 				<configuration>
-					<!-- DIAGNOSTIC (build #479): the parent-pom jacoco prepare-agent set ${jacocoArgLine}
-					     but every module's report said "missing execution data file", so the agent never
-					     wrote target/jacoco.exec. This module is the single-module probe: prepare-agent is
-					     bound LOCALLY here (jacoco-prepare-agent-local below) writing an explicit destFile,
-					     fork is forced, and the effective argLine is referenced directly. If this module
-					     then produces target/jacoco.exec + a non-empty report, the same pattern is rolled
-					     out to the other 8 .tests modules. -->
-					<forkCount>1</forkCount>
-					<reuseForks>true</reuseForks>
-					<argLine>${jacocoArgLine}</argLine>
+					<!-- @{jacocoArgLine} is set by jacoco:prepare-agent (parent pom); late @{...} evaluation so the
+					     agent reaches the forked test JVM and writes target/jacoco.exec (a ${jacocoArgLine}
+					     reference is resolved before prepare-agent runs and stays empty). -->
+					<argLine>@{jacocoArgLine}</argLine>
 					<includes>
 						<include>**/plainjunit/**/*.java</include>
 					</includes>
 				</configuration>
-			</plugin>
-			<!-- Local prepare-agent probe: bound in this module, explicit destFile + property, so there is
-			     no doubt the agent arg is produced for THIS reactor module's test JVM. -->
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
-				<executions>
-					<execution>
-						<id>jacoco-prepare-agent-local</id>
-						<phase>process-test-classes</phase>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<configuration>
-							<propertyName>jacocoArgLine</propertyName>
-							<destFile>${project.build.directory}/jacoco.exec</destFile>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<!-- tycho-surefire always starts an OSGi runtime; this project has no integrationpde tests, so it stays skipped -->
 			<plugin>

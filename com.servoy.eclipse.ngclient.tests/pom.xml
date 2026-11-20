@@ -36,9 +36,12 @@
 					</execution>
 				</executions>
 				<configuration>
-					<!-- ${jacocoArgLine} is set by jacoco:prepare-agent (parent pom); it instruments
-					     the classes under test as this JVM loads them and writes target/jacoco.exec -->
-					<argLine>${jacocoArgLine}</argLine>
+					<!-- @{jacocoArgLine} is set by jacoco:prepare-agent (parent pom); it instruments
+					     the classes under test as this JVM loads them and writes target/jacoco.exec.
+					     Late @{...} evaluation is required: a ${jacocoArgLine} reference is resolved when the
+					     pom is loaded, before prepare-agent runs, so the fork got the empty default and no
+					     jacoco.exec was ever written. -->
+					<argLine>@{jacocoArgLine}</argLine>
 					<includes>
 						<include>**/plainjunit/**/*.java</include>
 					</includes>

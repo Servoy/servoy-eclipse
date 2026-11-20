@@ -128,14 +128,15 @@
 					<defaultP2Metadata>false</defaultP2Metadata>
 				</configuration>
 			</plugin>
-			<!-- JaCoCo code coverage for the Java tests. prepare-agent sets the ${jacocoArgLine}
-			     property (the -javaagent that instruments classes as the test JVM loads them);
-			     each .tests module's plain-surefire execution injects it via <argLine>, and the
-			     report goal writes target/site/jacoco/jacoco.xml which Jenkins' Coverage plugin
-			     reads (JACOCO parser). Harmless in non-test modules: with no tests, prepare-agent
-			     produces no .exec and report is a no-op. The forked-workbench PDE integration
-			     tests are a later phase (they need the agent inside the Tycho surefire argLine
-			     and OSGi bundle instrumentation), so only the plainjunit runs are wired for now. -->
+			<!-- JaCoCo code coverage for the Java tests (same recipe as Servoy-Copilot).
+			     prepare-agent sets the jacocoArgLine property (the -javaagent that instruments classes
+			     as the test JVM loads them); each .tests module's plain-surefire execution injects it
+			     as @{jacocoArgLine} (late evaluation, a ${...} reference would freeze the empty default)
+			     and writes target/jacoco.exec. The integrationpde PDE tests get their own agent in each
+			     .tests integration profile (target/jacoco-it.exec).
+			     The report is NOT generated here: the classes exercised by a .tests module belong to
+			     the production bundles, and the report goal only analyzes the current module's own
+			     classes. See the coverage-report profile below, run after the integration tests. -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -151,13 +152,6 @@
 							     it in their surefire <argLine> -->
 							<propertyName>jacocoArgLine</propertyName>
 						</configuration>
-					</execution>
-					<execution>
-						<id>jacoco-report</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -264,6 +258,43 @@
 	</build>
 
 	<profiles>
+		<!-- JaCoCo report step, run after a build that executed the plainjunit tests (target/jacoco.exec in
+		     each .tests module) and optionally the -Pintegration PDE tests (target/jacoco-it.exec):
+		       mvn -Pplugins,coverage-report org.jacoco:jacoco-maven-plugin:merge org.jacoco:jacoco-maven-plugin:report \
+		           -pl '!org.eclipse.jface,!<every *.tests module>'
+		     (-Pplugins is required: activating any profile of this pom deactivates the activeByDefault one.)
+		     In every production bundle, 'merge' unions the exec files of ALL .tests modules into
+		     target/jacoco-merged.exec (a test of one project often exercises classes of another bundle; data
+		     for other bundles' classes is simply ignored by that bundle's report), then 'report' analyzes the
+		     bundle's own target/classes + sources and writes target/site/jacoco/jacoco.xml, which Jenkins'
+		     recordCoverage (JACOCO) aggregates. One plugin-level configuration serves both direct goals:
+		     'merge' reads fileSets/destFile, 'report' reads dataFile. Missing exec files are skipped. -->
+		<profile>
+			<id>coverage-report</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.version}</version>
+						<configuration>
+							<fileSets>
+								<fileSet>
+									<directory>${project.basedir}/..</directory>
+									<includes>
+										<include>*.tests/target/jacoco.exec</include>
+										<include>*.tests/target/jacoco-it.exec</include>
+									</includes>
+								</fileSet>
+							</fileSets>
+							<destFile>${project.build.directory}/jacoco-merged.exec</destFile>
+							<dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
+							<outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>target</id>
 			<modules>

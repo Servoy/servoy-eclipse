@@ -123,6 +123,28 @@ pipeline {
             }
         }
 
+        // JaCoCo report for ALL Java tests (plainjunit + integrationpde), same recipe as Servoy-Copilot.
+        // Runs AFTER 'Integration Tests' on purpose: 'Build with Tycho' wrote target/jacoco.exec (plainjunit) in
+        // every .tests module, the integration run wrote target/jacoco-it.exec. The jacoco 'report' goal can only
+        // analyze the current module's own classes, so it runs in each PRODUCTION bundle (-Pcoverage-report, root
+        // pom), which first merges the exec files of all .tests modules into target/jacoco-merged.exec and then
+        // reports its own classes against it. -Pplugins: activating a profile deactivates the activeByDefault one.
+        stage('Coverage Report') {
+            when {
+                expression { !params.WIPE_WORKSPACE }
+            }
+            steps {
+                configFileProvider([
+                    configFile(fileId: 'master_mvn_repo', variable: 'MAVEN_SETTINGS'),
+                    configFile(fileId: 'maven_toolchain', variable: 'TOOLCHAIN')
+                ]) {
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                        sh 'mvn -B -fae -s "$MAVEN_SETTINGS" -t "$TOOLCHAIN" -Pplugins,coverage-report org.jacoco:jacoco-maven-plugin:merge org.jacoco:jacoco-maven-plugin:report -pl com.servoy.eclipse.model,com.servoy.eclipse.model.exporter.mobile,com.servoy.eclipse.core,com.servoy.eclipse.cloud,com.servoy.eclipse.ui,com.servoy.eclipse.ngclient,com.servoy.eclipse.debug,com.servoy.eclipse.designer,com.servoy.eclipse.designer.rfb,com.servoy.eclipse.designer.wpm,com.servoy.eclipse.jsunit,com.servoy.eclipse.exporter.ngdesktop,com.servoy.eclipse.exporter.mobile,com.servoy.eclipse.exporter.solution,com.servoy.eclipse.exporter.war,com.servoy.eclipse.extension.compatibility,com.servoy.eclipse.profiler,com.servoy.eclipse.notification,com.servoy.eclipse.ui.tweaks,j2db_documentation,com.servoy.eclipse.ngclient.ui,com.servoy.eclipse.cypress'
+                    }
+                }
+            }
+        }
+
     }
     
     post {
@@ -184,19 +206,22 @@ pipeline {
                         reportTitles: 'TiNG,Designer RFB,WPM'
                     ])
                     
-                    // Java (JaCoCo) code coverage - Phase 1: the plain-JUnit test modules only.
-                    // jacoco:prepare-agent instruments each .tests module's plain-surefire JVM and
-                    // jacoco:report (verify phase) writes target/site/jacoco/jacoco.xml per module.
-                    // One recordCoverage aggregates all of them into a single Java coverage trend.
-                    // allowEmpty so a build that ran no Java tests (or skipped them) does not fail.
-                    // The forked-workbench PDE integration tests are not yet instrumented (Phase 2),
-                    // so this reflects plainjunit coverage only.
+                    // Java (JaCoCo) code coverage of the plainjunit + integrationpde tests (merged), one
+                    // jacoco.xml per production bundle written by the 'Coverage Report' stage, aggregated
+                    // here into a single Java coverage trend. EVERY_BUILD keeps the sources so the Coverage
+                    // view shows covered/missed lines per .java file.
                     recordCoverage(
                         tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml']],
                         id: 'java-jacoco',
-                        name: 'Java Coverage (JaCoCo, plainjunit)',
+                        name: 'Java Coverage (JaCoCo, unit + integration)',
                         sourceCodeRetention: 'EVERY_BUILD'
                     )
+
+                    // Archive the raw coverage data so it can be read per build (also via the Jenkins MCP).
+                    // The exec files are kept separately so unit vs integration can be split offline:
+                    // jacoco.exec = plainjunit, jacoco-it.exec = integrationpde, jacoco-merged.exec = both
+                    // (what the published number reflects). The cobertura files are the Angular Vitest coverage.
+                    archiveArtifacts artifacts: '**/target/site/jacoco/jacoco.xml, **/target/jacoco.exec, **/target/jacoco-it.exec, **/target/jacoco-merged.exec, com.servoy.eclipse.ngclient.ui/target/coverage/combined/cobertura-coverage.xml, com.servoy.eclipse.designer.rfb/target/coverage/combined/cobertura-coverage.xml, com.servoy.eclipse.designer.wpm/target/coverage/cobertura-coverage.xml', allowEmptyArchive: true, fingerprint: false
                 }
             }
         }
