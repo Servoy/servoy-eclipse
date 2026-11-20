@@ -230,12 +230,23 @@ pipeline {
                     )
                     
                     // Browsable HTML coverage reports (one tab per Angular project).
+                    // publishHTML copies its whole reportDir into the build. With reportDir '.' that was the
+                    // entire workspace (all node_modules, target folders, ...), which took minutes per build.
+                    // So first stage only the three HTML report folders into one small directory.
+                    sh '''
+                        rm -rf angular-coverage-html
+                        mkdir -p angular-coverage-html
+                        stage_report() { if [ -d "$1" ]; then cp -r "$1" "angular-coverage-html/$2"; fi; }
+                        stage_report com.servoy.eclipse.ngclient.ui/target/coverage/combined ting
+                        stage_report com.servoy.eclipse.designer.rfb/target/coverage/combined rfb
+                        stage_report com.servoy.eclipse.designer.wpm/target/coverage/lcov-report wpm
+                    '''
                     publishHTML([
                         allowMissing: true, 
                         alwaysLinkToLastBuild: false, 
                         keepAll: true, 
-                        reportDir: '.', 
-                        reportFiles: 'com.servoy.eclipse.ngclient.ui/target/coverage/combined/index.html,com.servoy.eclipse.designer.rfb/target/coverage/combined/index.html,com.servoy.eclipse.designer.wpm/target/coverage/lcov-report/index.html', 
+                        reportDir: 'angular-coverage-html', 
+                        reportFiles: 'ting/index.html,rfb/index.html,wpm/index.html', 
                         reportName: 'Angular Coverage', 
                         reportTitles: 'TiNG,Designer RFB,WPM'
                     ])
