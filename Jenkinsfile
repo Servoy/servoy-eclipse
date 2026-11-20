@@ -244,11 +244,24 @@ pipeline {
                     // jacoco.xml per production bundle written by the 'Coverage Report' stage, aggregated
                     // here into a single Java coverage trend. EVERY_BUILD keeps the sources so the Coverage
                     // view shows covered/missed lines per .java file.
+                    // sourceDirectories: jacoco.xml only holds package-relative file names
+                    // (com/servoy/eclipse/...), and the plugin otherwise only looks in src/main/java, which
+                    // these Eclipse bundles do not use (build 518: "found: 0, not found: 1706"). List each
+                    // production bundle's src folder so the line view can show the sources.
                     recordCoverage(
                         tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml']],
                         id: 'java-jacoco',
                         name: 'Java Coverage (JaCoCo, unit + integration)',
-                        sourceCodeRetention: 'EVERY_BUILD'
+                        sourceCodeRetention: 'EVERY_BUILD',
+                        sourceDirectories: [
+                            'com.servoy.eclipse.model', 'com.servoy.eclipse.model.exporter.mobile', 'com.servoy.eclipse.core',
+                            'com.servoy.eclipse.cloud', 'com.servoy.eclipse.ui', 'com.servoy.eclipse.ngclient',
+                            'com.servoy.eclipse.debug', 'com.servoy.eclipse.designer', 'com.servoy.eclipse.designer.rfb',
+                            'com.servoy.eclipse.designer.wpm', 'com.servoy.eclipse.jsunit', 'com.servoy.eclipse.exporter.ngdesktop',
+                            'com.servoy.eclipse.exporter.mobile', 'com.servoy.eclipse.exporter.solution', 'com.servoy.eclipse.exporter.war',
+                            'com.servoy.eclipse.extension.compatibility', 'com.servoy.eclipse.profiler', 'com.servoy.eclipse.notification',
+                            'com.servoy.eclipse.ui.tweaks', 'j2db_documentation', 'com.servoy.eclipse.ngclient.ui', 'com.servoy.eclipse.cypress'
+                        ].collect { [path: "${it}/src"] }
                     )
 
                     // Archive the coverage reports so they can be read per build (also via the Jenkins MCP).

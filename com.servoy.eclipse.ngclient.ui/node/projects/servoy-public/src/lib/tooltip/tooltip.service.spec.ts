@@ -7,6 +7,9 @@ describe('TooltipService', () => {
     let service: TooltipService;
 
     beforeEach(() => {
+        // start from a clean body: another spec may have left a #mktipmsg div behind, and getElementById
+        // would then return that stale div instead of the one this service creates
+        document.querySelectorAll('#mktipmsg').forEach(div => div.remove());
         TestBed.configureTestingModule({
             providers: [TooltipService, WindowRefService]
         });
@@ -16,7 +19,7 @@ describe('TooltipService', () => {
     afterEach(() => {
         vi.useRealTimers();
         // clean up any tooltip div the service created on the body
-        document.getElementById('mktipmsg')?.remove();
+        document.querySelectorAll('#mktipmsg').forEach(div => div.remove());
     });
 
     const makeMouseEvent = (overrides: Partial<MouseEvent> = {}): MouseEvent => ({

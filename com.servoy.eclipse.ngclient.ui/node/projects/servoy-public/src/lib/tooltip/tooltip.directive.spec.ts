@@ -46,6 +46,9 @@ describe('Directive: Tooltip', () => {
   afterEach(() => {
     fixture.destroy();
     component = null as any;
+    // the TooltipService appends its #mktipmsg div to the shared document body; remove it so a later spec
+    // (tooltip.service.spec.ts) does not find this stale div first via getElementById
+    document.querySelectorAll('#mktipmsg').forEach(div => div.remove());
   });
 
   it('should not display when text is undefined', () => {
