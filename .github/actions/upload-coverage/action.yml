@@ -47,6 +47,10 @@ inputs:
     description: Space separated zip patterns of the files to upload. Start each with * so it matches at any depth.
     required: false
     default: '*jacoco.xml *cobertura-coverage.xml'
+  branch:
+    description: Only a run on this branch uploads; on any other branch (2026.9, v2026.x, PRs, ...) the step does nothing.
+    required: false
+    default: master
   fail-on-error:
     description: Fail the workflow when the upload fails. By default a failed upload only gives a warning, coverage must not break a build.
     required: false
@@ -66,8 +70,15 @@ runs:
         WORKDIR: ${{ inputs.working-directory }}
         PATTERNS: ${{ inputs.patterns }}
         FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+        ONLY_BRANCH: ${{ inputs.branch }}
       run: |
         set -uo pipefail
+        # Only one branch feeds the combined report, also when a workflow forgets the 'if' on this step:
+        # release branches (2026.9, ...) build the same workflow and would otherwise overwrite master's coverage.
+        if [ "${GITHUB_REF:-}" != "refs/heads/${ONLY_BRANCH}" ]; then
+          echo "coverage upload skipped: ${GITHUB_REF:-?} is not refs/heads/${ONLY_BRANCH}"
+          exit 0
+        fi
         fail() {
           if [ "$FAIL_ON_ERROR" = "true" ]; then echo "::error::$1"; exit 1; fi
           echo "::warning::$1 (coverage upload skipped, the workflow continues)"; exit 0
