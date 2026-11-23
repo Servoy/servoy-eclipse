@@ -97,6 +97,12 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		return fcCompAndPropPath[1];
 	}
 
+	private JSONObject getRootFCValueOfParent()
+	{
+		Object value = ((IBasicWebObject)getParent()).getProperty(getRootFCPropertyNameInParent());
+		return value instanceof JSONObject json ? json : null;
+	}
+
 	/**
 	 * Gives something like [7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8, containedForm, formComponent2, containedForm, n1]; can be nested, more or less.<br/>
 	 * So it includes even the root form component container name/uuid.
@@ -333,9 +339,15 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	{
 		// the "current" prefix in names is there because we go through the fcPropAndCompPath array - in case of nested form components; so all these variables
 		// will point to the the current place in that path that we go through
-		FormElement currentNgFormElementOfParentFC = FormElementHelper.INSTANCE.getFormElement((IFormElement)getParent(), fs, new PropertyPath(), true);
+		Object rootFCRawValue = ((IBasicWebObject)getParent()).getProperty(getRootFCPropertyNameInParent()); // rootFCPropertyNameInParent is fcPropAndCompPath[1]
+		if (rootFCRawValue == null) return null;
+		IPersist parentForm = getParent().getAncestor(IRepository.FORMS);
+		JSONObject currentFCPropertyValue = FormComponentPropertyType.asFormComponentValue(rootFCRawValue,
+			parentForm instanceof Form parentFormAsForm ? parentFormAsForm.getName() : null, ((IBasicWebObject)getParent()).getName(),
+			getRootFCPropertyNameInParent());
+		if (currentFCPropertyValue == null) return null;
 
-		JSONObject currentFCPropertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(getRootFCPropertyNameInParent()); // rootFCPropertyNameInParent is fcPropAndCompPath[1]
+		FormElement currentNgFormElementOfParentFC = FormElementHelper.INSTANCE.getFormElement((IFormElement)getParent(), fs, new PropertyPath(), true);
 		PropertyDescription currentFCCachedPD = FormComponentPropertyType.INSTANCE.getPropertyDescription(getRootFCPropertyNameInParent(),
 			currentFCPropertyValue, fs);
 		Form currentFCPersist = FormComponentPropertyType.INSTANCE.getForm(currentFCPropertyValue, fs);
@@ -379,20 +391,27 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 				if (propertyInsideCurrentFCPD.getType() == FormComponentPropertyType.INSTANCE && currentFCPersist != null)
 				{
 					// this is a nested form component, try to find that FormElement so we have the full flattened properties.
-					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(currentNgFormElementOfParentFC, currentFCCachedPD,
-						(JSONObject)currentNgFormElementOfParentFC.getPropertyValue(currentFCCachedPD.getName()), currentFCPersist, fs);
-
-					for (FormElement fe : cache.getFormComponentElements())
+					Object fcRawValue = currentNgFormElementOfParentFC.getPropertyValue(currentFCCachedPD.getName());
+					JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(fcRawValue,
+						currentNgFormElementOfParentFC.getForm() != null ? currentNgFormElementOfParentFC.getForm().getName() : null,
+						currentNgFormElementOfParentFC.getName(), currentFCCachedPD.getName());
+					if (fcValue != null)
 					{
-						String[] feComponentAndPropertyNamePath = ((AbstractBase)fe.getPersistIfAvailable())
-							.getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
-						if (feComponentAndPropertyNamePath != null &&
-							Arrays.equals(feComponentAndPropertyNamePath, 1, feComponentAndPropertyNamePath.length, fcCompAndPropPath, 1, i))
+						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(currentNgFormElementOfParentFC, currentFCCachedPD,
+							fcValue, currentFCPersist, fs);
+
+						for (FormElement fe : cache.getFormComponentElements())
 						{
-							currentNgFormElementOfParentFC = fe;
-							currentFCCachedPD = propertyInsideCurrentFCPD;
-							currentFCPersist = FormComponentPropertyType.INSTANCE.getForm(fe.getPropertyValue(currentFCCachedPD.getName()), fs);
-							break;
+							String[] feComponentAndPropertyNamePath = ((AbstractBase)fe.getPersistIfAvailable())
+								.getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
+							if (feComponentAndPropertyNamePath != null &&
+								Arrays.equals(feComponentAndPropertyNamePath, 1, feComponentAndPropertyNamePath.length, fcCompAndPropPath, 1, i))
+							{
+								currentNgFormElementOfParentFC = fe;
+								currentFCCachedPD = propertyInsideCurrentFCPD;
+								currentFCPersist = FormComponentPropertyType.INSTANCE.getForm(fe.getPropertyValue(currentFCCachedPD.getName()), fs);
+								break;
+							}
 						}
 					}
 				}
@@ -403,22 +422,29 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 		if (currentFCPersist != null)
 		{
 			// get the merged/fully flattened form element from the form component cache for the current parent form element.
-			FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(currentNgFormElementOfParentFC, currentFCCachedPD,
-				(JSONObject)currentNgFormElementOfParentFC.getPropertyValue(currentFCCachedPD.getName()), currentFCPersist, fs);
-			for (FormElement fe : cache.getFormComponentElements())
+			Object fcRawValue = currentNgFormElementOfParentFC.getPropertyValue(currentFCCachedPD.getName());
+			JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(fcRawValue,
+				currentNgFormElementOfParentFC.getForm() != null ? currentNgFormElementOfParentFC.getForm().getName() : null,
+				currentNgFormElementOfParentFC.getName(), currentFCCachedPD.getName());
+			if (fcValue != null)
 			{
-				String[] feComponentAndPropertyNamePath = ((AbstractBase)fe.getPersistIfAvailable())
-					.getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
-
-				if (feComponentAndPropertyNamePath != null &&
-					Arrays.equals(feComponentAndPropertyNamePath, 1, feComponentAndPropertyNamePath.length, fcCompAndPropPath, 1,
-						fcCompAndPropPath.length))
+				FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(currentNgFormElementOfParentFC, currentFCCachedPD,
+					fcValue, currentFCPersist, fs);
+				for (FormElement fe : cache.getFormComponentElements())
 				{
-					// element is found which is the fully flattened one that has all the properties.
-					// this is used in the getJSON() when the flattened form must be returned.
-					element = (IFormElement)fe.getPersistIfAvailable();
-					this.type = element.getTypeID(); // so that it is aware of pure persist prop default values better (like extendsID int)
-					break;
+					String[] feComponentAndPropertyNamePath = ((AbstractBase)fe.getPersistIfAvailable())
+						.getRuntimeProperty(FormElementHelper.FC_COMPONENT_AND_PROPERTY_NAME_PATH);
+
+					if (feComponentAndPropertyNamePath != null &&
+						Arrays.equals(feComponentAndPropertyNamePath, 1, feComponentAndPropertyNamePath.length, fcCompAndPropPath, 1,
+							fcCompAndPropPath.length))
+					{
+						// element is found which is the fully flattened one that has all the properties.
+						// this is used in the getJSON() when the flattened form must be returned.
+						element = (IFormElement)fe.getPersistIfAvailable();
+						this.type = element.getTypeID(); // so that it is aware of pure persist prop default values better (like extendsID int)
+						break;
+					}
 				}
 			}
 		}
@@ -474,7 +500,8 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 			if (jsonObject == null || !jsonObject.has(getRootFCPropertyNameInParent()))
 			{
 				JSONObject parentObject = new JSONObject();
-				JSONObject superValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(getRootFCPropertyNameInParent());
+				JSONObject superValue = getRootFCValueOfParent();
+				if (superValue == null) return new JSONObject();
 				parentObject.put(FormComponentPropertyType.SVY_FORM, superValue.get(FormComponentPropertyType.SVY_FORM));
 				// this set property will override the cloned from super parent json in the parent, if the parent has a super persist.
 				((IBasicWebObject)getParent()).setProperty(getRootFCPropertyNameInParent(), parentObject);
@@ -485,13 +512,14 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 			}
 			else if (!flattened)
 			{
-				propertyValue = jsonObject.getJSONObject(getRootFCPropertyNameInParent());
+				propertyValue = jsonObject.optJSONObject(getRootFCPropertyNameInParent());
 			}
 		}
 
 		if (propertyValue == null)
 		{
-			propertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(getRootFCPropertyNameInParent());
+			propertyValue = getRootFCValueOfParent();
+			if (propertyValue == null) return new JSONObject();
 		}
 
 		for (int i = 2; i < fcCompAndPropPath.length; i++)

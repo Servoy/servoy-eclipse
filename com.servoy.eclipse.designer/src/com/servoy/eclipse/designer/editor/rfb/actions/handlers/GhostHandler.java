@@ -647,7 +647,14 @@ public class GhostHandler implements IServerService
 									Debug.error("recursive reference found between (List)FormComponents: " + recursiveCheck);
 									continue;
 								}
-								FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
+								JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(propertyValue,
+									formComponentEl.getForm() != null ? formComponentEl.getForm().getName() : null, formComponentEl.getName(), pd.getName());
+								if (fcValue == null)
+								{
+									recursiveCheck.remove(frm.getName());
+									continue;
+								}
+								FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, fcValue, frm,
 									fs);
 								ArrayList<IBasicWebComponent> newParentFormComponentPath;
 								if (parentFormComponentPath == null)

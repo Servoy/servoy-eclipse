@@ -440,8 +440,12 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						Form formThatIsFormComponent = FormComponentPropertyType.INSTANCE.getForm(fcPropertyValue,
 							ModelUtils.getEditingFlattenedSolution(form));
 						if (formThatIsFormComponent == null) continue;
+						JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(fcPropertyValue,
+							formComponentComponentNGElement.getForm() != null ? formComponentComponentNGElement.getForm().getName() : null,
+							formComponentComponentNGElement.getName(), pd.getName());
+						if (fcValue == null) continue;
 						FormComponentCache fcCache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentComponentNGElement, pd,
-							(JSONObject)fcPropertyValue, formThatIsFormComponent,
+							fcValue, formThatIsFormComponent,
 							ModelUtils.getEditingFlattenedSolution(form));
 						// responsive forms also just show the pure elements and not the structure.
 						for (FormElement childNGFormElement : fcCache.getFormComponentElements())

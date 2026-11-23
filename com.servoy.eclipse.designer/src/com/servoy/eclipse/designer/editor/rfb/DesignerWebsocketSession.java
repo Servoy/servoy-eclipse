@@ -973,11 +973,18 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Debug.error("recursive reference found between (List)FormComponents: " + forms);
 						continue;
 					}
+					JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(propertyValue,
+						formElement.getForm() != null ? formElement.getForm().getName() : null, formElement.getName(), pd.getName());
+					if (fcValue == null)
+					{
+						forms.remove(frm.getName());
+						continue;
+					}
 					// this is a form container so give it is own list
 					ArrayList<LayoutContainer> value = new ArrayList<LayoutContainer>();
 					layoutContainersOfComponentPersist.put(formElement.getPersistIfAvailable(), value);
 					updatedFormComponentsDesignId.add(getDesignIDOrFeName(formElement));
-					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formElement, pd, (JSONObject)propertyValue, frm, fs);
+					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formElement, pd, fcValue, frm, fs);
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
@@ -1031,8 +1038,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 				if (frm != null)
 				{
+					JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(propertyValue,
+						formComponentEl.getForm() != null ? formComponentEl.getForm().getName() : null, formComponentEl.getName(),
+						formComponentPropertyTypePD.getName());
+					if (fcValue == null) return null;
 					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, formComponentPropertyTypePD,
-						(JSONObject)propertyValue, frm, fs);
+						fcValue, frm, fs);
 					for (FormElement element : cache.getFormComponentElements())
 					{
 						IPersist p = element.getPersistIfAvailable();
@@ -1106,7 +1117,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Object propertyValue = fe.getPropertyValue(pd.getName());
 						Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 						if (frm == null) continue;
-						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(fe, pd, (JSONObject)propertyValue, frm, fs);
+						JSONObject fcValue = FormComponentPropertyType.asFormComponentValue(propertyValue,
+							fe.getForm() != null ? fe.getForm().getName() : null, fe.getName(), pd.getName());
+						if (fcValue == null) continue;
+						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(fe, pd, fcValue, frm, fs);
 						formComponentTemplates.put(cache.getHtmlTemplateUUIDForAngular(), cache.getTemplate());
 					}
 				}

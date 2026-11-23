@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,6 +26,7 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.ICommonWebComponent;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
@@ -223,13 +225,134 @@ class WebFormComponentChildTypeTest {
 		}
 
 		/**
-		 * A BaseComponent with a public no-arg constructor so a real getAttributes() can be
-		 * exercised without a workspace/repository (the Bean constructors are protected).
+		 * A BaseComponent with a public no-arg constructor so a real getAttributes()
+		 * can be exercised without a workspace/repository (the Bean constructors are
+		 * protected).
 		 */
 		static class TestableBean extends Bean {
 			TestableBean() {
 				super(null, UUID.randomUUID());
 			}
+		}
+	}
+
+	/**
+	 * SVY-21714 - the parent's root form-component property can hold a bare
+	 * form-name/UUID String in a hand-written .frm. WebFormComponentChildType used
+	 * to cast it to JSONObject in initializeElement() (run by the constructor) and
+	 * in getJson(...), so building one from the Outline, PersistFinder or the tab
+	 * sequence page threw a ClassCastException.
+	 */
+	@Nested
+	class MalformedRootFormComponentValue {
+		private static final String ROOT_PROPERTY = "containedForm";
+
+		private WebComponent parent;
+
+		private WebFormComponentChildType newChildOnParentValue(Object rootValue) throws Exception {
+			parent = Mockito.mock(WebComponent.class);
+			Mockito.when(parent.getProperty(ROOT_PROPERTY)).thenReturn(rootValue);
+			Mockito.when(parent.getName()).thenReturn("fc1");
+
+			WebFormComponentChildType child = Mockito.mock(WebFormComponentChildType.class, Mockito.CALLS_REAL_METHODS);
+
+			Field pathField = WebFormComponentChildType.class.getDeclaredField("fcCompAndPropPath");
+			pathField.setAccessible(true);
+			pathField.set(child, new String[] { "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8", ROOT_PROPERTY, "n1" });
+
+			Field parentField = com.servoy.j2db.persistence.AbstractBase.class.getDeclaredField("parent");
+			parentField.setAccessible(true);
+			parentField.set(child, parent);
+
+			return child;
+		}
+
+		private Object invokeInitializeElement(WebFormComponentChildType child) throws Exception {
+			Method initializeElement = WebFormComponentChildType.class.getDeclaredMethod("initializeElement");
+			initializeElement.setAccessible(true);
+			return initializeElement.invoke(child);
+		}
+
+		private JSONObject invokeGetJson(WebFormComponentChildType child, boolean forMutation, boolean flattened)
+				throws Exception {
+			Method getJson = WebFormComponentChildType.class.getDeclaredMethod("getJson", boolean.class, boolean.class);
+			getJson.setAccessible(true);
+			return (JSONObject) getJson.invoke(child, Boolean.valueOf(forMutation), Boolean.valueOf(flattened));
+		}
+
+		@Test
+		@DisplayName("initializeElement on a bare-string root value returns null instead of throwing ClassCastException")
+		void initializeElementRejectsBareString() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+
+			Object result = assertDoesNotThrow(() -> invokeInitializeElement(child));
+
+			assertNull(result, "a malformed root value must yield no child property description");
+		}
+
+		@Test
+		@DisplayName("initializeElement on a missing root value returns null instead of throwing")
+		void initializeElementToleratesMissingValue() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue(null);
+
+			Object result = assertDoesNotThrow(() -> invokeInitializeElement(child));
+
+			assertNull(result, "a missing root value must yield no child property description");
+		}
+
+		@Test
+		@DisplayName("plain read on a bare-string root value returns an empty json instead of throwing ClassCastException")
+		void plainReadRejectsBareString() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+
+			JSONObject json = assertDoesNotThrow(() -> invokeGetJson(child, false, false));
+
+			assertAll(() -> assertNotNull(json, "getJson must never return null"),
+					() -> assertEquals(0, json.length(), "a malformed root value must read as an empty json"));
+		}
+
+		@Test
+		@DisplayName("mutation read on a bare-string inherited root value returns an empty json and does not rewrite the parent")
+		void mutationReadRejectsBareStringWithoutTouchingParent() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+
+			JSONObject json = assertDoesNotThrow(() -> invokeGetJson(child, true, false));
+
+			assertAll(() -> assertEquals(0, json.length(), "a malformed root value must read as an empty json"),
+					() -> Mockito.verify(parent, Mockito.never()).setProperty(Mockito.eq(ROOT_PROPERTY),
+							Mockito.any()));
+		}
+
+		@Test
+		@DisplayName("mutation read on a bare string inside the parent's own json returns an empty json instead of throwing JSONException")
+		void mutationReadRejectsBareStringInOwnJson() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+			JSONObject ownJson = new JSONObject();
+			ownJson.put(ROOT_PROPERTY, "orders_fc");
+			java.util.Map<String, Object> propertiesMap = new java.util.HashMap<>();
+			propertiesMap.put(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName(), ownJson);
+			Mockito.when(parent.getPropertiesMap()).thenReturn(propertiesMap);
+
+			JSONObject json = assertDoesNotThrow(() -> invokeGetJson(child, true, false));
+
+			assertAll(() -> assertEquals(0, json.length(), "a malformed root value must read as an empty json"),
+					() -> assertEquals("orders_fc", ownJson.get(ROOT_PROPERTY),
+							"the parent's own json must be left untouched"));
+		}
+
+		@Test
+		@DisplayName("plain read on a valid root value still returns the child's json (pass-through)")
+		void plainReadPassesThroughValidValue() throws Exception {
+			JSONObject childBlob = new JSONObject();
+			childBlob.put("text", "hello");
+			JSONObject rootValue = new JSONObject();
+			rootValue.put("svy_form", "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF9");
+			rootValue.put("n1", childBlob);
+			WebFormComponentChildType child = newChildOnParentValue(rootValue);
+
+			JSONObject json = invokeGetJson(child, false, false);
+
+			assertSame(childBlob, json, "a valid root value must resolve to the child's own json object");
 		}
 	}
 }
