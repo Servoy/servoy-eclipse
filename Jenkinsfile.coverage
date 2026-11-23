@@ -69,14 +69,18 @@ pipeline {
                 // keep github-uploads/, history/ and .tools/, everything else is rebuilt on every run
                 sh 'rm -rf incoming prepared report-html report-data coverage-report-html.zip'
                 script {
-                    // name = folder / row prefix in the report, job = full name of the Jenkins job
+                    // name = folder / row prefix in the report, job = name of the Jenkins job.
+                    // Copy Artifact resolves a name relative to the folder of THIS job: the jobs next to it
+                    // are just 'servoy-eclipse', so the same file also works in another line (lts_2026/coverage
+                    // reads lts_2026/servoy-eclipse). A job outside this folder needs an absolute name with a
+                    // leading '/', like Servoy-Copilot (developer_ai_plugin) at the top level.
                     def sources = [
-                        [name: 'servoy-eclipse',   job: 'master/servoy-eclipse'],
-                        [name: 'server',           job: 'master/server'],
-                        [name: 'servoy-client',    job: 'master/servoy-client'],
-                        [name: 'servoy-extensions', job: 'master/servoy-extensions'],
-                        [name: 'servoy-copilot',   job: 'developer_ai_plugin']
-                        // later: [name: 'sablo', job: 'master/sablo'] once it archives a jacoco.xml
+                        [name: 'servoy-eclipse',    job: 'servoy-eclipse'],
+                        [name: 'server',            job: 'server'],
+                        [name: 'servoy-client',     job: 'servoy-client'],
+                        [name: 'servoy-extensions', job: 'servoy-extensions'],
+                        [name: 'servoy-copilot',    job: '/developer_ai_plugin']
+                        // later: [name: 'sablo', job: 'sablo'] once it archives a jacoco.xml
                     ]
                     sources.each { s ->
                         // lastSuccessful = SUCCESS or UNSTABLE: skips failed, aborted and NOT_BUILT builds
