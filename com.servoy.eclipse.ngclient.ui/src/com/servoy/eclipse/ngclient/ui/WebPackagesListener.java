@@ -2069,7 +2069,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						packageVersion = split[0] + '.' + split[1] + '.' + split[2] + '-' + split[3];
 					}
 					String installedVersion = dependencies.optString(packageName);
-					if (!installedVersion.contains(packageVersion))
+					if (!isVersionInstalled(installedVersion, packageVersion))
 					{
 						return packageName + '@' + packageVersion;
 					}
@@ -2077,6 +2077,25 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 
 			return null;
+		}
+
+		/**
+		 * Checks if the installed version (could have a prefix like ^ or ~) is the given version. A version with a qualifier (x.y.z-pre) is not the same
+		 * as the version without it (x.y.z), so the match may not be followed by more version characters.
+		 */
+		private boolean isVersionInstalled(String installedVersion, String packageVersion)
+		{
+			int index = installedVersion.indexOf(packageVersion);
+			while (index >= 0)
+			{
+				int end = index + packageVersion.length();
+				if (end == installedVersion.length() || !(Character.isDigit(installedVersion.charAt(end)) || "-+".indexOf(installedVersion.charAt(end)) >= 0))
+				{
+					return true;
+				}
+				index = installedVersion.indexOf(packageVersion, index + 1);
+			}
+			return false;
 		}
 
 		private String replace(String content, String start, String end, CharSequence toInsert)
