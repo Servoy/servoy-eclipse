@@ -1,0 +1,121 @@
+// Combined coverage of all Servoy repos in ONE report (ReportGenerator, https://github.com/danielpalme/ReportGenerator).
+//
+// Where the data comes from:
+//   - the archived JaCoCo (jacoco.xml) and Cobertura (cobertura-coverage.xml) files of the last successful
+//     build (SUCCESS or UNSTABLE) of the Jenkins jobs listed in 'sources' below, copied with Copy Artifact;
+//   - uploads from GitHub Actions (repos that are built on GitHub instead of Jenkins): the action
+//     .github/actions/upload-coverage in this repo does a buildWithParameters on this job with the parameters
+//     GITHUB_REPO and GITHUB_COVERAGE (zip). The last upload of every repo is kept in github-uploads/<repo>/.
+//
+// Result: the 'Combined Coverage' tab on the job page (one row per repo/bundle, with history charts) and the
+// build artifacts Summary.csv, Summary.json, Cobertura.xml, SummaryGithub.md and coverage-report-html.zip,
+// which are the "export" of the combined numbers.
+//
+// Setting up the job (once):
+//   1. New pipeline job, "Pipeline script from SCM", git https://github.com/Servoy/servoy-eclipse.git,
+//      script path 'Jenkinsfile.coverage'. Do NOT add 'Clean before checkout': the workspace keeps the GitHub
+//      uploads (github-uploads/), the report history (history/) and the downloaded tools (.tools/) between builds.
+//   2. Run it once by hand; the parameters (GITHUB_REPO, GITHUB_COVERAGE) only appear after the first build.
+//   3. Copy Artifact must be allowed to read the source jobs: either the 'Authenticated' group has Job/Read, or
+//      each source job lists this job in copyArtifactPermission(...).
+//   4. For GitHub uploads: a Jenkins user with 'Job/Build' on this job and an API token for it; store it as the
+//      GitHub secrets JENKINS_COVERAGE_USER / JENKINS_COVERAGE_TOKEN (see the action for the workflow snippet).
+//
+// A new repo is added by adding it to 'sources' (its build must archive **/target/site/jacoco/jacoco.xml or a
+// cobertura-coverage.xml, see the 'Coverage Report' stage of the servoy-eclipse Jenkinsfile).
+
+pipeline {
+    agent any
+
+    options {
+        // the workspace holds state (uploads, history), so never two builds at once
+        disableConcurrentBuilds()
+        // several uploads or builds that finish at about the same time end up in one run
+        quietPeriod(30)
+        buildDiscarder(logRotator(numToKeepStr: '15', artifactNumToKeepStr: '5'))
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    triggers {
+        // nightly; 'Build now' / 'Build with Parameters' runs it by hand, a GitHub upload starts it through the API
+        cron('H 3 * * *')
+    }
+
+    parameters {
+        string(name: 'GITHUB_REPO', defaultValue: '', trim: true,
+            description: 'Set by the GitHub upload action: name of the repo this upload belongs to. Leave empty for a normal run.')
+        stashedFile 'GITHUB_COVERAGE'
+    }
+
+    environment {
+        COVERAGE_TITLE = 'Servoy combined coverage'
+    }
+
+    stages {
+        stage('Store GitHub upload') {
+            when {
+                expression { params.GITHUB_REPO?.trim() }
+            }
+            steps {
+                // GITHUB_COVERAGE is the path of the uploaded zip, GITHUB_REPO the repo name (validated in the script)
+                withFileParameter('GITHUB_COVERAGE') {
+                    sh 'bash ci/coverage/ingest-upload.sh "$GITHUB_COVERAGE" "$GITHUB_REPO"'
+                }
+            }
+        }
+
+        stage('Collect Jenkins coverage') {
+            steps {
+                // keep github-uploads/, history/ and .tools/, everything else is rebuilt on every run
+                sh 'rm -rf incoming prepared report-html report-data coverage-report-html.zip'
+                script {
+                    // name = folder / row prefix in the report, job = full name of the Jenkins job
+                    def sources = [
+                        [name: 'servoy-eclipse',   job: 'master/servoy-eclipse'],
+                        [name: 'server',           job: 'master/server'],
+                        [name: 'servoy-client',    job: 'master/servoy-client'],
+                        [name: 'servoy-extensions', job: 'master/servoy-extensions'],
+                        [name: 'servoy-copilot',   job: 'developer_ai_plugin']
+                        // later: [name: 'sablo', job: 'master/sablo'] once it archives a jacoco.xml
+                    ]
+                    sources.each { s ->
+                        // lastSuccessful = SUCCESS or UNSTABLE: skips failed, aborted and NOT_BUILT builds
+                        copyArtifacts projectName: s.job,
+                            selector: lastSuccessful(),
+                            filter: '**/target/site/jacoco/jacoco.xml, **/cobertura-coverage.xml',
+                            target: "incoming/jenkins/${s.name}",
+                            fingerprintArtifacts: false,
+                            optional: true
+                    }
+                }
+                sh 'echo "coverage files copied from Jenkins: $(find incoming/jenkins -type f 2>/dev/null | wc -l)"; ls github-uploads 2>/dev/null | sed "s/^/GitHub upload kept for: /" || true'
+            }
+        }
+
+        stage('Combine') {
+            steps {
+                sh 'bash ci/coverage/aggregate.sh'
+            }
+        }
+
+        stage('Publish') {
+            steps {
+                script {
+                    def summary = readJSON file: 'report-data/Summary.json'
+                    currentBuild.description = "Lines ${summary.summary.linecoverage}% | branches ${summary.summary.branchcoverage}% | ${summary.summary.assemblies} reports"
+                }
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: false,
+                    reportDir: 'report-html',
+                    reportFiles: 'index.html',
+                    reportName: 'Combined Coverage'
+                ])
+                zip zipFile: 'coverage-report-html.zip', dir: 'report-html', archive: false
+                archiveArtifacts artifacts: 'report-data/Summary.csv, report-data/Summary.json, report-data/Cobertura.xml, report-data/SummaryGithub.md, report-data/sources.txt, coverage-report-html.zip',
+                    fingerprint: false
+            }
+        }
+    }
+}

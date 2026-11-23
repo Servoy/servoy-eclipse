@@ -1,0 +1,91 @@
+# Uploads the coverage reports of a GitHub Actions run to the combined Servoy coverage job on Jenkins
+# (Jenkinsfile.coverage in this repo). Use it as the last step of a workflow, after the tests:
+#
+#   - name: Upload coverage to the combined Servoy coverage job (Jenkins)
+#     if: ${{ !cancelled() && github.ref == 'refs/heads/master' && vars.JENKINS_COVERAGE_JOB_URL != '' }}
+#     uses: Servoy/servoy-eclipse/.github/actions/upload-coverage@master
+#     with:
+#       job-url: ${{ vars.JENKINS_COVERAGE_JOB_URL }}        # e.g. https://build.servoy.com/jenkins/job/master/job/coverage
+#       jenkins-user: ${{ secrets.JENKINS_COVERAGE_USER }}
+#       jenkins-token: ${{ secrets.JENKINS_COVERAGE_TOKEN }}  # API token of that Jenkins user, never a password
+#       working-directory: ${{ env.COMPONENT_DIR }}           # where the coverage folder is
+#       patterns: '*coverage/combined/cobertura-coverage.xml' # ONE report per run, see below
+#
+# It zips the matching coverage files and starts a build of the combined job with the zip as file parameter.
+# Jenkins keeps the LAST upload of every repo, so run it on the branch that should be reported (usually
+# master), not on every PR or branch. The Jenkins user only needs the Job/Build permission on the combined job.
+#
+# Upload ONE report per run. A run that writes the same coverage as cobertura-coverage.xml AND lcov.info, or per
+# test type (jsdom, browser) AND combined, would be counted several times in the combined report. Pick the
+# merged file (for the Angular components: coverage/combined/cobertura-coverage.xml).
+name: Upload coverage to the combined Servoy coverage job
+description: Sends the JaCoCo / Cobertura reports of this workflow run to the combined coverage job on Jenkins.
+
+inputs:
+  job-url:
+    description: Full URL of the combined coverage job on Jenkins, including the /jenkins context path. Must be https.
+    required: true
+  jenkins-user:
+    description: Jenkins user that has Job/Build on the combined coverage job.
+    required: true
+  jenkins-token:
+    description: API token of that user (a GitHub secret).
+    required: true
+  repo-name:
+    description: Name under which the coverage is listed in the combined report. Only letters, digits, dot, dash and underscore.
+    required: false
+    default: ${{ github.event.repository.name }}
+  working-directory:
+    description: Folder to search for coverage files; the paths inside the zip are relative to it.
+    required: false
+    default: .
+  patterns:
+    description: Space separated zip patterns of the files to upload. Start each with * so it matches at any depth.
+    required: false
+    default: '*jacoco.xml *cobertura-coverage.xml'
+  fail-on-error:
+    description: Fail the workflow when the upload fails. By default a failed upload only gives a warning, coverage must not break a build.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Zip and upload the coverage files
+      shell: bash
+      env:
+        # values go through the environment, never through ${{ }} inside the script
+        JOB_URL: ${{ inputs.job-url }}
+        JENKINS_USER: ${{ inputs.jenkins-user }}
+        JENKINS_TOKEN: ${{ inputs.jenkins-token }}
+        REPO_NAME: ${{ inputs.repo-name }}
+        WORKDIR: ${{ inputs.working-directory }}
+        PATTERNS: ${{ inputs.patterns }}
+        FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+      run: |
+        set -uo pipefail
+        fail() {
+          if [ "$FAIL_ON_ERROR" = "true" ]; then echo "::error::$1"; exit 1; fi
+          echo "::warning::$1 (coverage upload skipped, the workflow continues)"; exit 0
+        }
+        case "$JOB_URL" in https://*) ;; *) fail "job-url must start with https://" ;; esac
+        [ -n "$JENKINS_USER" ] && [ -n "$JENKINS_TOKEN" ] || fail "jenkins-user and jenkins-token are required"
+        # the repo name goes into the URL query and becomes a folder name on Jenkins: keep it plain
+        [[ "$REPO_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$ ]] || fail "invalid repo-name '$REPO_NAME'"
+
+        cd "$WORKDIR" || fail "working-directory $WORKDIR does not exist"
+        zip_file="$(mktemp -u "${RUNNER_TEMP:-/tmp}/coverage-upload-XXXXXX.zip")"
+        read -r -a patterns <<< "$PATTERNS"
+        if ! zip -r -q "$zip_file" . -i "${patterns[@]}" -x '*/node_modules/*' '*/.git/*'; then
+          fail "no coverage files matching '$PATTERNS' found in $WORKDIR"
+        fi
+        echo "uploading $(unzip -Z1 "$zip_file" | wc -l) coverage file(s) for '$REPO_NAME'"
+        unzip -Z1 "$zip_file" | sed 's/^/  /'
+
+        # The repo name is a query parameter and the zip the file parameter (multipart). Credentials go through
+        # curl's config on stdin, so they never show up in the process list.
+        printf 'user = "%s:%s"\n' "$JENKINS_USER" "$JENKINS_TOKEN" | curl -sS --fail-with-body -K - \
+          -X POST "${JOB_URL%/}/buildWithParameters?GITHUB_REPO=${REPO_NAME}" \
+          -F "GITHUB_COVERAGE=@${zip_file}" \
+          || fail "upload to Jenkins failed"
+        echo "coverage of '$REPO_NAME' sent to Jenkins"
