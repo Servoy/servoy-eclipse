@@ -18,8 +18,10 @@
 //   - Pipeline job 'coverage' in the branch folder (master/coverage), "Pipeline script from SCM", git
 //     https://github.com/Servoy/servoy-eclipse.git, script path 'Jenkinsfile.coverage'. Do NOT add
 //     'Clean before checkout': the workspace keeps the report history and the downloaded tools.
-//   - For GitHub uploads: a Jenkins user with 'Job/Build' on this job and an API token for it, stored as the
-//     GitHub secrets JENKINS_COVERAGE_USER / JENKINS_COVERAGE_TOKEN (see the action for the workflow snippet).
+//   - For GitHub uploads: Configure > Build Triggers > 'Trigger builds remotely' with a long random token. The
+//     upload action calls /buildByToken/buildWithParameters (plugin build-token-root) with that token, so no Jenkins
+//     user is needed. On GitHub the token is the organisation secret JENKINS_COVERAGE_TOKEN and the Jenkins URL the
+//     organisation variable JENKINS_COVERAGE_URL (see the action for the workflow snippet).
 
 pipeline {
     agent any

@@ -17,6 +17,16 @@ if ! [[ "$repo" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$ ]]; then
     exit 2
 fi
 
+# Names the Jenkins jobs push with pushCoverage are reserved: an upload (anyone with the trigger token)
+# must not be able to overwrite the coverage of a Jenkins-built repo. Add a name here when a new Jenkins
+# job starts calling pushCoverage.
+case "$repo" in
+    servoy-eclipse|server|servoy-client|servoy-extensions|servoy-copilot|sablo)
+        echo "'$repo' is pushed by its Jenkins job, a GitHub upload cannot use that name" >&2
+        exit 2
+        ;;
+esac
+
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
