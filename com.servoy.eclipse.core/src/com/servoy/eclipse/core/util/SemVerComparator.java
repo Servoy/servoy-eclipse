@@ -21,11 +21,29 @@ import java.util.Arrays;
 
 /**
  * Used to compare web package versions.
+ * A version can have a qualifier after the first '-' (for example 2026.9.1-pre). When the numeric parts are equal,
+ * a version without a qualifier is greater than one with a qualifier, so 2026.9.1-pre is lower than 2026.9.1.
  * @author emera
  */
 public class SemVerComparator
 {
 	public static int compare(String v1, String v2)
+	{
+		int v1Dash = v1.indexOf('-');
+		int v2Dash = v2.indexOf('-');
+		String v1Qualifier = v1Dash >= 0 ? v1.substring(v1Dash + 1) : null;
+		String v2Qualifier = v2Dash >= 0 ? v2.substring(v2Dash + 1) : null;
+
+		int cv = compareNumbers(v1Dash >= 0 ? v1.substring(0, v1Dash) : v1, v2Dash >= 0 ? v2.substring(0, v2Dash) : v2);
+		if (cv != 0) return cv;
+
+		if (v1Qualifier == null && v2Qualifier == null) return 0;
+		if (v1Qualifier == null) return 1;
+		if (v2Qualifier == null) return -1;
+		return v1Qualifier.compareTo(v2Qualifier);
+	}
+
+	private static int compareNumbers(String v1, String v2)
 	{
 		String[] v1Split = v1.split("\\.");
 		String[] v2Split = v2.split("\\.");
