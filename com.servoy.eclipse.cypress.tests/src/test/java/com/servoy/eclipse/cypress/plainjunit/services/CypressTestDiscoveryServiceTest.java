@@ -307,6 +307,52 @@ public class CypressTestDiscoveryServiceTest
 			assertTrue(forms.isEmpty());
 		}
 
+		@Test
+		@DisplayName("the solution prefix is matched case-sensitively")
+		void prefixIsCaseSensitive() throws IOException
+		{
+			createSpecs("Sol.a", "sol.b");
+
+			assertEquals(List.of("sol.b"), service.discoverFormTests(List.of("sol")));
+		}
+
+		@Test
+		@DisplayName("accepts any collection of names, such as a set")
+		void acceptsASet() throws IOException
+		{
+			createSpecs("sol.a", "other.b");
+
+			assertEquals(List.of("sol.a"), service.discoverFormTests(java.util.Set.of("sol")));
+		}
+
+		@Test
+		@DisplayName("a .spec.cy.ts spec is scoped like a .spec.cy.js one")
+		void scopesTypeScriptSpecs() throws IOException
+		{
+			Files.createFile(tempDir.resolve("sol.a.spec.cy.ts"));
+			Files.createFile(tempDir.resolve("other.b.spec.cy.ts"));
+
+			assertEquals(List.of("sol.a"), service.discoverFormTests(List.of("sol")));
+		}
+
+		@Test
+		@DisplayName("a name that starts with a dot has no owner and is kept")
+		void leadingDotHasNoOwner() throws IOException
+		{
+			createSpecs(".hidden", "other.b");
+
+			assertEquals(List.of(".hidden"), service.discoverFormTests(List.of("sol")));
+		}
+
+		@Test
+		@DisplayName("a solution name that is only a prefix of another does not match it")
+		void prefixOfAnotherNameDoesNotMatch() throws IOException
+		{
+			createSpecs("sol2.a", "sol.b");
+
+			assertEquals(List.of("sol.b"), service.discoverFormTests(List.of("sol")));
+		}
+
 		private void createSpecs(String... baseNames) throws IOException
 		{
 			for (String baseName : baseNames)
