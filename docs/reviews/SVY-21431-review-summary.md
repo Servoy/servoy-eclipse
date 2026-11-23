@@ -1,65 +1,70 @@
 # Review Summary: SVY-21431 improve servoy builder performance
 
-**Risk: ELEVATED (round 2).** Of the two round 1 problems, the Site 1 false positive is fixed. The marker-latch problem is only partly fixed. A duplicate resolved by giving the copy a new UUID still leaves the ERROR marker until the solution is reloaded (`SolutionDeserializer.java:1915-1925`, `ServoyBuilder.java:1825-1832`). All findings come from reading the code; the IDE was not run.
+**Risk: MODERATE (round 3).** Both open findings from round 2 are fixed: a copy given a new UUID now clears its marker, and a pure external rename no longer raises a false one. No High risk remains. The fix introduced one Medium false negative: a form copied on disk whose inner name is then edited is no longer flagged (`ServoyBuilder.java:1853`, `SolutionDeserializer.java:1921-1929`). All findings come from reading the code; the IDE and the tests were not run.
 
 **Scope reviewed:** `servoy-eclipse`, `master` (Fix Version 2026.12, release-target check MATCH). No commits in sibling repositories.
-- Round 1: `62ae7701ca` (the in-memory duplicate check)
-- Round 2: `01f2ed8359` (fixes for the round 1 findings: absolute path plus existence check, Site 1 no longer sets the property, `SubMonitor` progress, new `ServoyBuilderDuplicateUUIDTest`)
+- Round 1: `62ae7701ca` (in-memory duplicate check)
+- Round 2: `01f2ed8359` (absolute path plus existence check, Site 1 fix, `SubMonitor` progress)
+- Round 3: `06bc085d34` (clear on new UUID, own-file guard, no recording for form elements, `split()` progress, extended tests)
 
-## Round 1 findings vs round 2
+## Findings across rounds
 
-| Round 1 finding | Round 2 verdict |
+| Finding | Status after round 3 |
 |---|---|
-| Marker can never clear once `DUPLICATE_UUID_OTHER_FILE` is set | **Partly fixed.** It now clears when the recorded file is deleted, and when the original is deleted and the copy kept. It does **not** clear when the copy is given a new UUID (R2 below). |
-| Same-file / same-name / other-UUID persist gets a false duplicate marker | **Fixed.** That branch no longer records the property. Site 3 excludes `.js`, so scripts never carry it. |
-| Progress only changes the label | **Partly fixed.** The percentage now moves and cannot overshoot, but see R3. |
-| Core logic untested | **Partly fixed.** The new test covers the decision logic. The deserializer set-sites and the progress code are still untested. |
+| Marker can never clear (round 1) | **Fixed.** Clears when the copy or the original is deleted, and now also when the copy gets a new UUID. |
+| False marker for same-file / same-name / other-UUID persist (round 1) | **Fixed** in round 2. |
+| New UUID in the copy keeps the marker (round 2, High) | **Fixed.** The re-read clears the recorded path (`clearDuplicateUUIDOtherFile`), and the next incremental build removes the marker. No full or clean build is needed. |
+| False marker after an external rename (round 2, Medium) | **Fixed** for a pure rename, through the own-file guard. **New regression** below. |
+| Progress freezes after the first project (round 2, Low) | **Fixed.** One root `SubMonitor` with a `split()` child per project, so the bar moves across modules, stays monotonic and cannot overshoot. |
+| Core logic untested | **Partly fixed.** The decision method is tested, the deserializer and progress are not. |
 
 ## Open findings
 
-- **R2 [High] New UUID in the copy keeps the marker.**
-  - Copy `orig.frm` to `copy.frm`. Site 3 flags the original persist and records `copy.frm`.
-  - Changing the `uuid` inside `copy.frm` creates a new persist for the copy and leaves the flagged original alone.
-  - `copy.frm` still exists, so the existence check stays true. The old code re-read the sibling UUIDs and cleared the flag.
-- **R1 [Medium] False duplicate after an external rename.**
-  - On a pull or `git mv` that also changes the form's inner name, Site 3 fires because the persist's cached file name still differs from the file being read.
-  - The recorded "other" file is then the persist's own new file, which exists, so the marker is raised. The old scan skipped the persist's own file.
-  - Not verified: the rename timing in `completePersist`, and whether a rename through the Servoy UI avoids this.
-- **R3 [Low] Progress freezes after the first project in a multi-project build.**
-  - `SubMonitor.convert(monitor, N)` on an existing `SubMonitor` redistributes the unused ticks, so the first project consumes all of them.
-  - This hits the uninitialised-dependencies path (`ServoyBuilder.java:726-729`), which is the long first build in the ticket.
-  - This comes from the upstream `SubMonitor` source, not the target-platform jar.
-  - Forms are one tick each, and `ServoyFormBuilder`, where the ticket's stack trace sits, reports nothing.
-- **R5/R6 [Low] Smaller points.**
-  - The existence check reads the workspace tree, so a file deleted outside Eclipse and not yet refreshed counts as existing for one build.
-  - `getDuplicateUUIDList()` now runs per flagged persist and mutates a plain `HashMap`. This is theoretical.
+- **1 [Medium] Copy plus inner rename is no longer flagged.**
+  - The user copies `orig.frm` to `copy.frm` and edits only the inner `"name"` to `copy`. The same persist instance is renamed, so its own file becomes `copy.frm`. That equals the recorded "other" file, and the guard returns false.
+  - The removed scan found `orig.frm` with the same UUID and raised the marker.
+  - It is only reported after an IDE restart, and then only by the project-level `UUIDDuplicateIn` markers, not by the per-file marker.
+  - The rename timing in `completePersist` was read from the code, not run.
+- **2 [Low] Per-element markers for forms loaded at startup.**
+  - Two form files with the same UUID at startup create two instances. Each flagged element is confirmed through the index, so one marker per element appears.
+  - The old scan never reported elements. Round 3 only fixed the Site 3 half of this. Index membership of the element persists is likely but not confirmed.
+- **3 [Low] Cancel between modules.**
+  - `SubMonitor.split()` throws `OperationCanceledException` and does not call `forgetLastBuiltState()`, as the builder's own `checkCancel()` does.
+  - Inside the `try` it is swallowed and logged. Whether the next build is then incremental instead of full is unverified.
+- **4 [Low] Public API wider than needed.**
+  - `getDuplicateUUIDs`, the 3-argument `checkDuplicateUUID` and `countPersists` are public in the exported package `com.servoy.eclipse.model.builder` but only used inside it.
+  - Only `isDuplicateConfirmedInMemory` needs to be public, because of the test package.
+- **Not new:** with duplicate files loaded at startup, giving the copy a new UUID does not clean the in-memory index until the solution is reloaded. Same as before round 3.
+- **Not new:** if the copy also gets a new inner name, the marker on the original stays until the next full project check. Same as the old behaviour.
 
 ## Manual test plan
 
 **Verifying the fix**
 1. Load a large solution (ideally the one from the ticket) and run a full Servoy build. Compare build time against `62ae7701ca~1`. No baseline numbers exist.
-2. Copy `forms/orig.frm` to `forms/copy.frm` in the file system and refresh. The "UUID duplicate found" marker should appear.
-3. Delete `copy.frm`, refresh and build. The marker should disappear without a restart. This should now work.
-4. Watch the progress bar and label during a full build. The percentage should move steadily and the label should show names.
+2. Copy `forms/orig.frm` to `forms/copy.frm` (same inner name) and refresh. The "UUID duplicate found" marker should appear on the form.
+3. Delete `copy.frm`. The marker should disappear on the next auto-build.
+4. Watch the progress bar and label during a full build with several modules. The percentage should move across all modules and forms.
 
 **Regression checks**
-1. **R2 check:** repeat step 2, then change the `uuid` inside `copy.frm` to a new GUID and save. Run a clean or full build. The marker should be gone; if it stays, R2 is confirmed (check whether an IDE restart clears it).
-2. **R1 check:** with the solution loaded, `git mv forms/f1.frm forms/f2.frm` and change the inner `"name"` to `f2`. Refresh and build. There should be no duplicate marker on `f2`. Also rename a form through the Servoy UI and check the same.
-3. **Delete the original:** repeat step 2, then delete `orig.frm` and keep the copy. There should be no stuck marker.
-4. **Progress with several modules:** start Developer fresh (dependencies uninitialised) with an active solution that has several modules, then build. Check whether the bar reaches 100% after the first module and then stops (R3).
-5. **Script UUID change:** change the UUID of a method in a `.js` file but keep the name, then build (the SVY-21072 steps). There should be no marker. This is the case round 2 fixed.
-6. **Modules:** two modules sharing one form UUID. `UUIDDuplicateIn` already existed. Check whether a second `UUIDDuplicate` marker appears.
-7. **Incremental build:** duplicate a file, then edit only the other one. Check that detection still works with a partial build delta.
-8. **Quick fix:** with a duplicate marker present, open the quick fix (`ServoyQuickFixGenerator`) and check that it still gets the `Uuid` and `SolutionName` attributes.
+1. **Copy with new UUID (was High):** repeat step 2, then change the `uuid` inside `copy.frm` to a new GUID and save. The marker on `orig` should disappear on the next automatic build, without a clean build.
+2. **Finding 1:** copy `forms/a.frm` to `forms/b.frm` and edit only `"name": "a"` to `"b"`. Wait for the auto-build. Compare with the pre-`62ae7701ca` builder, which shows the marker on `b.frm`. Then restart the IDE and check how the two forms are reported.
+3. **Pure rename:** `git mv forms/f1.frm forms/f2.frm` and change the inner name to `f2`. There should be no duplicate marker on `f2`. Also rename a form through the Servoy UI.
+4. **Rename without editing the inner name:** the marker is expected here, as with the old scan.
+5. **Delete the original:** repeat step 2, then delete `orig.frm` and keep the copy. There should be no stuck marker.
+6. **Finding 2:** start the IDE on a solution with two `.frm` files sharing one UUID and a few elements. Count the per-element duplicate markers.
+7. **Finding 3:** start a multi-module first build and cancel between modules. Check that the remaining modules get their markers on the next build.
+8. **Script UUID change:** change the UUID of a method in a `.js` file but keep the name. There should be no marker.
+9. **Modules and incremental:** two modules sharing one form UUID, and an incremental build after duplicating a file. Check marker counts and that detection still works.
+10. **Quick fix:** with a duplicate marker present, open the quick fix (`ServoyQuickFixGenerator`) and check that it still gets the `Uuid` and `SolutionName` attributes.
 
-**Automated checks:** `ServoyBuilderDuplicateUUIDTest` and `DeveloperPersistIndexDuplicateUUIDTest` (plainjunit, `com.servoy.eclipse.model.tests`, `junitVersion: "6"`). Neither can catch R1 or R2. The existence predicate is injected, so the real `workspaceFileExists` is never exercised. Neither test was run in this review, and Spotbugs was not run either.
+**Automated checks:** `ServoyBuilderDuplicateUUIDTest` and `DeveloperPersistIndexDuplicateUUIDTest` (plainjunit, `com.servoy.eclipse.model.tests`, `junitVersion: "6"`). They call the real `isDuplicateConfirmedInMemory` with injected paths. These tests were not run in this review, and Spotbugs was not run either. Not covered by any test: the deserializer clear and its trigger, the Site 3 guard for form elements, the own-file guard on real workspace paths, `checkDuplicateUUID`'s clear tail, `countPersists`, and progress. The `OtherFileFlag` test only reads back a runtime property and is not evidence for the feature.
 
 ## Possible improvements / follow-ups
-- **R2:** re-validate the recorded file instead of only checking that it exists, for example by checking that it still declares this persist's UUID. Alternatively, clear the flags when the other file is re-read with a different UUID.
-- **R1:** ignore a recorded "other file" that is the persist's own current file, as the old scan did (`!pathPair.getRight().equals(f.getName())`).
-- **R3:** use one `SubMonitor` per project, for example `SubMonitor.split(...)`, instead of repeated `convert(monitor, N)` on the same instance. Consider reporting progress inside `ServoyFormBuilder` too.
-- Add tests that exercise the real file-existence check, the deserializer set-sites, and the new-UUID and rename scenarios.
-- `DeveloperPersistIndexDuplicateUUIDTest.java:164` still sets `DUPLICATE_UUID_OTHER_FILE` to the round 1 value `"formA.frm"`. It passes, but no longer matches the production meaning of an absolute path.
-- The new test calls the package-private method reflectively. Since `acef0ffad5` (SVY-21640), the sdd skills say to avoid reflection in generated tests. As a fragment, the test could call it directly from package `com.servoy.eclipse.model.builder`.
+- **Finding 1:** at `SolutionDeserializer.java:1921`, `getFileName(retval)` is the persist's previous file. Record it only if it still exists on disk: in a pure external rename it is gone, in a copy it is still there.
+- Add tests for the deserializer clear, the form-element guard, the own-file guard with real paths (case, separators, null `getLocation()`), and the copy-plus-rename case.
+- Make `getDuplicateUUIDs`, the 3-argument `checkDuplicateUUID` and `countPersists` package-private. Keep only `isDuplicateConfirmedInMemory` public for the test.
+- Consider `forgetLastBuiltState()` handling when `split()` cancels between modules.
+- The `worked(countPersists(form) - 1)` lump after a form is coarse: progress stalls inside a large form and then jumps.
+- `DeveloperPersistIndexDuplicateUUIDTest` and `ServoyBuilderDuplicateUUIDTest` still use reflection. Since `acef0ffad5` (SVY-21640) the sdd skills say to avoid it. As a fragment, the test could call the package-private method directly.
 - Measure build time before and after on the ticket's solution.
 - Minor: `AGENTS.md` says version `2026.6.0-SNAPSHOT` while the newest unreleased Jira version is 2026.12.
