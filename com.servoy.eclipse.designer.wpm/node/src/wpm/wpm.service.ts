@@ -246,6 +246,23 @@ export class WpmService {
   }
 
   versionCompare(v1: string, v2: string): number {
+	// a qualifier is what follows the first '-' (for example 2026.9.1-pre); a version without qualifier is greater than the same version with one
+	const dash1 = v1.indexOf('-');
+	const dash2 = v2.indexOf('-');
+	const qualifier1 = dash1 >= 0 ? v1.substring(dash1 + 1) : null;
+	const qualifier2 = dash2 >= 0 ? v2.substring(dash2 + 1) : null;
+	const result = this.numbersCompare(dash1 >= 0 ? v1.substring(0, dash1) : v1, dash2 >= 0 ? v2.substring(0, dash2) : v2);
+	if (result !== 0) return result;
+
+	if (qualifier1 === null && qualifier2 === null) return 0;
+	if (qualifier1 === null) return 1;
+	if (qualifier2 === null) return -1;
+	if (qualifier1 < qualifier2) return -1;
+	if (qualifier1 > qualifier2) return 1;
+	return 0;
+  }
+
+  private numbersCompare(v1: string, v2: string): number {
 	const av1 = v1.split('.');
 	const av2 = v2.split('.');
 

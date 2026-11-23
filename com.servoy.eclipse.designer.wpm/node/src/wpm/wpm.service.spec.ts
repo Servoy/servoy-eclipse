@@ -78,6 +78,17 @@ describe('WpmService', () => {
       expect(service.versionCompare('1.0.0-alpha', '1.0.0-beta')).toBeLessThan(0);
       expect(service.versionCompare('1.0.0-beta', '1.0.0-alpha')).toBeGreaterThan(0);
     });
+
+    it('should rank a -pre version below the same final version', () => {
+      expect(service.versionCompare('2026.9.1-pre', '2026.9.1')).toBeLessThan(0);
+      expect(service.versionCompare('2026.9.1', '2026.9.1-pre')).toBeGreaterThan(0);
+    });
+
+    it('should rank a -pre version above the previous release and below the next one', () => {
+      expect(service.versionCompare('2026.9.1-pre', '2026.9.0')).toBeGreaterThan(0);
+      expect(service.versionCompare('2026.9.1-pre', '2026.9.2')).toBeLessThan(0);
+      expect(service.versionCompare('2026.9.2-pre', '2026.9.1')).toBeGreaterThan(0);
+    });
   });
 
   describe('install', () => {
