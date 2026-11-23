@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Combines every coverage report found under
-#   incoming/jenkins/<source>/...   (copied from the Jenkins jobs of the Servoy repos)
-#   github-uploads/<repo>/...       (pushed by GitHub Actions, see ci/coverage/ingest-upload.sh)
+#   incoming/<source>/<path in that repo>   (a copy of the staging folder the repos push to,
+#                                             see Jenkinsfile.coverage)
 # into ONE ReportGenerator report (https://github.com/danielpalme/ReportGenerator).
 #
 # Output (relative to the working directory):
@@ -81,39 +81,32 @@ emit() { # $1 file, $2 label, $3 java|js
     printf '%s\t%s\n' "$label" "$1" >> report-data/sources.txt
 }
 
+# incoming/<source>/<path in that repo>: label = <source>/<module>, where the module is the folder before
+# target/ (Maven/Tycho: <bundle>/target/site/jacoco/jacoco.xml) or before coverage/ (Angular: <x>/coverage/combined/...)
 while IFS= read -r f; do
-    rel="${f#incoming/jenkins/}"; src="${rel%%/*}"; rest="${rel#*/}"
-    bundle="${rest%%/target/*}"; bundle="${bundle##*/}"
-    case "$(kind_of "$f")" in
-        jacoco)    emit "$f" "$src/$bundle (Java)" ;;
-        cobertura) emit "$f" "$src/$bundle (JS)" ;;
-        *)         echo "WARN: not a JaCoCo/Cobertura file, skipped: $f" >&2 ;;
-    esac
-done < <(find incoming/jenkins -type f -name '*.xml' 2>/dev/null | sort)
-
-while IFS= read -r f; do
-    rel="${f#github-uploads/}"; repo="${rel%%/*}"; rest="${rel#*/}"
+    rel="${f#incoming/}"; src="${rel%%/*}"; rest="${rel#*/}"
     dir="$(dirname "$rest")"
     dir="${dir%%/target*}"                                  # <module>/target/site/jacoco -> <module>
     dir="$(sed -E 's#(^|/)coverage(/[^/]+)?$##' <<<"$dir")" # <x>/coverage/combined -> <x>
     case "$dir" in .|target|target/*) dir="" ;; esac
-    label="$repo${dir:+/$dir}"
+    dir="${dir##*/}"                                        # bundles/com.x.y -> com.x.y
+    label="$src${dir:+/$dir}"
     case "$(kind_of "$f")" in
         jacoco)    emit "$f" "$label (Java)" ;;
         cobertura) emit "$f" "$label (JS)" ;;
         *)         echo "WARN: not a JaCoCo/Cobertura file, skipped: $f" >&2 ;;
     esac
-done < <(find github-uploads -type f -name '*.xml' 2>/dev/null | sort)
+done < <(find incoming -type f -name '*.xml' 2>/dev/null | sort)
 
 # lcov has no package names to relabel: all lcov files end up in the default assembly
 l=0
 while IFS= read -r f; do
     l=$((l + 1)); mkdir -p "prepared/lcov-$l"; cp "$f" "prepared/lcov-$l/lcov.info"
     printf '(lcov, not relabelled)\t%s\n' "$f" >> report-data/sources.txt
-done < <(find incoming/jenkins github-uploads -type f -name 'lcov.info' 2>/dev/null | sort)
+done < <(find incoming -type f -name 'lcov.info' 2>/dev/null | sort)
 
 if [ "$n" -eq 0 ] && [ "$l" -eq 0 ]; then
-    echo "no coverage files found under incoming/jenkins or github-uploads" >&2
+    echo "no coverage files found under incoming/ (nothing pushed to the staging folder yet?)" >&2
     exit 1
 fi
 echo "combining $n JaCoCo/Cobertura files and $l lcov files"

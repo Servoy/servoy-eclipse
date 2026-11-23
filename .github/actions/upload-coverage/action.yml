@@ -85,7 +85,7 @@ runs:
         # The repo name is a query parameter and the zip the file parameter (multipart). Credentials go through
         # curl's config on stdin, so they never show up in the process list.
         printf 'user = "%s:%s"\n' "$JENKINS_USER" "$JENKINS_TOKEN" | curl -sS --fail-with-body -K - \
-          -X POST "${JOB_URL%/}/buildWithParameters?GITHUB_REPO=${REPO_NAME}" \
-          -F "GITHUB_COVERAGE=@${zip_file}" \
+          -X POST "${JOB_URL%/}/buildWithParameters?COVERAGE_SOURCE=${REPO_NAME}" \
+          -F "COVERAGE_ZIP=@${zip_file}" \
           || fail "upload to Jenkins failed"
         echo "coverage of '$REPO_NAME' sent to Jenkins"
