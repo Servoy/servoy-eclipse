@@ -235,6 +235,134 @@ public class CypressTestDiscoveryServiceTest
 	}
 
 	@Nested
+	@DisplayName("discoverFormTests")
+	class DiscoverFormTests
+	{
+		@Test
+		@DisplayName("keeps the specs whose prefix is the active solution or one of its modules")
+		void keepsActiveSolutionAndModules() throws IOException
+		{
+			createSpecs("main.f1", "modA.f2", "other.f3", "main.f4");
+
+			List<String> forms = service.discoverFormTests(List.of("main", "modA"));
+
+			assertEquals(3, forms.size());
+			assertAll(
+				() -> assertTrue(forms.contains("main.f1")),
+				() -> assertTrue(forms.contains("modA.f2")),
+				() -> assertTrue(forms.contains("main.f4")),
+				() -> assertFalse(forms.contains("other.f3")));
+		}
+
+		@Test
+		@DisplayName("only the text before the first dot is the owner, so dots in the form name do not matter")
+		void ownerIsTheTextBeforeTheFirstDot() throws IOException
+		{
+			createSpecs("sol.form.with.dots", "other.sol");
+
+			List<String> forms = service.discoverFormTests(List.of("sol"));
+
+			assertEquals(List.of("sol.form.with.dots"), forms);
+		}
+
+		@Test
+		@DisplayName("a spec without a prefix is kept, because its owner cannot be told")
+		void keepsSpecsWithoutOwner() throws IOException
+		{
+			createSpecs("legacy", "other.b");
+
+			List<String> forms = service.discoverFormTests(List.of("sol"));
+
+			assertEquals(List.of("legacy"), forms);
+		}
+
+		@Test
+		@DisplayName("no solution names keeps only the specs without an owner")
+		void noSolutionNames() throws IOException
+		{
+			createSpecs("sol.a", "legacy");
+
+			assertEquals(List.of("legacy"), service.discoverFormTests(List.of()));
+			assertEquals(List.of("legacy"), service.discoverFormTests(null));
+		}
+
+		@Test
+		@DisplayName("returns empty list when no spec belongs to the given solutions")
+		void nothingMatches() throws IOException
+		{
+			createSpecs("other.a", "other.b");
+
+			assertTrue(service.discoverFormTests(List.of("sol")).isEmpty());
+		}
+
+		@Test
+		@DisplayName("returns empty list when the spec directory is null")
+		void returnsEmptyWhenDirIsNull() throws Exception
+		{
+			injectMockSpecGenerator(null);
+
+			List<String> forms = service.discoverFormTests(List.of("sol"));
+
+			assertNotNull(forms);
+			assertTrue(forms.isEmpty());
+		}
+
+		@Test
+		@DisplayName("the solution prefix is matched case-sensitively")
+		void prefixIsCaseSensitive() throws IOException
+		{
+			createSpecs("Sol.a", "sol.b");
+
+			assertEquals(List.of("sol.b"), service.discoverFormTests(List.of("sol")));
+		}
+
+		@Test
+		@DisplayName("accepts any collection of names, such as a set")
+		void acceptsASet() throws IOException
+		{
+			createSpecs("sol.a", "other.b");
+
+			assertEquals(List.of("sol.a"), service.discoverFormTests(java.util.Set.of("sol")));
+		}
+
+		@Test
+		@DisplayName("a .spec.cy.ts spec is scoped like a .spec.cy.js one")
+		void scopesTypeScriptSpecs() throws IOException
+		{
+			Files.createFile(tempDir.resolve("sol.a.spec.cy.ts"));
+			Files.createFile(tempDir.resolve("other.b.spec.cy.ts"));
+
+			assertEquals(List.of("sol.a"), service.discoverFormTests(List.of("sol")));
+		}
+
+		@Test
+		@DisplayName("a name that starts with a dot has no owner and is kept")
+		void leadingDotHasNoOwner() throws IOException
+		{
+			createSpecs(".hidden", "other.b");
+
+			assertEquals(List.of(".hidden"), service.discoverFormTests(List.of("sol")));
+		}
+
+		@Test
+		@DisplayName("a solution name that is only a prefix of another does not match it")
+		void prefixOfAnotherNameDoesNotMatch() throws IOException
+		{
+			createSpecs("sol2.a", "sol.b");
+
+			assertEquals(List.of("sol.b"), service.discoverFormTests(List.of("sol")));
+		}
+
+		private void createSpecs(String... baseNames) throws IOException
+		{
+			for (String baseName : baseNames)
+			{
+				Files.createFile(tempDir.resolve(baseName + ".spec.cy.js"));
+			}
+		}
+	}
+
+	@Nested
 	@DisplayName("hasAnyTest")
 	class HasAnyTest
 	{
