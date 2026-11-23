@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -640,8 +641,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	@Override
 	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor progressMonitor) throws CoreException
 	{
-		// SVY-21431: give the whole build a progress total once, so worked() below moves the reported percentage
-		progressMonitor = SubMonitor.convert(progressMonitor, "Servoy build", 1000);
+		// SVY-21431: one root monitor for the whole build; every project build below gets its own split() child, so the
+		// percentage moves across all projects instead of filling up after the first one.
+		SubMonitor buildProgress = SubMonitor.convert(progressMonitor, "Servoy build", 100);
 		// make sure the IServoyModel is initialized
 		getServoyModel();
 		referencedProjectsSet.clear();
@@ -723,14 +725,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			// cache is empty we need a full build on all active solutions
 			// this will also delete all markers and create them on accurate file
 			BuilderDependencies.getInstance().initialize();
-			for (ServoyProject project : servoyModel.getModulesOfActiveProject())
+			ServoyProject[] modulesToBuild = servoyModel.getModulesOfActiveProject();
+			buildProgress.setWorkRemaining(Math.max(modulesToBuild.length, 1));
+			for (ServoyProject project : modulesToBuild)
 			{
-				fullBuild(project.getProject(), progressMonitor);
+				fullBuild(project.getProject(), buildProgress.split(1));
 			}
 		}
 		else if (kind == FULL_BUILD)
 		{
-			fullBuild(getProject(), progressMonitor);
+			fullBuild(getProject(), buildProgress.split(100));
 		}
 		else
 		{
@@ -765,14 +769,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (needFullBuild)
 				{
-					fullBuild(getProject(), progressMonitor);
+					fullBuild(getProject(), buildProgress.split(100));
 				}
 				else
 				{
 					IResourceDelta delta = getDelta(getProject());
 					if (delta != null)
 					{
-						incrementalBuild(delta, progressMonitor);
+						incrementalBuild(delta, buildProgress.split(50));
 					}
 					// servoy builder is not called on resources project, so, if we can do an incremental build, do it when main active project is checked
 					if (resourcesProjectDelta != null)
@@ -780,7 +784,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						ServoyProject activeProject = getServoyModel().getActiveProject();
 						if (activeProject != null && activeProject.getProject().getName().equals(getProject().getName()))
 						{
-							incrementalBuild(resourcesProjectDelta, progressMonitor);
+							incrementalBuild(resourcesProjectDelta, buildProgress.split(50));
 						}
 					}
 				}
@@ -1780,19 +1784,34 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	public static void checkDuplicateUUID(IPersist persist, IProject project)
 	{
+		checkDuplicateUUID(persist, project, getDuplicateUUIDs());
+	}
+
+	/**
+	 * SVY-21431: the in-memory duplicate-UUID map of the active developer solution (empty when there is none). Fetch it once and
+	 * pass it to {@link #checkDuplicateUUID(IPersist, IProject, Map)} for every flagged persist, instead of once per persist.
+	 */
+	public static Map<UUID, List<IPersist>> getDuplicateUUIDs()
+	{
+		FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		return fs instanceof DeveloperFlattenedSolution dfs ? dfs.getDuplicateUUIDList() : Collections.emptyMap();
+	}
+
+	public static void checkDuplicateUUID(IPersist persist, IProject project, Map<UUID, List<IPersist>> indexDuplicates)
+	{
 		boolean found = false;
 
 		if (Utils.getAsBoolean(((AbstractBase)persist).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID)))
 		{
 			// SVY-21431: confirm the duplicate entirely from in-memory state - no sibling-file reads
 			// (see isDuplicateConfirmedInMemory for the two cases).
-			FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
-			Map<UUID, List<IPersist>> duplicates = fs instanceof DeveloperFlattenedSolution dfs ? dfs.getDuplicateUUIDList() : null;
-			found = isDuplicateConfirmedInMemory(persist, duplicates, ServoyBuilder::workspaceFileExists);
+			Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
+			IPath ownFileLocation = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(pathPair.getLeft() + pathPair.getRight())).getLocation();
+			found = isDuplicateConfirmedInMemory(persist, indexDuplicates, ownFileLocation != null ? ownFileLocation.toOSString() : null,
+				ServoyBuilder::workspaceFileExists);
 
 			if (found)
 			{
-				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				String persistFile = ((AbstractBase)persist).getSerializableRuntimeProperty(IScriptProvider.FILENAME);
 				IFile fileForLocation = persistFile != null ? ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
 					Path.fromPortableString(persistFile.replace('\\', '/'))) : null;
@@ -1815,20 +1834,24 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	 * <ol>
 	 * <li>two distinct persist instances share the UUID: the developer persist index lists a persist other than this one;
 	 * <li>the same persist instance was re-read from a second file: deserialization recorded that file's path in
-	 * DUPLICATE_UUID_OTHER_FILE. It only counts while that file still exists, so the marker goes away once the copy is
-	 * deleted or renamed instead of staying until the solution is reloaded.
+	 * DUPLICATE_UUID_OTHER_FILE. That only counts while the recorded file is not the persist's own file (an external rename
+	 * makes the "other" file the persist's own new file; the old sibling-file scan skipped it too) and while that file still
+	 * exists. When the copy is given a new UUID, the deserializer clears the property as it reads the copy again.
 	 * </ol>
 	 *
 	 * @param indexDuplicates the developer persist index duplicate map (may be null)
-	 * @param otherFileExists whether a recorded file path still exists (a workspace resource-tree lookup, not file I/O)
+	 * @param ownFilePath absolute path of the file this persist is serialized to, derived from its name (may be null)
+	 * @param otherFileExists whether a recorded file still exists (a workspace resource-tree lookup, not a file read)
 	 */
-	static boolean isDuplicateConfirmedInMemory(IPersist persist, Map<UUID, List<IPersist>> indexDuplicates, Predicate<String> otherFileExists)
+	public static boolean isDuplicateConfirmedInMemory(IPersist persist, Map<UUID, List<IPersist>> indexDuplicates, String ownFilePath,
+		Predicate<String> otherFileExists)
 	{
 		List<IPersist> withSameUUID = indexDuplicates != null ? indexDuplicates.get(persist.getUUID()) : null;
 		if (withSameUUID != null && withSameUUID.stream().anyMatch(other -> other != persist)) return true;
 
 		String otherFile = ((AbstractBase)persist).getRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE);
-		return otherFile != null && otherFileExists.test(otherFile);
+		if (otherFile == null || new File(otherFile).equals(ownFilePath != null ? new File(ownFilePath) : null)) return false;
+		return otherFileExists.test(otherFile);
 	}
 
 	private static boolean workspaceFileExists(String absolutePath)
@@ -1967,7 +1990,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				final FlattenedSolution flattenedSolution = ServoyBuilderUtils.getReferenceFlattenedSolution(solution);
 				// SVY-21431: the persists visited below are the unit of progress (an in-memory count, no file reads)
-				if (monitor != null) SubMonitor.convert(monitor, countPersistsToValidate(solution));
+				if (monitor != null) SubMonitor.convert(monitor, countPersists(solution));
+				// SVY-21431: fetched once for the whole visit instead of once per flagged persist
+				final Map<UUID, List<IPersist>> duplicateUUIDs = getDuplicateUUIDs();
 				solution.acceptVisitor(new IPersistVisitor()
 				{
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
@@ -1975,10 +2000,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 					public Object visit(final IPersist o)
 					{
-						reportBuildProgress(o); // SVY-21431: advance progress so the reported percentage does not appear frozen
+						reportBuildProgress(o); // SVY-21431: label + one tick, so the reported percentage does not appear frozen
 						if (o instanceof Form)
 						{
 							ServoyFormBuilder.addFormMarkers(servoyProject, (Form)o, methodsParsed, formsAbstractChecked);
+							// SVY-21431: the form's elements were validated inside addFormMarkers; count them as done now
+							if (monitor != null) monitor.worked(countPersists(o) - 1);
 							return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 						}
 						checkCancel();
@@ -2051,7 +2078,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						if (((AbstractBase)o).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
 						{
-							checkDuplicateUUID(o, project);
+							checkDuplicateUUID(o, project, duplicateUUIDs);
 						}
 						checkCancel();
 						addMissingServer(o, missingServers, goodServers);
@@ -3609,15 +3636,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	}
 
 	/**
-	 * Counts the persists {@link #checkServoyProject} visits, using the same traversal rule (forms are visited but not entered),
-	 * so it can be used as the progress total. Walks the in-memory solution only.
+	 * Counts a persist and all its descendants, walking the in-memory tree only. Used as the progress total of
+	 * {@link #checkServoyProject} (each persist is one tick, a form counts with all its elements because
+	 * ServoyFormBuilder.addFormMarkers validates them).
 	 */
-	static int countPersistsToValidate(Solution solution)
+	public static int countPersists(IPersist root)
 	{
 		int[] count = { 0 };
-		solution.acceptVisitor(o -> {
+		root.acceptVisitor(o -> {
 			count[0]++;
-			return o instanceof Form ? IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER : IPersistVisitor.CONTINUE_TRAVERSAL;
+			return IPersistVisitor.CONTINUE_TRAVERSAL;
 		});
 		return Math.max(count[0], 1);
 	}

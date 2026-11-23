@@ -160,10 +160,12 @@ class DeveloperPersistIndexDuplicateUUIDTest {
 		@Test
 		void otherFileFlagIsReadableAndClearable() throws Exception {
 			Relation persist = relationWithUUID(UUID.randomUUID());
-			// deserialization set-site behaviour: record the conflicting file name
-			persist.setRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE, "formA.frm");
-			assertEquals("formA.frm", persist.getRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE),
-					"the recorded other-file name must be readable by the builder");
+			// deserialization set-site behaviour (Site 3): record the absolute path of the
+			// other file
+			String otherFile = new java.io.File("forms", "formA.frm").getAbsolutePath();
+			persist.setRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE, otherFile);
+			assertEquals(otherFile, persist.getRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE),
+					"the recorded other-file path must be readable by the builder");
 
 			// builder clears both flags when nothing is found on a later clean build
 			persist.setRuntimeProperty(SolutionDeserializer.DUPLICATE_UUID_OTHER_FILE, null);

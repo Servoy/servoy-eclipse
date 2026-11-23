@@ -231,6 +231,8 @@ public class ServoyFormBuilder
 
 		form.acceptVisitor(new IPersistVisitor()
 		{
+			private Map<UUID, List<IPersist>> duplicateUUIDs; // SVY-21431: fetched once per form, only when an element is flagged
+
 			@Override
 			public Object visit(IPersist o)
 			{
@@ -320,7 +322,8 @@ public class ServoyFormBuilder
 				if (((AbstractBase)o).getRuntimeProperty(
 					SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
 				{
-					ServoyBuilder.checkDuplicateUUID(o, servoyProject.getProject());
+					if (duplicateUUIDs == null) duplicateUUIDs = ServoyBuilder.getDuplicateUUIDs();
+					ServoyBuilder.checkDuplicateUUID(o, servoyProject.getProject(), duplicateUUIDs);
 				}
 
 				if (o instanceof WebComponent)

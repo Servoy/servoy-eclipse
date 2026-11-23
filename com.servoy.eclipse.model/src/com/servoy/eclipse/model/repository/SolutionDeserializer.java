@@ -153,11 +153,12 @@ public class SolutionDeserializer
 	};
 
 	/**
-	 * SVY-21431: companion to {@link #POSSIBLE_DUPLICATE_UUID}. Set only when the same persist (uuid) is
+	 * SVY-21431: companion to {@link #POSSIBLE_DUPLICATE_UUID}. Set only when a persist that has its own file (not a form element) is
 	 * re-read from a second file (the single-reused-instance case where the in-memory persist index only
 	 * holds one instance). Holds the absolute path of that other file so the builder can confirm the
-	 * duplicate from memory instead of re-reading sibling files from disk. The builder treats it as
-	 * confirmed only while that file still exists in the workspace, so it does not outlive the duplicate.
+	 * duplicate from memory instead of re-reading sibling files from disk. The builder only counts it while that
+	 * file still exists and is not the persist's own file, and it is dropped here when that file is read again
+	 * declaring another uuid, so it does not outlive the duplicate.
 	 */
 	public static final RuntimeProperty<String> DUPLICATE_UUID_OTHER_FILE = new RuntimeProperty<String>()
 	{
@@ -1863,6 +1864,9 @@ public class SolutionDeserializer
 		IPersist retval = null;
 		if (existingNode == null)
 		{
+			// SVY-21431: this file now declares a uuid no existing persist has (e.g. the copy was given a new uuid).
+			// Only on a re-read (testExisting): on the initial load DUPLICATE_UUID_OTHER_FILE is never set, so skip the extra pass. Form elements never carry it either, so only a file's own top-level persist triggers it.
+			if (testExisting && !SolutionSerializer.isCompositeWithItems(parent)) clearDuplicateUUIDOtherFile(parent, file);
 			// check if there is already a child with that name and not with that uuid (then it is an incoming uuid change)
 			// so that child should be used. Else we will have 2 childs with the same name but different uuids.
 			if (!obj.isNull(SolutionSerializer.PROP_NAME) && obj.has(SolutionSerializer.PROP_UUID))
@@ -1921,7 +1925,8 @@ public class SolutionDeserializer
 				((AbstractBase)retval).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
 				// SVY-21431: same persist (uuid) is read from a second file; record that other file's path so
 				// the builder confirms the duplicate from memory instead of scanning sibling files on disk.
-				((AbstractBase)retval).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, file.getAbsolutePath());
+				// only for persists that have their own file: form elements share their form's file and the old scan never reported them
+				if (!SolutionSerializer.isCompositeItem(retval)) ((AbstractBase)retval).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, file.getAbsolutePath());
 			}
 		}
 
@@ -1980,6 +1985,25 @@ public class SolutionDeserializer
 			setDestructuringProperties(obj, sv);
 		}
 		return retval;
+	}
+
+	/**
+	 * SVY-21431: a sibling that recorded this file as the other file declaring its uuid is no longer duplicated by it, so drop
+	 * that record (the builder then clears the duplicate marker on its next run). Only json files can be recorded.
+	 */
+	private static void clearDuplicateUUIDOtherFile(ISupportChilds parent, File file)
+	{
+		if (file == null || parent == null || !SolutionSerializer.isJSONFile(file.getName())) return;
+		String path = file.getAbsolutePath();
+		Iterator<IPersist> siblings = parent.getAllObjects();
+		while (siblings.hasNext())
+		{
+			IPersist sibling = siblings.next();
+			if (path.equals(((AbstractBase)sibling).getRuntimeProperty(DUPLICATE_UUID_OTHER_FILE)))
+			{
+				((AbstractBase)sibling).setRuntimeProperty(DUPLICATE_UUID_OTHER_FILE, null);
+			}
+		}
 	}
 
 	private static UUID getContainerUUID(IPersist persist)
