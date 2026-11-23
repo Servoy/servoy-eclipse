@@ -40,7 +40,7 @@ Before this skill can run, the following must be available:
 | `/release` | Build → changelog → create a **draft** release (title `<Bundle-Name> <version>`). No tag pushed. |
 | `/release publish` | Detect state at the target tag → tell the user + confirm → promote an existing draft, OR run a full publish if none exists, OR hard-stop if already published → then offer a version bump. |
 
-The version is **always** read from the 3 version files. It is never passed as an argument.
+The version is **always** read from the 3 version files. It is never passed as an argument. A `-pre` suffix in those files (e.g. `2026.9.1-pre`) is removed before the release (Phase 0b), and added again to the next version after the release (Phase 5).
 
 ---
 
@@ -58,19 +58,21 @@ The version is **always** read from the 3 version files. It is never passed as a
 
 3. **Read the version from all three files and verify they match:**
    - `package.json` → `.version`
-   - `META-INF/MANIFEST.MF` → `Bundle-Version` (always dot-separated numbers, e.g. `2026.9.0`)
+   - `META-INF/MANIFEST.MF` → `Bundle-Version` (dot-separated numbers, e.g. `2026.9.0`, optionally followed by a `-pre` suffix, e.g. `2026.9.1-pre`)
    - `projects/*/package.json` → `.version` (the library package.json)
 
    If any of the three disagree, **report the mismatch and stop** — do not attempt to reconcile automatically.
 
+   **Pre-release suffix (`-pre`).** Between releases the repo keeps the *next* version with a `-pre` suffix (e.g. `2026.9.1-pre`), so development and nightly builds can be told apart from the official release in the Servoy Package Manager. The same single string is used in all three files (no OSGi-style spelling). Call the value as read `<fileVersion>` and the value with the trailing `-pre` removed `<version>` (`2026.9.1-pre` → `2026.9.1`; a value without `-pre` is already `<version>`). The release is always for `<version>`. The suffix is always exactly `-pre` (a single lowercase token, never `-pre.1`).
+
 4. **Read `Bundle-Name`** from `META-INF/MANIFEST.MF` — used for the release title.
    - **Join OSGi continuation lines.** Manifest headers fold long values onto the next line, which begins with a single leading space. For example `Bundle-Name: Bootstrap ` followed by ` Extra Components` is the single value `Bootstrap Extra Components`. A naive single-line read would yield just `Bootstrap` and produce a wrong title like `Bootstrap  2026.9.1`. When reading `Bundle-Name` (and any header), concatenate each continuation line (strip the one leading space) onto the previous line before using the value. This applies to `Bundle-Version` too, though versions rarely wrap.
 
-5. **Compute:**
+5. **Compute** (always from `<version>`, i.e. **without** the `-pre` suffix):
    - Tag: `v<version>` (e.g. `v2026.9.0`)
    - Title: `<Bundle-Name> <version>` (e.g. `Servoy NG-Grids 2026.9.0`)
 
-6. **Ask the user to confirm the version is correct** before continuing.
+6. **Ask the user to confirm the version is correct** before continuing. If the files contain `<fileVersion>` with `-pre`, say so explicitly: *"The files say `2026.9.1-pre`; I'll release `2026.9.1` and remove the `-pre` suffix first (see Phase 0b)."*
 
 7. **Confirm the working tree** is clean, on the correct release branch, and pushed to the remote. If there are uncommitted changes, report them and let the user decide.
 
@@ -79,6 +81,27 @@ The version is **always** read from the 3 version files. It is never passed as a
    git rev-parse --abbrev-ref HEAD
    ```
    Call this `<branch>` (e.g. `2024.3`). This is critical: `gh release create` without `--target` defaults the tag to the repository's **default branch** (usually `master`), NOT the branch you are releasing from. On a maintenance line (e.g. `2024.3`) that silently tags the wrong commit — a `master`-only commit that is not even on the release branch. **Always pass `--target <branch>`** so the tag lands on the branch tip you are actually releasing. Confirm `<branch>` is the intended release branch with the user.
+
+---
+
+## Phase 0b — Remove the `-pre` suffix (only when `<fileVersion>` ends with `-pre`)
+
+Skip this phase entirely when the three files already hold a version without `-pre` (for example a draft was already prepared earlier, or a legacy repo that never used `-pre`).
+
+The release zip and the tag must carry the clean version, and the tag is created on the tip of `<branch>` at publish time, so the clean version must be **committed and pushed** before building/publishing. Otherwise the zip, or the tagged commit, would still say `-pre`.
+
+1. Tell the user what will happen and ask for confirmation: *"I'll change the version from `<fileVersion>` to `<version>` in the 3 files, commit it as `release <version> [skip ci] [ai]` and push it to `<branch>`."* Pushing is required here (the tag will point to this commit); do not push without the confirmation.
+2. Replace `<fileVersion>` with `<version>` in all three files:
+   - `package.json` → `version`
+   - `META-INF/MANIFEST.MF` → `Bundle-Version`
+   - `projects/*/package.json` → `version`
+
+   Change only the version value, nothing else, and keep each file's line endings.
+3. Re-read the three files and verify they all hold `<version>` now.
+4. Commit only those three files (by explicit path, not `git add .`) with the subject `release <version> [skip ci] [ai]`. The `[skip ci]` is important: it stops the nightly workflow (`buildDraftRelease.yml`, which runs on every push to the branch) from republishing a nightly build that carries the clean version, which is exactly the situation the `-pre` suffix exists to prevent.
+5. Push the commit to `origin <branch>`.
+
+If the user declines, stop: a release must not be built from a `-pre` version.
 
 ---
 
@@ -108,7 +131,7 @@ The changelog covers commits since the previous release tag. The tag history is 
 
 1. List all tags: `git tag`.
 2. **Normalize** each candidate: strip a leading `v`. **Ignore any tag containing `_`** (underscore tags are noise and must be excluded entirely).
-3. Find the immediate predecessor of the new version by decrementing the last numeric segment (e.g. new `2026.9.3` → look for `2026.9.2`), matching either `v<pred>` or the bare `<pred>` form (old tags were sometimes created without the `v` prefix).
+3. Find the immediate predecessor of the new version (`<version>`, without any `-pre` suffix) by decrementing the last numeric segment (e.g. new `2026.9.3` → look for `2026.9.2`), matching either `v<pred>` or the bare `<pred>` form (old tags were sometimes created without the `v` prefix).
 4. If the exact predecessor is not found, fall back to the **highest normalized version tag that sorts below the new version** (version-aware numeric-segment sort, underscore tags excluded).
 
 ### Confirm the start tag
@@ -247,14 +270,14 @@ Tell the user: *"`v<version>` is already published at `<url>`. Published assets 
 Run this **only after a promote or a full publish** — NOT after creating a draft.
 
 1. Tell the user the current released version (e.g. `2026.9.1`).
-2. Propose a bump of the **last numeric segment** (e.g. `2026.9.1` → `2026.9.2`, `2026.9.0` → `2026.9.1`).
+2. Propose a bump of the **last numeric segment** (e.g. `2026.9.1` → `2026.9.2`, `2026.9.0` → `2026.9.1`) and **always add the `-pre` suffix** to the proposed value, so development/nightly builds are not mistaken for the official release: `2026.9.1` → `2026.9.2-pre`. (When the user enters a different version, append `-pre` to it as well unless it already ends with `-pre`.)
 3. Ask whether to update the version in the 3 files. Let the user accept the proposal or enter a different version.
-4. If the user chooses a new version, update all three files to the new version:
+4. If the user chooses a new version, update all three files to the new `<newVersion>-pre` string, the same spelling in all three:
    - `package.json` → `version`
    - `META-INF/MANIFEST.MF` → `Bundle-Version`
    - `projects/*/package.json` → `version`
-5. Commit the change with subject: `bump version to <newVersion> [ai]`. **Do not push** — leave the commit for the user to review.
-6. If the user declines, skip without changes.
+5. Commit the change with subject: `bump version to <newVersion>-pre [ai]`. **Do not push** — leave the commit for the user to review.
+6. If the user declines, skip without changes. (The files then keep the released version without `-pre`, and the next nightly build is indistinguishable from the release, so mention this to the user.)
 
 ---
 
@@ -264,5 +287,6 @@ This skill is designed to be updated as tooling and conventions evolve:
 
 - **`gh` changes**: update the Phase 3 commands if the GitHub CLI release syntax changes.
 - **Tag prefix**: tags are always `v<version>`. Change Phase 0 / Phase 2 detection if this convention changes.
-- **Version files**: if a new version-bearing file is added to component repos, add it to Phase 0 detection and Phase 5 bump.
+- **Version files**: if a new version-bearing file is added to component repos, add it to Phase 0 detection, Phase 0b (suffix removal) and Phase 5 bump.
+- **Pre-release suffix**: the `-pre` suffix is removed in Phase 0b and added back in Phase 5. If the suffix spelling ever changes, update both phases and Phase 0 step 3.
 - **Changelog format**: the table format mirrors the Servoy component release notes. Update Phase 2 if the release-notes style changes.
