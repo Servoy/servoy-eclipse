@@ -1,0 +1,23 @@
+/* Style of overview.html (the one-line-per-repo page of the combined coverage job, built by Jenkinsfile.coverage).
+   A separate file on purpose: Jenkins serves published HTML with a CSP that only allows stylesheets from the same
+   origin (style-src 'self') and no scripts, so the page is plain HTML + this CSS. */
+body { font-family: system-ui, "Segoe UI", Arial, sans-serif; margin: 24px; color: #222; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+.meta { color: #666; font-size: 13px; }
+table { border-collapse: collapse; margin-top: 12px; }
+th, td { padding: 6px 10px; border-bottom: 1px solid #e3e3e3; text-align: left; font-size: 14px; white-space: nowrap; }
+th { background: #f4f4f4; font-weight: 600; }
+.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.repo td { font-weight: 600; background: #fafafa; border-top: 2px solid #d8d8d8; }
+tr.sub td { color: #555; font-size: 13px; }
+tr.sub td.bundle { padding-left: 28px; }
+tr.total td { font-weight: 700; border-top: 2px solid #999; background: #f4f4f4; }
+.bar { display: inline-block; width: 120px; height: 10px; background: #eee; border-radius: 5px; vertical-align: middle; margin-right: 8px; overflow: hidden; }
+.fill { display: block; height: 100%; }
+.low { background: #d9534f; } .mid { background: #f0ad4e; } .high { background: #5cb85c; }
+.pct { display: inline-block; width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
+.na { color: #999; }
+/* bar widths in 5% steps: inline style attributes are blocked by the CSP as well */
+.w0{width:0}.w5{width:5%}.w10{width:10%}.w15{width:15%}.w20{width:20%}.w25{width:25%}.w30{width:30%}.w35{width:35%}
+.w40{width:40%}.w45{width:45%}.w50{width:50%}.w55{width:55%}.w60{width:60%}.w65{width:65%}.w70{width:70%}
+.w75{width:75%}.w80{width:80%}.w85{width:85%}.w90{width:90%}.w95{width:95%}.w100{width:100%}

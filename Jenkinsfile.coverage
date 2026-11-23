@@ -23,6 +23,122 @@
 //     user is needed. On GitHub the token is the organisation secret JENKINS_COVERAGE_TOKEN and the Jenkins URL the
 //     organisation variable JENKINS_COVERAGE_URL (see the action for the workflow snippet).
 
+// Writes report-html/overview.html (+ overview.css) and report-data/overview.csv: ONE line per repo and kind
+// (Java / JS) with a total, the bundles of each repo listed below its line. Built from ReportGenerator's
+// Summary.json, whose assemblies are named '<repo>/<bundle> (Java|JS)' by aggregate.sh.
+// Plain HTML + a CSS file: the HTML Publisher CSP blocks scripts and inline styles.
+// The steps (writeFile/readFile/echo) are here; the computation is in buildOverview (@NonCPS).
+def writeOverview(assemblies, String generatedOn) {
+    def result = buildOverview(assemblies, generatedOn ?: '', env.COVERAGE_TITLE ?: 'Servoy combined coverage', env.BUILD_NUMBER ?: '')
+    writeFile file: 'report-html/overview.html', text: result.html, encoding: 'UTF-8'
+    writeFile file: 'report-html/overview.css', text: readFile(file: 'ci/coverage/overview.css', encoding: 'UTF-8'), encoding: 'UTF-8'
+    writeFile file: 'report-data/overview.csv', text: result.csv, encoding: 'UTF-8'
+    echo result.summary
+}
+
+// @NonCPS: plain Groovy (sorting with a comparator does not work under CPS), no steps inside.
+// Written for the pipeline sandbox: no 'new' of JDK classes (new LinkedHashMap is rejected, build #10), no
+// String.format / Locale / Math. Only Groovy literals ([:] / [] / GStrings), String and Number basics.
+@NonCPS
+def buildOverview(assemblies, String generatedOn, String titleText, String buildNumber) {
+    def toLong = { v -> (v instanceof Number) ? v.longValue() : 0L }
+    def esc = { s -> s.toString().replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;') }
+    // tenths of a percent, rounded half up; null when there is nothing to cover
+    def tenths = { long c, long t -> t > 0 ? ((c * 2000L + t) / (2L * t)).longValue() : null }
+    def pctText = { x -> x == null ? '' : "${(x / 10).longValue()}.${x % 10}".toString() }
+    def thousands = { long v ->
+        def s = v.toString()
+        def out = ''
+        for (int i = 0; i < s.length(); i++) {
+            if (i > 0 && (s.length() - i) % 3 == 0) { out += ',' }
+            out += s.substring(i, i + 1)
+        }
+        out
+    }
+    def bar = { x ->
+        if (x == null) { return '<span class="na">-</span>' }
+        def cls = x < 300 ? 'low' : (x < 700 ? 'mid' : 'high')
+        long w = ((x + 25) / 50).longValue() * 5            // nearest 5%
+        if (w > 100) { w = 100 }
+        "<span class=\"bar\"><span class=\"fill ${cls} w${w}\"></span></span><span class=\"pct\">${pctText(x)}%</span>"
+    }
+    def cells = { g ->
+        "<td class=\"n\">${thousands(g.l)}</td><td class=\"n\">${thousands(g.cl)}</td><td>${bar(tenths(g.cl, g.l))}</td><td>${bar(tenths(g.cb, g.b))}</td>"
+    }
+
+    def groups = [:]                             // 'repo|kind' -> [repo, kind, bundles, sums]; [:] keeps insertion order
+    for (a in assemblies) {
+        def name = a.get('name')?.toString() ?: '(unnamed)'
+        def repo = name
+        def bundle = name
+        def kind = 'other'
+        // '<repo>/<bundle> (Java|JS)' or '<repo> (Java|JS)'
+        def m = (name =~ /^([^\/ ]+)(?:\/(.*?))? \((Java|JS)\)$/)
+        if (m.matches()) {
+            repo = m.group(1)
+            bundle = m.group(2) ?: m.group(1)
+            kind = m.group(3)
+        }
+        def key = repo + '|' + kind
+        def g = groups[key]
+        if (g == null) {
+            g = [repo: repo, kind: kind, bundles: [], cl: 0L, l: 0L, cb: 0L, b: 0L]
+            groups[key] = g
+        }
+        def row = [bundle: bundle, cl: toLong(a.get('coveredlines')), l: toLong(a.get('coverablelines')),
+                   cb: toLong(a.get('coveredbranches')), b: toLong(a.get('totalbranches'))]
+        g.bundles << row
+        g.cl += row.cl; g.l += row.l; g.cb += row.cb; g.b += row.b
+    }
+    def kindOrder = [Java: 0, JS: 1]
+    def ordered = []
+    for (g in groups.values()) { ordered << g }
+    ordered.sort { x, y ->
+        def r = x.repo.toLowerCase() <=> y.repo.toLowerCase()
+        // not '?:' on the order: Java is 0, which Groovy treats as false
+        def ox = kindOrder.containsKey(x.kind) ? kindOrder[x.kind] : 9
+        def oy = kindOrder.containsKey(y.kind) ? kindOrder[y.kind] : 9
+        r != 0 ? r : (ox <=> oy)
+    }
+    def tot = [cl: 0L, l: 0L, cb: 0L, b: 0L, n: 0]
+    for (g in ordered) { tot.cl += g.cl; tot.l += g.l; tot.cb += g.cb; tot.b += g.b; tot.n += g.bundles.size() }
+
+    def body = ''
+    def csv = 'repo,kind,bundles,coverable_lines,covered_lines,line_coverage_pct,total_branches,covered_branches,branch_coverage_pct\n'
+    for (g in ordered) {
+        int n = g.bundles.size()
+        body += "<tr class=\"repo\"><td>${esc(g.repo)}</td><td>${esc(g.kind)}</td><td class=\"n\">${n}</td>${cells(g)}</tr>\n"
+        if (n > 1) {
+            def bundles = []
+            for (b in g.bundles) { bundles << b }
+            bundles.sort { x, y -> x.bundle.toLowerCase() <=> y.bundle.toLowerCase() }
+            for (b in bundles) {
+                body += "<tr class=\"sub\"><td class=\"bundle\" colspan=\"3\">${esc(b.bundle)}</td>${cells(b)}</tr>\n"
+            }
+        }
+        csv += "${g.repo},${g.kind},${n},${g.l},${g.cl},${pctText(tenths(g.cl, g.l))},${g.b},${g.cb},${pctText(tenths(g.cb, g.b))}\n"
+    }
+    csv += "TOTAL,,${tot.n},${tot.l},${tot.cl},${pctText(tenths(tot.cl, tot.l))},${tot.b},${tot.cb},${pctText(tenths(tot.cb, tot.b))}\n"
+
+    def title = esc(titleText)
+    def html = """<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>${title} - per repo</title><link rel="stylesheet" href="overview.css"></head>
+<body>
+<h1>${title}</h1>
+<p class="meta">One line per repo and kind, its bundles below it. Generated ${esc(generatedOn)}, build #${esc(buildNumber)}.
+The 'Per bundle, package and class' tab has the full report; the table is also the build artifact report-data/overview.csv.</p>
+<table>
+<thead><tr><th>Repo</th><th>Kind</th><th class="n">Bundles</th><th class="n">Coverable lines</th><th class="n">Covered lines</th><th>Line coverage</th><th>Branch coverage</th></tr></thead>
+<tbody>
+${body}</tbody>
+<tfoot><tr class="total"><td>Total</td><td></td><td class="n">${tot.n}</td>${cells(tot)}</tr></tfoot>
+</table>
+</body></html>
+"""
+    return [html: html.toString(), csv: csv.toString(),
+            summary: "overview: ${ordered.size()} repo line(s), total ${pctText(tenths(tot.cl, tot.l))}% lines".toString()]
+}
+
 pipeline {
     agent any
 
@@ -35,10 +151,8 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
     }
 
-    triggers {
-        // nightly, so the report and its history are refreshed also on days without pushes
-        cron('H 3 * * *')
-    }
+    // No timer: every push (pushCoverage in a Jenkins job, the upload action on GitHub) starts this job, and
+    // without a push the combined coverage does not change. 'Build Now' rebuilds the report by hand.
 
     parameters {
         string(name: 'COVERAGE_SOURCE', defaultValue: '', trim: true,
@@ -96,17 +210,21 @@ pipeline {
                     def summary = readJSON file: 'report-data/Summary.json'
                     currentBuild.description = "Lines ${summary.summary.linecoverage}% | branches ${summary.summary.branchcoverage}% | ${summary.summary.assemblies} reports" +
                         (params.COVERAGE_SOURCE?.trim() ? " | upload: ${params.COVERAGE_SOURCE}" : '')
+                    // one line per repo + kind, with its bundles below it (overview.html + overview.csv)
+                    writeOverview(summary.coverage.assemblies, summary.summary.generatedon?.toString())
                 }
                 publishHTML(target: [
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: false,
                     reportDir: 'report-html',
-                    reportFiles: 'index.html',
+                    // overview.html first: it is the page the tab opens; index.html is the full ReportGenerator report
+                    reportFiles: 'overview.html,index.html',
+                    reportTitles: 'Per repo,Per bundle, package and class',
                     reportName: 'Combined Coverage'
                 ])
                 zip zipFile: 'coverage-report-html.zip', dir: 'report-html', archive: false
-                archiveArtifacts artifacts: 'report-data/Summary.csv, report-data/Summary.json, report-data/Cobertura.xml, report-data/SummaryGithub.md, report-data/sources.txt, coverage-report-html.zip',
+                archiveArtifacts artifacts: 'report-data/overview.csv, report-data/Summary.csv, report-data/Summary.json, report-data/Cobertura.xml, report-data/SummaryGithub.md, report-data/sources.txt, coverage-report-html.zip',
                     fingerprint: false
             }
         }
