@@ -3,6 +3,8 @@ package com.servoy.eclipse.cypress.services;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -78,6 +80,27 @@ public class CypressTestDiscoveryService {
 		} catch (IOException e) {
 			return Collections.emptyList();
 		}
+	}
+
+	/**
+	 * The form tests that belong to the given solutions. A form spec is named {@code <solution>.<form>}, where the
+	 * prefix is the solution or module that owns the form, so a spec is kept when that prefix is in
+	 * {@code solutionNames}. A spec without a prefix (no dot) is kept as well, because its owner cannot be told and
+	 * dropping it would hide a test that does exist.
+	 *
+	 * @param solutionNames the active solution and its modules
+	 * @return the in-scope spec base names, in discovery order; empty when none match
+	 */
+	public List<String> discoverFormTests(Collection<String> solutionNames) {
+		List<String> result = new ArrayList<>();
+		for (String entry : discoverAllTestForms()) {
+			int dot = entry.indexOf('.');
+			boolean hasOwner = dot > 0;
+			if (!hasOwner || (solutionNames != null && solutionNames.contains(entry.substring(0, dot)))) {
+				result.add(entry);
+			}
+		}
+		return result;
 	}
 
 	public List<String> discoverAllE2ETests() {
