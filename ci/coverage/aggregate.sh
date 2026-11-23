@@ -87,7 +87,7 @@ while IFS= read -r f; do
     rel="${f#incoming/}"; src="${rel%%/*}"; rest="${rel#*/}"
     dir="$(dirname "$rest")"
     dir="${dir%%/target*}"                                  # <module>/target/site/jacoco -> <module>
-    dir="$(sed -E 's#(^|/)coverage(/[^/]+)?$##' <<<"$dir")" # <x>/coverage/combined -> <x>
+    dir="$(sed -E 's#(^|/)coverage(/.*)?$##' <<<"$dir")"    # <x>/coverage/combined, <x>/coverage/@servoy/<pkg> -> <x>
     case "$dir" in .|target|target/*) dir="" ;; esac
     dir="${dir##*/}"                                        # bundles/com.x.y -> com.x.y
     label="$src${dir:+/$dir}"
