@@ -1,7 +1,7 @@
 import { SimpleChanges, Directive, inject, input, model, contentChild, signal } from '@angular/core';
 import { TemplateRef } from '@angular/core';
 
-import { BaseCustomObject, LoggerFactory, LoggerService, ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
+import { BaseCustomObject, LoggerFactory, LoggerService, PropertyUtils, ServoyBaseComponent, ServoyPublicService, WindowRefService } from '@servoy/public';
 
 
 @Directive()
@@ -73,7 +73,19 @@ export abstract class BaseTabpanel extends ServoyBaseComponent<HTMLDivElement> {
                 this.select(this.tabs()[index]);
             }
         }
+        if (changes['borderType']) {
+            this.applyBorder(changes['borderType'].currentValue);
+        }
         super.svyOnChanges(changes);
+    }
+
+    protected applyBorder(borderType: any) {
+        if (borderType?.type === 'TitledBorder') {
+            // TitledBorder is not supported here: setBorder would move Angular managed child nodes into a fieldset
+            PropertyUtils.setBorder(this.getNativeElement(), this.renderer, null);
+        } else {
+            PropertyUtils.setBorder(this.getNativeElement(), this.renderer, borderType);
+        }
     }
 
 	get borderStyle(): string {

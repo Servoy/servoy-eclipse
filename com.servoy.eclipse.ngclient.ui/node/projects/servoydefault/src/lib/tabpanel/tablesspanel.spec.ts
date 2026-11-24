@@ -219,3 +219,138 @@ describe('ServoyDefaultTablesspanel', () => {
         });
     });
 });
+
+@Component({
+    selector: 'test-tablesspanel-border-host',
+    template: `
+        <servoydefault-tablesspanel [servoyApi]="servoyApi" [name]="'testTablesspanel'" [tabs]="tabs" [tabIndex]="1"
+            [borderType]="borderType()">
+            <ng-template let-name="name">
+                <div class="form-placeholder">{{name}}</div>
+            </ng-template>
+        </servoydefault-tablesspanel>
+    `,
+    standalone: true,
+    imports: [ServoyDefaultTablesspanel],
+})
+class TestTablesspanelBorderHostComponent {
+    servoyApi = createMockServoyApi();
+    tabs = createTabs();
+    readonly borderType = signal<any>(undefined);
+}
+
+// SVY-21792: borderType must be applied (through PropertyUtils.setBorder) on the single #element div
+describe('ServoyDefaultTablesspanel borderType (SVY-21792)', () => {
+    const matte = { type: 'MatteBorder', borderStyle: { borderWidth: '1px 2px 3px 4px ', borderStyle: 'solid', borderColor: 'red' } };
+    const line = { type: 'LineBorder', borderStyle: { borderWidth: '2px', borderStyle: 'solid', borderColor: 'blue' } };
+    const sides = ['Top', 'Right', 'Bottom', 'Left'];
+
+    let fixture: ComponentFixture<TestTablesspanelBorderHostComponent>;
+
+    const outer = () => fixture.nativeElement.querySelector('.svy-tablesspanel') as HTMLElement;
+    const setBorder = async (value: any) => {
+        fixture.componentInstance.borderType.set(value);
+        fixture.detectChanges();
+        await fixture.whenStable();
+    };
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [TestTablesspanelBorderHostComponent],
+            providers: defaultProviders,
+        });
+        fixture = TestBed.createComponent(TestTablesspanelBorderHostComponent);
+    });
+
+    it('should apply a Matte border with a width per side', async () => {
+        fixture.componentInstance.borderType.set(matte);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const style = outer().style;
+        expect(style.borderTopWidth).toBe('1px');
+        expect(style.borderRightWidth).toBe('2px');
+        expect(style.borderBottomWidth).toBe('3px');
+        expect(style.borderLeftWidth).toBe('4px');
+        sides.forEach(s => {
+            expect((style as any)['border' + s + 'Style']).toBe('solid');
+            expect((style as any)['border' + s + 'Color']).toBe('red');
+        });
+        expect(getComputedStyle(outer()).borderTopWidth).toBe('1px');
+        expect(getComputedStyle(outer()).borderLeftWidth).toBe('4px');
+    });
+
+    it('should apply a Line border on all sides', async () => {
+        fixture.componentInstance.borderType.set(line);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const style = outer().style;
+        sides.forEach(s => {
+            expect((style as any)['border' + s + 'Width']).toBe('2px');
+            expect((style as any)['border' + s + 'Style']).toBe('solid');
+            expect((style as any)['border' + s + 'Color']).toBe('blue');
+        });
+    });
+
+    [null, undefined].forEach(empty => {
+        it('should not draw a border when borderType is ' + empty, async () => {
+            fixture.componentInstance.borderType.set(empty);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            sides.forEach(s => expect((outer().style as any)['border' + s + 'Width']).toBe(''));
+        });
+    });
+
+    it('should remove a previously applied border when borderType changes to null', async () => {
+        fixture.componentInstance.borderType.set(line);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(outer().style.borderTopWidth).toBe('2px');
+
+        await setBorder(null);
+
+        sides.forEach(s => {
+            expect((outer().style as any)['border' + s + 'Width']).toBe('');
+            expect((outer().style as any)['border' + s + 'Style']).toBe('');
+        });
+    });
+
+    it('should update the widths when borderType changes from Matte to Line', async () => {
+        fixture.componentInstance.borderType.set(matte);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(outer().style.borderLeftWidth).toBe('4px');
+
+        await setBorder(line);
+
+        sides.forEach(s => {
+            expect((outer().style as any)['border' + s + 'Width']).toBe('2px');
+            expect((outer().style as any)['border' + s + 'Color']).toBe('blue');
+        });
+    });
+
+    it('should not create a fieldset or move children for a TitledBorder and clear an earlier border', async () => {
+        fixture.componentInstance.borderType.set(line);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const before = Array.from(outer().childNodes);
+        expect(outer().style.borderTopWidth).toBe('2px');
+
+        await setBorder({ type: 'TitledBorder', title: 'a title', color: 'red', titleJustification: 'left' });
+
+        expect(outer().querySelector('fieldset')).toBeNull();
+        expect(Array.from(outer().childNodes)).toEqual(before);
+        expect(outer().style.borderTopWidth).toBe('');
+    });
+
+    it('should keep the legacy borderStyle getter working', async () => {
+        fixture.componentInstance.borderType.set(line);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const component: ServoyDefaultTablesspanel = fixture.debugElement.children[0].componentInstance;
+
+        expect(component.borderStyle).toBe('2px solid blue');
+    });
+});
