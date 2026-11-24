@@ -2,13 +2,12 @@
 
 **Verdict:** PROCEED
 
-> **Implementation target is NOT this repository.** SVY-21714 concerns the `servoy-client`
-> and `servoy-eclipse` git repositories (checked out under `C:\Users\Cristian\git\servoy\master\`),
-> **not** Servoy-Copilot. None of the nine affected files exist in Servoy-Copilot — the
-> `ServoyAI` label and the `[AI]` suffix only mark the ticket as AI-assisted analysis. This
-> triage report is written into `Servoy-Copilot/docs/` because that is the configured repo
-> root for the triage run, but the fix itself must be made in `servoy/master/servoy-client`
-> and `servoy/master/servoy-eclipse`.
+> **Scope:** SVY-21714 spans two repositories, `servoy-client` (3 sites in `servoy_ngclient`)
+> and `servoy-eclipse` (the Developer IDE sites). This report is the pre-implementation
+> analysis and lists the sites known from the ticket. The final, implemented site list is in
+> [`SVY-21714-form-component-cast-guard-remaining-sites.spec.md`](SVY-21714-form-component-cast-guard-remaining-sites.spec.md):
+> it adds the parent root-value casts in `WebFormComponentChildType` (spec §3.3.8), found
+> during implementation by checking every `getForm(...)` / `getFormComponentCache(...)` caller.
 
 ## Reported problem
 
@@ -59,6 +58,9 @@ Confirmed sites (line numbers drift slightly from the ticket; the pattern matche
 - `com.servoy.eclipse.designer/.../rfb/DesignerWebsocketSession.java` ~980, ~1035, ~1109 (`(JSONObject)propertyValue`)
 - `com.servoy.eclipse.designer/.../rfb/actions/handlers/GhostHandler.java` ~650 (`(JSONObject)propertyValue`)
 - `com.servoy.eclipse.model/.../util/WebFormComponentChildType.java` ~407 (`(JSONObject)currentNgFormElementOfParentFC.getPropertyValue(...)`)
+
+*(Found later, during implementation, and fixed in the same change: the parent root-value
+casts in `WebFormComponentChildType.initializeElement()` and `getJson(...)`. See spec §3.3.8.)*
 
 The bug is real, in Servoy's own code, and user-reachable from a hand-written or
 AI-generated `.frm` that compiles clean. It is not a misconfiguration, not expected
@@ -126,8 +128,8 @@ Keep **Approach 2** (shared resolve-and-validate helper) in mind as an optional 
 consolidation — it is the ticket's own "optionally route all sites through one helper" note —
 but it should not gate this fix.
 
-**Important for whoever implements this:** work in the `servoy/master/servoy-client` and
-`servoy/master/servoy-eclipse` checkouts, not Servoy-Copilot. Mirror the SVY-21667 test
+**Important for whoever implements this:** the change spans both the `servoy-client` and
+`servoy-eclipse` repositories (one commit each). Mirror the SVY-21667 test
 style (there are existing `FormComponentPropertyTypeAsFormComponentValueTest` and
 `TestServoyFormBuilderFormComponentGuard` tests to follow). `WebFormComponentChildType` and
 the `DesignerWebsocketSession`/`GhostHandler`/`FormOutlineContentProvider` sites each already

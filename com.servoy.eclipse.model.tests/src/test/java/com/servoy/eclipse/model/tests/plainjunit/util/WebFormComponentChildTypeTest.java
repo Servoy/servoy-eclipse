@@ -341,6 +341,66 @@ class WebFormComponentChildTypeTest {
 		}
 
 		@Test
+		@DisplayName("setProperty on a bare-string root value is refused: the form is not flagged as changed and the parent is not rewritten")
+		void setPropertyRefusedOnBareString() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+
+			assertDoesNotThrow(() -> child.setProperty("text", "hello"));
+
+			assertAll(() -> Mockito.verify(parent, Mockito.never()).flagChanged(), () -> Mockito
+					.verify(parent, Mockito.never()).setProperty(Mockito.eq(ROOT_PROPERTY), Mockito.any()));
+		}
+
+		@Test
+		@DisplayName("removeProperty on a bare-string root value is refused: the form is not flagged as changed")
+		void removePropertyRefusedOnBareString() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+
+			assertDoesNotThrow(() -> child.removeProperty());
+
+			Mockito.verify(parent, Mockito.never()).flagChanged();
+		}
+
+		@Test
+		@DisplayName("clearProperty on a bare-string root value is refused: the form is not flagged as changed")
+		void clearPropertyRefusedOnBareString() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+
+			assertDoesNotThrow(() -> child.clearProperty("text"));
+
+			Mockito.verify(parent, Mockito.never()).flagChanged();
+		}
+
+		@Test
+		@DisplayName("clearCustomProperty on a bare-string root value is refused: the form is not flagged as changed")
+		void clearCustomPropertyRefusedOnBareString() throws Exception {
+			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
+
+			assertDoesNotThrow(() -> child.clearCustomProperty("styles", "color", -1));
+
+			Mockito.verify(parent, Mockito.never()).flagChanged();
+		}
+
+		@Test
+		@DisplayName("setProperty on a valid root value writes into the parent's json and flags the form as changed")
+		void setPropertyWritesIntoParentOnValidValue() throws Exception {
+			JSONObject rootValue = new JSONObject();
+			rootValue.put("svy_form", "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF9");
+			WebFormComponentChildType child = newChildOnParentValue(rootValue);
+
+			child.setProperty("text", "hello");
+
+			org.mockito.ArgumentCaptor<Object> written = org.mockito.ArgumentCaptor.forClass(Object.class);
+			Mockito.verify(parent).setProperty(Mockito.eq(ROOT_PROPERTY), written.capture());
+			JSONObject writtenValue = assertInstanceOf(JSONObject.class, written.getValue(),
+					"the parent must receive a json object for its form component property");
+			assertAll(
+					() -> assertEquals("hello", writtenValue.getJSONObject("n1").getString("text"),
+							"the edit must land in the child's json inside the parent's value"),
+					() -> Mockito.verify(parent).flagChanged());
+		}
+
+		@Test
 		@DisplayName("plain read on a valid root value still returns the child's json (pass-through)")
 		void plainReadPassesThroughValidValue() throws Exception {
 			JSONObject childBlob = new JSONObject();

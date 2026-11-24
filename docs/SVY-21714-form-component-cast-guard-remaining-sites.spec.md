@@ -343,8 +343,13 @@ property edits, drag/drop) and `VisualFormEditorTabSequencePage`.
   casting. The mutation branch's `jsonObject.getJSONObject(...)` becomes `optJSONObject(...)` so a
   string in the parent's own json falls through to the same guarded read. No log here - the
   constructor already reported the bad value.
-Edits made against a malformed child are therefore not persisted into the parent; that is
-accepted (the value must be fixed in the `.frm` first, and the builder/outline already report it).
+- Write methods (`setProperty`, `removeProperty`, `clearProperty`, `clearCustomProperty`) go
+  through a private `getJsonForMutation(...)` that refuses the edit when the parent's root value
+  is not a `JSONObject`: it logs one `Debug.error` naming the edit, the child and the parent
+  property, and the method returns **without** calling `getParent().flagChanged()` or touching
+  the form's `lastModified`. Before this, the edit went into the detached empty object while the
+  form was still marked dirty, so the user lost the edit with no message (peer review, SVY-21714).
+  The value must be fixed in the `.frm` first; the builder and Outline already report it.
 
 > **Both WebFormComponentChildType casts are inside the single method `initializeElement()`
 > (lines 332-426 as read).** Treat them as one file-level site with two edits. Do NOT guard the

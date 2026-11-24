@@ -51,6 +51,7 @@ import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -104,6 +105,23 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	}
 
 	/**
+	 * The json of this child that edits write into, or null when the parent's root form component value is not a JSONObject.
+	 * In that case there is no json in the parent to write into, so the edit is refused (and reported) instead of going into a detached object
+	 * while the form is still flagged as changed.
+	 */
+	private JSONObject getJsonForMutation(String edit)
+	{
+		if (getRootFCValueOfParent() == null)
+		{
+			Debug.error("Cannot " + edit + " on form component child '" + this + "': form component property '" + getRootFCPropertyNameInParent() +
+				"' of element '" + ((IBasicWebObject)getParent()).getName() + "' is not a JSON object of the form { \"" + FormComponentPropertyType.SVY_FORM +
+				"\": \"<form UUID>\" }. Fix that value in the .frm file first; the edit was not applied. (SVY-21714)");
+			return null;
+		}
+		return getJson(true, false);
+	}
+
+	/**
 	 * Gives something like [7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8, containedForm, formComponent2, containedForm, n1]; can be nested, more or less.<br/>
 	 * So it includes even the root form component container name/uuid.
 	 */
@@ -130,7 +148,8 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	public void setProperty(String propertyName, Object val)
 	{
 		Object valueFromJavaType = convertFromJavaType(propertyName, val);
-		JSONObject updatableJSON = getJson(true, false);
+		JSONObject updatableJSON = getJsonForMutation("set property '" + propertyName + "'");
+		if (updatableJSON == null) return;
 		Object currentPropertyValue = updatableJSON.opt(propertyName);
 		if (currentPropertyValue instanceof JSONObject && valueFromJavaType instanceof JSONObject)
 		{
@@ -151,7 +170,8 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 
 	public void removeProperty()
 	{
-		JSONObject valuesJSON = getJson(true, false);
+		JSONObject valuesJSON = getJsonForMutation("remove the properties");
+		if (valuesJSON == null) return;
 		for (String keyToRemove : valuesJSON.keySet())
 		{
 			valuesJSON.remove(keyToRemove);
@@ -297,7 +317,9 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 	@Override
 	public void clearProperty(String propertyName)
 	{
-		getJson(true, false).remove(propertyName);
+		JSONObject updatableJSON = getJsonForMutation("clear property '" + propertyName + "'");
+		if (updatableJSON == null) return;
+		updatableJSON.remove(propertyName);
 		getParent().flagChanged();
 		// force form component cache reload
 		getAncestor(Form.class).setLastModified(System.currentTimeMillis());
@@ -306,7 +328,9 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 
 	public void clearCustomProperty(String customPropertyName, String propertyName, int propertyIndex)
 	{
-		Object customProperty = getJson(true, false).get(customPropertyName);
+		JSONObject updatableJSON = getJsonForMutation("clear property '" + customPropertyName + "." + propertyName + "'");
+		if (updatableJSON == null) return;
+		Object customProperty = updatableJSON.get(customPropertyName);
 		if (customProperty instanceof JSONObject)
 		{
 			((JSONObject)customProperty).remove(propertyName);
