@@ -172,3 +172,148 @@ describe('ServoyDefaultTabpanel tabIndex writes outside change detection', () =>
         expect(host.tabIndex()).toBe(2);
     });
 } );
+
+@Component({
+    selector: 'test-tabpanel-border-host',
+    template: `
+        <servoydefault-tabpanel [servoyApi]="servoyApi" [name]="'testTabpanel'" [tabs]="tabs" [tabIndex]="1"
+            [enabled]="true" [borderType]="borderType()">
+            <ng-template let-name="name">
+                <div class="form-placeholder">{{name}}</div>
+            </ng-template>
+        </servoydefault-tabpanel>
+    `,
+    standalone: true,
+    imports: [ServoyDefaultTabpanel],
+})
+class TestTabpanelBorderHostComponent {
+    servoyApi = createMockServoyApi();
+    tabs = createTabs();
+    readonly borderType = signal<any>(undefined);
+}
+
+// SVY-21792: borderType must be applied (through PropertyUtils.setBorder) on the outer .svy-tabpanel div
+describe('ServoyDefaultTabpanel borderType (SVY-21792)', () => {
+    const matte = { type: 'MatteBorder', borderStyle: { borderWidth: '1px 2px 3px 4px ', borderStyle: 'solid', borderColor: 'red' } };
+    const line = { type: 'LineBorder', borderStyle: { borderWidth: '2px', borderStyle: 'solid', borderColor: 'blue' } };
+    const sides = ['Top', 'Right', 'Bottom', 'Left'];
+
+    let fixture: ComponentFixture<TestTabpanelBorderHostComponent>;
+
+    const outer = () => fixture.nativeElement.querySelector('.svy-tabpanel') as HTMLElement;
+    const setBorder = async (value: any) => {
+        fixture.componentInstance.borderType.set(value);
+        fixture.detectChanges();
+        await fixture.whenStable();
+    };
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [TestTabpanelBorderHostComponent],
+            providers: [
+                provideZonelessChangeDetection(),
+                provideCheckNoChangesConfig({ exhaustive: true }),
+                { provide: ServoyPublicService, useValue: { generateUploadUrl: vi.fn(), showFileOpenDialog: vi.fn(), getFormCacheByName: vi.fn().mockReturnValue(null) } },
+                { provide: FormattingService, useValue: {} },
+                { provide: TooltipService, useValue: { isTooltipActive: new Subject<boolean>(), isTooltipActiveSignal: signal(false) } },
+                { provide: WindowRefService, useValue: { nativeWindow: { event: null, console } } },
+            ],
+        });
+        fixture = TestBed.createComponent(TestTabpanelBorderHostComponent);
+    });
+
+    it('should apply a Matte border with a width per side', async () => {
+        fixture.componentInstance.borderType.set(matte);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const style = outer().style;
+        expect(style.borderTopWidth).toBe('1px');
+        expect(style.borderRightWidth).toBe('2px');
+        expect(style.borderBottomWidth).toBe('3px');
+        expect(style.borderLeftWidth).toBe('4px');
+        sides.forEach(s => {
+            expect((style as any)['border' + s + 'Style']).toBe('solid');
+            expect((style as any)['border' + s + 'Color']).toBe('red');
+        });
+        expect(getComputedStyle(outer()).borderTopWidth).toBe('1px');
+        expect(getComputedStyle(outer()).borderLeftWidth).toBe('4px');
+    });
+
+    it('should apply a Line border on all sides', async () => {
+        fixture.componentInstance.borderType.set(line);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const style = outer().style;
+        sides.forEach(s => {
+            expect((style as any)['border' + s + 'Width']).toBe('2px');
+            expect((style as any)['border' + s + 'Style']).toBe('solid');
+            expect((style as any)['border' + s + 'Color']).toBe('blue');
+        });
+    });
+
+    [null, undefined].forEach(empty => {
+        it('should not draw a border when borderType is ' + empty, async () => {
+            fixture.componentInstance.borderType.set(empty);
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            sides.forEach(s => expect((outer().style as any)['border' + s + 'Width']).toBe(''));
+        });
+    });
+
+    it('should remove a previously applied border when borderType changes to null', async () => {
+        fixture.componentInstance.borderType.set(line);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(outer().style.borderTopWidth).toBe('2px');
+
+        await setBorder(null);
+
+        sides.forEach(s => {
+            expect((outer().style as any)['border' + s + 'Width']).toBe('');
+            expect((outer().style as any)['border' + s + 'Style']).toBe('');
+        });
+    });
+
+    it('should update the widths when borderType changes from Matte to Line', async () => {
+        fixture.componentInstance.borderType.set(matte);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(outer().style.borderLeftWidth).toBe('4px');
+
+        await setBorder(line);
+
+        sides.forEach(s => {
+            expect((outer().style as any)['border' + s + 'Width']).toBe('2px');
+            expect((outer().style as any)['border' + s + 'Color']).toBe('blue');
+        });
+    });
+
+    it('should not create a fieldset or move children for a TitledBorder and clear an earlier border', async () => {
+        fixture.componentInstance.borderType.set(line);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const before = Array.from(outer().childNodes);
+        expect(outer().style.borderTopWidth).toBe('2px');
+
+        await setBorder({ type: 'TitledBorder', title: 'a title', color: 'red', titleJustification: 'left' });
+
+        expect(outer().querySelector('fieldset')).toBeNull();
+        expect(Array.from(outer().childNodes)).toEqual(before);
+        expect(outer().style.borderTopWidth).toBe('');
+    });
+
+    it('should put the border on the outer element, not on the tab strip or the content outlet', async () => {
+        fixture.componentInstance.borderType.set(matte);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const ul = outer().querySelector('ul') as HTMLElement;
+        const outlet = outer().lastElementChild as HTMLElement;
+        expect(ul.style.borderTopWidth).toBe('');
+        expect(outlet.style.borderTopWidth).toBe('');
+        expect(outer().style.borderTopWidth).toBe('1px');
+    });
+});
