@@ -235,5 +235,153 @@ describe( 'ServoyDefaultTabpanel', () => {
         expect( fixture.componentInstance.tabIndex ).toBe( 2 );
       } ) );
 
+    // SVY-21792: borderType must be applied (through PropertyUtils.setBorder) on the outer .svy-tabpanel
+    describe( 'borderType (SVY-21792)', () => {
+        const matte = { type: 'MatteBorder', borderStyle: { borderWidth: '1px 2px 3px 4px ', borderStyle: 'solid', borderColor: 'red' } };
+        const line = { type: 'LineBorder', borderStyle: { borderWidth: '2px', borderStyle: 'solid', borderColor: 'blue' } };
+
+        const renderWithBorder = ( fixture, borderType: any ) => {
+            const changes: SimpleChanges = {};
+            changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
+            fixture.componentInstance.ngOnChanges( changes );
+            fixture.detectChanges();
+            fixture.componentInstance.borderType = borderType;
+            changeBorder( fixture, null, borderType, true );
+        };
+        const changeBorder = ( fixture, oldValue: any, newValue: any, first = false ) => {
+            fixture.componentInstance.borderType = newValue;
+            const changes: SimpleChanges = {};
+            changes['borderType'] = new SimpleChange( oldValue, newValue, first );
+            fixture.componentInstance.ngOnChanges( changes );
+        };
+        const outer = ( fixture ) => fixture.nativeElement.querySelector( '.svy-tabpanel' ) as HTMLElement;
+        const sides = ['Top', 'Right', 'Bottom', 'Left'];
+
+        it( 'should apply a Matte border with a width per side on the outer element', fakeAsync(() => {
+            const fixture = createComponentWithTabs();
+            renderWithBorder( fixture, matte );
+            discardPeriodicTasks();
+
+            const style = outer( fixture ).style;
+            expect( style.borderTopWidth ).toBe( '1px' );
+            expect( style.borderRightWidth ).toBe( '2px' );
+            expect( style.borderBottomWidth ).toBe( '3px' );
+            expect( style.borderLeftWidth ).toBe( '4px' );
+            sides.forEach( s => {
+                expect( style['border' + s + 'Style'] ).toBe( 'solid' );
+                expect( style['border' + s + 'Color'] ).toBe( 'red' );
+            } );
+            const computed = getComputedStyle( outer( fixture ) );
+            expect( computed.borderTopWidth ).toBe( '1px' );
+            expect( computed.borderLeftWidth ).toBe( '4px' );
+        } ) );
+
+        it( 'should apply a Line border on all sides', fakeAsync(() => {
+            const fixture = createComponentWithTabs();
+            renderWithBorder( fixture, line );
+            discardPeriodicTasks();
+
+            const style = outer( fixture ).style;
+            sides.forEach( s => {
+                expect( style['border' + s + 'Width'] ).toBe( '2px' );
+                expect( style['border' + s + 'Style'] ).toBe( 'solid' );
+                expect( style['border' + s + 'Color'] ).toBe( 'blue' );
+            } );
+        } ) );
+
+        it( 'should not put the border on the tab strip or the content outlet', fakeAsync(() => {
+            const fixture = createComponentWithTabs();
+            renderWithBorder( fixture, matte );
+            discardPeriodicTasks();
+
+            const ul = outer( fixture ).querySelector( 'ul' ) as HTMLElement;
+            const outlet = outer( fixture ).querySelector( '[ngbNavOutlet], .tab-content' ) as HTMLElement;
+            expect( ul ).toBeTruthy();
+            expect( ul.style.borderTopWidth ).toBe( '' );
+            expect( ul.style.borderLeftWidth ).toBe( '' );
+            if ( outlet ) {
+                expect( outlet.style.borderTopWidth ).toBe( '' );
+            }
+            expect( ( outer( fixture ).lastElementChild as HTMLElement ).style.borderTopWidth ).toBe( '' );
+        } ) );
+
+        [null, undefined].forEach( empty => {
+            it( 'should not draw a border when borderType is ' + empty, fakeAsync(() => {
+                const fixture = createComponentWithTabs();
+                renderWithBorder( fixture, empty );
+                discardPeriodicTasks();
+
+                const style = outer( fixture ).style;
+                sides.forEach( s => expect( style['border' + s + 'Width'] ).toBe( '' ) );
+            } ) );
+        } );
+
+        it( 'should remove a previously applied border when borderType changes to null', fakeAsync(() => {
+            const fixture = createComponentWithTabs();
+            renderWithBorder( fixture, line );
+            expect( outer( fixture ).style.borderTopWidth ).toBe( '2px' );
+
+            changeBorder( fixture, line, null );
+            discardPeriodicTasks();
+
+            const style = outer( fixture ).style;
+            sides.forEach( s => {
+                expect( style['border' + s + 'Width'] ).toBe( '' );
+                expect( style['border' + s + 'Style'] ).toBe( '' );
+            } );
+        } ) );
+
+        it( 'should update the widths when borderType changes from Matte to Line', fakeAsync(() => {
+            const fixture = createComponentWithTabs();
+            renderWithBorder( fixture, matte );
+            expect( outer( fixture ).style.borderLeftWidth ).toBe( '4px' );
+
+            changeBorder( fixture, matte, line );
+            discardPeriodicTasks();
+
+            const style = outer( fixture ).style;
+            sides.forEach( s => {
+                expect( style['border' + s + 'Width'] ).toBe( '2px' );
+                expect( style['border' + s + 'Color'] ).toBe( 'blue' );
+            } );
+        } ) );
+
+        it( 'should not create a fieldset or move children for a TitledBorder and clear an earlier border', fakeAsync(() => {
+            const fixture = createComponentWithTabs();
+            renderWithBorder( fixture, line );
+            const before = Array.from( outer( fixture ).childNodes );
+            expect( outer( fixture ).style.borderTopWidth ).toBe( '2px' );
+
+            const titled = { type: 'TitledBorder', title: 'a title', color: 'red', titleJustification: 'left' };
+            changeBorder( fixture, line, titled );
+            discardPeriodicTasks();
+
+            expect( outer( fixture ).querySelector( 'fieldset' ) ).toBeNull();
+            expect( Array.from( outer( fixture ).childNodes ) ).toEqual( before );
+            expect( outer( fixture ).style.borderTopWidth ).toBe( '' );
+        } ) );
+
+        it( 'should apply a borderType that arrives before the view exists once the view is initialized', fakeAsync(() => {
+            const fixture = createComponentWithTabs();
+            fixture.componentInstance.borderType = matte;
+            const changes: SimpleChanges = {};
+            changes['tabs'] = new SimpleChange( null, fixture.componentInstance.tabs, true );
+            changes['borderType'] = new SimpleChange( null, matte, true );
+            fixture.componentInstance.ngOnChanges( changes );
+
+            // no #element yet, so nothing could have been applied
+            expect( fixture.componentInstance.getNativeElement() ).toBeFalsy();
+
+            fixture.detectChanges();
+            discardPeriodicTasks();
+
+            const style = outer( fixture ).style;
+            expect( style.borderTopWidth ).toBe( '1px' );
+            expect( style.borderRightWidth ).toBe( '2px' );
+            expect( style.borderBottomWidth ).toBe( '3px' );
+            expect( style.borderLeftWidth ).toBe( '4px' );
+        } ) );
+    } );
+
 } );
 
