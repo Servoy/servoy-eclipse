@@ -10,7 +10,7 @@ Checked against the AssistAI fork (`eclipse-chatgpt-plugin` `main` `3218e3b`), b
 
 | Problem | Origin |
 |---|---|
-| Fetch/pull/push failure text carries the remote URL (token as user name) | **Inherited.** Upstream builds these texts from `e.getMessage()` and JGit puts the URL in it. Upstream has no redaction. |
+| Fetch/pull/push failure text carries the remote URL (token as user name) | **Inherited, and rooted in JGit.** Upstream builds these texts from `e.getMessage()` and JGit puts the URL in it: `TransportException(URIish, String)` and `Transport.open`'s "URI not supported" message strip only the password, never the user name. `https://:token@host` is not parsed as user info at all, so the secret stays in the path. Upstream AssistAI has no redaction. Reported to JGit: https://github.com/eclipse-jgit/jgit/issues/322 (git itself strips user info from the URLs it prints, `transport_anonymize_url`). |
 | `gitRemoteList` prints remote URLs unredacted | **Inherited.** Upstream prints `config.getURIs().get(0).toString()`. |
 | No timeout on fetch/pull/push, lock held over the network in pull | **Inherited** (upstream has no `setTimeout`); fixed in the port. |
 | Redactor misses `#`/`?` in userinfo; thrown failures bypass the redactor | **Servoy-only.** Upstream has no redactor. The thrown-failure bypass sits in Servoy's `McpServerFactory` (not compared with an upstream equivalent). |
@@ -64,7 +64,7 @@ Use a scratch clone for anything that stages, resets or fetches. Servoy-Copilot 
 
 ## Possible improvements / follow-ups
 
-1. Make thrown remote failures safe end to end: throw an exception whose whole chain is redacted (or redact the root cause in `McpServerFactory`), pass `fetchIn`'s `"Remote said:"` through the redactor, handle the empty-authority form `https:///:tok@host`, and add a test that drives a credentialed URL through `fetchIn`/`pullIn`/`pushIn` and the MCP unwrap.
+1. Make thrown remote failures safe end to end: throw an exception whose whole chain is redacted (or redact the root cause in `McpServerFactory`, and the Eclipse log line that carries the raw chain), pass `fetchIn`'s `"Remote said:"` through the redactor, handle the empty-authority form `https:///:tok@host`, and add a test that drives a credentialed URL through `fetchIn`/`pullIn`/`pushIn` and the MCP unwrap. The URL gets into the message inside JGit, which is filed as https://github.com/eclipse-jgit/jgit/issues/322. A JGit fix would only arrive with a new target platform, so our own redaction stays needed. Keep it as defence in depth once JGit changes, and re-run the four URL shapes from the issue against the new JGit.
 2. Fix the `#`/`?` regression in `redactUserInfo` (end the authority by the last `@` before the first `/`), and add tests for both directions (`u:p#x@h` redacted, `h/r?x=a@b` untouched). The three `7780329` tests do not fail if that commit's change is reverted.
 3. Decide what reads do with a repo-root path that exists only in history (refuse, search history, or say "0 paths matched").
 4. Decide whether `gitReset "."` at a repo-root project should unstage everything (upstream adds no path in that case); the test now pins the no-op.
