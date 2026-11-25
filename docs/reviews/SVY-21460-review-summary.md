@@ -9,7 +9,19 @@ Reviewed scope (all on `origin/master`):
 
 Fix Version 2026.12: the release-target check is MATCH. The servoy-eclipse and servoy-client commits also shipped in 2026.3.2 and 2026.9.0 (via lts_2026).
 
+## Test results at review time
+
+- Jenkins `master/servoy-eclipse` #546: formtemplate Vitest specs (37) and `ChromiumWrapperScreenshotTest` (4) passed.
+- Jenkins `master/servoy-client` #148: `PersistFieldInstanceTest` (7) passed, including the form-template case.
+- Jenkins `developer_ai_plugin` #476: `McpToolResultTest` and the `FormLayout*` plain tests passed. The `FormLayout*IntegrationTest` render tests are skipped on CI because the agent has no browser.
+- Local PDE run of the three `FormLayout*IntegrationTest` classes in a Developer: 23 tests, 12 passed, 2 failed, 9 skipped.
+  - The SVY-21460 render path passed: CSS form DOM, `data-svy-*` stamping, deterministic re-render, viewport handling, error cases.
+  - The 9 skips were HTTP 503 or a timeout while the Developer was still building its Angular resources.
+  - The 2 failures are SVY-21610 (sample data) and SVY-21614 (disabled/readonly) tests, out of scope here.
+
 ## Manual test plan
+
+Run the whole plan with testing mode **off** on the admin page first. Check that testing mode is still off after that round, then switch it **on** and run the plan again.
 
 **Verifying the feature**
 1. With a Developer running and a solution active, open `http://localhost:<port>/formtemplate/<cssPositionForm>.html` in a browser. Components should render in position with `data-svy-name`/`data-svy-id` attributes, and the solution stylesheets should load as separate `<link>` tags.
@@ -28,7 +40,7 @@ Fix Version 2026.12: the release-target check is MATCH. The servoy-eclipse and s
 
 ## Possible improvements / follow-ups
 
-- **Testing-mode toggle** (`HeadlessFormTemplateContent.getFormDataJS`). Stop mutating the global setting: pass testing mode per call, for example through the converter context. If that isn't possible, at least serialise the save, set and restore. Also decide whether the form-template output needs testing mode at all. Johan's 2 Oct Jira comment asked for a test with testing mode off.
+- **Testing-mode toggle** (`HeadlessFormTemplateContent.getFormDataJS`). Accepted as-is at review time: it is Developer-only and needs overlapping renders. If it ever causes trouble, pass testing mode per call (for example through the converter context) instead of mutating the global setting, or at least serialise the save, set and restore. The tester covers the off/on behaviour, as described in the test plan above.
 - **Shared form-component cache** (servoy-client `FormElementHelper`). A form-template render can fill the shared `formComponentElements` cache while testing mode is on. It is unclear whether TiNG clients read that legacy `template` string. If they don't, this has no effect.
 - **Network exposure.** `/formtemplate/*` has no loopback or auth check. The bundled Developer connector has no `address` attribute, so it may bind to all interfaces. This is the same exposure the existing `/designer/*` filters already have. Consider a loopback check for all of these endpoints.
 - **Tests.** There is no automated test for `HeadlessFormTemplateContent` or `FormTemplateHttpEndpoint`, although the spec planned a Java test.
