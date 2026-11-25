@@ -18,8 +18,8 @@ import com.servoy.eclipse.cypress.services.FormSpecModel.Handler;
 import com.servoy.eclipse.cypress.services.FormSpecModel.Kind;
 
 /**
- * SVY-21517: an element that is hidden in the form (visible=false) is not in the page, so it can be neither asserted visible nor clicked. The
- * baseline leaves it out and its handlers become skipped cases.
+ * SVY-21517: an element that is hidden in the form (visible=false) is not rendered, so it can be neither asserted visible nor clicked. The
+ * baseline asserts that it is NOT in the DOM (initial state) and its handlers become skipped cases.
  */
 class FormSpecModelHiddenElementTest
 {
@@ -59,12 +59,13 @@ class FormSpecModelHiddenElementTest
 	}
 
 	@Test
-	void hiddenElementIsLeftOutOfTheBaselineAndItsHandlerIsASkippedCase()
+	void hiddenElementIsAssertedNotToExistAndItsHandlerIsASkippedCase()
 	{
 		String expected = String.join("\n", "describe('myForm', () => {", "", "  beforeEach(() => {", "    cy.visit('" + URL + "');",
 			"    cy.get('[data-cy^=\"myForm.\"]', { timeout: 30000 }).should('exist');", "  });", "",
 			"  it('loads without errors and all elements are visible', () => {", OVERLAY,
-			"    cy.get('[data-cy=\"myForm.btn\"]').should('be.visible');", "    cy.measureContainer('.svy-form');", "  });", "",
+			"    cy.get('[data-cy=\"myForm.btn\"]').should('be.visible');",
+			"    cy.get('[data-cy=\"myForm.secret\"]').should('not.exist');", "    cy.measureContainer('.svy-form');", "  });", "",
 			"  // btn.onActionMethodID -> forms.myForm.hide", "  it('btn: onActionMethodID (hide)', () => {",
 			"    cy.get('[data-cy=\"myForm.btn\"]').click();", OVERLAY, "  });", "",
 			"  it.skip('secret: onActionMethodID (element is hidden by design)', () => {});", "", "});", "");
@@ -73,11 +74,12 @@ class FormSpecModelHiddenElementTest
 	}
 
 	@Test
-	void hiddenElementIsNeverClickedOrAsserted()
+	void hiddenElementIsNeverClickedOrAssertedVisible()
 	{
-		String output = emit(model(hidden("secret", click("reveal", new Effect(EffectKind.VISIBLE, "secret", "true")))));
+		String output = emit(model(hidden("secret", click("reveal"))));
 
-		assertAll(() -> assertFalse(output.contains("myForm.secret"), "a hidden element must not be selected at all: " + output),
+		assertAll(() -> assertTrue(output.contains("    cy.get('[data-cy=\"myForm.secret\"]').should('not.exist');\n"), output),
+			() -> assertFalse(output.contains("myForm.secret\"]').should('be.visible')"), "a hidden element must not be asserted visible: " + output),
 			() -> assertFalse(output.contains(".click()"), "a hidden element must not be clicked: " + output));
 	}
 
@@ -113,11 +115,12 @@ class FormSpecModelHiddenElementTest
 	}
 
 	@Test
-	void formWithOnlyHiddenElementsStillWaitsForItsDataCyElements()
+	void formWithOnlyHiddenElementsWaitsForTheRootContainerInsteadOfAnAbsentElement()
 	{
 		String output = emit(model(hidden("secret")));
 
-		assertAll(() -> assertTrue(output.contains("cy.get('[data-cy^=\"myForm.\"]', { timeout: 30000 }).should('exist');")),
+		assertAll(() -> assertTrue(output.contains("cy.get('.svy-form', { timeout: 30000 }).should('exist');"), output),
+			() -> assertFalse(output.contains("[data-cy^="), "nothing with a data-cy prefix is rendered: " + output),
 			() -> assertFalse(output.contains("should('be.visible')")));
 	}
 }

@@ -281,6 +281,25 @@ public class FormSpecGeneratorTest
 		assertTrue(spec.contains("cy.visit("), "Generated spec must use cy.visit()");
 	}
 
+	// SVY-21514: an element with visible=false is not rendered, so the scaffold asserts it is not in the DOM
+	@Test
+	public void testFormSpecGenerator_generateCypressSpec_hiddenElementIsAssertedNotToExist() throws Exception
+	{
+		Object metadata = buildMetadata("myForm", null,
+			new Object[][] { { "shownBtn", null, false, true, false }, { "hiddenBtn", null, false, true, false } });
+		@SuppressWarnings("unchecked")
+		List<Object> elements = (List<Object>)getField(metadata, "namedElements");
+		setField(elements.get(1), "hidden", true);
+
+		String spec = invokeGenerateCypressSpecContent(metadata, java.util.List.of());
+
+		assertTrue(spec.contains("cy.get('[data-cy=\"myForm.shownBtn\"]').should('be.visible');"), spec);
+		assertTrue(spec.contains("cy.get('[data-cy=\"myForm.hiddenBtn\"]').should('not.exist');"), spec);
+		assertTrue(!spec.contains("myForm.hiddenBtn\"]').should('be.visible')"), "a hidden element must not be asserted visible: " + spec);
+		assertTrue(!spec.contains("myForm.hiddenBtn\"]').should('be.visible').and('be.enabled')"),
+			"a hidden button must not be in the clickable block: " + spec);
+	}
+
 	@Test
 	public void testFormSpecGenerator_generateCypressSpec_usesCyGet() throws Exception
 	{

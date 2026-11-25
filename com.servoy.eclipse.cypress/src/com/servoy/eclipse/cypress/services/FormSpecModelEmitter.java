@@ -48,7 +48,8 @@ final class FormSpecModelEmitter
 
 		sb.append("  beforeEach(() => {\n");
 		sb.append("    cy.visit('").append(js(formUrl)).append("');\n");
-		if (elements.isEmpty())
+		// hidden elements are not rendered, so only a visible element can be waited for
+		if (elements.stream().noneMatch(Element::visible))
 		{
 			sb.append("    cy.get('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("', { timeout: 30000 }).should('exist');\n");
 		}
@@ -65,6 +66,14 @@ final class FormSpecModelEmitter
 			if (isAsserted(element))
 			{
 				sb.append("    cy.get('").append(js(selector(form, element.name()))).append("').should('be.visible');\n");
+			}
+		}
+		for (Element element : elements)
+		{
+			if (isAssertedHidden(element))
+			{
+				// hidden by design: the element is not rendered at all in the initial state
+				sb.append("    cy.get('").append(js(selector(form, element.name()))).append("').should('not.exist');\n");
 			}
 		}
 		// Always-on (SVY-21619): report innerWidth + root-container width at the default viewport after layout settles.
@@ -115,6 +124,12 @@ final class FormSpecModelEmitter
 	private static boolean isAsserted(Element element)
 	{
 		return element.visible() && (element.kind() == Kind.CONTROL || element.kind() == Kind.INPUT);
+	}
+
+	/** A control or input that is hidden by design: it is not rendered, so the initial state asserts it is not in the DOM. */
+	private static boolean isAssertedHidden(Element element)
+	{
+		return !element.visible() && (element.kind() == Kind.CONTROL || element.kind() == Kind.INPUT);
 	}
 
 	private static void appendHandlerCase(StringBuilder sb, String form, Element element, Handler handler)
