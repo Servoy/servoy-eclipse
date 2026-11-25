@@ -81,6 +81,25 @@ there is no Jira Fix Version, so set `FIX_VERSIONS` to `none (not a Jira issue)`
 `FIX_VERSION_CHECK` to `NOT_APPLICABLE`: the Phase B release-target check is skipped and
 no Fix Version line appears in the briefing or the summary.
 
+## Session title
+
+As soon as the issue is identified, rename this session so it is easy to find later. The
+auto-generated title (e.g. "peer review of code changes") is meaningless.
+
+Use the Code Mode `execute` tool:
+
+```js
+await tools.opencode.session_rename({ title: "Review: <ISSUE_REF> <subject>" })
+```
+
+- `<subject>` is the issue summary: for a Jira key, the `summary` field read in Phase A.0
+  step 1 (rename right after that call succeeds, before the status/assignee gates, so the
+  title is right even if a gate stops the review). Truncate to ~70 characters in total.
+- Without a Jira issue, use the best short description you have (issue title from the
+  tracker, else the branch name or range), e.g. `Review: range main..feature/hover-size`.
+- With no `ISSUE_REF` and no scope hint, use `Review: <current branch>`.
+- Do this once; do not rename again later in the run.
+
 ---
 
 ## Phase A.0 — Jira pre-flight gate (Jira issue keys only)
@@ -100,6 +119,7 @@ same base URL and auth.
    GET /rest/api/3/issue/{JIRA_KEY}?fields=summary,status,assignee,fixVersions,comment
    ```
 
+   Then rename the session as described in **Session title** above, using `summary`.
    Note `status.name` and whether `assignee` is `null` (unassigned). Record the Fix
    Version(s) as `FIX_VERSIONS`: for each entry of `fixVersions[]` keep `name`, `released`
    and `releaseDate` (the list may be empty or hold several). Jira rarely lists
