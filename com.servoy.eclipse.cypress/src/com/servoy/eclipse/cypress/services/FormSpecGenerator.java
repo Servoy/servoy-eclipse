@@ -100,7 +100,10 @@ public class FormSpecGenerator
 					FORM_SETUP_RELATIVE_DIR + "/" + setupSpecPath.getFileName();
 			}
 
-			FormMetadata metadata = buildMetadata(form);
+			// SVY-21514: use the flattened form so elements inherited through extendsID are part of the spec; the owner
+			// solution name above still comes from the original form, so the spec name does not change
+			Form flattenedForm = flattenedSolution.getFlattenedForm(form);
+			FormMetadata metadata = buildMetadata(flattenedForm != null ? flattenedForm : form);
 			metadata.solutionName = solutionName;
 
 			// Scaffold the shared measureAtViewport/measureContainer support (SVY-21619) so the form spec can
