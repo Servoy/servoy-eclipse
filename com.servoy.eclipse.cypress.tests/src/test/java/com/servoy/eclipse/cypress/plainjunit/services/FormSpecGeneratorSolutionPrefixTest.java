@@ -109,6 +109,15 @@ public class FormSpecGeneratorSolutionPrefixTest
 		assertNull(result, "findExistingSetupFile must return null when no file exists");
 	}
 
+	// SVY-21514: FormSpecRunner resolves the owner solution of a (module) form to find its <owner>.<form> spec
+	@Test
+	public void testResolveOwnerSolutionNameReturnsStringAndNullWithoutActiveProject() throws NoSuchMethodException
+	{
+		assertEquals(String.class, FormSpecGenerator.class.getMethod("resolveOwnerSolutionName", String.class).getReturnType());
+		assertNull(new FormSpecGenerator().resolveOwnerSolutionName("nonExistentForm"),
+			"resolveOwnerSolutionName must return null when the form cannot be resolved");
+	}
+
 	@Test
 	public void testLegacySingleArgMethodsStillExist() throws NoSuchMethodException
 	{
