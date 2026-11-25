@@ -101,6 +101,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.SerialRule;
 import com.servoy.eclipse.model.war.exporter.ITiNGExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarPrecompressModel;
+import com.servoy.eclipse.ngclient.ui.utils.DeterministicTarball;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 import com.servoy.j2db.util.DeletePathVisitor;
 import com.servoy.j2db.util.Pair;
@@ -1428,8 +1429,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				List<String> toRemove = new ArrayList<>();
 				for (String name : dependencies.keySet())
 				{
-					// only @servoy/* file: tarball component deps are managed as a packed-or-not subset here
-					if (!name.startsWith("@servoy/")) continue;
+					// all file: tarball component deps (@servoy/* and third party source packages like mycomp) are managed
+					// as a packed-or-not subset here
 					String specifier = dependencies.optString(name, "");
 					if (!specifier.startsWith("file:")) continue;
 					// the committed specifier is file:.tarballs/<tarball>.tgz; the component is shipped only if that
@@ -1437,6 +1438,17 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					String tarballName = specifier.substring(specifier.lastIndexOf('/') + 1);
 					if (!new File(tarballsDir, tarballName).exists())
 					{
+						String sanitized = name.replace("@", "").replace('/', '-');
+						File[] packed = tarballsDir.listFiles((d, n) -> n.startsWith(sanitized + "-") && n.endsWith(".tgz"));
+						if (packed != null && packed.length > 0)
+						{
+							// this package IS exported (it was packed) but its content differs from what the committed
+							// lockfile pins: removing it would silently drop a component, so fail with a clear message
+							String msg = "web package '" + name + "' differs from the committed pnpm-lock.yaml: expected " + tarballName +
+								" but packed " + packed[0].getName() + ". Re-run the developer install and commit package.json + pnpm-lock.yaml.";
+							writeConsole(console, "\r\nERROR: " + msg + "\r\n");
+							return new Status(IStatus.WARNING, getClass(), msg);
+						}
 						toRemove.add(name);
 					}
 				}
@@ -1562,8 +1574,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 				if (tarball.exists())
 				{
-					// already packed for this exact content timestamp; reuse it
-					return tarball;
+					if (!isFrozenWarPnpm())
+					{
+						// developer path: already packed for this exact content hash; reuse it (pure speed-up)
+						return tarball;
+					}
+					// WAR/CI export: never trust a leftover tarball (it may come from an older build/packer and then
+					// not match the lockfile integrity); always re-pack so the bytes are what the current code produces
+					Files.delete(tarball.toPath());
 				}
 
 				// 'pnpm pack --pack-destination <tarballsDir>' produces '<name>-<version>.tgz' in tarballsDir;
@@ -1593,6 +1611,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				{
 					Files.move(produced.toPath(), tarball.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
+				// make the tarball byte-for-byte reproducible (fixed mtimes/order/line endings, no .timestamp), so
+				// its name AND the integrity recorded in the committed pnpm-lock.yaml are identical on every machine
+				DeterministicTarball.normalize(tarball);
 				return tarball;
 			}
 			catch (Exception e)
@@ -1624,6 +1645,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			{
 				List<File> files = FileUtils.listFiles(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE).stream()
 					.filter(f -> !pathContainsNodeModules(root, f))
+					// .timestamp is generated change-detection state (an mtime), it is not part of the packed tarball
+					.filter(f -> !DeterministicTarball.TIMESTAMP_FILE.equals(f.getName()))
 					.sorted(Comparator.comparing(f -> root.relativize(f.toPath()).toString().replace('\\', '/')))
 					.collect(Collectors.toList());
 				MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -1632,7 +1655,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					String rel = root.relativize(f.toPath()).toString().replace('\\', '/');
 					digest.update(rel.getBytes(StandardCharsets.UTF_8));
 					digest.update((byte)0);
-					digest.update(Files.readAllBytes(f.toPath()));
+					// line endings are normalized: a customer's git checkout (autocrlf) must give the same hash
+				digest.update(DeterministicTarball.normalizeContent(Files.readAllBytes(f.toPath())));
 					digest.update((byte)0);
 				}
 				byte[] hash = digest.digest();
@@ -1721,6 +1745,16 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 * changed the hash (and thus the name) differs and the package is treated as not-yet-installed, forcing
 		 * a re-pack + re-install.
 		 */
+		/**
+		 * True for a WAR export / headless CI build in pnpm mode: it installs frozen against the committed lockfile and
+		 * the (non persistent) .tarballs folder, so every exported source package must be (re)packed into it even if
+		 * package.json already references it.
+		 */
+		private boolean isFrozenWarPnpm()
+		{
+			return Activator.isPnpmMode() && this.warExportModel != null;
+		}
+
 		private boolean isAlreadyInstalled(String installedVersion, String dirSuffix, String packageName, File packageDir)
 		{
 			if (Activator.isPnpmMode())
@@ -1728,7 +1762,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				if (installedVersion == null || packageDir == null) return false;
 				String sanitized = packageName.replace("@", "").replace('/', '-');
 				String currentTarballName = sanitized + "-" + contentHash(packageDir) + ".tgz";
-				return installedVersion.endsWith(currentTarballName);
+				// the tarball must also still exist on disk: package.json can reference a tarball in the (non committed)
+				// .tarballs folder that is gone, e.g. on a fresh CI workspace
+				return installedVersion.endsWith(currentTarballName) && new File(new File(projectFolder, ".tarballs"), currentTarballName).exists();
 			}
 			return installedVersion != null && installedVersion.endsWith(dirSuffix);
 		}
@@ -1924,7 +1960,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 
 									String installedVersion = dependencies.optString(packageName);
-									if (packageJsonChanged || !isAlreadyInstalled(installedVersion, "packages/" + packageName, packageName, new File(location)))
+									if (packageJsonChanged || isFrozenWarPnpm() || !isAlreadyInstalled(installedVersion, "packages/" + packageName, packageName, new File(location)))
 									{
 										return resolveInstallSpecifier(new File(location), packageName, console);
 									}
@@ -2046,7 +2082,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (entry.exists())
 						{
 							String installedVersion = dependencies.optString(packageName);
-							if (!exists || !isAlreadyInstalled(installedVersion, entryPoint, packageName, entry))
+							if (!exists || isFrozenWarPnpm() || !isAlreadyInstalled(installedVersion, entryPoint, packageName, entry))
 							{
 								return resolveInstallSpecifier(entry, packageName, console);
 							}
