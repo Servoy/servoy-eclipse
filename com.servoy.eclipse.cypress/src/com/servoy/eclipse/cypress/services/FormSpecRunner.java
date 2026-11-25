@@ -377,7 +377,13 @@ public class FormSpecRunner
 			}
 
 			String solutionName = activeProject.getSolution().getName();
-			Path specFilePath = specGenerator.findExistingSpecFile(formName, solutionName);
+			// SVY-21514: the spec of a module form is named <ownerSolution>.<form>, so try the owner first, then the active solution
+			String ownerName = specGenerator.resolveOwnerSolutionName(formName);
+			Path specFilePath = ownerName == null ? null : specGenerator.findExistingSpecFile(formName, ownerName);
+			if (specFilePath == null)
+			{
+				specFilePath = specGenerator.findExistingSpecFile(formName, solutionName);
+			}
 			if (specFilePath == null || !Files.exists(specFilePath))
 			{
 				return "Error: Spec file not found: jenkins-custom/e2e-test-scripts/cypress/cy-form/" + formName +

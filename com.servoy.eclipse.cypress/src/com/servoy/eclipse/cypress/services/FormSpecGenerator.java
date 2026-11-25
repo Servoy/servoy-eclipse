@@ -368,6 +368,27 @@ public class FormSpecGenerator
 		}
 	}
 
+	/**
+	 * SVY-21514: resolves the name of the solution (active solution or one of its modules) that owns the given form,
+	 * which is the prefix generateSpec uses for the spec file name.
+	 *
+	 * @return the owner solution name, or null when there is no active solution or the form cannot be resolved
+	 */
+	public String resolveOwnerSolutionName(String formName)
+	{
+		try
+		{
+			ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+			FlattenedSolution flattenedSolution = activeProject == null ? null : activeProject.getEditingFlattenedSolution();
+			Form form = flattenedSolution == null ? null : flattenedSolution.getForm(formName);
+			return form == null ? null : form.getRootObject().getName();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+
 	public Path findExistingSetupFile(String formName, String solutionName)
 	{
 		try
