@@ -567,6 +567,18 @@ class FormSpecModelEmitterTest
 		}
 
 		@Test
+		@DisplayName("SVY-21514: a hidden control is asserted as not in the DOM, never as visible")
+		void hiddenElementIsAssertedNotToExist()
+		{
+			String out = emit(model(element("shown", Kind.CONTROL),
+				new Element("hid", "bootstrapcomponents-button", Kind.CONTROL, false, false, List.of())));
+
+			assertAll(() -> assertTrue(out.contains("    cy.get('[data-cy=\"myForm.shown\"]').should('be.visible');\n"), out),
+				() -> assertTrue(out.contains("    cy.get('[data-cy=\"myForm.hid\"]').should('not.exist');\n"), out),
+				() -> assertFalse(out.contains("myForm.hid\"]').should('be.visible')"), out));
+		}
+
+		@Test
 		@DisplayName("countVisibilityAssertions counts only CONTROL and INPUT elements")
 		void countVisibilityAssertions()
 		{

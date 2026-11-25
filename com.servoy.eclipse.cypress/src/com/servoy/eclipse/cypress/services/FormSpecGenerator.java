@@ -429,13 +429,11 @@ public class FormSpecGenerator
 			{
 				continue;
 			}
-			if (element instanceof BaseComponent baseComponent && !baseComponent.getVisible())
-			{
-				continue;
-			}
 
 			ElementInfo elem = new ElementInfo();
 			elem.name = name;
+			// a form element with visible=false is not rendered at all, so the spec asserts it is NOT in the DOM (instead of visible)
+			elem.hidden = element instanceof BaseComponent baseComponent && !baseComponent.getVisible();
 			elem.isWebComponent = element instanceof WebComponent;
 			if (elem.isWebComponent)
 			{
@@ -466,7 +464,8 @@ public class FormSpecGenerator
 
 		sb.append("  beforeEach(() => {\n");
 		sb.append("    cy.visit('").append(formUrl).append("');\n");
-		if (metadata.namedElements.isEmpty())
+		// hidden elements are not rendered, so only a non-hidden element can be waited for
+		if (metadata.namedElements.stream().allMatch(e -> e.hidden))
 		{
 			sb.append("    cy.get('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("', { timeout: 30000 }).should('exist');\n");
 		}
@@ -481,12 +480,19 @@ public class FormSpecGenerator
 		sb.append("    cy.get('.svy-error, .error-overlay').should('not.exist');\n");
 
 		List<ElementInfo> visibleElements = metadata.namedElements.stream()
-			.filter(e -> e.isWebComponent || e.isButton || e.isLabel).limit(8).toList();
+			.filter(e -> !e.hidden && (e.isWebComponent || e.isButton || e.isLabel)).limit(8).toList();
+		List<ElementInfo> hiddenElements = metadata.namedElements.stream().filter(e -> e.hidden).toList();
 
 		for (ElementInfo elem : visibleElements)
 		{
 			sb.append("    cy.get('[data-cy=\"").append(metadata.formName).append(".").append(elem.name)
 				.append("\"]').should('be.visible');\n");
+		}
+		for (ElementInfo elem : hiddenElements)
+		{
+			// hidden by design (visible=false): the element must not be rendered at all in the initial state
+			sb.append("    cy.get('[data-cy=\"").append(metadata.formName).append(".").append(elem.name)
+				.append("\"]').should('not.exist');\n");
 		}
 		// Always-on (SVY-21619): report innerWidth + root-container width at the default viewport after layout settles.
 		sb.append("    cy.measureContainer('").append(CypressSupportScaffold.ROOT_CONTAINER_SELECTOR).append("');\n");
@@ -503,7 +509,7 @@ public class FormSpecGenerator
 		}
 
 		List<ElementInfo> buttons = metadata.namedElements.stream()
-			.filter(e -> e.isButton || (e.typeName != null && e.typeName.contains("button"))).limit(3).toList();
+			.filter(e -> !e.hidden && (e.isButton || (e.typeName != null && e.typeName.contains("button")))).limit(3).toList();
 
 		if (!buttons.isEmpty())
 		{
@@ -588,6 +594,8 @@ public class FormSpecGenerator
 		boolean isWebComponent;
 		boolean isButton;
 		boolean isLabel;
+		/** visible=false in the form: not rendered in the initial state, so asserted as not.exist instead of be.visible */
+		boolean hidden;
 
 		@Override
 		public String toString()
