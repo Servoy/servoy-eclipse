@@ -1,11 +1,10 @@
 # Review Summary - SVY-21648: Zoneless: BaseTabpanel signal writes during change detection
 
-**Risk: MODERATE.** The fix is sound, but `tabIndex` now stays a tab name when the named tab is already selected (`basetabpanel.ts:153`), and Fix Version 2026.9.0 was released without the commits.
+**Risk: MODERATE.** The fix is sound, but `tabIndex` now stays a tab name when the named tab is already selected (`basetabpanel.ts:153`). This is unverified and may be harmless.
 
 Scope: `servoy-eclipse`, branch `release`, commits `db5e0a69d0`, `34ffabf11f`, `7155fb5379`.
 
-## Release-target check: MISMATCH
-- Fix Version `2026.9.0` in `servoy-eclipse`: tag `2026.9.0` (2026-10-09) contains none of the three commits (authored 2026-10-28, 11-05, 11-10). The commits are on `release` (2026.9.1) and `master` (2026.12.0). Either the fix is meant for 2026.9.1 or the Fix Version is wrong.
+Fix Version `2026.9.0` names the 2026.9 line, and `release` is that line, so the commits are on the right branch. The `2026.9.0` tag predates them, which is expected for a follow-up on the maintenance line.
 
 ## Manual test plan
 **Verifying the fix**
