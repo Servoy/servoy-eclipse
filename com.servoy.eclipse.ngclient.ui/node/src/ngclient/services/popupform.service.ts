@@ -5,7 +5,7 @@ import { FormService } from '../form.service';
 import { ServicesService } from '../../sablo/services.service';
 import { ServoyService } from '../servoy.service';
 import { SvyUtilsService } from '../utils.service';
-import { MainViewRefService, PopupForm, EventLike } from '@servoy/public';
+import { MainViewRefService, PopupForm, EventLike, PopupStateService } from '@servoy/public';
 import { isEqual } from 'lodash-es';
 
 @Injectable()
@@ -22,6 +22,8 @@ export class PopupFormService {
   private readonly servoyService = inject(ServoyService);
   private readonly utils = inject(SvyUtilsService);
   private readonly doc = inject(DOCUMENT) as Document;
+  private readonly popupStateService = inject(PopupStateService);
+  private readonly popupStateId = 'formpopup';
 
   constructor() {}
 
@@ -45,6 +47,7 @@ export class PopupFormService {
   public cancelFormPopup(disableClearPopupFormCallToServer_or_name: boolean | string): void {
     if (typeof disableClearPopupFormCallToServer_or_name === 'boolean') {
       this.doc.body.removeEventListener('mouseup', this.formPopupBodyListener);
+      this.removeKeyListenerAndDeactivate();
       if (this.formPopupComponent) {
         let popup = this.formPopupComponent.instance.popup;
         while (popup) {
@@ -110,7 +113,15 @@ export class PopupFormService {
       });
 
       this.formPopupComponent = newFormPopupComponent;
+      if (!this.formPopupComponent) {
+        this.removeKeyListenerAndDeactivate();
+      }
     }
+  }
+
+  private removeKeyListenerAndDeactivate() {
+    (this.doc.defaultView ?? window).removeEventListener('keyup', this.formPopupKeyListener, true);
+    this.popupStateService.deactivatePopup(this.popupStateId);
   }
 
   private async showPopup(popup: PopupForm, counter?: number) {
@@ -176,6 +187,8 @@ export class PopupFormService {
       const { ServoyFormPopupComponent } = await import('./popupform/popupform');
       this.formPopupComponent = this.mainViewRefService.mainContainer.createComponent(ServoyFormPopupComponent);
       this.formPopupComponent.instance.setPopupForm(popup);
+      this.popupStateService.activatePopup(this.popupStateId);
+      (this.doc.defaultView ?? window).addEventListener('keyup', this.formPopupKeyListener, true);
       this.sequencePopup = false;
       setTimeout(() => {
         this.doc.body.addEventListener('mouseup', this.formPopupBodyListener);
@@ -228,6 +241,12 @@ export class PopupFormService {
     if (mainform && mainform.contains(event.target as Node)) {
       this.cancelFormPopup(false);
       return;
+    }
+  };
+
+  private formPopupKeyListener = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.formPopupComponent && !this.formPopupComponent.instance.popup.doNotCloseOnClickOutside) {
+      this.cancelFormPopup(false);
     }
   };
 }
