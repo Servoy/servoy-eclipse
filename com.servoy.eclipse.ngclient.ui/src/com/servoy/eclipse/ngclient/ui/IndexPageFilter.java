@@ -21,6 +21,7 @@ import static com.servoy.j2db.server.ngclient.AngularIndexPageWriter.addcontentS
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -76,7 +77,7 @@ public class IndexPageFilter implements Filter
 			requestURI.toLowerCase().endsWith("/index.html"))
 		{
 
-			File projectFolder = Activator.getInstance().getSolutionProjectFolder();
+			File projectFolder = getSolutionProjectFolder();
 			if (projectFolder != null)
 			{
 				File distFolder = new File(projectFolder, "dist/app/browser");
@@ -101,7 +102,7 @@ public class IndexPageFilter implements Filter
 		if (requestURI.toLowerCase().endsWith("/index.html") &&
 			(requestURI.toLowerCase().contains("rfb/angular2") || requestURI.toLowerCase().contains("/solution/")) && WebPackagesListener.isBuildRunning())
 		{
-			String indexHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/loadingclient.html"));
+			String indexHtml = Utils.getURLContent(getBundleEntry("/resources/loadingclient.html"));
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("text/html");
 			response.setContentLengthLong(indexHtml.length());
@@ -111,7 +112,7 @@ public class IndexPageFilter implements Filter
 		}
 		File distFolder = null;
 		File indexFile = null;
-		File projectFolder = Activator.getInstance().getSolutionProjectFolder();
+		File projectFolder = getSolutionProjectFolder();
 		if (projectFolder != null)
 		{
 			distFolder = new File(projectFolder, "dist/app/browser");
@@ -229,7 +230,7 @@ public class IndexPageFilter implements Filter
 		else if (solutionName != null)
 		{
 			// the system is not ready because the TiNG resources are not build/ not build properly
-			String indexHtml = Utils.getURLContent(Activator.getInstance().getBundle().getEntry("/resources/buildfailedclient.html"));
+			String indexHtml = Utils.getURLContent(getBundleEntry("/resources/buildfailedclient.html"));
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("text/html");
 			response.setContentLengthLong(indexHtml.length());
@@ -244,7 +245,17 @@ public class IndexPageFilter implements Filter
 	{
 	}
 
-	private String getSolutionNameFromURI(Path path)
+	protected File getSolutionProjectFolder()
+	{
+		return Activator.getInstance().getSolutionProjectFolder();
+	}
+
+	protected URL getBundleEntry(String path)
+	{
+		return Activator.getInstance().getBundle().getEntry(path);
+	}
+
+	public String getSolutionNameFromURI(Path path)
 	{
 		Path p = path;
 		if (p.startsWith("/designer"))

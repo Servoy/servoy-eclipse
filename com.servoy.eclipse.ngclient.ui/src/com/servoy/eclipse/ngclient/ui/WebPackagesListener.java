@@ -59,6 +59,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -295,8 +296,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	 * @author jcompanger
 	 * @since 2021.06
 	 */
-	private static final class PackageCheckerJob extends Job
+	public static final class PackageCheckerJob extends Job
 	{
+		private final Environment env;
 		private final ITiNGExportModel warExportModel;
 		private final File projectFolder;
 		private final String whatToRun;
@@ -321,7 +323,15 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 		private PackageCheckerJob(String name, File projectFolder, ITiNGExportModel warExportModel, String approvalsSolutionName)
 		{
+			this(name, projectFolder, warExportModel, approvalsSolutionName, new Environment()
+			{
+			});
+		}
+
+		public PackageCheckerJob(String name, File projectFolder, ITiNGExportModel warExportModel, String approvalsSolutionName, Environment env)
+		{
 			super(name);
+			this.env = env;
 			this.warExportModel = warExportModel;
 			this.projectFolder = projectFolder;
 			this.approvalsSolutionName = approvalsSolutionName;
@@ -364,7 +374,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		{
 			if (Activator.isNodeExtractionAndTitaniumBuildDisabled()) return Status.CANCEL_STATUS;
 
-			StringOutputStream console = Activator.getInstance().getConsole().outputStream();
+			StringOutputStream console = env.console();
 			try
 			{
 				scheduled.incrementAndGet();
@@ -372,194 +382,14 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				writeConsole(console,
 					"---- Starting Titanium NGClient solution/dependencies source check (" + DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.now()) + ")");
 				packFailures.clear();
-				if (Activator.isPnpmMode())
-				{
-					// without node + pnpm, createNPMCommand hands out no-op commands that "succeed" without doing anything
-					Activator activator = Activator.getInstance();
-					activator.waitForNodeExtraction();
-					File node = activator.getNodePath();
-					File pnpm = activator.getPnpmPath();
-					String missingRuntime = missingPnpmRuntimeMessage(node, pnpm);
-					if (missingRuntime != null)
-					{
-						writeConsole(console, "\r\nERROR: " + missingRuntime + "\r\n");
-						Activator.getInstance().getLog().error(missingRuntime);
-						return new Status(IStatus.WARNING, getClass(), missingRuntime);
-					}
-				}
-				// modules and css of the components those are based on the Packages itself
-				CssLibSet cssLibs = new CssLibSet();
-				boolean hasFontAwesomePro = false;
-				Set<String> packageToInstall = new HashSet<>();
-				Set<String> assetsToAdd = new HashSet<>();
-				Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = new HashMap<>();
-				// service are based just on all service specifications
-				Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>((spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
-				SpecProviderState serviceProviderState = WebServiceSpecProvider.getSpecProviderState();
-				WebObjectSpecification[] allServices = serviceProviderState.getAllWebObjectSpecifications();
-				for (WebObjectSpecification webObjectSpecification : allServices)
-				{
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(webObjectSpecification.getPackageName()))
-					{
-						continue;
-					}
-					Set<CssLib> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
-					if (libs != null)
-					{
-						cssLibs.addAll(libs);
-						if ("@servoy/fontawesomepro".equals(webObjectSpecification.getNG2Config().getPackageName()))
-						{
-							hasFontAwesomePro = true;
-						}
-					}
-					List<String> assets = webObjectSpecification.getNG2Config().getAssets().getAssetsList();
-					if (assets != null)
-					{
-						assetsToAdd.addAll(assets);
-					}
-					if (webObjectSpecification.getNG2Config().getPackageName() != null)
-					{
-						if (isDefaultPackageEnabled(webObjectSpecification.getNG2Config().getPackageName()))
-						{
-							IPackageReader packageReader = serviceProviderState
-								.getPackageReader(webObjectSpecification.getPackageName());
-							ng2Services.put(webObjectSpecification, packageReader);
-						}
-					}
-				}
+				IStatus runtimeStatus = checkRuntimeAvailable(console);
+				if (runtimeStatus != null) return runtimeStatus;
 
-				TreeMap<PackageSpecification< ? extends WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
-					(spec1, spec2) -> spec1.getPackageName().compareTo(spec2.getPackageName()));
-				SpecProviderState specProviderState = WebComponentSpecProvider.getSpecProviderState();
-				for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
-				{
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(entry.getPackageName()))
-					{
-						continue;
-					}
+				SpecInfo info = collectSpecInfo(monitor);
+				if (info == null) return Status.CANCEL_STATUS;
 
-					String module = entry.getNg2Module();
-					String packageName = entry.getNpmPackageName();
-					if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
-					{
-						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
-						componentPackageSpecToReader.put(entry, packageReader);
-					}
-
-					Set<CssLib> libs = entry.getNg2CssLibrary();
-					if (libs != null)
-					{
-						cssLibs.addAll(libs);
-					}
-				}
-				for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
-				{
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(entry.getPackageName()))
-					{
-						continue;
-					}
-
-					String module = entry.getNg2Module();
-					String packageName = entry.getNpmPackageName();
-					if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
-					{
-						IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
-						componentPackageSpecToReader.put(entry, packageReader);
-					}
-
-					Set<CssLib> libs = entry.getNg2CssLibrary();
-					if (libs != null)
-					{
-						cssLibs.addAll(libs);
-					}
-
-					Map<String, WebLayoutSpecification> specifications = entry.getSpecifications();
-					specifications.values().forEach(spec -> {
-						String tagName = null;
-						PropertyDescription tagType = spec.getProperty("tagType");
-						if (tagType != null && tagType.getDefaultValue() != null && !"div".equals(tagType.getDefaultValue()))
-						{
-							tagName = (String)tagType.getDefaultValue();
-							structureTagNames.put(tagName, new Pair<WebLayoutSpecification, String>(spec, tagName));
-						}
-						List<String> directives = spec.getDirectives();
-						if (directives.size() > 0)
-						{
-							if (tagName == null) tagName = "div";
-							else structureTagNames.remove(tagName);
-							structureTagNames.put(spec.getName(), new Pair<WebLayoutSpecification, String>(spec, tagName));
-						}
-					});
-				}
-
-
-				boolean sourceChanged = false;
-				// SVY-21502 §4.2: in pnpm mode the shipped @servoy/public tarball copied into .tarballs/ (set by
-				// copyShippedPublicTarball below, before the install block); reused later as the specifier to install
-				// for @servoy/public.
-				File copiedPublicTarball = null;
-				// SVY-21502 §4.2: in pnpm mode @servoy/public is pre-built at the ngclient.ui Maven build and
-				// shipped in node/tarballs/. Copy it into .tarballs/ NOW - before the install block - so the
-				// committed lockfile's file: specifier for @servoy/public resolves against a tarball that already
-				// exists on disk before any pnpm install runs (fixes the ERR_PNPM_TARBALL_READ_LOCAL_TARBALL
-				// ordering hazard). The four default component packages are source packages (resolved via a
-				// tsconfig paths alias) and are NOT packed/installed as tarballs at all.
-				// SVY-21734: done for every pnpm run (not only when component/service packages exist) so the install
-				// below never has to cope with a missing @servoy/public tarball; a missing one aborts the job instead.
-				if (Activator.isPnpmMode())
-				{
-					copiedPublicTarball = copyShippedPublicTarball(console);
-					if (copiedPublicTarball == null) packFailures.add("@servoy/public");
-				}
-				if (ng2Services.size() > 0 || componentPackageSpecToReader.size() > 0)
-				{
-					File distIndexFile = new File(projectFolder, "dist/app/browser/index.html");
-					sourceChanged = !distIndexFile.exists();
-					if (sourceChanged)
-					{
-						writeConsole(console, "- build will be triggered; no previously build-generated files detected...");
-					}
-					try
-					{
-						File packageJson = new File(projectFolder, "package.json");
-						String json = FileUtils.readFileToString(packageJson, "UTF-8");
-						JSONObject jsonObject = new JSONObject(json);
-						JSONObject dependencies = jsonObject.optJSONObject("dependencies");
-						ng2Services.entrySet().forEach(entry -> {
-							WebObjectSpecification spec = entry.getKey();
-							NG2Config ng2Config = spec.getNG2Config();
-							String packageName = ng2Config.getPackageName();
-							IPackageReader packageReader = entry.getValue();
-							String entryPoint = ng2Config.getEntryPoint();
-							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
-							if (pck != null)
-							{
-								writeConsole(console, "- need to install package " + pck);
-								packageToInstall.add(pck);
-							}
-						});
-
-						componentPackageSpecToReader.entrySet().forEach(entry -> {
-							PackageSpecification< ? extends WebObjectSpecification> spec = entry.getKey();
-							String packageName = spec.getNpmPackageName();
-							IPackageReader packageReader = entry.getValue();
-							String entryPoint = spec.getEntryPoint();
-							String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
-							if (pck != null)
-							{
-								packageToInstall.add(pck);
-							}
-						});
-					}
-					catch (IOException e)
-					{
-						writeErrorToConsoleAndLog(console, e, "Exception while checking what packages should be installed: ");
-						// TODO should we return a WARNING status here as we do for other failures?
-					}
-				}
+				PackageCheckResult check = prepareTarballsAndCheckPackages(info, console);
+				boolean sourceChanged = check.sourceChanged;
 				String packFailed = packFailuresMessage(packFailures);
 				if (packFailed != null)
 				{
@@ -567,682 +397,23 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					return new Status(IStatus.WARNING, getClass(), packFailed);
 				}
 
-				// adjust the allservices.sevice.ts
-				try
-				{
-					StringBuilder imports = new StringBuilder("// generated imports start\n");
-					StringBuilder services = new StringBuilder("// generated services start\n");
-					StringBuilder providers = new StringBuilder("// generated providers start\n");
-					StringBuilder modules = new StringBuilder("// generated modules start\n");
-					ng2Services.keySet().forEach(service -> {
-						if (service.getNG2Config().getServiceName() != null)
-						{
-							if (this.warExportModel != null && !this.warExportModel.getAllExportedServicesWithoutSabloServices().contains(service.getName()))
-							{
-								return;
-							}
-
-							String moduleName = service.getNG2Config().getModuleName();
-							// import the service
-							imports.append("import { ");
-							String serviceName = service.getNG2Config().getServiceName();
-							imports.append(serviceName);
-							// add it to the modules
-							if (moduleName != null && modules.indexOf(moduleName + ',') == -1)
-							{
-								imports.append(',');
-								imports.append(moduleName);
-								modules.append(moduleName);
-								modules.append(",\n");
-							}
-							imports.append(" } from '");
-							imports.append(service.getNG2Config().getPackageName());
-							imports.append("';\n");
-							// add it to the service declarations as inject() field initializers
-							services.append("private readonly ");
-							services.append(ClientService.convertToJSName(service.getName()));
-							services.append(" = inject(");
-							services.append(serviceName);
-							services.append(");\n");
-							// add it to the providers (if it is not a module)
-							if (!"aggridservice".equals(service.getPackageName()) && moduleName == null)
-							{
-								providers.append(serviceName);
-								providers.append(",\n");
-							}
-						}
-					});
-
-					imports.append("// generated imports end");
-					services.append("// generated services end");
-					providers.append("// generated providers end");
-					modules.append("// generated modules end");
-
-					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allservices.service.ts"), "UTF-8");
-					String old = content;
-					content = replace(content, "// generated imports start", "// generated imports end", imports);
-					content = replace(content, "// generated services start", "// generated services end", services);
-					content = replace(content, "// generated providers start", "// generated providers end", providers);
-					content = replace(content, "// generated modules start", "// generated modules end", modules);
-					if (!old.equals(content))
-					{
-						sourceChanged = true;
-						writeConsole(console, "- services ts file changed");
-						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allservices.service.ts"), content, "UTF-8");
-					}
-				}
-				catch (IOException e)
-				{
-					writeErrorToConsoleAndLog(console, e, "Exception while generating allservices.service.ts: ");
-					// TODO should we return a WARNING status here as we do for other failures?
-				}
-
-				for (WebObjectSpecification spec : WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications())
-				{
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					if (warExportModel == null || warExportModel.getAllExportedComponents().contains(spec.getName()))
-					{
-						Set<CssLib> libs = spec.getNG2Config().getDependencies().getCssLibrary();
-						if (libs != null)
-						{
-							cssLibs.addAll(libs);
-						}
-						List<String> assets = spec.getNG2Config().getAssets().getAssetsList();
-						if (assets != null)
-						{
-							assetsToAdd.addAll(assets);
-						}
-					}
-				}
-
-				ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
-				Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate(warExportModel);
-				// SVY-21460: the stateless formtemplate copy also stamps data-svy-name/data-svy-id on the
-				// component element itself; runtime and designer copies keep using componentTemplates.
-				Pair<StringBuilder, StringBuilder> formTemplateComponentTemplates = generator.generateHTMLTemplate(warExportModel, true);
-				try
-				{
-					// adjust component templates
-					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), "UTF-8");
-					String editorContent = FileUtils.readFileToString(new File(projectFolder, "src/designer/designform_component.component.ts"), "UTF-8");
-					String old = content;
-					String oldEditor = editorContent;
-					content = replace(content, "<!-- component template generate start -->", "<!-- component template generate end -->",
-						componentTemplates.getLeft());
-					content = replace(content, "// component viewchild template generate start", "// component viewchild template generate end",
-						componentTemplates.getRight());
-					editorContent = replace(editorContent, "<!-- component template generate start -->", "<!-- component template generate end -->",
-						componentTemplates.getLeft());
-					editorContent = replace(editorContent, "// component viewchild template generate start", "// component viewchild template generate end",
-						componentTemplates.getRight());
-					// add structure templates
-					if (structureTagNames.size() > 0)
-					{
-						LayoutTemplates generateStructureTemplate = generateStructureTemplate(structureTagNames);
-						content = replace(content, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
-							generateStructureTemplate.getFormComponentTemplate());
-						content = replace(content, "// structure viewchild template generate start", "// structure viewchild template generate end",
-							generateStructureTemplate.getViewChilds());
-
-						editorContent = replace(editorContent, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
-							generateStructureTemplate.getFormComponentTemplate());
-						editorContent = replace(editorContent, "// structure viewchild template generate start", "// structure viewchild template generate end",
-							generateStructureTemplate.getViewChilds());
-
-						String lfc = FileUtils.readFileToString(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), "UTF-8");
-						String oldLFC = lfc;
-						lfc = replace(lfc, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
-							generateStructureTemplate.getLFFormComponentTemplate());
-						lfc = replace(lfc, "// structure viewchild template generate start", "// structure viewchild template generate end",
-							generateStructureTemplate.getViewChilds());
-						if (!oldLFC.equals(lfc))
-						{
-							sourceChanged = true;
-							writeConsole(console, "- LFC components ts file changed");
-							FileUtils.writeStringToFile(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), lfc, "UTF-8");
-						}
-
-					}
-					if (!old.equals(content))
-					{
-						sourceChanged = true;
-						writeConsole(console, "- components ts file changed");
-						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), content, "UTF-8");
-					}
-
-					if (!oldEditor.equals(editorContent))
-					{
-						sourceChanged = true;
-						writeConsole(console, "- editor ts file changed");
-						FileUtils.writeStringToFile(new File(projectFolder, "src/designer/designform_component.component.ts"), editorContent, "UTF-8");
-					}
-
-					// SVY-21460: keep the stateless form-template copy's component/structure/viewchild
-					// marker regions filled the same way as the runtime and designer form components
-					File formTemplateFile = new File(projectFolder, "src/formtemplate/formtemplate_component.component.ts");
-					if (formTemplateFile.exists())
-					{
-						String formTemplateContent = FileUtils.readFileToString(formTemplateFile, "UTF-8");
-						String oldFormTemplate = formTemplateContent;
-						formTemplateContent = replace(formTemplateContent, "<!-- component template generate start -->",
-							"<!-- component template generate end -->", formTemplateComponentTemplates.getLeft());
-						formTemplateContent = replace(formTemplateContent, "// component viewchild template generate start",
-							"// component viewchild template generate end", formTemplateComponentTemplates.getRight());
-						if (structureTagNames.size() > 0)
-						{
-							LayoutTemplates generateStructureTemplate = generateStructureTemplate(structureTagNames);
-							formTemplateContent = replace(formTemplateContent, "<!-- structure template generate start -->",
-								"<!-- structure template generate end -->", generateStructureTemplate.getFormComponentTemplate());
-							formTemplateContent = replace(formTemplateContent, "// structure viewchild template generate start",
-								"// structure viewchild template generate end", generateStructureTemplate.getViewChilds());
-						}
-						if (!oldFormTemplate.equals(formTemplateContent))
-						{
-							sourceChanged = true;
-							writeConsole(console, "- form template ts file changed");
-							FileUtils.writeStringToFile(formTemplateFile, formTemplateContent, "UTF-8");
-						}
-					}
-
-				}
-				catch (IOException e1)
-				{
-					writeErrorToConsoleAndLog(console, e1, "Exception while adjusting component templates: ");
-					// TODO should we return a WARNING status here as we do for other failures?
-				}
-
-				try
-				{
-
-
-					// generate the all components.module.ts
-					String current = generateAllComponentsModuleContent(componentPackageSpecToReader.keySet());
-					String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), "UTF-8");
-
-					if (!current.equals(content))
-					{
-						sourceChanged = true;
-						writeConsole(console, "- component modules ts file changed");
-						FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), current, "UTF-8");
-					}
-				}
-				catch (IOException e1)
-				{
-					writeErrorToConsoleAndLog(console, e1, "Exception while generating allcomponents.module.ts: ");
-					// TODO should we return a WARNING status here as we do for other failures?
-				}
-
-				try
-				{
-					/* component/services imports */
-					if (cssLibs.size() > -0)
-					{
-						File angularJSON = new File(projectFolder, "angular.json");
-						String angularJSONContents = FileUtils.readFileToString(angularJSON, "UTF8");
-						JSONObject json = new JSONObject(angularJSONContents);
-						JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
-							.getJSONObject("options").getJSONArray("styles");
-						boolean[] stylesChanged = new boolean[] { false };
-						if (!hasFontAwesomePro && cssLibs.size() + 2 != styles.length())
-						{
-							stylesChanged[0] = true;
-						}
-						else
-						{
-							for (CssLib style : cssLibs)
-							{
-								boolean[] styleFound = new boolean[] { false };
-								String styleUrl = resolveCssLibUrl(style);
-								styles.forEach(existingStyle -> {
-									if (existingStyle.toString().equals(styleUrl))
-									{
-										styleFound[0] = true;
-									}
-								});
-								if (!styleFound[0])
-								{
-									stylesChanged[0] = true;
-									break;
-								}
-							}
-						}
-						if (stylesChanged[0])
-						{
-							// just write everything back to be sure the priority is respected
-							writeConsole(console, "- styles source changed");
-							sourceChanged = true;
-							while (styles.length() > 0)
-							{
-								styles.remove(0);
-							}
-							if (!hasFontAwesomePro) styles.put("@fortawesome/fontawesome-free/css/all.css");
-							for (CssLib style : cssLibs)
-							{
-								styles.put(resolveCssLibUrl(style));
-							}
-							styles.put("src/styles.css");
-							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
-						}
-					}
-				}
-				catch (IOException e)
-				{
-					writeErrorToConsoleAndLog(console, e, "Exception while adjusting angular.json styles: ");
-					// TODO should we return a WARNING status here as we do for other failures?
-				}
-				try
-				{
-					if (assetsToAdd.size() > 0)
-					{
-						File angularJSON = new File(projectFolder, "angular.json");
-						String angularJSONContents = FileUtils.readFileToString(angularJSON, "UTF8");
-						JSONObject json = new JSONObject(angularJSONContents);
-						JSONArray assets = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
-							.getJSONObject("options").getJSONArray("assets");
-						boolean[] assetsChanged = new boolean[] { false };
-						assetsToAdd.forEach((asset) -> {
-							boolean[] assetFound = new boolean[] { false };
-							assets.forEach(existingAsset -> {
-								if (existingAsset.toString().equals(asset))
-								{
-									assetFound[0] = true;
-								}
-							});
-							if (!assetFound[0])
-							{
-								assetsChanged[0] = true;
-								if (asset.startsWith("{") && asset.endsWith("}"))
-								{
-									try
-									{
-										JSONObject assetJSONObject = new JSONObject(asset);
-										assets.put(assetJSONObject);
-									}
-									catch (JSONException ex)
-									{
-										writeErrorToConsoleAndLog(console, ex, "Can't add asset object to angular.json: " + asset + ": ");
-										// TODO should we return a WARNING status here as we do for other failures?
-									}
-								}
-								else
-								{
-									assets.put(asset);
-								}
-							}
-						});
-						if (assetsChanged[0])
-						{
-							writeConsole(console, "- assets source changed");
-							sourceChanged = true;
-							FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
-						}
-					}
-				}
-				catch (IOException e)
-				{
-					writeErrorToConsoleAndLog(console, e, "Exception while checking assets: ");
-					// TODO should we return a WARNING status here as we do for other failures?
-				}
-				// Only ever consider bundling zone.js on the developer-run build; a WAR export (warExportModel != null,
-				// both from Developer and from the cloud) always stays zoneless regardless of the system property.
-				// On the developer run: if -Dti.ng.includezonejs is set we honour it (including "false"); if it is not
-				// set at all it defaults to true, so a developer run restores async patching by default and NG0100
-				// ExpressionChangedAfterItHasBeenCheckedError warnings keep surfacing (debugging aid).
-				if (warExportModel == null && "true".equals(System.getProperty("ti.ng.includezonejs", "true")))
-				{
-					// The app runs zoneless, so a fresh source copy has an empty src/polyfills.ts (no zone.js).
-					// We add the zone.js import so async patching is restored.
-					try
-					{
-						File polyfills = new File(projectFolder, "src/polyfills.ts");
-						String polyfillsContents = polyfills.exists() ? FileUtils.readFileToString(polyfills, "UTF8") : "";
-						if (!polyfillsContents.contains("import 'zone.js'"))
-						{
-							writeConsole(console, "- adding zone.js import to src/polyfills.ts (developer run, ti.ng.includezonejs not false)");
-							sourceChanged = true;
-							FileUtils.write(polyfills, "import 'zone.js';\r\n" + polyfillsContents, "UTF8", false);
-						}
-					}
-					catch (IOException e)
-					{
-						writeErrorToConsoleAndLog(console, e, "Exception while adding zone.js to src/polyfills.ts: ");
-						// TODO should we return a WARNING status here as we do for other failures?
-					}
-				}
-				if (packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get())
+				sourceChanged |= writeAllServices(info, console);
+				if (!collectCssAndAssets(info, monitor)) return Status.CANCEL_STATUS;
+				sourceChanged |= writeComponentTemplates(info, console);
+				sourceChanged |= writeAllComponentsModule(info, console);
+				sourceChanged |= updateAngularJsonStyles(info, console);
+				sourceChanged |= updateAngularJsonAssets(info, console);
+				sourceChanged |= ensureZoneJsPolyfill(console);
+				if (needsInstallOrBuild(check.packageToInstall, sourceChanged))
 				{
 					if (warExportModel == null)
 					{
-						Display.getDefault().asyncExec(() -> {
-							if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
-								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
-							{
-								IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-								for (IEditorReference editorRef : editorRefs)
-								{
-									IEditorPart editor = editorRef.getEditor(false);
-									if (editor instanceof IEditorRefresh)
-									{
-										((IEditorRefresh)editor).refresh();
-									}
-								}
-							}
-						});
+						env.refreshOpenEditors();
 					}
-					// SVY-21502: in pnpm mode, before the first package-mutating pnpm command, generate the
-					// solution-local pnpm-workspace.yaml from the KNOWN committed allow/deny lists so already-decided
-					// build scripts run. The web-package tarballs installed below pull in NEW dependencies whose build
-					// scripts can only be discovered after they are installed, so the install block runs inside a
-					// strictDepBuilds-demotion window (so a brand-new pending script does not hard-fail), and
-					// resolvePnpmBuildScriptApprovals (discover + prompt + rebuild) runs right after it.
-					boolean pnpmMode = Activator.isPnpmMode();
-					boolean[] installBlockSucceeded = new boolean[] { false };
-					// SVY-21502 §3.10/§6: a headless WAR export that reaches an undecided name@version build script
-					// must FAIL LOUD (not silently run or skip). resolvePnpmBuildScriptApprovals returns such a
-					// failure status; it is captured here (it runs in the finally below) and returned after the block.
-					IStatus[] approvalsStatus = new IStatus[] { Status.OK_STATUS };
-					if (pnpmMode)
-					{
-						applyKnownPnpmBuildApprovals(this.projectFolder, this.warExportModel, this.approvalsSolutionName, console);
-						RunPNPMCommand.beginBuildScriptDiscoveryDemotion();
-					}
-					// SVY-21502 §4.1/§4.3: in pnpm mode the internal @servoy/* tarballs were already copied from the
-					// shipped node/tarballs/ into .tarballs/ above (before the checkPackage loop), so here only npm
-					// mode still needs to build+pack dist-public.
-					boolean internalTarballsFromShipped = Activator.isPnpmMode();
-					try
-					{
-						// npm mode only: build the servoy/public dist. In pnpm mode the shipped public tarball is used.
-						if (!internalTarballsFromShipped && (!new File(this.projectFolder, "dist-public").exists() || sourceChanged))
-						{
-							IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
-								Arrays.asList("run", "build_lib_debug_nowatch"));
-							try
-							{
-								npmCommand.runCommand(monitor);
-								if (npmCommand.getExitCode() != 0)
-								{
-									writeConsole(console,
-										"\r\n" + "Unexpected EXIT_CODE calling build_lib_debug_nowatch: " + npmCommand.getExitCode() + "\r\n");
-									return new Status(IStatus.WARNING, getClass(),
-										"npm run build_lib_debug_nowatch EXIT_CODE was: " + npmCommand.getExitCode());
-								}
-							}
-							catch (Exception e)
-							{
-								writeErrorToConsoleAndLog(console, e, "Exception while running 'npm run build_lib_debug_nowatch': ");
-								return new Status(IStatus.WARNING, getClass(), "npm run build_lib_debug_nowatch failed: " + e.getMessage());
-							}
-						}
-
-						// SVY-21502 §3.11: a WAR export / headless CI build installs FROZEN against the committed,
-						// matched package.json + pnpm-lock.yaml pair (both seeded above). pnpm's --frozen-lockfile
-						// compares the package.json specifier set against the lockfile, so the seeded package.json MUST
-						// declare exactly the component tarballs the seeded lockfile pins. The committed pair is the
-						// FULL component set; the WAR ships only the exported subset, so we first 'pnpm remove' the
-						// components this war does not export (verified to not re-resolve/drift the remaining pins) so
-						// package.json and the lockfile agree on the subset, then install frozen. We must NOT run an
-						// unfrozen 'pnpm add <tarballs>' - that would re-resolve and rewrite the seeded lockfile,
-						// defeating the version pin. A lockfile-vs-package.json mismatch then fails loud via the
-						// non-zero exit code checked below. The Developer path stays NON-frozen (its install is what
-						// updates and commits-back the full pair).
-						boolean frozenWarInstall = Activator.isPnpmMode() && this.warExportModel != null;
-						IRunNPMCommand npmCommand;
-						if (!frozenWarInstall)
-						{
-							// Developer (and npm-mode) path: add the changed/new packages (unfrozen).
-							// only execute this if a source is changed (should always happens the first time)
-							// or if there are really packages to install.
-							List<String> command = new ArrayList<>();
-							command.add("install");
-							packageToInstall.forEach(packageName -> command.add(packageName));
-							// also add the public api: in pnpm mode a directory dep does not bring its transitive deps, so
-							// install a @servoy/public tarball; in npm mode keep installing the directory as before.
-							if (Activator.isPnpmMode())
-							{
-								// SVY-21502 §4.3: use the shipped @servoy/public tarball copied into .tarballs/ above (never null
-								// here: a missing tarball aborted the job earlier, SVY-21734).
-								// SVY-21502: pass the tarball RELATIVE to the project folder (./.tarballs/<name>.tgz),
-								// not an absolute path. pnpm records the 'add' argument verbatim as the lockfile
-								// 'specifier:', so an absolute C:\... path would make the committed lockfile
-								// machine- and OS-specific (it must work on a Linux WAR exporter). A relative path
-								// makes the lockfile portable and identical across the dev and dist target folders.
-								command.add(relativeTarballSpecifier(copiedPublicTarball));
-							}
-							else
-							{
-								command.add("./dist-public/");
-							}
-							npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
-							try
-							{
-								npmCommand.runCommand(monitor);
-								if (npmCommand.getExitCode() != 0)
-								{
-									writeConsole(console,
-										"\r\n" + "Unexpected EXIT_CODE calling npm install [many packages that are needed]: " + npmCommand.getExitCode() +
-											"\r\n");
-									return new Status(IStatus.WARNING, getClass(),
-										"npm install [many packages that are needed] EXIT_CODE was: " + npmCommand.getExitCode());
-								}
-							}
-							catch (Exception e)
-							{
-								writeErrorToConsoleAndLog(console, e, "Exception while running 'npm install many, packages, that, we, need': ");
-								return new Status(IStatus.WARNING, getClass(), "npm install many, packages, that, we, need failed: " + e.getMessage());
-							}
-						}
-						else
-						{
-							// WAR/CI path (SVY-21502 §3.11): the frozen 'ci' below installs everything (registry + tarballs)
-							// from the committed, matched package.json + lockfile pair; pack dist-public so its tarball exists
-							// on disk for the lockfile's file: specifier to resolve, but do NOT run an unfrozen add. The
-							// seeded pair is the FULL component set, so trim the components this war does not export (their
-							// tarball was not packed into .tarballs) from package.json + lockfile via 'pnpm remove' - this does
-							// not re-resolve the remaining pinned versions - so package.json and the lockfile agree on the
-							// shipped subset and the following frozen 'ci' passes instead of failing ERR_PNPM_OUTDATED_LOCKFILE.
-							// SVY-21502 §4.3: in pnpm mode the shipped @servoy/public tarball was already copied into
-							// .tarballs/ above; only npm mode packs dist-public.
-							if (!Activator.isPnpmMode())
-							{
-								packPackage(new File(this.projectFolder, "dist-public"), "@servoy/public", console);
-							}
-							Status removeStatus = removeNonExportedComponents(monitor, console);
-							if (removeStatus != null) return removeStatus;
-							npmCommand = null;
-						}
-						// A "clean install" (the menu action) only means "wipe the target and regenerate from scratch";
-						// it must NOT run a frozen 'pnpm install --frozen-lockfile'. The non-frozen 'add' above already
-						// regenerated a fresh lockfile, so a clean install continues to the normal 'update' branch (and
-						// commits the fresh lockfile back). Only a WAR/CI export installs frozen against the committed
-						// pair. (SVY-21502)
-						cleanInstall.set(false);
-						if (frozenWarInstall)
-						{
-							// SVY-21502: frozen, unless a nightly (-pre) web package changed; then only that one is re-resolved
-							npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
-								Arrays.asList(changedNightlies.isEmpty() ? "ci" : "ci-unfrozen"));
-							try
-							{
-								npmCommand.runCommand(monitor);
-								if (npmCommand.getExitCode() != 0)
-								{
-									writeConsole(console,
-										"\r\n" + "Unexpected EXIT_CODE calling npm ci: " + npmCommand.getExitCode() + "\r\n");
-									return new Status(IStatus.WARNING, getClass(), "npm ci EXIT_CODE was: " + npmCommand.getExitCode());
-								}
-							}
-							catch (Exception e)
-							{
-								writeErrorToConsoleAndLog(console, e, "Exception while running 'npm ci': ");
-								return new Status(IStatus.WARNING, getClass(), "npm ci failed: " + e.getMessage());
-							}
-						}
-						else
-						{
-							npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("update"));
-							try
-							{
-								npmCommand.runCommand(monitor);
-								if (npmCommand.getExitCode() != 0)
-								{
-									writeConsole(console,
-										"\r\n" + "Unexpected EXIT_CODE calling npm update: " + npmCommand.getExitCode() + "\r\n");
-									return new Status(IStatus.WARNING, getClass(), "npm update EXIT_CODE was: " + npmCommand.getExitCode());
-								}
-							}
-							catch (Exception e)
-							{
-								writeErrorToConsoleAndLog(console, e, "Exception while running 'npm update': ");
-								return new Status(IStatus.WARNING, getClass(), "npm update failed: " + e.getMessage());
-							}
-						}
-						// pnpm's global store + symlinked node_modules already deduplicate, so in pnpm mode neither the
-						// 'dedup' verb nor the hand-written folder-deletion pass below runs.
-						if (!Activator.isPnpmMode())
-						{
-							npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("dedup"));
-							try
-							{
-								npmCommand.runCommand(monitor);
-								if (npmCommand.getExitCode() != 0)
-								{
-									writeConsole(console,
-										"\r\n" + "Unexpected EXIT_CODE calling npm dedup: " + npmCommand.getExitCode() + "\r\n");
-									return new Status(IStatus.WARNING, getClass(), "npm dedup EXIT_CODE was: " + npmCommand.getExitCode());
-								}
-							}
-							catch (Exception e)
-							{
-								writeErrorToConsoleAndLog(console, e, "Exception while running 'npm dedup': ");
-								return new Status(IStatus.WARNING, getClass(), "npm dedup failed: " + e.getMessage());
-							}
-							long dedupTime = System.currentTimeMillis();
-							// after dedup we have to run our own dedup, but then compared to the root node_modules
-							File projectNodeModules = new File(this.projectFolder, "node_modules");
-							File rootNodeModules = new File(this.projectFolder.getParentFile(), "node_modules");
-
-							File[] projectListing = projectNodeModules.listFiles();
-							File[] rootListing = rootNodeModules.listFiles();
-
-							BiFunction<File[], File[], SortedList<File>> filterFunction = (list1, list2) -> {
-								Comparator<File> comparator = (file1, file2) -> file1.getName().compareToIgnoreCase(file2.getName());
-								SortedList<File> result = new SortedList<File>(comparator, Arrays.asList(list1));
-								result.retainAll(Arrays.asList(list2));
-								return result;
-							};
-
-							if (projectListing != null && rootListing != null)
-							{
-								SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
-
-								mainDirs.forEach(file -> {
-									if (file.isDirectory())
-									{
-										if (new File(file, "package.json").exists())
-										{
-											// this is already the package (root of node modules, like rxjs)
-											try
-											{
-												Files.walkFileTree(file.toPath(), DeletePathVisitor.INSTANCE);
-											}
-											catch (IOException e)
-											{
-												writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
-											}
-										}
-										else
-										{
-											// sub dirs are the package, this is a group dir like angular/aggrid
-											SortedList<File> nestedResult = filterFunction.apply(file.listFiles(),
-												new File(rootNodeModules, file.getName()).listFiles());
-											nestedResult.forEach(nested -> {
-												if (nested.isDirectory() && new File(nested, "package.json").exists())
-												{
-													try
-													{
-														Files.walkFileTree(nested.toPath(), DeletePathVisitor.INSTANCE);
-													}
-													catch (IOException e)
-													{
-														writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
-													}
-												}
-											});
-										}
-
-									}
-								});
-							}
-
-							writeConsole(console,
-								"Node NPM dedup time (root node_modules/solution node_modules): " +
-									Math.round((System.currentTimeMillis() - dedupTime) / 1000) +
-									" s.");
-						}
-						installBlockSucceeded[0] = true;
-					}
-					finally
-					{
-						// SVY-21502: close the install-only strictDepBuilds demotion window. When the installs
-						// succeeded, node_modules is materialized, so discover the (newly-appeared) pending build
-						// scripts, prompt the developer for the undecided ones (Developer UI only), persist, regenerate
-						// the allowBuilds yaml and 'pnpm rebuild' so the approved scripts run - all BEFORE the Angular
-						// build below, which then runs with the normal strictDepBuilds: true and the scripts already
-						// built. If an install failed (early return), only the demotion window is closed.
-						if (pnpmMode)
-						{
-							RunPNPMCommand.endBuildScriptDiscoveryDemotion();
-							if (installBlockSucceeded[0])
-							{
-								approvalsStatus[0] = resolvePnpmBuildScriptApprovals(this.projectFolder, this.warExportModel,
-									this.approvalsSolutionName, monitor, console);
-							}
-						}
-					}
-
-					// SVY-21502 §6: in a headless WAR export a non-OK approvals status (an undecided name@version was
-					// reached) is a hard build failure - propagate it so the exporter surfaces the error and the
-					// developer opens the solution, approves/denies the listed versions and commits. The Developer path
-					// never returns a non-OK status here (it prompts instead), so this does not affect it.
-					if (pnpmMode && approvalsStatus[0] != null && approvalsStatus[0].getSeverity() == IStatus.ERROR)
-					{
-						return approvalsStatus[0];
-					}
-
-					if (copyAngularLocales(this.projectFolder))
-					{
-						writeConsole(console, "- copying Angular locale files to locales/angular");
-					}
-					else
-					{
-						writeConsole(console, "- WARNING: Angular locale files not found or copy failed, skipping");
-					}
-
-					if (SOURCE_DEBUG)
-					{
-						writeConsole(console,
-							"SOURCE DEBUG enabled (ti.ng.source.debug=true); skipping npm run build_debug_nowatch; you need to run it manually YOURSELF. (npm install did happen)");
-					}
-					else
-					{
-						IRunNPMCommand npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("run", whatToRun));
-						try
-						{
-							npmCommand.runCommand(monitor);
-							if (npmCommand.getExitCode() != 0)
-							{
-								writeConsole(console,
-									"\r\n" + "Unexpected EXIT_CODE calling npm " + whatToRun + ": " + npmCommand.getExitCode() + "\r\n");
-								return new Status(IStatus.WARNING, getClass(), "npm run " + whatToRun + " EXIT_CODE was: " + npmCommand.getExitCode());
-							}
-						}
-						catch (Exception e)
-						{
-							writeErrorToConsoleAndLog(console, e, "Exception while running 'npm run " + whatToRun + "': ");
-							return new Status(IStatus.WARNING, getClass(), "npm run " + whatToRun + " failed: " + e.getMessage());
-						}
-					}
+					IStatus installStatus = runInstallBlock(monitor, console, check.packageToInstall, sourceChanged, check.copiedPublicTarball);
+					if (installStatus != null) return installStatus;
+					IStatus buildStatus = runAngularBuild(monitor, console);
+					if (buildStatus != null) return buildStatus;
 				}
 				else writeConsole(console, "Skipping install / build as no changes were found.");
 				writeConsole(console, "Total time to check/install Titanium NG solution/dependencies into target folder: " + projectFolder + " is " +
@@ -1251,26 +422,1025 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 			finally
 			{
+				finishAndReschedule(console);
+			}
+		}
+
+		/**
+		 * Everything the job needs from the running Developer (console, runtime, command creation, spec providers, UI and approvals).
+		 * The default methods delegate to the existing static calls; tests override what they need.
+		 */
+		public interface Environment
+		{
+			default StringOutputStream console()
+			{
+				return Activator.getInstance().getConsole().outputStream();
+			}
+
+			default boolean isPnpmMode()
+			{
+				return Activator.isPnpmMode();
+			}
+
+			default void waitForNodeExtraction()
+			{
+				Activator.getInstance().waitForNodeExtraction();
+			}
+
+			default File nodePath()
+			{
+				return Activator.getInstance().getNodePath();
+			}
+
+			default File pnpmPath()
+			{
+				return Activator.getInstance().getPnpmPath();
+			}
+
+			default IRunNPMCommand createCommand(File folder, List<String> args)
+			{
+				return Activator.getInstance().createNPMCommand(folder, args);
+			}
+
+			default ILog log()
+			{
+				return Activator.getInstance().getLog();
+			}
+
+			default SpecProviderState specProviderState()
+			{
+				return WebComponentSpecProvider.getSpecProviderState();
+			}
+
+			default SpecProviderState serviceSpecProviderState()
+			{
+				return WebServiceSpecProvider.getSpecProviderState();
+			}
+
+			default java.net.URL bundleEntry(String path)
+			{
+				return Activator.getInstance().getBundle().getEntry(path);
+			}
+
+			default void refreshOpenEditors()
+			{
+				Display.getDefault().asyncExec(() -> {
+					if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
+					{
+						IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+						for (IEditorReference editorRef : editorRefs)
+						{
+							IEditorPart editor = editorRef.getEditor(false);
+							if (editor instanceof IEditorRefresh)
+							{
+								((IEditorRefresh)editor).refresh();
+							}
+						}
+					}
+				});
+			}
+
+			default void applyKnownPnpmBuildApprovals(File projectFolder, ITiNGExportModel warExportModel, String approvalsSolutionName,
+				StringOutputStream console)
+			{
+				WebPackagesListener.applyKnownPnpmBuildApprovals(projectFolder, warExportModel, approvalsSolutionName, console);
+			}
+
+			default IStatus resolvePnpmBuildScriptApprovals(File projectFolder, ITiNGExportModel warExportModel, String approvalsSolutionName,
+				IProgressMonitor monitor, StringOutputStream console)
+			{
+				return WebPackagesListener.resolvePnpmBuildScriptApprovals(projectFolder, warExportModel, approvalsSolutionName, monitor, console);
+			}
+		}
+
+		/** The component/service/layout information collected from the spec providers. */
+		public static final class SpecInfo
+		{
+			/** the css libraries of all (exported) services and components */
+			public final CssLibSet cssLibs = new CssLibSet();
+			/** true if the fontawesomepro package is used (then the free fontawesome css is not added) */
+			public boolean hasFontAwesomePro = false;
+			/** the angular.json assets of all (exported) services and components */
+			public final Set<String> assetsToAdd = new HashSet<>();
+			/** the layout tags (by template name) that need a structure template, with their spec and tag name */
+			public final Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = new HashMap<>();
+			/** the services to generate imports for (sorted by name), with the reader of their package */
+			public final Map<WebObjectSpecification, IPackageReader> ng2Services = new TreeMap<>(
+				(spec1, spec2) -> spec1.getName().compareTo(spec2.getName()));
+			/** the component and layout packages that have an angular module/standalone components (sorted by package name), with their reader */
+			public final TreeMap<PackageSpecification< ? extends WebObjectSpecification>, IPackageReader> componentPackageSpecToReader = new TreeMap<>(
+				(spec1, spec2) -> spec1.getPackageName().compareTo(spec2.getPackageName()));
+		}
+
+		/** The outcome of {@link PackageCheckerJob#prepareTarballsAndCheckPackages(SpecInfo, StringOutputStream)}. */
+		public static final class PackageCheckResult
+		{
+			/** true if the build has to be triggered because no previously built output was found */
+			public boolean sourceChanged = false;
+			/** the install specifiers of the packages that are new or changed */
+			public final Set<String> packageToInstall = new HashSet<>();
+			/** pnpm mode only: the shipped @servoy/public tarball copied into .tarballs/, or null if it was not copied */
+			public File copiedPublicTarball = null;
+		}
+
+		/**
+		 * @return an error status when pnpm mode is on and node or pnpm are missing, otherwise null
+		 */
+		public IStatus checkRuntimeAvailable(StringOutputStream console)
+		{
+			if (env.isPnpmMode())
+			{
+				// without node + pnpm, createNPMCommand hands out no-op commands that "succeed" without doing anything
+				env.waitForNodeExtraction();
+				File node = env.nodePath();
+				File pnpm = env.pnpmPath();
+				String missingRuntime = missingPnpmRuntimeMessage(node, pnpm);
+				if (missingRuntime != null)
+				{
+					writeConsole(console, "\r\nERROR: " + missingRuntime + "\r\n");
+					env.log().error(missingRuntime);
+					return new Status(IStatus.WARNING, getClass(), missingRuntime);
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Collects services, component packages, layouts, css libraries and assets (taking the export model into account).
+		 *
+		 * @return the info, or null if the monitor was cancelled
+		 */
+		public SpecInfo collectSpecInfo(IProgressMonitor monitor)
+		{
+			SpecInfo info = new SpecInfo();
+			SpecProviderState serviceProviderState = env.serviceSpecProviderState();
+			WebObjectSpecification[] allServices = serviceProviderState.getAllWebObjectSpecifications();
+			for (WebObjectSpecification webObjectSpecification : allServices)
+			{
+				if (monitor.isCanceled()) return null;
+				if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(webObjectSpecification.getPackageName()))
+				{
+					continue;
+				}
+				Set<CssLib> libs = webObjectSpecification.getNG2Config().getDependencies().getCssLibrary();
+				if (libs != null)
+				{
+					info.cssLibs.addAll(libs);
+					if ("@servoy/fontawesomepro".equals(webObjectSpecification.getNG2Config().getPackageName()))
+					{
+						info.hasFontAwesomePro = true;
+					}
+				}
+				List<String> assets = webObjectSpecification.getNG2Config().getAssets().getAssetsList();
+				if (assets != null)
+				{
+					info.assetsToAdd.addAll(assets);
+				}
+				if (webObjectSpecification.getNG2Config().getPackageName() != null)
+				{
+					if (isDefaultPackageEnabled(webObjectSpecification.getNG2Config().getPackageName()))
+					{
+						IPackageReader packageReader = serviceProviderState.getPackageReader(webObjectSpecification.getPackageName());
+						info.ng2Services.put(webObjectSpecification, packageReader);
+					}
+				}
+			}
+
+			SpecProviderState specProviderState = env.specProviderState();
+			for (PackageSpecification<WebObjectSpecification> entry : specProviderState.getWebObjectSpecifications().values())
+			{
+				if (monitor.isCanceled()) return null;
+				if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(entry.getPackageName()))
+				{
+					continue;
+				}
+
+				String module = entry.getNg2Module();
+				String packageName = entry.getNpmPackageName();
+				if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
+				{
+					IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
+					info.componentPackageSpecToReader.put(entry, packageReader);
+				}
+
+				Set<CssLib> libs = entry.getNg2CssLibrary();
+				if (libs != null)
+				{
+					info.cssLibs.addAll(libs);
+				}
+			}
+			for (PackageSpecification<WebLayoutSpecification> entry : specProviderState.getLayoutSpecifications().values())
+			{
+				if (monitor.isCanceled()) return null;
+				if (this.warExportModel != null && !this.warExportModel.getExportedPackagesExceptSablo().contains(entry.getPackageName()))
+				{
+					continue;
+				}
+
+				String module = entry.getNg2Module();
+				String packageName = entry.getNpmPackageName();
+				if ((!Utils.stringIsEmpty(module) || entry.hasStandaloneComponents()) && !Utils.stringIsEmpty(packageName))
+				{
+					IPackageReader packageReader = specProviderState.getPackageReader(entry.getPackageName());
+					info.componentPackageSpecToReader.put(entry, packageReader);
+				}
+
+				Set<CssLib> libs = entry.getNg2CssLibrary();
+				if (libs != null)
+				{
+					info.cssLibs.addAll(libs);
+				}
+
+				Map<String, WebLayoutSpecification> specifications = entry.getSpecifications();
+				specifications.values().forEach(spec -> {
+					String tagName = null;
+					PropertyDescription tagType = spec.getProperty("tagType");
+					if (tagType != null && tagType.getDefaultValue() != null && !"div".equals(tagType.getDefaultValue()))
+					{
+						tagName = (String)tagType.getDefaultValue();
+						info.structureTagNames.put(tagName, new Pair<WebLayoutSpecification, String>(spec, tagName));
+					}
+					List<String> directives = spec.getDirectives();
+					if (directives.size() > 0)
+					{
+						if (tagName == null) tagName = "div";
+						else info.structureTagNames.remove(tagName);
+						info.structureTagNames.put(spec.getName(), new Pair<WebLayoutSpecification, String>(spec, tagName));
+					}
+				});
+			}
+			return info;
+		}
+
+		/**
+		 * SVY-21734/SVY-21502: in pnpm mode the shipped @servoy/public tarball is copied into .tarballs/ BEFORE the install block and
+		 * before checkPackage; a missing tarball is recorded in packFailures (the caller aborts the job). Then checks which packages need
+		 * to be installed.
+		 */
+		public PackageCheckResult prepareTarballsAndCheckPackages(SpecInfo info, StringOutputStream console)
+		{
+			PackageCheckResult result = new PackageCheckResult();
+			if (env.isPnpmMode())
+			{
+				result.copiedPublicTarball = copyShippedPublicTarball(console);
+				if (result.copiedPublicTarball == null) packFailures.add("@servoy/public");
+			}
+			if (info.ng2Services.size() > 0 || info.componentPackageSpecToReader.size() > 0)
+			{
+				File distIndexFile = new File(projectFolder, "dist/app/browser/index.html");
+				result.sourceChanged = !distIndexFile.exists();
+				if (result.sourceChanged)
+				{
+					writeConsole(console, "- build will be triggered; no previously build-generated files detected...");
+				}
 				try
 				{
-					console.close();
+					File packageJson = new File(projectFolder, "package.json");
+					String json = FileUtils.readFileToString(packageJson, "UTF-8");
+					JSONObject jsonObject = new JSONObject(json);
+					JSONObject dependencies = jsonObject.optJSONObject("dependencies");
+					info.ng2Services.entrySet().forEach(entry -> {
+						WebObjectSpecification spec = entry.getKey();
+						NG2Config ng2Config = spec.getNG2Config();
+						String packageName = ng2Config.getPackageName();
+						IPackageReader packageReader = entry.getValue();
+						String entryPoint = ng2Config.getEntryPoint();
+						String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
+						if (pck != null)
+						{
+							writeConsole(console, "- need to install package " + pck);
+							result.packageToInstall.add(pck);
+						}
+					});
+
+					info.componentPackageSpecToReader.entrySet().forEach(entry -> {
+						PackageSpecification< ? extends WebObjectSpecification> spec = entry.getKey();
+						String packageName = spec.getNpmPackageName();
+						IPackageReader packageReader = entry.getValue();
+						String entryPoint = spec.getEntryPoint();
+						String pck = checkPackage(dependencies, packageName, packageReader, entryPoint, console);
+						if (pck != null)
+						{
+							result.packageToInstall.add(pck);
+						}
+					});
 				}
 				catch (IOException e)
 				{
+					writeErrorToConsoleAndLog(console, e, "Exception while checking what packages should be installed: ");
+					// TODO should we return a WARNING status here as we do for other failures?
 				}
-				// remove the schedules 1 and start + 1 from the scheduled.
-				// if that is still higher then 0 we need to start another.
-				if (scheduled.addAndGet(-2) <= 0)
+			}
+			return result;
+		}
+
+		/**
+		 * Rewrites the generated part of allservices.service.ts.
+		 *
+		 * @return true if the file changed
+		 */
+		public boolean writeAllServices(SpecInfo info, StringOutputStream console)
+		{
+			boolean changed = false;
+			try
+			{
+				StringBuilder imports = new StringBuilder("// generated imports start\n");
+				StringBuilder services = new StringBuilder("// generated services start\n");
+				StringBuilder providers = new StringBuilder("// generated providers start\n");
+				StringBuilder modules = new StringBuilder("// generated modules start\n");
+				info.ng2Services.keySet().forEach(service -> {
+					if (service.getNG2Config().getServiceName() != null)
+					{
+						if (this.warExportModel != null && !this.warExportModel.getAllExportedServicesWithoutSabloServices().contains(service.getName()))
+						{
+							return;
+						}
+
+						String moduleName = service.getNG2Config().getModuleName();
+						// import the service
+						imports.append("import { ");
+						String serviceName = service.getNG2Config().getServiceName();
+						imports.append(serviceName);
+						// add it to the modules
+						if (moduleName != null && modules.indexOf(moduleName + ',') == -1)
+						{
+							imports.append(',');
+							imports.append(moduleName);
+							modules.append(moduleName);
+							modules.append(",\n");
+						}
+						imports.append(" } from '");
+						imports.append(service.getNG2Config().getPackageName());
+						imports.append("';\n");
+						// add it to the service declarations as inject() field initializers
+						services.append("private readonly ");
+						services.append(ClientService.convertToJSName(service.getName()));
+						services.append(" = inject(");
+						services.append(serviceName);
+						services.append(");\n");
+						// add it to the providers (if it is not a module)
+						if (!"aggridservice".equals(service.getPackageName()) && moduleName == null)
+						{
+							providers.append(serviceName);
+							providers.append(",\n");
+						}
+					}
+				});
+
+				imports.append("// generated imports end");
+				services.append("// generated services end");
+				providers.append("// generated providers end");
+				modules.append("// generated modules end");
+
+				String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allservices.service.ts"), "UTF-8");
+				String old = content;
+				content = replace(content, "// generated imports start", "// generated imports end", imports);
+				content = replace(content, "// generated services start", "// generated services end", services);
+				content = replace(content, "// generated providers start", "// generated providers end", providers);
+				content = replace(content, "// generated modules start", "// generated modules end", modules);
+				if (!old.equals(content))
 				{
-					// this can be a WAR export, then it was 1 not 2 when running.
-					scheduled.set(0);
+					changed = true;
+					writeConsole(console, "- services ts file changed");
+					FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allservices.service.ts"), content, "UTF-8");
+				}
+			}
+			catch (IOException e)
+			{
+				writeErrorToConsoleAndLog(console, e, "Exception while generating allservices.service.ts: ");
+				// TODO should we return a WARNING status here as we do for other failures?
+			}
+			return changed;
+		}
+
+		/**
+		 * Adds the css libraries and assets of all (exported) components to the info.
+		 *
+		 * @return false if the monitor was cancelled
+		 */
+		public boolean collectCssAndAssets(SpecInfo info, IProgressMonitor monitor)
+		{
+			for (WebObjectSpecification spec : env.specProviderState().getAllWebObjectSpecifications())
+			{
+				if (monitor.isCanceled()) return false;
+				if (warExportModel == null || warExportModel.getAllExportedComponents().contains(spec.getName()))
+				{
+					Set<CssLib> libs = spec.getNG2Config().getDependencies().getCssLibrary();
+					if (libs != null)
+					{
+						info.cssLibs.addAll(libs);
+					}
+					List<String> assets = spec.getNG2Config().getAssets().getAssetsList();
+					if (assets != null)
+					{
+						info.assetsToAdd.addAll(assets);
+					}
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * Rewrites the generated component/structure/viewchild regions of the form, designer, list form component and form template files.
+		 *
+		 * @return true if any file changed
+		 */
+		public boolean writeComponentTemplates(SpecInfo info, StringOutputStream console)
+		{
+			boolean sourceChanged = false;
+			Map<String, Pair<WebLayoutSpecification, String>> structureTagNames = info.structureTagNames;
+			ComponentTemplateGenerator generator = new ComponentTemplateGenerator();
+			Pair<StringBuilder, StringBuilder> componentTemplates = generator.generateHTMLTemplate(warExportModel);
+			// SVY-21460: the stateless formtemplate copy also stamps data-svy-name/data-svy-id on the
+			// component element itself; runtime and designer copies keep using componentTemplates.
+			Pair<StringBuilder, StringBuilder> formTemplateComponentTemplates = generator.generateHTMLTemplate(warExportModel, true);
+			try
+			{
+				// adjust component templates
+				String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), "UTF-8");
+				String editorContent = FileUtils.readFileToString(new File(projectFolder, "src/designer/designform_component.component.ts"), "UTF-8");
+				String old = content;
+				String oldEditor = editorContent;
+				content = replace(content, "<!-- component template generate start -->", "<!-- component template generate end -->",
+					componentTemplates.getLeft());
+				content = replace(content, "// component viewchild template generate start", "// component viewchild template generate end",
+					componentTemplates.getRight());
+				editorContent = replace(editorContent, "<!-- component template generate start -->", "<!-- component template generate end -->",
+					componentTemplates.getLeft());
+				editorContent = replace(editorContent, "// component viewchild template generate start", "// component viewchild template generate end",
+					componentTemplates.getRight());
+				// add structure templates
+				if (structureTagNames.size() > 0)
+				{
+					LayoutTemplates generateStructureTemplate = generateStructureTemplate(structureTagNames);
+					content = replace(content, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
+						generateStructureTemplate.getFormComponentTemplate());
+					content = replace(content, "// structure viewchild template generate start", "// structure viewchild template generate end",
+						generateStructureTemplate.getViewChilds());
+
+					editorContent = replace(editorContent, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
+						generateStructureTemplate.getFormComponentTemplate());
+					editorContent = replace(editorContent, "// structure viewchild template generate start", "// structure viewchild template generate end",
+						generateStructureTemplate.getViewChilds());
+
+					String lfc = FileUtils.readFileToString(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), "UTF-8");
+					String oldLFC = lfc;
+					lfc = replace(lfc, "<!-- structure template generate start -->", "<!-- structure template generate end -->",
+						generateStructureTemplate.getLFFormComponentTemplate());
+					lfc = replace(lfc, "// structure viewchild template generate start", "// structure viewchild template generate end",
+						generateStructureTemplate.getViewChilds());
+					if (!oldLFC.equals(lfc))
+					{
+						sourceChanged = true;
+						writeConsole(console, "- LFC components ts file changed");
+						FileUtils.writeStringToFile(new File(projectFolder, "src/servoycore/listformcomponent/listformcomponent.ts"), lfc, "UTF-8");
+					}
+
+				}
+				if (!old.equals(content))
+				{
+					sourceChanged = true;
+					writeConsole(console, "- components ts file changed");
+					FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/form/form_component.component.ts"), content, "UTF-8");
+				}
+
+				if (!oldEditor.equals(editorContent))
+				{
+					sourceChanged = true;
+					writeConsole(console, "- editor ts file changed");
+					FileUtils.writeStringToFile(new File(projectFolder, "src/designer/designform_component.component.ts"), editorContent, "UTF-8");
+				}
+
+				// SVY-21460: keep the stateless form-template copy's component/structure/viewchild
+				// marker regions filled the same way as the runtime and designer form components
+				File formTemplateFile = new File(projectFolder, "src/formtemplate/formtemplate_component.component.ts");
+				if (formTemplateFile.exists())
+				{
+					String formTemplateContent = FileUtils.readFileToString(formTemplateFile, "UTF-8");
+					String oldFormTemplate = formTemplateContent;
+					formTemplateContent = replace(formTemplateContent, "<!-- component template generate start -->",
+						"<!-- component template generate end -->", formTemplateComponentTemplates.getLeft());
+					formTemplateContent = replace(formTemplateContent, "// component viewchild template generate start",
+						"// component viewchild template generate end", formTemplateComponentTemplates.getRight());
+					if (structureTagNames.size() > 0)
+					{
+						LayoutTemplates generateStructureTemplate = generateStructureTemplate(structureTagNames);
+						formTemplateContent = replace(formTemplateContent, "<!-- structure template generate start -->",
+							"<!-- structure template generate end -->", generateStructureTemplate.getFormComponentTemplate());
+						formTemplateContent = replace(formTemplateContent, "// structure viewchild template generate start",
+							"// structure viewchild template generate end", generateStructureTemplate.getViewChilds());
+					}
+					if (!oldFormTemplate.equals(formTemplateContent))
+					{
+						sourceChanged = true;
+						writeConsole(console, "- form template ts file changed");
+						FileUtils.writeStringToFile(formTemplateFile, formTemplateContent, "UTF-8");
+					}
+				}
+
+			}
+			catch (IOException e1)
+			{
+				writeErrorToConsoleAndLog(console, e1, "Exception while adjusting component templates: ");
+				// TODO should we return a WARNING status here as we do for other failures?
+			}
+			return sourceChanged;
+		}
+
+		/**
+		 * Regenerates allcomponents.module.ts.
+		 *
+		 * @return true if the file changed
+		 */
+		public boolean writeAllComponentsModule(SpecInfo info, StringOutputStream console)
+		{
+			boolean changed = false;
+			try
+			{
+				// generate the all components.module.ts
+				String current = generateAllComponentsModuleContent(info.componentPackageSpecToReader.keySet());
+				String content = FileUtils.readFileToString(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), "UTF-8");
+
+				if (!current.equals(content))
+				{
+					changed = true;
+					writeConsole(console, "- component modules ts file changed");
+					FileUtils.writeStringToFile(new File(projectFolder, "src/ngclient/allcomponents.module.ts"), current, "UTF-8");
+				}
+			}
+			catch (IOException e1)
+			{
+				writeErrorToConsoleAndLog(console, e1, "Exception while generating allcomponents.module.ts: ");
+				// TODO should we return a WARNING status here as we do for other failures?
+			}
+			return changed;
+		}
+
+		/**
+		 * Updates the styles of angular.json.
+		 *
+		 * @return true if angular.json changed
+		 */
+		public boolean updateAngularJsonStyles(SpecInfo info, StringOutputStream console)
+		{
+			boolean changed = false;
+			CssLibSet cssLibs = info.cssLibs;
+			try
+			{
+				/* component/services imports */
+				if (cssLibs.size() > -0)
+				{
+					File angularJSON = new File(projectFolder, "angular.json");
+					String angularJSONContents = FileUtils.readFileToString(angularJSON, "UTF8");
+					JSONObject json = new JSONObject(angularJSONContents);
+					JSONArray styles = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
+						.getJSONObject("options").getJSONArray("styles");
+					boolean[] stylesChanged = new boolean[] { false };
+					if (!info.hasFontAwesomePro && cssLibs.size() + 2 != styles.length())
+					{
+						stylesChanged[0] = true;
+					}
+					else
+					{
+						for (CssLib style : cssLibs)
+						{
+							boolean[] styleFound = new boolean[] { false };
+							String styleUrl = resolveCssLibUrl(style);
+							styles.forEach(existingStyle -> {
+								if (existingStyle.toString().equals(styleUrl))
+								{
+									styleFound[0] = true;
+								}
+							});
+							if (!styleFound[0])
+							{
+								stylesChanged[0] = true;
+								break;
+							}
+						}
+					}
+					if (stylesChanged[0])
+					{
+						// just write everything back to be sure the priority is respected
+						writeConsole(console, "- styles source changed");
+						changed = true;
+						while (styles.length() > 0)
+						{
+							styles.remove(0);
+						}
+						if (!info.hasFontAwesomePro) styles.put("@fortawesome/fontawesome-free/css/all.css");
+						for (CssLib style : cssLibs)
+						{
+							styles.put(resolveCssLibUrl(style));
+						}
+						styles.put("src/styles.css");
+						FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				writeErrorToConsoleAndLog(console, e, "Exception while adjusting angular.json styles: ");
+				// TODO should we return a WARNING status here as we do for other failures?
+			}
+			return changed;
+		}
+
+		/**
+		 * Updates the assets of angular.json.
+		 *
+		 * @return true if angular.json changed
+		 */
+		public boolean updateAngularJsonAssets(SpecInfo info, StringOutputStream console)
+		{
+			boolean changed = false;
+			try
+			{
+				if (info.assetsToAdd.size() > 0)
+				{
+					File angularJSON = new File(projectFolder, "angular.json");
+					String angularJSONContents = FileUtils.readFileToString(angularJSON, "UTF8");
+					JSONObject json = new JSONObject(angularJSONContents);
+					JSONArray assets = json.getJSONObject("projects").getJSONObject("ngclient2").getJSONObject("architect").getJSONObject("build")
+						.getJSONObject("options").getJSONArray("assets");
+					boolean[] assetsChanged = new boolean[] { false };
+					info.assetsToAdd.forEach((asset) -> {
+						boolean[] assetFound = new boolean[] { false };
+						assets.forEach(existingAsset -> {
+							if (existingAsset.toString().equals(asset))
+							{
+								assetFound[0] = true;
+							}
+						});
+						if (!assetFound[0])
+						{
+							assetsChanged[0] = true;
+							if (asset.startsWith("{") && asset.endsWith("}"))
+							{
+								try
+								{
+									JSONObject assetJSONObject = new JSONObject(asset);
+									assets.put(assetJSONObject);
+								}
+								catch (JSONException ex)
+								{
+									writeErrorToConsoleAndLog(console, ex, "Can't add asset object to angular.json: " + asset + ": ");
+									// TODO should we return a WARNING status here as we do for other failures?
+								}
+							}
+							else
+							{
+								assets.put(asset);
+							}
+						}
+					});
+					if (assetsChanged[0])
+					{
+						writeConsole(console, "- assets source changed");
+						changed = true;
+						FileUtils.write(angularJSON, json.toString(1), "UTF8", false);
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				writeErrorToConsoleAndLog(console, e, "Exception while checking assets: ");
+				// TODO should we return a WARNING status here as we do for other failures?
+			}
+			return changed;
+		}
+
+		/**
+		 * Only ever consider bundling zone.js on the developer-run build; a WAR export (warExportModel != null,
+		 * both from Developer and from the cloud) always stays zoneless regardless of the system property.
+		 * On the developer run: if -Dti.ng.includezonejs is set we honour it (including "false"); if it is not
+		 * set at all it defaults to true, so a developer run restores async patching by default and NG0100
+		 * ExpressionChangedAfterItHasBeenCheckedError warnings keep surfacing (debugging aid).
+		 *
+		 * @return true if src/polyfills.ts changed
+		 */
+		public boolean ensureZoneJsPolyfill(StringOutputStream console)
+		{
+			boolean changed = false;
+			if (warExportModel == null && "true".equals(System.getProperty("ti.ng.includezonejs", "true")))
+			{
+				// The app runs zoneless, so a fresh source copy has an empty src/polyfills.ts (no zone.js).
+				// We add the zone.js import so async patching is restored.
+				try
+				{
+					File polyfills = new File(projectFolder, "src/polyfills.ts");
+					String polyfillsContents = polyfills.exists() ? FileUtils.readFileToString(polyfills, "UTF8") : "";
+					if (!polyfillsContents.contains("import 'zone.js'"))
+					{
+						writeConsole(console, "- adding zone.js import to src/polyfills.ts (developer run, ti.ng.includezonejs not false)");
+						changed = true;
+						FileUtils.write(polyfills, "import 'zone.js';\r\n" + polyfillsContents, "UTF8", false);
+					}
+				}
+				catch (IOException e)
+				{
+					writeErrorToConsoleAndLog(console, e, "Exception while adding zone.js to src/polyfills.ts: ");
+					// TODO should we return a WARNING status here as we do for other failures?
+				}
+			}
+			return changed;
+		}
+
+		/**
+		 * @return true if an install and build must run: there are packages to install, a source file changed, there is no dist folder yet
+		 *         or a clean install was requested
+		 */
+		public boolean needsInstallOrBuild(Set<String> packageToInstall, boolean sourceChanged)
+		{
+			return packageToInstall.size() > 0 || sourceChanged || !new File(projectFolder, "dist").exists() || cleanInstall.get();
+		}
+
+		/**
+		 * The install block: npm builds dist-public, pnpm/npm add, frozen ci for a pnpm WAR export, update and npm dedup, surrounded by the pnpm
+		 * build-script discovery demotion window (always closed in finally; approvals only run after a successful install).
+		 *
+		 * @return null if the block succeeded, otherwise the status the job must return
+		 */
+		public IStatus runInstallBlock(IProgressMonitor monitor, StringOutputStream console, Set<String> packageToInstall, boolean sourceChanged,
+			File copiedPublicTarball)
+		{
+			// SVY-21502: in pnpm mode, before the first package-mutating pnpm command, generate the
+			// solution-local pnpm-workspace.yaml from the KNOWN committed allow/deny lists so already-decided
+			// build scripts run. The install block runs inside a strictDepBuilds-demotion window and
+			// resolvePnpmBuildScriptApprovals (discover + prompt + rebuild) runs right after it.
+			boolean pnpmMode = env.isPnpmMode();
+			boolean installBlockSucceeded = false;
+			// SVY-21502 §3.10/§6: a headless WAR export that reaches an undecided name@version build script
+			// must FAIL LOUD; the approvals status is captured here (it runs in the finally below) and returned after the block.
+			IStatus approvalsStatus = Status.OK_STATUS;
+			if (pnpmMode)
+			{
+				env.applyKnownPnpmBuildApprovals(this.projectFolder, this.warExportModel, this.approvalsSolutionName, console);
+				RunPNPMCommand.beginBuildScriptDiscoveryDemotion();
+			}
+			// SVY-21502 §4.1/§4.3: in pnpm mode the internal @servoy/* tarballs were already copied from the
+			// shipped node/tarballs/ into .tarballs/ (before the checkPackage loop), so only npm mode still builds+packs dist-public.
+			boolean internalTarballsFromShipped = env.isPnpmMode();
+			try
+			{
+				// npm mode only: build the servoy/public dist. In pnpm mode the shipped public tarball is used.
+				if (!internalTarballsFromShipped && (!new File(this.projectFolder, "dist-public").exists() || sourceChanged))
+				{
+					IStatus status = buildPublicDist(monitor, console);
+					if (status != null) return status;
+				}
+
+				// SVY-21502 §3.11: a WAR export / headless CI build installs FROZEN against the committed pair;
+				// it must NOT run an unfrozen 'pnpm add'. The Developer path stays NON-frozen.
+				boolean frozenWarInstall = env.isPnpmMode() && this.warExportModel != null;
+				if (!frozenWarInstall)
+				{
+					IStatus status = addPackages(monitor, console, packageToInstall, copiedPublicTarball);
+					if (status != null) return status;
 				}
 				else
 				{
-					// first just set it now to 0 to start over.
-					scheduled.set(0);
-					checkPackages(false);
+					// WAR/CI path: pack dist-public (npm mode only), trim the components this war does not export via 'pnpm remove',
+					// then the frozen 'ci' below installs everything.
+					if (!env.isPnpmMode())
+					{
+						packPackage(new File(this.projectFolder, "dist-public"), "@servoy/public", console);
+					}
+					Status removeStatus = removeNonExportedComponents(monitor, console);
+					if (removeStatus != null) return removeStatus;
 				}
+				// A "clean install" (the menu action) only means "wipe the target and regenerate from scratch";
+				// it must NOT run a frozen 'pnpm install --frozen-lockfile'. (SVY-21502)
+				cleanInstall.set(false);
+				IStatus status = frozenWarInstall ? frozenInstall(monitor, console) : updatePackages(monitor, console);
+				if (status != null) return status;
+				// pnpm's global store + symlinked node_modules already deduplicate, so in pnpm mode neither the
+				// 'dedup' verb nor the hand-written folder-deletion pass runs.
+				if (!env.isPnpmMode())
+				{
+					status = npmDedup(monitor, console);
+					if (status != null) return status;
+				}
+				installBlockSucceeded = true;
+			}
+			finally
+			{
+				// SVY-21502: close the install-only strictDepBuilds demotion window. When the installs
+				// succeeded, discover the pending build scripts, prompt for the undecided ones (Developer UI only),
+				// persist, and 'pnpm rebuild' - all BEFORE the Angular build. If an install failed (early return), only the window is closed.
+				if (pnpmMode)
+				{
+					RunPNPMCommand.endBuildScriptDiscoveryDemotion();
+					if (installBlockSucceeded)
+					{
+						approvalsStatus = env.resolvePnpmBuildScriptApprovals(this.projectFolder, this.warExportModel, this.approvalsSolutionName, monitor,
+							console);
+					}
+				}
+			}
+
+			// SVY-21502 §6: in a headless WAR export a non-OK approvals status is a hard build failure.
+			if (pnpmMode && approvalsStatus != null && approvalsStatus.getSeverity() == IStatus.ERROR)
+			{
+				return approvalsStatus;
+			}
+			return null;
+		}
+
+		/** npm mode: builds the dist-public library. */
+		public IStatus buildPublicDist(IProgressMonitor monitor, StringOutputStream console)
+		{
+			IRunNPMCommand npmCommand = env.createCommand(this.projectFolder, Arrays.asList("run", "build_lib_debug_nowatch"));
+			return runCommandStep(npmCommand, monitor, console, "build_lib_debug_nowatch", "npm run build_lib_debug_nowatch",
+				"npm run build_lib_debug_nowatch");
+		}
+
+		/** Developer (and npm-mode) path: add the changed/new packages (unfrozen). */
+		public IStatus addPackages(IProgressMonitor monitor, StringOutputStream console, Set<String> packageToInstall, File copiedPublicTarball)
+		{
+			List<String> command = new ArrayList<>();
+			command.add("install");
+			packageToInstall.forEach(packageName -> command.add(packageName));
+			// also add the public api: in pnpm mode a directory dep does not bring its transitive deps, so
+			// install a @servoy/public tarball; in npm mode keep installing the directory as before.
+			if (env.isPnpmMode())
+			{
+				// SVY-21502: pass the tarball RELATIVE to the project folder (./.tarballs/<name>.tgz), not an absolute path,
+				// so the committed lockfile stays portable across machines/OSes.
+				command.add(relativeTarballSpecifier(copiedPublicTarball));
+			}
+			else
+			{
+				command.add("./dist-public/");
+			}
+			IRunNPMCommand npmCommand = env.createCommand(this.projectFolder, command);
+			return runCommandStep(npmCommand, monitor, console, "npm install [many packages that are needed]", "npm install [many packages that are needed]",
+				"npm install many, packages, that, we, need");
+		}
+
+		/** WAR/CI path in pnpm mode: install frozen against the committed package.json + lockfile pair. */
+		public IStatus frozenInstall(IProgressMonitor monitor, StringOutputStream console)
+		{
+			// SVY-21502: frozen, unless a nightly (-pre) web package changed; then only that one is re-resolved
+			IRunNPMCommand npmCommand = env.createCommand(this.projectFolder, Arrays.asList(changedNightlies.isEmpty() ? "ci" : "ci-unfrozen"));
+			return runCommandStep(npmCommand, monitor, console, "npm ci", "npm ci", "npm ci");
+		}
+
+		/** Runs 'update' (npm or pnpm) in the project folder. */
+		public IStatus updatePackages(IProgressMonitor monitor, StringOutputStream console)
+		{
+			IRunNPMCommand npmCommand = env.createCommand(this.projectFolder, Arrays.asList("update"));
+			return runCommandStep(npmCommand, monitor, console, "npm update", "npm update", "npm update");
+		}
+
+		/** npm mode only: 'npm dedup' followed by our own dedup against the root node_modules. */
+		public IStatus npmDedup(IProgressMonitor monitor, StringOutputStream console)
+		{
+			IRunNPMCommand npmCommand = env.createCommand(this.projectFolder, Arrays.asList("dedup"));
+			IStatus status = runCommandStep(npmCommand, monitor, console, "npm dedup", "npm dedup", "npm dedup");
+			if (status != null) return status;
+			long dedupTime = System.currentTimeMillis();
+			dedupAgainstRootNodeModules(this.projectFolder, console);
+			writeConsole(console,
+				"Node NPM dedup time (root node_modules/solution node_modules): " +
+					Math.round((System.currentTimeMillis() - dedupTime) / 1000) +
+					" s.");
+			return null;
+		}
+
+		/**
+		 * After npm dedup: deletes the packages in the solution node_modules that also exist in the root node_modules (the parent folder of
+		 * the project folder).
+		 */
+		public static void dedupAgainstRootNodeModules(File projectFolder, StringOutputStream console)
+		{
+			File projectNodeModules = new File(projectFolder, "node_modules");
+			File rootNodeModules = new File(projectFolder.getParentFile(), "node_modules");
+
+			File[] projectListing = projectNodeModules.listFiles();
+			File[] rootListing = rootNodeModules.listFiles();
+
+			BiFunction<File[], File[], SortedList<File>> filterFunction = (list1, list2) -> {
+				Comparator<File> comparator = (file1, file2) -> file1.getName().compareToIgnoreCase(file2.getName());
+				SortedList<File> result = new SortedList<File>(comparator, Arrays.asList(list1));
+				result.retainAll(Arrays.asList(list2));
+				return result;
+			};
+
+			if (projectListing != null && rootListing != null)
+			{
+				SortedList<File> mainDirs = filterFunction.apply(projectListing, rootListing);
+
+				mainDirs.forEach(file -> {
+					if (file.isDirectory())
+					{
+						if (new File(file, "package.json").exists())
+						{
+							// this is already the package (root of node modules, like rxjs)
+							try
+							{
+								Files.walkFileTree(file.toPath(), DeletePathVisitor.INSTANCE);
+							}
+							catch (IOException e)
+							{
+								WebPackagesListener.writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
+							}
+						}
+						else
+						{
+							// sub dirs are the package, this is a group dir like angular/aggrid
+							SortedList<File> nestedResult = filterFunction.apply(file.listFiles(), new File(rootNodeModules, file.getName()).listFiles());
+							nestedResult.forEach(nested -> {
+								if (nested.isDirectory() && new File(nested, "package.json").exists())
+								{
+									try
+									{
+										Files.walkFileTree(nested.toPath(), DeletePathVisitor.INSTANCE);
+									}
+									catch (IOException e)
+									{
+										WebPackagesListener.writeErrorToConsoleAndLog(console, e, "Exception while deleting node_modules: ");
+									}
+								}
+							});
+						}
+
+					}
+				});
+			}
+		}
+
+		/**
+		 * Copies the Angular locales and runs 'npm run <whatToRun>' (unless SOURCE_DEBUG).
+		 *
+		 * @return null if OK, otherwise the status the job must return
+		 */
+		public IStatus runAngularBuild(IProgressMonitor monitor, StringOutputStream console)
+		{
+			if (copyAngularLocales(this.projectFolder))
+			{
+				writeConsole(console, "- copying Angular locale files to locales/angular");
+			}
+			else
+			{
+				writeConsole(console, "- WARNING: Angular locale files not found or copy failed, skipping");
+			}
+
+			if (SOURCE_DEBUG)
+			{
+				writeConsole(console,
+					"SOURCE DEBUG enabled (ti.ng.source.debug=true); skipping npm run build_debug_nowatch; you need to run it manually YOURSELF. (npm install did happen)");
+				return null;
+			}
+			IRunNPMCommand npmCommand = env.createCommand(this.projectFolder, Arrays.asList("run", whatToRun));
+			return runCommandStep(npmCommand, monitor, console, "npm " + whatToRun, "npm run " + whatToRun, "npm run " + whatToRun);
+		}
+
+		private IStatus runCommandStep(IRunNPMCommand npmCommand, IProgressMonitor monitor, StringOutputStream console, String consoleExitName,
+			String statusName, String exceptionName)
+		{
+			try
+			{
+				npmCommand.runCommand(monitor);
+				if (npmCommand.getExitCode() != 0)
+				{
+					writeConsole(console, "\r\n" + "Unexpected EXIT_CODE calling " + consoleExitName + ": " + npmCommand.getExitCode() + "\r\n");
+					return new Status(IStatus.WARNING, getClass(), statusName + " EXIT_CODE was: " + npmCommand.getExitCode());
+				}
+			}
+			catch (Exception e)
+			{
+				writeErrorToConsoleAndLog(console, e, "Exception while running '" + exceptionName + "': ");
+				return new Status(IStatus.WARNING, getClass(), exceptionName + " failed: " + e.getMessage());
+			}
+			return null;
+		}
+
+		/**
+		 * Closes the console and reschedules when more than one request came in while running.
+		 */
+		public void finishAndReschedule(StringOutputStream console)
+		{
+			try
+			{
+				console.close();
+			}
+			catch (IOException e)
+			{
+			}
+			// remove the schedules 1 and start + 1 from the scheduled.
+			// if that is still higher then 0 we need to start another.
+			if (scheduled.addAndGet(-2) <= 0)
+			{
+				// this can be a WAR export, then it was 1 not 2 when running.
+				scheduled.set(0);
+			}
+			else
+			{
+				// first just set it now to 0 to start over.
+				scheduled.set(0);
+				checkPackages(false);
 			}
 		}
 
@@ -1358,7 +1528,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 */
 		private String resolveCssLibUrl(CssLib style)
 		{
-			return rewriteCssLibUrl(style.getUrl(), Activator.isPnpmMode(), defaultPackages);
+			return rewriteCssLibUrl(style.getUrl(), env.isPnpmMode(), defaultPackages);
 		}
 
 		private void writeConsole(StringOutputStream console, String message)
@@ -1374,7 +1544,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 
 		private void writeErrorToConsoleAndLog(StringOutputStream console, Exception e, String s)
 		{
-			Activator.getInstance().getLog().error(s, e);
+			env.log().error(s, e);
 			writeConsole(console, "\r\n" + s + e.getMessage() + "\r\n");
 		}
 
@@ -1400,7 +1570,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 */
 		private String resolveInstallSpecifier(File packageDir, String packageName, StringOutputStream console)
 		{
-			if (!Activator.isPnpmMode())
+			if (!env.isPnpmMode())
 			{
 				try
 				{
@@ -1439,7 +1609,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		private Status removeNonExportedComponents(IProgressMonitor monitor, StringOutputStream console)
 		{
 			changedNightlies.clear();
-			if (!Activator.isPnpmMode() || this.warExportModel == null) return null;
+			if (!env.isPnpmMode() || this.warExportModel == null) return null;
 			try
 			{
 				File packageJson = new File(this.projectFolder, PnpmBuildScriptConfig.PACKAGE_JSON);
@@ -1514,7 +1684,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				List<String> command = new ArrayList<>();
 				command.add("remove");
 				command.addAll(toRemove);
-				IRunNPMCommand removeCommand = Activator.getInstance().createNPMCommand(this.projectFolder, command);
+				IRunNPMCommand removeCommand = env.createCommand(this.projectFolder, command);
 				removeCommand.runCommand(monitor);
 				if (removeCommand.getExitCode() != 0)
 				{
@@ -1541,7 +1711,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 			catch (IOException | JSONException e)
 			{
-				Activator.getInstance().getLog().error("Could not read the version of packed web package " + tarball, e);
+				env.log().error("Could not read the version of packed web package " + tarball, e);
 				return null;
 			}
 		}
@@ -1563,7 +1733,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			String entry = "/node/projects/servoy-public/package.json";
 			try
 			{
-				java.net.URL url = Activator.getInstance().getBundle().getEntry(entry);
+				java.net.URL url = env.bundleEntry(entry);
 				if (url == null) return null;
 				String content = Utils.getURLContent(url);
 				if (content == null) return null;
@@ -1571,7 +1741,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 			catch (RuntimeException e)
 			{
-				Activator.getInstance().getLog().error("Error reading version for @servoy/public from " + entry, e);
+				env.log().error("Error reading version for @servoy/public from " + entry, e);
 				return null;
 			}
 		}
@@ -1590,7 +1760,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			File tarballsDir = new File(projectFolder, ".tarballs");
 			if (!tarballsDir.exists()) tarballsDir.mkdirs();
 			String tarballName = publicTarballName();
-			java.net.URL entry = Activator.getInstance().getBundle().getEntry("/node/tarballs/" + tarballName);
+			java.net.URL entry = env.bundleEntry("/node/tarballs/" + tarballName);
 			if (entry == null)
 			{
 				writeConsole(console, "- WARNING: shipped tarball /node/tarballs/" + tarballName + " was not found in the plugin");
@@ -1662,7 +1832,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				// all later output (including the final "Total time ..." line). Let the pack command use its own
 				// console stream instead (as every other runner call in this job does).
 				Set<String> before = listTgzNames(tarballsDir);
-				IRunNPMCommand packCommand = Activator.getInstance().createNPMCommand(packageDir,
+				IRunNPMCommand packCommand = env.createCommand(packageDir,
 					Arrays.asList("pack", "--pack-destination", tarballsDir.getCanonicalPath()));
 				packCommand.runCommand(new NullProgressMonitor());
 				if (packCommand.getExitCode() != 0)
@@ -1727,7 +1897,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 					digest.update(rel.getBytes(StandardCharsets.UTF_8));
 					digest.update((byte)0);
 					// line endings are normalized: a customer's git checkout (autocrlf) must give the same hash
-				digest.update(DeterministicTarball.normalizeContent(Files.readAllBytes(f.toPath())));
+					digest.update(DeterministicTarball.normalizeContent(Files.readAllBytes(f.toPath())));
 					digest.update((byte)0);
 				}
 				byte[] hash = digest.digest();
@@ -1739,7 +1909,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			}
 			catch (Exception e)
 			{
-				writeErrorToConsoleAndLog(Activator.getInstance().getConsole().outputStream(), e,
+				writeErrorToConsoleAndLog(env.console(), e,
 					"Exception computing content hash for " + dir + "; falling back to a time-based suffix: ");
 				// fall back rather than fail the build; a time-based suffix still works within a single workspace,
 				// it only loses CI-checkout stability.
@@ -1823,12 +1993,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 */
 		private boolean isFrozenWarPnpm()
 		{
-			return Activator.isPnpmMode() && this.warExportModel != null;
+			return env.isPnpmMode() && this.warExportModel != null;
 		}
 
 		private boolean isAlreadyInstalled(String installedVersion, String dirSuffix, String packageName, File packageDir)
 		{
-			if (Activator.isPnpmMode())
+			if (env.isPnpmMode())
 			{
 				if (installedVersion == null || packageDir == null) return false;
 				String sanitized = packageName.replace("@", "").replace('/', '-');
@@ -1871,7 +2041,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							// node_modules would never be read); their package.json dependencies are already present in
 							// the solution node_modules via the root package.json + the external component packages.
 							// In npm mode keep the historical directory install so the deps are pulled in.
-							if (Activator.isPnpmMode())
+							if (env.isPnpmMode())
 							{
 								return null;
 							}
@@ -2031,7 +2201,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 									}
 
 									String installedVersion = dependencies.optString(packageName);
-									if (packageJsonChanged || isFrozenWarPnpm() || !isAlreadyInstalled(installedVersion, "packages/" + packageName, packageName, new File(location)))
+									if (packageJsonChanged || isFrozenWarPnpm() ||
+										!isAlreadyInstalled(installedVersion, "packages/" + packageName, packageName, new File(location)))
 									{
 										return resolveInstallSpecifier(new File(location), packageName, console);
 									}
@@ -2420,7 +2591,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	/**
 	 * Builds the argument list for the bundled precompress-war.mjs script (the script path itself is not part of it).
 	 */
-	static List<String> buildPrecompressArgs(File warDir, boolean brotli, boolean gzip)
+	public static List<String> buildPrecompressArgs(File warDir, boolean brotli, boolean gzip)
 	{
 		List<String> args = new ArrayList<>();
 		try

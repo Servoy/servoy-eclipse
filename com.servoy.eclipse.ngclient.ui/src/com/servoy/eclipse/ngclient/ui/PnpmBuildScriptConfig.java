@@ -286,7 +286,7 @@ public class PnpmBuildScriptConfig
 	 * @param content the full text of <code>node_modules/.modules.yaml</code> (may be <code>null</code>)
 	 * @return the discovered <code>name@version</code> entries, in file order (possibly empty, never <code>null</code>)
 	 */
-	static Set<String> parseModulesYamlIgnoredBuilds(String content)
+	public static Set<String> parseModulesYamlIgnoredBuilds(String content)
 	{
 		Set<String> result = new LinkedHashSet<>();
 		if (content == null || content.isBlank()) return result;
@@ -384,7 +384,7 @@ public class PnpmBuildScriptConfig
 	 * @param outputLines captured pnpm console output lines (may be <code>null</code>)
 	 * @return the discovered <code>name@version</code> entries (possibly empty, never <code>null</code>)
 	 */
-	static Set<String> parseIgnoredBuildsErrorLine(List<String> outputLines)
+	public static Set<String> parseIgnoredBuildsErrorLine(List<String> outputLines)
 	{
 		Set<String> result = new LinkedHashSet<>();
 		if (outputLines == null) return result;

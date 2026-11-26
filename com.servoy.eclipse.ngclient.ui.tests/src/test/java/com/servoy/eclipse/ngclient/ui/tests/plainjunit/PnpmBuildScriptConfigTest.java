@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -205,32 +203,8 @@ class PnpmBuildScriptConfigTest {
 
 	@Nested
 	class ParseModulesYamlIgnoredBuilds {
-		private static Method parseMethod;
-
-		static {
-			try {
-				parseMethod = PnpmBuildScriptConfig.class.getDeclaredMethod("parseModulesYamlIgnoredBuilds",
-						String.class);
-				parseMethod.setAccessible(true);
-			} catch (NoSuchMethodException e) {
-				throw new ExceptionInInitializerError(e);
-			}
-		}
-
-		@SuppressWarnings("unchecked")
 		private static Set<String> parse(String content) {
-			try {
-				return (Set<String>) parseMethod.invoke(null, content);
-			} catch (IllegalAccessException | IllegalArgumentException e) {
-				throw new RuntimeException(e);
-			} catch (InvocationTargetException e) {
-				Throwable cause = e.getCause();
-				if (cause instanceof RuntimeException re)
-					throw re;
-				if (cause instanceof Error err)
-					throw err;
-				throw new RuntimeException(cause);
-			}
+			return PnpmBuildScriptConfig.parseModulesYamlIgnoredBuilds(content);
 		}
 
 		@Test
@@ -368,31 +342,8 @@ class PnpmBuildScriptConfigTest {
 
 	@Nested
 	class ParseErrorLine {
-		private static Method parseMethod;
-
-		static {
-			try {
-				parseMethod = PnpmBuildScriptConfig.class.getDeclaredMethod("parseIgnoredBuildsErrorLine", List.class);
-				parseMethod.setAccessible(true);
-			} catch (NoSuchMethodException e) {
-				throw new ExceptionInInitializerError(e);
-			}
-		}
-
-		@SuppressWarnings("unchecked")
 		private static Set<String> parse(List<String> lines) {
-			try {
-				return (Set<String>) parseMethod.invoke(null, lines);
-			} catch (IllegalAccessException | IllegalArgumentException e) {
-				throw new RuntimeException(e);
-			} catch (InvocationTargetException e) {
-				Throwable cause = e.getCause();
-				if (cause instanceof RuntimeException re)
-					throw re;
-				if (cause instanceof Error err)
-					throw err;
-				throw new RuntimeException(cause);
-			}
+			return PnpmBuildScriptConfig.parseIgnoredBuildsErrorLine(lines);
 		}
 
 		@Test

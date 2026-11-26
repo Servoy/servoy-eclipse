@@ -20,7 +20,6 @@ package com.servoy.eclipse.ngclient.ui.tests.plainjunit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -38,12 +37,8 @@ class WebPackagesListenerPrecompressArgsTest {
 	@TempDir
 	Path tmp;
 
-	@SuppressWarnings("unchecked")
 	private static List<String> build(File dir, boolean brotli, boolean gzip) throws Exception {
-		Method m = WebPackagesListener.class.getDeclaredMethod("buildPrecompressArgs", File.class, boolean.class,
-				boolean.class);
-		m.setAccessible(true);
-		return (List<String>) m.invoke(null, dir, brotli, gzip);
+		return WebPackagesListener.buildPrecompressArgs(dir, brotli, gzip);
 	}
 
 	@Test

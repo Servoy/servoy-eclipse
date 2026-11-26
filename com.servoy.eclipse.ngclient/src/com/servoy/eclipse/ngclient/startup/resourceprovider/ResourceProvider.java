@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
@@ -88,7 +89,15 @@ public class ResourceProvider implements Filter
 	private static final Map<String, List<IPackageReader>> serviceReaders = new ConcurrentHashMap<>();
 	private static final List<String> removePackageNames = new ArrayList<String>();
 
-	private final File templatesDir = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "server/webapps/ROOT/templates");
+	// seams (public so tests can replace them); the defaults delegate to the real bundle/registry lookups
+	/** Test seam: supplies the ngclient bundle; replaceable by tests. */
+	public static Supplier<Bundle> nClientBundleSupplier = Activator::getNClientBundle;
+	/** Test seam: supplies the sablo bundle; replaceable by tests. */
+	public static Supplier<Bundle> sabloBundleSupplier = Activator::getSaboBundle;
+	/** Test seam: supplies the Servoy application server directory; replaceable by tests. */
+	public static Supplier<String> servoyApplicationServerDirSupplier = () -> ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
+
+	private final File templatesDir = new File(servoyApplicationServerDirSupplier.get(), "server/webapps/ROOT/templates");
 
 	private static String getName(IPackageReader reader)
 	{
@@ -211,7 +220,7 @@ public class ResourceProvider implements Filter
 	public static Set<String> getDefaultPackageNames()
 	{
 		Set<String> result = new HashSet<String>();
-		Enumeration<String> paths = Activator.getNClientBundle().getEntryPaths("/war/");
+		Enumeration<String> paths = nClientBundleSupplier.get().getEntryPaths("/war/");
 		while (paths.hasMoreElements())
 		{
 			String name = paths.nextElement().replace("war/", "");
@@ -242,10 +251,10 @@ public class ResourceProvider implements Filter
 		List<IPackageReader> componentPackages = flatten(componentReaders.values());
 		List<IPackageReader> servicePackages = flatten(serviceReaders.values());
 
-		for (URL url : Utils.iterate(Activator.getNClientBundle().findEntries("/war/", "MANIFEST.MF", true)))
+		for (URL url : Utils.iterate(nClientBundleSupplier.get().findEntries("/war/", "MANIFEST.MF", true)))
 		{
 			String pathPrefix = url.getPath().substring(0, url.getPath().indexOf("/META-INF/MANIFEST.MF"));
-			IPackageReader reader = new BundlePackageReader(Activator.getNClientBundle(), url, pathPrefix);
+			IPackageReader reader = new BundlePackageReader(nClientBundleSupplier.get(), url, pathPrefix);
 			if (removePackageNames.contains(reader.getPackageName())) continue;
 			if (pathPrefix.endsWith("services"))
 			{
@@ -258,7 +267,7 @@ public class ResourceProvider implements Filter
 		}
 
 		// Add sablo services and components
-		Bundle sabloBundle = Activator.getSaboBundle();
+		Bundle sabloBundle = sabloBundleSupplier.get();
 		BundlePackageReader sabloReader = new BundlePackageReader(sabloBundle, sabloBundle.getEntry("META-INF/MANIFEST.MF"), "META-INF/resources");
 		servicePackages.add(sabloReader);
 		componentPackages.add(sabloReader);
@@ -296,7 +305,7 @@ public class ResourceProvider implements Filter
 					url = templateFile.toURI().toURL();
 				}
 			}
-			if (url == null) url = computeURL(normalizedPath.toString().replace('\\', '/'), Activator.getNClientBundle());
+			if (url == null) url = computeURL(normalizedPath.toString().replace('\\', '/'), nClientBundleSupplier.get());
 
 			if (url != null)
 			{
@@ -381,7 +390,7 @@ public class ResourceProvider implements Filter
 		}
 		if (url == null)
 		{
-			url = Activator.getSaboBundle().getEntry("/META-INF/resources/" + (pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo));
+			url = sabloBundleSupplier.get().getEntry("/META-INF/resources/" + (pathInfo.startsWith("/") ? pathInfo.substring(1) : pathInfo));
 		}
 		if (url == null)
 		{

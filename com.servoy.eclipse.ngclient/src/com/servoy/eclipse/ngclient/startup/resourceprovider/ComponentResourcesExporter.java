@@ -27,8 +27,6 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-import com.servoy.eclipse.ngclient.startup.Activator;
-
 /**
  * Used in war Exporter to copy resources.
  * @author emera
@@ -45,7 +43,7 @@ public class ComponentResourcesExporter
 	public static void copyDefaultComponentsAndServices(File tmpWarDir, Set<String> exportedPackages,
 		Map<String, File> allTemplates) throws IOException
 	{
-		copy(Activator.getNClientBundle().getEntryPaths("/war/"), tmpWarDir, exportedPackages, allTemplates);
+		copy(ResourceProvider.nClientBundleSupplier.get().getEntryPaths("/war/"), tmpWarDir, exportedPackages, allTemplates);
 	}
 
 	/**
@@ -55,7 +53,7 @@ public class ComponentResourcesExporter
 	public static String getDefaultComponentDirectoryNames(Set<String> exportedPackages)
 	{
 		StringBuilder locations = new StringBuilder();
-		Enumeration<String> paths = Activator.getNClientBundle().getEntryPaths("/war/");
+		Enumeration<String> paths = ResourceProvider.nClientBundleSupplier.get().getEntryPaths("/war/");
 		while (paths.hasMoreElements())
 		{
 			String name = paths.nextElement().replace("war/", "");
@@ -78,7 +76,7 @@ public class ComponentResourcesExporter
 	public static String getDefaultServicesDirectoryNames(Set<String> exportedPackages)
 	{
 		StringBuilder locations = new StringBuilder();
-		Enumeration<String> paths = Activator.getNClientBundle().getEntryPaths("/war/");
+		Enumeration<String> paths = ResourceProvider.nClientBundleSupplier.get().getEntryPaths("/war/");
 		while (paths.hasMoreElements())
 		{
 			String name = paths.nextElement().replace("war/", "");
@@ -114,12 +112,12 @@ public class ComponentResourcesExporter
 						exportedPackages.contains(packageName.split("/")[0]))
 					{
 						File targetDir = new File(destDir, FilenameUtils.getName(path.substring(0, path.lastIndexOf("/"))));
-						copy(Activator.getNClientBundle().getEntryPaths(path), targetDir, exportedPackages, allTemplates);
+						copy(ResourceProvider.nClientBundleSupplier.get().getEntryPaths(path), targetDir, exportedPackages, allTemplates);
 					}
 				}
 				else
 				{
-					URL entry = Activator.getNClientBundle().getEntry(path);
+					URL entry = ResourceProvider.nClientBundleSupplier.get().getEntry(path);
 					File newFile = new File(destDir, FilenameUtils.getName(path));
 					if (!path.startsWith("war/templates") || !newFile.exists())
 					{

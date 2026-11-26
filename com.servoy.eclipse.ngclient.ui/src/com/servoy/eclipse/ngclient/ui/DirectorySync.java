@@ -225,7 +225,7 @@ public class DirectorySync
 		return true;
 	}
 
-	static void createFolder(File folder)
+	public static void createFolder(File folder)
 	{
 		if (!folder.exists())
 		{
@@ -233,7 +233,7 @@ public class DirectorySync
 		}
 	}
 
-	static void copyOrCreateFile(String filename, File nodeFolder, InputStream is) throws IOException
+	public static void copyOrCreateFile(String filename, File nodeFolder, InputStream is) throws IOException
 	{
 		File file = new File(nodeFolder, filename);
 		FileUtils.copyInputStreamToFile(is, file);

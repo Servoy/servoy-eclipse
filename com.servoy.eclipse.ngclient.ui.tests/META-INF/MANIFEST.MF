@@ -13,7 +13,8 @@ Require-Bundle: com.servoy.eclipse.core.tests,
  com.servoy.eclipse.model,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
- sablo
+ sablo,
+ org.tukaani.xz
 Import-Package: org.junit.jupiter.api;version="[6.0.0,7.0.0)",
  org.junit.jupiter.api.extension;version="[6.0.0,7.0.0)",
  org.junit.jupiter.api.function;version="[6.0.0,7.0.0)",
@@ -21,6 +22,10 @@ Import-Package: org.junit.jupiter.api;version="[6.0.0,7.0.0)",
  org.junit.jupiter.params;version="[6.0.0,7.0.0)",
  org.junit.jupiter.params.provider;version="[6.0.0,7.0.0)",
  org.junit.platform.commons;version="[6.0.0,7.0.0)",
- org.junit.platform.launcher;version="[6.0.0,7.0.0)"
+ org.junit.platform.launcher;version="[6.0.0,7.0.0)",
+ jakarta.servlet;version="[6.1.0,8.0.0)",
+ jakarta.servlet.http;version="[6.1.0,8.0.0)",
+ org.mockito,
+ org.mockito.stubbing
 Automatic-Module-Name: com.servoy.eclipse.ngclient.ui.tests
 Export-Package: com.servoy.eclipse.ngclient.ui.tests.integrationpde

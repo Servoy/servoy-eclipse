@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,39 +43,9 @@ class RunPNPMCommandTest
 	 */
 	private static final String UNBLOCK_FLAG = "--config.strictDepBuilds=false";
 
-	private static Method translateMethod;
-
-	static
-	{
-		try
-		{
-			translateMethod = RunPNPMCommand.class.getDeclaredMethod("translateToPnpmArguments", List.class);
-			translateMethod.setAccessible(true);
-		}
-		catch (NoSuchMethodException e)
-		{
-			throw new ExceptionInInitializerError(e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
 	private static List<String> translate(List<String> commands)
 	{
-		try
-		{
-			return (List<String>)translateMethod.invoke(null, commands);
-		}
-		catch (IllegalAccessException | IllegalArgumentException e)
-		{
-			throw new RuntimeException(e);
-		}
-		catch (InvocationTargetException e)
-		{
-			Throwable cause = e.getCause();
-			if (cause instanceof RuntimeException re) throw re;
-			if (cause instanceof Error err) throw err;
-			throw new RuntimeException(cause);
-		}
+		return RunPNPMCommand.translateToPnpmArguments(commands);
 	}
 
 	@Nested
@@ -329,60 +297,14 @@ class RunPNPMCommandTest
 	@Nested
 	class StoreDirCrossVolume
 	{
-		private static Method volumeRootMethod;
-		private static Method fileStoreMethod;
-
-		static
-		{
-			try
-			{
-				volumeRootMethod = RunPNPMCommand.class.getDeclaredMethod("getVolumeRoot", java.io.File.class);
-				volumeRootMethod.setAccessible(true);
-				fileStoreMethod = RunPNPMCommand.class.getDeclaredMethod("getFileStoreOfNearestExisting", java.io.File.class);
-				fileStoreMethod.setAccessible(true);
-			}
-			catch (NoSuchMethodException e)
-			{
-				throw new ExceptionInInitializerError(e);
-			}
-		}
-
 		private static java.io.File volumeRoot(java.io.File f)
 		{
-			try
-			{
-				return (java.io.File)volumeRootMethod.invoke(null, f);
-			}
-			catch (IllegalAccessException | IllegalArgumentException e)
-			{
-				throw new RuntimeException(e);
-			}
-			catch (InvocationTargetException e)
-			{
-				Throwable c = e.getCause();
-				if (c instanceof RuntimeException re) throw re;
-				if (c instanceof Error err) throw err;
-				throw new RuntimeException(c);
-			}
+			return RunPNPMCommand.getVolumeRoot(f);
 		}
 
 		private static java.nio.file.FileStore fileStore(java.io.File f)
 		{
-			try
-			{
-				return (java.nio.file.FileStore)fileStoreMethod.invoke(null, f);
-			}
-			catch (IllegalAccessException | IllegalArgumentException e)
-			{
-				throw new RuntimeException(e);
-			}
-			catch (InvocationTargetException e)
-			{
-				Throwable c = e.getCause();
-				if (c instanceof RuntimeException re) throw re;
-				if (c instanceof Error err) throw err;
-				throw new RuntimeException(c);
-			}
+			return RunPNPMCommand.getFileStoreOfNearestExisting(f);
 		}
 
 		@Test

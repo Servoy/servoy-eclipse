@@ -356,7 +356,23 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	{
 		try
 		{
-			File defaultStore = resolvePnpmDefaultStoreDir();
+			return computeStoreDirArgIfCrossVolume(targetFolder, resolvePnpmDefaultStoreDir());
+		}
+		catch (RuntimeException e)
+		{
+			// never let store-dir detection break a build; fall back to pnpm's default store
+			return null;
+		}
+	}
+
+	/**
+	 * Same as {@link #computeStoreDirArgIfCrossVolume(File)} but with the already resolved default pnpm store
+	 * directory passed in, so it can be called without running pnpm.
+	 */
+	public static String computeStoreDirArgIfCrossVolume(File targetFolder, File defaultStore)
+	{
+		try
+		{
 			if (targetFolder == null || defaultStore == null) return null;
 
 			// Decide whether an override is needed by comparing the actual FILESYSTEM VOLUMES, not drive letters.
@@ -414,6 +430,24 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	{
 		try
 		{
+			if (storeDirArg != null) return computeHardlinkImportMethodArgIfSameVolume(targetFolder, storeDirArg, null);
+			return computeHardlinkImportMethodArgIfSameVolume(targetFolder, null, resolvePnpmDefaultStoreDir());
+		}
+		catch (RuntimeException e)
+		{
+			// never let import-method detection break a build; fall back to pnpm's default
+			return null;
+		}
+	}
+
+	/**
+	 * Same as {@link #computeHardlinkImportMethodArgIfSameVolume(File, String)} but with the already resolved default
+	 * pnpm store directory passed in (only consulted when <code>storeDirArg</code> is <code>null</code>).
+	 */
+	public static String computeHardlinkImportMethodArgIfSameVolume(File targetFolder, String storeDirArg, File defaultStore)
+	{
+		try
+		{
 			// Cross-volume case already handled: the per-drive store-dir override lives on the target's own
 			// volume, so a hardlink from node_modules into that store stays within one volume.
 			if (storeDirArg != null)
@@ -425,7 +459,6 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 			// a volume (hardlink safe), or because the volume relationship could not be determined (store
 			// resolution failed - then stay on pnpm's default). Re-check explicitly so an undetermined volume does
 			// NOT force a possibly-cross-volume hardlink.
-			File defaultStore = resolvePnpmDefaultStoreDir();
 			if (targetFolder == null || defaultStore == null) return null;
 
 			FileStore targetStore = getFileStoreOfNearestExisting(targetFolder);
@@ -448,7 +481,7 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	 *         on, or {@code null} if it cannot be determined. Walking up to an existing ancestor is needed because
 	 *         the target folder may not exist yet at the time of the first command.
 	 */
-	private static FileStore getFileStoreOfNearestExisting(File file)
+	public static FileStore getFileStoreOfNearestExisting(File file)
 	{
 		File probe = file.getAbsoluteFile();
 		while (probe != null && !probe.exists())
@@ -470,7 +503,7 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	 * @return the filesystem root that {@code file} lives on (the drive root on Windows, e.g. {@code D:\}; the
 	 *         top-level mount root elsewhere), or {@code null} if it cannot be determined.
 	 */
-	private static File getVolumeRoot(File file)
+	public static File getVolumeRoot(File file)
 	{
 		if (file == null) return null;
 		File abs = file.getAbsoluteFile();
@@ -581,7 +614,7 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	 *         fallback for the volume check when <code>pnpm store path</code> cannot be queried. Returns
 	 *         <code>null</code> if the user home is unknown.
 	 */
-	private static File getDefaultPnpmStoreDir()
+	public static File getDefaultPnpmStoreDir()
 	{
 		String userHome = System.getProperty("user.home");
 		if (userHome == null) return null;
@@ -599,7 +632,7 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 	 *
 	 * @return the translated pnpm arguments, or <code>null</code> if the command is a no-op in pnpm mode (dedup).
 	 */
-	private static List<String> translateToPnpmArguments(List<String> commands)
+	public static List<String> translateToPnpmArguments(List<String> commands)
 	{
 		if (commands == null || commands.isEmpty()) return new ArrayList<>();
 

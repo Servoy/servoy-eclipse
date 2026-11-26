@@ -14,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -135,7 +135,7 @@ public class Activator extends Plugin
 		}
 	}
 
-	private String getSystemOrEvironmentProperty(String propertyName)
+	public static String getSystemOrEvironmentProperty(String propertyName)
 	{
 		String value = System.getProperty(propertyName);
 		if (value == null)
@@ -185,34 +185,10 @@ public class Activator extends Plugin
 				{
 					IExtensionRegistry registry = Platform.getExtensionRegistry();
 					IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
-					File node = null;
-					File npm = null;
-					File pnpm = null;
-					if (cf.length > 0)
-					{
-						node = extractPath(cf[0], "nodePath", true);
-						node.setExecutable(true);
-						npm = extractPath(cf[0], "npmPath", false);
-						// in pnpm mode also extract the bundled pnpm binary next to node so pnpm can find the bundled node via PATH;
-						// pnpm uses its own extraction marker so its extract/skip decision is independent of node's .fullygenerated
-						if (isPnpmMode() && cf[0].getAttribute("pnpmPath") != null)
-						{
-							pnpm = extractPnpmPath(cf[0]);
-							if (pnpm != null)
-							{
-								pnpm.setExecutable(true);
-							}
-						}
-					}
-					else
-					{
-						ServoyLog.logWarning("No Node.js plugin found, npm commands will be unavailable", null);
-					}
-					// an explicitly configured servoy.pnpmPath wins over the bundled pnpm, also when node/npm are bundled
-					pnpm = WebPackagesListener.preferConfiguredPnpm(pnpmPth, pnpm);
-					nodePath = node;
-					npmPath = npm;
-					pnpmPath = pnpm;
+					File[] selected = selectAndExtractRuntime(cf, isPnpmMode(), pnpmPth);
+					nodePath = selected[0];
+					npmPath = selected[1];
+					pnpmPath = selected[2];
 					countDown();
 					return Status.OK_STATUS;
 				}
@@ -272,6 +248,43 @@ public class Activator extends Plugin
 		return pnpmPath;
 	}
 
+	/**
+	 * Selection logic of the node extraction job: with no <code>nodejs</code> extension nothing is bundled; otherwise node and npm are
+	 * extracted from the first element, pnpm only in pnpm mode when the element declares a <code>pnpmPath</code>, and an explicitly
+	 * configured pnpm path always wins over the bundled one.
+	 *
+	 * @return an array of {node, npm, pnpm}, each possibly <code>null</code>
+	 */
+	public static File[] selectAndExtractRuntime(IConfigurationElement[] cf, boolean pnpmMode, String configuredPnpmPath)
+	{
+		File node = null;
+		File npm = null;
+		File pnpm = null;
+		if (cf.length > 0)
+		{
+			node = extractPath(cf[0], "nodePath", true);
+			node.setExecutable(true);
+			npm = extractPath(cf[0], "npmPath", false);
+			// in pnpm mode also extract the bundled pnpm binary next to node so pnpm can find the bundled node via PATH;
+			// pnpm uses its own extraction marker so its extract/skip decision is independent of node's .fullygenerated
+			if (pnpmMode && cf[0].getAttribute("pnpmPath") != null)
+			{
+				pnpm = extractPnpmPath(cf[0]);
+				if (pnpm != null)
+				{
+					pnpm.setExecutable(true);
+				}
+			}
+		}
+		else
+		{
+			ServoyLog.logWarning("No Node.js plugin found, npm commands will be unavailable", null);
+		}
+		// an explicitly configured servoy.pnpmPath wins over the bundled pnpm, also when node/npm are bundled
+		pnpm = WebPackagesListener.preferConfiguredPnpm(configuredPnpmPath, pnpm);
+		return new File[] { node, npm, pnpm };
+	}
+
 	private static File extractPath(IConfigurationElement element, String attribute, boolean deletePreviousPaths)
 	{
 		return extractPath(element, attribute, "archive", deletePreviousPaths);
@@ -281,14 +294,35 @@ public class Activator extends Plugin
 	{
 		String pluginId = element.getNamespaceIdentifier();
 		String path = element.getAttribute(attribute);
-		IPath stateLocation = plugin.getStateLocation();
-		File baseDir = stateLocation.toFile();
+		File baseDir = plugin.getStateLocation().toFile();
+		File file = new File(baseDir, path);
+		File fullyGenerated = new File(baseDir, ".fullygenerated");
+		URL archiveUrl = null;
+		if (!file.exists() || !fullyGenerated.exists())
+		{
+			String archive = element.getAttribute(archiveAttribute);
+			archiveUrl = Platform.getBundle(pluginId).getResource(archive);
+			if (archiveUrl == null)
+			{
+				getInstance().getLog().info("couldn't create nodejs install from plugin " + pluginId + " and archive: " + archive);
+				return null;
+			}
+		}
+		return extractPath(baseDir, archiveUrl, path, deletePreviousPaths, getInstance().getLog());
+	}
+
+	/**
+	 * Extracts the archive at the given url into baseDir (unless <code>path</code> is already there and the <code>.fullygenerated</code>
+	 * marker exists).
+	 *
+	 * @return the extracted file (baseDir/path), or <code>null</code> if an extraction was needed but the archive url is <code>null</code>
+	 */
+	public static File extractPath(File baseDir, URL archiveUrl, String path, boolean deletePreviousPaths, ILog log)
+	{
 		File file = new File(baseDir, path);
 		File fullyGenerated = new File(baseDir, ".fullygenerated");
 		if (!file.exists() || !fullyGenerated.exists())
 		{
-			String archive = element.getAttribute(archiveAttribute);
-			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
 			if (archiveUrl != null)
 			{
 				if (deletePreviousPaths || !fullyGenerated.exists())
@@ -308,7 +342,7 @@ public class Activator extends Plugin
 							}
 							catch (IOException e)
 							{
-								getInstance().getLog().error("Error deleting old node install path:" + oldDir.getAbsolutePath(), e);
+								log.error("Error deleting old node install path:" + oldDir.getAbsolutePath(), e);
 							}
 						}
 					}
@@ -334,12 +368,12 @@ public class Activator extends Plugin
 				}
 				catch (IOException e)
 				{
-					getInstance().getLog().error("Error extracting path from " + archiveUrl, e);
+					log.error("Error extracting path from " + archiveUrl, e);
 				}
 			}
 			else
 			{
-				getInstance().getLog().info("couldn't create nodejs install from plugin " + pluginId + " and archive: " + archive);
+				log.info("couldn't create nodejs install from archive: " + archiveUrl);
 				return null;
 			}
 		}
@@ -373,8 +407,7 @@ public class Activator extends Plugin
 	{
 		String pluginId = element.getNamespaceIdentifier();
 		String path = element.getAttribute("pnpmPath");
-		IPath stateLocation = plugin.getStateLocation();
-		File baseDir = stateLocation.toFile();
+		File baseDir = plugin.getStateLocation().toFile();
 
 		// The pnpm version identity: the contributing bundle's version bumps whenever the shipped pnpm payload
 		// changes, so it is a stable token for "which pnpm is on disk". An optional pnpmVersion attribute may
@@ -385,19 +418,46 @@ public class Activator extends Plugin
 			currentToken = Platform.getBundle(pluginId).getVersion().toString();
 		}
 
+		URL archiveUrl = null;
+		if (pnpmNeedsExtract(baseDir, path, currentToken))
+		{
+			String archive = element.getAttribute("pnpmArchive");
+			archiveUrl = Platform.getBundle(pluginId).getResource(archive);
+			if (archiveUrl == null)
+			{
+				getInstance().getLog().info("couldn't extract pnpm from plugin " + pluginId + " and archive: " + archive);
+				return null;
+			}
+		}
+		return extractPnpmPath(baseDir, archiveUrl, path, currentToken, getInstance().getLog());
+	}
+
+	private static boolean pnpmNeedsExtract(File baseDir, String path, String currentToken)
+	{
+		File file = new File(new File(baseDir, "pnpm-" + currentToken), path);
+		File pnpmGenerated = new File(baseDir, ".pnpmgenerated");
+		return !file.exists() || !pnpmGenerated.exists() || !currentToken.equals(readPnpmMarkerToken(pnpmGenerated));
+	}
+
+	/**
+	 * Extracts the pnpm archive into <code>baseDir/pnpm-&lt;currentToken&gt;/</code> when needed (binary missing, marker missing or marker
+	 * token different), removing stale <code>pnpm-*</code> dirs first. Never touches the node install or the target folder.
+	 *
+	 * @return the pnpm binary file inside the version sub-dir, or <code>null</code> if an extraction was needed but the archive url is <code>null</code>
+	 */
+	public static File extractPnpmPath(File baseDir, URL archiveUrl, String path, String currentToken, ILog log)
+	{
 		// extract into a version-qualified sub-dir (e.g. pnpm-12.5.1/) so pnpm and its dist/ stay out of the
 		// state-location root that holds the TiNG target/ folder
 		File pnpmDir = new File(baseDir, "pnpm-" + currentToken);
 		File file = new File(pnpmDir, path);
 		File pnpmGenerated = new File(baseDir, ".pnpmgenerated");
 
-		String storedToken = readPnpmMarkerToken(pnpmGenerated);
+		String storedToken = readPnpmMarkerToken(pnpmGenerated, log);
 
 		boolean needsExtract = !file.exists() || !pnpmGenerated.exists() || !currentToken.equals(storedToken);
 		if (needsExtract)
 		{
-			String archive = element.getAttribute("pnpmArchive");
-			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
 			if (archiveUrl != null)
 			{
 				// clean up the previous pnpm version dir (targeted: only our own pnpm-* dirs, never node dirs or
@@ -414,7 +474,7 @@ public class Activator extends Plugin
 						}
 						catch (IOException e)
 						{
-							getInstance().getLog().error("Error deleting old pnpm dir: " + stale.getAbsolutePath(), e);
+							log.error("Error deleting old pnpm dir: " + stale.getAbsolutePath(), e);
 						}
 					}
 				}
@@ -442,12 +502,12 @@ public class Activator extends Plugin
 				}
 				catch (IOException e)
 				{
-					getInstance().getLog().error("Error extracting pnpm from " + archiveUrl, e);
+					log.error("Error extracting pnpm from " + archiveUrl, e);
 				}
 			}
 			else
 			{
-				getInstance().getLog().info("couldn't extract pnpm from plugin " + pluginId + " and archive: " + archive);
+				log.info("couldn't extract pnpm from archive: " + archiveUrl);
 				return null;
 			}
 		}
@@ -458,7 +518,12 @@ public class Activator extends Plugin
 	 * Reads the version token previously stored in the <code>.pnpmgenerated</code> marker. A missing, empty or
 	 * unreadable marker yields <code>null</code> (treated as "no token" -> re-extract).
 	 */
-	private static String readPnpmMarkerToken(File pnpmGenerated)
+	public static String readPnpmMarkerToken(File pnpmGenerated)
+	{
+		return readPnpmMarkerToken(pnpmGenerated, getInstance() != null ? getInstance().getLog() : null);
+	}
+
+	private static String readPnpmMarkerToken(File pnpmGenerated, ILog log)
 	{
 		if (!pnpmGenerated.exists())
 		{
@@ -471,7 +536,7 @@ public class Activator extends Plugin
 		}
 		catch (IOException e)
 		{
-			getInstance().getLog().error("Error reading pnpm marker: " + pnpmGenerated.getAbsolutePath(), e);
+			if (log != null) log.error("Error reading pnpm marker: " + pnpmGenerated.getAbsolutePath(), e);
 			return null;
 		}
 	}

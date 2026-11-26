@@ -314,7 +314,7 @@ public class NodeFolderCreatorJob extends Job
 		return jobStatus;
 	}
 
-	private void writeErrorToConsoleAndLog(StringOutputStream console, Exception e, String s)
+	private static void writeErrorToConsoleAndLog(StringOutputStream console, Exception e, String s)
 	{
 		Activator.getInstance().getLog().error(s, e);
 		writeConsole(console, "\r\n" + s + e.getMessage() + "\r\n");
@@ -329,7 +329,7 @@ public class NodeFolderCreatorJob extends Job
 	 * <code>file:</code> directory dependency does not exist. {@link WebPackagesListener} re-adds
 	 * <code>@servoy/public</code> afterwards as a real tarball, so it is safe to drop it here.
 	 */
-	private void removePublicFileDependency(File packageJson, StringOutputStream console)
+	public static void removePublicFileDependency(File packageJson, StringOutputStream console)
 	{
 		try
 		{
@@ -350,7 +350,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 	}
 
-	private void writeConsole(StringOutputStream console, String message)
+	private static void writeConsole(StringOutputStream console, String message)
 	{
 		try
 		{
@@ -436,7 +436,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 	}
 
-	private static boolean ignoredResource(String filename)
+	public static boolean ignoredResource(String filename)
 	{
 		return filename.startsWith("/scripts") || filename.startsWith("/.vscode") || filename.startsWith("/e2e/") || filename.indexOf("/node_modules/") != -1 ||
 			filename.startsWith("/node/") || filename.startsWith("/dist/") || filename.startsWith("/dist-public/") || filename.endsWith(".spec.ts") ||
@@ -563,7 +563,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 	}
 
-	static void createFolder(File folder)
+	public static void createFolder(File folder)
 	{
 		if (!folder.exists())
 		{
@@ -626,7 +626,7 @@ public class NodeFolderCreatorJob extends Job
 		return registerWatch;
 	}
 
-	static void copyOrCreateFile(String filename, File nodeFolder, InputStream is) throws IOException
+	public static void copyOrCreateFile(String filename, File nodeFolder, InputStream is) throws IOException
 	{
 		File file = new File(nodeFolder, filename);
 		FileUtils.copyInputStreamToFile(is, file);
