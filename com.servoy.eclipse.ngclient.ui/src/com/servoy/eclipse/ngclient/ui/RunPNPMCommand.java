@@ -625,6 +625,12 @@ public class RunPNPMCommand extends WorkspaceJob implements IRunNPMCommand
 				result.add("install");
 				result.add("--frozen-lockfile");
 				break;
+			case "ci-unfrozen" :
+				// WAR/CI install where a nightly (-pre) web package differs from the committed lockfile (SVY-21502):
+				// explicitly NOT frozen (pnpm defaults to frozen on a CI server); unchanged entries keep their pins
+				result.add("install");
+				result.add("--no-frozen-lockfile");
+				break;
 			case "update" :
 				result.add("update");
 				result.addAll(rest);

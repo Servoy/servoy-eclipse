@@ -204,6 +204,22 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	}
 
 	/**
+	 * SVY-21502: whether a web package version is a nightly build (a <code>-pre</code> prerelease, e.g.
+	 * <code>2026.9.1-pre</code> or <code>2026.9.1-pre.3</code>) whose content may change without a version change.
+	 * Release candidates (<code>-rc</code>) and releases are not nightlies.
+	 */
+	public static boolean isNightlyVersion(String version)
+	{
+		if (version == null) return false;
+		int dash = version.indexOf('-');
+		if (dash < 0) return false;
+		// strip build metadata (+...) and look at the first prerelease identifier
+		String prerelease = version.substring(dash + 1).split("\\+")[0];
+		String first = prerelease.split("\\.")[0];
+		return first.matches("pre\\d*");
+	}
+
+	/**
 	 * SVY-21734: installing without the web-package tarballs gives a broken Angular build.
 	 *
 	 * @return an error message listing the packages that could not be packed, or <code>null</code> when there are none
@@ -291,6 +307,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		// pnpm mode: packages that could not be packed/copied into a tarball. Installing without them would silently
 		// produce a broken Angular build, so the job fails loud when this is not empty.
 		private final List<String> packFailures = new ArrayList<>();
+		// SVY-21502: nightly (-pre) web packages whose packed content differs from the committed lockfile on a WAR/CI
+		// export; when not empty the install is done non-frozen (see removeNonExportedComponents)
+		private final List<String> changedNightlies = new ArrayList<>();
 
 		/**
 		 * @param name
@@ -1040,7 +1059,9 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						cleanInstall.set(false);
 						if (frozenWarInstall)
 						{
-							npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder, Arrays.asList("ci"));
+							// SVY-21502: frozen, unless a nightly (-pre) web package changed; then only that one is re-resolved
+							npmCommand = Activator.getInstance().createNPMCommand(this.projectFolder,
+								Arrays.asList(changedNightlies.isEmpty() ? "ci" : "ci-unfrozen"));
 							try
 							{
 								npmCommand.runCommand(monitor);
@@ -1417,6 +1438,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 		 */
 		private Status removeNonExportedComponents(IProgressMonitor monitor, StringOutputStream console)
 		{
+			changedNightlies.clear();
 			if (!Activator.isPnpmMode() || this.warExportModel == null) return null;
 			try
 			{
@@ -1427,7 +1449,7 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				if (dependencies == null) return null;
 				File tarballsDir = new File(this.projectFolder, ".tarballs");
 				List<String> toRemove = new ArrayList<>();
-				for (String name : dependencies.keySet())
+				for (String name : new ArrayList<>(dependencies.keySet()))
 				{
 					// all file: tarball component deps (@servoy/* and third party source packages like mycomp) are managed
 					// as a packed-or-not subset here
@@ -1443,14 +1465,48 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 						if (packed != null && packed.length > 0)
 						{
 							// this package IS exported (it was packed) but its content differs from what the committed
-							// lockfile pins: removing it would silently drop a component, so fail with a clear message
-							String msg = "web package '" + name + "' differs from the committed pnpm-lock.yaml: expected " + tarballName +
-								" but packed " + packed[0].getName() + ". Re-run the developer install and commit package.json + pnpm-lock.yaml.";
+							// lockfile pins
+							String version = packedVersion(packed[0]);
+							if (isNightlyVersion(version))
+							{
+								// a nightly (-pre) package is expected to change with every push of its repo: do not force
+								// the developer to re-commit the lockfile for that, re-resolve just this package instead
+								writeConsole(console, "- pnpm mode: nightly web package '" + name + "@" + version +
+									"' differs from the committed pnpm-lock.yaml (expected " + tarballName + ", packed " + packed[0].getName() +
+									"); it will be re-resolved by a non-frozen install");
+								dependencies.put(name, "file:.tarballs/" + packed[0].getName());
+								changedNightlies.add(name);
+								continue;
+							}
+							// a release version must match the committed lockfile: removing it would silently drop a
+							// component, so fail with a clear message
+							String msg = "web package '" + name + "@" + version + "' differs from the committed pnpm-lock.yaml: expected " +
+								tarballName + " but packed " + packed[0].getName() +
+								". Re-run the developer install and commit package.json + pnpm-lock.yaml.";
 							writeConsole(console, "\r\nERROR: " + msg + "\r\n");
 							return new Status(IStatus.WARNING, getClass(), msg);
 						}
 						toRemove.add(name);
 					}
+				}
+				if (!changedNightlies.isEmpty())
+				{
+					// non-frozen path: one 'pnpm install --no-frozen-lockfile' later does everything. Do NOT run a
+					// separate 'pnpm remove' first: pnpm reads every lockfile entry before removing, and the old tarball of
+					// the changed nightly no longer exists (ERR_PNPM_TARBALL_READ_LOCAL_TARBALL). Edit package.json
+					// directly instead; the install then drops the removed + old entries from the lockfile and keeps the
+					// pins of everything that did not change.
+					for (String name : toRemove)
+					{
+						dependencies.remove(name);
+					}
+					if (!toRemove.isEmpty())
+					{
+						writeConsole(console, "- pnpm mode: removing " + toRemove.size() + " component(s) not exported by this WAR from package.json: " +
+							toRemove);
+					}
+					FileUtils.writeStringToFile(packageJson, json.toString(2), "UTF-8");
+					return null;
 				}
 				if (toRemove.isEmpty()) return null;
 				writeConsole(console, "- pnpm mode: removing " + toRemove.size() +
@@ -1472,6 +1528,21 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 			{
 				writeErrorToConsoleAndLog(console, e, "Exception while removing non-exported components on the WAR path: ");
 				return new Status(IStatus.WARNING, getClass(), "removing non-exported components failed: " + e.getMessage());
+			}
+		}
+
+		/** the version from the package.json inside a packed tarball, or <code>null</code> if it cannot be read */
+		private String packedVersion(File tarball)
+		{
+			try
+			{
+				String content = DeterministicTarball.readPackageJson(tarball);
+				return content == null ? null : new JSONObject(content).optString("version", null);
+			}
+			catch (IOException | JSONException e)
+			{
+				Activator.getInstance().getLog().error("Could not read the version of packed web package " + tarball, e);
+				return null;
 			}
 		}
 

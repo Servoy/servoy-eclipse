@@ -70,6 +70,15 @@ class DeterministicTarballTest
 	}
 
 	@Test
+	void readPackageJsonReturnsThePackedManifest() throws Exception
+	{
+		File a = new File(tmp.toFile(), "a.tgz");
+		writeTgz(a, 5L, "package/src/a.ts", "x", "package/package.json", "{\"version\":\"2026.9.1-pre\"}");
+		DeterministicTarball.normalize(a);
+		assertTrue("{\"version\":\"2026.9.1-pre\"}".equals(DeterministicTarball.readPackageJson(a)), DeterministicTarball.readPackageJson(a));
+	}
+
+	@Test
 	void binaryContentIsLeftUntouched()
 	{
 		byte[] bin = new byte[] { 1, 0, '\r', '\n', 2 };

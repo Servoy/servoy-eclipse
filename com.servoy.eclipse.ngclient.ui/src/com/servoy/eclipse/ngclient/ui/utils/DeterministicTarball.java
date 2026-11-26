@@ -131,6 +131,35 @@ public final class DeterministicTarball
 		Files.move(tmp.toPath(), tgz.toPath(), StandardCopyOption.REPLACE_EXISTING);
 	}
 
+	/**
+	 * Returns the content of <code>package/package.json</code> inside the given tgz, or <code>null</code> if it has none.
+	 */
+	public static String readPackageJson(File tgz) throws IOException
+	{
+		try (InputStream in = new GZIPInputStream(Files.newInputStream(tgz.toPath())))
+		{
+			TarInputStream tar = new TarInputStream(in);
+			TarEntry entry;
+			while ((entry = tar.getNextEntry()) != null)
+			{
+				if (!"package/package.json".equals(entry.getName())) continue;
+				ByteArrayOutputStream content = new ByteArrayOutputStream();
+				byte[] buffer = new byte[8192];
+				int read;
+				while ((read = tar.read(buffer, 0, buffer.length)) > 0)
+				{
+					content.write(buffer, 0, read);
+				}
+				return content.toString(StandardCharsets.UTF_8);
+			}
+			return null;
+		}
+		catch (TarException e)
+		{
+			throw new IOException("Not a valid tar archive: " + tgz, e);
+		}
+	}
+
 	private static void writeHeader(ByteArrayOutputStream out, String path, long size) throws IOException
 	{
 		byte[] nameBytes = path.getBytes(StandardCharsets.UTF_8);
