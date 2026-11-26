@@ -1,6 +1,6 @@
 # Review Summary - SVY-21648: Zoneless: BaseTabpanel signal writes during change detection
 
-**Risk: MODERATE.** The fix is sound, but `tabIndex` now stays a tab name when the named tab is already selected (`basetabpanel.ts:153`). This is unverified and may be harmless.
+**Risk: MODERATE.** The fix is sound, but `tabIndex` now stays a tab name when the named tab is already selected (`basetabpanel.ts:153`). Reproduced manually on all three components (see Manual test results); whether it is acceptable is the author's call.
 
 Scope: `servoy-eclipse`, branch `release`, commits `db5e0a69d0`, `34ffabf11f`, `7155fb5379`.
 
@@ -19,8 +19,21 @@ Fix Version `2026.9.0` names the 2026.9 line, and `release` is that line, so the
 
 Automated: `npm run test_default` and `npm run lint` from `com.servoy.eclipse.ngclient.ui/node` (not run during review).
 
+## Manual test results
+Run in the NG client (localhost:8183) with a test form holding a tabpanel, a tablesspanel and an accordion, each with 3 named tabs. Results read from the form's label and the Developer log.
+
+| Check | tabpanel | tablesspanel | accordion |
+|---|---|---|---|
+| Assign the name of the already-selected tab, then read `tabIndex` | string (`second_d`) | string (`second_t`) | string (`second_a`) |
+| Assign tab 2's name, then tab 3's name, in one call | tab 3 shown, `tabIndex` 3 (number) | same | same |
+| Tab-change handler: `tabIndex` inside it | new number | new number | new number |
+| Change tab, then leave the form | no console problems reported | not run | not run |
+
+- The string result is a behaviour change: before the fix `getRealTabIndex()` rewrote the name to a number. It is also visible to scripts, because the server value is the string too.
+- Not verified: a dev-mode console check for NG0100/NG0600 (the panel only showed a harmless `slider-vertical` CSS warning, and it is unconfirmed that the client ran in dev mode), the leave-the-form check with a delay, and a pre-fix comparison.
+
 ## Possible improvements / follow-ups
-- Name of the already-selected tab leaves `tabIndex` as a string (`select()` returns early). Decide whether that is intended.
-- Quick double name assignment while the previous hide is pending: confirm "last assignment wins" in the real client.
+- Name of the already-selected tab leaves `tabIndex` as a string (`select()` returns early). Confirmed in the manual test. Decide whether that is intended.
+- Quick double name assignment: "last assignment wins" held in the manual test.
 - The deferred `setTimeout` write has no `clearTimeout` or destroy guard (Low).
 - `com.servoy.eclipse.ngclient.ui/node/AGENTS.md` still mentions Karma files that no longer exist.
