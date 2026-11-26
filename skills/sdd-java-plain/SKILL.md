@@ -93,6 +93,17 @@ Parse the first token as the issue key/URL. Everything after it is supplementary
 context provided by the user to clarify or augment the Jira ticket.
 
 Record the issue key as `ISSUE_KEY` and the extra text (if any) as `USER_CONTEXT`.
+If the user gave a URL, extract the bare key (e.g. `SVY-12345`) from it.
+
+**Name the session (so pipeline runs are easy to find).** Immediately, before Phase 0, rename
+the current session to `[SDD] <ISSUE_KEY>` by running this inside `execute` (Code Mode):
+
+```js
+await tools.opencode.session_rename({ title: "[SDD] SVY-12345" })
+```
+
+Once Triage has read the case (see Phase 0), you rename it again to include the Jira subject.
+If the rename tool is unavailable or fails, continue the pipeline; naming is cosmetic.
 
 ---
 
@@ -124,6 +135,11 @@ do not hand it a proposed solution.
 The task's output will be the relative path to the triage report it created. Record that
 as `TRIAGE_PATH`. Read the report to obtain its **verdict** (`PROCEED`, `NO_ACTION`, or
 `NEEDS_INPUT`) and recommendation.
+
+**Rename the session with the Jira subject.** The triage report has a `**Subject:**` line holding
+the issue's summary. Read it and rename the session to `[SDD] <ISSUE_KEY> <subject>` (via
+`execute`, same call as above, e.g. `title: "[SDD] SVY-12345 Fix NPE in WAR export"`). Keep the
+title to roughly 80 characters, truncating the subject if needed. If the rename fails, continue.
 
 **HUMAN GATE — Triage decision**
 

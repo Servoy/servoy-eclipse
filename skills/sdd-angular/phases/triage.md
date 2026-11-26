@@ -133,6 +133,8 @@ Use this structure:
 ```markdown
 # Triage Report — <KEY>
 
+**Subject:** <the Jira issue's summary/title, verbatim, on a single line>
+
 **Verdict:** PROCEED | NO_ACTION | NEEDS_INPUT
 
 ## Reported problem
