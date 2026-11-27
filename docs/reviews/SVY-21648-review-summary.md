@@ -1,6 +1,6 @@
 # Review Summary - SVY-21648: Zoneless: BaseTabpanel signal writes during change detection
 
-**Risk: MODERATE.** The fix is sound, but `tabIndex` now stays a tab name when the named tab is already selected (`basetabpanel.ts:153`). Reproduced manually on all three components (see Manual test results); whether it is acceptable is the author's call.
+**Risk: LOW.** The fix is sound. `tabIndex` now stays a tab name when the named tab is already selected (`basetabpanel.ts:153`). This was reproduced manually on all three components, but it matches the NG1 client (see Behaviour vs NG1), so it is not a regression against NG1.
 
 Scope: `servoy-eclipse`, branch `release`, commits `db5e0a69d0`, `34ffabf11f`, `7155fb5379`.
 
@@ -29,11 +29,20 @@ Run in the NG client (localhost:8183) with a test form holding a tabpanel, a tab
 | Tab-change handler: `tabIndex` inside it | new number | new number | new number |
 | Change tab, then leave the form | no console problems reported | not run | not run |
 
-- The string result is a behaviour change: before the fix `getRealTabIndex()` rewrote the name to a number. It is also visible to scripts, because the server value is the string too.
+- The string result is a behaviour change against the previous TiNG code, where `getRealTabIndex()` rewrote the name to a number. It is also visible to scripts, because the server value is the string too.
 - Not verified: a dev-mode console check for NG0100/NG0600 (the panel only showed a harmless `slider-vertical` CSS warning, and it is unconfirmed that the client ran in dev mode), the leave-the-form check with a delay, and a pre-fix comparison.
 
+## Behaviour vs NG1
+- NG1 (`servoy_ngclient/war/servoydefault/tabpanel/tabpanel.js`) accepts a number, a numeric string or a tab name in `tabIndex`. `refresh()` (lines 42-55) resolves the name to an index and does not rewrite `model.tabIndex`.
+- NG1 writes the number back only in `setFormVisible()` (line 192). `select()` returns early when the tab is already selected (line 259), so a name assigned for the already-selected tab stays a name there too.
+- SVY-21526 asked for exactly this parity: set a tab by name in TiNG as in NG1. The fix in SVY-21648 (`34ffabf11f`) makes TiNG behave like NG1 in this case.
+- Not read: the NG1 paths that also write `model.tabIndex` (lines 467, 483, 497), and the full path from the assignment to `select()`.
+
+## Author answers
+- Destroy guard: not needed. The write is a 0 ms timeout. If the component is destroyed first, the Angular output code logs a warning (NG0953, "Unexpected emit for destroyed OutputRef") and returns, without throwing.
+- `tabIndex` as a name: supported since NG1, so a string value is expected.
+
 ## Possible improvements / follow-ups
-- Name of the already-selected tab leaves `tabIndex` as a string (`select()` returns early). Confirmed in the manual test. Decide whether that is intended.
+- Optional, not a defect: normalize the name to the number also when the named tab is already selected. This would differ from NG1, so it would be a new decision and not a fix.
 - Quick double name assignment: "last assignment wins" held in the manual test.
-- The deferred `setTimeout` write has no `clearTimeout` or destroy guard (Low).
 - `com.servoy.eclipse.ngclient.ui/node/AGENTS.md` still mentions Karma files that no longer exist.
