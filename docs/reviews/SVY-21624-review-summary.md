@@ -1,18 +1,22 @@
 # Peer-review summary — SVY-21624: getFormLayout render does not show CSS grid; agent concluded a Servoy limitation and rewrote correct CSS
 
-**Risk: MODERATE.** The source premise holds: the design render gets the same solution and
-`svy-<formname>`-rewritten form CSS as the NG client. But the corrected fact was not fixed at every
-occurrence. `servoy-reviewer/context/correctness.md:256` still says `getFormLayout` "skips the
-rewrite", and `servoy-developer/context/ui/look.md:308,332` still says the render "hides" or "cannot
-show" injected-markup styling, which the Reviewer now accepts from the render.
+**Risk: MODERATE at review, addressed by a follow-up fix.** The source premise holds: the design
+render gets the same solution and `svy-<formname>`-rewritten form CSS as the NG client. The original
+commit did not fix the corrected fact at every occurrence (Reviewer `correctness.md` still said
+`getFormLayout` "skips the rewrite"; Developer `look.md` still said the render "cannot show"
+injected-markup styling). The follow-up commit `22efdda` corrects both and adds a "trust set in
+`onShow`" exception to the Reviewer's relaxed evidence rule. Issue resolved as Fixed.
 
-**Reviewed scope:** `skill4servoy` commit `547c585191e1f39c64f18a97ad6c318fbaa9f0cb` on `master`.
-It changes `look.md`, `styling.spec.md` and `correctness.md` under `.opencode-shippable/skills/`
-(+25/-11). No sibling-repo commits.
+**Reviewed scope:** `skill4servoy` on `master`:
+- `547c585191e1f39c64f18a97ad6c318fbaa9f0cb` (author's fix): `look.md`, `styling.spec.md`,
+  `correctness.md` under `.opencode-shippable/skills/` (+25/-11).
+- `22efdda6069cb18a9e0b197571e08337986c3731` (review follow-up): `look.md`, `correctness.md`
+  (+13/-6).
 
-**Release target:** Fix Version `2026.12`, **INDETERMINATE**. skill4servoy has only `master`, no tags
-and no version source, so we don't know which Servoy Developer 2026.12 build (Servoy-Copilot skills
-bundle) picks up this commit.
+No sibling-repo commits.
+
+**Release target:** Fix Version `2026.12`. skill4servoy has only `master` and no version source; the
+reviewer confirmed the pack commits ship with 2026.12.
 
 ## Manual test plan
 
@@ -34,18 +38,15 @@ bundle) picks up this commit.
    PASSes.
 3. Set tab `text` to `<span style="color:red">x</span>`, trusted via
    `putClientProperty(UICONSTANTS.TRUST_DATA_AS_HTML, true)` in `onShow`. Compare the `getFormLayout`
-   `htmlFile` with the tab's `innerHTML` in the running client. If the render strips the style, the
-   Reviewer rule needs a "trust set by code" exception.
+   `htmlFile` with the tab's `innerHTML` in the running client. Expected: the render strips the style
+   and the client keeps it, which is what the new `22efdda` exception assumes. If the render keeps it,
+   the exception can be dropped.
 4. Theme-override task where the theme itself uses `!important`. Expected: the Developer still uses
    the step-4 `!important` escape.
 
 ## Possible improvements / follow-ups
-- Remove the leftover "skips the rewrite" sentence at `correctness.md:255-256`.
-- Align `look.md` § Markup injected through an HTML property (l.307-308, 331-332) with the Reviewer
-  rule: render `appearance` is valid for property-driven markup.
-- Add "trust set by form code (`onShow`)" to the exceptions of the relaxed Reviewer rule
-  (`correctness.md:281-283`) if regression check 3 confirms the render sanitizes it.
+- Regression check 3 is still unverified. The `onShow` trust exception in `correctness.md` and
+  `look.md` (`22efdda`) rests on reasoning ("the render runs no form code"), not on an observed render.
 - Confirm with the author of `5dedc71` (which called the opposite claim "source-verified") that the
   reversal is agreed.
-- No `s4s.py validate` run or run-008 replay is recorded for this commit.
 - Link the planned jlessc `/`-division fix case from SVY-21624.
