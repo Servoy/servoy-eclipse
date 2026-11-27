@@ -380,6 +380,33 @@ class ServoyRelationBuilderTest
 	}
 
 	@Test
+	@DisplayName("a view primary datasource is checked under the view server name, with its own table name, also when the foreign datasource is a db one")
+	void viewPrimaryWithDbForeign()
+	{
+		Relation relation = relation("view:orders_view", LINES);
+		server("view:orders_view", "view");
+
+		ServoyRelationBuilder.checkRelation(relation);
+
+		assertSingleMarker(MarkerMessages.RelationPrimaryTableNotFound.fill("orders_to_lines", "orders_view", "view").getText(), IMarker.SEVERITY_ERROR);
+	}
+
+	@Test
+	@DisplayName("a view primary datasource with a view foreign datasource looks up the primary view table, not null")
+	void viewPrimaryWithViewForeign() throws Exception
+	{
+		Relation relation = relation("view:orders_view", "view:lines_view");
+		IServerInternal server = server("view:orders_view", "view");
+		when(dsm.getServer("view:lines_view")).thenReturn(server);
+		table(server, "orders_view", "view:orders_view");
+		table(server, "lines_view", "view:lines_view");
+
+		ServoyRelationBuilder.checkRelation(relation);
+
+		assertSingleMarker(MarkerMessages.RelationEmpty.fill("orders_to_lines").getText(), IMarker.SEVERITY_ERROR);
+	}
+
+	@Test
 	@DisplayName("an in-memory primary datasource is checked under the mem server name")
 	void inmemPrimary()
 	{

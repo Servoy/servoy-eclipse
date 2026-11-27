@@ -149,7 +149,7 @@ public class ServoyRelationBuilder
 			{
 				primaryServerName = DataSourceUtils.INMEM_DATASOURCE;
 			}
-			else if ((primaryServerName = DataSourceUtils.getViewDataSourceName(element.getForeignDataSource())) != null)
+			else if ((primaryTableName = DataSourceUtils.getViewDataSourceName(element.getPrimaryDataSource())) != null)
 			{
 				primaryServerName = DataSourceUtils.VIEW_DATASOURCE;
 			}
