@@ -225,6 +225,10 @@ public final class WorkspaceMarkers implements AutoCloseable
 				store(path, invocation.getArgument(0));
 				return null;
 			}).when(file).create(any(java.io.InputStream.class), anyBoolean(), Mockito.<IProgressMonitor> any());
+			doAnswer(invocation -> {
+				fileContents.remove(path);
+				return null;
+			}).when(file).delete(anyBoolean(), Mockito.<IProgressMonitor> any());
 		}
 		catch (Exception e)
 		{
