@@ -87,7 +87,7 @@ public class JSDocScriptTemplates
 		return new JSDocScriptTemplates(InstanceScope.INSTANCE.getNode(JSDOC_SCRIPT_TEMPLATES_NODE));
 	}
 
-	private JSDocScriptTemplates(IEclipsePreferences eclipsePrefferences)
+	JSDocScriptTemplates(IEclipsePreferences eclipsePrefferences)
 	{
 		settingsNode = eclipsePrefferences;
 	}
