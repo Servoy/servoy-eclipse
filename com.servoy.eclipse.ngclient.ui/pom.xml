@@ -175,6 +175,23 @@
                             <arguments>run pack_public</arguments>
                         </configuration>
                     </execution>
+
+                    <!-- SVY-21502: dependency-only tarballs of the four internal SOURCE component packages
+                         (servoydefault, dialogs, window, ngclientutils). They are compiled from source through the
+                         tsconfig paths alias, but pnpm only installs the third party dependencies (tinymce, ng-bootstrap,
+                         ...) of a package that is installed as a tarball. Must run after pack_public (it empties tarballs/). -->
+                    <execution>
+                        <id>pack servoy component tarballs</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>node</workingDirectory>
+                            <skipTests>${maven.test.skip}</skipTests>
+                            <arguments>run pack_components</arguments>
+                        </configuration>
+                    </execution>
 					<!-- 3. npm run build_lib <execution> <id>npm run build_lib</id> <phase>compile</phase> 
 						<goals> <goal>npm</goal> </goals> <configuration> <workingDirectory>node</workingDirectory> 
 						<arguments>run build_lib</arguments> </configuration> </execution> -->

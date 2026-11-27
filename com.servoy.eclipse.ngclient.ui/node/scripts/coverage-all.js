@@ -88,6 +88,14 @@ for (const p of projects) {
   }
 }
 
+// the node:test tests of the build scripts (scripts/*.test.mjs) have no coverage, but must run on every CI build
+try {
+  run('node scripts/run-script-tests.js');
+} catch (e) {
+  console.error(`Tests failed for the build scripts (exit code ${e.status}).`);
+  failedProjects.push('scripts');
+}
+
 if (lcovFiles.length === 0) {
   console.error('No coverage was produced by any project.');
   process.exit(1);

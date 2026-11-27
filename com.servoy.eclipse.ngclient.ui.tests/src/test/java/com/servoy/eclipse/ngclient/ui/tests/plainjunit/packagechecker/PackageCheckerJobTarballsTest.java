@@ -273,6 +273,95 @@ class PackageCheckerJobTarballsTest {
 		assertTrue(tarballPresentWhenChecked.get(), "SVY-21734: copy before checkPackage");
 	}
 
+	private static final String DEFAULT_JSON = "{\"packageName\":\"@servoy/window\",\"serviceName\":\"Svc\",\"entryPoint\":\"projects/window\"}";
+	private static final String COMPONENT_TARBALL = "servoy-window-abc123def456.tgz";
+
+	private SpecInfo servoyDefaultPackage() {
+		SpecInfo info = new SpecInfo();
+		info.ng2Services.put(SpecMocks.spec("window-a", "window", DEFAULT_JSON),
+				SpecMocks.reader("window", "2025.9.0"));
+		return info;
+	}
+
+	private void shipComponentTarball(String listedName) throws IOException {
+		env.putBundleFile(bundle, "/node/tarballs/component-tarballs.json", "[\"" + listedName + "\"]");
+		env.putBundleFile(bundle, "/node/tarballs/" + listedName, "deps-only-bytes");
+	}
+
+	@Test
+	void pnpmModeInstallsTheShippedDependencyOnlyTarballOfAnInternalSourceComponentPackage() throws IOException {
+		env.pnpmMode = true;
+		shipPublicTarball();
+		shipComponentTarball(COMPONENT_TARBALL);
+		ProjectFiles.write(projectFolder, "tsconfig.json", "{\"compilerOptions\":{\"paths\":{}}}");
+		packageJson("{}");
+
+		PackageCheckResult result = job().prepareTarballsAndCheckPackages(servoyDefaultPackage(), env.console());
+
+		assertEquals(Set.of(".tarballs/" + COMPONENT_TARBALL), result.packageToInstall);
+		assertEquals("deps-only-bytes", Files.readString(new File(new File(projectFolder, ".tarballs"), COMPONENT_TARBALL).toPath()));
+		assertTrue(Files.readString(new File(projectFolder, "tsconfig.json").toPath()).contains("projects/window/src/public-api".replace('/', File.separatorChar).replace("\\", "\\\\")),
+				"the source alias is still written");
+	}
+
+	@Test
+	void aShippedComponentTarballThatIsAlreadyInstalledIsCopiedButNotInstalledAgainAndOlderOnesAreRemoved() throws IOException {
+		env.pnpmMode = true;
+		shipPublicTarball();
+		shipComponentTarball(COMPONENT_TARBALL);
+		ProjectFiles.write(projectFolder, "tsconfig.json", "{\"compilerOptions\":{\"paths\":{}}}");
+		ProjectFiles.write(projectFolder, ".tarballs/servoy-window-old000000000.tgz", "stale");
+		packageJson("{\"@servoy/window\":\"file:.tarballs/" + COMPONENT_TARBALL + "\"}");
+
+		PackageCheckResult result = job().prepareTarballsAndCheckPackages(servoyDefaultPackage(), env.console());
+
+		assertTrue(result.packageToInstall.isEmpty(), result.packageToInstall.toString());
+		assertTrue(new File(new File(projectFolder, ".tarballs"), COMPONENT_TARBALL).isFile());
+		assertFalse(new File(new File(projectFolder, ".tarballs"), "servoy-window-old000000000.tgz").exists(),
+				"a Copy & Build always uses the shipped tarball: older ones are removed");
+	}
+
+	@Test
+	void theTarballOfAPackageWhoseNameStartsWithTheSameWordsIsNotUsed() throws IOException {
+		env.pnpmMode = true;
+		shipPublicTarball();
+		shipComponentTarball("servoy-window-extra-abc123def456.tgz");
+		ProjectFiles.write(projectFolder, "tsconfig.json", "{\"compilerOptions\":{\"paths\":{}}}");
+		packageJson("{}");
+
+		PackageCheckResult result = job().prepareTarballsAndCheckPackages(servoyDefaultPackage(), env.console());
+
+		assertTrue(result.packageToInstall.isEmpty(), "servoy-window-extra belongs to the package @servoy/window-extra: " + result.packageToInstall);
+		assertFalse(new File(new File(projectFolder, ".tarballs"), "servoy-window2-abc123def456.tgz").exists());
+	}
+
+	@Test
+	void aListedComponentTarballThatIsNotInThePluginIsReportedAndNothingIsInstalled() throws IOException {
+		env.pnpmMode = true;
+		shipPublicTarball();
+		env.putBundleFile(bundle, "/node/tarballs/component-tarballs.json", "[\"" + COMPONENT_TARBALL + "\"]");
+		ProjectFiles.write(projectFolder, "tsconfig.json", "{\"compilerOptions\":{\"paths\":{}}}");
+		packageJson("{}");
+
+		PackageCheckResult result = job().prepareTarballsAndCheckPackages(servoyDefaultPackage(), env.console());
+
+		assertTrue(result.packageToInstall.isEmpty());
+		assertTrue(env.consoleText().contains("- WARNING: shipped tarball /node/tarballs/" + COMPONENT_TARBALL + " was not found in the plugin"),
+				env.consoleText());
+	}
+
+	@Test
+	void anInternalComponentPackageWithoutAShippedTarballIsStillOnlyAliased() throws IOException {
+		env.pnpmMode = true;
+		shipPublicTarball();
+		ProjectFiles.write(projectFolder, "tsconfig.json", "{\"compilerOptions\":{\"paths\":{}}}");
+		packageJson("{}");
+
+		PackageCheckResult result = job().prepareTarballsAndCheckPackages(servoyDefaultPackage(), env.console());
+
+		assertTrue(result.packageToInstall.isEmpty());
+	}
+
 	@Test
 	void aMissingShippedTarballIsReportedAndNothingIsCopied() throws IOException {
 		env.pnpmMode = true;

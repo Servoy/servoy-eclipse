@@ -242,7 +242,25 @@ class PackageCheckerJobInstallBlockTest {
 		String packageJson = Files.readString(new File(projectFolder, "package.json").toPath(), StandardCharsets.UTF_8);
 		assertTrue(packageJson.contains("file:.tarballs/servoy-nightly-999.tgz"), packageJson);
 		assertFalse(packageJson.contains("servoy-gone-111"), "the non-exported component is removed from package.json directly");
-		assertTrue(env.consoleText().contains("nightly web package '@servoy/nightly@2026.9.1-pre.3' differs"), env.consoleText());
+		assertTrue(env.consoleText().contains("web package '@servoy/nightly@2026.9.1-pre.3' differs"), env.consoleText());
+	}
+
+	@Test
+	void aChangedShippedComponentTarballIsReResolvedEvenThoughItsVersionIsNotANightly() throws IOException {
+		env.pnpmMode = true;
+		File bundle = new File(tmp, "bundle");
+		assertTrue(bundle.mkdirs());
+		env.putBundleFile(bundle, "/node/tarballs/component-tarballs.json", "[\"servoy-nightly-999.tgz\"]");
+		ProjectFiles.write(projectFolder, "package.json",
+				"{\"dependencies\":{\"@servoy/nightly\":\"file:.tarballs/servoy-nightly-111.tgz\"}}");
+		writeTarballWithVersion("servoy-nightly-999.tgz", "2025.9.0");
+
+		assertNull(install(job(war(), null), false));
+
+		assertEquals(List.of("ci-unfrozen"), env.commandLines(),
+				"a Servoy update changes the dependency-only tarball of an internal component: that is not a lockfile error");
+		String packageJson = Files.readString(new File(projectFolder, "package.json").toPath(), StandardCharsets.UTF_8);
+		assertTrue(packageJson.contains("file:.tarballs/servoy-nightly-999.tgz"), packageJson);
 	}
 
 	@Test

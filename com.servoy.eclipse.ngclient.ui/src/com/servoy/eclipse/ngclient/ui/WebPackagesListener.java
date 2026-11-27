@@ -122,8 +122,8 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 	// plugin's node/tarballs/ folder and shipped; at solution-build time it is COPIED into the solution's
 	// .tarballs/ and installed from there instead of running 'ng build @servoy/public' per solution. The four
 	// default component packages above are SOURCE packages (resolved via a tsconfig paths alias to their live
-	// projects/<name>/src/public-api), so they are NOT packed or installed as tarballs - only their package.json
-	// dependencies need to be present, which they already are via the root + external component packages.
+	// projects/<name>/src/public-api); for them a dependency-only tarball (just a package.json) is shipped in the same
+	// folder and installed, because pnpm only installs the third party dependencies of a tarball package.
 	private static final String PUBLIC_PACKAGE = "@servoy/public";
 	private static final Map<String, String> NG1MAPPING = new HashMap<>();
 	static
@@ -1637,11 +1637,12 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							// this package IS exported (it was packed) but its content differs from what the committed
 							// lockfile pins
 							String version = packedVersion(packed[0]);
-							if (isNightlyVersion(version))
+							if (isNightlyVersion(version) || shippedComponentTarballName(name) != null)
 							{
-								// a nightly (-pre) package is expected to change with every push of its repo: do not force
-								// the developer to re-commit the lockfile for that, re-resolve just this package instead
-								writeConsole(console, "- pnpm mode: nightly web package '" + name + "@" + version +
+								// a nightly (-pre) package is expected to change with every push of its repo, and the dependency-only
+								// tarball of an internal component package changes with a Servoy update: do not force the
+								// developer to re-commit the lockfile for that, re-resolve just this package instead
+								writeConsole(console, "- pnpm mode: web package '" + name + "@" + version +
 									"' differs from the committed pnpm-lock.yaml (expected " + tarballName + ", packed " + packed[0].getName() +
 									"); it will be re-resolved by a non-frozen install");
 								dependencies.put(name, "file:.tarballs/" + packed[0].getName());
@@ -1714,6 +1715,72 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 				env.log().error("Could not read the version of packed web package " + tarball, e);
 				return null;
 			}
+		}
+
+		/**
+		 * The file name of the shipped dependency-only tarball of an internal source component package (listed by
+		 * <code>/node/tarballs/component-tarballs.json</code>, written by the Maven <code>pack_components</code> script), or
+		 * <code>null</code> if this package has none (it has no dependencies, or it is not an internal component package).
+		 */
+		private String shippedComponentTarballName(String packageName)
+		{
+			java.net.URL url = env.bundleEntry("/node/tarballs/component-tarballs.json");
+			if (url == null) return null;
+			try
+			{
+				String content = Utils.getURLContent(url);
+				if (content == null) return null;
+				String prefix = packageName.replace("@", "").replace('/', '-') + "-";
+				JSONArray names = new JSONArray(content);
+				for (int i = 0; i < names.length(); i++)
+				{
+					String name = names.optString(i, "");
+					// "<prefix><hash>.tgz": the remainder must be just the hash, so servoy-window does not match servoy-window2
+					if (name.startsWith(prefix) && name.endsWith(".tgz") && name.indexOf('-', prefix.length()) == -1) return name;
+				}
+			}
+			catch (RuntimeException e)
+			{
+				env.log().error("Error reading the shipped component tarballs list " + url, e);
+			}
+			return null;
+		}
+
+		/**
+		 * SVY-21502: copies the shipped dependency-only tarball of an internal source component package into
+		 * <code>.tarballs/</code> (replacing older ones of that package, so a Servoy update, a "Copy &amp; Build" and a
+		 * "Copy &amp; Clean build" always use the shipped one) and returns the specifier to install it, or <code>null</code>
+		 * if there is nothing to install: no shipped tarball, or it is already the installed one.
+		 */
+		private String installShippedComponentTarball(String packageName, JSONObject dependencies, StringOutputStream console)
+		{
+			String tarballName = shippedComponentTarballName(packageName);
+			if (tarballName == null) return null;
+			File tarballsDir = new File(projectFolder, ".tarballs");
+			File target = new File(tarballsDir, tarballName);
+			java.net.URL entry = env.bundleEntry("/node/tarballs/" + tarballName);
+			if (entry == null)
+			{
+				writeConsole(console, "- WARNING: shipped tarball /node/tarballs/" + tarballName + " was not found in the plugin");
+				packFailures.add(packageName);
+				return null;
+			}
+			try (java.io.InputStream is = entry.openStream())
+			{
+				tarballsDir.mkdirs();
+				deleteStaleTarballs(tarballsDir, packageName.replace("@", "").replace('/', '-'), tarballName);
+				FileUtils.copyInputStreamToFile(is, target);
+			}
+			catch (IOException e)
+			{
+				writeErrorToConsoleAndLog(console, e, "Exception while copying shipped tarball " + tarballName + " into .tarballs/: ");
+				packFailures.add(packageName);
+				return null;
+			}
+			String installed = dependencies.optString(packageName, "");
+			if (installed.endsWith(tarballName)) return null;
+			writeConsole(console, "- pnpm mode: installing the dependencies of " + packageName + " from " + tarballName);
+			return relativeTarballSpecifier(target);
 		}
 
 		/**
@@ -2037,13 +2104,13 @@ public class WebPackagesListener implements ILoadedNGPackagesListener
 							// SVY-21502: the four default component packages are SOURCE packages - the Angular compiler
 							// reads their code through the tsconfig 'paths' alias written above (pointing at the live,
 							// file-watched projects/<name>/src/public-api), so build_watch live editing keeps working.
-							// In pnpm mode we therefore do NOT pack/install a tarball for them (their src/** in
-							// node_modules would never be read); their package.json dependencies are already present in
-							// the solution node_modules via the root package.json + the external component packages.
+							// pnpm however only installs the third party dependencies (tinymce, ng-bootstrap, ...) of a package
+							// that is installed as a tarball, so in pnpm mode the shipped dependency-only tarball of this
+							// package is installed (it has no sources; they are never read from node_modules).
 							// In npm mode keep the historical directory install so the deps are pulled in.
 							if (env.isPnpmMode())
 							{
-								return null;
+								return installShippedComponentTarball(packageName, dependencies, console);
 							}
 							String installedVersion = dependencies.optString(packageName);
 							if (!isAlreadyInstalled(installedVersion, entryPoint, packageName, packageFolder))
