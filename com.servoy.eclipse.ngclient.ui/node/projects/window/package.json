@@ -1,9 +1,11 @@
 {
   "name": "@servoy/window",
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "version": "2025.9.0",
   "dependencies": {
-    "@popperjs/core": "<3",
-    "tslib": "*"
+    "@popperjs/core": "<3"
   },
   "license": "MIT",
   "repository": {

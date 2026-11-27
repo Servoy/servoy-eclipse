@@ -54,3 +54,4 @@ Thumbs.db
 /dist-designer/
 /locales/
 /.eslintcache
+/pnpm-lock.yaml

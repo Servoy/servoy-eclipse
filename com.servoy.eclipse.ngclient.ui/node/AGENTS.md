@@ -13,7 +13,7 @@ This is the **Servoy TiNG** runtime — the Angular-based NG Client UI that powe
 | Framework | Angular 22 |
 | Language | TypeScript 6.0 |
 | Build tool | Angular CLI (`@angular/build:application`, esbuild-based) |
-| Test framework | Vitest 4.x (with jsdom environment) |
+| Test framework | Vitest 5.x (with jsdom environment) |
 | Linter | ESLint 10 (`@angular-eslint`) |
 | Package manager | npm (default) / pnpm (opt-in via `servoy.jsRuntime=pnpm`, SVY-21456) |
 | License | GNU Affero General Public License |
@@ -273,7 +273,7 @@ Full spec: `../../docs/angular22-modernization-remaining.spec.md`
 
 ### Completed
 - **Template control flow:** 100% — all templates use `@if`/`@for`/`@switch`
-- **Karma removal:** 100% — Vitest 4 with jsdom, forks pool
+- **Karma removal:** 100% — Vitest 5 with jsdom, forks pool
 - **Polyfills cleanup:** 100% — only zone.js remains
 - **inject() migration:** Done for servoydefault (29 files) and src/ (8 files). Remaining are plain classes (not Angular DI).
 - **takeUntilDestroyed():** Done — tooltip-html.directive, form_component.component

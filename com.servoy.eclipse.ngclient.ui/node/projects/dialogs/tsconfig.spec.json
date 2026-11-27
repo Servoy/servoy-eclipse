@@ -11,9 +11,9 @@
   },
   "files": [],
   "include": [
-    "src/**/*.spec.ts",
-    "src/**/*.ts",
-    "src/**/*.d.ts"
+    "**/*.spec.ts",
+    "**/*.ts",
+    "**/*.d.ts"
   ],
   "angularCompilerOptions": {
     "extendedDiagnostics": {

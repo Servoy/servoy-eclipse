@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="ngclient.ui" tests="76" failures="0" errors="0" time="0.2437686">
+    <testsuite name="projects/window/src/lib/window_service/popupmenu.service.spec.ts" timestamp="2026-11-26T13:00:31.742Z" hostname="nl-ws-jcompagner-01" tests="34" failures="0" errors="0" skipped="0" time="0.1291706">
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; should be created" time="0.0129053">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should create a dropdown menu element and append it to the body" time="0.0120094">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should add the popup cssClass to the menu" time="0.0039906">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render an item text sanitized into a span" time="0.0037436">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render &quot;no text&quot; when the item has no text" time="0.0029984">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should add the disabled class for disabled items" time="0.0029139">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should add the keep-open class when autoClose is false" time="0.0028836">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render a divider for a null item" time="0.0027594">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should skip items with visible === false" time="0.0028165">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render a fa icon when fa_icon is set" time="0.0028744">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render a checkbox icon for img_checkbox when not selected" time="0.0023285">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render a checked checkbox icon for img_checkbox when selected" time="0.0020524">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render a selected radio icon for img_radio_off when selected" time="0.0020679">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should render an image when icon is set" time="0.0103439">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should apply background and foreground colors" time="0.0042015">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should set data-cy attribute when in testing mode" time="0.00224">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should call the server-side api on left mousedown of an enabled item" time="0.0031654">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should not call the server-side api on right mousedown" time="0.0021953">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should create a nested submenu for items with children" time="0.0027097">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initMenu &gt; should wire tooltip handlers for items with tooltipText" time="0.0021677">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; getMenuRect &gt; should return null when no menu is present" time="0.0015103">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; getMenuRect &gt; should return the bounding rect when a menu exists" time="0.0020622">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; showMenu / showMenuAt &gt; showMenu should make the menu visible and create a popper" time="0.0025184">
+            <system-out>
+DIAG isMock true calls 0
+DIAG after 1 instances 1
+
+            </system-out>
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; showMenu / showMenuAt &gt; showMenuAt should create a popper anchored to the element" time="0.0026894">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; showMenu / showMenuAt &gt; showMenuAt should use bottom placement when displayTop is false" time="0.0107553">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initClosePopupHandler &gt; should register a mousedown listener on the document" time="0.0016059">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initClosePopupHandler &gt; should invoke the handler and clean up the menu on an outside mousedown" time="0.0028174">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initClosePopupHandler &gt; should keep the menu open when mousedown targets the dropdown-menu itself" time="0.002165">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initClosePopupHandler &gt; should keep the menu open when mousedown targets a keep-open element" time="0.0021508">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; initClosePopupHandler &gt; should destroy the menu popper and submenu poppers on close" time="0.0037351">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; hover submenu behaviour &gt; hovering a menu item with a submenu should show the submenu" time="0.0046893">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; hover submenu behaviour &gt; mouseleave on a menu item should mark previous active and schedule a hide pass" time="0.003383">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; hover submenu behaviour &gt; hoverMenuListener should track the active menu on enter" time="0.0020594">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.popupmenu.service" name="PopupMenuService &gt; hover submenu behaviour &gt; hoverMenuListener should restore active menu to the root menu on leave" time="0.0017971">
+        </testcase>
+    </testsuite>
+    <testsuite name="projects/window/src/lib/window_service/shortcut.service.spec.ts" timestamp="2026-11-26T13:00:31.747Z" hostname="nl-ws-jcompagner-01" tests="18" failures="0" errors="0" skipped="0" time="0.0494192">
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should be created" time="0.0120889">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should register a shortcut in all_shortcuts with the document as default target and keydown type" time="0.0034989">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should attach the listener to the document and invoke the callback on matching key" time="0.0030891">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should not invoke the callback when a different key is pressed" time="0.0023605">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should resolve a string target via getElementById" time="0.0036698">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should match ctrl modifier combinations" time="0.0022571">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should match special keys by name (f1)" time="0.0019828">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should match using an explicit keycode option" time="0.0019228">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should not fire when disable_in_input is set and the event target is an INPUT" time="0.0028293">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should fire when disable_in_input is set but the target is not an input" time="0.0024322">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should stop the event when propagate is false and callback returns true" time="0.0017079">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should stop the event when callback returns false even if propagate is true" time="0.0016011">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should not prevent default when propagate is true and callback returns true" time="0.0013651">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should translate punctuation keycodes (comma -&gt; ,)" time="0.0013758">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should not match a plain number key against its shifted symbol when shift is not wanted" time="0.0013873">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should remove a registered shortcut and detach the listener" time="0.0015073">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should be a no-op when removing a non-existent shortcut" time="0.001636">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.shortcut.service" name="ShortcutService &gt; should fill option defaults when a partial option object is passed" time="0.0012904">
+        </testcase>
+    </testsuite>
+    <testsuite name="projects/window/src/lib/window_service/window.service.spec.ts" timestamp="2026-11-26T13:00:31.749Z" hostname="nl-ws-jcompagner-01" tests="24" failures="0" errors="0" skipped="0" time="0.0651788">
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; should be created" time="0.0125756">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; cancelFormPopup &gt; cancelFormPopup should delegate to servoyService with false" time="0.0031021">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; cancelFormPopup &gt; cancelFormPopupInternal should pass through the flag" time="0.0023896">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; cancelFormPopup &gt; cancelForm should delegate with the form name" time="0.0023238">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupform &gt; setting a popupform should call showForm" time="0.0022144">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupform &gt; setting a falsy popupform should not call showForm" time="0.0021943">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; should register a translated shortcut with the shortcut service" time="0.002346">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; should not re-add a shortcut that is already present in all_shortcuts" time="0.0021086">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; should translate numpad shortcuts" time="0.0021641">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; should not register anything when set to a falsy value" time="0.0019948">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; the registered handler should run the callback via executeInlineScript on timeout" time="0.0034467">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; the registered handler should return false when consumeEvent is set" time="0.0016369">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; the registered handler should skip when createJSEvent returns null" time="0.0017742">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; the handler should dispatch a change event for a modifier shortcut" time="0.0022081">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; shortcuts &gt; the handler should concat array arguments onto the jsEvent" time="0.0017718">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; setting popupMenus stores the value" time="0.0014469">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; setting popupMenuShowCommand stores the value" time="0.0013966">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; showPopupMenu (debounced) should call initMenu and showMenu when no elementId" time="0.0018536">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; showPopupMenu should use showMenuAt when an element with the id is found" time="0.0063154">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; showPopupMenu should log an error when the elementId is not found" time="0.0021097">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; showPopupMenu should offset by element rect when x and y are provided with an element" time="0.0021461">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; showPopupMenu should do nothing when the popup name does not match" time="0.0014721">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; the close handler should reset the command and send service changes" time="0.001465">
+        </testcase>
+        <testcase classname="angular.ngclient.ui.projects.window.src.lib.window_service.window.service" name="WindowPluginService &gt; popupMenus / popupMenuShowCommand &gt; should debounce multiple rapid show commands into a single showPopupMenu run" time="0.0014132">
+        </testcase>
+    </testsuite>
+</testsuites>

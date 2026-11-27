@@ -5,7 +5,7 @@ description: "Use when writing, generating, or fixing Angular unit tests with Vi
 
 # Writing Angular Unit Tests with Vitest
 
-This project uses **Vitest 4.x** with **@angular/build:unit-test** (AOT-compiled tests) and **jsdom** environment.
+This project uses **Vitest 5.x** with **@angular/build:unit-test** (AOT-compiled tests) and **jsdom** environment.
 
 ## Key Principles
 

@@ -172,18 +172,26 @@
     "@servoy/public": {
       "projectType": "library",
       "root": "projects/servoy-public",
-      "sourceRoot": "projects/servoy-public/src",
+      "sourceRoot": "projects/servoy-public",
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular/build:ng-packagr",
+          "builder": "@angular/build:library",
           "options": {
             "tsConfig": "projects/servoy-public/tsconfig.lib.json",
-            "project": "projects/servoy-public/ng-package.json"
+            "outputPath": "dist-public/",
+            "allowedNonPeerDependencies": [
+              "bignumber.js",
+              "luxon",
+              "numbro"
+            ]
           },
           "configurations": {
             "production": {
               "tsConfig": "projects/servoy-public/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "compilationMode": "full"
             }
           }
         },
@@ -230,18 +238,21 @@
     "@servoy/ngclientutils": {
       "projectType": "library",
       "root": "projects/ngclientutils",
-      "sourceRoot": "projects/ngclientutils/src",
+      "sourceRoot": "projects/ngclientutils",
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular/build:ng-packagr",
+          "builder": "@angular/build:library",
           "options": {
             "tsConfig": "projects/ngclientutils/tsconfig.lib.json",
-            "project": "projects/ngclientutils/ng-package.json"
+            "outputPath": "dist/servoy/ngutils"
           },
           "configurations": {
             "production": {
               "tsConfig": "projects/ngclientutils/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "compilationMode": "full"
             }
           }
         },
@@ -258,18 +269,21 @@
     "@servoy/dialogs": {
       "projectType": "library",
       "root": "projects/dialogs",
-      "sourceRoot": "projects/dialogs/src",
+      "sourceRoot": "projects/dialogs",
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular/build:ng-packagr",
+          "builder": "@angular/build:library",
           "options": {
             "tsConfig": "projects/dialogs/tsconfig.lib.json",
-            "project": "projects/dialogs/ng-package.json"
+            "outputPath": "dist/servoy/dialogs"
           },
           "configurations": {
             "production": {
               "tsConfig": "projects/dialogs/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "compilationMode": "full"
             }
           }
         },
@@ -286,18 +300,24 @@
     "@servoy/window": {
       "projectType": "library",
       "root": "projects/window",
-      "sourceRoot": "projects/window/src",
+      "sourceRoot": "projects/window",
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular/build:ng-packagr",
+          "builder": "@angular/build:library",
           "options": {
             "tsConfig": "projects/window/tsconfig.lib.json",
-            "project": "projects/window/ng-package.json"
+            "outputPath": "dist/servoy/window",
+            "assets": [
+              "projects/window/servoy-menu.css"
+            ]
           },
           "configurations": {
             "production": {
               "tsConfig": "projects/window/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "compilationMode": "full"
             }
           }
         },
@@ -306,7 +326,8 @@
           "options": {
             "tsConfig": "projects/window/tsconfig.spec.json",
             "buildTarget": "dummy:build",
-            "runnerConfig": "vitest-base.config.ts"
+            "runnerConfig": "vitest-base.config.ts",
+            "splitting": false
           }
         }
       }
@@ -341,18 +362,24 @@
     "@servoy/servoydefault": {
       "projectType": "library",
       "root": "projects/servoydefault",
-      "sourceRoot": "projects/servoydefault/src",
+      "sourceRoot": "projects/servoydefault",
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular/build:ng-packagr",
+          "builder": "@angular/build:library",
           "options": {
             "tsConfig": "projects/servoydefault/tsconfig.lib.json",
-            "project": "projects/servoydefault/ng-package.json"
+            "outputPath": "dist/servoy/servoydefault",
+            "assets": [
+              "projects/servoydefault/defaultcomponents.css"
+            ]
           },
           "configurations": {
             "production": {
               "tsConfig": "projects/servoydefault/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "compilationMode": "full"
             }
           }
         },
@@ -403,7 +430,8 @@
     }
   },
   "cli": {
-    "analytics": "29dacfd7-cdec-49f1-8ea1-6dfee8c909c0"
+    "analytics": "29dacfd7-cdec-49f1-8ea1-6dfee8c909c0",
+    "packageManager": "pnpm"
   }
 }
 

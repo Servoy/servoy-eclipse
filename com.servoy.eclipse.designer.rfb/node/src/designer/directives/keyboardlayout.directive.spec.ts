@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { KeyboardLayoutDirective } from './keyboardlayout.directive';
 
@@ -30,6 +30,11 @@ describe('KeyboardLayoutDirective', () => {
     (directive as any).editorContentService = editorContentService;
     directive.isSendChanges = true;
     directive.boundsUpdating = false;
+  });
+
+  afterEach(() => {
+    // jsdom 31 returns empty computed styles for detached elements, so tests attach their element to the document
+    document.body.innerHTML = '';
   });
 
   describe('onKeyDown', () => {
@@ -96,6 +101,7 @@ describe('KeyboardLayoutDirective', () => {
       element.style.left = '10px';
       element.style.top = '20px';
       editorContentService.getContentElement.mockReturnValue(element);
+      document.body.appendChild(element);
       directive.onKeyDown({ keyCode: 37 } as KeyboardEvent);
       expect(element.style.left).toBe('9px');
     });
@@ -121,6 +127,7 @@ describe('KeyboardLayoutDirective', () => {
       element.style.top = '100px';
       element.style.left = '10px';
       editorContentService.getContentElement.mockReturnValue(element);
+      document.body.appendChild(element);
       directive.onKeyDown({ keyCode: 40 } as KeyboardEvent);
       expect(element.style.top).toBe('120px');
     });
@@ -133,6 +140,7 @@ describe('KeyboardLayoutDirective', () => {
       element.style.top = '100px';
       element.style.left = '10px';
       editorContentService.getContentElement.mockReturnValue(element);
+      document.body.appendChild(element);
       directive.onKeyDown({ keyCode: 38 } as KeyboardEvent);
       expect(element.style.top).toBe('90px');
     });

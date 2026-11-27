@@ -1,9 +1,9 @@
 {
+  "exports": {
+    ".": "./src/public-api.ts"
+  },
   "name": "@servoy/ngclientutils",
   "version": "2025.9.0",
-  "dependencies": {
-    "tslib": "*"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",

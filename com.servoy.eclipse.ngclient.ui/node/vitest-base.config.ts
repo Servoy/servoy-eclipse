@@ -5,9 +5,6 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     pool: 'forks',
-    deps: {
-      inline: []
-    },
     globalSetup: ['./vitest-ng-bootstrap-link.ts'],
     setupFiles: ['./vitest-setup.ts'],
     reporters: ['default', ['junit', {

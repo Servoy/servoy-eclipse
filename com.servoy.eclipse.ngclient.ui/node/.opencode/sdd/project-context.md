@@ -1,4 +1,4 @@
-﻿# Project Context — Servoy TiNG (NG Client UI)
+# Project Context — Servoy TiNG (NG Client UI)
 
 ## SDD variant
 
@@ -15,7 +15,7 @@ workspace with one application and multiple library sub-projects.
 | Framework | Angular 22 |
 | Language | TypeScript 6.0 |
 | Build tool | Angular CLI (`@angular/build:application`, esbuild-based) |
-| Test framework | Vitest 4.x (with jsdom environment) |
+| Test framework | Vitest 5.x (with jsdom environment) |
 | Linter | ESLint 10 (`@angular-eslint`) |
 | Package manager | npm (default) / pnpm (opt-in via `servoy.jsRuntime=pnpm`, SVY-21456) |
 | Version | 2026.12.0 |
