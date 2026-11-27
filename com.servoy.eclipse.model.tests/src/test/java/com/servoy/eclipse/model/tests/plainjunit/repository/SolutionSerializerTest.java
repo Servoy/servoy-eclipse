@@ -8,10 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Method;
+import java.util.HashMap;
 
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,93 +20,117 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.servoy.eclipse.model.repository.RepositoryTestAccess;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.tests.plainjunit.utils.TestPersists;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
+import com.servoy.j2db.persistence.ArgumentType;
+import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.IContentSpecConstants;
+import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.MethodArgument;
-import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.UUID;
 
 @DisplayName("SolutionSerializer")
 class SolutionSerializerTest {
-	private Method generateParamsMethod;
-
-	@BeforeEach
-	void setUp() throws Exception {
-		generateParamsMethod = SolutionSerializer.class.getDeclaredMethod("generateParams", StringBuilder.class,
-				AbstractScriptProvider.class);
-		generateParamsMethod.setAccessible(true);
-	}
-
+	/**
+	 * The generated JSDoc of methods and calculations (getComment, the public entry
+	 * of the private generateParams): the @param lines for the method arguments.
+	 * Real persists (through the public persist factory) on a mocked repository
+	 * with an empty content spec, so only the uuid/type id end up in @properties.
+	 */
 	@Nested
+	@DisplayName("getComment @param generation")
 	class GenerateParams {
-		@Test
-		@DisplayName("returns false for null input")
-		void returnsFalseForNull() throws Exception {
-			StringBuilder sb = new StringBuilder();
-			boolean result = (boolean) generateParamsMethod.invoke(null, sb, null);
-			assertFalse(result);
+		private static final String TODO_LINE = " * TODO generated, please specify type and doc for the params\n";
+
+		private IDeveloperRepository repository;
+
+		@BeforeEach
+		void setUpRepository() throws Exception {
+			repository = mock(IDeveloperRepository.class);
+			when(repository.getPersistAsValueMap(any())).thenAnswer(inv -> new HashMap<String, Object>());
+			when(repository.getContentSpec()).thenReturn(new ContentSpec());
+		}
+
+		private <T extends AbstractScriptProvider> T scriptProvider(int typeId, String declaration,
+				MethodArgument... arguments) {
+			T provider = TestPersists.create(null, typeId, UUID.randomUUID());
+			provider.setDeclaration(declaration);
+			if (arguments.length > 0)
+				provider.setRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS, arguments);
+			return provider;
+		}
+
+		private String comment(AbstractScriptProvider provider) {
+			return SolutionSerializer.getComment(provider, null, repository);
 		}
 
 		@Test
-		@DisplayName("does not throw ClassCastException for ScriptCalculation")
-		void doesNotThrowForScriptCalculation() throws Exception {
-			ScriptCalculation calc = mock(ScriptCalculation.class);
-			when(calc.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS)).thenReturn(null);
+		@DisplayName("a method without arguments gets no @param lines")
+		void methodWithoutArgumentsHasNoParams() {
+			String comment = comment(scriptProvider(IRepository.METHODS, "function noArgs() {}"));
 
-			StringBuilder sb = new StringBuilder();
-			assertDoesNotThrow(() -> generateParamsMethod.invoke(null, sb, calc));
+			assertAll(() -> assertTrue(comment.startsWith("/**\n"), comment),
+					() -> assertFalse(comment.contains("@param"), comment),
+					() -> assertFalse(comment.contains(TODO_LINE), comment));
 		}
 
 		@Test
-		@DisplayName("returns false for ScriptCalculation with no arguments")
-		void returnsFalseForCalcWithNoArgs() throws Exception {
-			ScriptCalculation calc = mock(ScriptCalculation.class);
-			when(calc.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS)).thenReturn(null);
+		@DisplayName("a method gets a @param line per argument, after the TODO line, in argument order")
+		void methodArgumentsBecomeParams() {
+			String comment = comment(scriptProvider(IRepository.METHODS, "function withArgs(first, second) {}",
+					new MethodArgument("first", null, null), new MethodArgument("second", null, null)));
 
-			StringBuilder sb = new StringBuilder();
-			boolean result = (boolean) generateParamsMethod.invoke(null, sb, calc);
-			assertFalse(result);
+			assertTrue(comment.contains(TODO_LINE + " * @param first\n * @param second\n"), comment);
 		}
 
 		@Test
-		@DisplayName("generates params for ScriptCalculation with arguments")
-		void generatesParamsForCalcWithArgs() throws Exception {
-			ScriptCalculation calc = mock(ScriptCalculation.class);
-			MethodArgument arg = new MethodArgument("myParam", null, null);
-			when(calc.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS)).thenReturn(new MethodArgument[] { arg });
+		@DisplayName("the argument type is written in braces, an Any type is left out")
+		void argumentTypeIsWritten() {
+			String comment = comment(scriptProvider(IRepository.METHODS, "function typed(text, anything) {}",
+					new MethodArgument("text", ArgumentType.String, null),
+					new MethodArgument("anything", ArgumentType.valueOf("Any"), null)));
 
-			StringBuilder sb = new StringBuilder();
-			boolean result = (boolean) generateParamsMethod.invoke(null, sb, calc);
-			assertAll(() -> assertTrue(result), () -> assertTrue(sb.toString().contains("@param")),
-					() -> assertTrue(sb.toString().contains("myParam")));
+			assertTrue(comment.contains(" * @param {String} text\n * @param anything\n"), comment);
 		}
 
 		@Test
-		@DisplayName("generates params for ScriptMethod with arguments")
-		void generatesParamsForScriptMethod() throws Exception {
-			ScriptMethod method = mock(ScriptMethod.class);
-			MethodArgument arg = new MethodArgument("testParam", null, null);
-			when(method.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS)).thenReturn(new MethodArgument[] { arg });
+		@DisplayName("a calculation gets @param lines too (no ClassCastException for ScriptCalculation)")
+		void calculationArgumentsBecomeParams() {
+			String comment = comment(scriptProvider(IRepository.SCRIPTCALCULATIONS, "function calc(value) {}",
+					new MethodArgument("value", null, null)));
 
-			StringBuilder sb = new StringBuilder();
-			boolean result = (boolean) generateParamsMethod.invoke(null, sb, method);
-			assertAll(() -> assertTrue(result), () -> assertTrue(sb.toString().contains("@param")),
-					() -> assertTrue(sb.toString().contains("testParam")));
+			assertTrue(comment.contains(TODO_LINE + " * @param value\n"), comment);
 		}
 
 		@Test
-		@DisplayName("returns false for ScriptMethod with no arguments")
-		void returnsFalseForScriptMethodWithNoArgs() throws Exception {
-			ScriptMethod method = mock(ScriptMethod.class);
-			when(method.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS)).thenReturn(null);
+		@DisplayName("current behaviour: the argument description is glued to the name without a space")
+		void descriptionFollowsTheNameWithoutSeparator() {
+			String comment = comment(scriptProvider(IRepository.METHODS, "function described(name) {}",
+					new MethodArgument("name", null, "the name")));
 
-			StringBuilder sb = new StringBuilder();
-			boolean result = (boolean) generateParamsMethod.invoke(null, sb, method);
-			assertFalse(result);
+			// possible bug: generateParams appends the description right after the name
+			assertTrue(comment.contains(" * @param namethe name\n"), comment);
+		}
+
+		@Test
+		@DisplayName("an existing JSDoc without @param gets the params inserted, one with @param is left as is")
+		void existingCommentGetsParamsOnlyWhenItHasNone() {
+			String withoutParams = comment(scriptProvider(IRepository.METHODS,
+					"/**\n * Does it.\n */\nfunction existing(arg) {}", new MethodArgument("arg", null, null)));
+			String withParams = comment(scriptProvider(IRepository.METHODS,
+					"/**\n * Does it.\n * @param {Number} arg\n */\nfunction existing(arg) {}",
+					new MethodArgument("arg", null, null)));
+
+			assertAll(() -> assertTrue(withoutParams.contains(" * @param arg\n"), withoutParams),
+					() -> assertTrue(withoutParams.contains("Does it."), withoutParams),
+					() -> assertTrue(withParams.contains("@param {Number} arg"), withParams),
+					() -> assertFalse(withParams.contains(TODO_LINE), withParams));
 		}
 	}
 
@@ -123,17 +148,9 @@ class SolutionSerializerTest {
 				.getPropertyName();
 		private static final String LEGACY_CUSTOM_PROPERTIES = "attributes:{ data-Target:\"dashboard-health\" }";
 
-		private Method normalizeMethod;
-
-		@BeforeEach
-		void setUpNormalize() throws Exception {
-			normalizeMethod = SolutionSerializer.class.getDeclaredMethod("normalizeFormComponentChildCustomProperties",
-					JSONObject.class);
-			normalizeMethod.setAccessible(true);
-		}
-
-		private JSONObject invokeNormalize(JSONObject jsonValue) throws Exception {
-			return (JSONObject) normalizeMethod.invoke(null, jsonValue);
+		private JSONObject invokeNormalize(JSONObject jsonValue) {
+			// package-private in SolutionSerializer (SVY-21469), reached through the same-package bridge
+			return RepositoryTestAccess.normalizeFormComponentChildCustomProperties(jsonValue);
 		}
 
 		@Test

@@ -10,9 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.sablo.specification.PropertyDescription;
 
+import com.servoy.eclipse.model.util.UtilTestAccess;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.IBasicWebObject;
@@ -60,15 +58,14 @@ class WebFormComponentChildTypeTest {
 	@Nested
 	class GetPropertyDescriptionContract {
 		@Test
-		@DisplayName("getPropertyDescription method exists and matches ICommonWebComponent contract")
-		void methodMatchesInterfaceContract() throws NoSuchMethodException {
-			Method interfaceMethod = ICommonWebComponent.class.getMethod("getPropertyDescription");
-			Method classMethod = WebFormComponentChildType.class.getMethod("getPropertyDescription");
+		@DisplayName("a child that is not resolved against its form component has no property description, also via ICommonWebComponent")
+		void unresolvedChildHasNoPropertyDescription() {
+			// no value for the form component property in the parent: the public constructor resolves nothing
+			IBasicWebObject parent = Mockito.mock(IBasicWebObject.class);
+			ICommonWebComponent asInterface = new WebFormComponentChildType(parent,
+					new String[] { "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8", "containedForm", "n1" }, null);
 
-			assertAll(
-					() -> assertNotNull(classMethod, "getPropertyDescription must exist on WebFormComponentChildType"),
-					() -> assertTrue(interfaceMethod.getReturnType().isAssignableFrom(classMethod.getReturnType()),
-							"return type must be compatible with ICommonWebComponent.getPropertyDescription()"));
+			assertNull(asInterface.getPropertyDescription());
 		}
 
 		@Test
@@ -97,36 +94,22 @@ class WebFormComponentChildTypeTest {
 		private static final String LEGACY_CUSTOM_PROPERTIES = "attributes:{ data-Target:\"dashboard-health\" }";
 
 		/**
-		 * Builds a WebFormComponentChildType instance without running the heavy
-		 * constructor (Objenesis via Mockito CALLS_REAL_METHODS), wires the private
-		 * fcCompAndPropPath and the protected AbstractBase.parent to a mocked parent
-		 * web component whose json blob is {@code parentBlob}, and leaves the
-		 * {@code element} field null so getJson takes the simple, non-merge branch.
-		 * Real methods (including the private getJson) then run.
+		 * Builds a WebFormComponentChildType on a mocked parent web component whose
+		 * form component value is {@code parentBlob}, through the package-private
+		 * constructor that does not resolve the child against its form component (so
+		 * no form element and getJson takes the simple, non-merge branch).
 		 */
-		private WebFormComponentChildType newChildOnParentBlob(JSONObject parentBlob) throws Exception {
+		private WebFormComponentChildType newChildOnParentBlob(JSONObject parentBlob) {
 			IBasicWebObject parent = Mockito.mock(IBasicWebObject.class);
 			// fcCompAndPropPath = [rootUuid, rootFCPropertyName, childName]
 			Mockito.when(parent.getProperty("containedForm")).thenReturn(parentBlob);
-
-			WebFormComponentChildType child = Mockito.mock(WebFormComponentChildType.class, Mockito.CALLS_REAL_METHODS);
-
-			Field pathField = WebFormComponentChildType.class.getDeclaredField("fcCompAndPropPath");
-			pathField.setAccessible(true);
-			pathField.set(child, new String[] { "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8", "containedForm", "n1" });
-
-			Field parentField = com.servoy.j2db.persistence.AbstractBase.class.getDeclaredField("parent");
-			parentField.setAccessible(true);
-			parentField.set(child, parent);
-
-			return child;
+			return UtilTestAccess.unresolvedFormComponentChild(parent,
+					new String[] { "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8", "containedForm", "n1" }, null);
 		}
 
-		private JSONObject invokeGetJson(WebFormComponentChildType child, boolean forMutation, boolean flattened)
-				throws Exception {
-			Method getJson = WebFormComponentChildType.class.getDeclaredMethod("getJson", boolean.class, boolean.class);
-			getJson.setAccessible(true);
-			return (JSONObject) getJson.invoke(child, Boolean.valueOf(forMutation), Boolean.valueOf(flattened));
+		/** The flattened read, as BaseComponent.getAttributes/onAction sees it. */
+		private JSONObject flattenedJson(WebFormComponentChildType child) {
+			return (JSONObject) child.getProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
 		}
 
 		@Test
@@ -138,7 +121,7 @@ class WebFormComponentChildTypeTest {
 			parentBlob.put("n1", childBlob);
 
 			WebFormComponentChildType child = newChildOnParentBlob(parentBlob);
-			JSONObject json = invokeGetJson(child, false, true);
+			JSONObject json = flattenedJson(child);
 
 			Object customProperties = json.opt(CUSTOM_PROPERTIES);
 			assertAll(() -> assertNotNull(json, "flattened json blob for the child must not be null"),
@@ -161,7 +144,7 @@ class WebFormComponentChildTypeTest {
 			parentBlob.put("n1", childBlob);
 
 			WebFormComponentChildType child = newChildOnParentBlob(parentBlob);
-			JSONObject json = invokeGetJson(child, false, true);
+			JSONObject json = flattenedJson(child);
 			JSONObject normalized = (JSONObject) json.opt(CUSTOM_PROPERTIES);
 
 			// feed the normalized customProperties into a real BaseComponent and read it
@@ -192,7 +175,7 @@ class WebFormComponentChildTypeTest {
 			parentBlob.put("n1", childBlob);
 
 			WebFormComponentChildType child = newChildOnParentBlob(parentBlob);
-			JSONObject json = invokeGetJson(child, false, true);
+			JSONObject json = flattenedJson(child);
 
 			Object customProperties = json.opt(CUSTOM_PROPERTIES);
 			assertAll(
@@ -215,7 +198,7 @@ class WebFormComponentChildTypeTest {
 			parentBlob.put("n1", childBlob);
 
 			WebFormComponentChildType child = newChildOnParentBlob(parentBlob);
-			JSONObject json = invokeGetJson(child, false, false);
+			JSONObject json = child.getJson();
 
 			assertAll(
 					() -> assertInstanceOf(String.class, json.opt(CUSTOM_PROPERTIES),
@@ -249,83 +232,65 @@ class WebFormComponentChildTypeTest {
 
 		private WebComponent parent;
 
-		private WebFormComponentChildType newChildOnParentValue(Object rootValue) throws Exception {
+		private WebComponent mockParent(Object rootValue) {
 			parent = Mockito.mock(WebComponent.class);
 			Mockito.when(parent.getProperty(ROOT_PROPERTY)).thenReturn(rootValue);
 			Mockito.when(parent.getName()).thenReturn("fc1");
-
-			WebFormComponentChildType child = Mockito.mock(WebFormComponentChildType.class, Mockito.CALLS_REAL_METHODS);
-
-			Field pathField = WebFormComponentChildType.class.getDeclaredField("fcCompAndPropPath");
-			pathField.setAccessible(true);
-			pathField.set(child, new String[] { "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8", ROOT_PROPERTY, "n1" });
-
-			Field parentField = com.servoy.j2db.persistence.AbstractBase.class.getDeclaredField("parent");
-			parentField.setAccessible(true);
-			parentField.set(child, parent);
-
-			return child;
+			return parent;
 		}
 
-		private Object invokeInitializeElement(WebFormComponentChildType child) throws Exception {
-			Method initializeElement = WebFormComponentChildType.class.getDeclaredMethod("initializeElement");
-			initializeElement.setAccessible(true);
-			return initializeElement.invoke(child);
+		private static String[] path() {
+			return new String[] { "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8", ROOT_PROPERTY, "n1" };
 		}
 
-		private JSONObject invokeGetJson(WebFormComponentChildType child, boolean forMutation, boolean flattened)
-				throws Exception {
-			Method getJson = WebFormComponentChildType.class.getDeclaredMethod("getJson", boolean.class, boolean.class);
-			getJson.setAccessible(true);
-			return (JSONObject) getJson.invoke(child, Boolean.valueOf(forMutation), Boolean.valueOf(flattened));
+		/**
+		 * The public constructor: a malformed (bare string) or missing root value is
+		 * rejected while resolving the child, so nothing else of the form component is
+		 * needed.
+		 */
+		private WebFormComponentChildType newChildOnParentValue(Object rootValue) {
+			return new WebFormComponentChildType(mockParent(rootValue), path(), null);
 		}
 
-		@Test
-		@DisplayName("initializeElement on a bare-string root value returns null instead of throwing ClassCastException")
-		void initializeElementRejectsBareString() throws Exception {
-			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
-
-			Object result = assertDoesNotThrow(() -> invokeInitializeElement(child));
-
-			assertNull(result, "a malformed root value must yield no child property description");
+		/**
+		 * A valid root value would be resolved against a real form component (form
+		 * element, flattened solution); the package-private constructor skips that, so
+		 * only the parent's json is used.
+		 */
+		private WebFormComponentChildType newUnresolvedChildOnParentValue(Object rootValue) {
+			return UtilTestAccess.unresolvedFormComponentChild(mockParent(rootValue), path(), null);
 		}
 
 		@Test
-		@DisplayName("initializeElement on a missing root value returns null instead of throwing")
-		void initializeElementToleratesMissingValue() throws Exception {
-			WebFormComponentChildType child = newChildOnParentValue(null);
+		@DisplayName("constructing on a bare-string root value does not throw ClassCastException and resolves no property description")
+		void constructorRejectsBareString() {
+			WebFormComponentChildType child = assertDoesNotThrow(() -> newChildOnParentValue("orders_fc"));
 
-			Object result = assertDoesNotThrow(() -> invokeInitializeElement(child));
+			assertNull(child.getPropertyDescription(), "a malformed root value must yield no child property description");
+		}
 
-			assertNull(result, "a missing root value must yield no child property description");
+		@Test
+		@DisplayName("constructing on a missing root value does not throw and resolves no property description")
+		void constructorToleratesMissingValue() {
+			WebFormComponentChildType child = assertDoesNotThrow(() -> newChildOnParentValue(null));
+
+			assertNull(child.getPropertyDescription(), "a missing root value must yield no child property description");
 		}
 
 		@Test
 		@DisplayName("plain read on a bare-string root value returns an empty json instead of throwing ClassCastException")
-		void plainReadRejectsBareString() throws Exception {
+		void plainReadRejectsBareString() {
 			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
 
-			JSONObject json = assertDoesNotThrow(() -> invokeGetJson(child, false, false));
+			JSONObject json = assertDoesNotThrow(() -> child.getJson());
 
 			assertAll(() -> assertNotNull(json, "getJson must never return null"),
 					() -> assertEquals(0, json.length(), "a malformed root value must read as an empty json"));
 		}
 
 		@Test
-		@DisplayName("mutation read on a bare-string inherited root value returns an empty json and does not rewrite the parent")
-		void mutationReadRejectsBareStringWithoutTouchingParent() throws Exception {
-			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
-
-			JSONObject json = assertDoesNotThrow(() -> invokeGetJson(child, true, false));
-
-			assertAll(() -> assertEquals(0, json.length(), "a malformed root value must read as an empty json"),
-					() -> Mockito.verify(parent, Mockito.never()).setProperty(Mockito.eq(ROOT_PROPERTY),
-							Mockito.any()));
-		}
-
-		@Test
-		@DisplayName("mutation read on a bare string inside the parent's own json returns an empty json instead of throwing JSONException")
-		void mutationReadRejectsBareStringInOwnJson() throws Exception {
+		@DisplayName("setProperty with a bare string inside the parent's own json is refused and leaves that json untouched")
+		void setPropertyRefusedOnBareStringInOwnJson() {
 			WebFormComponentChildType child = newChildOnParentValue("orders_fc");
 			JSONObject ownJson = new JSONObject();
 			ownJson.put(ROOT_PROPERTY, "orders_fc");
@@ -333,11 +298,11 @@ class WebFormComponentChildTypeTest {
 			propertiesMap.put(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName(), ownJson);
 			Mockito.when(parent.getPropertiesMap()).thenReturn(propertiesMap);
 
-			JSONObject json = assertDoesNotThrow(() -> invokeGetJson(child, true, false));
+			assertDoesNotThrow(() -> child.setProperty("text", "hello"));
 
-			assertAll(() -> assertEquals(0, json.length(), "a malformed root value must read as an empty json"),
-					() -> assertEquals("orders_fc", ownJson.get(ROOT_PROPERTY),
-							"the parent's own json must be left untouched"));
+			assertAll(() -> assertEquals("orders_fc", ownJson.get(ROOT_PROPERTY),
+					"the parent's own json must be left untouched"),
+					() -> Mockito.verify(parent, Mockito.never()).flagChanged());
 		}
 
 		@Test
@@ -386,7 +351,7 @@ class WebFormComponentChildTypeTest {
 		void setPropertyWritesIntoParentOnValidValue() throws Exception {
 			JSONObject rootValue = new JSONObject();
 			rootValue.put("svy_form", "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF9");
-			WebFormComponentChildType child = newChildOnParentValue(rootValue);
+			WebFormComponentChildType child = newUnresolvedChildOnParentValue(rootValue);
 
 			child.setProperty("text", "hello");
 
@@ -408,9 +373,9 @@ class WebFormComponentChildTypeTest {
 			JSONObject rootValue = new JSONObject();
 			rootValue.put("svy_form", "7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF9");
 			rootValue.put("n1", childBlob);
-			WebFormComponentChildType child = newChildOnParentValue(rootValue);
+			WebFormComponentChildType child = newUnresolvedChildOnParentValue(rootValue);
 
-			JSONObject json = invokeGetJson(child, false, false);
+			JSONObject json = child.getJson();
 
 			assertSame(childBlob, json, "a valid root value must resolve to the child's own json object");
 		}

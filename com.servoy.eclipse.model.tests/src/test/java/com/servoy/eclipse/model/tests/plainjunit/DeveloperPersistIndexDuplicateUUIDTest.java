@@ -24,8 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +32,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.servoy.eclipse.model.DeveloperPersistIndex;
+import com.servoy.eclipse.model.ModelTestAccess;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.tests.plainjunit.utils.TestPersists;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.UUID;
@@ -66,20 +65,14 @@ class DeveloperPersistIndexDuplicateUUIDTest {
 		return new DeveloperPersistIndex(Collections.<Solution>emptyList());
 	}
 
-	private static void putInCache(DeveloperPersistIndex index, IPersist persist) throws Exception {
-		Method m = com.servoy.j2db.PersistIndex.class.getDeclaredMethod("putInCache", IPersist.class);
-		m.setAccessible(true);
-		m.invoke(index, persist);
+	private static void putInCache(DeveloperPersistIndex index, IPersist persist) {
+		ModelTestAccess.putInCache(index, persist);
 	}
 
-	private static Relation relationWithUUID(UUID uuid) throws Exception {
+	private static Relation relationWithUUID(UUID uuid) {
 		// parent null, not a clone: the putInCache clone-guards pass and the persist
-		// carries the given
-		// UUID. The Relation(ISupportChilds, UUID) constructor is package-private, so
-		// build it reflectively.
-		Constructor<Relation> ctor = Relation.class.getDeclaredConstructor(ISupportChilds.class, UUID.class);
-		ctor.setAccessible(true);
-		return ctor.newInstance(null, uuid);
+		// carries the given UUID
+		return TestPersists.relation(uuid);
 	}
 
 	@Test

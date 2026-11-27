@@ -48,6 +48,23 @@
 					<includes>
 						<include>**/plainjunit/**/*.java</include>
 					</includes>
+					<!-- Test against the host bundle's compiled CLASSES, not its packaged jar (same as
+					     Servoy-Copilot opencode.tests). The parent pom signs every module's jar
+					     (maven-jarsigner-plugin), and the tests live in the host's own packages (this is a
+					     fragment) to use package-private members without reflection. An unsigned test class
+					     in a package whose other classes come from the signed jar is refused by the JVM
+					     ("signer information does not match"), and JaCoCo would not see the host's classes
+					     as the ones it reports on. The host is built before this module in the reactor, so
+					     target/classes exists. -->
+					<!-- Tycho adds the host as com.servoy:... in a reactor build and as p2.eclipse.plugin:... (resolved from the target
+					     platform / local repo) when this module is built on its own: exclude both. -->
+					<classpathDependencyExcludes>
+						<classpathDependencyExclude>com.servoy:com.servoy.eclipse.model</classpathDependencyExclude>
+						<classpathDependencyExclude>p2.eclipse.plugin:com.servoy.eclipse.model</classpathDependencyExclude>
+					</classpathDependencyExcludes>
+					<additionalClasspathElements>
+						<additionalClasspathElement>${project.basedir}/../com.servoy.eclipse.model/target/classes</additionalClasspathElement>
+					</additionalClasspathElements>
 				</configuration>
 			</plugin>
 			<!-- tycho-surefire always starts an OSGi runtime; it is only used by the integration profile -->

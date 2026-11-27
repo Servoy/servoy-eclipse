@@ -84,13 +84,22 @@ public class WebFormComponentChildType extends BaseComponent implements IBasicWe
 
 	public WebFormComponentChildType(IBasicWebObject parentWebObject, String[] fcPropAndCompPath, FlattenedSolution fs)
 	{
+		this(parentWebObject, fcPropAndCompPath, fs, true);
+	}
+
+	/**
+	 * @param resolveElement false only for unit tests: the child is not resolved against its form component (no property description
+	 *            and no flattened form element), so it works on the json of the parent only.
+	 */
+	WebFormComponentChildType(IBasicWebObject parentWebObject, String[] fcPropAndCompPath, FlattenedSolution fs, boolean resolveElement)
+	{
 		super(IRepository.WEBCUSTOMTYPES, parentWebObject, UUID.randomUUID());
 
 		this.fcCompAndPropPath = fcPropAndCompPath; // something like [7C783D6E-8E26-40B9-8BDA-E2DC4F2ECDF8, containedForm, formComponent2, containedForm, n1]; can be nested, more or less
 		fcPropAndCompPathAsString = String.join(".", Arrays.copyOfRange(fcPropAndCompPath, 1, fcPropAndCompPath.length)); // would be containedForm.formComponent2.containedForm.n1
 		this.fs = fs;
 
-		propertyDescription = initializeElement();
+		propertyDescription = resolveElement ? initializeElement() : null;
 	}
 
 	private String getRootFCPropertyNameInParent()

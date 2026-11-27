@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.tests.plainjunit.utils.TestPersists;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.util.UUID;
 
@@ -32,10 +31,8 @@ class ServoyBuilderDuplicateUUIDTest {
 	private final String ownFile = new File(dir, "orig.frm").getAbsolutePath();
 	private final String copyFile = new File(dir, "copy.frm").getAbsolutePath();
 
-	private static Relation relation(UUID uuid) throws Exception {
-		Constructor<Relation> ctor = Relation.class.getDeclaredConstructor(ISupportChilds.class, UUID.class);
-		ctor.setAccessible(true);
-		return ctor.newInstance(null, uuid);
+	private static Relation relation(UUID uuid) {
+		return TestPersists.relation(uuid);
 	}
 
 	private static Map<UUID, List<IPersist>> index(UUID uuid, IPersist... persists) {

@@ -26,8 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,39 +42,29 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.model.war.exporter.WarExporterTestAccess;
 
 /**
  * SVY-21642 - tests the Tomcat precompressed DefaultServlet injection into the
  * generated web.xml ({@code WarExporter.injectPrecompressedServlet},
- * package-private, so it is invoked reflectively).
+ * package-private, reached through {@link WarExporterTestAccess}).
  */
 class WarExporterPrecompressedWebXmlTest {
 	private static final String CLOSE = "</web-app>";
-	private static Method inject;
 	private static String snippet;
 	private static String template;
 
 	@BeforeAll
 	static void init() throws Exception {
-		inject = WarExporter.class.getDeclaredMethod("injectPrecompressedServlet", String.class);
-		inject.setAccessible(true);
-		var f = WarExporter.class.getDeclaredField("PRECOMPRESSED_SERVLET_SNIPPET");
-		f.setAccessible(true);
-		snippet = (String) f.get(null);
+		snippet = WarExporterTestAccess.precompressedServletSnippet();
 		try (InputStream is = WarExporter.class.getResourceAsStream("resources/web.xml")) {
 			assertNotNull(is, "web.xml template resource must be reachable");
 			template = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 		}
 	}
 
-	private static String inject(String s) throws Exception {
-		try {
-			return (String) inject.invoke(null, s);
-		} catch (InvocationTargetException e) {
-			if (e.getCause() instanceof Exception ex)
-				throw ex;
-			throw e;
-		}
+	private static String inject(String s) {
+		return WarExporterTestAccess.injectPrecompressedServlet(s);
 	}
 
 	private static int count(String s, String what) {

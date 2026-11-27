@@ -56,6 +56,15 @@ public class ServoyModelFinder
 		return modelProvider;
 	}
 
+	/**
+	 * Replaces the model provider that is normally looked up in the extension registry, for plain unit tests that run without
+	 * an OSGi runtime (see ModelTestAccess in com.servoy.eclipse.model.tests). null removes it again.
+	 */
+	static void setServoyModelProvider(IServoyEnvironmentProvider provider)
+	{
+		modelProvider = provider;
+	}
+
 	public static void initializeServoyModelProvider(String instance)
 	{
 		// if the instance name is given, make sure that that one is created.
